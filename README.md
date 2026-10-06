@@ -1,4 +1,4 @@
-# dsh-plugin-check
+# dsh-plugin-compat-check
 
 > 在安装之前，几分钟内判断一个 DSH 社区插件在你这一版 DeepSeek Harness 上到底能不能用。
 
@@ -28,26 +28,26 @@ DeepSeek Harness（DSH）是「万物皆插件」的 agent harness：模型、�
 ## 快速开始
 
 ```bash
-git clone https://github.com/<你的用户名>/dsh-plugin-check.git
-cd dsh-plugin-check
-chmod +x dsh-plugin-check.sh
+git clone https://github.com/<你的用户名>/dsh-plugin-compat-check.git
+cd dsh-plugin-compat-check
+chmod +x dsh-plugin-compat-check.sh
 ```
 
 ```bash
-./dsh-plugin-check.sh <spec> [--keep] [--timeout 秒]
+./dsh-plugin-compat-check.sh <spec> [--keep] [--timeout 秒]
 ```
 
 `<spec>` 与 `dsh plugin add` 完全一致：
 
 ```bash
 # npm 包名
-./dsh-plugin-check.sh dsh-keep-awake
+./dsh-plugin-compat-check.sh dsh-keep-awake
 
 # GitHub 仓库（生态里大量插件未发布到 npm）
-./dsh-plugin-check.sh github:owner/repo
+./dsh-plugin-compat-check.sh github:owner/repo
 
 # 本地开发中的插件
-./dsh-plugin-check.sh file:/path/to/my-plugin
+./dsh-plugin-compat-check.sh file:/path/to/my-plugin
 ```
 
 | 选项 | 作用 |
@@ -111,9 +111,9 @@ chmod +x dsh-plugin-check.sh
 
 | 路径 | 内容 |
 |---|---|
-| `/tmp/dsh-plugin-check/boot.log` | 宿主启动日志（含 `did not activate`） |
-| `/tmp/dsh-plugin-check/static.json` | 从插件源码提取的服务与调用点 |
-| `/tmp/dsh-plugin-check/probe-report.json` | 宿主真实 API 面 |
+| `/tmp/dsh-plugin-compat-check/boot.log` | 宿主启动日志（含 `did not activate`） |
+| `/tmp/dsh-plugin-compat-check/static.json` | 从插件源码提取的服务与调用点 |
+| `/tmp/dsh-plugin-compat-check/probe-report.json` | 宿主真实 API 面 |
 
 ## 产物与清理
 
@@ -127,8 +127,8 @@ chmod +x dsh-plugin-check.sh
 ## 目录结构
 
 ```
-dsh-plugin-check/
-├── dsh-plugin-check.sh   # 编排：身份核对 → 安装 → 提取 → 启动 → 比对
+dsh-plugin-compat-check/
+├── dsh-plugin-compat-check.sh   # 编排：身份核对 → 安装 → 提取 → 启动 → 比对
 ├── probe/                # 诊断探针（以 file: 方式装进临时 profile）
 │   ├── package.json
 │   ├── cordis.patch.yml

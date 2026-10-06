@@ -1,4 +1,4 @@
-# dsh-plugin-check
+# dsh-plugin-compat-check
 
 > Find out whether a DSH community plugin actually works on **your** DeepSeek Harness version — in a few minutes, before you install it.
 
@@ -28,26 +28,26 @@ Reading declarations and logs is not enough. You have to **actually boot once, t
 ## Quick start
 
 ```bash
-git clone https://github.com/<your-user>/dsh-plugin-check.git
-cd dsh-plugin-check
-chmod +x dsh-plugin-check.sh
+git clone https://github.com/<your-user>/dsh-plugin-compat-check.git
+cd dsh-plugin-compat-check
+chmod +x dsh-plugin-compat-check.sh
 ```
 
 ```bash
-./dsh-plugin-check.sh <spec> [--keep] [--timeout SECONDS]
+./dsh-plugin-compat-check.sh <spec> [--keep] [--timeout SECONDS]
 ```
 
 `<spec>` is exactly what `dsh plugin add` accepts:
 
 ```bash
 # npm package name
-./dsh-plugin-check.sh dsh-keep-awake
+./dsh-plugin-compat-check.sh dsh-keep-awake
 
 # GitHub repo (many ecosystem plugins are never published to npm)
-./dsh-plugin-check.sh github:owner/repo
+./dsh-plugin-compat-check.sh github:owner/repo
 
 # A plugin you are developing locally
-./dsh-plugin-check.sh file:/path/to/my-plugin
+./dsh-plugin-compat-check.sh file:/path/to/my-plugin
 ```
 
 | Option | Effect |
@@ -113,9 +113,9 @@ Static scanning can mistake a non-call site for a call. When unsure, pass `--kee
 
 | Path | Contents |
 |---|---|
-| `/tmp/dsh-plugin-check/boot.log` | Host startup log (including `did not activate`) |
-| `/tmp/dsh-plugin-check/static.json` | Extracted services and call sites |
-| `/tmp/dsh-plugin-check/probe-report.json` | The host's real API surface |
+| `/tmp/dsh-plugin-compat-check/boot.log` | Host startup log (including `did not activate`) |
+| `/tmp/dsh-plugin-compat-check/static.json` | Extracted services and call sites |
+| `/tmp/dsh-plugin-compat-check/probe-report.json` | The host's real API surface |
 
 ## Artifacts and cleanup
 
@@ -129,8 +129,8 @@ On exit (`trap EXIT`) the script:
 ## Layout
 
 ```
-dsh-plugin-check/
-├── dsh-plugin-check.sh   # Orchestration: identity → install → extract → boot → diff
+dsh-plugin-compat-check/
+├── dsh-plugin-compat-check.sh   # Orchestration: identity → install → extract → boot → diff
 ├── probe/                # Diagnostic probe (installed into the throwaway profile via file:)
 │   ├── package.json
 │   ├── cordis.patch.yml

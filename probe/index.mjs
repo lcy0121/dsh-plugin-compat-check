@@ -1,5 +1,5 @@
 /**
- * dsh-plugin-check 通用探针
+ * dsh-plugin-compat-check 通用探针
  * ---------------------------------------------------------------------------
  * 为什么需要它：插件的 package.json 只声明「依赖哪些服务」（peerDependencies /
  * dsh.client.inject），无法告诉你宿主**实际**提供了什么。而这个生态里同一版本号
@@ -13,9 +13,9 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 
-export const name = 'dsh-plugin-check-probe';
+export const name = 'dsh-plugin-compat-check-probe';
 
-const WORKDIR = '/tmp/dsh-plugin-check';
+const WORKDIR = '/tmp/dsh-plugin-compat-check';
 const SERVICES_FILE = `${WORKDIR}/services.json`;
 const APPLIED = `${WORKDIR}/probe-applied.txt`;
 const REPORT = `${WORKDIR}/probe-report.json`;

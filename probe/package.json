@@ -1,5 +1,5 @@
 {
-  "name": "dsh-plugin-check-probe",
+  "name": "dsh-plugin-compat-check-probe",
   "version": "0.0.1",
   "private": true,
   "type": "module",

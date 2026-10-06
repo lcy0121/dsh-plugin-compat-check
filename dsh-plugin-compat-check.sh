@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# dsh-plugin-check —— 回答「这个 DSH 插件在我这版上到底能不能用」
+# dsh-plugin-compat-check —— 回答「这个 DSH 插件在我这版上到底能不能用」
 #
 # 为什么需要：插件声明（peerDependencies / dsh.client.inject）不等于宿主实际提供的
 # API。这个生态里同一大版本内 API 被移除是常态（实测：0.2.0 移除了
@@ -34,19 +34,19 @@ done
 
 if [ -z "$SPEC" ]; then
   cat >&2 <<'USAGE'
-用法: dsh-plugin-check <spec> [--keep] [--timeout 秒] [--json]
+用法: dsh-plugin-compat-check <spec> [--keep] [--timeout 秒] [--json]
 
   spec 可为 npm 包名 / github:owner/repo / file:/本地路径 / git+https://...
 
 示例:
-  dsh-plugin-check dsh-keep-awake
-  dsh-plugin-check github:bearice/dsh-keep-awake
-  dsh-plugin-check file:/path/to/my-plugin
+  dsh-plugin-compat-check dsh-keep-awake
+  dsh-plugin-compat-check github:bearice/dsh-keep-awake
+  dsh-plugin-compat-check file:/path/to/my-plugin
 USAGE
   exit 2
 fi
 
-WORKDIR=/tmp/dsh-plugin-check
+WORKDIR=/tmp/dsh-plugin-compat-check
 PROFILE=plugincheck
 DSH_HOME_DIR="${DSH_HOME:-$HOME/.dsh}"
 PROFILE_DIR="$DSH_HOME_DIR/profiles/$PROFILE"
@@ -80,7 +80,7 @@ trap cleanup EXIT
 rm -rf "$WORKDIR"; mkdir -p "$WORKDIR"
 
 DSH_VER="$(dsh --version 2>/dev/null | tail -1)"
-echo "══ dsh-plugin-check ══"
+echo "══ dsh-plugin-compat-check ══"
 echo "目标插件 : $SPEC"
 echo "本机 DSH : $DSH_VER"
 echo
