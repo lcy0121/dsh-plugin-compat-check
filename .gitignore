@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+
+# 运行产物（工具默认写到 /tmp/dsh-plugin-check，此处仅作兜底）
+/tmp/
+*.log
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
