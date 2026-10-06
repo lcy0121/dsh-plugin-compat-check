@@ -215,38 +215,33 @@ for name, full, j in targets:
 def is_client_file(path):
     return any('client' in seg.lower() for seg in path.replace('\\', '/').split('/'))
 
-# 客户端服务判定：只要**任一**引用它的文件属客户端（或名字本身是已知客户端服务），
-# 就归为客户端——宿主探针看不到，不能据此判「缺失」。
-# 放宽到 any 是必须的：插件常有 src/shared/ 这类两端共用代码，
-# 严判（要求所有引用文件都含 client）会把共享文件里的客户端服务误报成缺失。
+# 客户端提示：服务名属于已知客户端服务，或只在疑似客户端的路径里出现。
+#
+# 重要：这**只是提示，不是判据**。实测两个插件都存在同一服务被宿主与客户端
+# 同时引用的情况（客户端设置页要显示运行中 agent 数、读 locale；共用代码
+# src/shared/ 也会同时提到），所以文件路径无法可靠区分宿端/客户端。
+# 真正的判据是探针：宿主里存在 → 宿主服务；不存在 + 有客户端提示 → 归客户端。
 KNOWN_CLIENT = {'slots', 'locale', 'uiRenderer', 'uiSlots', 'themeStore', 'modules',
                 'clientModules', 'connection'}
 
 
-def is_client_service(svc, files):
+def client_hint(svc, files):
     if svc in KNOWN_CLIENT:
         return True
     return any(is_client_file(f) for f in files)
 
 
-client_services, host_services = [], []
-for s in sorted(services):
-    files = svc_files.get(s, set())
-    if is_client_service(s, files):
-        client_services.append(s)
-    else:
-        host_services.append(s)
+client_hints = {s: client_hint(s, svc_files.get(s, set())) for s in sorted(services)}
 
 report = {
     'manifests': manifests,
     'services': sorted(services),
-    'hostServices': host_services,
-    'clientServices': client_services,
+    'clientHints': client_hints,
     'calls': {k: sorted(v) for k, v in calls.items()},
 }
 json.dump(report, open(os.path.join(workdir, 'static.json'), 'w'), ensure_ascii=False, indent=2)
-# 探针只探测宿主端服务
-json.dump({'services': host_services}, open(os.path.join(workdir, 'services.json'), 'w'), ensure_ascii=False, indent=2)
+# 探针探测**全部**发现的服务 —— 让宿主自己回答"存在与否"，这才是可靠判据
+json.dump({'services': sorted(services)}, open(os.path.join(workdir, 'services.json'), 'w'), ensure_ascii=False, indent=2)
 
 for m in manifests:
     print(f"  插件: {m['name']}@{m['version']}  bundle={m['dshBundle']}  client={m['clientPlatform']}")
@@ -256,9 +251,8 @@ for m in manifests:
         print(f"    声明的 DSH 依赖: {json.dumps(dsh_peers, ensure_ascii=False)}")
     else:
         print("    声明的 DSH 依赖: 无（闸门不会拦，但也没有兼容保证）")
-print(f"  宿主端服务 ({len(host_services)}): {', '.join(host_services) or '（无）'}")
-print(f"  客户端服务 ({len(client_services)}): {', '.join(client_services) or '（无）'}"
-      + ("   ← 宿主探针不可见，需界面验证" if client_services else ""))
+print(f"  提取到 {len(report['services'])} 个服务引用: {', '.join(report['services']) or '（未识别）'}")
+print("  （宿主端 / 客户端的归属由下一步的真实探针判定，不靠路径猜测）")
 for s, ms in report['calls'].items():
     if ms:
         print(f"    {s} → {', '.join(ms)}")
@@ -313,14 +307,18 @@ scoped = probe.get('scoped', {})
 print(f"  探针已运行 (node {probe.get('node')}, {probe.get('platform')})")
 print()
 
-missing_services, missing_methods, ok = [], [], []
-host_services = static.get('hostServices', static['services'])
-client_services = static.get('clientServices', [])
-for svc in host_services:
+missing_services, missing_methods, ok, client_services = [], [], [], []
+hints = static.get('clientHints', {})
+for svc in static['services']:
     info = root.get(svc)
     if not info or not info.get('present'):
-        missing_services.append(svc)
-        print(f"  ❌ 服务缺失: {svc}")
+        # 宿主里没有：若路径/名称提示它属客户端，则归为"需界面验证"而非硬判缺失。
+        # 否则就是真的缺 —— 这个区分靠探针做裁判，不靠路径猜测。
+        if hints.get(svc):
+            client_services.append(svc)
+        else:
+            missing_services.append(svc)
+            print(f"  ❌ 服务缺失: {svc}")
         continue
     methods = info.get('methods', {})
     used = static['calls'].get(svc, [])
@@ -339,7 +337,7 @@ for svc in host_services:
 if client_services:
     print(f"  ◻︎ 客户端服务: {', '.join(client_services)}")
     print("        这些活在浏览器侧，宿主探针看不到 —— 只能靠「界面上有没有出现该插件的 UI 元素」来验证。")
-    print("        本机踩过的坑：插件客户端抛错、而宿主端启动日志完全干净。命令行永远测不到这一层。")
+    print("        实测过的坑：有插件客户端抛错、而宿主端启动日志完全干净。命令行永远测不到这一层。")
 
 print()
 print("  ── 结论 ──")

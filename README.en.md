@@ -95,7 +95,7 @@ A failure here usually means DSH's built-in version gate rejected it — such pl
 
 Scans the plugin's sources for the services and methods it **really calls**, not just what it declares.
 
-It separates **host-side** from **client-side** services — the latter live in the browser and are inherently invisible to a host probe, so they must not be reported as "missing".
+> This step only *extracts*; it does not decide whether a service is host-side or client-side. That call is made by the real probe in step ④ — see the implementation notes for why.
 
 ### ④ Real boot + API-surface diff
 
@@ -144,7 +144,7 @@ dsh-plugin-check/
 
 - **The probe declares no `inject`**: doing so would leave it stuck in `PENDING` whenever a service is missing, which *reduces* what it can observe. It relies on delayed execution plus `try/catch`.
 - **The probe writes `probe-applied.txt` before probing**: otherwise "no report" cannot be distinguished between "the plugin never loaded" and "probing threw midway".
-- **Client-side service detection uses `any`, not `all`**: plugins often share code under something like `src/shared/`. Requiring every referencing file to live in a client directory misclassifies client services found in shared files — this did happen with a real plugin during testing.
+- **Host vs client attribution is decided by the probe, not by file paths.** This took two failed attempts. Requiring *every* referencing file to sit in a client directory misreported client services found in shared code as missing; switching to *any* client-directory reference then misclassified host services as client — because **a client settings UI legitimately references host services** (to display running agent/job counts), while shared code and even the host entry mention `locale` and `slots`. Both directions are wrong. The final rule: **if the probe finds it in the host, it is a host service; only when it is absent *and* has a client-side hint do we label it "verify in the UI"** instead of declaring it missing.
 - **Mind hard links after editing `probe/index.mjs`**: once installed into a profile the plugin is hard-linked or copied. Writing in a way that replaces the inode (some editors do) leaves the `node_modules` copy stale, producing "I changed the code but behaviour did not change".
 
 ## Known limitations
