@@ -153,6 +153,118 @@ def pkg_json(path):
     except Exception:
         return None
 
+
+def main_entry(j):
+    """package.json 声明的入口：exports['.'] 优先，退回 main。"""
+    exp = j.get('exports')
+    if isinstance(exp, dict):
+        dot = exp.get('.')
+        if isinstance(dot, str):
+            return dot
+        if isinstance(dot, dict):
+            for k in ('default', 'import', 'require'):
+                if isinstance(dot.get(k), str):
+                    return dot[k]
+    return j.get('main') or 'index.js'
+
+
+def mounted_entries(full, j):
+    """从 dsh.bundle.patch → cordis.patch.yml 读出**实际被挂载**的入口。
+
+    这是精度关键：包里常有不会被加载的伴随模块（实测有插件带一个 lib/invariant.js，
+    主入口并不 import 它、patch 也没挂载它）。整包扫描会把这些孤儿模块需要的服务
+    当成真实缺口，把判定压得过低。
+    """
+    dsh = j.get('dsh') or {}
+    patch = (dsh.get('bundle') or {}).get('patch')
+    seeds = []
+    if patch:
+        try:
+            txt = open(os.path.join(full, patch), encoding='utf-8').read()
+            for m in re.findall(r'^\s*-\s*name:\s*[\'"]?([^\s\'"]+)', txt, re.M):
+                seeds.append(os.path.normpath(m) if m.startswith('.') else main_entry(j))
+        except Exception:
+            pass
+    if not seeds:
+        seeds.append(main_entry(j))
+    return [s.lstrip('./') for s in seeds]
+
+
+def local_graph(full, seeds):
+    """从入口出发收集本地相对依赖图。"""
+    seen, queue = set(), list(seeds)
+    while queue:
+        rel = queue.pop()
+        if not rel or rel in seen:
+            continue
+        path = os.path.join(full, rel)
+        if not os.path.isfile(path):
+            hit = None
+            for e in ('.js', '.mjs', '.cjs', '.ts', '/index.js', '/index.mjs', '/index.ts'):
+                if os.path.isfile(path + e):
+                    hit = path + e
+                    break
+            if not hit:
+                continue
+            path = hit
+            rel = os.path.relpath(path, full)
+        seen.add(rel)
+        try:
+            txt = open(path, encoding='utf-8', errors='ignore').read()
+        except Exception:
+            continue
+        for groups in re.findall(
+                r'from\s*[\'"]([^\'"]+)[\'"]'
+                r'|require\(\s*[\'"]([^\'"]+)[\'"]\s*\)'
+                r'|import\(\s*[\'"]([^\'"]+)[\'"]\s*\)', txt):
+            spec = next((g for g in groups if g), '')
+            if spec.startswith('.'):
+                queue.append(os.path.normpath(os.path.join(os.path.dirname(rel), spec)))
+    return seen
+
+
+def collect_files(full, j):
+    """返回 (需要扫描的文件 [(相对路径, 文本)], 是否退回整包扫描)。
+
+    只扫「实际挂载的入口 + 其本地依赖图」，外加客户端入口（dsh.client 单独挂载，
+    不经过宿主入口图）。无法解析入口时才退回整包扫描，并把退回状态如实上报。
+    """
+    graph = local_graph(full, mounted_entries(full, j))
+    fallback = not graph
+    files, rels = [], set()
+
+    def add(rel):
+        rel = os.path.normpath(rel)
+        if rel in rels:
+            return
+        try:
+            files.append((rel, open(os.path.join(full, rel), encoding='utf-8', errors='ignore').read()))
+            rels.add(rel)
+        except Exception:
+            pass
+
+    if fallback:
+        for root, _dirs, fs in os.walk(full):
+            for f in fs:
+                if f.endswith(('.js', '.mjs', '.cjs', '.ts')):
+                    add(os.path.relpath(os.path.join(root, f), full))
+    else:
+        for rel in sorted(graph):
+            add(rel)
+        client_seeds = []
+        exp = j.get('exports')
+        if isinstance(exp, dict) and isinstance(exp.get('./client'), (str, dict)):
+            c = exp['./client']
+            client_seeds.append(c if isinstance(c, str) else (c.get('default') or ''))
+        for root, _dirs, fs in os.walk(full):
+            for f in fs:
+                rel = os.path.relpath(os.path.join(root, f), full)
+                if f.endswith(('.js', '.mjs', '.cjs', '.ts')) and 'client' in rel.lower():
+                    client_seeds.append(rel)
+        for rel in sorted(local_graph(full, [s.lstrip('./') for s in client_seeds if s])):
+            add(rel)
+    return files, fallback
+
 # 找出"社区插件"：package.json 里有 dsh 清单、且非 @deepseek-ai 官方
 targets = []
 for entry in sorted(os.listdir(nm)):
@@ -165,6 +277,7 @@ for entry in sorted(os.listdir(nm)):
         targets.append((base, full, j))
 
 services, calls, manifests, svc_files = set(), {}, [], {}
+fallback_pkgs = []
 for name, full, j in targets:
     manifests.append({
         'name': j.get('name'), 'version': j.get('version'),
@@ -173,16 +286,10 @@ for name, full, j in targets:
         'clientInject': (j.get('dsh', {}).get('client') or {}).get('inject'),
         'peerDependencies': j.get('peerDependencies'),
     })
-    # 收集源码文本（保留路径，用于区分宿主端与客户端）
-    blob = []
-    for root, _dirs, files in os.walk(full):
-        for f in files:
-            if f.endswith(('.js', '.mjs', '.cjs', '.ts')):
-                try:
-                    blob.append((os.path.relpath(os.path.join(root, f), full),
-                                 open(os.path.join(root, f), encoding='utf-8', errors='ignore').read()))
-                except Exception:
-                    pass
+    # 收集源码文本：只取「实际挂载的入口 + 本地依赖图」（+ 客户端入口）
+    blob, fell_back = collect_files(full, j)
+    if fell_back:
+        fallback_pkgs.append(j.get('name') or full)
     src = '\n'.join(t for _f, t in blob)
     for arr in re.findall(r'inject\s*:\s*\[([^\]]*)\]', src):
         for s in re.findall(r'["\']([A-Za-z][\w.]*)["\']', arr):
@@ -238,6 +345,7 @@ report = {
     'services': sorted(services),
     'clientHints': client_hints,
     'calls': {k: sorted(v) for k, v in calls.items()},
+    'fallbackPackages': fallback_pkgs,
 }
 json.dump(report, open(os.path.join(workdir, 'static.json'), 'w'), ensure_ascii=False, indent=2)
 # 探针探测**全部**发现的服务 —— 让宿主自己回答"存在与否"，这才是可靠判据
@@ -252,7 +360,10 @@ for m in manifests:
     else:
         print("    声明的 DSH 依赖: 无（闸门不会拦，但也没有兼容保证）")
 print(f"  提取到 {len(report['services'])} 个服务引用: {', '.join(report['services']) or '（未识别）'}")
-print("  （宿主端 / 客户端的归属由下一步的真实探针判定，不靠路径猜测）")
+print("  （只扫实际挂载的入口及其依赖图；宿主端 / 客户端归属由下一步真实探针判定）")
+if fallback_pkgs:
+    print(f"  ⚠️ 无法解析入口、已退回整包扫描: {', '.join(fallback_pkgs)}")
+    print("     这种情况下可能把未被加载的伴随模块算进来，判定会偏严，请结合 --keep 核对")
 for s, ms in report['calls'].items():
     if ms:
         print(f"    {s} → {', '.join(ms)}")
