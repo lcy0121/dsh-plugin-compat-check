@@ -293,19 +293,36 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
     #   window.__DSH_BOOT__.entries 里有本包
     #   window.__COMPAT_CHECK__（渲染侧标记）
     ```
-- [x] **C2. 总览表落到 `settings.plugins.tab`** —— ✅ **完成（占位内容已渲染验证）**
-  - 验收：真实启动 + 无头 Chrome → **看到标签名与正文**。实测：
-    - 页面上可点的 tab 文字：`["通用设置","模型","内置插件","Agent 预设",…,"compat-check","插件列表"]`
-    - 正文含 `compat-check 占位` = true；DOM 里 `[data-compat-check]` 元素数 = 1
-    - **渲染侧标记** `window.__COMPAT_CHECK__ = {"slot":"settings.plugins.tab","label":"compat-check","body":"compat-check 占位","renders":2}`
-      
-      > 为什么要这个标记：页面上出现"compat-check"这几个字**不能证明**是我们的组件渲染的
-      > （任何同名文案都会命中）。这个标记只在我们自己的组件函数体里设置，
-      > 所以它出现 = **我们的代码真的执行了渲染**。验收要经得起这种追问。
-  - ⚠️ **一个必须记下来的落点发现**：`settings.plugins.tab` 加 tab 的宿主页是
-    **设置 → 内置插件**（官方包 `@deepseek-ai/dsh-client-ui-settings-plugins`），
-    该页本来就有一个「插件列表」tab。所以 C2 的形态是**加一个兄弟 tab**，
-    而不是"另起一个插件页"。这个落点直接决定面板的空间与入口 —— C2 真正的内容实现要按它来。
+- [x] **C2. 总览表落到 `settings.plugins.tab`** —— ✅ **完成：真实结论表已渲染，端到端实测**
+  - **数据通路**（这是 C2 真正的技术难点）：客户端跑在浏览器里，读不了文件系统；
+    而结论不能算两份。所以——
+    - **宿主半边**算结论（`computeReport()` 直接 import 仓库内核 `lib/extract.mjs` +
+      `lib/verdict.mjs`），挂 `GET /plugin-compat-check/report` 把它送出去；
+    - **客户端半边** fetch 这个路由渲染成表。
+    - 路由注册走**作用域 `ctx.inject(['webServer'], …)`**（不是往 `inject` 里加 `webServer`）：
+      headless / CLI 形态下根本没有 webServer，这样本插件的 fiber **不会去等一个不存在的服务**，
+      `inject` 得以保持 `[]` —— 与本文件从第一天起的设计一致（健康检查插件不能依赖被审计的东西）。
+    - 路由带本机信任栅栏（只接受 loopback 的 Host/Origin）：装了哪些插件、用了哪些 API 是本机信息。
+  - **端到端实测**（`c2verify` profile = desktop 的 20 个 bundle + 本插件）：
+    - 宿主日志：`HOST-HALF-ACTIVATED` + `C2 route registered: GET /plugin-compat-check/report`，
+      `did not activate` 告警 **0**
+    - 直接打路由：`http=200`，**123 489 字节**，`ok:true`，`elapsedMs:1538`，
+      `nodeModules=/Users/…/profiles/desktop/node_modules（DSH_PROFILE=desktop）`
+    - 真实界面里点开 **设置 → 内置插件 → 兼容性** tab：
+      - 渲染侧标记 `window.__COMPAT_CHECK__ = {"slot":"settings.plugins.tab","label":"兼容性","state":"done","renders":4}`
+      - DOM 里 `table` 元素数 = 1；页面出现「不兼容 / 部分可用」等结论词
+      - 表格内容是真结论，逐条带影响面，例如
+        `sessions.binding @ lib/client.js:1312 [疑似] · 会话绑定关系读不到`
+      - 网络记录里能看到 `200 http://127.0.0.1:61964/plugin-compat-check/report`
+      - **运行时异常 0**
+  - ⚠️ **落点事实（决定面板的信息层级）**：这个 slot 的宿主页是
+    **设置 → 内置插件**（官方 `@deepseek-ai/dsh-client-ui-settings-plugins`），
+    该页**已有「插件列表」tab**。所以本 tab 刻意回答**另一个问题**：
+    插件列表答"我装了什么"，本 tab 答"**装的东西到底兼不兼容**"。
+    标签名因此叫「兼容性」而不是「插件」。
+  - 面板自己会区分三种"没发现"：**空洞的可用**（插件没用过任何服务）、
+    **无证据可判**（只出现名字没有调用点）、**客户端半边**（命令行测不到）。
+    这三件事在别处都长得像"没问题"，而它们不是。
 - [ ] **C3. 单插件详情 `plugins.detail.section` / `.badge`**（**仍未验证**：至今没找到进入详情抽屉的入口）
 - [ ] **C4. 角标**：任何变化都打，标明方向（变好/变差）
 
@@ -447,6 +464,15 @@ dsh --profile <p> --port 0 --no-open
 
 # 只跑提取
 node lib/extract.mjs <node_modules 目录> <输出目录>
+
+# 跑一次完整体检（内核的 CLI 形态；三个入口共用这一份结论）
+node bin/compat-check.mjs --nm <node_modules 目录> [--probe <探针报告>] [--dsh-version <v>]
+node bin/compat-check.mjs --nm <dir> --json     # 机器可读
+node bin/compat-check.mjs --nm <dir> --quiet    # 只要一行总结论
+# 退出码: 0 可用 / 1 部分可用 / 2 不兼容 / 3 无法判定（CI 可直接用）
+
+# 端到端（装包 + 起宿主 + 拿探针报告 + 判定），需要内核在同目录
+./dsh-plugin-compat-check.sh <spec>
 ```
 
 ### 7.2 客户端层怎么测（命令行永远测不到）
@@ -580,14 +606,37 @@ dsh-plugin-compat-check/
 
 ## 9. 下一动作
 
-**C2 的内容实现 + CLI 接线**：把**真实总览表**（来自 `lib/verdict.mjs` 的结论）
-落进 `settings.plugins.tab`（骨架与占位已渲染验证，见 §5 C2），
-并把 `dsh-plugin-compat-check.sh` 第 ⑤ 步（那段 python 的比对逻辑）换成 `lib/verdict.mjs`。
+**D1：注册对话工具 `compat_check`**（`ctx.tools.register(defineTool({...}))`，`inject = ["tools"]`）。
+面板已经有了（C2 完成），而工具是**唯一能在对话里拿到结论**的入口 ——
+用户问「我这插件兼容吗」时，agent 应该能直接答，而不是让他去翻设置页。
 
-> ⚠️ 落点已查清：这个 slot 是给**设置 → 内置插件**页加一个**兄弟 tab**，
-> 该页已有「插件列表」tab。面板要有自己的信息层级，不要与「插件列表」重复。
+> 两个入口消费**同一份** `computeReport()` 结果，所以不可能给出不同答案
+> （C1/C2 已经把这句话变成了可执行的事实：宿主半边与 CLI 都 import 同一个内核）。
 
-> **上一次更新**：2026-10-11，**C1 与 C2 复验并勾选**（§5 C 节）——用临时 profile + 应用自带 pnpm 装包，
+### 已完成：C2 + CLI 接线（2026-10-11）
+
+**C2**（见 §5 C2 节的完整证据）：宿主算结论 → `GET /plugin-compat-check/report` →
+客户端渲染成表。真实界面里点开 **设置 → 内置插件 → 兼容性** 看到 21 个插件的真实结论、
+0 异常、路由 200/123 KB。
+
+**CLI 接线**：判定收成**一处实现**。
+- 新增 `bin/compat-check.mjs`：三个入口共用的内核外壳（参数解析 / 退出码 / 表格与 JSON 两种渲染）。
+- `dsh-plugin-compat-check.sh` 第 ⑤ 步（那段 python 比对，70 行）→ 一行 `node bin/compat-check.mjs`。
+- 第 ③ 步的**内嵌 python 提取实现**（239 行）→ 一行 `node lib/extract.mjs`。
+  两份提取实现必然漂移，而本产品的全部卖点就是结论可信 —— 所以只保留一份。
+  那份 python 没丢，冻结成对拍用的参考基线 `tools/parity/python-reference/extract.py`，
+  `parity.sh` 改为从冻结文件取真源（不再从 .sh 现抽）。
+- 顺带修掉 `.sh` 的 **`--json` 死参数**：它被解析、被写进用法说明，然后从没被用过。
+  现在真的会传下去，并且有测试盯着（`test/cli.test.mjs`）。
+- 脚本从 491 行降到 221 行，其中 python 只剩 6 行（报告规模用）。
+
+⚠️ **脚本形态的一个新前提**：它现在**需要内核在旁边**（`lib/` + `rules/`）。
+找不到就**直接报错退出**，不会降级成"只打印提取结果"——
+降级会给出一个看起来正常、实际没有结论的输出。`DSC_KERNEL` 可指向别处的内核。
+
+> **上一次更新**：2026-10-11，**C2 完成 + CLI 接线完成**（见下面「已完成」）。
+>
+> 上次：**C1 与 C2 复验并勾选**（§5 C 节）——用临时 profile + 应用自带 pnpm 装包，
 > 真实启动 + 无头 Chrome 走完整流程。C1 拿到了**四层证据**：配置树挂载、宿主自报激活
 > （`HOST-HALF-ACTIVATED`，且 `did not activate` 告警为 0）、客户端条目在 66 条 boot entries 里
 > 且位于真实取回的 application 批次、控制台 `CLIENT-HALF-APPLIED` + `REGISTERED`、页面 0 异常。

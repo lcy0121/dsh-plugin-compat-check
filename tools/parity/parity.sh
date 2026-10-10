@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# 静态提取对拍：Node 移植版 vs .sh 里那段 python 真源。
+# 静态提取对拍：Node 版 vs **冻结的** python 参考实现。
 #
-# python 源码是**从 dsh-plugin-compat-check.sh 里现抽的**，不是副本 ——
-# 否则比到的可能是一个已经漂移的拷贝，对拍就失去意义。
+# 参考实现在 tools/parity/python-reference/extract.py，它来自 dsh-plugin-compat-check.sh
+# 早先的那段内嵌 python（该段已随"判定收成一处"被删除）。冻结的理由见下面 ① 处注释：
+# 参考实现本来就该是不可变的历史基线，而不是从别处现抽。
 #
 # 用法: tools/parity/parity.sh <node_modules 目录> [输出目录]
 #       tools/parity/parity.sh tools/parity/fixtures        # 对拍每个 fixture 子目录
@@ -11,7 +12,7 @@ set -euo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 NM="${1:?用法: parity.sh <node_modules 目录> [输出目录]}"
 OUT="${2:-/tmp/compat-parity}"
-PY_SRC="$REPO/dsh-plugin-compat-check.sh"
+REF_PY="$REPO/tools/parity/python-reference/extract.py"
 
 # ── fixture 根目录的展开 ──────────────────────────────────────────
 #
@@ -69,12 +70,20 @@ fi
 
 rm -rf "$OUT"; mkdir -p "$OUT/py" "$OUT/js"
 
-# 只取**第一个** python 块；脚本里有多个 heredoc，抽多了会连比对段一起跑
-awk "/<<'PY'/{if(!f){f=1;next}} f&&/^PY$/{exit} f" "$PY_SRC" > "$OUT/extract.py"
-if ! grep -q "json.dump(report" "$OUT/extract.py" || grep -q "探针未产出报告" "$OUT/extract.py"; then
-  echo "✗ 没能从 $PY_SRC 抽出 python 块"; exit 1
+# python 真源现在是一个**冻结的参考实现**，不再从 .sh 里现抽。
+#
+# 为什么改：原来是从 dsh-plugin-compat-check.sh 里 awk 出一段内嵌 python。
+# 但那个 .sh 的提取步骤已经换成调用 Node（判定收成一处，见 bin/compat-check.mjs），
+# 内嵌 python 随之删除 —— 于是"现抽"就抽不到了。
+# 抽不到时脚本会报错退出，不会静默；但把它冻结下来更好：
+#   1) 参考实现本来就该是不可变的历史基线，而不是"从别处现抽"；
+#   2) 现在它会随 .sh 的编排变化而消失，冻结后不受影响；
+#   3) 历史仍在：文件头注明了它来自哪个提交。
+cp "$REF_PY" "$OUT/extract.py"
+if ! grep -q "json.dump(report" "$OUT/extract.py"; then
+  echo "✗ 参考实现 $REF_PY 不完整"; exit 1
 fi
-echo "① 已从 .sh 抽出 python 真源: $(wc -l < "$OUT/extract.py" | tr -d ' ') 行"
+echo "① 参考实现: $(wc -l < "$OUT/extract.py" | tr -d ' ') 行（已冻结，不再从 .sh 现抽）"
 
 python3 "$OUT/extract.py" "$NM" "$OUT/py" > "$OUT/py.stdout" 2>&1 || { echo "✗ python 版失败"; tail -5 "$OUT/py.stdout"; exit 1; }
 echo "② python 版输出 OK"

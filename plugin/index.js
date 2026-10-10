@@ -21,9 +21,10 @@
 //   ${DSC_OUT_DIR:-$TMPDIR/dsh-plugin-compat-check}/loader-introspect.json
 // plus structured console lines prefixed with [dsh-plugin-compat-check].
 
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { homedir, tmpdir } from 'node:os';
+import path, { join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export const name = 'dsh-plugin-compat-check';
 
@@ -582,6 +583,164 @@ function firstLine(text) {
 // apply
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// C2: 面板数据通道（宿主半边算结论，客户端半边渲染）
+// ---------------------------------------------------------------------------
+
+/**
+ * 内核的位置。插件半边**不自己实现判定** —— 它 import 仓库里的内核。
+ *
+ * 三条候选路径，按可靠性排序：
+ *   1. 环境变量 `DSC_KERNEL`（打包/发布形态下由外层指定）
+ *   2. 本包在仓库里的位置（`plugin/` 的上一级）—— 开发与 GitHub 分发时的形态
+ * 找不到就返回 null，**由调用方决定怎么说**，这里不抛。
+ */
+function resolveKernelDir() {
+  const { dirname: dir } = path;
+  const here = dir(fileURLToPath(import.meta.url));
+  const candidates = [
+    process.env.DSC_KERNEL,
+    path.resolve(here, '..'), // plugin/ → 仓库根
+  ].filter(Boolean);
+  for (const c of candidates) {
+    try {
+      if (existsSync(path.join(c, 'lib', 'extract.mjs')) && existsSync(path.join(c, 'lib', 'verdict.mjs'))) {
+        return c;
+      }
+    } catch { /* 下一个候选 */ }
+  }
+  return null;
+}
+
+/**
+ * 当前 profile 的 node_modules。
+ *
+ * 优先级：显式覆盖 → DSH 正在跑的 profile → `desktop`。
+ * 「正在跑的是哪个 profile」没有正式服务暴露，只能靠环境变量与目录推断 ——
+ * 所以这里把推断的**依据**一起放进报告，让结论可追溯，而不是猜一个就不吭声。
+ */
+function resolveNodeModules() {
+  const dshHome = process.env.DSH_HOME || join(homedir(), '.dsh');
+  const explicit = process.env.DSC_PROFILE;
+  const candidates = [];
+  if (explicit) candidates.push({ dir: join(dshHome, 'profiles', explicit, 'node_modules'), why: `DSC_PROFILE=${explicit}` });
+
+  for (const key of ['DSH_PROFILE', 'DSH_ACTIVE_PROFILE', 'DSH_PROFILE_NAME']) {
+    const v = process.env[key];
+    if (v) candidates.push({ dir: join(dshHome, 'profiles', v, 'node_modules'), why: `${key}=${v}` });
+  }
+  candidates.push({ dir: join(dshHome, 'profiles', 'desktop', 'node_modules'), why: '回退到 desktop profile' });
+
+  for (const c of candidates) {
+    try {
+      if (existsSync(c.dir)) return { dir: c.dir, why: c.why };
+    } catch { /* 下一个 */ }
+  }
+  return { dir: null, why: '没有任何候选目录存在' };
+}
+
+/**
+ * 跑一次体检。**同步、纯计算、不抛**。
+ *
+ * 为什么宿主半边要算而不是把原始数据丢给客户端：
+ *   - 客户端跑在浏览器里，读不了文件系统；
+ *   - 结论（五元组 + 确定性）是内核的产物，算出唯一一份才不会两边漂移。
+ */
+async function computeReport(state) {
+  const started = Date.now();
+  const out = {
+    schemaVersion: 1,
+    kind: 'plugin-compat-check/report',
+    computedAt: new Date().toISOString(),
+    ok: false,
+    error: null,
+    kernelDir: null,
+    nodeModules: null,
+    nodeModulesWhy: null,
+    report: null,
+  };
+  try {
+    const kernel = resolveKernelDir();
+    out.kernelDir = kernel;
+    if (!kernel) {
+      out.error = '找不到判定内核（lib/extract.mjs + lib/verdict.mjs）。'
+        + '插件形态下它们是同仓库的相邻目录；发布形态请设 DSC_KERNEL。';
+      return out;
+    }
+    const nm = resolveNodeModules();
+    out.nodeModules = nm.dir;
+    out.nodeModulesWhy = nm.why;
+    if (!nm.dir) {
+      out.error = `找不到要体检的 node_modules：${nm.why}`;
+      return out;
+    }
+
+    const { extractWithProvenance } = await import(pathToFileURL(join(kernel, 'lib', 'extract.mjs')).href);
+    const { buildVerdicts } = await import(pathToFileURL(join(kernel, 'lib', 'verdict.mjs')).href);
+
+    const catalogPath = join(kernel, 'rules', 'dsh-api-catalog.json');
+    const rulesPath = join(kernel, 'rules', 'severity.json');
+    const catalog = JSON.parse(readFileSync(catalogPath, 'utf8'));
+    const rules = JSON.parse(readFileSync(rulesPath, 'utf8'));
+
+    // 运行时面：宿主半边**自己就在进程里**，所以它能拿到比探针更准的东西。
+    // 第一版先读探针报告（如果外层给了路径），没有就退回目录 —— 并如实标注。
+    let hostSurface = null;
+    let surfaceWhy = '没有运行时面：结论中的方法级判定降为「疑似」';
+    const probePath = process.env.DSC_PROBE_REPORT;
+    if (probePath && existsSync(probePath)) {
+      try {
+        hostSurface = JSON.parse(readFileSync(probePath, 'utf8'));
+        surfaceWhy = `运行时面来自探针报告 ${probePath}`;
+      } catch (error) {
+        surfaceWhy = `探针报告读不动（${errText(error)}），退回目录`;
+      }
+    }
+    out.surfaceWhy = surfaceWhy;
+
+    const extracted = extractWithProvenance(nm.dir, { catalog });
+    const verdict = buildVerdicts({
+      report: extracted.report,
+      hostSurface,
+      rules,
+      catalog,
+      dshVersion: process.env.DSH_VERSION || null,
+    });
+
+    // 只把面板要用的部分送过去：完整 report 在 desktop profile 上是 ~1 MB，
+    // 而面板要的只是每个插件的结论与去处。
+    out.report = {
+      summary: verdict.summary,
+      dshVersion: verdict.dshVersion,
+      hasRuntimeSurface: Boolean(hostSurface),
+      surfaceWhy,
+      plugins: verdict.plugins,
+      // 逐条发现的证据形态：面板要能回答「凭什么这么判」
+      manifests: extracted.report.manifests,
+      serviceCount: extracted.report.services.length,
+      siteTotal: (extracted.report.callSites || []).length,
+    };
+    out.ok = true;
+    out.elapsedMs = Date.now() - started;
+  } catch (error) {
+    out.error = errText(error);
+  }
+  return out;
+}
+
+/** 本地信任栅栏：只有本机的 DSH 界面该读到这份数据。 */
+function isTrustedRequest(req) {
+  try {
+    const host = String((req.headers && (req.headers.host || req.headers.Host)) || '');
+    const origin = String((req.headers && (req.headers.origin || req.headers.Origin)) || '');
+    const hostOk = /^(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(host);
+    if (!origin) return hostOk;
+    return hostOk && /^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(origin);
+  } catch {
+    return false;
+  }
+}
+
 export function apply(ctx) {
   // Nothing below may throw: a throw here fails this plugin's own fiber.
   try {
@@ -596,6 +755,7 @@ export function apply(ctx) {
         injectProbe: { registered: false, outcome: 'not run' },
       },
       disposeInjectProbe: null,
+      lastReport: null,
     };
 
     // Resolve the loader immediately: it is a plain service read and must not
@@ -618,6 +778,59 @@ export function apply(ctx) {
       state.disposeInjectProbe = startInjectProbe(ctx, state.loaderAccess.injectProbe);
     } catch (error) {
       state.loaderAccess.injectProbe.outcome = `probe setup threw: ${errText(error)}`;
+    }
+
+    // ── C2 数据通道 ──
+    //
+    // 路由挂在**作用域 ctx** 上，而不是本插件自己的 ctx 上：这样
+    // webServer 缺席时（headless / CLI 形态）这一段根本不注册，
+    // 本插件的 fiber 也不会去等一个不存在的服务 —— `inject` 保持 []，
+    // 与本文件的整体设计一致（见文件头）。
+    try {
+      if (typeof ctx.inject === 'function') {
+        ctx.inject(['webServer'], (scope) => {
+          try {
+            scope.webServer.register({
+              name: 'dsh-plugin-compat-check',
+              kind: 'exact',
+              path: '/plugin-compat-check/report',
+              handler: async (req, res) => {
+                // 体检结论是本机信息（装了哪些插件、用了哪些 API），
+                // 不该被这台机器上的任意页面读到。
+                if (!isTrustedRequest(req)) {
+                  res.writeHead(403, { 'content-type': 'application/json; charset=utf-8' });
+                  res.end(JSON.stringify({ error: 'refused: untrusted request' }));
+                  return;
+                }
+                try {
+                  // `?refresh=1` 强制重算；否则用缓存（体检是几百毫秒级的活，
+                  // 而面板打开时可能连着拉几次）。
+                  const url = new URL(req.url || '/', 'http://127.0.0.1');
+                  if (url.searchParams.get('refresh') === '1' || !state.lastReport) {
+                    state.lastReport = await computeReport(state);
+                  }
+                  res.writeHead(200, {
+                    'content-type': 'application/json; charset=utf-8',
+                    'cache-control': 'no-store',
+                  });
+                  res.end(JSON.stringify(state.lastReport));
+                } catch (error) {
+                  // 连处理器里都不抛：把错误变成一条可读的 JSON，而不是 500 空响应。
+                  res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+                  res.end(JSON.stringify({ ok: false, error: errText(error) }));
+                }
+              },
+            });
+            log('C2 route registered: GET /plugin-compat-check/report');
+          } catch (error) {
+            log(`WARN C2 route registration failed: ${errText(error)}`);
+          }
+        });
+      } else {
+        log('C2 route skipped: ctx.inject is not a function');
+      }
+    } catch (error) {
+      log(`WARN C2 route setup threw: ${errText(error)}`);
     }
 
     const finish = () => {
@@ -669,6 +882,8 @@ export function apply(ctx) {
       globalThis.__DSH_COMPAT_CHECK__ = {
         rescan: () => scan(ctx, state, 0),
         reportPath: OUT_JSON,
+        // 面板用的那份结论（同一个函数，所以界面与工具不可能给出不同答案）
+        compatReport: () => computeReport(state),
       };
     } catch {
       /* 忽略 */

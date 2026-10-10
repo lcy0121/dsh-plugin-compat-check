@@ -46,6 +46,29 @@ USAGE
   exit 2
 fi
 
+# ── 找到判定内核所在的位置 ────────────────────────────────────────
+#
+# 这个 .sh 只做编排（装包 / 起宿主 / 拿探针报告），判定本身在 Node 内核里。
+# 所以它**需要内核在旁边**：同目录下的 lib/ + rules/（仓库形态），
+# 或一个已发布的包（`DSC_KERNEL` 指过去）。找不到就**直接报错**，不降级 ——
+# 降级成"跳过判定只打印提取结果"会给出一个看起来正常、实际没有结论的输出。
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+KERNEL_DIR="${DSC_KERNEL:-$SCRIPT_DIR}"
+if [ ! -f "$KERNEL_DIR/lib/extract.mjs" ] || [ ! -f "$KERNEL_DIR/lib/verdict.mjs" ]; then
+  cat >&2 <<EOF
+✗ 找不到判定内核（$KERNEL_DIR/lib/{extract,verdict}.mjs）
+
+  这个脚本不自带判定实现 —— 判定只有一处实现（lib/verdict.mjs），
+  而它需要 Node 环境（DSH 自带 Node ≥22）。
+
+  两种用法：
+    1) 在仓库里跑（推荐）：git clone 后直接执行本脚本
+    2) 只想要脚本：用 DSC_KERNEL 指向内核目录，例如
+         DSC_KERNEL=/path/to/dsh-plugin-compat-check ./dsh-plugin-compat-check.sh <spec>
+EOF
+  exit 1
+fi
+
 WORKDIR=/tmp/dsh-plugin-compat-check
 PROFILE=plugincheck
 DSH_HOME_DIR="${DSH_HOME:-$HOME/.dsh}"
@@ -143,244 +166,19 @@ echo
 
 # ---------- ③ 静态提取：插件声明的与调用的 API ----------
 echo "── ③ 静态提取插件实际使用的服务 ──"
-python3 - "$PROFILE_DIR/node_modules" "$WORKDIR" <<'PY'
-import json, os, re, sys
-nm, workdir = sys.argv[1], sys.argv[2]
-
-def pkg_json(path):
-    try:
-        return json.load(open(os.path.join(path, 'package.json'), encoding='utf-8'))
-    except Exception:
-        return None
-
-
-def main_entry(j):
-    """package.json 声明的入口：exports['.'] 优先，退回 main。"""
-    exp = j.get('exports')
-    if isinstance(exp, dict):
-        dot = exp.get('.')
-        if isinstance(dot, str):
-            return dot
-        if isinstance(dot, dict):
-            for k in ('default', 'import', 'require'):
-                if isinstance(dot.get(k), str):
-                    return dot[k]
-    return j.get('main') or 'index.js'
-
-
-def mounted_entries(full, j):
-    """从 dsh.bundle.patch → cordis.patch.yml 读出**实际被挂载**的入口。
-
-    这是精度关键：包里常有不会被加载的伴随模块（实测有插件带一个 lib/invariant.js，
-    主入口并不 import 它、patch 也没挂载它）。整包扫描会把这些孤儿模块需要的服务
-    当成真实缺口，把判定压得过低。
-    """
-    dsh = j.get('dsh') or {}
-    patch = (dsh.get('bundle') or {}).get('patch')
-    seeds = []
-    if patch:
-        try:
-            txt = open(os.path.join(full, patch), encoding='utf-8').read()
-            for m in re.findall(r'^\s*-\s*name:\s*[\'"]?([^\s\'"]+)', txt, re.M):
-                seeds.append(os.path.normpath(m) if m.startswith('.') else main_entry(j))
-        except Exception:
-            pass
-    if not seeds:
-        seeds.append(main_entry(j))
-    return [s.lstrip('./') for s in seeds]
-
-
-def local_graph(full, seeds):
-    """从入口出发收集本地相对依赖图。
-
-    seen   = 已成功解析出的文件（返回值）
-    visited = 已出队检查过的**路径形态**
-
-    这两个必须分开。原先只用 seen 去重，而「靠补扩展名才解析成功」时它把解析后的
-    路径（b.js）放进 seen，队列里传的却是未解析形态（b），于是 `rel in seen` 永远
-    不成立 → 每次访问都重新读文件、重新展开它的导入 → 只要有环就无界膨胀。
-    实测：3 个 JS 文件（无扩展名 ESM 导入 + 成环）即可让本函数 98% CPU 空转不停；
-    真实插件 @liustack/modlens 打包的 undici 就是这个写法。修法是把「检查过」与
-    「解析成功」分开，不改变返回的图，只去掉重复展开。
-    """
-    seen, visited, queue = set(), set(), list(seeds)
-    while queue:
-        rel = queue.pop()
-        if not rel or rel in visited:
-            continue
-        visited.add(rel)
-        path = os.path.join(full, rel)
-        if not os.path.isfile(path):
-            hit = None
-            for e in ('.js', '.mjs', '.cjs', '.ts', '/index.js', '/index.mjs', '/index.ts'):
-                if os.path.isfile(path + e):
-                    hit = path + e
-                    break
-            if not hit:
-                continue
-            path = hit
-            rel = os.path.relpath(path, full)
-        if rel in seen:
-            continue
-        seen.add(rel)
-        try:
-            txt = open(path, encoding='utf-8', errors='ignore').read()
-        except Exception:
-            continue
-        for groups in re.findall(
-                r'from\s*[\'"]([^\'"]+)[\'"]'
-                r'|require\(\s*[\'"]([^\'"]+)[\'"]\s*\)'
-                r'|import\(\s*[\'"]([^\'"]+)[\'"]\s*\)', txt):
-            spec = next((g for g in groups if g), '')
-            if spec.startswith('.'):
-                queue.append(os.path.normpath(os.path.join(os.path.dirname(rel), spec)))
-    return seen
-
-
-def collect_files(full, j):
-    """返回 (需要扫描的文件 [(相对路径, 文本)], 是否退回整包扫描)。
-
-    只扫「实际挂载的入口 + 其本地依赖图」，外加客户端入口（dsh.client 单独挂载，
-    不经过宿主入口图）。无法解析入口时才退回整包扫描，并把退回状态如实上报。
-    """
-    graph = local_graph(full, mounted_entries(full, j))
-    fallback = not graph
-    files, rels = [], set()
-
-    def add(rel):
-        rel = os.path.normpath(rel)
-        if rel in rels:
-            return
-        try:
-            files.append((rel, open(os.path.join(full, rel), encoding='utf-8', errors='ignore').read()))
-            rels.add(rel)
-        except Exception:
-            pass
-
-    if fallback:
-        for root, _dirs, fs in os.walk(full):
-            for f in fs:
-                if f.endswith(('.js', '.mjs', '.cjs', '.ts')):
-                    add(os.path.relpath(os.path.join(root, f), full))
-    else:
-        for rel in sorted(graph):
-            add(rel)
-        client_seeds = []
-        exp = j.get('exports')
-        if isinstance(exp, dict) and isinstance(exp.get('./client'), (str, dict)):
-            c = exp['./client']
-            client_seeds.append(c if isinstance(c, str) else (c.get('default') or ''))
-        for root, _dirs, fs in os.walk(full):
-            for f in fs:
-                rel = os.path.relpath(os.path.join(root, f), full)
-                if f.endswith(('.js', '.mjs', '.cjs', '.ts')) and 'client' in rel.lower():
-                    client_seeds.append(rel)
-        for rel in sorted(local_graph(full, [s.lstrip('./') for s in client_seeds if s])):
-            add(rel)
-    return files, fallback
-
-# 找出"社区插件"：package.json 里有 dsh 清单、且非 @deepseek-ai 官方
-targets = []
-for entry in sorted(os.listdir(nm)):
-    for base in ([entry] if not entry.startswith('@') else
-                 [os.path.join(entry, s) for s in sorted(os.listdir(os.path.join(nm, entry)))]):
-        full = os.path.join(nm, base)
-        j = pkg_json(full)
-        if not j or 'dsh' not in j or str(j.get('name', '')).startswith('@deepseek-ai/'):
-            continue
-        targets.append((base, full, j))
-
-services, calls, manifests, svc_files = set(), {}, [], {}
-fallback_pkgs = []
-for name, full, j in targets:
-    manifests.append({
-        'name': j.get('name'), 'version': j.get('version'),
-        'dshBundle': bool(j.get('dsh', {}).get('bundle')),
-        'clientPlatform': (j.get('dsh', {}).get('client') or {}).get('platform'),
-        'clientInject': (j.get('dsh', {}).get('client') or {}).get('inject'),
-        'peerDependencies': j.get('peerDependencies'),
-    })
-    # 收集源码文本：只取「实际挂载的入口 + 本地依赖图」（+ 客户端入口）
-    blob, fell_back = collect_files(full, j)
-    if fell_back:
-        fallback_pkgs.append(j.get('name') or full)
-    src = '\n'.join(t for _f, t in blob)
-    for arr in re.findall(r'inject\s*:\s*\[([^\]]*)\]', src):
-        for s in re.findall(r'["\']([A-Za-z][\w.]*)["\']', arr):
-            services.add(s)
-    for s in re.findall(r"ctx\.get\(\s*['\"]([A-Za-z][\w.]*)['\"]\s*\)", src):
-        services.add(s)
-    # ctx.get('x') 赋给变量后调用的方法
-    for var, svc in re.findall(r"(?:const|let|var)\s+(\w+)\s*=\s*ctx\.get\(\s*['\"]([A-Za-z][\w.]*)['\"]\s*\)", src):
-        services.add(svc)
-        for m in re.findall(re.escape(var) + r'\.([A-Za-z_]\w*)\s*\(', src):
-            calls.setdefault(svc, set()).add(m)
-    # 记录每个服务名出现在哪些文件 —— 客户端服务（slots/locale 等）在宿主探针里必然缺席，
-    # 必须与宿主端服务分开判定，否则会报假阳性
-    for s in services:
-        for fname, text in blob:
-            if re.search(r'\b' + re.escape(s) + r'\b', text):
-                svc_files.setdefault(s, set()).add(fname)
-    # 直接 ctx.<svc>.<method>()
-    for svc, m in re.findall(r'ctx\.([a-zA-Z]\w*)\.([A-Za-z_]\w*)\s*\(', src):
-        services.add(svc)
-        calls.setdefault(svc, set()).add(m)
-    # svc.<method>() 直呼
-    for svc in list(services):
-        for m in re.findall(r'\b' + re.escape(svc) + r'\.([A-Za-z_]\w*)\s*\(', src):
-            calls.setdefault(svc, set()).add(m)
-
-# 客户端服务：只在路径含 "client" 的文件（任一目录段或文件名）里被引用 ——
-# 它们活在浏览器侧，宿主探针必然看不到，不能据此判定「缺失」。
-# 注意必须看完整相对路径：客户端代码常在 lib/sprite.js 这类不含 client 的文件名里。
-def is_client_file(path):
-    return any('client' in seg.lower() for seg in path.replace('\\', '/').split('/'))
-
-# 客户端提示：服务名属于已知客户端服务，或只在疑似客户端的路径里出现。
-#
-# 重要：这**只是提示，不是判据**。实测两个插件都存在同一服务被宿主与客户端
-# 同时引用的情况（客户端设置页要显示运行中 agent 数、读 locale；共用代码
-# src/shared/ 也会同时提到），所以文件路径无法可靠区分宿端/客户端。
-# 真正的判据是探针：宿主里存在 → 宿主服务；不存在 + 有客户端提示 → 归客户端。
-KNOWN_CLIENT = {'slots', 'locale', 'uiRenderer', 'uiSlots', 'themeStore', 'modules',
-                'clientModules', 'connection'}
-
-
-def client_hint(svc, files):
-    if svc in KNOWN_CLIENT:
-        return True
-    return any(is_client_file(f) for f in files)
-
-
-client_hints = {s: client_hint(s, svc_files.get(s, set())) for s in sorted(services)}
-
-report = {
-    'manifests': manifests,
-    'services': sorted(services),
-    'clientHints': client_hints,
-    'calls': {k: sorted(v) for k, v in calls.items()},
-    'fallbackPackages': fallback_pkgs,
-}
-json.dump(report, open(os.path.join(workdir, 'static.json'), 'w'), ensure_ascii=False, indent=2)
-# 探针探测**全部**发现的服务 —— 让宿主自己回答"存在与否"，这才是可靠判据
-json.dump({'services': sorted(services)}, open(os.path.join(workdir, 'services.json'), 'w'), ensure_ascii=False, indent=2)
-
-for m in manifests:
-    print(f"  插件: {m['name']}@{m['version']}  bundle={m['dshBundle']}  client={m['clientPlatform']}")
-    peers = m.get('peerDependencies') or {}
-    dsh_peers = {k: v for k, v in peers.items() if 'dsh' in k or 'cordis' in k}
-    if dsh_peers:
-        print(f"    声明的 DSH 依赖: {json.dumps(dsh_peers, ensure_ascii=False)}")
-    else:
-        print("    声明的 DSH 依赖: 无（闸门不会拦，但也没有兼容保证）")
-print(f"  提取到 {len(report['services'])} 个服务引用: {', '.join(report['services']) or '（未识别）'}")
-print("  （只扫实际挂载的入口及其依赖图；宿主端 / 客户端归属由下一步真实探针判定）")
-if fallback_pkgs:
-    print(f"  ⚠️ 无法解析入口、已退回整包扫描: {', '.join(fallback_pkgs)}")
-    print("     这种情况下可能把未被加载的伴随模块算进来，判定会偏严，请结合 --keep 核对")
-for s, ms in report['calls'].items():
-    if ms:
-        print(f"    {s} → {', '.join(ms)}")
+# ⚠️ 这一步曾经是**另一份** python 提取实现（内嵌在这个 .sh 里）。
+# 现在改为调用 Node 内核 —— 理由是「同一个判定不能有两份实现」：
+# 两份必然漂移，而本产品的全部卖点就是结论可信。
+# 那个 python 实现没有丢，它被冻结成对拍用的参考基线：
+#   tools/parity/python-reference/extract.py
+node "$KERNEL_DIR/lib/extract.mjs" "$PROFILE_DIR/node_modules" "$WORKDIR" \
+  || { echo "  ❌ 静态提取失败"; exit 1; }
+# services.json 由内核一并写好了；这里只报告规模
+python3 - "$WORKDIR/static.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding='utf-8'))
+print(f"  识别到 {len(d['manifests'])} 个社区插件，{len(d['services'])} 个服务引用")
+print(f"  调用点 {len(d.get('callSites', []))} 个（逐插件归属，带 file:line 与证据形态）")
 PY
 echo
 
@@ -411,75 +209,34 @@ echo
 
 # ---------- ⑤ API 比对与结论 ----------
 echo "── ⑤ API 比对 ──"
-python3 - "$WORKDIR" "$ACTIVATED" <<'PY'
-import json, os, sys
-workdir, activated = sys.argv[1], sys.argv[2]
+# 判定**只有一处实现**：lib/verdict.mjs，经 bin/compat-check.mjs 暴露。
+# 这个 .sh 只负责编排（装包、起宿主、拿探针报告），不再自己拼结论。
+#
+# 注意这里把两个输入都交给内核：
+#   --nm      ：重新按 Node 内核提取（它需要逐插件归属与调用点证据，
+#               而这些是 python 参考实现没有的）
+#   --probe   ：宿主真实运行时面。**给了它，方法级结论才是「确定」**；
+#               不给就只能退回官方目录，结论降为「疑似」。
+# `--json` 此前是个**死参数**：被解析、被写进用法说明，然后从没被用过。
+# 那比不支持更糟 —— 用户以为拿到了机器可读输出，其实是一张表。
+JSON_FLAG=""
+[ "$JSON" -eq 1 ] && JSON_FLAG="--json"
+node "$KERNEL_DIR/bin/compat-check.mjs" \
+  --nm "$PROFILE_DIR/node_modules" \
+  --probe "$WORKDIR/probe-report.json" \
+  --dsh-version "$DSH_VER" $JSON_FLAG
+VERDICT_RC=$?
+# 退出码是有含义的（0 可用 / 1 部分可用 / 2 不兼容 / 3 无法判定），
+# 但对这个脚本的语义来说"检查成功"就够了 —— 结论好坏已经打印出来。
+if [ "$VERDICT_RC" -ge 3 ]; then
+  echo "  ⚠️ 判定过程本身出了问题（退出码 $VERDICT_RC）—— 这不算插件的结论，别当成不兼容。"
+fi
 
-static = json.load(open(os.path.join(workdir, 'static.json'), encoding='utf-8'))
-try:
-    probe = json.load(open(os.path.join(workdir, 'probe-report.json'), encoding='utf-8'))
-except Exception:
-    probe = None
+if [ "$ACTIVATED" = "no" ]; then
+  echo
+  echo "  另有：启动时出现了 did not activate，说明有插件条目没激活（见上面的启动告警）。"
+fi
 
-if not probe:
-    print("  探针未产出报告（宿主可能启动失败，或插件把启动打断了）")
-    print(f"  启动是否干净: {activated}")
-    print("结论: 无法判定 —— 请用 --keep 保留现场后人工查看 boot.log")
-    raise SystemExit
-
-root = probe.get('root', {})
-scoped = probe.get('scoped', {})
-print(f"  探针已运行 (node {probe.get('node')}, {probe.get('platform')})")
-print()
-
-missing_services, missing_methods, ok, client_services = [], [], [], []
-hints = static.get('clientHints', {})
-for svc in static['services']:
-    info = root.get(svc)
-    if not info or not info.get('present'):
-        # 宿主里没有：若路径/名称提示它属客户端，则归为"需界面验证"而非硬判缺失。
-        # 否则就是真的缺 —— 这个区分靠探针做裁判，不靠路径猜测。
-        if hints.get(svc):
-            client_services.append(svc)
-        else:
-            missing_services.append(svc)
-            print(f"  ❌ 服务缺失: {svc}")
-        continue
-    methods = info.get('methods', {})
-    used = static['calls'].get(svc, [])
-    # 只判定"看起来像方法调用"的名字，且排除本来就不是方法的内建属性
-    gone = [m for m in used if m not in methods]
-    if gone:
-        missing_methods.append((svc, gone))
-        have = ', '.join(sorted(methods)[:8]) or '（无方法）'
-        print(f"  ⚠️  {svc}: 调用了不存在的方法 {gone}")
-        print(f"        宿主实际提供: {have}{' …' if len(methods) > 8 else ''}")
-    else:
-        ok.append(svc)
-        if used:
-            print(f"  ✓  {svc}: {', '.join(used)} 均存在")
-
-if client_services:
-    print(f"  ◻︎ 客户端服务: {', '.join(client_services)}")
-    print("        这些活在浏览器侧，宿主探针看不到 —— 只能靠「界面上有没有出现该插件的 UI 元素」来验证。")
-    print("        实测过的坑：有插件客户端抛错、而宿主端启动日志完全干净。命令行永远测不到这一层。")
-
-print()
-print("  ── 结论 ──")
-if missing_services or missing_methods:
-    print("  部分可用：依赖的 API 有缺失，相关功能会失效或静默降级。")
-    if missing_services:
-        print(f"    缺失服务: {missing_services}")
-    for svc, gone in missing_methods:
-        print(f"    {svc} 缺失方法: {gone}")
-    print("  注意：缺失的方法若被 try/catch 或 typeof 守卫包住，插件仍会「激活成功」，")
-    print("        但那部分功能是死的 —— 只看 did not activate 会误判成可用。")
-else:
-    print("  API 面完整，启动干净 —— 判定可用。")
-if activated == 'no':
-    print("  另有：启动时出现了 did not activate，说明有插件条目没激活。")
-print("  注：方法级判定是静态正则启发式，可能存在误报；拿不准时加 --keep 保留现场人工核对。")
-PY
 echo
 echo "── 收尾 ──"
 echo "  日志: $LOG"
