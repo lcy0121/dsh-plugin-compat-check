@@ -24,22 +24,16 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { extractWithProvenance } from '../lib/extract.mjs';
-import { buildVerdicts, DISPOSITION } from '../lib/verdict.mjs';
+import { buildVerdicts } from '../lib/verdict.mjs';
+import { render, toJSON } from '../lib/report.mjs';
+import { snapshotForBaseline, diffAgainstBaseline, badgeFor, BASELINE_SCHEMA } from '../lib/baseline.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-
-const VERDICT_LABEL = { ok: '可用', partial: '部分可用', broken: '不兼容', unknown: '未知' };
-const SEVERITY_LABEL = { fatal: '致命', 'feature-dead': '功能失效', degraded: '降级' };
-const CATEGORY_LABEL = {
-  'host-service-missing': '宿主服务缺失',
-  'host-method-missing': '宿主方法缺失',
-  'unprovided-dependency': '无人提供的依赖',
-  'declaration-mismatch': '声明与实测不符',
-};
 
 const USAGE = `用法: node bin/compat-check.mjs --nm <node_modules 目录> [选项]
 
@@ -51,19 +45,30 @@ const USAGE = `用法: node bin/compat-check.mjs --nm <node_modules 目录> [选
   --dsh-version <v> 当前 DSH 版本（用于「声明与实测不符」这一类结论）。
   --rules <json>   覆盖 severity 规则表（默认 rules/severity.json）
   --catalog <json> 覆盖官方 API 目录（默认 rules/dsh-api-catalog.json）
+  --no-baseline    不读写本机基线（CI / 一次性检查用）
+  --baseline-file <path>  指定基线文件（默认按 profile 分文件放在 $DSH_HOME 下）
+  --dry-run        算出差分但不写基线
   --json           输出机器可读的完整结论，而不是给人看的表
   --quiet          只输出结论行，不输出逐条发现
   --help           显示这段文字
+
+退出码（**1 与 2 只表示插件的结论**，3 表示这次体检本身没得出可信结论）:
+  0  全部可用
+  1  有插件"部分可用"
+  2  有插件"不兼容"
+  3  无法判定（用法错误 / 目录不存在 / 工具自身出错 —— 都不是插件的结论）
 `;
 
 /* ── 参数解析：手写，零依赖；未知参数一律报错而不是忽略 ────────────── */
 
 function parseArgs(argv) {
   const out = { json: false, quiet: false };
-  const takesValue = new Set(['--nm', '--probe', '--dsh-version', '--rules', '--catalog']);
+  const takesValue = new Set(['--nm', '--probe', '--dsh-version', '--rules', '--catalog', '--baseline-file', '--profile']);
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--json') { out.json = true; continue; }
+    if (a === '--no-baseline') { out.baseline = false; continue; }
+    if (a === '--dry-run') { out.dryRun = true; continue; }
     if (a === '--quiet') { out.quiet = true; continue; }
     if (a === '--help' || a === '-h') { out.help = true; continue; }
     if (takesValue.has(a)) {
@@ -106,6 +111,53 @@ function findProbeReport(nm) {
   return null;
 }
 
+/* ── 基线（C4 的持久层） ─────────────────────────────────────────────── */
+
+/**
+ * 基线文件的位置。
+ *
+ * 放在插件自己的状态目录（`$DSH_HOME/dsh-plugin-compat-check/`），与插件半边共用
+ * 同一份 —— 用户在面板里看到的"变化"和命令行看到的必须是同一件事，
+ * 两份基线会立刻分叉。
+ *
+ * **按 profile 分文件**：桌面 profile 与临时 profile 的插件集合不同，
+ * 混在一起会让差分变成噪音（"移除了 18 个插件"）。这正是要避免的。
+ */
+function baselineFileFor(nm, profile) {
+  const home = process.env.DSH_HOME || path.join(os.homedir(), '.dsh');
+  // profile 名从路径里取：…/profiles/<name>/node_modules
+  const inferred = (() => {
+    try {
+      const parts = path.resolve(nm).split(path.sep);
+      const i = parts.lastIndexOf('profiles');
+      if (i >= 0 && parts[i + 1]) return parts[i + 1];
+    } catch { /* 忽略 */ }
+    return 'unknown';
+  })();
+  const key = (profile || inferred || 'unknown').replace(/[^\w.-]/g, '_');
+  return path.join(home, 'dsh-plugin-compat-check', `baseline.${key}.json`);
+}
+
+function readBaseline(file) {
+  try {
+    if (!fs.existsSync(file)) return { prev: null, note: '还没有基线（这是第一次体检）' };
+    return { prev: JSON.parse(fs.readFileSync(file, 'utf8')), note: null };
+  } catch (error) {
+    // 读不出来**不是**"没有变化"。基线坏了就说不确定，不能假装一切正常。
+    return { prev: null, note: `基线读不出来（${error.message}）—— 这次不做比较` };
+  }
+}
+
+function writeBaseline(file, snapshot) {
+  try {
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, `${JSON.stringify(snapshot, null, 2)}\n`);
+    return null;
+  } catch (error) {
+    return `基线写不进去（${error.message}）`;
+  }
+}
+
 /* ── 内核 ──────────────────────────────────────────────────────────── */
 
 /**
@@ -144,6 +196,25 @@ export function run(options = {}) {
       catalog,
       dshVersion: options.dshVersion || null,
     });
+
+    // ── 基线差分 ──
+    // `--no-baseline` 关掉它（CI 里跑一次性检查时不该读写本机状态）。
+    result.baseline = null;
+    if (options.baseline !== false) {
+      const file = options.baselineFile || baselineFileFor(nm, options.profile);
+      result.inputs.baselineFile = file;
+      const { prev, note } = readBaseline(file);
+      const snap = snapshotForBaseline(result.verdict, options.dshVersion || null);
+      const diff = diffAgainstBaseline(prev, snap);
+      result.baseline = { file, note, diff, badge: badgeFor(diff), wrote: false };
+      // 只有**这次拿得到完整结论**时才写基线：一次失败的体检写出的基线，
+      // 会把"读不到"记成"这些插件都没了"，下次比较就全是假变化。
+      if (!options.dryRun) {
+        const err = writeBaseline(file, snap)
+        if (err) result.baseline.writeError = err
+        else result.baseline.wrote = true
+      }
+    }
   } catch (error) {
     result.error = error && error.message ? error.message : String(error);
   }
@@ -151,92 +222,6 @@ export function run(options = {}) {
 }
 
 /* ── 给人看的渲染 ──────────────────────────────────────────────────── */
-
-const pad = (s, n) => {
-  const w = [...String(s)].reduce((a, c) => a + (c.charCodeAt(0) > 0x2e80 ? 2 : 1), 0);
-  return String(s) + ' '.repeat(Math.max(0, n - w));
-};
-
-function render(result, opts) {
-  const L = [];
-  const { verdict, extract } = result;
-
-  if (result.error) {
-    L.push(`结论: 无法判定 —— ${result.error}`);
-    return L.join('\n');
-  }
-
-  const meta = extract.report.manifests;
-  // `--quiet` 只输出那一条总结论。真实 profile 上有 21 个插件、每个几行，
-  // 而这个开关的用途是「脚本里只要一个信号」—— 它必须真的安静，而不是「安静一点」。
-  // （本会话里已经踩过一次死参数：.sh 的 --json 被解析却从没被用过。）
-  if (opts.quiet) {
-    const q = verdict.summary;
-    L.push(`结论: ${VERDICT_LABEL.ok} ${q.ok}    ${VERDICT_LABEL.partial} ${q.partial}    ${VERDICT_LABEL.broken} ${q.broken}`);
-    return L.join('\n');
-  }
-
-  L.push(`插件数: ${meta.length}    有运行时面: ${result.inputs.hasRuntimeSurface ? '是' : '否（方法级结论降为「疑似」）'}`);
-  L.push('');
-
-  const s = verdict.summary;
-  L.push(`结论: ${VERDICT_LABEL.ok} ${s.ok}    ${VERDICT_LABEL.partial} ${s.partial}    ${VERDICT_LABEL.broken} ${s.broken}`
-    + (s.vacuousOk ? `    （其中 ${s.vacuousOk} 个「可用」是空洞的：它没有任何可检查的依赖）` : ''));
-  L.push('');
-
-  const names = Object.keys(verdict.plugins).sort((a, b) => {
-    const rank = { broken: 0, partial: 1, unknown: 2, ok: 3 };
-    return rank[verdict.plugins[a].verdict] - rank[verdict.plugins[b].verdict] || a.localeCompare(b);
-  });
-
-  for (const name of names) {
-    const p = verdict.plugins[name];
-    L.push(`${VERDICT_LABEL[p.verdict]}  ${name}@${p.version}${p.vacuous ? '   [空洞的结论：无可检查对象]' : ''}`);
-    if (opts.quiet) continue;
-    for (const f of p.findings) {
-      const api = f.service ? (f.method ? `${f.service}.${f.method}` : f.service) : '(声明)';
-      const loc = f.location ? `${f.location.file}:${f.location.line}` : '-';
-      const cert = f.certainty === 'certain' ? '' : ' [疑似]';
-      L.push(`     ${SEVERITY_LABEL[f.severity] ?? f.severity} / ${CATEGORY_LABEL[f.category] ?? f.category}${cert}  ${api}  @ ${loc}`);
-      if (f.impact) L.push(`       影响: ${f.impact}`);
-      if (f.basis) L.push(`       依据: ${f.basis}`);
-    }
-    // 「没报」和「报了」一样要能审：过滤与弃权是结论的一部分。
-    const cs = p.clientSide || [];
-    if (cs.length) L.push(`     客户端半边（命令行测不到，需界面验证）: ${cs.map((c) => c.service).join(', ')}`);
-    const filtered = p.filtered || [];
-    if (filtered.length) L.push(`     已过滤（判为噪音/有兜底）: ${filtered.map((x) => `${x.service}${x.method ? '.' + x.method : ''}`).join(', ')}`);
-    const noCalls = Object.values(p.resolved || {}).filter((c) => c.disposition === DISPOSITION.NO_CALLS);
-    if (noCalls.length) L.push(`     无证据可判（只出现名字，没有调用点）: ${noCalls.map((c) => c.service).join(', ')}`);
-  }
-
-  L.push('');
-  L.push('说明: 「疑似」= 没有运行时面、只能靠官方目录推断（那份目录是契约目录，不是运行时面）。');
-  L.push('      假阳性会让用户去做不必要的处置，所以判不准时一律降级，而不是升格成确定。');
-  return L.join('\n');
-}
-
-/** 机器可读形态：保留完整结论，但把 extract 换成一个摘要（原始输出可能几 MB） */
-function toJSON(result) {
-  if (result.error) return { error: result.error, inputs: result.inputs };
-  const report = result.extract.report;
-  return {
-    schemaVersion: 1,
-    inputs: result.inputs,
-    dshVersion: result.verdict.dshVersion,
-    summary: result.verdict.summary,
-    plugins: result.verdict.plugins,
-    extraction: {
-      manifests: report.manifests,
-      services: report.services,
-      fallbackPackages: report.fallbackPackages,
-      siteTotal: (report.callSites || []).length,
-      provenanceCounts: Object.fromEntries(
-        Object.entries(result.extract.provenance.packages).map(([k, v]) => [k, v.counts]),
-      ),
-    },
-  };
-}
 
 /* ── CLI ───────────────────────────────────────────────────────────── */
 
@@ -246,24 +231,39 @@ function main() {
     opts = parseArgs(process.argv.slice(2));
   } catch (error) {
     process.stderr.write(`${error.message}\n\n${USAGE}`);
-    process.exit(2);
+    process.exit(3);
   }
   if (opts.help || !opts.nm) {
     process.stdout.write(USAGE);
-    process.exit(opts.help ? 0 : 2);
+    process.exit(opts.help ? 0 : 3);
   }
 
-  const result = run(opts);
-  if (opts.json) {
-    process.stdout.write(`${JSON.stringify(toJSON(result), null, 2)}\n`);
-  } else {
-    process.stdout.write(`${render(result, opts)}\n`);
-  }
+  // **整个主体都在 try 里**，这是被实测逼出来的。
+  //
+  // 一次重构让 `render()` 里少了一个 import，Node 抛出 ReferenceError 并把栈打到
+  // stdout，而进程**退出码是 0** —— 一个 CI 或 shell 脚本会认为这次体检通过了。
+  // 「明明崩了却报成功」是本项目最不能容忍的失败形态（.sh 的 CLI 空操作、
+  // `--update` 旗标失效，都是同一类）。所以：
+  //   1) 任何未预料的抛出都必须变成非零退出码；
+  //   2) 错误信息走 stderr，stdout 只留结论（否则 `--json | jq` 会吃到一堆栈）；
+  //   3) 用退出码 3（= 无法判定），而不是 1/2 —— 那是**插件**的结论码，
+  //      工具自己出错不能被误读成"这个插件部分可用"。
+  try {
+    const result = run(opts);
+    if (opts.json) {
+      process.stdout.write(`${JSON.stringify(toJSON(result), null, 2)}\n`);
+    } else {
+      process.stdout.write(`${render(result, opts)}\n`);
+    }
 
-  if (result.error) process.exit(1);
-  // 退出码：不兼容给 2，部分可用给 1，可用给 0 —— 让 CI 能直接用。
-  const s = result.verdict.summary;
-  process.exit(s.broken > 0 ? 2 : (s.partial > 0 ? 1 : 0));
+    if (result.error) process.exit(3);
+    // 退出码：不兼容给 2，部分可用给 1，可用给 0 —— 让 CI 能直接用。
+    const s = result.verdict.summary;
+    process.exit(s.broken > 0 ? 2 : (s.partial > 0 ? 1 : 0));
+  } catch (error) {
+    process.stderr.write(`✗ 体检工具自身出错（不是插件的问题）：${error && error.stack ? error.stack : error}\n`);
+    process.exit(3);
+  }
 }
 
 // 只有被当作主脚本时才跑 CLI；被 import 时什么都不做。

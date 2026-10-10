@@ -22,26 +22,126 @@ shift 2>/dev/null || true
 KEEP=0
 TIMEOUT=30
 JSON=0
+# [E2] --install-skill 的开关。见下方「[E2] --install-skill」区块。
+INSTALL_SKILL=0
+FORCE=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --keep) KEEP=1 ;;
     --timeout) TIMEOUT="${2:-30}"; shift ;;
     --json) JSON=1 ;;
+    --install-skill) INSTALL_SKILL=1 ;;
+    --force) FORCE=1 ;;
     *) echo "未知参数: $1" >&2; exit 2 ;;
   esac
   shift
 done
 
+# =============================================================================
+# [E2] --install-skill：把随包的 skill/SKILL.md 装进 ~/.agents/skills/<name>/
+#
+# 为什么这个区块放在「内核检查」之前、并且**不需要内核**：
+# 只用 npx / 只拷了这一个 .sh 的用户，是拿不到 skill 的唯一人群，
+# 而装 skill 这件事根本不需要判定内核（内核要 Node + lib/ + rules/）。
+# 把安装卡在"先找到内核"上，等于让这部分用户永远拿不到 skill。
+#
+# 为什么必须整块独立：脚本的其余部分依赖 SPEC（第一个参数），而本区块
+# 不接受 spec。放在 SPEC 检查之前，`./dsh-plugin-compat-check.sh --install-skill`
+# 才是一条合法的命令行。
+# =============================================================================
+
+# SCRIPT_DIR 要到下面「找到判定内核」那一段才赋值，而本区块必须能在**没有内核**
+# 的机器上单独跑，所以这里先按同一方式解析一次（下方那处会得到同一个值，不冲突）。
+SCRIPT_DIR="${SCRIPT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+
+# 目标根目录。与宿主端的解析顺序保持一致（实测见 skill/README.md §3）：
+#   宿主是 config.agentsHome ?? DSH_AGENTS_HOME ?? ~/.agents
+# 这里没有 profile 配置可读，所以只跟环境变量与 $HOME。
+AGENTS_HOME="${DSH_AGENTS_HOME:-$HOME/.agents}"
+SKILL_NAME="dsh-plugin-compat-check"
+
+# 找随包的 SKILL.md。候选顺序 = 从最可能的打包形态到最宽松的形态。
+# 找不到就**明确报错**，不静默成功 —— 一个"装完了但什么都没装"的 flag，
+# 与这个脚本里踩过的死参数（--json / --update）是同一类失败。
+find_skill_source() {
+  local cand
+  for cand in "${DSC_SKILL:-}" "$SCRIPT_DIR/skill/SKILL.md" "$SCRIPT_DIR/SKILL.md"; do
+    [ -n "$cand" ] && [ -f "$cand" ] && { printf '%s' "$cand"; return 0; }
+  done
+  return 1
+}
+
+install_skill() {
+  local src dest_dir dest
+  if ! src="$(find_skill_source)"; then
+    cat >&2 <<EOF
+✗ 找不到要安装的 SKILL.md
+
+  已找过：${DSC_SKILL:-（未设置）}、$SCRIPT_DIR/skill/SKILL.md、$SCRIPT_DIR/SKILL.md
+  这个 flag 装的是**随包携带**的 skill/SKILL.md，网络下载不在它的职责内。
+  若你只拷了脚本，请连 skill/ 目录一起拿，或用 DSC_SKILL 指过去。
+EOF
+    return 1
+  fi
+
+  dest_dir="$AGENTS_HOME/skills/$SKILL_NAME"
+  dest="$dest_dir/SKILL.md"
+
+  # 绝不静默覆盖：已有的可能不是我们的（撞名），也可能是用户改过的。
+  # 覆盖别人的 skill 是数据丢失，而这个工具的全部卖点就是"不撒谎"。
+  if [ -f "$dest" ]; then
+    if [ "$FORCE" -ne 1 ]; then
+      echo "已存在，未做改动: $dest"
+      if cmp -s "$src" "$dest"; then
+        echo "  （内容与本次要装的一致）"
+      else
+        echo "  （内容与本次要装的不同 —— 可能是你改过的，也可能是别的 skill）"
+      fi
+      echo "  already installed, use --force 覆盖"
+      return 1
+    fi
+    # 覆盖是数据丢失，所以即使用户要求了，也要把"覆盖了什么"打在屏幕上。
+    echo "已存在，按 --force 覆盖: $dest"
+    cmp -s "$src" "$dest" && echo "  （原有内容与本次一致）" || echo "  （原有内容将被覆盖，且没有备份）"
+  fi
+
+  mkdir -p "$dest_dir" || { echo "✗ 建不了目录: $dest_dir" >&2; return 1; }
+  cp "$src" "$dest" || { echo "✗ 拷不进: $dest" >&2; return 1; }
+  echo "源文件  : $src"
+  echo "已安装  : $dest"
+  # 提示下一次会遇到什么：再次运行会拒绝，这是刻意的。
+  echo "  （再次运行会拒绝覆盖，需要时加 --force）"
+  return 0
+}
+
+# SPEC 里可能吞掉了 argv[1]（脚本第 19 行 `SPEC="${1:-}"`）。
+# 所以 `--force --install-skill` 这种顺序要在这里补一次判定。
+case "$SPEC" in
+  --install-skill) INSTALL_SKILL=1 ;;
+  --force) FORCE=1 ;;
+esac
+
+if [ "$INSTALL_SKILL" -eq 1 ]; then
+  install_skill
+  exit $?
+fi
+# ===================== [E2] 区块结束 ========================================
+
 if [ -z "$SPEC" ]; then
   cat >&2 <<'USAGE'
 用法: dsh-plugin-compat-check <spec> [--keep] [--timeout 秒] [--json]
+       dsh-plugin-compat-check --install-skill [--force]
 
   spec 可为 npm 包名 / github:owner/repo / file:/本地路径 / git+https://...
+
+  --install-skill  把随包的 skill/SKILL.md 装进 ~/.agents/skills/<name>/
+                   （不需要判定内核；已有文件不会静默覆盖，要覆盖加 --force）
 
 示例:
   dsh-plugin-compat-check dsh-keep-awake
   dsh-plugin-compat-check github:bearice/dsh-keep-awake
   dsh-plugin-compat-check file:/path/to/my-plugin
+  dsh-plugin-compat-check --install-skill
 USAGE
   exit 2
 fi

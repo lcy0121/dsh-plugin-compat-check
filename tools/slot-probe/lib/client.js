@@ -11,7 +11,8 @@ window.__ModuleLoader__.load({
       "plugins.detail.section", "plugins.detail.badge", "plugins.detail.actions",
       "plugins.item", "plugins.row.config", "plugins.bundle.config", "plugins.bundle.activation",
       "sidebar.right.pane.tab", "sidebar.right.pane.tab.title", "shell.overlay",
-      "sidebar.footer.action", "conversation.session.header.utilities"
+      "sidebar.footer.action", "conversation.session.header.utilities",
+      "main", "sidebar.panellist"
     ];
 
     const mark = (slot, detail) => {
@@ -59,13 +60,18 @@ window.__ModuleLoader__.load({
       console.log("[compat-slot-probe] DIAG " + JSON.stringify(out));
     }
 
-    const tryRegister = (ctx, slot, detail) => {
+    const tryRegister = (ctx, slot, detail, extra) => {
       try {
         ctx.slots.inject(slot, () =>
-          ctx.slots.register({ name: slot, id: "compat-probe-" + detail, order: 1, label: "COMPAT PROBE" },
+          ctx.slots.register(
+            Object.assign({ name: slot, id: "compat-probe-" + detail, order: 1, label: "COMPAT PROBE" }, extra || {}),
             make(slot, detail)));
+        const w = window;
+        w.__COMPAT_PROBE_INJECT__ = Object.assign(w.__COMPAT_PROBE_INJECT__ || {}, { [slot]: "ok" });
         console.log("[compat-slot-probe] INJECT-CALLED " + slot);
       } catch (error) {
+        const w = window;
+        w.__COMPAT_PROBE_INJECT__ = Object.assign(w.__COMPAT_PROBE_INJECT__ || {}, { [slot]: "THREW " + String(error) });
         console.warn("[compat-slot-probe] INJECT-THREW " + slot + " :: " + String(error));
       }
     };
@@ -78,6 +84,11 @@ window.__ModuleLoader__.load({
       tryRegister(ctx, "settings.plugins.tab", "target");
       tryRegister(ctx, "plugins.detail.section", "detail");
       tryRegister(ctx, "plugins.detail.badge", "badge");
+      tryRegister(ctx, "plugins.detail.actions", "actions");
+      tryRegister(ctx, "plugins.bundle.activation", "bundleact", { key: "compat-probe-bundle" });
+      tryRegister(ctx, "plugins.item", "item", { key: "compat-probe-item" });
+      tryRegister(ctx, "plugins.row.config", "rowcfg", { key: "compat-probe-row" });
+      tryRegister(ctx, "plugins.bundle.config", "bundlecfg", { key: "compat-probe-bundle" });
       diag();
       [3000, 8000, 15000].forEach(ms => setTimeout(diag, ms));
     }

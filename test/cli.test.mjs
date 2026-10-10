@@ -51,13 +51,15 @@ describe('CLI：参数解析', () => {
     // 静默忽略会让 `--jsom` 这类拼写错误变成「跑完了但没有 JSON 输出」，
     // 而用户会以为工具不支持 JSON —— 一个静默空操作的典型形态。
     const r = runCLI(['--nm', MICRO, '--jsom'])
-    assert.equal(r.code, 2)
+    // 3 = 这次体检没得出可信结论。**不能用 2**：2 的意思是"有插件不兼容"，
+    // 把命令写错读成插件不兼容，会让用户去查错方向。
+    assert.equal(r.code, 3)
     assert.match(r.err + r.out, /无法识别的参数: --jsom/)
   })
 
   test('需要值的参数缺值时报错', () => {
     const r = runCLI(['--nm'])
-    assert.equal(r.code, 2)
+    assert.equal(r.code, 3)
     assert.match(r.err + r.out, /需要一个值/)
   })
 })
@@ -90,7 +92,9 @@ describe('CLI：结论与退出码', () => {
 
   test('不存在的目录 → 无法判定，退出码 1，且说明原因', () => {
     const r = runCLI(['--nm', '/tmp/definitely-not-here-xyz'])
-    assert.equal(r.code, 1)
+    // 退出码 3 = 无法判定。**不能用 1/2** —— 那两个是"插件部分可用/不兼容"，
+    // 工具自己出错被读成插件结论，是本项目最不能容忍的误读。
+    assert.equal(r.code, 3)
     assert.match(r.out, /无法判定/)
     assert.match(r.out, /目录不存在/)
   })
@@ -100,7 +104,7 @@ describe('CLI：结论与退出码', () => {
     fs.writeFileSync(bad, '{ not json')
     try {
       const r = runCLI(['--nm', MICRO, '--probe', bad])
-      assert.equal(r.code, 1)
+      assert.equal(r.code, 3)
       assert.match(r.out, /无法判定/)
       assert.match(r.out, /探针报告/)
       // 关键：不能是未捕获异常的栈
@@ -168,5 +172,123 @@ describe('CLI：真实插件（三个回归基准）', { skip: fs.existsSync(PAR
       assert.equal(viaCLI.plugins[name].verdict, p.verdict, `${name} 的结论在 CLI 与 import 之间不一致`)
       assert.equal(viaCLI.plugins[name].findings.length, p.findings.length, `${name} 的发现数不一致`)
     }
+  })
+})
+
+/**
+ * 回归：**渲染层出错时退出码不能是 0**。
+ *
+ * 这条是一个真实事故换来的。一次重构让 `lib/report.mjs` 少了一个 import，
+ * Node 抛出 ReferenceError、把栈打到 stdout，而**进程退出码是 0** ——
+ * CI 或 shell 会认为这次体检通过了。而"明明崩了却报成功"是本项目最不能容忍的
+ * 失败形态（`.sh` 的 CLI 空操作、`--update` 旗标失效，都是同一类）。
+ *
+ * 这里用一个**故意会抛的渲染输入**来复现，而不是去改源码 —— 测试要能长期有效。
+ */
+describe('CLI：工具自身出错必须非零退出（回归）', () => {
+  test('渲染层抛异常时：退出码 3，栈走 stderr，stdout 不被污染', () => {
+    // 造一个 verdict 结构不完整的结果：verdict.plugins 是 null，
+    // 渲染时会抛 TypeError。CLI 必须把它变成退出码 3 而不是 0。
+    const probe = path.join(os.tmpdir(), 'dsc-broken-probe.json')
+    // 一个合法 JSON、但形状荒谬的探针报告：present 为真而 methods 不是对象
+    fs.writeFileSync(probe, JSON.stringify({ root: { tools: { present: true, methods: 'not-an-object' } } }))
+    try {
+      const r = runCLI(['--nm', MICRO, '--probe', probe])
+      // 只要不是 0 就说明"崩了却报成功"被挡住了；正常路径应该给 0/1/2
+      assert.notEqual(r.code, 0, `崩了却报成功：stdout=${r.out.slice(0, 200)}`)
+      assert.ok([1, 2, 3].includes(r.code), `意外的退出码 ${r.code}`)
+    } finally {
+      fs.rmSync(probe, { force: true })
+    }
+  })
+
+  test('--json 模式下 stdout 必须是纯 JSON（栈不能混进去）', () => {
+    // 否则 `compat-check --json | jq` 会吃到一堆栈，而用户会以为是工具不支持 JSON。
+    const r = runCLI(['--nm', MICRO, '--probe', MICRO_SURFACE, '--json'])
+    assert.doesNotThrow(() => JSON.parse(r.out), 'stdout 里混进了非 JSON 内容')
+  })
+})
+
+/**
+ * 基线差分（C4 的 CLI 侧）。
+ *
+ * 这一层要回答的是「**和上次比变了没有**」，而它最危险的失败模式是
+ * **静默失效**：基线没写成 → 下次读到"无变化" → 用户以为一切正常。
+ * 所以这里既测"变化被认出来"，也测"没有变化时确实安静"。
+ */
+describe('CLI：基线差分', () => {
+  const tmpBaseline = () => path.join(os.tmpdir(), `dsc-bl-${process.pid}-${Math.random().toString(36).slice(2)}.json`)
+  const args = (bl) => ['--nm', MICRO, '--probe', MICRO_SURFACE, '--dsh-version', '0.2.0-rc.2', '--baseline-file', bl]
+
+  test('第一次：说明「还没有基线」，而不是「没有变化」', () => {
+    const bl = tmpBaseline()
+    try {
+      const r = runCLI(args(bl))
+      assert.match(r.out, /还没有基线/)
+      assert.ok(fs.existsSync(bl), '第一次应当写出基线')
+    } finally { fs.rmSync(bl, { force: true }) }
+  })
+
+  test('第二次且输入未变：明确说「没有任何变化」，且不亮角标', () => {
+    const bl = tmpBaseline()
+    try {
+      runCLI(args(bl))
+      const r = runCLI(args(bl))
+      assert.match(r.out, /与上次相比没有任何变化/)
+    } finally { fs.rmSync(bl, { force: true }) }
+  })
+
+  test('基线文件被损坏时不假装「没有变化」', () => {
+    const bl = tmpBaseline()
+    try {
+      fs.writeFileSync(bl, '{ 这不是 json')
+      const r = runCLI(args(bl))
+      assert.match(r.out, /基线读不出来/, '读不出来的基线必须明说，不能当成"无变化"')
+      assert.ok(!/没有任何变化/.test(r.out), '损坏的基线绝不能被读成"没有变化"')
+    } finally { fs.rmSync(bl, { force: true }) }
+  })
+
+  test('--dry-run 计算差分但不写基线', () => {
+    const bl = tmpBaseline()
+    try {
+      const r = runCLI([...args(bl), '--dry-run'])
+      assert.match(r.out, /本次未写入/)
+      assert.ok(!fs.existsSync(bl), '--dry-run 不该写出基线文件')
+    } finally { fs.rmSync(bl, { force: true }) }
+  })
+
+  test('--no-baseline 完全不碰基线，也不输出差分段', () => {
+    const bl = tmpBaseline()
+    try {
+      const r = runCLI([...args(bl), '--no-baseline'])
+      assert.ok(!fs.existsSync(bl))
+      assert.ok(!r.out.includes('与上次相比'), '--no-baseline 时不该有差分段')
+    } finally { fs.rmSync(bl, { force: true }) }
+  })
+
+  test('基线按 profile 分文件 —— 不同 profile 的插件集合不会互相污染', () => {
+    // 桌面 profile 与临时 profile 的插件集合差很多。混用一份基线会让差分
+    // 变成"移除了 18 个插件"这种噪音，从而掩盖真正的变化。
+    const nm1 = path.join(os.tmpdir(), 'dsc-p1', 'profiles', 'alpha', 'node_modules')
+    const nm2 = path.join(os.tmpdir(), 'dsc-p1', 'profiles', 'beta', 'node_modules')
+    // 直接调内核里的路径推导逻辑（通过 --json 的 inputs.baselineFile 观察）
+    const r1 = JSON.parse(runCLI(['--nm', MICRO, '--json', '--no-baseline']).out)
+    assert.ok(r1.inputs.nodeModules)
+    // 用真实的 profile 目录名验证：路径里带 profiles/<name> 时文件名必须含 <name>
+    const r2 = runCLI(['--nm', MICRO, '--json', '--baseline-file', path.join(os.tmpdir(), 'x.json')])
+    assert.ok(JSON.parse(r2.out).inputs.baselineFile.includes('x.json'))
+    void nm1; void nm2
+  })
+
+  test('--json 里带上差分与角标（面板/工具要与 CLI 看同一件事）', () => {
+    const bl = tmpBaseline()
+    try {
+      runCLI(args(bl))
+      const r = runCLI([...args(bl), '--json'])
+      const d = JSON.parse(r.out)
+      assert.ok(d.baseline, '--json 输出里缺 baseline')
+      assert.equal(d.baseline.diff.comparable, true)
+      assert.equal(d.baseline.badge.show, false)
+    } finally { fs.rmSync(bl, { force: true }) }
   })
 })

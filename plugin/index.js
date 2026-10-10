@@ -640,13 +640,29 @@ function resolveNodeModules() {
 }
 
 /**
+ * 基线文件的位置。**必须与 CLI 的 `bin/compat-check.mjs` 推导出同一个路径** ——
+ * 两份基线会立刻分叉，而用户在面板和命令行看到的"变化"就会是两件事。
+ * 按 profile 分文件：不同 profile 的插件集合不同，混在一起会让差分变成噪音。
+ */
+function baselineFileFor(nmDir) {
+  const dshHome = process.env.DSH_HOME || join(homedir(), '.dsh');
+  let key = 'unknown';
+  try {
+    const parts = String(nmDir).split(path.sep);
+    const i = parts.lastIndexOf('profiles');
+    if (i >= 0 && parts[i + 1]) key = parts[i + 1];
+  } catch { /* 保持 unknown */ }
+  return join(dshHome, 'dsh-plugin-compat-check', `baseline.${key.replace(/[^\w.-]/g, '_')}.json`);
+}
+
+/**
  * 跑一次体检。**同步、纯计算、不抛**。
  *
  * 为什么宿主半边要算而不是把原始数据丢给客户端：
  *   - 客户端跑在浏览器里，读不了文件系统；
  *   - 结论（五元组 + 确定性）是内核的产物，算出唯一一份才不会两边漂移。
  */
-async function computeReport(state) {
+async function computeReport(state, ctx) {
   const started = Date.now();
   const out = {
     schemaVersion: 1,
@@ -657,6 +673,8 @@ async function computeReport(state) {
     kernelDir: null,
     nodeModules: null,
     nodeModulesWhy: null,
+    // C4：与上次体检的差分包（没有基线时为 null，并带 note 说明为什么）
+    baseline: null,
     report: null,
   };
   try {
@@ -707,8 +725,66 @@ async function computeReport(state) {
       dshVersion: process.env.DSH_VERSION || null,
     });
 
+    // ── C4：基线差分 ──
+    // 用**与 CLI 完全相同**的 lib/baseline.mjs。面板说"变差了"而命令行说"没变"
+    // 这种分叉在结构上就不可能发生。
+    let baseline = null;
+    try {
+      const { snapshotForBaseline, diffAgainstBaseline, badgeFor } =
+        await import(pathToFileURL(join(kernel, 'lib', 'baseline.mjs')).href);
+      const snap = snapshotForBaseline(verdict, process.env.DSH_VERSION || null);
+      const bfile = baselineFileFor(nm.dir);
+      let prev = null;
+      let readNote = null;
+      try {
+        if (existsSync(bfile)) prev = JSON.parse(readFileSync(bfile, 'utf8'));
+        else readNote = '还没有基线（这是第一次体检）';
+      } catch (error) {
+        // 读不出来**不是**"没有变化"。必须区分"你没跑过"与"你的基线坏了" ——
+        // 后者会让用户以为一切照旧，继续用着已经变坏的环境。
+        readNote = `基线读不出来（${errText(error)}）—— 这次不做比较`;
+      }
+      const diff = diffAgainstBaseline(prev, snap);
+      baseline = { file: bfile, note: readNote, diff, badge: badgeFor(diff), wrote: false };
+      // 只有这一次真的算出了结论才写基线：一次失败的体检写下的基线，
+      // 会把"读不到"记成"这些插件都没了"，下次比较全是假变化。
+      try {
+        mkdirSync(path.dirname(bfile), { recursive: true });
+        writeFileSync(bfile, `${JSON.stringify(snap, null, 2)}\n`);
+        baseline.wrote = true;
+      } catch (error) {
+        baseline.writeError = `基线写不进去（${errText(error)}）`;
+      }
+    } catch (error) {
+      baseline = { error: errText(error), note: '基线差分没算成（不影响本次结论）' };
+    }
+
     // 只把面板要用的部分送过去：完整 report 在 desktop profile 上是 ~1 MB，
     // 而面板要的只是每个插件的结论与去处。
+    // ── 面板条目台账：id → 包名 ──
+    // `plugins.detail.*` 只收到 `{subject:{kind,id}}`，**没有包名**，而 id 常常
+    // 不等于包名（插件面板自己那个条目的 id 就叫 `plugins`）。所以从面板管理器
+    // 自己的只读服务里取这张表，让客户端能解析出"这是哪个插件"。
+    // 取不到不算失败：客户端会退回到"id 就是包名"的判断，并如实不渲染角标。
+    try {
+      const pm = typeof ctx.get === 'function' ? ctx.get('pluginManager', false) : undefined;
+      const listing = pm && typeof pm.list === 'function' ? await pm.list() : null;
+      if (listing) {
+        const arr = Array.isArray(listing) ? listing : (listing.items || listing.plugins || []);
+        out.items = arr
+          .map((it) => {
+            if (!it || typeof it !== 'object') return null;
+            const id = it.id ?? it.entryId ?? it.slotId ?? null;
+            const pkg = it.packageName ?? it.package ?? it.name ?? null;
+            return (id && pkg) ? { id, packageName: String(pkg), label: it.label ?? null } : null;
+          })
+          .filter(Boolean);
+      }
+    } catch (error) {
+      out.itemsError = errText(error);
+    }
+
+    out.baseline = baseline;
     out.report = {
       summary: verdict.summary,
       dshVersion: verdict.dshVersion,
@@ -716,6 +792,9 @@ async function computeReport(state) {
       surfaceWhy,
       plugins: verdict.plugins,
       // 逐条发现的证据形态：面板要能回答「凭什么这么判」
+      // 条目台账（id → 包名），客户端解析角标归属时用
+      items: out.items || [],
+      itemsError: out.itemsError || null,
       manifests: extracted.report.manifests,
       serviceCount: extracted.report.services.length,
       siteTotal: (extracted.report.callSites || []).length,
@@ -738,6 +817,287 @@ function isTrustedRequest(req) {
     return hostOk && /^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(origin);
   } catch {
     return false;
+  }
+}
+
+
+// ---------------------------------------------------------------------------
+// D1: 对话工具 —— 让 agent 能直接答「我这插件兼容吗」
+// ---------------------------------------------------------------------------
+
+/**
+ * 把结论渲染成一段**给模型读**的文本。
+ *
+ * 与 CLI 的 `lib/report.mjs` 是同一口径：本函数只负责把已经算好的结论翻译成
+ * 文本，不做任何判定。这样"面板说可用、工具说部分可用"在结构上不可能发生。
+ *
+ * 为什么工具**必须**能给出结论而不是只丢一个文件名：
+ * 用户问的是"兼不兼容"，一个"报告写好了，你自己去看"的回答等于没答。
+ */
+function renderForModel(compat) {
+  try {
+    if (!compat || compat.ok !== true) {
+      return `体检没跑成（这是工具的问题，不是插件的结论）：${(compat && compat.error) || '未知原因'}`;
+    }
+    const r = compat.report;
+    const L = [];
+    const s = r.summary || {};
+    L.push(`结论：可用 ${s.ok || 0}　部分可用 ${s.partial || 0}　不兼容 ${s.broken || 0}`
+      + (s.vacuousOk ? `（其中 ${s.vacuousOk} 个「可用」是空洞的：该插件没有用过任何 DSH 服务，因此没有可检查的东西）` : ''));
+    L.push(`体检对象：${compat.nodeModules}（${compat.nodeModulesWhy}）`);
+    L.push(r.hasRuntimeSurface
+      ? '方法级判定依据：宿主运行时面 —— 这类结论是确定的。'
+      : '方法级判定依据：官方 API 目录（**契约目录，不是运行时面**）—— 因此方法级结论一律标「疑似」。'
+        + '「疑似」不是缺陷，是诚实：判不准时降级标注，而不是升格成确定。');
+    L.push('');
+
+    const rank = { broken: 0, partial: 1, unknown: 2, ok: 3 };
+    const names = Object.keys(r.plugins).sort((a, b) =>
+      (rank[r.plugins[a].verdict] - rank[r.plugins[b].verdict]) || a.localeCompare(b));
+
+    for (const name of names) {
+      const p = r.plugins[name];
+      const label = { broken: '不兼容', partial: '部分可用', unknown: '未知', ok: '可用' }[p.verdict] || p.verdict;
+      L.push(`${label}  ${name}@${p.version || '?'}${p.vacuous ? '　[空洞的结论：无可检查对象]' : ''}`);
+      for (const f of p.findings || []) {
+        const api = f.service ? (f.method ? `${f.service}.${f.method}` : f.service) : '(包声明)';
+        const loc = f.location ? `${f.location.file}:${f.location.line}` : '—';
+        const cat = {
+          'host-service-missing': '服务缺失', 'host-method-missing': '方法缺失',
+          'unprovided-dependency': '无人提供的依赖', 'declaration-mismatch': '声明与实测不符',
+        }[f.category] || f.category;
+        const sev = { fatal: '致命', 'feature-dead': '功能失效', degraded: '降级' }[f.severity] || f.severity;
+        L.push(`    ${sev} / ${cat}${f.certainty === 'certain' ? '' : ' [疑似]'}  ${api}  @ ${loc}`);
+        if (f.impact) L.push(`      影响：${f.impact}`);
+      }
+      const cs = p.clientSide || [];
+      if (cs.length) L.push(`    客户端半边（命令行测不到，需界面验证）：${cs.map((c) => c.service).join('、')}`);
+      const noCalls = Object.values(p.resolved || {})
+        .filter((c) => c.disposition === 'no-calls').map((c) => c.service);
+      if (noCalls.length) L.push(`    无证据可判（只出现名字，没有调用点）：${noCalls.join('、')}`);
+    }
+
+    L.push('');
+    L.push('读这个结果时注意两点：');
+    L.push('  1) 「可用」不等于"功能验证过"。它只说明**用到的 DSH 服务与 API 都在**。'
+      + '插件仍然可能因为自身逻辑、配置或第三方依赖而出问题。');
+    L.push('  2) 「客户端半边」的那些服务命令行永远测不到 —— 它们活在浏览器里，'
+      + '只能靠"界面上有没有出现该插件的 UI"来验证。别把"没报错"当成"没问题"。');
+    return L.join('\n');
+  } catch (error) {
+    return `渲染结论时出错（工具的问题）：${errText(error)}`;
+  }
+}
+
+/** 工具的服务集合：`tools`；`agents` 用来把相对路径解析到会话工作目录。 */
+const TOOL_SERVICES = ['tools', 'agents'];
+
+function registerTool(ctx, state) {
+  // 与 C2 路由同一个理由：走作用域 ctx.inject，headless/CLI 形态下 `tools` 不在场时
+  // 这段根本不注册，本插件的 fiber 也就不会去等一个不存在的服务（`inject` 保持 []）。
+  if (typeof ctx.inject !== 'function') return;
+  ctx.inject(TOOL_SERVICES, (scope) => {
+    try {
+      if (!scope.tools || typeof scope.tools.register !== 'function') {
+        log('D1 tool skipped: scoped ctx has no tools.register');
+        return;
+      }
+      scope.tools.register({
+        name: 'compat_check',
+        description:
+          'Check whether the DSH plugins installed in this profile are actually compatible with the '
+          + 'current DSH version, and report the exact file:line and reason for anything that is not. '
+          + 'Use it when the user asks whether a plugin still works, why a feature disappeared after '
+          + 'updating DSH, or whether something they installed is safe to keep. It reads the installed '
+          + 'profile; it does not install anything or check a plugin that is not yet installed. '
+          + 'Findings are labelled "certain" (backed by the live runtime surface) or "suspected" '
+          + '(inferred from the official API catalogue, which is a contract catalogue and not the '
+          + 'runtime surface) — report that distinction to the user instead of flattening it.',
+        parameters: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            profile: {
+              type: 'string',
+              description:
+                'Optional profile name to inspect (e.g. "desktop"). Defaults to the profile this '
+                + 'DSH instance is running, or desktop if it cannot be determined.',
+            },
+          },
+        },
+        output: {
+          // ⚠️ **工具 DSL 不是 JSON Schema**：`required` 是**顶层数组**，
+          // 不是每个属性上的 `required: true`。写成后者会被宿主直接拒掉，
+          // 报 `schema.properties.X.required is not supported on type "string"`。
+          // 实测踩过：注册失败、工具不存在，而**面板与路由照常工作** ——
+          // 所以只有真的去调一次工具才发现得了。
+          schema: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              summary: { type: 'string' },
+              nodeModules: { type: 'string' },
+              hasRuntimeSurface: { type: 'boolean' },
+              text: { type: 'string' },
+            },
+            required: ['summary', 'nodeModules', 'hasRuntimeSurface', 'text'],
+          },
+          render: (_args, value) => [{ type: 'text', text: value && typeof value.text === 'string' ? value.text : '' }],
+        },
+        isConcurrencySafe: () => false,
+        presentCall: (args) => ({
+          card: 'generic',
+          title: 'compat_check',
+          kind: 'read',
+          rawInput: args || {},
+        }),
+        async execute(args) {
+          try {
+            const wanted = args && typeof args.profile === 'string' && args.profile.trim() !== ''
+              ? args.profile.trim()
+              : null;
+            const prev = process.env.DSC_PROFILE;
+            if (wanted) process.env.DSC_PROFILE = wanted;
+            let compat;
+            try {
+              compat = await computeReport(state, ctx);
+            } finally {
+              if (wanted) {
+                if (prev === undefined) delete process.env.DSC_PROFILE;
+                else process.env.DSC_PROFILE = prev;
+              }
+            }
+            const text = renderForModel(compat);
+            const s = (compat.report && compat.report.summary) || {};
+            return {
+              summary: `可用 ${s.ok || 0} / 部分可用 ${s.partial || 0} / 不兼容 ${s.broken || 0}`,
+              nodeModules: compat.nodeModules || '',
+              hasRuntimeSurface: Boolean(compat.report && compat.report.hasRuntimeSurface),
+              text,
+            };
+          } catch (error) {
+            // 工具的 execute 抛错会把整轮对话变成错误 —— 而"体检失败"不是用户的错，
+            // 也不该让他重来一遍。所以这里**不抛**，把失败也变成一段可读的文本。
+            return {
+              summary: '无法判定',
+              nodeModules: '',
+              hasRuntimeSurface: false,
+              text: `体检没跑成（这是工具的问题，不是插件的结论）：${errText(error)}\n`
+                + '请不要据此判断兼容性。',
+            };
+          }
+        },
+      });
+      log('D1 tool registered: compat_check');
+    } catch (error) {
+      log(`WARN D1 tool registration failed: ${errText(error)}`);
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// E1: skill 半边 —— 把 skill/SKILL.md 注册进 ctx.skills
+// ---------------------------------------------------------------------------
+//
+// **放在包里不算数。** DSH 不扫描插件包内的文件（实测见 skill/README.md）：
+// `@liustack/modlens` 发了 `skills/modlens/SKILL.md` 却没注册，运行时根本没有这个 skill。
+// 两条路能进 skill 目录：① 文件落进文件系统扫描根（那是脚本 --install-skill 的路）；
+// ② 运行时注册 —— 就是下面这段。
+//
+// 为什么用 `ctx.inject` 而不是静态 `inject = ['skills']`：与本文件开头同一条理由 ——
+// 静态 inject 会让本插件的 fiber 依赖 skills 服务，缺服务时整条条目停在 PENDING；
+// 而这个插件的职责正是"宿主缺了什么"，它自己更不能因为缺服务而消失。
+//
+// 字段约束读自运行时源码（`@deepseek-ai/dsh-skill` 的 validateCandidate），不是照抄：
+//   name 必须 kebab-case；description 必须非空；
+//   provider 必须**等于** provider 自己的 name（否则报 returned skill "x" for provider "y"）；
+//   rank 必须是有限数，600 是官方 bundled skill 用的 BUNDLED_SKILL_RANK。
+
+const SKILL_NAME = 'dsh-plugin-compat-check';
+const SKILL_PROVIDER = 'dsh-plugin-compat-check';
+const SKILL_RANK = 600;
+
+/** 仓库形态下 SKILL.md 在 plugin/ 的上一级；打包形态允许与 index.js 同级。 */
+function readPackagedSkill() {
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    join(here, '..', 'skill', 'SKILL.md'), // <repo>/plugin/index.js → <repo>/skill/SKILL.md
+    join(here, 'SKILL.md'),
+    join(here, 'assets', 'SKILL.md'),
+  ];
+  for (const file of candidates) {
+    try {
+      if (!existsSync(file)) continue;
+      const raw = readFileSync(file, 'utf8');
+      const fm = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/u.exec(raw);
+      if (fm === null) continue;
+      // 只按**单行标量**读这两个字段。写成多行 YAML 时这里读不到 ——
+      // 宁可读不到（打一条日志），也好过猜一个错的 description。
+      const field = (key) => {
+        const m = new RegExp(`^${key}:[ \t]*(.+)$`, 'm').exec(fm[1]);
+        return m === null ? null : m[1].trim().replace(/^["']|["']$/g, '');
+      };
+      const skillName = field('name');
+      const description = field('description');
+      if (skillName === null || description === null) continue;
+      return { file, name: skillName, description, content: raw.slice(fm[0].length).trim() };
+    } catch {
+      /* 读不到就试下一个候选 */
+    }
+  }
+  return null;
+}
+
+function registerSkill(ctx) {
+  try {
+    if (typeof ctx.inject !== 'function') {
+      log('SKILL registration skipped: ctx.inject is not a function');
+      return;
+    }
+    ctx.inject(['skills'], (skillCtx) => {
+      try {
+        if (!skillCtx.skills || typeof skillCtx.skills.registerProvider !== 'function') {
+          log('SKILL registration skipped: scoped ctx has no skills.registerProvider');
+          return;
+        }
+        const skill = readPackagedSkill();
+        if (skill === null) {
+          log('SKILL registration skipped: 找不到随包的 skill/SKILL.md');
+          return;
+        }
+        // 正文在注册时读进内存：包内文件运行时不会变，这样 get() 永不抛。
+        const invocation = { modelInvocable: true, userInvocable: true };
+        const summary = {
+          name: SKILL_NAME,
+          description: skill.description,
+          invocation,
+          provider: SKILL_PROVIDER,
+          source: 'bundled',
+          rank: SKILL_RANK,
+          locator: skill.file,
+          path: skill.file,
+          resourceBase: { kind: 'directory', path: path.dirname(skill.file) },
+        };
+        skillCtx.skills.registerProvider(() => ({
+          name: SKILL_PROVIDER,
+          list: () => Promise.resolve([summary]),
+          get: () => Promise.resolve({
+            name: SKILL_NAME,
+            description: skill.description,
+            invocation,
+            provider: SKILL_PROVIDER,
+            source: summary.source,
+            path: skill.file,
+            content: skill.content,
+          }),
+        }));
+        log(`SKILL registered: ${SKILL_NAME} <- ${skill.file}`);
+      } catch (error) {
+        log(`SKILL registration failed: ${errText(error)}`);
+      }
+    });
+  } catch (error) {
+    log(`SKILL registration subscribe failed: ${errText(error)}`);
   }
 }
 
@@ -807,7 +1167,7 @@ export function apply(ctx) {
                   // 而面板打开时可能连着拉几次）。
                   const url = new URL(req.url || '/', 'http://127.0.0.1');
                   if (url.searchParams.get('refresh') === '1' || !state.lastReport) {
-                    state.lastReport = await computeReport(state);
+                    state.lastReport = await computeReport(state, ctx);
                   }
                   res.writeHead(200, {
                     'content-type': 'application/json; charset=utf-8',
@@ -831,6 +1191,20 @@ export function apply(ctx) {
       }
     } catch (error) {
       log(`WARN C2 route setup threw: ${errText(error)}`);
+    }
+
+    // E1：注册随包的 skill。**失败只留日志，绝不抛** —— 见文件顶部硬规矩。
+    try {
+      registerSkill(ctx);
+    } catch (error) {
+      log(`WARN SKILL registration threw: ${errText(error)}`);
+    }
+
+    // D1：对话工具（同一个 computeReport，所以工具与面板不可能给出不同答案）
+    try {
+      registerTool(ctx, state);
+    } catch (error) {
+      log(`WARN D1 tool setup threw: ${errText(error)}`);
     }
 
     const finish = () => {
@@ -883,7 +1257,7 @@ export function apply(ctx) {
         rescan: () => scan(ctx, state, 0),
         reportPath: OUT_JSON,
         // 面板用的那份结论（同一个函数，所以界面与工具不可能给出不同答案）
-        compatReport: () => computeReport(state),
+        compatReport: (c) => computeReport(state, c || ctx),
       };
     } catch {
       /* 忽略 */

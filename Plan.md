@@ -323,21 +323,97 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
   - 面板自己会区分三种"没发现"：**空洞的可用**（插件没用过任何服务）、
     **无证据可判**（只出现名字没有调用点）、**客户端半边**（命令行测不到）。
     这三件事在别处都长得像"没问题"，而它们不是。
-- [ ] **C3. 单插件详情 `plugins.detail.section` / `.badge`**（**仍未验证**：至今没找到进入详情抽屉的入口）
-- [ ] **C4. 角标**：任何变化都打，标明方向（变好/变差）
+- [x] **C3. 单插件详情 `plugins.detail.section` / `.badge`** —— ✅ **完成，端到端实测**
+  - **入口查清了**（这是我此前一直没找到的东西，也是 C3 迟迟没做的原因）：
+    **没有"抽屉"**。插件详情是侧栏插件面板**换了 React 视图状态**（`{kind:"list"}` →
+    `{kind:"package"|"bundle"|"item"}`），导航链路：
+    ```
+    button[class*="panelRow"][aria-label="插件"]      → 列表（24 张卡）
+      button[class*="cardOpen"][aria-label^="查看 "]  → 详情页
+        button[class*="crumb"]                        → 返回列表
+    ```
+    Escape **不回退**；重按侧栏条目也**不回退**（`activePanelId` 始终是 `plugins`）；
+    没有 URL/hash 路由，只能靠点击驱动。
+  - **槽位契约（读自宿主源码 + 实测印证）**：详情页的 `subject` 按条目种类有两态 ——
+    `{kind:"package", pkg:{name,version,…}}`（社区插件卡）、
+    `{kind:"bundle", pkg:{…}}`（官方 bundle 卡）、`{kind:"item", id}`（面板条目）。
+    `plugins.detail.badge` 还会多一个 `label`。
+  - **实测结果**（真实界面，三类卡片）：
+    | 卡片 | 角标 | section |
+    |---|---|---|
+    | `dsh-pet`（可用） | **可用** ✓ | 1 ✓ |
+    | `@liustack/modlens`（部分可用） | **部分可用** ✓ | 1 ✓ |
+    | 官方 bundle（我们不分析官方包） | 不渲染（正确） | 0 |
+    | 我的配置页条目（不是包） | 不渲染（正确） | 0 |
+  - ⚠️ **放弃了一个槽位，并且这是有据的决定**：`plugins.item`（列表卡片角标）**没做**。
+    它的 props 是 `{view:"summary"}`，**没有任何插件身份** —— 宿主用
+    `renderSlot("plugins.item", {view}, {only: entryId})` 限定，而那个 `entryId` 是
+    **配置页注册时给的 id**，不是包名。也就是说它加不到"社区插件卡"上；
+    硬撑只会得到一个永不出现的组件，或一个挂在自己配置页上的角标。
+    **概览本来就有地方放**：`settings.plugins.tab`（设置 → 内置插件 → 兼容性）。
+  - 两次**静默失败**的教训（都记在代码注释里）：第一版按 `props.name` 猜、第二版按
+    `subject.id` 猜，两次都是"角标悄悄不出现"——页面看起来完全正常。
+    这正是本项目最该防的那类失败，所以现在解析失败会把**看到的形状**记进
+    `window.__COMPAT_CHECK__.detailUnmatched`，可查而不是靠猜。
+- [x] **C4. 角标** —— ✅ **完成**（`lib/baseline.mjs` + 主机基线持久化 + 面板角标）
+  - **任何变化都打，并标明方向**（§2 第 5 题的落地）：
+    - `worsened`：档位下降**或新增发现**（档位不变但有新发现也算变差 —— 最容易漏的一类）
+    - `improved`：档位上升、发现消失、**或只是插件版本变了**（"版本动了但结论没变"也要说）
+    - `added` / `removed`：新装 / 卸载
+    - `dshVersionChanged` **单独一类** —— 它常常是上面几类的**原因**
+  - 角标文案带方向箭头（`↓ 变差 1` / `↑ 变好 1` / `• …`），`mixed` 时**变差排在最前**
+    （坏消息被好消息稀释掉等于没说）。
+  - **没有基线时不打角标，但要说清是「还没比过」而不是「没问题」**；
+    基线**读不出来**时也明说（早先这两种情况会给出同一句话，已修）。
+  - 基线按 profile 分文件（`$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.json`），
+    插件半边与 CLI 共用同一份、同一个 `lib/baseline.mjs` —— 面板与命令行不可能给出不同答案。
+  - 13 条单测覆盖每一类变化**以及"没有变化时必须安静"**（一个不停亮的角标与一个
+    永远不亮的角标一样没用）。
 
 #### D. 对话工具
 
-- [ ] **D1. 注册 `compat_check` 工具**：`ctx.tools.register(defineTool({...}))`，`inject = ["tools"]`
-  - 注意：`parameters` 是 DSH 自有 DSL；`output.schema` 与 `output.render` **必需**；重名直接抛错；只有 `run_code` 是保留名
-  - 注意：**工具不能返回 UI 组件**，只能给文本/Markdown/图片
+- [x] **D1. 注册 `compat_check` 工具** —— ✅ **完成，实测能执行**
+  - 注册走**作用域 `ctx.inject(['tools','agents'], …)`**（与 C2 路由同一个理由）：
+    `inject` 保持 `[]`，headless 形态下不注册也不会让本插件停 PENDING。
+  - **实测执行结果**（用假 ctx 驱动 `apply`，抓住注册的工具再真调一次）：
+    `summary: 可用 3 / 部分可用 1 / 不兼容 0`，`hasRuntimeSurface: true`，
+    正文里 `dsh-keep-awake` 的两条发现带 `lib/index.js:591` / `:466` 与影响面。
+  - ⚠️ **踩到一个真坑**：`required` 是**顶层数组**，不是每个属性上的 `required: true`。
+    写成后者会被宿主拒掉：`schema.properties.X.required is not supported on type "string"`。
+    后果很有教育意义 —— **注册失败、工具不存在，而面板与路由照常工作**，
+    所以只有真的去调一次工具才发现得了。错误被 try/catch 记成一条日志（不抛）。
+  - 工具**不抛**：`execute` 里的失败也变成一段可读文本（"体检没跑成（这是工具的问题，
+    不是插件的结论）"）。工具的 execute 抛错会把整轮对话变成错误，而"体检失败"不是用户的错。
+  - `renderForModel()` 与 CLI 的 `lib/report.mjs` **同一口径**；两者都读
+    `computeReport()` 的同一份结果，所以面板/工具/CLI 不可能给出不同答案。
 
 #### E. skill 产物
 
-- [ ] **E1. `ctx.skills.registerProvider()`** 注册包内 SKILL.md
-  - **反例警告**：`@liustack/modlens` 发了 `skills/modlens/SKILL.md` 却没注册，本会话里根本没有这个 skill。**包里放文件不算数**
-  - frontmatter 必需：`name`（kebab-case）+ `description`；旧键 `disableModelInvocation` 等会被**整条丢弃**
-- [ ] **E2. 脚本产物提供 `--install-skill`**，把 SKILL.md 装到 `~/.agents/skills/`（这是只用 npx 的用户拿到 skill 的唯一途径）
+- [x] **E1. `ctx.skills.registerProvider()`** —— ✅ **完成，机制先被实测再落地**
+  - 落地前先做了**对照实验**（`/tmp` 里两个一次性探针插件 + 一次性 profile，
+    `DSH_HOME`/`DSH_AGENTS_HOME` 全指 /tmp，没碰正式环境）：
+    | 做法 | 结果 |
+    |---|---|
+    | 静态 `inject=['skills']` + `registerProvider()` | ✅ 可见，`get()` 取回正文 3867 字符 |
+    | `ctx.inject(['skills'], cb)` 里注册（**采用这个**） | ✅ 同上，且不新增依赖 |
+    | 包内放 SKILL.md 但不注册（`@liustack/modlens` 的情形） | ❌ **目录里不存在** |
+    | frontmatter 含旧键 `disableModelInvocation` | ❌ 整条 frontmatter 被丢弃 |
+    | `name: Bad_Name`（非 kebab-case） | ❌ 文件被忽略 |
+  - 字段约束**读自运行时源码**（`@deepseek-ai/dsh-skill` 的 `validateCandidate`）并已核对：
+    `name` 匹配 `^[a-z0-9]+(?:-[a-z0-9]+)*$`；`description` 非空；
+    `provider` 必须**等于** provider 自己的 `name`（否则报 `returned skill "x" for provider "y"`）；
+    `rank` 有限，600 = `BUNDLED_SKILL_RANK`。
+  - **真插件里已跑通**：宿主启动日志 `SKILL registered: dsh-plugin-compat-check <- …/skill/SKILL.md`。
+  - 测试守的是**文档漂移**而不是文字：SKILL.md 提到的每个 CLI 旗标必须在 `--help` 里存在；
+    它写的退出码必须与 CLI 真实行为一致；frontmatter 不得含已知旧键。
+    （skill 让 agent 去跑一个不存在的旗标，比没有 skill 更糟 —— 它会自信地做错事。）
+- [x] **E2. 脚本产物提供 `--install-skill`** —— ✅ **完成**
+  - 装到 `${DSH_AGENTS_HOME:-$HOME/.agents}/skills/dsh-plugin-compat-check/SKILL.md`
+    （落点与扫描根都从运行时代码读出并记录在 `skill/README.md`）。
+  - **不静默覆盖**：已有不同内容时拒绝并非零退出，要 `--force` 才覆盖。
+    静默改写别人的 skill 是数据丢失。
+  - **不需要判定内核**（`DSC_KERNEL` 指向不存在的路径也能装成功）—— skill 安装与检查是两件事。
+  - 测试一律把 `HOME`/`DSH_HOME` 钉进临时目录，并有一条断言**绝不去碰真实的 `~/.agents`**。
 
 #### F. 触发与基线
 
@@ -606,61 +682,34 @@ dsh-plugin-compat-check/
 
 ## 9. 下一动作
 
-**D1：注册对话工具 `compat_check`**（`ctx.tools.register(defineTool({...}))`，`inject = ["tools"]`）。
-面板已经有了（C2 完成），而工具是**唯一能在对话里拿到结论**的入口 ——
-用户问「我这插件兼容吗」时，agent 应该能直接答，而不是让他去翻设置页。
+**第一批只剩验收与收尾（§5 G3–G5）**：C/D/E 三节全部完成。
+- **G3**：在真实 desktop profile 上跑一遍（宿主层、面板、角标）——面板与角标已在
+  复刻的 desktop 插件集上端到端验过，但还差在**正式** desktop profile 上过一遍。
+- **G4**：客户端半边的完整界面确认（本轮的实测已经是浏览器级的，可以据此勾）。
+- **G5**：收尾干净（无残留 profile / 进程）。
 
-> 两个入口消费**同一份** `computeReport()` 结果，所以不可能给出不同答案
-> （C1/C2 已经把这句话变成了可执行的事实：宿主半边与 CLI 都 import 同一个内核）。
+下一批的入口仍是 §5 第二批：**H1' 客户端半边对账**（计划加载的 `__DSH_BOOT__.entries`
+vs 实际到货）、**H2' 真解析器**、**H3' npm 发布**、**H4' 规则表补全**。
 
-### 已完成：C2 + CLI 接线（2026-10-11）
-
-**C2**（见 §5 C2 节的完整证据）：宿主算结论 → `GET /plugin-compat-check/report` →
-客户端渲染成表。真实界面里点开 **设置 → 内置插件 → 兼容性** 看到 21 个插件的真实结论、
-0 异常、路由 200/123 KB。
-
-**CLI 接线**：判定收成**一处实现**。
-- 新增 `bin/compat-check.mjs`：三个入口共用的内核外壳（参数解析 / 退出码 / 表格与 JSON 两种渲染）。
-- `dsh-plugin-compat-check.sh` 第 ⑤ 步（那段 python 比对，70 行）→ 一行 `node bin/compat-check.mjs`。
-- 第 ③ 步的**内嵌 python 提取实现**（239 行）→ 一行 `node lib/extract.mjs`。
-  两份提取实现必然漂移，而本产品的全部卖点就是结论可信 —— 所以只保留一份。
-  那份 python 没丢，冻结成对拍用的参考基线 `tools/parity/python-reference/extract.py`，
-  `parity.sh` 改为从冻结文件取真源（不再从 .sh 现抽）。
-- 顺带修掉 `.sh` 的 **`--json` 死参数**：它被解析、被写进用法说明，然后从没被用过。
-  现在真的会传下去，并且有测试盯着（`test/cli.test.mjs`）。
-- 脚本从 491 行降到 221 行，其中 python 只剩 6 行（报告规模用）。
-
-⚠️ **脚本形态的一个新前提**：它现在**需要内核在旁边**（`lib/` + `rules/`）。
-找不到就**直接报错退出**，不会降级成"只打印提取结果"——
-降级会给出一个看起来正常、实际没有结论的输出。`DSC_KERNEL` 可指向别处的内核。
-
-> **上一次更新**：2026-10-11，**C2 完成 + CLI 接线完成**（见下面「已完成」）。
+> ### 本轮（2026-10-11）：C3 + C4 + D1 + E1 + E2 五项并行完成
 >
-> 上次：**C1 与 C2 复验并勾选**（§5 C 节）——用临时 profile + 应用自带 pnpm 装包，
-> 真实启动 + 无头 Chrome 走完整流程。C1 拿到了**四层证据**：配置树挂载、宿主自报激活
-> （`HOST-HALF-ACTIVATED`，且 `did not activate` 告警为 0）、客户端条目在 66 条 boot entries 里
-> 且位于真实取回的 application 批次、控制台 `CLIENT-HALF-APPLIED` + `REGISTERED`、页面 0 异常。
-> C2 拿到了**渲染级证据**：tab 文字里有 `compat-check`、正文渲染出占位内容、
-> 我们自己的**渲染侧标记** `window.__COMPAT_CHECK__` 出现（只有我们的组件函数体会设置它，
-> 所以它证明的是"我们的代码真的渲染了"，而不是"页面上恰好有这几个字"）。
+> **五个里程碑一起做完，全部有实测证据。** 关键结论：
 >
-> 顺带查清一个落点事实：`settings.plugins.tab` 归属**设置 → 内置插件**页（官方包提供），
-> 它是个**兄弟 tab**，该页已有「插件列表」tab —— 这直接影响 C2 内容实现的空间与信息层级。
+> 1. **C3 的入口一直没找到，是因为它不存在** —— 插件详情不是"抽屉"，是侧栏面板
+>    换了 React 视图状态。查清后三类卡片的角标与 section 都验过了。
+> 2. **两次静默失败**（角标悄悄不出现）教了一件事：槽位 props 的契约**不能猜**。
+>    现在解析失败会把看到的形状记进 `window.__COMPAT_CHECK__.detailUnmatched`。
+> 3. **一次真实事故催生了一个测试层**：清理调试代码时误删了 `lib/client.js` 里
+>    几个函数定义（`usePluginState` / `verdictOf` / `pickPlugin` / `Badge`），
+>    **187 条测试全绿**，只有真的在浏览器里打开面板才看得到 `is not defined`。
+>    新增 `test/client-structure.test.mjs`：用 `vm` 在受控环境里**逐个调用**每个函数，
+>    ReferenceError 当场炸出来。已做**有效性自证**（重新删掉定义，测试确实变红）。
+> 4. **D1 的 `required` 是顶层数组**，写成每个属性上的 `required: true` 会被静默拒掉：
+>    工具不存在，而面板与路由照常工作 —— 只有真调一次才发现。
+> 5. **E1 的机制先被实测再落地**：包内放 SKILL.md **不算数**（`@liustack/modlens` 是现成反例），
+>    必须 `ctx.skills.registerProvider()`。
 >
-> 上次：**测试基础设施落地（§5 H0–H4）+ 判定引擎与实际缺陷的一批修复**。
+> 退出码语义也修正了：**1 与 2 只表示插件的结论**，3 表示这次体检没得出可信结论
+> （含用法错误）——把命令写错读成"插件不兼容"会让用户查错方向。
 >
-> 测试：`node --test test/` → **116 条断言全过**，覆盖 5 个真实 profile + 15 个合成 fixture。
-> 三个回归基准已**自动化**为判据，每次跑测试都在验收（§5 G1 已勾选）。
->
-> 这一轮的实际产出（全部有实测依据）：
-> - **首条不变式当天就抓到 163/942 个调用点无法在源码行上验证**，顺藤修掉四类匹配缺陷；
->   之后又按探针报告修 6 个缺陷（含一个**CLI 空操作**：脚本路径带符号链接祖先时静默不写文件）；
-> - 修掉一个**假阴性**：`const inject = ["x"]`（声明后引用）此前不被识别，
->   导致 `dsh-mnemon-strategy-*` 一族被判成「0 个服务 → 可用」，而它们依赖的
->   `mnemonMemory` 当前 profile 里**无人提供**；
-> - 修掉一个**假阳性**：`dsh-pet` 因为没识别「作者自己做了能力检测」被误报为「部分可用」；
-> - 判定引擎补上**每个服务的去处**（`checked` / `resolved`）：此前 63 个服务落在两条
->   静默 `continue` 上，「确认没问题」与「根本没看」在输出里长得一样；
-> - 对拍的**两个自相矛盾**已修（`services` 的假声明、hang-cycle 的假通过）。
->
-> 下一步动作仍是本节顶部这一条 —— **每完成一小项都改这里。**
+> `node --test test/` → **192 条全过**。三个回归基准仍精确命中（466 / 591 两行）。
