@@ -191,12 +191,24 @@ def mounted_entries(full, j):
 
 
 def local_graph(full, seeds):
-    """从入口出发收集本地相对依赖图。"""
-    seen, queue = set(), list(seeds)
+    """从入口出发收集本地相对依赖图。
+
+    seen   = 已成功解析出的文件（返回值）
+    visited = 已出队检查过的**路径形态**
+
+    这两个必须分开。原先只用 seen 去重，而「靠补扩展名才解析成功」时它把解析后的
+    路径（b.js）放进 seen，队列里传的却是未解析形态（b），于是 `rel in seen` 永远
+    不成立 → 每次访问都重新读文件、重新展开它的导入 → 只要有环就无界膨胀。
+    实测：3 个 JS 文件（无扩展名 ESM 导入 + 成环）即可让本函数 98% CPU 空转不停；
+    真实插件 @liustack/modlens 打包的 undici 就是这个写法。修法是把「检查过」与
+    「解析成功」分开，不改变返回的图，只去掉重复展开。
+    """
+    seen, visited, queue = set(), set(), list(seeds)
     while queue:
         rel = queue.pop()
-        if not rel or rel in seen:
+        if not rel or rel in visited:
             continue
+        visited.add(rel)
         path = os.path.join(full, rel)
         if not os.path.isfile(path):
             hit = None
@@ -208,6 +220,8 @@ def local_graph(full, seeds):
                 continue
             path = hit
             rel = os.path.relpath(path, full)
+        if rel in seen:
+            continue
         seen.add(rel)
         try:
             txt = open(path, encoding='utf-8', errors='ignore').read()

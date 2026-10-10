@@ -1,700 +1,557 @@
 {
- "_note": "从作者本机 desktop profile 的 21 个社区插件静态提取的真实调用点，用作严重度规则表的覆盖依据。不是规范，只是一次快照。",
+ "_note": "由 lib/extract.mjs（Node 版内核）在作者本机 desktop profile 上生成的真实输出，用作严重度规则表的覆盖依据。不是规范。",
  "_capturedAt": "2026-10-10",
  "_dshVersion": "0.2.0-rc.2",
- "_caveat": "提取用的是与现有 bash 内核相同的正则启发式，含已知误报（例如 locale.startsWith、get.call 明显是变量名/字符串方法被误匹配）。这正是需要“确定性标注”和后续真解析器的原因。",
- "svcPlugins": {
-  "tools": [
-   "@changfenhuang/dsh-genui",
-   "@liustack/modlens",
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-better-sidebar",
-   "dsh-meme",
-   "dsh-mnemon"
-  ],
-  "systemPrompt": [
-   "@changfenhuang/dsh-genui",
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "locale": [
-   "@linxin666/dsh-client-ui-git-graph",
-   "@linxin666/dsh-client-ui-skill-explorer",
-   "@linxin666/dsh-remote-web-ui",
-   "@nanmicoder/dsh-agent-teams",
-   "@nonamelego/dsh-catppuccin",
-   "dsh-better-sidebar",
-   "dsh-mnemon",
-   "dsh-mnemon-source-documents",
-   "dsh-mnemon-source-memory-spaces",
-   "dsh-mnemon-source-runtime",
-   "dsh-pet",
-   "dshmarket"
-  ],
-  "subprocess": [
-   "@linxin666/dsh-client-ui-git-graph"
-  ],
-  "webServer": [
-   "@linxin666/dsh-client-ui-git-graph",
-   "@linxin666/dsh-client-ui-skill-explorer",
-   "@linxin666/dsh-remote-web-ui",
-   "@liustack/modlens",
-   "@nonamelego/dsh-catppuccin",
-   "dsh-better-sidebar",
-   "dsh-meme",
-   "dsh-pet"
-  ],
-  "logger": [
-   "@linxin666/dsh-client-ui-git-graph",
-   "@linxin666/dsh-client-ui-skill-explorer",
-   "@michengai/dsh-archive-manager",
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-better-sidebar"
-  ],
-  "workspaceRegistry": [
-   "@linxin666/dsh-client-ui-git-graph",
-   "dsh-mnemon"
-  ],
-  "slots": [
-   "@linxin666/dsh-client-ui-skill-explorer",
-   "@linxin666/dsh-remote-web-ui",
-   "@liustack/modlens",
-   "@nanmicoder/dsh-agent-teams",
-   "@nonamelego/dsh-catppuccin",
-   "dsh-better-sidebar",
-   "dsh-meme",
-   "dsh-mnemon",
-   "dsh-pet",
-   "dsh-recall-plugin",
-   "dshmarket"
-  ],
-  "profileContext": [
-   "@linxin666/dsh-remote-web-ui",
-   "dsh-mnemon",
-   "dshmarket"
-  ],
-  "webUiSettings": [
-   "@linxin666/dsh-remote-web-ui"
-  ],
-  "webStartup": [
-   "@linxin666/dsh-remote-web-ui"
-  ],
-  "connection": [
-   "@linxin666/dsh-remote-web-ui",
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-better-sidebar",
-   "dshmarket"
-  ],
-  "layout": [
-   "@linxin666/dsh-remote-web-ui",
-   "dsh-mnemon"
-  ],
-  "get": [
-   "@linxin666/dsh-remote-web-ui"
-  ],
-  "pet": [
-   "@linxin666/dsh-remote-web-ui"
-  ],
-  "attachments": [
-   "@liustack/modlens",
-   "dsh-meme"
-  ],
-  "storageDomain": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessionProjectionCache": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessionPersistence": [
-   "@michengai/dsh-archive-manager",
-   "dsh-better-sidebar"
-  ],
-  "sessionProjections": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "spillStore": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "typert": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions": [
-   "@michengai/dsh-archive-manager",
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-better-sidebar",
-   "dsh-mnemon",
-   "dsh-recall-plugin"
-  ],
-  "uiWorkspace": [
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-better-sidebar",
-   "dsh-recall-plugin"
-  ],
-  "llm": [
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-meme",
-   "dsh-mnemon"
-  ],
-  "agents": [
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-better-sidebar",
-   "dsh-mnemon",
-   "dshmarket"
-  ],
-  "uiConversation": [
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "commands": [
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-pet"
-  ],
-  "effect": [
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "subagents": [
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-better-sidebar"
-  ],
-  "theme": [
-   "@nonamelego/dsh-catppuccin",
-   "dshmarket"
-  ],
-  "desktopProfiles": [
-   "@nonamelego/dsh-catppuccin",
-   "dshmarket"
-  ],
-  "webRuntime": [
-   "dsh-better-sidebar"
-  ],
-  "settings": [
-   "dsh-better-sidebar",
-   "dsh-recall-plugin",
-   "dshmarket"
-  ],
-  "betterSidebar": [
-   "dsh-better-sidebar",
-   "dsh-mnemon"
-  ],
-  "conversation": [
-   "dsh-better-sidebar",
-   "dsh-meme",
-   "dsh-recall-plugin"
-  ],
-  "agentTeams": [
-   "dsh-better-sidebar"
-  ],
-  "sessionTitle": [
-   "dsh-better-sidebar"
-  ],
-  "jobs": [
-   "dsh-better-sidebar"
-  ],
-  "loader": [
-   "dsh-better-sidebar",
-   "dsh-mnemon"
-  ],
-  "betterLocale": [
-   "dsh-better-sidebar"
-  ],
-  "remote": [
-   "dsh-better-sidebar"
-  ],
-  "sidebarRight": [
-   "dsh-better-sidebar"
+ "_generatedBy": "node lib/extract.mjs ~/.dsh/profiles/desktop/node_modules",
+ "_knownGaps": [
+  "内核的 services/calls 是**跨插件全局合并**的，没有逐插件归属——所以这份数据回答不了「哪个插件用了哪个服务」。逐插件归属是第一批要做的重构。",
+  "提取是正则启发式，含已知误报（例如把 locale.startsWith、get.call 当成 API 调用）。",
+  "副作用导入 `import './x'` 不被匹配（正则只认 from '...' / require(...) / import(...)）——纯靠副作用装配的插件会显著漏检。"
+ ],
+ "manifests": [
+  "@changfenhuang/dsh-genui@0.11.4",
+  "@linxin666/dsh-client-ui-git-graph@0.4.5",
+  "@linxin666/dsh-client-ui-skill-explorer@0.4.5",
+  "@linxin666/dsh-remote-web-ui@0.4.5",
+  "@liustack/modlens@3.26.6",
+  "@michengai/dsh-archive-manager@1.0.16",
+  "@nanmicoder/dsh-agent-teams@0.1.22",
+  "@nonamelego/dsh-catppuccin@0.6.1",
+  "dsh-better-sidebar@0.24.1",
+  "dsh-meme@0.1.47",
+  "dsh-mnemon@0.5.24",
+  "dsh-mnemon-source-documents@0.5.9",
+  "dsh-mnemon-source-memory-spaces@0.5.16",
+  "dsh-mnemon-source-runtime@0.5.12",
+  "dsh-mnemon-strategy-auto-capture@0.5.5",
+  "dsh-mnemon-strategy-general@0.5.1",
+  "dsh-mnemon-strategy-light-context@0.5.5",
+  "dsh-mnemon-strategy-scoped@0.5.5",
+  "dsh-pet@0.3.6",
+  "dsh-recall-plugin@2.4.10",
+  "dshmarket@1.66.13"
+ ],
+ "services": [
+  "agentDefaultModel",
+  "agentPresets",
+  "agentTeams",
+  "agents",
+  "attachments",
+  "betterLocale",
+  "betterSidebar",
+  "commands",
+  "companionQq",
+  "configEditor",
+  "connection",
+  "conversation",
+  "credentials",
+  "desktopProfiles",
+  "jobs",
+  "layout",
+  "llm",
+  "loader",
+  "locale",
+  "logger",
+  "parser",
+  "pet",
+  "pluginManager",
+  "profileContext",
+  "remote",
+  "ruleNames",
+  "sandboxPolicy",
+  "sessionPersistence",
+  "sessionProjectionCache",
+  "sessionProjections",
+  "sessionQuery",
+  "sessionTitle",
+  "sessions",
+  "settings",
+  "sidebarRight",
+  "slots",
+  "spillStore",
+  "storageDomain",
+  "styles",
+  "subagents",
+  "subprocess",
+  "systemPrompt",
+  "theme",
+  "timer",
+  "tools",
+  "topoIndex",
+  "typert",
+  "uiWorkspace",
+  "webServer",
+  "webStartup",
+  "webUiSettings",
+  "workspaceRegistry",
+  "workspaces"
+ ],
+ "calls": {
+  "agentDefaultModel": [
+   "currentSelection"
   ],
   "agentPresets": [
-   "dsh-better-sidebar",
-   "dsh-mnemon"
+   "mount",
+   "resolve"
+  ],
+  "agentTeams": [
+   "tryMembership"
+  ],
+  "agents": [
+   "create",
+   "filter",
+   "find",
+   "get",
+   "isOwnedBy",
+   "list",
+   "listDescendants",
+   "resume",
+   "roots"
+  ],
+  "attachments": [
+   "readImage"
+  ],
+  "betterLocale": [
+   "getPrefs",
+   "getSessionStates",
+   "getSnapshot",
+   "reduce",
+   "reduceFor",
+   "register",
+   "setPrefs",
+   "setSession",
+   "subscribe",
+   "tabOpen"
+  ],
+  "betterSidebar": [
+   "badge",
+   "closeTab",
+   "component",
+   "createTab",
+   "fileIcon",
+   "folderIcon",
+   "getFileViewers",
+   "getTab",
+   "getTabs",
+   "icon",
+   "isTabEnabled",
+   "openTab",
+   "read",
+   "registerFileViewer",
+   "registerTab",
+   "setSurface",
+   "subscribe",
+   "title",
+   "updateTab"
+  ],
+  "commands": [
+   "cancelActive",
+   "probePnpm",
+   "provisionPnpm",
+   "push",
+   "register"
   ],
   "companionQq": [
-   "dsh-meme"
+   "sendImage"
   ],
-  "agentDefaultModel": [
-   "dsh-meme",
-   "dsh-mnemon",
-   "dsh-pet"
+  "connection": [
+   "destroy",
+   "onNotification",
+   "sendNotification"
   ],
-  "pluginManager": [
-   "dsh-mnemon"
-  ],
-  "uiSession": [
-   "dsh-mnemon"
-  ],
-  "mnemonMemory": [
-   "dsh-mnemon"
-  ],
-  "configEditor": [
-   "dsh-mnemon"
+  "conversation": [
+   "createDrafts",
+   "releaseDraftAttachments"
   ],
   "credentials": [
-   "dsh-pet"
+   "resolve"
   ],
-  "workspaces": [
-   "dsh-recall-plugin"
+  "desktopProfiles": [
+   "delete",
+   "get",
+   "set",
+   "trim"
   ],
-  "sandboxPolicy": [
-   "dsh-recall-plugin"
+  "jobs": [
+   "closeTab",
+   "fileIcon",
+   "folderIcon",
+   "getFileViewers",
+   "getTab",
+   "getTabs",
+   "isTabEnabled",
+   "kill",
+   "observe",
+   "openTab",
+   "registerFileViewer",
+   "registerTab",
+   "setSurface",
+   "subscribe",
+   "updateTab",
+   "watchRows"
   ],
-  "styles": [
-   "dsh-recall-plugin"
+  "layout": [
+   "addListener",
+   "checkLayoutSuccess",
+   "doPostLayout",
+   "emit",
+   "getAllNodes",
+   "getGraphManager",
+   "getPositionsData",
+   "newEdge",
+   "newGraph",
+   "newGraphManager",
+   "newNode",
+   "one",
+   "run",
+   "runLayout",
+   "selectPanel",
+   "tick",
+   "tilingPostLayout"
+  ],
+  "llm": [
+   "listConfigurableProviders",
+   "listModels",
+   "listProviders",
+   "prepareCall",
+   "resolveCallConfig",
+   "resolveModelInfo",
+   "stream"
+  ],
+  "loader": [
+   "entries",
+   "import",
+   "unwrapExports"
+  ],
+  "locale": [
+   "addLanguage",
+   "bind",
+   "format",
+   "getLocale",
+   "getShortMonths",
+   "getShortWeekDays",
+   "getSnapshot",
+   "getWeek",
+   "getWeekFirstDate",
+   "getWeekFirstDay",
+   "parse",
+   "register",
+   "startsWith",
+   "subscribe"
+  ],
+  "logger": [
+   "debug",
+   "error",
+   "info",
+   "log",
+   "table",
+   "warn"
+  ],
+  "parser": [
+   "action",
+   "allActions",
+   "alternatives",
+   "atLeastOne",
+   "callFunction",
+   "configure",
+   "consume",
+   "consumeSpaces",
+   "dynamicPrecedence",
+   "expect",
+   "fetch",
+   "finalize",
+   "finish",
+   "formatUnsupportedCmd",
+   "getGoto",
+   "getName",
+   "getNodeType",
+   "getRule",
+   "hasAction",
+   "hasWrappers",
+   "isRecording",
+   "many",
+   "nextLine",
+   "nextStates",
+   "optional",
+   "parse",
+   "parseArguments",
+   "parseError",
+   "parseExpression",
+   "parseFunction",
+   "parseInline",
+   "parseSizeGroup",
+   "rule",
+   "startParse",
+   "stateFlag",
+   "stateSlot",
+   "subparse",
+   "subrule",
+   "switchMode",
+   "validAction"
+  ],
+  "pet": [
+   "setVisible",
+   "state"
+  ],
+  "remote": [
+   "canOpenWorkspacePath",
+   "includes",
+   "indexOf",
+   "openWorkspacePath",
+   "rename",
+   "replace",
+   "slice",
+   "snapshotEvents",
+   "split",
+   "workspacePathApplications"
+  ],
+  "ruleNames": [
+   "get",
+   "has",
+   "set"
+  ],
+  "sessionPersistence": [
+   "list",
+   "open"
   ],
   "sessionQuery": [
-   "dsh-recall-plugin"
+   "listSessions",
+   "observeSession",
+   "readSession",
+   "trim"
   ],
-  "fiber": [
-   "dsh-recall-plugin"
+  "sessionTitle": [
+   "rename"
+  ],
+  "sessions": [
+   "announce",
+   "binding",
+   "delete",
+   "detachEntered",
+   "enter",
+   "filter",
+   "findIndex",
+   "flush",
+   "fork",
+   "get",
+   "getSnapshot",
+   "has",
+   "list",
+   "liveEntryFor",
+   "map",
+   "open",
+   "openSubagent",
+   "reduce",
+   "refresh",
+   "refreshSubagents",
+   "scope",
+   "search",
+   "set",
+   "slice",
+   "some",
+   "sort",
+   "subscribe",
+   "using",
+   "values"
+  ],
+  "settings": [
+   "configure",
+   "describe",
+   "externalDisable",
+   "get",
+   "getSnapshot",
+   "isTrusted",
+   "mutate",
+   "register",
+   "replace",
+   "reportNonstrict",
+   "settingsGet",
+   "subscribe",
+   "update",
+   "useStrictBehavior"
+  ],
+  "sidebarRight": [
+   "sort"
+  ],
+  "slots": [
+   "delete",
+   "entries",
+   "entriesOfSlot",
+   "get",
+   "getVersion",
+   "has",
+   "inject",
+   "register",
+   "reverse",
+   "set",
+   "subscribe",
+   "values"
+  ],
+  "storageDomain": [
+   "open"
+  ],
+  "styles": [
+   "insert"
+  ],
+  "subagents": [
+   "drainContinuableChildren",
+   "getProvider",
+   "interrupt",
+   "list",
+   "listDescendants",
+   "start",
+   "startContinuable"
+  ],
+  "subprocess": [
+   "spawn"
+  ],
+  "systemPrompt": [
+   "getSectionOrder",
+   "section"
+  ],
+  "theme": [
+   "calculate",
+   "getTheme",
+   "includes",
+   "of",
+   "register",
+   "setTheme"
   ],
   "timer": [
-   "dsh-recall-plugin"
+   "timeout"
+  ],
+  "tools": [
+   "filter",
+   "get",
+   "guard",
+   "join",
+   "push",
+   "register",
+   "restrict"
+  ],
+  "topoIndex": [
+   "get",
+   "set"
+  ],
+  "typert": [
+   "register"
+  ],
+  "uiWorkspace": [
+   "openSession"
+  ],
+  "webServer": [
+   "register",
+   "registerUpgrade",
+   "tapIndex"
+  ],
+  "webUiSettings": [
+   "bind"
+  ],
+  "workspaceRegistry": [
+   "create",
+   "delete",
+   "list"
+  ],
+  "workspaces": [
+   "get",
+   "set",
+   "values"
   ]
  },
- "usage": {
-  "tools.register": [
-   "@changfenhuang/dsh-genui",
-   "@liustack/modlens",
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-better-sidebar",
-   "dsh-meme",
-   "dsh-mnemon"
-  ],
-  "systemPrompt.section": [
-   "@changfenhuang/dsh-genui",
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "systemPrompt.getSectionOrder": [
-   "@changfenhuang/dsh-genui"
-  ],
-  "locale.register": [
-   "@linxin666/dsh-client-ui-git-graph",
-   "@linxin666/dsh-client-ui-skill-explorer",
-   "@linxin666/dsh-remote-web-ui",
-   "@nanmicoder/dsh-agent-teams",
-   "@nonamelego/dsh-catppuccin",
-   "dsh-better-sidebar",
-   "dsh-mnemon",
-   "dsh-pet",
-   "dshmarket"
-  ],
-  "subprocess.spawn": [
-   "@linxin666/dsh-client-ui-git-graph"
-  ],
-  "webServer.register": [
-   "@linxin666/dsh-client-ui-git-graph",
-   "@linxin666/dsh-client-ui-skill-explorer",
-   "@linxin666/dsh-remote-web-ui",
-   "@liustack/modlens",
-   "@nonamelego/dsh-catppuccin",
-   "dsh-better-sidebar",
-   "dsh-meme",
-   "dsh-pet"
-  ],
-  "logger.warn": [
-   "@linxin666/dsh-client-ui-git-graph",
-   "@linxin666/dsh-client-ui-skill-explorer",
-   "@michengai/dsh-archive-manager",
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-better-sidebar"
-  ],
-  "workspaceRegistry.create": [
-   "@linxin666/dsh-client-ui-git-graph"
-  ],
-  "workspaceRegistry.list": [
-   "@linxin666/dsh-client-ui-git-graph"
-  ],
-  "workspaceRegistry.delete": [
-   "@linxin666/dsh-client-ui-git-graph"
-  ],
-  "slots.inject": [
-   "@linxin666/dsh-client-ui-skill-explorer",
-   "@linxin666/dsh-remote-web-ui",
-   "@liustack/modlens",
-   "@nanmicoder/dsh-agent-teams",
-   "@nonamelego/dsh-catppuccin",
-   "dsh-better-sidebar",
-   "dsh-meme",
-   "dsh-mnemon",
-   "dsh-pet",
-   "dsh-recall-plugin",
-   "dshmarket"
-  ],
-  "slots.register": [
-   "@linxin666/dsh-client-ui-skill-explorer",
-   "@linxin666/dsh-remote-web-ui",
-   "@liustack/modlens",
-   "@nanmicoder/dsh-agent-teams",
-   "@nonamelego/dsh-catppuccin",
-   "dsh-better-sidebar",
-   "dsh-meme",
-   "dsh-mnemon",
-   "dsh-pet",
-   "dsh-recall-plugin",
-   "dshmarket"
-  ],
-  "locale.bind": [
-   "@linxin666/dsh-client-ui-skill-explorer",
-   "@linxin666/dsh-remote-web-ui",
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-better-sidebar",
-   "dsh-mnemon",
-   "dsh-mnemon-source-documents",
-   "dsh-mnemon-source-memory-spaces",
-   "dsh-mnemon-source-runtime",
-   "dsh-pet",
-   "dshmarket"
-  ],
-  "webServer.registerUpgrade": [
-   "@linxin666/dsh-remote-web-ui",
-   "dsh-better-sidebar"
-  ],
-  "get.call": [
-   "@linxin666/dsh-remote-web-ui"
-  ],
-  "pet.setVisible": [
-   "@linxin666/dsh-remote-web-ui"
-  ],
-  "pet.state": [
-   "@linxin666/dsh-remote-web-ui"
-  ],
-  "attachments.readImage": [
-   "@liustack/modlens"
-  ],
-  "tools.get": [
-   "@liustack/modlens"
-  ],
-  "storageDomain.open": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessionPersistence.list": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "typert.register": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions.some": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions.filter": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions.map": [
-   "@michengai/dsh-archive-manager",
-   "dsh-recall-plugin"
-  ],
-  "sessions.slice": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions.findIndex": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions.search": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions.refresh": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions.open": [
-   "@michengai/dsh-archive-manager",
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "sessions.using": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions.binding": [
-   "@michengai/dsh-archive-manager",
-   "dsh-recall-plugin"
-  ],
-  "sessions.fork": [
-   "@michengai/dsh-archive-manager",
-   "dsh-better-sidebar"
-  ],
-  "sessions.getSnapshot": [
-   "@michengai/dsh-archive-manager",
-   "dsh-mnemon"
-  ],
-  "sessions.flush": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions.liveEntryFor": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions.detachEntered": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions.enter": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions.announce": [
-   "@michengai/dsh-archive-manager"
-  ],
-  "sessions.list": [
-   "@michengai/dsh-archive-manager",
-   "dsh-recall-plugin"
-  ],
-  "llm.listModels": [
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-mnemon"
-  ],
-  "llm.resolveCallConfig": [
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-meme"
-  ],
-  "agents.get": [
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-mnemon"
-  ],
-  "agents.list": [
-   "@nanmicoder/dsh-agent-teams",
-   "dshmarket"
-  ],
-  "tools.restrict": [
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "commands.register": [
-   "@nanmicoder/dsh-agent-teams",
-   "dsh-pet"
-  ],
-  "sessions.refreshSubagents": [
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "sessions.openSubagent": [
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "logger.debug": [
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "subagents.drainContinuableChildren": [
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "subagents.getProvider": [
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "subagents.list": [
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "subagents.startContinuable": [
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "subagents.interrupt": [
-   "@nanmicoder/dsh-agent-teams"
-  ],
-  "locale.addLanguage": [
-   "@nonamelego/dsh-catppuccin"
-  ],
-  "locale.getLocale": [
-   "@nonamelego/dsh-catppuccin"
-  ],
-  "locale.subscribe": [
-   "@nonamelego/dsh-catppuccin",
-   "dsh-better-sidebar",
-   "dsh-mnemon",
-   "dshmarket"
-  ],
-  "theme.getTheme": [
-   "@nonamelego/dsh-catppuccin",
-   "dshmarket"
-  ],
-  "theme.register": [
-   "@nonamelego/dsh-catppuccin"
-  ],
-  "theme.setTheme": [
-   "@nonamelego/dsh-catppuccin",
-   "dshmarket"
-  ],
-  "settings.settingsGet": [
-   "dsh-better-sidebar"
-  ],
-  "settings.get": [
-   "dsh-better-sidebar"
-  ],
-  "settings.externalDisable": [
-   "dsh-better-sidebar"
-  ],
-  "settings.update": [
-   "dsh-better-sidebar",
-   "dsh-recall-plugin"
-  ],
-  "settings.describe": [
-   "dsh-better-sidebar",
-   "dsh-recall-plugin"
-  ],
-  "settings.configure": [
-   "dsh-better-sidebar"
-  ],
-  "agents.create": [
-   "dsh-better-sidebar",
-   "dsh-mnemon"
-  ],
-  "agents.resume": [
-   "dsh-better-sidebar"
-  ],
-  "logger.info": [
-   "dsh-better-sidebar"
-  ],
-  "subagents.listDescendants": [
-   "dsh-better-sidebar"
-  ],
-  "sessions.scope": [
-   "dsh-better-sidebar"
-  ],
-  "sessions.get": [
-   "dsh-better-sidebar",
-   "dsh-mnemon",
-   "dsh-recall-plugin"
-  ],
-  "slots.get": [
-   "dsh-better-sidebar",
-   "dsh-mnemon"
-  ],
-  "slots.set": [
-   "dsh-better-sidebar",
-   "dsh-mnemon"
-  ],
-  "slots.values": [
-   "dsh-better-sidebar"
-  ],
-  "slots.reverse": [
-   "dsh-better-sidebar"
-  ],
-  "locale.getSnapshot": [
-   "dsh-better-sidebar",
-   "dsh-mnemon",
-   "dshmarket"
-  ],
-  "jobs.watchRows": [
-   "dsh-better-sidebar"
-  ],
-  "jobs.observe": [
-   "dsh-better-sidebar"
-  ],
-  "jobs.kill": [
-   "dsh-better-sidebar"
-  ],
-  "loader.entries": [
-   "dsh-better-sidebar",
-   "dsh-mnemon"
-  ],
-  "tools.push": [
-   "dsh-better-sidebar"
-  ],
-  "tools.join": [
-   "dsh-better-sidebar"
-  ],
-  "remote.canOpenWorkspacePath": [
-   "dsh-better-sidebar"
-  ],
-  "remote.workspacePathApplications": [
-   "dsh-better-sidebar"
-  ],
-  "remote.openWorkspacePath": [
-   "dsh-better-sidebar"
-  ],
-  "agentDefaultModel.currentSelection": [
-   "dsh-meme",
-   "dsh-pet"
-  ],
-  "llm.resolveModelInfo": [
-   "dsh-meme"
-  ],
-  "llm.prepareCall": [
-   "dsh-meme"
-  ],
-  "webServer.tapIndex": [
-   "dsh-meme"
-  ],
-  "slots.getVersion": [
-   "dsh-mnemon"
-  ],
-  "slots.entriesOfSlot": [
-   "dsh-mnemon"
-  ],
-  "slots.subscribe": [
-   "dsh-mnemon"
-  ],
-  "slots.entries": [
-   "dsh-mnemon",
-   "dsh-pet",
-   "dsh-recall-plugin"
-  ],
-  "slots.has": [
-   "dsh-mnemon"
-  ],
-  "slots.delete": [
-   "dsh-mnemon"
-  ],
-  "locale.startsWith": [
-   "dsh-mnemon",
-   "dsh-mnemon-source-documents",
-   "dsh-mnemon-source-memory-spaces",
-   "dsh-mnemon-source-runtime"
-  ],
-  "llm.listProviders": [
-   "dsh-mnemon"
-  ],
-  "agents.isOwnedBy": [
-   "dsh-mnemon"
-  ],
-  "agents.roots": [
-   "dsh-mnemon"
-  ],
-  "agents.find": [
-   "dsh-mnemon"
-  ],
-  "agents.filter": [
-   "dsh-mnemon"
-  ],
-  "tools.guard": [
-   "dsh-mnemon"
-  ],
-  "tools.filter": [
-   "dsh-mnemon"
-  ],
-  "layout.selectPanel": [
-   "dsh-mnemon"
-  ],
-  "sessions.set": [
-   "dsh-mnemon",
-   "dsh-recall-plugin"
-  ],
-  "sessions.subscribe": [
-   "dsh-mnemon"
-  ],
-  "credentials.resolve": [
-   "dsh-pet"
-  ],
-  "workspaces.get": [
-   "dsh-recall-plugin"
-  ],
-  "workspaces.set": [
-   "dsh-recall-plugin"
-  ],
-  "workspaces.values": [
-   "dsh-recall-plugin"
-  ],
-  "settings.replace": [
-   "dsh-recall-plugin"
-  ],
-  "timer.timeout": [
-   "dsh-recall-plugin"
-  ],
-  "conversation.createDrafts": [
-   "dsh-recall-plugin"
-  ],
-  "conversation.releaseDraftAttachments": [
-   "dsh-recall-plugin"
-  ],
-  "sessions.has": [
-   "dsh-recall-plugin"
-  ],
-  "sessions.values": [
-   "dsh-recall-plugin"
-  ],
-  "sessions.sort": [
-   "dsh-recall-plugin"
-  ],
-  "sessions.reduce": [
-   "dsh-recall-plugin"
-  ],
-  "settings.register": [
-   "dshmarket"
+ "clientHints": {
+  "agentDefaultModel": false,
+  "agentPresets": false,
+  "agentTeams": true,
+  "agents": true,
+  "attachments": true,
+  "betterLocale": true,
+  "betterSidebar": true,
+  "commands": true,
+  "companionQq": false,
+  "configEditor": false,
+  "connection": true,
+  "conversation": true,
+  "credentials": true,
+  "desktopProfiles": false,
+  "jobs": true,
+  "layout": true,
+  "llm": true,
+  "loader": true,
+  "locale": true,
+  "logger": true,
+  "parser": false,
+  "pet": true,
+  "pluginManager": false,
+  "profileContext": false,
+  "remote": true,
+  "ruleNames": false,
+  "sandboxPolicy": false,
+  "sessionPersistence": false,
+  "sessionProjectionCache": false,
+  "sessionProjections": false,
+  "sessionQuery": false,
+  "sessionTitle": true,
+  "sessions": true,
+  "settings": true,
+  "sidebarRight": true,
+  "slots": true,
+  "spillStore": false,
+  "storageDomain": false,
+  "styles": true,
+  "subagents": true,
+  "subprocess": true,
+  "systemPrompt": false,
+  "theme": true,
+  "timer": true,
+  "tools": true,
+  "topoIndex": false,
+  "typert": true,
+  "uiWorkspace": true,
+  "webServer": true,
+  "webStartup": false,
+  "webUiSettings": true,
+  "workspaceRegistry": true,
+  "workspaces": true
+ },
+ "coverage": {
+  "servicesUsed": 53,
+  "servicesCoveredByRules": 18,
+  "servicesUncovered": [
+   "agentPresets",
+   "agentTeams",
+   "betterLocale",
+   "betterSidebar",
+   "companionQq",
+   "configEditor",
+   "connection",
+   "conversation",
+   "credentials",
+   "desktopProfiles",
+   "layout",
+   "parser",
+   "pet",
+   "pluginManager",
+   "profileContext",
+   "remote",
+   "ruleNames",
+   "sandboxPolicy",
+   "sessionPersistence",
+   "sessionProjectionCache",
+   "sessionProjections",
+   "sessionQuery",
+   "sessionTitle",
+   "sidebarRight",
+   "spillStore",
+   "storageDomain",
+   "styles",
+   "subagents",
+   "timer",
+   "topoIndex",
+   "typert",
+   "uiWorkspace",
+   "webStartup",
+   "webUiSettings",
+   "workspaces"
   ]
  }
 }
