@@ -26,9 +26,9 @@ echo "② python 版输出 OK"
 node "$REPO/lib/extract.mjs" "$NM" "$OUT/js" > "$OUT/js.stdout" 2>&1 || { echo "✗ node 版失败"; tail -5 "$OUT/js.stdout"; exit 1; }
 echo "③ node 版输出 OK"
 
-python3 - "$OUT" <<'PY'
+python3 - "$OUT" "$REPO/tools/parity/expected-diffs.json" <<'PY'
 import json, sys, os
-out = sys.argv[1]
+out, allow_path = sys.argv[1], sys.argv[2]
 a = json.load(open(os.path.join(out, 'py', 'static.json'), encoding='utf-8'))
 b = json.load(open(os.path.join(out, 'js', 'static.json'), encoding='utf-8'))
 sa = json.load(open(os.path.join(out, 'py', 'services.json'), encoding='utf-8'))
@@ -52,12 +52,31 @@ def walk(x, y, path='$', diffs=None):
 
 d1 = walk(a, b)
 d2 = walk(sa, sb)
+diffs = d1 + d2
+
+allow = {}
+try:
+    allow = {e["path"]: e.get("reason", "") for e in json.load(open(allow_path, encoding="utf-8"))["allow"]}
+except Exception:
+    pass
+
+def path_of(line):
+    # 差异行形如 "$.clientHints.webServer: True vs False"
+    return line.split(":", 1)[0].strip()
+
+expected = [l for l in diffs if path_of(l) in allow]
+unexpected = [l for l in diffs if path_of(l) not in allow]
 print()
-if not d1 and not d2:
-    print(f"✓ 完全一致：static.json 与 services.json 逐字段相同")
+if expected:
+    print(f"· 预期差异 {len(expected)} 处（已记入 expected-diffs.json）：")
+    for line in expected[:20]:
+        print("   " + line)
+        print("     原因: " + allow[path_of(line)])
+if not unexpected:
+    print(f"✓ 除预期差异外完全一致：static.json 与 services.json 逐字段相同")
     print(f"  manifests={len(a['manifests'])}  服务={len(a['services'])}  调用点={sum(len(v) for v in a['calls'].values())}  退回整包={len(a['fallbackPackages'])}")
 else:
-    print(f"✗ 存在 {len(d1)+len(d2)} 处差异：")
-    for line in (d1 + d2)[:40]: print("   " + line)
+    print(f"✗ 存在 {len(unexpected)} 处**非预期**差异：")
+    for line in unexpected[:40]: print("   " + line)
     sys.exit(1)
 PY

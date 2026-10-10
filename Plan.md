@@ -178,7 +178,7 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
   - ✅ **附带一刀（零风险）**：排除 `*.d.ts`。纯类型声明不含可运行代码，只因为文件名以 `.ts` 结尾才被误捞。
     desktop profile 客户端桶 **829 → 487** 个文件，而 **static.json 输出零变化**（53 服务 / 280 调用点全等）。
   - 验收：`tools/parity/parity.sh` 在三个 fixture 上全部 `✓ 完全一致`
-- [ ] **A4b. 客户端种子取舍** —— 已实测，结论如下（工具：`tools/parity/a4b-diff.mjs`）
+- [x] **A4b. 客户端种子取舍** —— ✅ **已采纳：默认排除包内 `src/` 源码树**（工具：`tools/parity/a4b-diff.mjs`）
   - 剩下的 487 个文件构成：包内 TS 源码 `src/` 320、嵌套 `node_modules` 110、`lib/` 构建产物 57
   - **排 `src/`：零信息损失。** 487 → 167，而服务 −0、调用点 −0、clientHints **零变化**。
     真正运行的是构建后的 `lib/*.js`；`src/` 是它的源，扫它等于把同一份逻辑扫两遍。
@@ -187,8 +187,12 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
   - ⚠️ **关键发现：这两刀都碰不到假阳性。** `parser`（40 个假方法）、`ruleNames` 都来自
     `dsh-better-sidebar/lib/client-mermaid.js`，它在 `lib/` 里，不属于被排的两类。
     所以 **A4b 是效率问题，不是正确性问题** —— 不要把假阳性的修复寄托在文件集合收窄上。
-  - **建议：只排 `src/`，不排 `node_modules`。** 前者零损失，后者有真实调用点损失却没有正确性收益。
-    （这一条修正了我原先"两者都排"的倾向。）
+  - **采纳的决策：只排 `src/`，不排 `node_modules`。** 前者零损失（desktop profile 上服务 −0、调用点 −0、clientHints 零变化），
+    后者有真实调用点损失却没有正确性收益。（这一条修正了我原先"两者都排"的倾向。）
+  - **副作用已查明并记账**：排 `src/` 会让 `clientHints` 失去一条来自 `src/client/...` 的客户端线索
+    （实测只影响 `webServer`，而它在官方宿主目录里 —— 该线索只在"宿主里找不到"时才起作用，故不影响结论；两个样本上**零危险翻转**）。
+    这条有意差异记在 `tools/parity/expected-diffs.json`，对拍脚本会把它列为「预期差异」而不是失败。
+  - 排除是**可审计**的：跳过了哪些文件逐条记在 `provenance.json` 的 `skippedClientExtra` 里 —— 空谈"排了什么"没有意义，要能查。
 - [ ] **A5. 识别 `ctx.provide("x")` 的产出**，把插件自定义服务从宿主服务里摘出去
   - 动机：`betterSidebar` / `betterLocale` / `pet` / `agentTeams` 是插件提供的服务；现在会被判成"依赖了不存在的宿主服务" —— 把插件间依赖误报成版本不兼容，方向最危险
   - 验收：desktop profile 的未覆盖服务列表里，插件自有服务不再出现
@@ -403,7 +407,6 @@ dsh-plugin-compat-check/
 它和 A4 性质不同：A4 是**不改输出**的安全改动，A5 **会改变输出**（少掉一批假缺口），
 所以流程是：改 → 跑对拍 → 把差异逐条摊开给用户确认 → 再决定是否回溯到 python 版。
 
-> **上一次更新**：2026-10-10，完成 A4b 的实测分析（`tools/parity/a4b-diff.mjs`）：
-> 排 `src/` 零信息损失、排 `node_modules` 只丢 2 个调用点且两者都碰不到假阳性；
-> 顺带确立了 §2.2 的三档确定性判据。**A4b 的默认行为尚未改动，等用户点头。**
+> **上一次更新**：2026-10-10，完成 A4b：**默认排除包内 `src/`**（零信息损失，已实测），
+> 并确立 §2.2 的三档确定性判据。对拍新增预期差异清单 `tools/parity/expected-diffs.json`。
 > 下一步动作就是本节顶部这一条 —— **每完成一小项都改这里。**

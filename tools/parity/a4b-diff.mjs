@@ -34,6 +34,9 @@ const HOST = readList(hostCatalogPath)
 const CLIENT = readList(clientCatalogPath)
 
 const VARIANTS = {
+  // 默认已经排除 src/ 了，所以「全扫」必须显式关掉默认规则
+  full: { skipClientExtra: () => false },
+  default: {},
   base: {},
   src: { skipClientExtra: (rel) => rel.startsWith('src/') || rel.includes('/src/') },
   nm: { skipClientExtra: (rel) => rel.includes('node_modules/') },
@@ -60,7 +63,7 @@ console.log(`基准（全扫）: ${base.manifests.length} 个插件、${baseSvc.
 
 console.log('变体            扫到的文件                                    消失的服务  消失的调用点')
 console.log('─'.repeat(96))
-for (const name of ['base', 'src', 'nm', 'both']) {
+for (const name of ['full', 'default', 'src', 'nm', 'both']) {
   const { report, counts } = runs[name]
   const svc = new Set(report.services)
   const lost = [...baseSvc].filter((s) => !svc.has(s))
