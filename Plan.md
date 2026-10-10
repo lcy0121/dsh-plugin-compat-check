@@ -269,12 +269,44 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
 
 #### C. 插件客户端半边（面板）
 
-- [ ] **C1. 插件骨架**：`package.json` 要有 `dsh.client = {platform:"web"}`、`exports["./client"]`、`dsh.bundle.patch`；`lib/client.js` 必须是 `window.__ModuleLoader__.load({id:"<包名>", factory})` 包装，factory 返回 `{name, inject, apply}`
-  - 注意：**宿主不构建**，`lib/client.js` 必须是预构建产物
-  - 可复用样本：`tools/slot-probe/`（已验证可用的最小插件）
-- [ ] **C2. 总览表落到 `settings.plugins.tab`**（**已验证可用**）
-  - 验收：真实启动 + 无头 Chrome 打开设置页 → 插件页能看到标签名与正文
-- [ ] **C3. 单插件详情 `plugins.detail.section` / `.badge`**（**未验证**，先确认消费者是否渲染）
+- [x] **C1. 插件骨架** —— ✅ **完成，且是逐项实测的**（不是"代码看起来对"）
+  - `package.json`：`dsh.bundle.patch` ✅；`dsh.client.platform` = 字面量 `"web"` ✅；
+    `exports["./client"]` = `{default:"./lib/client.js"}` —— **对象形态，不是字符串** ✅
+  - `lib/client.js`：预构建产物；`window.__ModuleLoader__.load({id:"dsh-plugin-compat-check", factory})`；
+    factory 返回 `{name, inject:["slots"], apply}` ✅
+  - **实测证据**（临时 profile `c1verify` = 官方 web 模板 + 本插件，用应用自带 pnpm 装）：
+    - 配置树：`dsh --profile c1verify --dump-config` → `- id: dsh-plugin-compat-check` / `name: dsh-plugin-compat-check`
+    - **宿主半边真激活**：启动时插件自己打出
+      `[dsh-plugin-compat-check] HOST-HALF-ACTIVATED pid=23649 node=v24.18.1` +
+      `loader access: via=ctx.get('loader') attempts=[...]`，且 **`did not activate` 告警数 = 0**
+      （这条是关键：宿主对未激活条目只 warn，**不 warn = 真起来了**）
+    - **客户端条目真加载**：`window.__DSH_BOOT__.entries` 共 66 条，含
+      `{"id":"dsh-plugin-compat-check","url":"plugins/??dsh-plugin-compat-check/client.js&rev=e65692ec156b"}`，
+      且它出现在 **application 批次的 URL 列表里**（不是只被登记、没被取回）
+    - **客户端半边真 apply**：控制台 `CLIENT-HALF-APPLIED` + `REGISTERED settings.plugins.tab`
+    - **一次完整加载 + 交互，`Runtime.exceptionThrown` = 0**
+  - 验收命令（可复现）：
+    ```
+    dsh plugin --profile c1verify add ./plugin
+    dsh --profile c1verify -- --port 0 --no-open    # 注意 `--`：launcher 参数与 app 参数的分界
+    # 无头 Chrome 连 CDP 打开 http://127.0.0.1:<port>/?token=...，然后检查
+    #   window.__DSH_BOOT__.entries 里有本包
+    #   window.__COMPAT_CHECK__（渲染侧标记）
+    ```
+- [x] **C2. 总览表落到 `settings.plugins.tab`** —— ✅ **完成（占位内容已渲染验证）**
+  - 验收：真实启动 + 无头 Chrome → **看到标签名与正文**。实测：
+    - 页面上可点的 tab 文字：`["通用设置","模型","内置插件","Agent 预设",…,"compat-check","插件列表"]`
+    - 正文含 `compat-check 占位` = true；DOM 里 `[data-compat-check]` 元素数 = 1
+    - **渲染侧标记** `window.__COMPAT_CHECK__ = {"slot":"settings.plugins.tab","label":"compat-check","body":"compat-check 占位","renders":2}`
+      
+      > 为什么要这个标记：页面上出现"compat-check"这几个字**不能证明**是我们的组件渲染的
+      > （任何同名文案都会命中）。这个标记只在我们自己的组件函数体里设置，
+      > 所以它出现 = **我们的代码真的执行了渲染**。验收要经得起这种追问。
+  - ⚠️ **一个必须记下来的落点发现**：`settings.plugins.tab` 加 tab 的宿主页是
+    **设置 → 内置插件**（官方包 `@deepseek-ai/dsh-client-ui-settings-plugins`），
+    该页本来就有一个「插件列表」tab。所以 C2 的形态是**加一个兄弟 tab**，
+    而不是"另起一个插件页"。这个落点直接决定面板的空间与入口 —— C2 真正的内容实现要按它来。
+- [ ] **C3. 单插件详情 `plugins.detail.section` / `.badge`**（**仍未验证**：至今没找到进入详情抽屉的入口）
 - [ ] **C4. 角标**：任何变化都打，标明方向（变好/变差）
 
 #### D. 对话工具
@@ -436,6 +468,41 @@ node lib/extract.mjs <node_modules 目录> <输出目录>
 
 **注意**：macOS 没有 `timeout` 命令，用后台进程 + 看门狗。
 
+#### 7.2.1 两个曾经踩到的坑（都会造成"看起来跑了其实没跑"）
+
+**① `dsh --profile <p> web` 会报 `too many arguments. Expected 0 arguments but got 1: web`。**
+`web` 是 launcher 层面的**应用名**，不是 app 参数。正确写法是让 launcher 与 app 参数用 `--` 分界：
+
+```bash
+dsh --profile <p> -- --port 0 --no-open        # ✅
+dsh --profile <p> web --port 0 --no-open       # ❌ too many arguments
+```
+
+**② `dsh rescue --profile X --from-default-profile web` 会报
+`select a profile only once`。** `rescue` 自己会选 profile，不要再传 `--profile`。
+
+绕开两者、按需造一个**完整** profile 的做法（已在 C1/C2 复验里用过）：
+
+```bash
+cd ~/.dsh/profiles && rm -rf <p> && mkdir <p> \
+  && cp web/cordis.yml web/cordis.patch.yml web/pnpm-workspace.yaml <p>/ \
+  && cat > <p>/package.json <<'JSON'
+{ "name": "dsh-profile-<p>", "private": true, "dependencies": {},
+  "dsh": { "profile": { "bundles": ["@deepseek-ai/dsh-base", "@deepseek-ai/dsh-web-app"] } } }
+JSON
+dsh plugin --profile <p> add ./plugin        # dsh 自己会调它自带的 pnpm
+```
+
+**③ 客户端渲染要验到"是我们的组件渲染的"。** 页面上出现某个字符串**不能证明**归属 ——
+任何同名文案都会命中。做法是在组件函数体里设一个只属于我们的标记：
+
+```js
+window.__COMPAT_CHECK__ = { slot, label, body, renders: (…||0)+1, at: Date.now() }
+```
+
+然后 CDP 里查 `window.__COMPAT_CHECK__`。**标记出现 = 我们的代码真的执行了渲染**，
+这把"页面里有这几个字"升级成"这一刻由我们的组件产出"。C2 的验收就是这么过的。
+
 ### 7.3 已实测的 DSH 契约（不要再重新调查）
 
 **客户端 UI 只有 `ctx.slots` 一条通道**，90 个槽位，每个带 `replaceRisk`。注册写法：
@@ -513,10 +580,25 @@ dsh-plugin-compat-check/
 
 ## 9. 下一动作
 
-**C2 + CLI 接线**：把真实总览表落进 `settings.plugins.tab`（占位组件已在 `plugin/lib/client.js`），
+**C2 的内容实现 + CLI 接线**：把**真实总览表**（来自 `lib/verdict.mjs` 的结论）
+落进 `settings.plugins.tab`（骨架与占位已渲染验证，见 §5 C2），
 并把 `dsh-plugin-compat-check.sh` 第 ⑤ 步（那段 python 的比对逻辑）换成 `lib/verdict.mjs`。
 
-> **上一次更新**：2026-10-11，**测试基础设施落地（§5 H0–H4）+ 判定引擎与实际缺陷的一批修复**。
+> ⚠️ 落点已查清：这个 slot 是给**设置 → 内置插件**页加一个**兄弟 tab**，
+> 该页已有「插件列表」tab。面板要有自己的信息层级，不要与「插件列表」重复。
+
+> **上一次更新**：2026-10-11，**C1 与 C2 复验并勾选**（§5 C 节）——用临时 profile + 应用自带 pnpm 装包，
+> 真实启动 + 无头 Chrome 走完整流程。C1 拿到了**四层证据**：配置树挂载、宿主自报激活
+> （`HOST-HALF-ACTIVATED`，且 `did not activate` 告警为 0）、客户端条目在 66 条 boot entries 里
+> 且位于真实取回的 application 批次、控制台 `CLIENT-HALF-APPLIED` + `REGISTERED`、页面 0 异常。
+> C2 拿到了**渲染级证据**：tab 文字里有 `compat-check`、正文渲染出占位内容、
+> 我们自己的**渲染侧标记** `window.__COMPAT_CHECK__` 出现（只有我们的组件函数体会设置它，
+> 所以它证明的是"我们的代码真的渲染了"，而不是"页面上恰好有这几个字"）。
+>
+> 顺带查清一个落点事实：`settings.plugins.tab` 归属**设置 → 内置插件**页（官方包提供），
+> 它是个**兄弟 tab**，该页已有「插件列表」tab —— 这直接影响 C2 内容实现的空间与信息层级。
+>
+> 上次：**测试基础设施落地（§5 H0–H4）+ 判定引擎与实际缺陷的一批修复**。
 >
 > 测试：`node --test test/` → **116 条断言全过**，覆盖 5 个真实 profile + 15 个合成 fixture。
 > 三个回归基准已**自动化**为判据，每次跑测试都在验收（§5 G1 已勾选）。
