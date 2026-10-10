@@ -533,11 +533,30 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
   - 基线目录只留 `baseline.desktop.json`（运行中的 app 写的真数据，是本工具的正常产物）——
     另外两份是我在临时 profile 上跑出来的，已删
 
-### 仍未闭合（第一批之外，但要记着）
+### 曾经记下的缺口（已闭合）
 
-1. **插件形态拿不到 DSH 版本**：`DSH_VERSION` 不存在 → 基线的 `dshVersion` 为 `null`，
-   「声明与实测不符」这类结论在插件半边不成立。CLI 形态有 `--dsh-version`，不受影响。
-   下一步可以从 `ctx.loader` 或 bundle 清单里找版本来源。
+- [x] **插件形态拿不到 DSH 版本** —— ✅ **已闭合**
+  - 症状：`process.env.DSH_VERSION` 不存在 → 基线的 `dshVersion` 是 `null`，
+    「声明与实测不符」这类结论（本工具相对既有方案唯一不可替代的那类）在插件形态下不成立。
+  - **解法：从 argv 反推 dsh 根，再用 Node 自己的解析器问它。**
+    实测（真实桌面端，VERPROBE 那一次）：
+    ```
+    process.env.DSH_VERSION   → null          （不存在）
+    process.versions.electron → "44.0.0"      （宿主跑在 Electron 里）
+    argv 里有 …/app.asar/dsh/node_modules/@deepseek-ai/dsh-desktop-host/lib/index.js
+      → 反推出 dsh 根，createRequire(根).resolve('@deepseek-ai/dsh-desktop-host/package.json')
+      → @deepseek-ai/dsh-desktop-host@0.2.0-rc.2      ✅ 与 `dsh --version` 一致
+      → 另一个包 @deepseek-ai/dsh@0.2.0-rc.2 也能解析（两个都试，不依赖某一个存在）
+    ```
+    实测结果：基线里的 `dshVersion` 从 `null` 变成 `'0.2.0-rc.2'`。
+  - **被否掉的三条路，理由写进源码了**（否则下一个人会加回来）：
+    - `process.env.DSH_VERSION` —— 不存在，就是缺口本身
+    - `dsh --version` 起子进程 —— **不是能力问题**：§2 第 1 题锁定了「插件严格只读：
+      不装包、不起子进程、不联网」。为一个版本号破这条边界不值
+    - `Info.plist` —— macOS 专有（`CFBundleShortVersionString` = 0.2.0-rc.2 能读到），
+      而 §2 第 6 题要求跨平台，不能当主路
+  - 拿不到时**返回 null 而不是猜**：猜一个版本会**凭空造出**"声明不符"的结论，
+    比缺一条结论糟得多。路径反推的正则同时接受 `/` 与 `\`（Windows 是一等目标）。
 
 ### 第二批
 
@@ -753,14 +772,35 @@ dsh-plugin-compat-check/
 
 ## 9. 下一动作
 
-**第一批只剩验收与收尾（§5 G3–G5）**：C/D/E 三节全部完成。
-- **G3**：在真实 desktop profile 上跑一遍（宿主层、面板、角标）——面板与角标已在
-  复刻的 desktop 插件集上端到端验过，但还差在**正式** desktop profile 上过一遍。
-- **G4**：客户端半边的完整界面确认（本轮的实测已经是浏览器级的，可以据此勾）。
-- **G5**：收尾干净（无残留 profile / 进程）。
+**第一批已全部完成（A–H 与 F1/F2/G1–G5）。** 下一步进入 **第二批**，从 H1' 开始：
 
-下一批的入口仍是 §5 第二批：**H1' 客户端半边对账**（计划加载的 `__DSH_BOOT__.entries`
-vs 实际到货）、**H2' 真解析器**、**H3' npm 发布**、**H4' 规则表补全**。
+- **H1' 客户端半边对账**：计划加载的 `__DSH_BOOT__.entries` vs 实际到货
+  —— 这是唯一能抓到「客户端条目没到货」的机制，而宿主侧对此**只 warn**
+- H2' 真解析器（验收指标：「疑似」比例明显下降）
+- H3' npm 发布
+- H4' 规则表补全
+
+> ### 本轮（2026-10-11 收尾）：F1 + F2 + G3–G5，以及两次自伤
+>
+> **第一批到这里全部完结。** 这一轮补上了 F1（字段其实早就有，只是没记账）、
+> F2（真正的缓存 + 启动自检），并跑完 G3–G5。中间出了两次**我自己造成的事故**：
+>
+> 1. **profile 认错会污染基线**：环境变量 `DSH_PROFILE=desktop` 是**从启动 app 的
+>    shell 继承来的过期值**。信它会把别的 profile 的结论写进 `baseline.desktop.json`，
+>    差分会报出"移除了 17 个插件"这种**完全编出来的变化**。现在按 argv 判断，
+>    且**两种形态都认**（CLI 的 `--profile X`、桌面端的位置参数 `…/profiles/X`）。
+>    前两版各只认了一种，两次都"看起来是对的" —— 因为结论恰好就是 desktop。**那是运气。**
+> 2. **我把 `apply()` 的函数体整个删掉了**：删除一段临时诊断代码时锚点选错，
+>    结果 `apply` 只剩一行日志。后果**不是崩溃** —— 宿主正常启动、`did not activate` 告警 0，
+>    而 skill / 工具 / 路由 / 启动自检**全都没注册，且没有任何报错**。
+>    我是靠"日志里少了几行"发现的。
+>
+> 第 2 条与 `lib/client.js` 上早先那次（删了 `usePluginState` 等定义、187 条测试全绿）
+> **是同一类事故，而且我在第一次之后只给客户端半边加了守卫，没给宿主半边加** ——
+> 于是它换了个地方又来一次。现在两边都有了（`test/client-structure.test.mjs` +
+> `test/host-structure.test.mjs`），且两条都做了**有效性自证**（人为削成空壳，测试确实变红）。
+>
+> `node --test test/` → **216 条全过**。
 
 > ### 本轮（2026-10-11）：C3 + C4 + D1 + E1 + E2 五项并行完成
 >

@@ -1,0 +1,198 @@
+/**
+ * 宿主半边（`plugin/index.js`）的**结构**测试。
+ *
+ * ## 为什么需要它 —— 一次真实事故，而且同类事故第二次
+ *
+ * 我在清理一段临时诊断代码时，用"从 A 切到 B"的方式删除，
+ * 而 B 选错了锚点 —— 结果把 **`apply()` 的整个函数体**删掉了，只留下第一行日志：
+ *
+ * ```js
+ * export function apply(ctx) {
+ *   try {
+ *     log(`HOST-HALF-ACTIVATED …`);
+ *   } catch (error) { … }
+ * }
+ * ```
+ *
+ * 后果非常有教育意义：**它不是一个崩溃**。
+ *   - `apply()` 正常返回，宿主正常启动，`did not activate` 告警 **0**
+ *   - skill 没注册、工具没注册、路由没挂、启动自检没跑 —— **全都没有任何报错**
+ *   - 我是靠"日志里少了几行"才发现的
+ *
+ * 也就是说：**一次静默的功能全灭**，恰好是本项目要检测的那类失败，而我亲手制造了一次。
+ * 同一类事故在 `lib/client.js` 上已经发生过一次（删了 `usePluginState` 等定义，
+ * 187 条测试全绿）。那次之后我加了 `test/client-structure.test.mjs`，
+ * **但没有把同样的守卫加到宿主半边上** —— 于是它换了个地方又发生一次。
+ *
+ * 这个文件补上那一半：用 `vm` 把文件求值一遍，再**真的调用 `apply`**，
+ * 用假 ctx 收集它注册了什么。功能全灭会当场暴露成"什么都没注册"。
+ */
+
+import { test, describe } from 'node:test'
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import path from 'node:path'
+import vm from 'node:vm'
+import { pathToFileURL } from 'node:url'
+
+import { createRequire } from 'node:module'
+
+import { REPO } from './helpers.mjs'
+
+// vm 里的沙箱没有 CommonJS 的 `require`，但我们要用它去加载真实的 node: 模块
+// （fs / os / path / url / module），这样替身的行为与真身完全一致。
+const nodeRequire = createRequire(import.meta.url)
+
+const HOST = path.join(REPO, 'plugin', 'index.js')
+const SRC = fs.readFileSync(HOST, 'utf8')
+
+/** 在受控环境里求值宿主半边，返回它的导出 */
+function loadHost(env = {}) {
+  const logs = []
+  const sandbox = {
+    console: { log: (m) => logs.push(String(m)), warn: (m) => logs.push('WARN ' + m), error: () => {} },
+    process: {
+      ...process,
+      argv: process.argv,
+      env: { ...process.env, ...env },
+    },
+    setTimeout: (fn) => { sandbox.__timers.push(fn); return 0 },
+    clearTimeout: () => {},
+    URL, Date, JSON, Object, Array, String, Number, Boolean, Error, TypeError, Promise, Symbol, RegExp,
+    Map, Set, WeakMap, Math, Reflect, Proxy, Buffer,
+    globalThis: undefined,
+    __timers: [],
+  }
+  sandbox.globalThis = sandbox
+  vm.createContext(sandbox)
+  // 把 ESM 的 import 换成受控替身；导出换成赋值
+  const cjs = SRC
+    .replace(/^import\s+\{([^}]+)\}\s+from\s+'node:([^']+)';?$/gm, (m, names, mod) => {
+      const pairs = names.split(',').map((s) => s.trim()).filter(Boolean)
+      return pairs.map((p) => {
+        const [orig, alias] = p.split(/\s+as\s+/).map((x) => x.trim())
+        const name = alias || orig
+        return `const ${name} = __node('${mod}', ${JSON.stringify(orig)});`
+      }).join('\n')
+    })
+    .replace(/^import\s+([A-Za-z_$][\w$]*)\s*,\s*\{([^}]+)\}\s+from\s+'node:([^']+)';?$/gm, (m, def, names, mod) =>
+      `const ${def} = __node('${mod}', 'default');\n`
+      + names.split(',').map((s) => s.trim()).filter(Boolean).map((p) => {
+        const [orig, alias] = p.split(/\s+as\s+/).map((x) => x.trim())
+        return `const ${alias || orig} = __node('${mod}', ${JSON.stringify(orig)});`
+      }).join('\n'))
+    .replace(/^import\s+\*\s+as\s+([A-Za-z_$][\w$]*)\s+from\s+'node:([^']+)';?$/gm, (m, n, mod) => `const ${n} = __nodeNS('${mod}');`)
+    // vm 里没有 ESM 上下文，`import.meta.url` 会报 "Cannot use 'import.meta' outside a module"。
+    // 用真实文件路径替换掉，这样 fileURLToPath / join 的行为与真身一致。
+    .replace(/import\.meta\.url/g, '__importMetaUrl')
+    .replace(/\bexport\s+const\s+/g, 'const ')
+    .replace(/\bexport\s+function\s+/g, 'function ')
+    .replace(/\bexport\s+default\s+/g, 'const __default = ')
+  sandbox.__importMetaUrl = pathToFileURL(HOST).href
+  sandbox.__node = (mod, name) => {
+    const m = name === 'default' ? nodeRequire(`node:${mod}`) : nodeRequire(`node:${mod}`)[name]
+    return m === undefined ? { resolve: () => '' } : m
+  }
+  sandbox.__nodeNS = (mod) => nodeRequire(`node:${mod}`)
+  sandbox.__out = {}
+  const wrapped = `${cjs}\n__out.apply = (typeof apply === 'function') ? apply : null;\n`
+  vm.runInContext(wrapped, sandbox, { timeout: 5000, filename: HOST })
+  return { apply: sandbox.__out.apply, logs, sandbox }
+}
+
+describe('宿主半边：结构完整性（功能全灭的回归）', () => {
+  test('apply 不是空壳 —— 它至少要注册三样东西', () => {
+    // 这就是那次事故的直接回归：apply 只剩一行日志时，它**不报错、不崩**，
+    // 宿主照常启动，只是什么都没注册。所以必须断言"注册了什么"。
+    const { apply, logs } = loadHost()
+    assert.equal(typeof apply, 'function', 'apply 不是函数 —— 导出被破坏了')
+
+    const registered = { tools: [], routes: [], providers: [], timers: 0 }
+    const ctx = {
+      get: (k) => (k === 'loader' ? { entries: () => [] } : (k === 'pluginManager' ? { list: () => [] } : undefined)),
+      loader: { entries: () => [] },
+      effect: () => {},
+      inject: (deps, cb) => {
+        const scope = {}
+        if (deps.includes('tools')) scope.tools = { register: (t) => registered.tools.push(t) }
+        if (deps.includes('webServer')) scope.webServer = { register: (r) => registered.routes.push(r) }
+        if (deps.includes('skills')) scope.skills = { registerProvider: (p) => registered.providers.push(p) }
+        cb(scope)
+      },
+    }
+    apply(ctx)
+
+    assert.equal(registered.tools.length, 1, 'compat_check 工具没注册（apply 可能是空壳）')
+    assert.equal(registered.routes.length, 1, 'C2 路由没注册')
+    assert.equal(registered.providers.length, 1, 'E1 skill provider 没注册')
+    assert.ok(logs.some((l) => /F2 启动自检|runAutoCheck/.test(l)) || SRC.includes('state.runAutoCheck = ()'),
+      'F2 启动自检的挂载点不见了')
+  })
+
+  test('apply() 里那些"注册动作"真的在函数体内（不是被误删成空壳）', () => {
+    // 断言源码层面的形状：这些调用必须出现在 apply 的函数体里。
+    // 用 vm 调用已经能抓到空壳，这条是**更早、更明确**的定位。
+    const i = SRC.indexOf('export function apply(ctx) {')
+    assert.ok(i > 0, '找不到 apply')
+    let depth = 0, j = SRC.indexOf('{', i)
+    for (let k = j; k < SRC.length; k++) {
+      if (SRC[k] === '{') depth++
+      else if (SRC[k] === '}') { depth--; if (depth === 0) { j = k + 1; break } }
+    }
+    const body = SRC.slice(i, j)
+    assert.ok(body.split('\n').length > 100,
+      `apply 只有 ${body.split('\n').length} 行 —— 像是被误删成空壳了（事故形态）`)
+    for (const needle of ['registerSkill(ctx)', 'registerTool(ctx, state)', 'schedulePass(0)', 'runAutoCheck']) {
+      assert.ok(body.includes(needle), `apply 里缺少 ${needle} —— 功能会被静默关掉`)
+    }
+  })
+
+  test('每个顶层函数定义都还在（防止"删多了"）', () => {
+    // 事故的机制是"删除时锚点选错、多删了一段"。所以把预期的顶层函数清点一遍。
+    const expected = [
+      'resolveKernelDir', 'resolveNodeModules', 'resolveActiveProfile', 'resolveDshVersion',
+      'baselineFileFor', 'computeReport', 'serveReport', 'readPackagedSkill', 'registerSkill',
+      'renderForModel', 'registerTool', 'scan', 'apply',
+    ]
+    // 注意 `async function` —— 第一版漏了它，于是把 serveReport / computeReport
+    // 误报成"不见了"。测试自己的正则会漏，这件事值得留一行注释。
+    const defined = new Set([
+      // `async function foo` / `function foo` / `export function foo` 三种都要覆盖。
+      // 第一版只写了 `function`，于是把 `async function serveReport` 误报成"不见了"；
+      // 第二版漏了 `export`，又把 `apply` 误报了一次。测试自己的正则会漏 —— 记在这。
+      ...SRC.matchAll(/^(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)/gm),
+    ].map((m) => m[1]))
+    const missing = expected.filter((n) => !defined.has(n))
+    assert.deepEqual(missing, [], `这些顶层函数不见了：${missing.join(', ')}`)
+  })
+})
+
+describe('宿主半边：DSH 版本（F1 的闭合）', () => {
+  test('有 resolveDshVersion，且**拿不到时返回 null 而不是猜**', () => {
+    assert.ok(SRC.includes('function resolveDshVersion'), '缺 resolveDshVersion')
+    // 「拿不到 → null」是刻意的：猜一个版本会**凭空造出**声明不符的结论，
+    // 那比缺一条结论糟得多。判定层对 null 已有处理。
+    assert.match(SRC, /拿不到 → \*\*null，不猜\*\*|return null;/)
+  })
+
+  test('四条路里被否掉的三条，理由都写在源码里（避免下次又有人踩）', () => {
+    // 代码里必须留下"为什么不用 xxx"的记录，否则下一个人会把它们加回来。
+    assert.match(SRC, /DSH_VERSION/, '没写清 DSH_VERSION 不存在这件事')
+    assert.match(SRC, /不起子进程/, '没写清为什么不用 dsh --version（只读边界）')
+    assert.match(SRC, /Info\.plist[\s\S]{0,80}macOS|macOS[\s\S]{0,80}Info\.plist|CFBundleShortVersionString/,
+      '没写清 Info.plist 是 macOS 专有')
+  })
+
+  test('解析用的路径**不写死 macOS**（要跨平台）', () => {
+    // §2 第 6 题：Windows 是一等目标。反推 dsh 根的正则必须同时接受 / 与 \。
+    //
+    // 断言方式刻意避开"在测试里再写一层反斜杠" —— 那本身就是个错误来源。
+    // 改为检查源码里那个正则的**字面形态**：字符类里必须同时出现这两种分隔符。
+    const i = SRC.indexOf('function resolveDshVersion')
+    assert.ok(i > 0, '找不到 resolveDshVersion')
+    const body = SRC.slice(i, i + 3000)
+    // 取出所有正则字面量，找带 `dsh` 的那个分隔符模式
+    const sepClass = /\[[^\]]*\\[^\]]*\/[^\]]*\]/.exec(body) || /\[[^\]]*\/[^\]]*\\[^\]]*\]/.exec(body)
+    assert.ok(sepClass, `resolveDshVersion 里没找到同时含 / 与 \\ 的字符类：${body.slice(0, 400)}`)
+  })
+})

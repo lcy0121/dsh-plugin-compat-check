@@ -25,6 +25,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import path, { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { createRequire as __createRequire } from 'node:module';
 
 export const name = 'dsh-plugin-compat-check';
 
@@ -75,6 +76,11 @@ function parseDelays(value, fallback) {
     .map((part) => toPositiveInt(part.trim(), 0))
     .filter((n) => n > 0);
   return parsed.length > 0 ? parsed : fallback;
+}
+
+/** `createRequire` 的小包装：同步可用，不要用 await import（apply 不是 async）。 */
+function reqNode() {
+  return { createRequire: __createRequire };
 }
 
 function log(message) {
@@ -620,6 +626,79 @@ function resolveKernelDir() {
  * 所以这里把推断的**依据**一起放进报告，让结论可追溯，而不是猜一个就不吭声。
  */
 /**
+ * 当前 DSH 的版本。
+ *
+ * ## 为什么必须拿到它
+ *
+ * `dshVersion` 是基线的三个字段之一（Plan.md §5 F1），也是「**声明与实测不符**」
+ * 这类结论的**前提** —— 没有它就没法把插件的 `dsh.compatibility` 声明与实际版本对上，
+ * 于是那一类发现（本工具相对既有方案唯一不可替代的结论）在插件形态下根本不成立。
+ *
+ * ## 实测过的四条路（按可靠性排序）
+ *
+ * 在真实桌面端里把宿主进程打出来（`--profile vprobe`，VERPROBE 那一次）：
+ *
+ *   process.env.DSH_VERSION          → null          （不存在）
+ *   process.versions.electron        → "44.0.0"      （说明宿主跑在 Electron 里）
+ *   argv 里指向 `…/dsh/node_modules/…` 的路径，从中反推 dsh 根
+ *   createRequire(dshRoot).resolve('@deepseek-ai/dsh-desktop-host/package.json')
+ *     → @deepseek-ai/dsh-desktop-host@0.2.0-rc.2     ✅ 与 `dsh --version` 一致
+ *   createRequire(dshRoot).resolve('@deepseek-ai/dsh/package.json')
+ *     → @deepseek-ai/dsh@0.2.0-rc.2                  ✅ 两个都行
+ *
+ * ### 被否掉的方案，以及为什么
+ *
+ * - **`process.env.DSH_VERSION`**：不存在（就是这次要解决的缺口本身）。
+ * - **`dsh --version` 起子进程**：不行，而且**不是**能力问题 —— Plan.md §2 第 1 题锁定了
+ *   「插件严格只读：不装包、不起子进程、不联网」。为拿一个版本号破这条边界不值。
+ * - **`Info.plist`**：macOS 专有（`CFBundleShortVersionString` = 0.2.0-rc.2，能读到）。
+ *   本产品要跨平台（§2 第 6 题），不能把它当主路。
+ *
+ * ## 拿不到时返回 null，而不是猜
+ *
+ * `dshVersion: null` 会让「声明与实测不符」这类结论自动不成立（判定层已经这样处理）。
+ * 猜一个版本字符进去，会**凭空造出**声明不符的结论 —— 那比缺一条结论糟得多。
+ */
+function resolveDshVersion() {
+  // ① 显式覆盖（CLI 形态与测试用）
+  if (process.env.DSH_VERSION) return process.env.DSH_VERSION;
+
+  // ② 从 argv 反推 dsh 根，再用 Node 自己的解析器问它
+  //
+  //    真实桌面端的 argv（实测）：
+  //      [ …/MacOS/DeepSeek Harness, --expose-internals,
+  //        …/app.asar/dsh/node_modules/@deepseek-ai/dsh-desktop-host/lib/index.js,
+  //        …/app.asar/dsh,                                            ← dsh 根
+  //        /Users/…/.dsh/profiles/vprobe, … ]
+  //
+  //    注意 **不写死 macOS 路径**：任何 `<…>/dsh/node_modules/<…>` 都能反推出根，
+  //    Windows 的 `\dsh\node_modules\` 形态也一并处理。
+  try {
+    const argv = (process.argv || []).map(String);
+    const sep = argv.find((a) => /[\\/]dsh[\\/]node_modules[\\/]/.test(a));
+    if (sep) {
+      const m = /^(.*[\\/]dsh)[\\/]node_modules[\\/]/.exec(sep);
+      if (m && m[1]) {
+        const dshRoot = m[1];
+        const req = __createRequire(join(dshRoot, 'probe.js'));
+        // 两个包实测都能解析；都试一遍是为了不依赖某一个包的存在
+        for (const spec of ['@deepseek-ai/dsh-desktop-host/package.json', '@deepseek-ai/dsh/package.json']) {
+          try {
+            const meta = req(req.resolve(spec));
+            if (meta && typeof meta.version === 'string' && meta.version) {
+              return meta.version;
+            }
+          } catch { /* 试下一个 */ }
+        }
+      }
+    }
+  } catch { /* 继续 */ }
+
+  // ③ 都没有 → **null，不猜**（判定层会据此不产出声明不符的结论）
+  return null;
+}
+
+/**
  * 当前正在跑的是哪个 profile。
  *
  * ## 为什么这里必须小心：环境变量会**主动骗人**
@@ -833,7 +912,7 @@ async function computeReport(state, ctx) {
       hostSurface,
       rules,
       catalog,
-      dshVersion: process.env.DSH_VERSION || null,
+      dshVersion: resolveDshVersion(),
     });
 
     // ── C4：基线差分 ──
@@ -843,7 +922,7 @@ async function computeReport(state, ctx) {
     try {
       const { snapshotForBaseline, diffAgainstBaseline, badgeFor } =
         await import(pathToFileURL(join(kernel, 'lib', 'baseline.mjs')).href);
-      const snap = snapshotForBaseline(verdict, process.env.DSH_VERSION || null);
+      const snap = snapshotForBaseline(verdict, resolveDshVersion());
       const bfile = baselineFileFor(nm.dir);
       let prev = null;
       let readNote = null;
@@ -896,6 +975,7 @@ async function computeReport(state, ctx) {
     }
 
     out.baseline = baseline;
+    out.dshVersion = resolveDshVersion();
     out.report = {
       summary: verdict.summary,
       dshVersion: verdict.dshVersion,
