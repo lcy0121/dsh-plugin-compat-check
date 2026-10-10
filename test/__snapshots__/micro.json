@@ -1,0 +1,1033 @@
+{
+  "schemaVersion": 1,
+  "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
+  "extract": {
+    "hash": "b633b136171588835732f50d92458d1bfe147c0c53512967696e50f07b2d5420",
+    "manifests": [
+      {
+        "name": "@fixture/aliased",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/clean",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/clientonly",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": "web",
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/declaredbutok",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/fallback",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/fatalmethod",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/guarded",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/hangcycle",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/methodexists",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/missingservice",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/noisy",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/pending",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/silent",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/spread",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/unresolved",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      }
+    ],
+    "services": [
+      "deepseekAccount",
+      "definitelyNotAHostService",
+      "jobs",
+      "llm",
+      "locale",
+      "logger",
+      "noSuchServiceAnywhere",
+      "sessions",
+      "settings",
+      "slots",
+      "tools",
+      "totallyUnknownThing",
+      "workspaces"
+    ],
+    "fallbackPackages": [
+      "@fixture/fallback"
+    ],
+    "providedServices": [],
+    "siteTotal": 23,
+    "buckets": {
+      "@fixture/aliased": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/clean": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/clientonly": {
+        "host-entry": 1,
+        "client-entry": 1,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/declaredbutok": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/fallback": {
+        "host-entry": 0,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 1
+      },
+      "@fixture/fatalmethod": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/guarded": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/hangcycle": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/methodexists": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/missingservice": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/noisy": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/pending": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/silent": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/spread": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/unresolved": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      }
+    },
+    "plugins": {
+      "@fixture/aliased": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "deepseekAccount",
+          "jobs"
+        ],
+        "declaredServices": [
+          "deepseekAccount",
+          "jobs"
+        ],
+        "calls": {
+          "deepseekAccount": [
+            "getBalance"
+          ],
+          "jobs": [
+            "list"
+          ]
+        },
+        "via": {
+          "alias": 2
+        },
+        "siteCounts": {
+          "deepseekAccount": 1,
+          "jobs": 1
+        },
+        "localBindings": [
+          "account->deepseekAccount/ctx-get-soft",
+          "jobsList->jobs/alias",
+          "narrow->jobs/ctx-get",
+          "store->deepseekAccount/alias"
+        ],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/clean": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "logger",
+          "tools"
+        ],
+        "declaredServices": [
+          "logger",
+          "tools"
+        ],
+        "calls": {
+          "logger": [
+            "info"
+          ],
+          "tools": [
+            "register"
+          ]
+        },
+        "via": {
+          "ctx-member": 2
+        },
+        "siteCounts": {
+          "logger": 1,
+          "tools": 1
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/clientonly": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [
+            "lib/client.js"
+          ],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "locale",
+          "slots"
+        ],
+        "declaredServices": [
+          "locale",
+          "slots"
+        ],
+        "calls": {
+          "locale": [
+            "bind"
+          ],
+          "slots": [
+            "inject",
+            "register"
+          ]
+        },
+        "via": {
+          "ctx-member": 3
+        },
+        "siteCounts": {
+          "locale": 1,
+          "slots": 2
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx",
+          "lib/client.js:ctx"
+        ]
+      },
+      "@fixture/declaredbutok": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "settings"
+        ],
+        "declaredServices": [
+          "settings"
+        ],
+        "calls": {
+          "settings": [
+            "installSection"
+          ]
+        },
+        "via": {
+          "ctx-member": 1
+        },
+        "siteCounts": {
+          "settings": 1
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/fallback": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": [
+            "index.js"
+          ]
+        },
+        "fallback": true,
+        "services": [
+          "tools"
+        ],
+        "declaredServices": [
+          "tools"
+        ],
+        "calls": {
+          "tools": [
+            "register"
+          ]
+        },
+        "via": {
+          "ctx-member": 1
+        },
+        "siteCounts": {
+          "tools": 1
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/fatalmethod": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "settings"
+        ],
+        "declaredServices": [
+          "settings"
+        ],
+        "calls": {
+          "settings": [
+            "installSection",
+            "register"
+          ]
+        },
+        "via": {
+          "ctx-member": 2
+        },
+        "siteCounts": {
+          "settings": 2
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/guarded": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "llm"
+        ],
+        "declaredServices": [
+          "llm"
+        ],
+        "calls": {
+          "llm": [
+            "listProviders",
+            "resolveModelInfo"
+          ]
+        },
+        "via": {
+          "ctx-member": 2
+        },
+        "siteCounts": {
+          "llm": 2
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [
+          "llm.listProviders"
+        ],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/hangcycle": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "tools"
+        ],
+        "declaredServices": [
+          "tools"
+        ],
+        "calls": {
+          "tools": [
+            "register"
+          ]
+        },
+        "via": {
+          "ctx-member": 1
+        },
+        "siteCounts": {
+          "tools": 1
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/methodexists": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "settings"
+        ],
+        "declaredServices": [
+          "settings"
+        ],
+        "calls": {
+          "settings": [
+            "describe",
+            "get",
+            "register",
+            "update"
+          ]
+        },
+        "via": {
+          "ctx-member": 4
+        },
+        "siteCounts": {
+          "settings": 4
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/missingservice": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "definitelyNotAHostService"
+        ],
+        "declaredServices": [
+          "definitelyNotAHostService"
+        ],
+        "calls": {
+          "definitelyNotAHostService": [
+            "doThing"
+          ]
+        },
+        "via": {
+          "ctx-member": 1
+        },
+        "siteCounts": {
+          "definitelyNotAHostService": 1
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/noisy": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "slots"
+        ],
+        "declaredServices": [
+          "slots"
+        ],
+        "calls": {
+          "slots": [
+            "inject",
+            "register"
+          ]
+        },
+        "via": {
+          "ctx-member": 2
+        },
+        "siteCounts": {
+          "slots": 2
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [
+          "index.js:slots"
+        ],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/pending": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "noSuchServiceAnywhere",
+          "tools"
+        ],
+        "declaredServices": [
+          "noSuchServiceAnywhere",
+          "tools"
+        ],
+        "calls": {},
+        "via": {},
+        "siteCounts": {},
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/silent": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "settings",
+          "tools"
+        ],
+        "declaredServices": [
+          "settings",
+          "tools"
+        ],
+        "calls": {
+          "settings": [
+            "register"
+          ],
+          "tools": [
+            "get"
+          ]
+        },
+        "via": {
+          "ctx-member": 2
+        },
+        "siteCounts": {
+          "settings": 1,
+          "tools": 1
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/spread": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "sessions",
+          "tools",
+          "workspaces"
+        ],
+        "declaredServices": [
+          "sessions",
+          "tools",
+          "workspaces"
+        ],
+        "calls": {},
+        "via": {},
+        "siteCounts": {},
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx,other"
+        ]
+      },
+      "@fixture/unresolved": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "totallyUnknownThing"
+        ],
+        "declaredServices": [
+          "totallyUnknownThing"
+        ],
+        "calls": {},
+        "via": {},
+        "siteCounts": {},
+        "localBindings": [
+          "mystery->totallyUnknownThing/ctx-get"
+        ],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      }
+    }
+  },
+  "verdict": {
+    "hash": "20df633134a8539bfffc9d869937db68bc38c55a7049504fdf168d27f0929869",
+    "summary": {
+      "ok": 10,
+      "partial": 3,
+      "broken": 2,
+      "unknown": 0
+    },
+    "plugins": {
+      "@fixture/aliased": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/clean": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/clientonly": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [
+          "locale",
+          "slots"
+        ],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/declaredbutok": {
+        "verdict": "partial",
+        "findings": [
+          {
+            "category": "host-method-missing",
+            "certainty": "certain",
+            "severity": "feature-dead",
+            "api": "settings.installSection",
+            "location": "index.js:4",
+            "impact": "走旧版 settings.installSection 通道注册的设置项不会出现（该通道在 0.2.0-rc.2 已被移除，插件需改用 Config 投影）"
+          },
+          {
+            "category": "declaration-mismatch",
+            "certainty": "certain",
+            "severity": "feature-dead",
+            "api": null,
+            "location": null,
+            "impact": "声明自己与 DSH 0.2.0-rc.2 兼容，但实测有 1 处失效"
+          }
+        ],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/fallback": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/fatalmethod": {
+        "verdict": "partial",
+        "findings": [
+          {
+            "category": "host-method-missing",
+            "certainty": "certain",
+            "severity": "feature-dead",
+            "api": "settings.installSection",
+            "location": "index.js:5",
+            "impact": "走旧版 settings.installSection 通道注册的设置项不会出现（该通道在 0.2.0-rc.2 已被移除，插件需改用 Config 投影）"
+          }
+        ],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/guarded": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [
+          "llm.listProviders"
+        ],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/hangcycle": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/methodexists": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/missingservice": {
+        "verdict": "broken",
+        "findings": [
+          {
+            "category": "host-service-missing",
+            "certainty": "certain",
+            "severity": "fatal",
+            "api": "definitelyNotAHostService",
+            "location": null,
+            "impact": "插件条目会停在 pending（等待该服务），等同于没起来"
+          }
+        ],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/noisy": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [
+          "slots"
+        ],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/pending": {
+        "verdict": "broken",
+        "findings": [
+          {
+            "category": "host-service-missing",
+            "certainty": "certain",
+            "severity": "fatal",
+            "api": "noSuchServiceAnywhere",
+            "location": null,
+            "impact": "插件条目会停在 pending（等待该服务），等同于没起来"
+          }
+        ],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/silent": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/spread": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [
+          "workspaces"
+        ],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/unresolved": {
+        "verdict": "partial",
+        "findings": [
+          {
+            "category": "unprovided-dependency",
+            "certainty": "certain",
+            "severity": "degraded",
+            "api": "totallyUnknownThing",
+            "location": null,
+            "impact": "依赖的服务由其它插件提供，当前 profile 里没有提供方 —— 相关功能降级或不可用"
+          }
+        ],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      }
+    }
+  }
+}

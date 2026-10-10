@@ -1,0 +1,228 @@
+{
+  "_note": "人写的判据。这是唯一允许断言**具体结论**的地方 —— 因为它写的是产品承诺，不是实现细节。快照（__snapshots__/）跟着代码走，本文件跟着承诺走；两者混在一起，就再没有东西能阻挡『改坏了 → 重建快照 → 全绿』这条路径。改这里必须说得出理由。",
+  "_schema": {
+    "verdict": "ok | partial | broken —— 必须精确相等",
+    "mustReport[]": "{ category, api, location?, certainty?, severity? } —— api 是 `svc.method` 或 `svc`。缺一项就失败",
+    "mustNotReport[]": "`category/svc.method` 或 `svc.method` —— 报了就失败。这一项比 mustReport 更重要：假阳性是本工具唯一卖点的反面",
+    "mustBeClientSide[]": "必须被判成客户端服务（宿主探针看不到，命令行也测不到）",
+    "targets": "本判据适用的快照目标（micro / parityfix）。必须显式写，不靠「找不到就跳过」——靠跳过会让拼错的包名静默变成一条不生效的判据。"
+  },
+  "plugins": {
+    "@fixture/clean": {
+      "verdict": "ok",
+      "mustNotReport": [
+        "logger.info",
+        "tools.register"
+      ],
+      "_why": "最普通的插件：只用运行时面里确实存在的方法。一条都不该报。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/methodexists": {
+      "verdict": "ok",
+      "mustNotReport": [
+        "settings.register",
+        "settings.describe",
+        "settings.get",
+        "settings.update"
+      ],
+      "_why": "四个方法都在 fixture 的运行时面里。这条防的是「把存在的方法报成缺失」——那是最常见的假阳性形态。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/fatalmethod": {
+      "verdict": "partial",
+      "mustReport": [
+        {
+          "category": "host-method-missing",
+          "api": "settings.installSection",
+          "location": "index.js:5",
+          "certainty": "certain",
+          "severity": "feature-dead"
+        }
+      ],
+      "mustNotReport": [
+        "settings.register"
+      ],
+      "_why": "同一个服务里，register 在、installSection 不在。必须**只**报后者，且位置精确到行 —— 位置是本工具的核心产物之一。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/missingservice": {
+      "verdict": "broken",
+      "mustReport": [
+        {
+          "category": "host-service-missing",
+          "api": "definitelyNotAHostService",
+          "certainty": "certain",
+          "severity": "fatal"
+        }
+      ],
+      "_why": "硬依赖（inject 里声明）的服务在运行时面里完全没有 → 条目会停在 pending，等同于没起来。这是「不兼容」这个词唯一配得上的情形。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/declaredbutok": {
+      "verdict": "partial",
+      "mustReport": [
+        {
+          "category": "host-method-missing",
+          "api": "settings.installSection",
+          "certainty": "certain"
+        },
+        {
+          "category": "declaration-mismatch",
+          "api": null,
+          "certainty": "certain"
+        }
+      ],
+      "_why": "包声明自己与 DSH 0.2.0-rc.2 兼容，实测却有一处失效。**这是本工具相对既有方案唯一不可替代的结论**：既有方案都只读声明，而声明可能是错的。这条判据没了，产品的存在理由也就没了。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/guarded": {
+      "verdict": "ok",
+      "mustNotReport": [
+        "llm.listProviders"
+      ],
+      "_why": "插件写的是 `typeof ctx.llm?.listProviders === 'function' ? ... : []` —— 它明知这个方法可能不在并自己兜了底。报出来是假阳性：用户并没失去任何东西。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/unresolved": {
+      "verdict": "partial",
+      "mustReport": [
+        {
+          "category": "unprovided-dependency",
+          "api": "totallyUnknownThing",
+          "severity": "degraded"
+        }
+      ],
+      "_why": "用 ctx.get 软取了一个谁都没有的服务。软取意味着作者知道它可能不在，所以是**降级**而不是致命 —— 档位错了，用户就会去做不必要的处置。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/clientonly": {
+      "verdict": "ok",
+      "mustBeClientSide": [
+        "slots",
+        "locale"
+      ],
+      "_why": "slots / locale 活在浏览器里。宿主探针必然看不到它们，命令行形态也测不到 —— 拿「宿主没有」去判会得出「不兼容」，把好插件报死。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/spread": {
+      "verdict": "ok",
+      "mustNotReport": [
+        "sessions.search",
+        "workspaces.list",
+        "tools.register"
+      ],
+      "_why": "作用域注入的子上下文（`ctx.inject([...], (tools, sub) => sub.sessions.search())`）。这条通路曾整片丢失，而它是这个生态最常见的写法之一。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/aliased": {
+      "verdict": "ok",
+      "mustNotReport": [
+        "deepseekAccount.getBalance",
+        "jobs.list"
+      ],
+      "_why": "`ctx.get('x', false)` 的显式软取 + 转手绑定（`const store = account`）。修好之前这两条真实依赖整片丢失。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/noisy": {
+      "verdict": "ok",
+      "mustNotReport": [
+        "slots.push",
+        "slots.add"
+      ],
+      "_why": "压缩产物形态的局部变量遮蔽：文件里有个 `const slots = [1,2,3]`，于是 `slots.push(4)` 是**数组**的方法。归到 slots 服务头上就是假阳性。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/pending": {
+      "verdict": "broken",
+      "mustReport": [
+        {
+          "category": "host-service-missing",
+          "api": "noSuchServiceAnywhere",
+          "certainty": "certain",
+          "severity": "fatal"
+        }
+      ],
+      "_why": "inject 里声明了一个当前 profile 里无人提供、且运行时面里也没有的服务 → 条目会停在 pending，等同于没起来。这一条判据曾经是**错的**：我先写成「ok，因为代码没调用它」。代码没调用它不是理由 —— 声明本身就是依赖。写成 ok 的那版如果通过，这个工具就会对真实缺口保持沉默。"
+    },
+    "@fixture/fallback": {
+      "verdict": "ok",
+      "_why": "声明的入口解析不出来 → 退回整包扫描。这条路径必须能出结论（而不是空结果），因为「解析不出入口」本身就是一种上游插件问题。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/hangcycle": {
+      "verdict": "ok",
+      "_why": "入口图里成环 + 无扩展名导入。这条曾在真实插件上让工具 98% CPU 空转不停。它必须秒级出结果。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "dsh-keep-awake": {
+      "verdict": "partial",
+      "mustReport": [
+        {
+          "category": "host-method-missing",
+          "api": "settings.register",
+          "location": "lib/index.js:466",
+          "certainty": "certain",
+          "severity": "feature-dead"
+        },
+        {
+          "category": "host-method-missing",
+          "api": "jobs.onJobsChanged",
+          "location": "lib/index.js:591",
+          "certainty": "certain",
+          "severity": "degraded"
+        }
+      ],
+      "_why": "**三个回归基准之一**（Plan.md §5 G1）。它是「激活成功但功能是死的」这一整类问题的标本：插件起来没报错，而设置页消失、任务变化通知退化成轮询。位置精确到行 —— 这两个行号从第一天起就没变过，变了就说明提取或规则表动了。",
+      "targets": [
+        "parityfix"
+      ]
+    },
+    "@omdsh-dev/dsh-plugin-check": {
+      "verdict": "ok",
+      "mustNotReport": [
+        "tools.register"
+      ],
+      "_why": "**三个回归基准之一**。只用了确实存在的方法。它必须永远是 ok —— 如果它开始报问题，第一个该怀疑的是我们自己的工具。",
+      "targets": [
+        "parityfix"
+      ]
+    },
+    "dsh-pet": {
+      "verdict": "ok",
+      "mustNotReport": [
+        "llm.listProviders",
+        "llm.listConfigurableProviders"
+      ],
+      "_why": "**三个回归基准之一**。它曾因为没识别「作者自己做了能力检测」而被误判成「部分可用」—— 那是假阳性，会让用户去做不必要的处置。修好后回到可用。",
+      "targets": [
+        "parityfix"
+      ]
+    }
+  }
+}

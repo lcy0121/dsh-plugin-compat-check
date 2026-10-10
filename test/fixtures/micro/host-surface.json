@@ -1,0 +1,11 @@
+{
+  "_note": "人工构造的运行时宿主 API 面，只为把判定引擎的行为钉死在 fixture 上。真实形态由插件宿主半边从 ctx.loader 读出（见 plugin/index.js）。刻意造出三种情形：某个服务在、某个服务不在、某个服务在但少一个方法。",
+  "root": {
+    "tools": { "present": true, "methods": { "register": {}, "get": {} } },
+    "logger": { "present": true, "methods": { "info": {}, "warn": {}, "error": {} } },
+    "settings": { "present": true, "methods": { "register": {}, "describe": {}, "get": {}, "update": {} } },
+    "llm": { "present": true, "methods": { "listModels": {}, "resolveModelInfo": {}, "stream": {} } },
+    "jobs": { "present": true, "methods": { "list": {} } },
+    "deepseekAccount": { "present": true, "methods": { "getBalance": {} } }
+  }
+}

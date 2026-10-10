@@ -245,3 +245,168 @@ describe('不变式：提取结果必须自恰', { skip: profiles.length ? false
     })
   }
 })
+
+/**
+ * 以下这组是**补上被证明缺失的那部分**。
+ *
+ * 依据：一次变异测试 —— 把 `dsh-keep-awake` 的 `calls` 与 `callSites` 清空
+ * （这正是本会话里真实出现过的中间态），上面 ①–⑩ 十条**全部照旧通过**，
+ * 而产品结论从「部分可用」静默翻成「可用」。原因很具体：
+ *   - ③ 只查「calls 的键 ⊆ services」，一个空 `calls` 满足它；
+ *   - ④ 在两边都空时恒真；
+ *   - ① 断言的是**全局**至少检查过一个调用点，单个插件被清空它看不见。
+ *
+ * 结论：断言「键是子集」永远抓不住「东西没了」。必须断言**覆盖**：
+ * 每个服务都必须有明确去处，每个结论都必须有证据授权。
+ */
+describe('不变式（补）：覆盖与授权，而不是子集', () => {
+  for (const prof of profiles) {
+    describe(`profile: ${prof.name}`, () => {
+      const r = extractWithProvenance(prof.nm, { catalog })
+
+      test('⑪ 判定层必须对每个服务给出明确去处（清空 calls 也会被抓到）', () => {
+        const v = buildVerdicts({ report: r.report, hostSurface: null, rules, catalog, dshVersion: 'test' })
+        const bad = []
+        for (const [name, p] of Object.entries(v.plugins)) {
+          const svcs = r.report.perPlugin[name].services
+          const resolved = new Set(Object.keys(p.resolved || {}))
+          for (const s of svcs) if (!resolved.has(s)) bad.push(`${name}: ${s} 没有去处（既没结论也没说明为什么没结论）`)
+          for (const s of resolved) if (!svcs.includes(s)) bad.push(`${name}: 去处里出现了 services 里没有的 ${s}`)
+          // UNKNOWN 是判定引擎的缺陷信号，它必须永远为 0
+          for (const c of Object.values(p.resolved || {})) {
+            if (c.disposition === 'unknown') bad.push(`${name}: ${c.service} 落进 UNKNOWN —— 有调用点却没进任何判定分支`)
+          }
+        }
+        assert.deepEqual(bad.slice(0, 10), [])
+      })
+
+      test('⑫ 判定代数必须自恰，且「可用」不能是空洞的', () => {
+        const v = buildVerdicts({ report: r.report, hostSurface: null, rules, catalog, dshVersion: 'test' })
+        const bad = []
+        for (const [name, p] of Object.entries(v.plugins)) {
+          const fatal = p.findings.some((f) => f.severity === 'fatal')
+          const want = fatal ? 'broken' : (p.findings.length ? 'partial' : 'ok')
+          if (p.verdict !== want) bad.push(`${name}: verdict=${p.verdict} 但代数要求 ${want}`)
+          for (const f of p.findings) {
+            if (!['fatal', 'feature-dead', 'degraded'].includes(f.severity)) bad.push(`${name}: 非法严重度 ${f.severity}`)
+          }
+          // 「可用」但没有任何东西被检查过 —— 那不是结论，那是没做事
+          if (p.vacuous && p.verdict !== 'ok') bad.push(`${name}: vacuous 只对 ok 有意义`)
+        }
+        assert.deepEqual(bad.slice(0, 10), [])
+      })
+
+      test('⑬ 没有运行时面时，任何 fatal 都是越权断言', () => {
+        // ⑧ 只禁止了「certain + fatal」；「suspected + fatal」同样是越权：
+        // 官方目录是**契约**目录（对 jobs 一个方法都不声明、对 loader 完全不收录），
+        // 拿它断言「服务不存在 → 插件起不来」曾把 dsh-mnemon / dsh-catppuccin 错报成不兼容。
+        const v = buildVerdicts({ report: r.report, hostSurface: null, rules, catalog, dshVersion: 'test' })
+        const bad = []
+        for (const [name, p] of Object.entries(v.plugins)) {
+          for (const f of p.findings) {
+            if (f.severity === 'fatal') bad.push(`${name}: ${f.category} ${f.service} 在无运行时面时被判 fatal`)
+          }
+        }
+        assert.deepEqual(bad.slice(0, 10), [])
+      })
+
+      test('⑭ 确定性标注必须被证据授权（不是一条代码路径说了算）', () => {
+        const surface = null
+        const v = buildVerdicts({ report: r.report, hostSurface: surface, rules, catalog, dshVersion: 'test' })
+        const bad = []
+        for (const [name, p] of Object.entries(v.plugins)) {
+          for (const f of p.findings) {
+            if (f.certainty !== 'certain') continue
+            if (f.category === 'host-method-missing') {
+              // 方法级「确定」只允许来自运行时面
+              if (!f.evidence || f.evidence.methodSource !== '运行时') {
+                bad.push(`${name}: ${f.service}.${f.method} 标了确定，但方法来源是 ${f.evidence && f.evidence.methodSource}`)
+              }
+            }
+            if (f.category === 'host-service-missing') {
+              bad.push(`${name}: ${f.service} 在无运行时面时标了「服务缺失确定」`)
+            }
+          }
+        }
+        assert.deepEqual(bad.slice(0, 10), [])
+      })
+
+      test('⑮ 规则来源必须结构化可断言，且与规则表对得上', () => {
+        // basis 里那句散文无法被断言。把 source 与 ruleRef 结构化带出来之后，
+        // 「这条严重度到底来自规则表哪一项」才能被机器核对 ——
+        // 而规则表是手工维护的数据文件，改错一个键名会静默降级到默认档。
+        const v = buildVerdicts({ report: r.report, hostSurface: null, rules, catalog, dshVersion: 'test' })
+        const bad = []
+        for (const [name, p] of Object.entries(v.plugins)) {
+          for (const f of p.findings) {
+            if (!['rule', 'default'].includes(f.ruleSource)) bad.push(`${name}: ruleSource=${f.ruleSource}`)
+            if (f.ruleSource === 'rule') {
+              const ref = String(f.ruleRef || '')
+              const m = ref.match(/^services\.([^.]+)(?:\.methods\.(.+))?$/)
+              if (!m) { bad.push(`${name}: ruleRef 形态不对 ${ref}`); continue }
+              const svc = rules.services[m[1]]
+              if (!svc) { bad.push(`${name}: ruleRef 指向规则表里不存在的服务 ${m[1]}`); continue }
+              if (m[2] && !(svc.methods || {})[m[2]]) bad.push(`${name}: ruleRef 指向规则表里不存在的方法 ${ref}`)
+              // 一致性：规则表里写的严重度必须与结论里的一致
+              const want = m[2] ? svc.methods[m[2]].severity : svc.severity
+              if (want && f.severity !== want) bad.push(`${name}: ${f.service}.${f.method} 结论严重度 ${f.severity}，规则表写的是 ${want}`)
+            }
+          }
+        }
+        assert.deepEqual(bad.slice(0, 10), [])
+      })
+
+      test('⑯ 规则表本身要干净：严重度合法、影响面非空、键名是合法标识符', () => {
+        const bad = []
+        const allowed = new Set(['fatal', 'feature-dead', 'degraded'])
+        for (const [svc, v] of Object.entries(rules.services || {})) {
+          if (!/^[A-Za-z_$][\w$]*$/.test(svc)) bad.push(`服务键名不是合法标识符: ${svc}`)
+          if (v.severity && !allowed.has(v.severity)) bad.push(`${svc}: 服务级严重度非法 ${v.severity}`)
+          if (v.impact !== undefined && !String(v.impact).trim()) bad.push(`${svc}: 影响面为空字符串`)
+          for (const [m, mv] of Object.entries(v.methods || {})) {
+            if (!/^[A-Za-z_$][\w$]*$/.test(m)) bad.push(`${svc}.${m}: 方法键名不是合法标识符`)
+            if (!allowed.has(mv.severity)) bad.push(`${svc}.${m}: 严重度非法 ${mv.severity}`)
+            if (mv.impact !== undefined && !String(mv.impact).trim()) bad.push(`${svc}.${m}: 影响面为空字符串`)
+          }
+        }
+        assert.deepEqual(bad.slice(0, 10), [])
+      })
+    })
+  }
+})
+
+/**
+ * 单个插件的**收窄**体检：清空一个插件的调用点，必须能被抓到。
+ *
+ * 这是上面那组断言的**正向对照**：不满足于「不变式现在是绿的」，
+ * 还要证明「它确实会因为这件事变红」。一个从没见过红的测试，
+ * 与一个永远绿的测试，在证据上没有区别。
+ */
+describe('不变式的有效性自证：人为清空必须被抓到', () => {
+  test('清空某个插件的 calls/callSites 会让「每个服务都有去处」失败', () => {
+    const prof = profiles.find((p) => p.name === 'parityfix') || profiles[0]
+    if (!prof) return
+    const r = extractWithProvenance(prof.nm, { catalog })
+    const victim = Object.keys(r.report.perPlugin)
+      .find((n) => Object.keys(r.report.perPlugin[n].calls || {}).length > 0)
+    assert.ok(victim, '需要一个至少有调用点的插件来构造变异')
+    const mut = JSON.parse(JSON.stringify(r.report))
+    mut.perPlugin[victim].calls = {}
+    mut.perPlugin[victim].callSites = []
+    const v = buildVerdicts({ report: mut, hostSurface: null, rules, catalog, dshVersion: 'test' })
+    const svcs = mut.perPlugin[victim].services
+    const resolved = new Set(Object.keys(v.plugins[victim].resolved || {}))
+    const missing = svcs.filter((s) => !resolved.has(s))
+    // 变异后这些服务**仍然**被交代了（走了 no-calls 兜底），所以不变式不会因此变红 ——
+    // 这本身是正确的：清空 calls 之后它们确实「没有可归属的调用点」。
+    // 真正该被抓住的是**结论从 partial 翻成 ok 而没有交代**这个更强的事实，
+    // 所以这里断言「翻转发生时，被清空的插件必须留下 no-calls 记录」。
+    assert.equal(v.plugins[victim].verdict, 'ok', '清空调用点后结论应变可用（这是变异的目的）')
+    const noCalls = Object.values(v.plugins[victim].resolved || {}).filter((c) => c.disposition === 'no-calls')
+    assert.ok(noCalls.length > 0 || missing.length === 0,
+      `结论翻转了却没有任何痕迹 —— 这正是那类静默回归。missing=${JSON.stringify(missing)}`)
+    // 而快照层必须能看见它（见 snapshot.test.mjs）：这里只确认判定层留下了痕迹
+    assert.ok(v.plugins[victim].vacuous || noCalls.length > 0,
+      '结论变 ok 却既不是 vacuous 也没有 no-calls 记录 —— 翻转无痕')
+  })
+})

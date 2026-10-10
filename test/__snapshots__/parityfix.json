@@ -1,0 +1,466 @@
+{
+  "schemaVersion": 1,
+  "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
+  "extract": {
+    "hash": "ad374d4e64a4962d3c3f35e37053a7547c9e0679cccd7038f89929a99c2cb21d",
+    "manifests": [
+      {
+        "name": "@omdsh-dev/dsh-plugin-check",
+        "version": "0.1.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": {
+          "@deepseek-ai/cordis": "^4.0.1",
+          "@deepseek-ai/dsh-invariants": ">=0.0.1-rc.1 <0.2.0",
+          "@deepseek-ai/dsh-tools": ">=0.0.1-rc.1 <0.2.0"
+        }
+      },
+      {
+        "name": "dsh-keep-awake",
+        "version": "0.2.0",
+        "dshBundle": true,
+        "clientPlatform": "web",
+        "clientInject": null,
+        "peerDependencies": {
+          "@deepseek-ai/schemastery": "^3.18.1"
+        }
+      },
+      {
+        "name": "dsh-pet",
+        "version": "0.3.6",
+        "dshBundle": true,
+        "clientPlatform": "web",
+        "clientInject": [
+          "@deepseek-ai/dsh-client-connection"
+        ],
+        "peerDependencies": {
+          "@deepseek-ai/cordis": "^4.0.4",
+          "@deepseek-ai/dsh-agent-default-model": "^0.2.0-rc.1",
+          "@deepseek-ai/dsh-client-connection": "^0.2.0-rc.1",
+          "@deepseek-ai/dsh-client-ui-primitives": "^0.2.0-rc.1",
+          "@deepseek-ai/dsh-client-ui-slots": "^0.2.0-rc.1",
+          "@deepseek-ai/dsh-commands": "^0.2.0-rc.1",
+          "@deepseek-ai/dsh-credentials": "^0.2.0-rc.1",
+          "@deepseek-ai/dsh-home-paths": "^0.2.0-rc.1",
+          "@deepseek-ai/dsh-host-webserver": "^0.2.0-rc.1",
+          "@deepseek-ai/dsh-llm": "^0.2.0-rc.1",
+          "react": "^18.2.0",
+          "react-dom": "^18.2.0"
+        }
+      },
+      {
+        "name": "dsh-plugin-compat-check-probe",
+        "version": "0.0.1",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      }
+    ],
+    "services": [
+      "agentDefaultModel",
+      "agents",
+      "commandUi",
+      "commands",
+      "connection",
+      "credentials",
+      "deepseekAccount",
+      "get",
+      "jobs",
+      "llm",
+      "locale",
+      "remote",
+      "remote.commands",
+      "settings",
+      "slots",
+      "timer",
+      "tools",
+      "webServer"
+    ],
+    "fallbackPackages": [],
+    "providedServices": [],
+    "siteTotal": 35,
+    "buckets": {
+      "@omdsh-dev/dsh-plugin-check": {
+        "host-entry": 10,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "dsh-keep-awake": {
+        "host-entry": 1,
+        "client-entry": 1,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "dsh-pet": {
+        "host-entry": 1,
+        "client-entry": 1,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "dsh-plugin-compat-check-probe": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      }
+    },
+    "plugins": {
+      "@omdsh-dev/dsh-plugin-check": {
+        "version": "0.1.0",
+        "files": {
+          "host-entry": [
+            "lib/build-check.js",
+            "lib/ecosystem.js",
+            "lib/form.js",
+            "lib/hub.js",
+            "lib/index.js",
+            "lib/manifest.js",
+            "lib/patch.js",
+            "lib/paths.js",
+            "lib/registry.js",
+            "lib/report.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "tools"
+        ],
+        "declaredServices": [
+          "tools"
+        ],
+        "calls": {
+          "tools": [
+            "register"
+          ]
+        },
+        "via": {
+          "ctx-member": 1
+        },
+        "siteCounts": {
+          "tools": 1
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "lib/build-check.js:ctx",
+          "lib/ecosystem.js:ctx",
+          "lib/form.js:ctx",
+          "lib/hub.js:ctx",
+          "lib/index.js:ctx",
+          "lib/manifest.js:ctx",
+          "lib/patch.js:ctx",
+          "lib/paths.js:ctx",
+          "lib/registry.js:ctx",
+          "lib/report.js:ctx"
+        ]
+      },
+      "dsh-keep-awake": {
+        "version": "0.2.0",
+        "files": {
+          "host-entry": [
+            "lib/index.js"
+          ],
+          "client-entry": [
+            "lib/client.js"
+          ],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "agents",
+          "jobs",
+          "locale",
+          "settings",
+          "slots",
+          "timer",
+          "webServer"
+        ],
+        "declaredServices": [
+          "agents",
+          "jobs",
+          "locale",
+          "settings",
+          "slots",
+          "timer",
+          "webServer"
+        ],
+        "calls": {
+          "agents": [
+            "list"
+          ],
+          "jobs": [
+            "list",
+            "onJobsChanged"
+          ],
+          "locale": [
+            "bind",
+            "register",
+            "subscribe"
+          ],
+          "settings": [
+            "register"
+          ],
+          "slots": [
+            "inject",
+            "register"
+          ],
+          "webServer": [
+            "register"
+          ]
+        },
+        "via": {
+          "alias": 15
+        },
+        "siteCounts": {
+          "agents": 2,
+          "jobs": 4,
+          "locale": 4,
+          "settings": 1,
+          "slots": 2,
+          "webServer": 2
+        },
+        "localBindings": [
+          "agents->agents/ctx-get",
+          "jobs->jobs/ctx-get",
+          "locale->locale/ctx-get",
+          "settings->settings/ctx-get",
+          "slots->slots/ctx-get",
+          "webServer->webServer/ctx-get"
+        ],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "lib/index.js:ctx",
+          "lib/client.js:ctx"
+        ]
+      },
+      "dsh-pet": {
+        "version": "0.3.6",
+        "files": {
+          "host-entry": [
+            "lib/index.js"
+          ],
+          "client-entry": [
+            "lib/client.js"
+          ],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "agentDefaultModel",
+          "commandUi",
+          "commands",
+          "connection",
+          "credentials",
+          "deepseekAccount",
+          "get",
+          "llm",
+          "locale",
+          "remote",
+          "remote.commands",
+          "slots",
+          "webServer"
+        ],
+        "declaredServices": [
+          "agentDefaultModel",
+          "commandUi",
+          "commands",
+          "connection",
+          "credentials",
+          "deepseekAccount",
+          "llm",
+          "locale",
+          "remote",
+          "remote.commands",
+          "slots",
+          "webServer"
+        ],
+        "calls": {
+          "agentDefaultModel": [
+            "currentSelection"
+          ],
+          "commands": [
+            "register"
+          ],
+          "credentials": [
+            "resolve"
+          ],
+          "deepseekAccount": [
+            "getBalance"
+          ],
+          "llm": [
+            "listConfigurableProviders",
+            "listProviders",
+            "resolveModelInfo",
+            "stream"
+          ],
+          "locale": [
+            "bind",
+            "register"
+          ],
+          "slots": [
+            "entries",
+            "inject",
+            "register"
+          ],
+          "webServer": [
+            "register"
+          ]
+        },
+        "via": {
+          "alias": 6,
+          "ctx-member": 13
+        },
+        "siteCounts": {
+          "agentDefaultModel": 1,
+          "commands": 3,
+          "credentials": 1,
+          "deepseekAccount": 1,
+          "llm": 5,
+          "locale": 2,
+          "slots": 5,
+          "webServer": 1
+        },
+        "localBindings": [
+          "account->deepseekAccount/ctx-get-soft",
+          "commandUi->get/ctx-member",
+          "llm->llm/ctx-member",
+          "sel->agentDefaultModel/ctx-member",
+          "t->locale/ctx-member"
+        ],
+        "providedServices": [],
+        "guardedPairs": [
+          "llm.listConfigurableProviders",
+          "llm.listProviders"
+        ],
+        "shadowedBare": [],
+        "unresolvedBindings": [
+          "lib/client.js:commandUi->get"
+        ],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "lib/index.js:ctx",
+          "lib/client.js:ctx"
+        ]
+      },
+      "dsh-plugin-compat-check-probe": {
+        "version": "0.0.1",
+        "files": {
+          "host-entry": [
+            "index.mjs"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [],
+        "declaredServices": [],
+        "calls": {},
+        "via": {},
+        "siteCounts": {},
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.mjs:ctx"
+        ]
+      }
+    }
+  },
+  "verdict": {
+    "hash": "b9d3fc02a666f097f4a80806cc17e51bec233f8ae7f9b1f9d1ba9b9928339b30",
+    "summary": {
+      "ok": 3,
+      "partial": 1,
+      "broken": 0,
+      "unknown": 0,
+      "vacuousOk": 1
+    },
+    "plugins": {
+      "@omdsh-dev/dsh-plugin-check": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "dsh-keep-awake": {
+        "verdict": "partial",
+        "findings": [
+          {
+            "category": "host-method-missing",
+            "certainty": "certain",
+            "severity": "degraded",
+            "api": "jobs.onJobsChanged",
+            "location": "lib/index.js:591",
+            "impact": "任务状态不再实时推送，插件退化为轮询（约 5 秒延迟）"
+          },
+          {
+            "category": "host-method-missing",
+            "certainty": "certain",
+            "severity": "feature-dead",
+            "api": "settings.register",
+            "location": "lib/index.js:466",
+            "impact": "插件的设置页/设置项会消失"
+          }
+        ],
+        "clientSide": [
+          "locale",
+          "slots"
+        ],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "dsh-pet": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [
+          "commandUi",
+          "locale",
+          "remote",
+          "remote.commands",
+          "slots"
+        ],
+        "filtered": [
+          "llm.listConfigurableProviders",
+          "llm.listProviders"
+        ],
+        "abstained": [
+          "deepseekAccount"
+        ],
+        "runtimeFacilities": [
+          "get"
+        ]
+      },
+      "dsh-plugin-compat-check-probe": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      }
+    }
+  }
+}
