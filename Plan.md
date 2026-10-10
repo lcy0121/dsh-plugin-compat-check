@@ -304,7 +304,10 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
 | **JS 内置集合方法名会被当成 API 调用** | 插件里 `const sessions = new Map()` 之后的 `sessions.set/map/sort/values` 会被当成"调用了宿主不存在的方法"。**只靠名字黑名单不安全**（`sessions.get` 是真实宿主方法），必须配合"该方法不在宿主方法表里"一起判 |
 | **客户端服务不能用宿主面判** | `locale` / `slots` / `configForms` / `sidebarRight` / `settingsScope` 活在浏览器里，宿主探针必然 `present=false`。判据两条并用：①在官方客户端目录里 ②它出现的文件**全部**落在客户端桶里。只靠①不够（那份目录只有 8 个条目） |
 | **没有运行时面时不得断言"服务缺失"** | 仅凭目录缺失就判 `fatal` 会把 `dsh-mnemon` / `dsh-catppuccin` 错报成"不兼容"。没有运行时面时必须降级为"疑似 + 降级" |
-| **对拍的严格范围已收窄** | python 版在 `calls` 上有**跨插件污染**（51/280）、`clientHints` 上有**顺序相关**缺陷。所以对拍只严格比 `manifests` / `services` / `fallbackPackages`；`calls` 与 `clientHints` 只并排打印数量供人眼核对。**别把"对拍通过"误读成"输出一致"** |
+| **别名正则必须带 `\b`** | `const v = ctx.get("x")` 的别名规则构造「变量.方法(」时漏了词边界，于是 `subagents.listDescendants(` 会因子串 `agents.` 被别名 `agents` 命中（实测 better-sidebar 里 2 处）。**已修** |
+| **同文件别名撞名会凭空造方法** | better-sidebar 的 `client.js` 里 `service` 同时绑给 `jobs`(1 处) 与 `betterSidebar`(6 处)，原实现每次声明都扫全文件 → 文件里所有 `service.X()`（**含 JSDoc 注释里的**）被同时记到两个服务头上，造出 13 个假方法（`jobs.getTabs/closeTab/registerTab`）。修法：同名多绑定时**弃权并记录**到 `ambiguousAliases`，不猜 |
+| **`manifests` 是旧兼容视图，不要往里加字段** | 给 `manifests` 加 `engines`/`compatibility` 当场被对拍抓住（"只在 node 版出现"）。新数据放 `perPlugin` |
+| **对拍的严格范围已收窄两次** | **移植期已结束**：python 版在四处落后于 Node 版（`calls` 跨插件污染 51/280、`clientHints` 顺序相关、看不见 `ctx.inject([...])`、不排除 `src/`）。对拍现在**只剩 `manifests` / `fallbackPackages` 严格比对**，其余并排打印数量。**它不是质量保证，只是结构性体检；真正的验收标准是三个回归基准。别把"对拍通过"误读成"输出正确"** |
 | **体检插件自己的 `inject` 必须留空** | 写成 `["settings","loader"]` 会让体检插件自己的 fiber 因缺服务停在 PENDING —— 一个体检工具自己变成"未激活"就荒诞了。用到再加 |
 | **设置页有两个「插件」** | 侧边栏有 `aria-label="插件"` 的按钮，设置页里有文本为「内置插件」的导航项。选择器必须**精确全等**，松散的 `includes('插件')` 会点到错的那个 —— 我本人已经因此得出过一次**错误结论** |
 | **`--port 0` 启动的宿主不会自己退出** | 任务结束后仍能存活很久，必须显式 kill，且要顺手确认端口释放 |

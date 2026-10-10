@@ -1,6 +1,21 @@
 {
   "schemaVersion": 1,
   "description": "服务/方法 → 严重度 + 影响面。判定由这张表驱动，不由 LLM 决定；表未覆盖的 API 落到 defaults。",
+  "_coverageBasis": {
+    "usedServices": "rules/usage-inventory.json（快照）与 `node lib/extract.mjs ~/.dsh/profiles/desktop/node_modules <out>` 的真实输出（实测 58 个服务）",
+    "serviceSemantics": "DSH 桌面端 app.asar 内官方生成的 API 目录（宿主 dsh-tool-cordis/lib/types/api-catalog.js、客户端 dsh-cordis-client-runner/lib/client.js）。每条 summary 与每个方法含义都取自它，不自行发明。",
+    "coverageReport": "覆盖率的前后对比、\"有官方目录依据\"与\"从调用点推断\"的分列、以及**故意没填**的清单见 rules/README.md"
+  },
+  "_entryConventions": {
+    "layer": "host = Node 宿主侧（ctx 在宿主进程里）；client = 浏览器客户端侧；both = 同名服务两侧都有但**语义/签名不同**（sessions、timer），此时逐方法再标一次 layer",
+    "summary": "这个服务是干什么的（人话，来自官方目录的 summary/description）",
+    "severity": "只能是 fatal / feature-dead / degraded 三档之一，语义见 severityLevels",
+    "impact": "一句人话：什么东西坏了，或者怎么个降级法。禁止\"可能有问题\"这类空话",
+    "basis": "该条判定的证据等级：catalog = 官方 API 目录的 summary/description 直接支持；catalog-description = 目录没声明方法，但官方 description 里明确写了这个方法；callsite = 目录里没有，依据是真实插件在该调用点上的代码（会在 evidence 里给出文件:行）",
+    "evidence": "basis=callsite 时必须给出具体文件:行",
+    "knownGoneIn": "已知在某个 DSH 版本起不再提供（沿用既有条目的写法）",
+    "note": "补充说明；不影响判定"
+  },
   "severityLevels": {
     "fatal": "致命：插件条目没有激活（pending/failed），整个插件是死的",
     "feature-dead": "功能失效：某个特性确定不可用",
@@ -31,6 +46,7 @@
   ],
   "services": {
     "slots": {
+      "layer": "client",
       "summary": "客户端唯一往界面里加东西的通道",
       "methods": {
         "register": { "severity": "feature-dead", "impact": "插件在界面上的一切都会消失（按钮/标签页/面板）" },
@@ -41,16 +57,21 @@
       }
     },
     "locale": {
+      "layer": "client",
       "summary": "客户端文案字典",
       "methods": {
         "register": { "severity": "degraded", "impact": "插件的文案回退到 key 或英文，界面仍可用" },
         "bind": { "severity": "feature-dead", "impact": "取不到翻译函数，插件界面可能直接抛错" },
         "subscribe": { "severity": "degraded", "impact": "语言切换不再实时生效" },
-        "getSnapshot": { "severity": "degraded", "impact": "只影响插件自己的语言状态读取" }
+        "getSnapshot": { "severity": "degraded", "impact": "只影响插件自己的语言状态读取" },
+        "getLocale": { "severity": "degraded", "impact": "读不到当前语言快照，插件只能用自己写死的默认语言（界面仍可用，只是不跟随语言切换）", "basis": "catalog" },
+        "addLanguage": { "severity": "feature-dead", "impact": "语言包注册不进去：这门语言不会出现在语言切换列表里", "basis": "catalog" }
       }
     },
     "settings": {
+      "layer": "host",
       "summary": "设置文档的读写 seam",
+      "note": "同名不同义：客户端设置页走的是客户端 slots/configForms 那一套，与这里的宿主设置文档不是一回事",
       "methods": {
         "register": {
           "severity": "feature-dead",
@@ -60,11 +81,20 @@
         },
         "describe": { "severity": "feature-dead", "impact": "读不到设置项，插件的配置界面空白" },
         "update": { "severity": "feature-dead", "impact": "设置改不动" },
-        "get": { "severity": "feature-dead", "impact": "读不到设置值，插件按默认值运行" }
+        "get": { "severity": "feature-dead", "impact": "读不到设置值，插件按默认值运行" },
+        "installSection": {
+          "severity": "feature-dead",
+          "impact": "走旧版 settings.installSection 通道注册的设置项不会出现（该通道在 0.2.0-rc.2 已被移除，插件需改用 Config 投影）",
+          "knownGoneIn": ["0.2.0-rc.2"],
+          "basis": "callsite",
+          "evidence": "@nonamelego/dsh-catppuccin/lib/index.js:734（typeof 探测后再调用，且其注释写明该通道对应 DSH <= 0.1.6-alpha.2，0.1.7-alpha.1 起已移除）"
+        }
       }
     },
     "jobs": {
+      "layer": "host",
       "summary": "后台任务",
+      "note": "客户端另有一个**同名**的 jobs 服务（watchRows/observe/kill/state，由 dsh-better-sidebar 的客户端代码软取），与这里的宿主任务注册表不是一回事。本表这一条只描述宿主侧。",
       "methods": {
         "onJobsChanged": {
           "severity": "degraded",
@@ -75,13 +105,16 @@
       }
     },
     "tools": {
+      "layer": "host",
       "summary": "向 agent 注册工具",
+      "note": "usage-inventory 里的 tools.filter / tools.join / tools.push 是数组方法的误报，见 knownExtractionArtifacts",
       "methods": {
         "register": { "severity": "feature-dead", "impact": "agent 失去该工具，相关能力在对话里完全不可用" },
         "get": { "severity": "degraded", "impact": "只影响插件对工具清单的内省" }
       }
     },
     "webServer": {
+      "layer": "host",
       "summary": "宿主侧 HTTP 路由",
       "methods": {
         "register": { "severity": "feature-dead", "impact": "插件自己的 HTTP 接口（含其前端资源）全部 404" },
@@ -89,21 +122,59 @@
       }
     },
     "sessions": {
-      "summary": "会话导航与读取",
+      "layer": "both",
+      "summary": "会话仓库：宿主侧是内存 session store（ctx.sessions），客户端侧是会话引用/作用域的面（同名不同 API）",
+      "note": "**同名不同义**：宿主 sessions 有 create/enter/flush/fork/get/list/announce，客户端 sessions 有 binding/scope/search/retain/using。方法级条目已逐条标 layer，判定时必须按调用点所在的那一侧比目录，不能拿宿主方法集去比客户端调用（也不该反过来）。",
       "methods": {
-        "get": { "severity": "feature-dead", "impact": "定位不到会话，插件相关入口点不动" },
-        "list": { "severity": "feature-dead", "impact": "会话列表为空" },
-        "map": { "severity": "feature-dead", "impact": "同上" },
-        "open": { "severity": "feature-dead", "impact": "点击后无法跳转到会话" },
-        "fork": { "severity": "feature-dead", "impact": "无法从会话分叉" },
-        "binding": { "severity": "feature-dead", "impact": "会话绑定关系读不到" },
-        "getSnapshot": { "severity": "degraded", "impact": "拿不到会话快照，相关 UI 显示不全" }
+        "get": { "severity": "feature-dead", "impact": "定位不到会话，插件相关入口点不动", "layer": "host" },
+        "list": { "severity": "feature-dead", "impact": "会话列表为空", "layer": "host" },
+        "map": { "severity": "feature-dead", "impact": "同上", "layer": "host" },
+        "open": { "severity": "feature-dead", "impact": "点击后无法跳转到会话", "layer": "client" },
+        "fork": { "severity": "feature-dead", "impact": "无法从会话分叉", "layer": "host" },
+        "binding": { "severity": "feature-dead", "impact": "会话绑定关系读不到", "layer": "client" },
+        "getSnapshot": { "severity": "degraded", "impact": "拿不到会话快照，相关 UI 显示不全", "layer": "client" },
+        "liveEntryFor": {
+          "severity": "feature-dead",
+          "impact": "拿不到会话在内存 store 里的条目 → “先定位条目再动手”的操作（归档/摘除）直接失败",
+          "layer": "host",
+          "basis": "callsite",
+          "evidence": "@michengai/dsh-archive-manager/lib/workspace.js:932（紧接 sessions.flush 之后取条目）"
+        },
+        "detachEntered": {
+          "severity": "feature-dead",
+          "impact": "无法把已进入 store 的会话摘下来：归档/关闭会话后它仍留在内存 store 里，列表与内存不收敛",
+          "layer": "host",
+          "basis": "callsite",
+          "evidence": "@michengai/dsh-archive-manager/lib/workspace.js:933（官方 enter() 的 description 里对应\"返回 detach disposer\"那一半）"
+        },
+        "scope": {
+          "severity": "feature-dead",
+          "impact": "拿不到会话的 Agent 作用域上下文 → 依赖它往会话里写入的操作失败（better-sidebar 只能打印警告、草稿不插入）",
+          "layer": "client",
+          "basis": "catalog",
+          "evidence": "官方客户端目录 sessions.scope(id): AgentContext | undefined；“借用已保留的 Agent 作用域，不延长其生命周期”；调用点 dsh-better-sidebar/lib/client.js:18645"
+        },
+        "search": {
+          "severity": "feature-dead",
+          "impact": "会话内容搜索不可用：搜索结果为空或直接报错",
+          "layer": "client",
+          "basis": "catalog"
+        },
+        "using": {
+          "severity": "degraded",
+          "impact": "拿不到“受管引用”通道，插件退回 sessions.binding()（archive-manager 已内置该回退）：引用不会被自动释放，能力缩水但仍可用",
+          "layer": "client",
+          "basis": "callsite",
+          "evidence": "@michengai/dsh-archive-manager/lib/client.js（typeof sessions.using === 'function' 不成立时走 sessions.binding）"
+        }
       },
       "serviceMissingSeverity": "fatal",
       "serviceMissingNote": "需要 sessions 才能挂载客户端半边的插件（如 dsh-plugin-message-edit）会在客户端直接抛错，等同于整个插件不可用"
     },
     "agents": {
+      "layer": "host",
       "summary": "agent 实例",
+      "note": "usage-inventory 里的 agents.listDescendants 是提取误报（子代理变量名里的 “agents.” 被当成 agents 服务），见 knownExtractionArtifacts —— 不要为它补规则",
       "methods": {
         "list": { "severity": "feature-dead", "impact": "看不到 agent 列表" },
         "get": { "severity": "feature-dead", "impact": "定位不到 agent，相关功能失效" },
@@ -111,6 +182,7 @@
       }
     },
     "systemPrompt": {
+      "layer": "host",
       "summary": "系统提示词贡献",
       "methods": {
         "section": { "severity": "feature-dead", "impact": "插件注入的提示词消失，agent 行为随之退化" },
@@ -118,14 +190,17 @@
       }
     },
     "theme": {
+      "layer": "client",
       "summary": "客户端主题",
       "methods": {
         "getTheme": { "severity": "degraded", "impact": "读不到当前主题，配色可能不同步" },
-        "setTheme": { "severity": "feature-dead", "impact": "主题切换按钮点了没反应" }
+        "setTheme": { "severity": "feature-dead", "impact": "主题切换按钮点了没反应" },
+        "register": { "severity": "feature-dead", "impact": "第三方主题注册不上：主题选择列表里没有它，配色插件（如 dsh-catppuccin）等于没装", "basis": "catalog" }
       }
     },
     "logger": {
-      "summary": "日志",
+      "layer": "host",
+      "summary": "日志（cordis 内建，不在官方服务目录里）",
       "methods": {
         "warn": { "severity": "degraded", "impact": "日志缺失，功能不受影响（但会让后续排障变难）" },
         "info": { "severity": "degraded", "impact": "同上" },
@@ -133,51 +208,345 @@
       }
     },
     "loader": {
-      "summary": "插件条目加载器",
+      "layer": "host",
+      "summary": "插件条目加载器（cordis 内建，不在官方服务目录里）",
       "methods": {
         "entries": { "severity": "feature-dead", "impact": "依赖插件清单的功能（如插件管理面板）失效" }
       }
     },
     "commands": {
+      "layer": "host",
       "summary": "斜杠命令",
       "methods": {
         "register": { "severity": "feature-dead", "impact": "该命令不存在，输入 /xxx 无反应" }
       }
     },
     "llm": {
+      "layer": "host",
       "summary": "模型访问",
       "methods": {
         "listModels": { "severity": "feature-dead", "impact": "模型选择器为空" },
-        "resolveCallConfig": { "severity": "feature-dead", "impact": "无法发起模型调用" }
+        "resolveCallConfig": { "severity": "feature-dead", "impact": "无法发起模型调用" },
+        "listProviders": {
+          "severity": "degraded",
+          "impact": "列不出已注册的模型提供方，插件只能按 provider id 显示（modlens 退回显示上游 id 而不是显示名）",
+          "basis": "callsite",
+          "evidence": "@liustack/modlens/dsh/index.js:397（typeof 探测不成立即整体跳过名称解析）"
+        }
       }
     },
     "agentDefaultModel": {
+      "layer": "host",
       "summary": "默认模型选择",
       "methods": {
         "currentSelection": { "severity": "feature-dead", "impact": "读不到当前模型，插件无法跟随模型变化" }
       }
     },
     "attachments": {
+      "layer": "host",
       "summary": "附件读取",
       "methods": {
         "readImage": { "severity": "feature-dead", "impact": "无法读取图片附件，视觉相关功能失效" }
       }
     },
     "subprocess": {
+      "layer": "host",
       "summary": "子进程",
       "methods": {
         "spawn": { "severity": "feature-dead", "impact": "插件无法执行外部命令" }
       }
     },
     "workspaceRegistry": {
+      "layer": "host",
       "summary": "工作区注册表",
       "methods": {
         "list": { "severity": "feature-dead", "impact": "工作区列表为空" },
         "create": { "severity": "feature-dead", "impact": "无法新建工作区" },
         "delete": { "severity": "feature-dead", "impact": "无法删除工作区" }
       }
+    },
+
+    "skills": {
+      "layer": "host",
+      "summary": "skill 提供方注册表：插件把自己的 SKILL.md 挂进会话技能目录，agent 才看得到、调得动",
+      "methods": {
+        "registerProvider": {
+          "severity": "feature-dead",
+          "impact": "插件自带的 SKILL.md 不会被会话看见：agent 收不到它的 description，也调不到这个 skill（包里放文件不算数，必须注册）",
+          "basis": "catalog",
+          "evidence": "官方目录：registerProvider 在插件 apply 期间同步注册一个 provider，dispose 时注销；调用点 @changfenhuang/dsh-genui/lib/index.js:5175"
+        }
+      }
+    },
+    "subagents": {
+      "layer": "host",
+      "summary": "子代理提供方注册表 + 继续型子代理（durable child）的启动/观察/中断操作",
+      "methods": {
+        "list": {
+          "severity": "feature-dead",
+          "impact": "列不出已注册的子代理提供方：按提供方名字挑选子代理的功能失败，连“可用提供方有哪些”都报不出来",
+          "basis": "catalog"
+        },
+        "getProvider": {
+          "severity": "feature-dead",
+          "impact": "按名字取不到子代理提供方 → 派生子代理/接管成员直接失败（agent-teams 会抛 no subagent provider）",
+          "basis": "catalog",
+          "evidence": "@nanmicoder/dsh-agent-teams/lib/members.js:499"
+        },
+        "startContinuable": {
+          "severity": "feature-dead",
+          "impact": "派生不出可续跑的子代理（durable child）→ 团队/成员的初始任务起不来",
+          "basis": "catalog",
+          "evidence": "@nanmicoder/dsh-agent-teams/lib/members.js:514"
+        },
+        "interrupt": {
+          "severity": "feature-dead",
+          "impact": "停不掉正在跑的继续型子代理：中断不生效，它会继续跑完当前回合",
+          "basis": "catalog",
+          "evidence": "@nanmicoder/dsh-agent-teams/lib/members.js:582"
+        },
+        "listDescendants": {
+          "severity": "feature-dead",
+          "impact": "列不出子代理的后代树 → 子代理拓扑/层级视图为空（better-sidebar 的子代理页返回 503）",
+          "basis": "catalog",
+          "evidence": "dsh-better-sidebar/lib/index.js:2950"
+        },
+        "drainContinuableChildren": {
+          "severity": "feature-dead",
+          "impact": "无法强制回收常驻子代理 → 一个团队被停止后成员仍可能继续执行：只能取消当前模型回合，不能关闭准入并清空排队任务",
+          "basis": "catalog",
+          "evidence": "@nanmicoder/dsh-agent-teams/lib/tools.js:193"
+        }
+      }
+    },
+    "sessionQuery": {
+      "layer": "host",
+      "summary": "统一的会话查询服务：优先读实时会话，回退到持久化记录",
+      "methods": {
+        "listSessions": {
+          "severity": "feature-dead",
+          "impact": "列不出会话全集 → 历史会话清单、统计与归档扫描全为空",
+          "basis": "catalog",
+          "evidence": "dsh-recall-plugin/lib/index.js:144"
+        },
+        "readSession": {
+          "severity": "feature-dead",
+          "impact": "读不出某个会话的完整事件日志 → 回放/导出/内容分析拿不到数据",
+          "basis": "catalog",
+          "evidence": "@michengai/dsh-archive-manager/lib/routes-manage.js:381"
+        },
+        "observeSession": {
+          "severity": "feature-dead",
+          "impact": "无法实时观察某个会话的事件流 → 实时跟随/预览停在打开时的状态",
+          "basis": "catalog",
+          "evidence": "@michengai/dsh-archive-manager/lib/snapshots.js:494"
+        }
+      }
+    },
+    "sessionTitle": {
+      "layer": "host",
+      "summary": "会话标题：日志折叠出标题 + 自动生成的兜底",
+      "methods": {
+        "rename": {
+          "severity": "feature-dead",
+          "impact": "写不进用户指定的会话标题：标题会继续由自动生成覆盖（better-sidebar 的侧会话标题钉不住）",
+          "basis": "catalog",
+          "evidence": "官方目录：rename 追加一条 source=user 的 session/title 事件从而“钉住”标题；调用点 dsh-better-sidebar/lib/index.js:3472"
+        }
+      }
+    },
+    "sessionPersistence": {
+      "layer": "host",
+      "summary": "只追加的会话持久化存储（按会话句柄寻址的抽象服务，目录里不声明方法）",
+      "methods": {
+        "open": {
+          "severity": "feature-dead",
+          "impact": "打不开某个已持久化的会话 → 读取历史会话日志、回放的功能失效",
+          "basis": "catalog-description",
+          "evidence": "官方 description 明写可见性由 stat/list/open 提供；调用点 dsh-better-sidebar/lib/index.js:3267"
+        },
+        "list": {
+          "severity": "feature-dead",
+          "impact": "列不出持久化会话 → 冷会话清单/归档扫描为空",
+          "basis": "catalog-description",
+          "evidence": "@michengai/dsh-archive-manager/lib/workspace.js:1041"
+        }
+      }
+    },
+    "credentials": {
+      "layer": "host",
+      "summary": "凭据解析：把一个环境变量名解析成背后的值（进程环境 → 托管存储 → .env 分层）",
+      "note": "官方目录对 credentials **一个方法都不声明**（抽象服务），但官方 description 明确写了 resolve 的行为。这正是“目录 ≠ 运行时 API 面”的典型：不要因为目录为空就认定 resolve 不存在。",
+      "methods": {
+        "resolve": {
+          "severity": "feature-dead",
+          "impact": "解析不出凭据：插件拿不到 API Key/Token，相关联网功能失败（取不到时返回 undefined 而不是抛错，所以是静默失效）",
+          "basis": "catalog-description",
+          "evidence": "官方 description：“an empty stored value is absent everywhere — resolve skips it”；调用点 dsh-pet/lib/index.js:2230"
+        }
+      }
+    },
+    "storageDomain": {
+      "layer": "host",
+      "summary": "已挂载的持久化域设施：按路由后端打开声明的域，一个域名字只允许打开一次",
+      "methods": {
+        "open": {
+          "severity": "feature-dead",
+          "impact": "打不开持久化域 → 依赖域表（table）的读写全部失败（archive-manager 的投影缓存导入会被整体跳过）",
+          "basis": "callsite",
+          "evidence": "@michengai/dsh-archive-manager/lib/projcache.js:102（未被 try/catch 之外的守卫包裹）",
+          "note": "官方目录声明的是 closeAll/get，没有 open；但官方 description 写的是“Opens declared domains over routed backends”。方法名与目录不一致，故证据等级标 callsite 而不是 catalog。"
+        }
+      }
+    },
+    "typert": {
+      "layer": "host",
+      "summary": "类型化调用的注册表：生成的 schema、包反射、调用端点与远程依赖提供方",
+      "methods": {
+        "register": {
+          "severity": "feature-dead",
+          "impact": "注册不了插件自己的 schema/远程调用端点 → 依赖它的跨进程（Remote）调用不可用（archive-manager 会直接抛 typert is unavailable）",
+          "basis": "catalog",
+          "evidence": "@michengai/dsh-archive-manager/lib/workspace.js:255、:264（后者在缺失时直接抛错）"
+        }
+      }
+    },
+    "agentPresets": {
+      "layer": "host",
+      "summary": "YAML 声明的 agent 预设注册表，以及活动 agent 保留的预设修订",
+      "methods": {
+        "resolve": {
+          "severity": "feature-dead",
+          "impact": "解析不出预设身份 → 依赖预设的装配失效：父代理的预设（工具集/人设）传不到子代理，子代理只能按默认组合启动",
+          "basis": "catalog",
+          "evidence": "dsh-better-sidebar/lib/index.js:3325（用父会话记录的预设 id 装配子代理）"
+        },
+        "mount": {
+          "severity": "feature-dead",
+          "impact": "预设绑定不到新建的 agent 上：按预设装配出来的 agent/子代理缺预设声明的工具集与人设",
+          "basis": "catalog",
+          "evidence": "dsh-better-sidebar/lib/index.js:3329"
+        }
+      }
+    },
+    "agentTeams": {
+      "layer": "host",
+      "summary": "Agent Teams 服务：以正在运行的 Lead 会话日志为准的团队/任务服务",
+      "methods": {
+        "tryMembership": {
+          "severity": "feature-dead",
+          "impact": "认不出调用者属于哪个团队 → 团队作用域的工具装不上：会话里看不到 Agent Teams 那一套工具",
+          "basis": "catalog",
+          "evidence": "官方目录：tryMembership “Resolve a caller without throwing, used by scoped-tool installation and observers”；调用点 dsh-better-sidebar/lib/index.js:3030"
+        }
+      }
+    },
+    "timer": {
+      "layer": "both",
+      "summary": "可随 fiber 释放的定时器助手（宿主与客户端都有同名服务，**签名不同**）",
+      "note": "宿主 overload 是 timeout(delay): Promise<void>；客户端 overload 是 timeout(callback, delay): () => void。同名不同签名，判定时要按调用点所在的那一侧看。",
+      "methods": {
+        "timeout": {
+          "severity": "degraded",
+          "impact": "定时/延时逻辑失效，插件退回原生 setTimeout（recall 已内置该回退）：功能仍在，但定时器不再随插件卸载自动清理",
+          "layer": "both",
+          "basis": "callsite",
+          "evidence": "dsh-recall-plugin/lib/client.js:1430（typeof timer.timeout === 'function' 不成立即用 setTimeout，属客户端 overload）"
+        }
+      }
+    },
+    "layout": {
+      "layer": "client",
+      "summary": "客户端面板导航：选中央面板、开关侧栏/右栏、发起一次导航",
+      "methods": {
+        "selectPanel": {
+          "severity": "degraded",
+          "impact": "切不动中央面板（点击后面板不切换）：能探测缺失的插件会退回侧栏入口（mnemon 已内置该回退），入口降级但界面仍可用",
+          "basis": "catalog",
+          "evidence": "dsh-mnemon/lib/client.js:11653（open 时切到自己的主面板，不可用则挂侧栏条目兜底）"
+        }
+      }
+    },
+    "uiWorkspace": {
+      "layer": "client",
+      "summary": "客户端的会话/工作区跳转与目录操作（打开会话、打开工作区、列目录、归档会话等）",
+      "methods": {
+        "openSession": {
+          "severity": "feature-dead",
+          "impact": "跳不过去：无法把某个会话切到前台显示（git-graph 建完 worktree 后跳到新会话的动作失效）",
+          "basis": "catalog",
+          "evidence": "@linxin666/dsh-client-ui-git-graph/lib/client.js:1933"
+        }
+      }
+    },
+    "workspaces": {
+      "layer": "client",
+      "summary": "客户端的工作区注册项管理（注册/改名/删除工作区、归档会话）",
+      "methods": {
+        "create": {
+          "severity": "feature-dead",
+          "impact": "注册不了新工作区（git-graph 从 worktree 建工作区那一步失败，整个流程会回滚并删掉刚建的 worktree）",
+          "basis": "catalog",
+          "evidence": "@linxin666/dsh-client-ui-git-graph/lib/client.js:1931"
+        },
+        "delete": {
+          "severity": "feature-dead",
+          "impact": "删不掉工作区注册项：它会一直留在工作区列表里，只能手动清理",
+          "basis": "catalog"
+        }
+      }
+    },
+
+    "configEditor": {
+      "layer": "host",
+      "summary": "读写 profile 的完整原始配置，并走正常 Loader 路径应用",
+      "methods": {},
+      "note": "本机 21 个插件里只见到服务级依赖（dsh-mnemon 的 inject），没有提取到方法级调用（目录声明的 configuration/edit/entries 都没被调用），故不给方法级判定。"
+    },
+    "connection": {
+      "layer": "host",
+      "summary": "宿主连接/鉴权面（供传输无关的适配器消费：admit、authenticatedUrl、authorizeIndex 等）",
+      "methods": {},
+      "note": "5 个插件声明依赖了它，但都没有提取到方法级调用，故不给方法级判定。"
+    },
+    "pluginManager": {
+      "layer": "host",
+      "summary": "管理 profile 文件并执行其声明的重载生命周期",
+      "methods": {},
+      "note": "只有服务级依赖（dsh-mnemon），没有方法级调用可判。"
+    },
+    "profileContext": {
+      "layer": "host",
+      "summary": "当前 profile 的事实（名称/路径等）；调度与修改归调用方",
+      "methods": {},
+      "note": "3 个插件声明依赖，无方法级调用可判。"
+    },
+    "sandboxPolicy": {
+      "layer": "host",
+      "summary": "沙箱策略：部署默认模式、回退工作区根与当前请求的策略段",
+      "methods": {},
+      "note": "dsh-recall-plugin 声明依赖，无方法级调用可判。"
+    },
+    "sessionProjections": {
+      "layer": "host",
+      "summary": "会话投影单元表与其驱动：每个提交事件过一遍各注册单元的 apply，变更只在其原始结果变化时通知",
+      "methods": {},
+      "note": "2 个插件声明依赖，无方法级调用可判。"
+    },
+    "sessionProjectionCache": {
+      "layer": "host",
+      "summary": "持久化的会话投影缓存（节流写回 + 会话创建/turn 结束/会话释放三个强制点，写失败只告警并自愈）",
+      "methods": {},
+      "note": "dsh-archive-manager 声明依赖，无方法级调用可判。"
+    },
+    "spillStore": {
+      "layer": "host",
+      "summary": "溢写存储：把超长内容落盘，返回定位符、精确字节数与检索提示",
+      "methods": {},
+      "note": "dsh-archive-manager 声明依赖，无方法级调用可判。"
     }
   },
+
   "declarationChecks": {
     "engines.dsh": {
       "missing": "插件没有声明 DSH 版本范围——闸门不会拦，但也没有任何兼容保证",
@@ -187,5 +556,98 @@
       "mismatch": "声明当前版本 compatible，但实测存在失效项——这是本工具相对既有方案最不可替代的结论",
       "missing": "插件没有逐版本声明，只能依赖实测"
     }
+  },
+
+  "knownExtractionArtifacts": {
+    "_note": "**不要为这些补规则。** 它们是正则提取的产物，不是 DSH API。为它们填影响面等于把假阳性升格成“看起来确定”的结论，会毁掉本工具唯一的资产。真源是 rules/usage-inventory.json 与 lib/extract.mjs 的输出。",
+    "_evidenceBase": "desktop profile，node lib/extract.mjs ~/.dsh/profiles/desktop/node_modules（2026-10-10，DSH 0.2.0-rc.2）",
+    "items": [
+      {
+        "service": "parser",
+        "methods": "全部 40 个（consume/subparse/rule/...）",
+        "why": "vendored 代码里的同名局部变量：这个是 markdown 解析器的 parser 上下文，不是宿主服务",
+        "evidence": "dsh-better-sidebar/lib/client-mermaid.js"
+      },
+      {
+        "service": "ruleNames",
+        "methods": ["get", "has", "set"],
+        "why": "同上，vendored markdown 解析器内部对象",
+        "evidence": "dsh-better-sidebar/lib/client-mermaid.js"
+      },
+      {
+        "service": "topoIndex",
+        "methods": ["get", "set"],
+        "why": "vendored 代码里的局部变量",
+        "evidence": "dsh-better-sidebar/lib/client-mermaid.js"
+      },
+      {
+        "service": "settings",
+        "methods": ["isTrusted", "reportNonstrict", "useStrictBehavior"],
+        "why": "KaTeX 的 parser.settings API（vendored 的数学公式渲染代码），与 DSH 的 settings 服务无关",
+        "evidence": "dsh-better-sidebar/lib/client-mermaid.js、katex/dist/katex.js"
+      },
+      {
+        "service": "settings",
+        "methods": ["settingsGet", "externalDisable"],
+        "why": "better-sidebar 自己声明的设置面（lib/types/index.d.ts 里的 SidebarSettingsFace 声明了 get/externalDisable/update），不是 DSH settings 服务的方法",
+        "evidence": "dsh-better-sidebar/lib/types/index.d.ts:45"
+      },
+      {
+        "service": "agents",
+        "methods": ["listDescendants"],
+        "why": "alias 正则漏了词边界：源码里是 subagents.listDescendants，前缀词 subagents 里的 “agents.” 被当成 agents 服务的调用",
+        "evidence": "dsh-better-sidebar/lib/index.js:2950 与 :3238 的原文是 await subagents.listDescendants(...)；desktop profile 上共 2 处"
+      },
+      {
+        "service": "jobs",
+        "methods": ["closeTab", "fileIcon", "folderIcon", "getFileViewers", "getTab", "getTabs", "isTabEnabled", "openTab", "registerFileViewer", "registerTab", "setSurface", "updateTab", "subscribe"],
+        "why": "同文件内别名撞名：`const service = ctx.get(\"jobs\")` 与 6 处 `const service = ctx.get(\"betterSidebar\")` 共用变量名 service，于是文件里所有 `service.X()`（**包括 JSDoc 注释里的**）被同时算到 jobs 头上。这些其实是 betterSidebar 的标签页 API",
+        "evidence": "dsh-better-sidebar/lib/client.js:977 是注释里的 `service.getTabs()`；真正属于宿主/客户端 jobs 的只有 watchRows/observe/kill 这几个"
+      },
+      {
+        "service": "locale",
+        "methods": ["startsWith"],
+        "why": "字符串方法",
+        "evidence": "usage-inventory.json"
+      },
+      {
+        "service": "tools",
+        "methods": ["filter", "join", "push"],
+        "why": "数组方法",
+        "evidence": "usage-inventory.json"
+      },
+      {
+        "service": "sessions",
+        "methods": ["map", "filter", "reduce", "some", "sort", "slice", "values", "has", "set", "findIndex", "delete"],
+        "why": "数组/集合方法，被当成 sessions 服务的方法",
+        "evidence": "usage-inventory.json"
+      }
+    ]
+  },
+
+  "needsReview": {
+    "_note": "既有条目里**看起来可疑、但本轮没有改**的项。改它们会改变输出，按 Plan.md §4 第 3 条应先摊开差异再由人决定，所以这里只登记证据。",
+    "items": [
+      {
+        "entry": "sessions.open / sessions.getSnapshot",
+        "problem": "宿主与客户端两个官方目录里都没有这两个方法。客户端侧真正的跳转入口是 uiWorkspace.openSession，archive-manager 也是把它当回退用的。",
+        "evidence": "@michengai/dsh-archive-manager/lib/client.js（typeof openSession === 'function' ? openSession : N.sessions.open）"
+      },
+      {
+        "entry": "sessions.refresh",
+        "problem": "两个官方目录都没有它（客户端目录里有的是 refreshProjections）。无法判断是旧版 API 还是误报，故不补规则。",
+        "evidence": "@michengai/dsh-archive-manager/lib/client.js（typeof 守卫后调用）"
+      },
+      {
+        "entry": "settings.get",
+        "problem": "0.2.0-rc.2 的宿主目录里 settings 没有 get（只有 configure/describe/mutate/prepareDocument/replace/update）。它可能和 settingsGet/externalDisable 一样来自插件自有的设置面。",
+        "evidence": "rules/dsh-api-catalog.json 的 host.settings.methods"
+      },
+      {
+        "entry": "attachments.readImage",
+        "problem": "宿主目录里是 readImageRequest，没有 readImage。条目本身写得通顺（“无法读取图片附件”），但方法名对不上，需要一次运行时探针来确认到底哪个是真的。",
+        "evidence": "rules/dsh-api-catalog.json 的 host.attachments.methods"
+      }
+    ]
   }
 }
