@@ -38,8 +38,8 @@ function w(file, text) {
  * 这里曾经还会收集一份 `data`：把所有非函数属性的**字面值**原样写进探针报告。
  * 当时的想法是"多留点现场便于排查"。后果是：
  *
- * - `credentials` 服务的 `text` 属性就是**整份凭据文件**，里面有
- *   `DEEPSEEK_API_KEY=sk-…` 与若干 session token；
+ * - `credentials` 服务的 `text` 属性就是**整份凭据文件**，里面有账号密钥
+ *   （`DEEPSEEK_API_KEY` 那一条）与若干 session token —— 都是可直接使用的凭据；
  * - 那份报告被提交进了仓库（`tools/parity/fixtures/host-surface-parityfix.json`）。
  *
  * 而这份 `data` **从来没有被任何消费方读过** —— `lib/verdict.mjs` 只取
