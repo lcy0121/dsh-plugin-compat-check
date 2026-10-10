@@ -37,10 +37,20 @@ const fake = (...parts) => parts.join('')
 
 /** 这些模式命中即失败。`sk-` 那一类是最要命的（可直接使用的账号密钥）。 */
 const FORBIDDEN = [
-  // DeepSeek / OpenAI 风格的账号密钥
-  new RegExp(fake('s', 'k-', '[A-Za-z0-9]{32,}')),
-  // 凭据文件里的引用名 + 冒号/等号 + 值
-  new RegExp(fake('DEEPSEEK_API_KEY', '\\s*[:=]\\s*\\S')),
+  // DeepSeek / OpenAI 风格的账号密钥。
+  //
+  // 这里刻意**要求 32 位以上且不含省略号** —— 第一版写成 `sk-\S{8,}` 之类，
+  // 结果把文档注释里的占位写法 `sk-…` 也报了（假阳性）。
+  // 守卫的假阳性不是小事：一个爱乱报警的守卫会被人学会忽略，那它就不再是守卫。
+  // 反过来也不能太紧 —— 下面"扫描器本身有效"那条用一个 40 位的假密钥确认它还抓得到。
+  new RegExp(fake('s', 'k-', '(?![\u2026.]{1,3}$)[A-Za-z0-9]{32,}')),
+  // 凭据文件里的引用名 + 冒号/等号 + **看起来是真的值**。
+  //
+  // 这里要求"值"至少 16 位十六进制/连字符 —— 而不是"任意非空白字符"。
+  // 原因同上：文档里写 `DEEPSEEK_API_KEY=sk-…`（描述形态）是**正确**写法，
+  // 而真实的 DeepSeek key 是 `sk-` + 32 位十六进制，必然满足下面这条。
+  // 用 `\S` 会把"提到这个变量名"也报成泄漏 —— 那种守卫会被忽略。
+  new RegExp(fake('DEEPSEEK_API_KEY', '\\s*[:=]\\s*[A-Za-z0-9_-]{16,}')),
   // 私钥
   new RegExp(fake('BEGIN ', '[A-Z ]*', 'PRIVATE KEY')),
   // 我们这次实际发生过的：grant 里的 secret / token
@@ -95,6 +105,21 @@ describe('安全：仓库里不许出现凭据', () => {
     assert.deepEqual(hits, [],
       `发现疑似凭据：\n  ${hits.join('\n  ')}\n`
       + '如果这是测试夹具，请改成"拼"出哨兵（见本文件头的 fake()）。')
+  })
+
+  test('占位写法（sk-… / sk-xxx）不该被报 —— 守卫的假阳性会让人学会忽略它', () => {
+    // 这是实测踩到的：文档注释里写 `sk-…` 是**正确**的写法（描述形态而不复现凭据），
+    // 但第一版扫描器把它当密钥报了。一个爱乱报警的守卫最后一定会被忽略。
+    const dir = fs.mkdtempSync(path.join('/tmp', 'dsc-placeholder-'))
+    try {
+      for (const [name, body] of [
+        ['ellipsis.md', '形如 ' + fake('s', 'k-') + '\u2026 的就是账号密钥'],
+        ['dot.md', '形如 ' + fake('s', 'k-') + '... 的就是账号密钥'],
+        ['short.md', fake('DEEPSEEK_API_KEY') + ' 那一条（不写出值）'],
+      ]) fs.writeFileSync(path.join(dir, name), body)
+      assert.deepEqual(scanForCredentials(dir), [],
+        '占位/描述性写法被误报成凭据了')
+    } finally { fs.rmSync(dir, { recursive: true, force: true }) }
   })
 
   test('扫描器本身有效（否则上面那条是空过）', () => {
