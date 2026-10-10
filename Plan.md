@@ -417,8 +417,46 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
 
 #### F. 触发与基线
 
-- [ ] **F1. 本地基线**：`{DSH 版本, 插件名@版本集合, 各插件结论}`，只写自己的状态目录，不联网不外传
-- [ ] **F2. 启动后延迟自动跑**，结果缓存；角标只在变化时亮
+- [x] **F1. 本地基线** —— ✅ **完成**（字段与要求在 C4 里就已落地，只是我没记账）
+  - 实际写出的 `baseline.<profile>.json`：
+    ```json
+    { "schemaVersion": 1,
+      "dshVersion": "0.2.0-rc.2",
+      "plugins": { "<包名>": { "version": "…", "verdict": "partial",
+                               "findings": [ { "key": "settings.register", "severity": "feature-dead",
+                                               "certainty": "certain", "location": "lib/index.js:466" } ] } } }
+    ```
+    三个字段逐一对应：**DSH 版本** ✓、**插件名@版本集合** ✓、**各插件结论** ✓。
+  - 落点：`$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.json` —— **只写自己的状态目录**，
+    **不联网、不外传**（这是「插件严格只读」的唯一例外，写的是它自己的体检记录）。
+  - ⚠️ **一个差点造成污染的正确性缺陷**：profile 名一度靠环境变量推断，而实测
+    `DSH_PROFILE=desktop` 是**从启动 app 的那个 shell 继承来的过期值**，与实际加载的 profile 无关。
+    信它会把 gverify 的结论写进 `baseline.desktop.json`，于是差分会报出"移除了 17 个插件"
+    这种**完全编出来的变化**。现在按 argv 判断，且**两种形态都认**：
+    CLI 的 `--profile <名>`、桌面端的**位置参数** `<…>/profiles/<名>`。
+    前两版都只认了其中一种 —— 而两次都"看起来是对的"，因为当时的结论恰好就是 desktop。
+    **那是运气，不是正确。**
+- [x] **F2. 启动后延迟自动跑，结果缓存；角标只在变化时亮** —— ✅ **完成**
+  - **自动跑**：由**最后一次 loader 扫描完成**触发（不是独立定时器）。时机很关键 ——
+    插件条目在启动后几秒内还会变（异步 import），太早跑会把"还在加载"误记成"没起来"。
+    实测日志（真实 desktop profile）：
+    ```
+    F2 启动自检: 可用 3 部分可用 19 不兼容 0
+    F2 与上次相比: 还没有基线（这是第一次体检）
+    ```
+    第二次启动 → `与上次相比没有任何变化`；人为把基线改坏 → `↑ 变好 1`。三条路都实测过。
+  - ⚠️ **一次真实事故**：早先用独立定时器 + 在 `finish()` 里 `clearTimeout(state.autoRunTimer)`，
+    而两者时间**相邻**（默认时机就落在最后一次扫描之后 2 秒）—— 最后一次扫描一结束就把
+    启动自检**取消了**：它从未运行、**也没有任何报错**。清理定时器必须由创建它的那一方负责。
+    现在 `finish()` 调幂等的 `runAutoCheck()`，兜底定时器叫 `fallbackTimer`（名字不同就是为了
+    让"谁拥有谁"一眼可见），并有静态测试钉住"finish() 不得再清理 F2 的东西"。
+  - **缓存**：stale-while-revalidate。一次体检 0.5–1.5 秒，让面板的请求**等**它看到的是转圈，
+    而结论晚 1.5 秒到完全无所谓。所以过期时**先给旧的、后台再刷**，并发请求共用同一个刷新
+    （`state.computing`）—— 否则十个请求会各算一遍。TTL 可配（`DSC_CACHE_TTL_MS`，默认 5 分钟）。
+    后台刷新失败会**留下痕迹**（`lastRefreshError` + 日志）：静默失败会让面板一直显示过期数据而没人知道。
+    9 条测试覆盖这条策略，包括"有效期内不重算"与"并发只刷一次"。
+  - **角标只在变化时亮**：这就是 C4 的 `badgeFor` —— 有变化才 `show:true`，
+    没有基线时**不打但说明原因**（"还没比过" ≠ "没问题"）。
 
 #### H. 测试基础设施（**新增，已落地**）
 
@@ -464,9 +502,42 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
   - `dsh-pet` → 可用（**曾经误报为「部分可用」**：它写 `typeof llm?.listProviders === "function"`，
     自己做了能力检测，报出来就是假阳性）
 - [x] **G2.** `tools/parity/fixtures/hang-cycle` 秒级通过（实测 0.12 秒，且确实比到 1 个包）
-- [ ] **G3.** 在真实 desktop profile 上：宿主层体检结果正确、面板能显示、角标逻辑正确
-- [ ] **G4.** 客户端半边：真实启动 + 无头 Chrome 确认面板元素出现（**命令行测不到这一层**）
-- [ ] **G5.** 收尾干净：无残留 profile、无残留进程、无 `caffeinate`
+- [x] **G3.** 真实 desktop profile —— ✅ **完成**，而且比预期更彻底
+  - 实测发现：`dsh --profile desktop` 会被拒绝 ——
+    `error: profile "desktop" is managed exclusively by the Electron application`。
+    也就是说**正在运行的那个桌面 app 本身就是 desktop profile**。把插件装进去之后，
+    **运行中的 app 当场加载了它**（无需重启）：
+    - `baseline.desktop.json` 被那个 app 写出（时间戳对得上）
+    - 打它自己的路由：`http=200`，**126 282 字节**，`ok:true`，
+      `nodeModules=/Users/…/profiles/desktop/node_modules`，`summary: 可用 3 部分可用 19`（22 个插件）
+    - **最硬的证据**：本次会话的运行时里出现了 `compat_check` 工具
+      （我在 agent 侧的工具表里看到了它），以及 `dsh-plugin-compat-check` 这个 skill
+      （会话的 skill 目录里出现了它）。**这是它在这台机器上真的在跑的证明** ——
+      不是"我测过"，是"它正在用"。
+  - 顺带查到：`DSH_VERSION` 环境变量不存在，所以那条基线的 `dshVersion` 是 `null`。
+    后果是「声明与实测不符」这一类结论在插件形态下不成立（CLI 形态有 `--dsh-version`）。
+    **已记录为已知缺口**，见下面「仍未闭合」。
+- [x] **G4.** 客户端半边 —— ✅ **完成**（无头 Chrome + CDP，**浏览器级**证据）
+  - C2 总览：渲染标记 `{registered:[settings.plugins.tab, plugins.detail.section,
+    plugins.detail.badge], state:"done"}`，`table` **1 个**、`tbody` **22 行**、结论标签齐全、
+    差分区出现、**无错误态**
+  - C3 详情：`dsh-pet` → 角标「可用」+ section；`@liustack/modlens` → 「部分可用」+ section；
+    官方 bundle 与我的配置页条目 → **正确不渲染**
+  - 运行时异常 **0**
+- [x] **G5.** 收尾干净 —— ✅ **完成**
+  - 临时 profile：`gverify` / `finalverify` / `slotprobe` 已删，`~/.dsh/profiles` 只剩
+    `desktop / headless / kawake-headless / kawake-test / parityfix / web`（与开工前一致）
+  - **真实 desktop profile 已恢复原状**：从 bundles 与 dependencies 移除本插件，
+    与备份**语义完全相同**（`pnpm install` 只改了键序，值全等），lock 里也不再有它
+  - 无头 Chrome、后台进程全部清理；`pgrep caffeinate` → 空
+  - 基线目录只留 `baseline.desktop.json`（运行中的 app 写的真数据，是本工具的正常产物）——
+    另外两份是我在临时 profile 上跑出来的，已删
+
+### 仍未闭合（第一批之外，但要记着）
+
+1. **插件形态拿不到 DSH 版本**：`DSH_VERSION` 不存在 → 基线的 `dshVersion` 为 `null`，
+   「声明与实测不符」这类结论在插件半边不成立。CLI 形态有 `--dsh-version`，不受影响。
+   下一步可以从 `ctx.loader` 或 bundle 清单里找版本来源。
 
 ### 第二批
 

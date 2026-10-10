@@ -619,17 +619,76 @@ function resolveKernelDir() {
  * 「正在跑的是哪个 profile」没有正式服务暴露，只能靠环境变量与目录推断 ——
  * 所以这里把推断的**依据**一起放进报告，让结论可追溯，而不是猜一个就不吭声。
  */
-function resolveNodeModules() {
-  const dshHome = process.env.DSH_HOME || join(homedir(), '.dsh');
-  const explicit = process.env.DSC_PROFILE;
-  const candidates = [];
-  if (explicit) candidates.push({ dir: join(dshHome, 'profiles', explicit, 'node_modules'), why: `DSC_PROFILE=${explicit}` });
-
+/**
+ * 当前正在跑的是哪个 profile。
+ *
+ * ## 为什么这里必须小心：环境变量会**主动骗人**
+ *
+ * 实测（在 `--profile gverify` 下启动宿主，让插件把进程环境打出来）：
+ *
+ * ```
+ * DSH_PROFILE=desktop          ← 过期值！
+ * DSH_PROFILE_DIR=…/profiles/desktop
+ * process.argv = [ …/dsh-desktop-host/lib/cli.js, "--profile", "gverify" ]
+ * ```
+ *
+ * 那两个 `DSH_PROFILE*` 是从**启动这个 app 的那个 shell** 继承来的，与实际加载的
+ * profile 无关。信它们会把 gverify 的结论写进 `baseline.desktop.json`，
+ * 于是差分会报出"移除了 17 个插件"这种**完全是编出来的变化**。
+ *
+ * 所以顺序是：argv（宿主自己声明的）> 显式覆盖 > 环境变量（可能是陈的）> 回退。
+ */
+function resolveActiveProfile() {
+  // ① 宿主自己的启动参数 —— 最权威。**两种形态都要认**：
+  //
+  //    CLI：     … dsh-desktop-host/lib/cli.js --profile gverify
+  //    桌面 app：… dsh-desktop-host/lib/index.js <dsh 根> /Users/…/profiles/desktop <runtime> …
+  //
+  //    桌面端把 **profile 目录路径按位置传**，没有 `--profile` 标志。
+  //    只认 `--profile` 时，真实 app 里会走"回退到 desktop" —— 幸亏这次的结论恰好
+  //    就是 desktop，否则会把别的 profile 的结论写进 desktop 的基线。**那次是运气，不是正确。**
+  try {
+    const argv = (process.argv || []).map(String);
+    for (let i = argv.length - 1; i >= 0; i--) {
+      const inline = /^--profile=(.+)$/.exec(argv[i]);
+      if (inline) return { name: inline[1], why: `process.argv 的 --profile=${inline[1]}` };
+      if (argv[i] === '--profile' && argv[i + 1] && !argv[i + 1].startsWith('-')) {
+        return { name: argv[i + 1], why: `process.argv 的 --profile ${argv[i + 1]}` };
+      }
+    }
+    // 位置形态：任何指向 `<…>/profiles/<名字>`（或它下面的 node_modules）的绝对路径
+    for (const a of argv) {
+      if (!a.startsWith('/')) continue;
+      const m = /\/profiles\/([^/]+)(?:\/|$)/.exec(a);
+      if (m && m[1]) return { name: m[1], why: `process.argv 里的 profile 路径 ${a}` };
+    }
+  } catch { /* 继续 */ }
+  // ② 显式覆盖（工具/测试用）
+  if (process.env.DSC_PROFILE) return { name: process.env.DSC_PROFILE, why: `DSC_PROFILE=${process.env.DSC_PROFILE}` };
+  // ③ 环境变量 —— **可能是陈的**，所以带上警示写进 why
   for (const key of ['DSH_PROFILE', 'DSH_ACTIVE_PROFILE', 'DSH_PROFILE_NAME']) {
     const v = process.env[key];
-    if (v) candidates.push({ dir: join(dshHome, 'profiles', v, 'node_modules'), why: `${key}=${v}` });
+    if (v) return { name: v, why: `${key}=${v}（环境变量可能来自启动 app 的那个 shell，未必是当前加载的 profile）` };
   }
-  candidates.push({ dir: join(dshHome, 'profiles', 'desktop', 'node_modules'), why: '回退到 desktop profile' });
+  return { name: null, why: '无法判断' };
+}
+
+function resolveNodeModules() {
+  const dshHome = process.env.DSH_HOME || join(homedir(), '.dsh');
+  const candidates = [];
+
+  const inferred = resolveActiveProfile();
+  if (inferred.name) {
+    candidates.push({ dir: join(dshHome, 'profiles', inferred.name, 'node_modules'), why: inferred.why });
+  }
+
+  // 兜底：从 `DSH_PROFILE_DIR` 直接拿目录（它指向 profile 根，不是 node_modules）
+  if (process.env.DSH_PROFILE_DIR) {
+    candidates.push({ dir: join(process.env.DSH_PROFILE_DIR, 'node_modules'), why: `DSH_PROFILE_DIR=${process.env.DSH_PROFILE_DIR}` });
+  }
+  // 最后回退。到这一步说明前面都没中（例如插件是从仓库直接跑的、或发布形态装在别处），
+  // 那就只能挑一个 —— 但 why 里会**写明这是回退**，否则用户会以为它检查的是当前 profile。
+  candidates.push({ dir: join(dshHome, 'profiles', 'desktop', 'node_modules'), why: '回退到 desktop profile（没能判断出正在跑哪一个）' });
 
   for (const c of candidates) {
     try {
@@ -637,6 +696,58 @@ function resolveNodeModules() {
     } catch { /* 下一个 */ }
   }
   return { dir: null, why: '没有任何候选目录存在' };
+}
+
+/**
+ * 把结论交给面板 —— **F2 的缓存策略集中在这里**。
+ *
+ * ## 策略：stale-while-revalidate（先给旧的，后台再刷）
+ *
+ * 为什么不是"到点就重算"：一次体检 0.5–1.5 秒（desktop profile 21 个插件）。
+ * 让面板的请求**等**这 1.5 秒，用户看到的是转圈；而结论晚 1.5 秒到完全无所谓 ——
+ * 这份数据说的是"你装的插件跟这版 DSH 兼不兼容"，它不是秒级指标。
+ * 所以：有缓存就先给，同时在后台刷新的。**响应速度与正确性都不牺牲**。
+ *
+ * 三种情况：
+ *   - `?refresh=1` 或没有缓存 → **同步算**（用户明确要新的，或者根本没有旧的）
+ *   - 缓存在有效期内         → 直接给
+ *   - 缓存过期               → 先给旧的，并触发一次后台刷新（同一时刻只跑一个）
+ *
+ * 并发安全：`state.computing` 保存"正在跑的那一个 promise"，所以十个面板请求
+ * 同时到达也只会算一次 —— 否则它们会各自算一遍，白烧 1.5 秒 × 10。
+ */
+async function serveReport(state, ctx, force) {
+  const now = Date.now();
+  const age = now - state.lastReportAt;
+
+  if (force || !state.lastReport) {
+    // 没有缓存时不并发去重：第一次访问就该拿到真结果。
+    const out = await computeReport(state, ctx);
+    state.lastReport = out;
+    state.lastReportAt = Date.now();
+    return out;
+  }
+  if (age <= state.cacheTtlMs) {
+    return { ...state.lastReport, cache: { hit: true, ageMs: age, refreshing: false } };
+  }
+  // 过期：**不等它**。给旧的，后台刷。
+  if (!state.computing) {
+    state.computing = computeReport(state, ctx)
+      .then((out) => {
+        state.lastReport = out;
+        state.lastReportAt = Date.now();
+        return out;
+      })
+      .catch((error) => {
+        // 后台刷新失败**不能影响已经发出去的那份**，但必须留下痕迹：
+        // 静默失败的刷新会让面板一直显示过期数据，而用户以为那是当前的。
+        try { log(`WARN F2 background refresh failed: ${errText(error)}`); } catch { /* 忽略 */ }
+        state.lastRefreshError = errText(error);
+        return null;
+      })
+      .finally(() => { state.computing = null; });
+  }
+  return { ...state.lastReport, cache: { hit: true, ageMs: age, refreshing: true } };
 }
 
 /**
@@ -1115,7 +1226,17 @@ export function apply(ctx) {
         injectProbe: { registered: false, outcome: 'not run' },
       },
       disposeInjectProbe: null,
+      // ── F2：结果缓存 ──
+      // 面板打开时可能连着拉几次，而一次体检是几百毫秒到 1.5 秒的活。
+      // 更重要的是**启动时就先跑一次**（见下面的预热），这样用户点开面板是即时的。
       lastReport: null,
+      lastReportAt: 0,
+      computing: null,
+      /** 缓存有效期。到点不清空，而是**先返回旧的、后台再刷新** —— 见下面的 stale-while-revalidate。 */
+      cacheTtlMs: toPositiveInt(process.env.DSC_CACHE_TTL_MS, 5 * 60 * 1000),
+      /** 启动后多久自动跑第一次（默认落在最后一次 loader 扫描之后） */
+      autoRunDelayMs: toPositiveInt(process.env.DSC_AUTORUN_MS, (SCAN_DELAYS[SCAN_DELAYS.length - 1] || 4000) + 2000),
+      autoRunTimer: null,
     };
 
     // Resolve the loader immediately: it is a plain service read and must not
@@ -1163,17 +1284,14 @@ export function apply(ctx) {
                   return;
                 }
                 try {
-                  // `?refresh=1` 强制重算；否则用缓存（体检是几百毫秒级的活，
-                  // 而面板打开时可能连着拉几次）。
                   const url = new URL(req.url || '/', 'http://127.0.0.1');
-                  if (url.searchParams.get('refresh') === '1' || !state.lastReport) {
-                    state.lastReport = await computeReport(state, ctx);
-                  }
+                  const force = url.searchParams.get('refresh') === '1';
+                  const out = await serveReport(state, ctx, force);
                   res.writeHead(200, {
                     'content-type': 'application/json; charset=utf-8',
                     'cache-control': 'no-store',
                   });
-                  res.end(JSON.stringify(state.lastReport));
+                  res.end(JSON.stringify(out));
                 } catch (error) {
                   // 连处理器里都不抛：把错误变成一条可读的 JSON，而不是 500 空响应。
                   res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
@@ -1217,6 +1335,17 @@ export function apply(ctx) {
           probe.firedAfterMs !== undefined ? ` firedAfterMs=${probe.firedAfterMs}` : ''
         }`,
       );
+      // ⚠️ 这里**不要**动 `state.autoRunTimer`。它是 F2 的启动自检，与 loader 扫描
+      // 是两件事 —— 但它们**时间上相邻**：默认时机就落在最后一次扫描之后 2 秒。
+      // 早先写成了 `finish()` 里 clearTimeout(autoRunTimer)，于是最后一次扫描一结束
+      // 就把启动自检取消了：**它从来没跑过，也没有任何报错**（性能测量看不见的静默失效）。
+      // 教训：清理定时器必须由创建它的那一方负责。
+      // F2：最后一次扫描之后跑启动自检 —— 这时候条目状态才是稳的。
+      try {
+        if (typeof state.runAutoCheck === 'function') state.runAutoCheck();
+      } catch (error) {
+        log(`WARN F2 启动自检触发失败: ${errText(error)}`);
+      }
       try {
         if (typeof state.disposeInjectProbe === 'function') {
           state.disposeInjectProbe();
@@ -1250,6 +1379,56 @@ export function apply(ctx) {
       if (timer && typeof timer.unref === 'function') timer.unref();
     };
     schedulePass(0);
+
+    // ── F2：启动后自动跑一次，并把「变了没有」直接打进启动日志 ──
+    //
+    // 为什么值得单独做：本产品最大的风险不是"算错"，而是**用户想不起来看**。
+    // 角标只在他点开面板时才存在；而"上次是好的、这次不行了"这件事，
+    // 最该被知道的时间点就是**启动时**。
+    //
+    // 时机：**由最后一次 loader 扫描完成来触发**，而不是另起一个定时器。
+    // 两个理由：
+    //   1. 插件条目的状态在启动后几秒内还会变（异步 import），太早跑会把
+    //      "还在加载"误记成"没起来"；
+    //   2. 早先用独立定时器，结果它和 `finish()` 的时间**相邻**，被 `finish()`
+    //      的清理顺手取消掉了 —— 启动自检从未运行、且**没有任何报错**。
+    //      一个"看起来做了其实没做"的定时器，比没有更糟。
+    state.runAutoCheck = () => {
+      if (state.autoCheckStarted) return;   // 幂等：只跑一次
+      state.autoCheckStarted = true;
+      try {
+        computeReport(state, ctx)
+          .then((out) => {
+            state.lastReport = out;
+            state.lastReportAt = Date.now();
+            if (out && out.ok) {
+              const sum = out.report.summary || {};
+              const b = out.baseline || {};
+              const badge = b.badge || {};
+              log(`F2 启动自检: 可用 ${sum.ok || 0} 部分可用 ${sum.partial || 0} 不兼容 ${sum.broken || 0}`
+                + (sum.vacuousOk ? ` (${sum.vacuousOk} 个为空洞的可用)` : ''));
+              // 有变化就打成一条显眼的日志；没变化也要有一条。
+              // 「没有变化」必须说出来 —— 沉默会被读成"没检查"或"坏消息被藏起来了"。
+              if (badge.show) log(`F2 与上次相比: ${badge.text} —— ${badge.detail || ''}`);
+              else log(`F2 与上次相比: ${badge.detail || b.note || '没有可比基线'}`);
+            } else if (out) {
+              log(`WARN F2 启动自检没跑成: ${out.error || '未知原因'}`);
+            }
+          })
+          .catch((error) => log(`WARN F2 启动自检失败: ${errText(error)}`));
+      } catch (error) {
+        log(`WARN F2 启动自检同步失败: ${errText(error)}`);
+      }
+    };
+
+    // 兜底：万一 loader 扫描那条路没走到（例如 loader 完全不可达，
+    // `scan` 会提前 return），启动自检也必须跑。两条路都调 `runAutoCheck`，
+    // 由它自己保证幂等 —— 谁先到都算数。
+    {
+      const timer = setTimeout(() => { try { state.runAutoCheck(); } catch { /* 忽略 */ } }, state.autoRunDelayMs);
+      if (timer && typeof timer.unref === 'function') timer.unref();
+      state.fallbackTimer = timer;
+    }
 
     // Manual re-scan handle for tooling/experiments (no host service needed).
     try {
