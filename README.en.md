@@ -1,160 +1,260 @@
 # dsh-plugin-compat-check
 
-> Find out whether a DSH community plugin actually works on **your** DeepSeek Harness version — in a few minutes, before you install it.
+> Find out whether the DSH plugins you **already have installed** actually work on **your current DSH version** — and for anything that doesn't, get the **location** (`file:line`) and the **reason**.
 
 [简体中文](README.md) | **English**
 
 ---
 
-## The problem it solves
+## What it answers
 
-DeepSeek Harness (DSH) is an agent harness where *everything is a plugin* — models, tools, sandboxes, session storage, the UI, even the agent loop itself. The community ecosystem is large, but **a plugin's declarations are not the host's reality**. All four of the following misjudgements were hit while building this tool:
+DeepSeek Harness (DSH) is a harness where *everything is a plugin*: models, tools, sandboxes, the UI, and even the agent loop itself. The ecosystem is large — and **what a plugin claims is not what the host provides**.
 
-| You might assume | What actually happens |
+It exists to answer exactly one question:
+
+> **On this version of DSH, do the plugins I already have installed still work?**
+
+For the parts that work, it stays quiet. For the parts that don't, it must say **which line** and **why**.
+
+### Four kinds of misjudgement, all encountered for real in this project
+
+| You might assume | Reality |
 |---|---|
-| `peerDependencies` says it supports version X → it works | The declaration can simply be wrong. One plugin declares support for `0.2.0` and throws `ctx.settings.register is not a function` on startup |
-| DSH's version gate let it install → it works | The gate only compares **version range strings**. It does not verify that APIs exist |
-| Startup logged no error → it works | Plugins commonly degrade with `try/catch` and `typeof` guards. **When an API is missing the plugin still "activates" — but that feature is dead** |
-| Startup logs are clean → the client half is fine too | Client code runs in the browser. One plugin had a perfectly clean host startup while its client half threw and never registered any UI |
+| `peerDependencies` / `dsh.compatibility` says it's supported → it works | **The declaration can be wrong.** One plugin declaring support for `0.2.0` threw `ctx.settings.register is not a function` on boot |
+| The DSH version gate let it through → it works | The gate only does **string range comparison**; it never verifies the API actually exists |
+| No error at startup → it works | Plugins habitually degrade with `try/catch` and `typeof` guards. **When an API is missing it still "activates successfully", but that functionality is dead** |
+| Clean startup log → the client half is fine too | Client code runs in the browser. One plugin had a completely clean host-side log while its client half threw and the UI never registered at all |
 
-Reading declarations and logs is not enough. You have to **actually boot once, then diff the host's real API surface against the services and methods the plugin really calls.** That is what this tool does.
+So: **reading declarations is not enough, and reading logs is not enough.** You have to read the installed plugin's source, obtain the host's real API surface, and compare them line by line.
 
-## Requirements
+## Three artifacts, one kernel
 
-- **DSH CLI**: `dsh` available on `PATH` (on desktop, install it via the menu bar → "Manage dsh Command…")
-- **A POSIX shell**: macOS or Linux. On Windows, run it under WSL or Git Bash
-- `bash`, `python3`, `curl`, `pgrep`/`pkill`
+One Node kernel (`lib/`), three entry points. **They cannot disagree** — the panel, the CLI, and the conversation tool all consume the same `computeReport()` result.
+
+| | Plugin (in-process) | CLI | skill |
+|---|---|---|---|
+| Audit the host layer of installed plugins | ✅ main job | ✅ | teaches an agent when to call the CLI |
+| Audit the client half | ✅ **unique** | ❌ invisible from a terminal | ❌ |
+| Pre-check a plugin **not yet installed** | ❌ | ✅ **unique** | ❌ |
+| "Can't even install it" (version gate refused) | ❌ | ✅ **unique** | ❌ |
+| Still works when the host won't boot | ❌ it is inside the host | ✅ **unique** | ❌ |
+| Terminal / CI output | ❌ | ✅ | ❌ |
+| Answer directly in conversation | with its tool ✅ | ❌ | ✅ |
+
+> **The plugin is strictly weaker than the CLI, not a superset.** That's why this project never claims "install this plugin and it will check things for you before installation" — that's the CLI's job.
 
 ## Quick start
 
+### 1. CLI (most complete; start here)
+
 ```bash
-git clone https://github.com/<your-user>/dsh-plugin-compat-check.git
+git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
 cd dsh-plugin-compat-check
-chmod +x dsh-plugin-compat-check.sh
+
+# audit the plugins installed in a profile
+node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop
+
+# with a probe report, method-level findings become "certain"
+node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --probe /tmp/dsh-plugin-compat-check/probe-report.json --dsh-version 0.2.0-rc.2
+
+# the repo ships one you can compare against directly (used by the regression baseline)
+node bin/compat-check.mjs --nm ~/.dsh/profiles/parityfix --probe tools/parity/fixtures/host-surface-parityfix.json --dsh-version 0.2.0-rc.2
+
+# machine-readable / one line
+node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --json
+node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --quiet
 ```
 
-```bash
-./dsh-plugin-compat-check.sh <spec> [--keep] [--timeout SECONDS]
-```
-
-`<spec>` is exactly what `dsh plugin add` accepts:
-
-```bash
-# npm package name
-./dsh-plugin-compat-check.sh dsh-keep-awake
-
-# GitHub repo (many ecosystem plugins are never published to npm)
-./dsh-plugin-compat-check.sh github:owner/repo
-
-# A plugin you are developing locally
-./dsh-plugin-compat-check.sh file:/path/to/my-plugin
-```
+`--nm` accepts either a `node_modules` directory or a profile directory (the `node_modules` suffix is added automatically).
 
 | Option | Effect |
 |---|---|
-| `--keep` | Keep the throwaway profile and evidence for manual inspection (deleted on exit by default) |
-| `--timeout N` | Seconds to wait for startup; default 30. Heavier plugins need more |
+| `--nm <dir>` | **Required.** The `node_modules` or profile directory to audit |
+| `--probe <json>` | Host runtime surface. **Only with this does a method-level finding become "certain"**; without it the tool falls back to the official catalogue and marks it "suspected" |
+| `--dsh-version <v>` | Current DSH version (prerequisite for the "declaration vs. reality" category) |
+| `--rules` / `--catalog` | Override the tables under `rules/` |
+| `--no-baseline` | Don't read or write the local baseline (CI / one-shot checks) |
+| `--baseline-file <path>` / `--dry-run` | Point at a specific baseline / compute the diff without writing |
+| `--json` / `--quiet` | Machine-readable / summary line only |
 
-> Note: the tool's own output text is currently in Chinese.
+**Exit codes** (`1` and `2` describe **the plugins**; `3` never does):
+
+| Code | Meaning |
+|---|---|
+| `0` | Everything usable |
+| `1` | Some plugin is "partially usable" |
+| `2` | Some plugin is "incompatible" |
+| `3` | **This audit produced no trustworthy verdict** (bad usage / missing directory / the tool itself failed) |
+
+> Why `3` must exist separately: reading a mistyped command as "this plugin is incompatible" sends the user to investigate **entirely the wrong thing**.
+
+### 2. Install as a DSH plugin (gives you a panel)
+
+```bash
+dsh plugin --profile <your-profile> add github:lcy0121/dsh-plugin-compat-check
+```
+
+Then look under **Settings → Built-in plugins → Compatibility** for the overview table. Open any plugin's detail page and its verdict badge sits in the title row, with the individual findings below. A few seconds after startup it also runs once by itself and logs whether anything **changed since last time**.
+
+### 3. Install the skill (so an agent knows how to use it)
+
+```bash
+./dsh-plugin-compat-check.sh --install-skill
+```
+
+Installs to `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`. With it, "does this plugin still work after the update?" gets answered by the agent running the check instead of sending you to the docs.
+
+> ⚠️ **Shipping `SKILL.md` inside a plugin package does not count** — DSH does not scan files inside plugin packages. That's why this is a separate step even after installing the plugin: the plugin form registers the skill itself via `ctx.skills.registerProvider()`, and this command exists for people who **only use the CLI** and therefore never get that registration.
+
+### 4. End-to-end script (install + boot + probe + verdict)
+
+```bash
+./dsh-plugin-compat-check.sh <spec> [--keep] [--timeout seconds] [--json]
+```
+
+`<spec>` is exactly what `dsh plugin add` accepts: `dsh-keep-awake`, `github:owner/repo`, `file:/path/to/plugin`.
+
+It does three things the CLI cannot, and therefore answers questions the CLI cannot: npm identity lookup (against name collisions), isolated install (catches version-gate refusals), and a real boot that produces the probe report (which is what turns method-level findings into "certain").
+
+| Option | Effect |
+|---|---|
+| `--keep` | Keep the temporary profile and evidence for manual inspection |
+| `--timeout N` | Boot wait in seconds, default 30 |
+| `--json` | Machine-readable output |
+| `--install-skill` | Install the skill only, no audit (needs no kernel) |
+| `--force` | With `--install-skill`, overwrite an existing skill |
+| `--help` | Usage (needs no kernel) |
+
+> **`--install-skill` and auditing are independent**: the former needs no kernel; the latter **fails outright** when the kernel is missing rather than degrading to "just print the extraction" — degrading would produce output that looks normal and **contains no verdict**, which is far worse than an error.
 
 ## Reading the output
 
 ```
-✓  agents: list 均存在                      ← this really works
-⚠️  settings: 调用了不存在的方法 ['register']
-      宿主实际提供: configure, describe, mutate, replace …
-❌ 服务缺失: xxx                             ← functionality is definitively broken
-◻︎ 客户端服务: locale, slots                 ← not testable here; verify in the UI
+插件数: 22    有运行时面: 是
+
+结论: 可用 3    部分可用 19    不兼容 0
+
+部分可用  dsh-keep-awake@0.2.0
+     降级 / 宿主方法缺失  jobs.onJobsChanged  @ lib/index.js:591
+       影响: 任务状态不再实时推送，插件退化为轮询（约 5 秒延迟）
+     功能缺失 / 宿主方法缺失  settings.register  @ lib/index.js:466
+     客户端半边（命令行测不到，需界面验证）: locale, slots
+     无证据可判（只出现名字，没有调用点）: timer
 ```
 
-| Verdict | Meaning |
+*(Tool output is Chinese-only; `README.en.md` documents the tool in English but the output strings themselves are not localised. This is listed under Known limitations.)*
+
+Every plugin lands in **exactly one** disposition, and the set of dispositions must equal the set of services (an invariant enforces this):
+
+| Disposition | Meaning |
 |---|---|
-| **API surface complete, clean startup** | Usable at the host level; the client half still needs a visual check |
-| **Partially usable** | Some APIs are missing → those features fail or silently degrade; the rest works |
-| **Incompatible** | It cannot even pass DSH's version gate to install |
+| `finding` | A verdict exists — see the findings above |
+| `client-side` | Runs in the browser. **Invisible from a terminal**; needs UI verification |
+| `self-provided` | The plugin provides this service itself; it is not a host service |
+| `runtime-facility` | A Cordis context builtin (`loader`, `effect`, …), not a DSH service |
+| `filtered` | Judged noise/false positive (JS builtin method names, variables with no credible source) |
+| `guarded` | **The author checks for it themselves** and has a fallback — reporting it would be a false positive |
+| `abstained` | Not enough data to judge (e.g. the catalogue declares no methods for that service) |
+| `no-calls` | The name appears but there is no call site — **no evidence, which is not "no problem"** |
 
-## What it does
+The last two are deliberately separated. `no-calls` and `abstained` look like "fine" everywhere else, and they are not.
 
-### ① Identity check
+## Three tiers of certainty (this is the honesty mechanism)
 
-Looks up the npm package name to find **which repository it actually belongs to**.
+| Tier | When | Shown as |
+|---|---|---|
+| **Certain** | A **runtime surface** is available, or the plugin **declares** the dependency itself | no annotation |
+| **Suspected** | Only the official catalogue (a **contract** catalogue, not the runtime surface) | `[suspected]` |
+| Excluded | Neither declared nor in the catalogue | recorded under `filtered`, auditable |
 
-This is not paranoia — name collisions are real in this ecosystem. For example, the npm name `dsh-effort-slider` belongs to one repository while the plugin you want may live in a different same-named one; and the npm package `aegis` is unrelated to the plugin of that name (which only exists on GitHub). **Installing the wrong package is worse than failing to install** — it silently runs something else.
+> **The official catalogue is not the runtime surface.** It declares no methods at all for abstract services (`jobs`), omits `loader` entirely, and declares fewer methods for `settings` than the runtime actually has. Asserting "this method does not exist" from it does not qualify as certain, so those findings are downgraded to "suspected".
+>
+> This is not a defect: **when you cannot judge, you downgrade the label instead of upgrading it to certain.**
 
-If the npm metadata declares no `repository`, the script warns explicitly.
+## What it deliberately does not do
 
-### ② Isolated install
-
-Creates a throwaway profile (`plugincheck`, from the `web` template) and installs the target into it.
-
-A failure here usually means DSH's built-in version gate rejected it — such plugins cannot even be installed.
-
-> **Your real profiles (`desktop`, etc.) are never touched.**
-
-### ③ Static extraction of what the plugin actually calls
-
-Scans the plugin's sources for the services and methods it **really calls**, not just what it declares.
-
-> This step only *extracts*; it does not decide whether a service is host-side or client-side. That call is made by the real probe in step ④ — see the implementation notes for why.
-
-### ④ Real boot + API-surface diff
-
-Boots the host, dumps its **real API surface** with the bundled probe, and diffs it against the call sites from ③.
-
-> The probe walks the **prototype chain**. That is a lesson paid for: enumerating only own properties misses prototype methods, which once led to the wrong conclusion that a version had *removed* a capability — when in fact the method had merely been renamed.
+- **Does not install packages, spawn subprocesses, or use the network** (plugin form). Breaking that boundary to obtain one version string is not worth it.
+- **Does not guess.** When the DSH version cannot be obtained, `dshVersion` is `null` and the "declaration vs. reality" category **simply cannot fire** — rather than inventing a version and conjuring a finding out of nothing.
+- **Does not call "not comparable" the same as "no problem".** No baseline yet says "never compared"; a corrupt baseline says "unreadable, skipping the comparison".
+- **Does not use an LLM for judgement.** Severity comes from layered defaults plus `rules/severity.json`.
 
 ## Two boundaries you must know
 
-**1. The client half can never be tested from the command line.**
-Client code executes in the browser. The only way to confirm it is to look at **whether the plugin's own UI element appears** (a button, a tab, a settings card). This tool lists client-side services but deliberately **does not** judge them.
+**1. The client half can never be verified from a terminal.** Client code executes in the browser; confirming it means looking at **whether the plugin's own UI elements appear**. This tool **lists** client-side services but **does not judge** them — deliberate honesty, not an omission. (The plugin's own panel cannot verify it either: the panel runs inside the host.)
 
-**2. Method-level findings are regex heuristics.**
-Static scanning can mistake a non-call site for a call. When unsure, pass `--keep` and inspect the raw data:
+**2. Method-level judgement rests on static extraction and has known false-positive sources.** Every real defect is recorded in [`docs/extraction-findings.md`](docs/extraction-findings.md) (18 fixed so far). When in doubt, add `--keep` and inspect the raw data:
 
 | Path | Contents |
 |---|---|
-| `/tmp/dsh-plugin-compat-check/boot.log` | Host startup log (including `did not activate`) |
-| `/tmp/dsh-plugin-compat-check/static.json` | Extracted services and call sites |
+| `/tmp/dsh-plugin-compat-check/boot.log` | Host boot log (including `did not activate`) |
+| `/tmp/dsh-plugin-compat-check/static.json` | Extracted services and call sites, with `file:line` |
 | `/tmp/dsh-plugin-compat-check/probe-report.json` | The host's real API surface |
-
-## Artifacts and cleanup
-
-On exit (`trap EXIT`) the script:
-
-1. Recursively kills the test server's process tree
-2. Sweeps for leftover sleep-inhibitor helpers such as `caffeinate`
-   > This is a safety requirement: a keep-awake plugin that leaves its helper process behind will prevent your machine from ever sleeping
-3. Deletes the throwaway profile (unless `--keep`)
 
 ## Layout
 
 ```
 dsh-plugin-compat-check/
-├── dsh-plugin-compat-check.sh   # Orchestration: identity → install → extract → boot → diff
-├── probe/                # Diagnostic probe (installed into the throwaway profile via file:)
-│   ├── package.json
-│   ├── cordis.patch.yml
-│   └── index.mjs         # Prototype-chain walk + scoped-context probing
-├── README.md
-├── README.en.md
-└── LICENSE
+├── lib/                      # kernel: four pure modules shared by all three artifacts
+│   ├── extract.mjs           #   static extraction: who calls what (with file:line and evidence form)
+│   ├── verdict.mjs           #   judgement: findings, certainty tiers, per-service disposition
+│   ├── baseline.mjs          #   diffing: what changed since last time, and in which direction
+│   └── report.mjs            #   rendering: the human table (same wording as the conversation tool)
+├── rules/                    # data, not logic
+│   ├── severity.json         #   severity layering (40 services) + impact wording
+│   ├── dsh-api-catalog.json  #   official catalogue, both halves (91 host / 8 client services)
+│   └── usage-inventory.json  #   evidence for rule-table coverage
+├── bin/compat-check.mjs      # CLI entry (arg parsing / exit codes / two renderings)
+├── plugin/                   # the DSH plugin artifact
+│   ├── index.js              #   host half: introspection + panel data channel + tool + skill
+│   └── lib/client.js         #   client half: **prebuilt**; the host does not build it
+├── skill/                    # the skill artifact (SKILL.md + how registration works)
+├── dsh-plugin-compat-check.sh # end-to-end orchestration
+├── probe/                    # diagnostic probe (installed into a throwaway profile)
+├── test/                     # 205 assertions (see below)
+├── tools/                    # development tooling: parity, catalogue extraction, slot probe
+└── Plan.md                   # **development plan and working rules** (read before changing anything)
 ```
 
-## Implementation notes (read before modifying)
+## Tests
 
-- **The probe declares no `inject`**: doing so would leave it stuck in `PENDING` whenever a service is missing, which *reduces* what it can observe. It relies on delayed execution plus `try/catch`.
-- **The probe writes `probe-applied.txt` before probing**: otherwise "no report" cannot be distinguished between "the plugin never loaded" and "probing threw midway".
-- **Only the actually mounted entry point and its local import graph are scanned — not the whole package.** Packages often carry companion modules that never load: one real plugin ships a `lib/invariant.js` that its main entry never imports, that `cordis.patch.yml` never mounts, and whose `apply` is an empty stub. Scanning everything reports the services such orphans need as genuine gaps and drags the verdict down. Only when entry resolution fails does it fall back to a whole-package scan, and it says so explicitly in the output.
-- **Host vs client attribution is decided by the probe, not by file paths.** This took two failed attempts. Requiring *every* referencing file to sit in a client directory misreported client services found in shared code as missing; switching to *any* client-directory reference then misclassified host services as client — because **a client settings UI legitimately references host services** (to display running agent/job counts), while shared code and even the host entry mention `locale` and `slots`. Both directions are wrong. The final rule: **if the probe finds it in the host, it is a host service; only when it is absent *and* has a client-side hint do we label it "verify in the UI"** instead of declaring it missing.
-- **Mind hard links after editing `probe/index.mjs`**: once installed into a profile the plugin is hard-linked or copied. Writing in a way that replaces the inode (some editors do) leaves the `node_modules` copy stale, producing "I changed the code but behaviour did not change".
+```bash
+node --test test/
+```
+
+205 assertions across seven layers, each answering a different question:
+
+| File | Answers | Blind to |
+|---|---|---|
+| `invariants.test.mjs` | Is the result **self-consistent** (for any input)? | Results that are wrong but internally consistent |
+| `snapshot.test.mjs` | Did the output **change** (key fields + content hash)? | Changes faithfully recorded into the snapshot |
+| `__expectations__/` | Is the verdict the one we **promised**? (hand-written) | Cases nobody thought of |
+| `cli.test.mjs` | Did the flags actually take effect? Are failures swallowed? | UI behaviour |
+| `client-structure` / `host-structure` | Can a component/host **register successfully but do nothing**? | Real rendering |
+| `baseline.test.mjs` | Is every diff category right? **Is it quiet when nothing changed?** | Real plugins |
+| `skill.test.mjs` | Can the tool actually do everything the skill claims? (doc drift) | —— |
+
+**All three layers are required** — established by measurement: injecting a "the fallback path never triggers" mutation leaves **all 69 invariants green while the snapshot turns red immediately**; conversely, emptying a plugin's call sites turns **the snapshot red while the invariants stay green**. Each is structurally blind to the other's failure mode.
+
+> Only the **snapshot** layer may be regenerated. Invariants and expectations must **never be "regenerated to green"** — that is precisely what they are for.
+>
+> Regenerate with `UPDATE_SNAPSHOTS=1 node --test test/snapshot.test.mjs` (an environment variable, not `--update`: `node --test` treats arguments after the test file as *test filenames*, so the flag never takes effect while the exit code stays normal — **yet another silent no-op**).
+
+## Maintenance
+
+| To do this | Do that |
+|---|---|
+| Track a new DSH version | `python3 tools/catalog/extract-host-api.py` to re-extract the official catalogue |
+| Change severity / impact wording | `rules/severity.json`, then run the tests (coverage and freshness invariants will notice) |
+| Compare against the Python reference | `./tools/parity/parity.sh <node_modules dir>` |
+| Change this repository | **Read [`Plan.md`](Plan.md) first**: 10 locked decisions, milestones, working rules, landmine list, and the measured DSH contracts |
 
 ## Known limitations
 
-- Output text is currently Chinese only
-- Covers the host-side API surface only; the client half needs manual UI confirmation
-- Method-level findings are heuristic and may produce false positives
-- Requires network access (npm registry lookup, plugin install)
-- Not verified on native Windows
+- Tool output is Chinese-only (this document is English; no i18n for the output strings yet)
+- Method-level judgement is heuristic and can produce false positives; every known one is in `docs/extraction-findings.md`
+- **The client half cannot be verified automatically** — it can only be listed, and needs a human to look at the UI
+- The end-to-end script needs network access (npm registry, installing plugins) and `python3`
+- Not verified on native Windows (the kernel is pure Node and should port; the script needs a POSIX shell)
 
 ## License
 

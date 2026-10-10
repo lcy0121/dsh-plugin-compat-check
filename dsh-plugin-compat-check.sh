@@ -127,22 +127,53 @@ if [ "$INSTALL_SKILL" -eq 1 ]; then
 fi
 # ===================== [E2] 区块结束 ========================================
 
-if [ -z "$SPEC" ]; then
+# ── 帮助与"没给参数" ──
+#
+# ⚠️ `--help` 此前**根本没被处理**：它会掉进下面的「找内核」检查并以 1 退出 ——
+# 也就是"想看用法"被当成"内核缺失"报了个错。`-h`/`--help`/`help` 现在都认，且
+# **不需要内核**（看用法当然不需要能跑）。
+#
+# 用法文本抽成函数，因为它现在有两个调用点（显式求助 / 没给参数），
+# 两份副本迟早会漂移。
+usage() {
   cat >&2 <<'USAGE'
 用法: dsh-plugin-compat-check <spec> [--keep] [--timeout 秒] [--json]
        dsh-plugin-compat-check --install-skill [--force]
+       dsh-plugin-compat-check --help
 
   spec 可为 npm 包名 / github:owner/repo / file:/本地路径 / git+https://...
 
-  --install-skill  把随包的 skill/SKILL.md 装进 ~/.agents/skills/<name>/
-                   （不需要判定内核；已有文件不会静默覆盖，要覆盖加 --force）
+  体检已装的插件（不需要联网、不碰正式 profile）:
+    node bin/compat-check.mjs --nm <profile 目录> [--probe <探针报告>] [--json] [--quiet]
+
+选项:
+  --keep            保留临时 profile 与现场，便于人工排查
+  --timeout N       启动等待秒数，默认 30
+  --json            机器可读输出
+  --install-skill   把随包的 skill/SKILL.md 装进 ~/.agents/skills/<name>/
+                    （不需要判定内核；已有文件不会静默覆盖，要覆盖加 --force）
+  --help            显示这段文字（不需要判定内核）
 
 示例:
   dsh-plugin-compat-check dsh-keep-awake
-  dsh-plugin-compat-check github:bearice/dsh-keep-awake
+  dsh-plugin-compat-check github:owner/repo
   dsh-plugin-compat-check file:/path/to/my-plugin
   dsh-plugin-compat-check --install-skill
 USAGE
+}
+
+case "$SPEC" in
+  --help|-h|help)
+    # 求助是**成功**，退出码 0。返回 1 会让 `cmd --help || echo failed` 这类
+    # 常见写法报错 —— 把"想了解用法"当成失败是很糟的第一印象。
+    usage
+    exit 0
+    ;;
+esac
+
+if [ -z "$SPEC" ]; then
+  # 没给参数才算用法错误（退出码 2）
+  usage
   exit 2
 fi
 
@@ -161,10 +192,17 @@ if [ ! -f "$KERNEL_DIR/lib/extract.mjs" ] || [ ! -f "$KERNEL_DIR/lib/verdict.mjs
   这个脚本不自带判定实现 —— 判定只有一处实现（lib/verdict.mjs），
   而它需要 Node 环境（DSH 自带 Node ≥22）。
 
-  两种用法：
-    1) 在仓库里跑（推荐）：git clone 后直接执行本脚本
-    2) 只想要脚本：用 DSC_KERNEL 指向内核目录，例如
+  两条路：
+    1) 在仓库里跑（推荐）：git clone 后直接执行本脚本（内核就在旁边）
+    2) 只拷了脚本：用 DSC_KERNEL 指向内核目录，例如
          DSC_KERNEL=/path/to/dsh-plugin-compat-check ./dsh-plugin-compat-check.sh <spec>
+
+  **不接受降级**：找不到内核就退出，而不是"只打印提取结果"。
+  降级会给出一个看起来正常、实际没有结论的输出 —— 那比报错糟得多。
+
+  也不需要内核的两件事（与体检分开）：
+    --help            看用法
+    --install-skill   只装 skill
 EOF
   exit 1
 fi

@@ -1,158 +1,262 @@
 # dsh-plugin-compat-check
 
-> 在安装之前，几分钟内判断一个 DSH 社区插件在你这一版 DeepSeek Harness 上到底能不能用。
+> 体检你**已经装了的** DSH 插件与**当前 DSH 版本**是否兼容；不兼容的，给出**位置**（`file:line`）和**原因**。
 
 **简体中文** | [English](README.en.md)
 
 ---
 
-## 它解决什么问题
+## 它回答什么
 
-DeepSeek Harness（DSH）是「万物皆插件」的 agent harness：模型、工具、沙箱、界面甚至 agent loop 本身都是插件。社区生态很大，但**插件的声明不等于宿主的现实**。以下四类误判在本项目中都真实遇到过：
+DeepSeek Harness（DSH）是「万物皆插件」的 agent harness：模型、工具、沙箱、界面、甚至 agent loop 本身都是插件。生态很大，而**插件的声明不等于宿主的现实**。
+
+它只有一个问题要答：
+
+> **我这一版 DSH 上，我已经装的那些插件，到底还能不能用？**
+
+能用的地方不说废话；不能用的地方，必须给出**哪一行、为什么**。
+
+### 四类误判，都在本项目里真实遇到过
 
 | 你可能会以为 | 实际情况 |
 |---|---|
-| `peerDependencies` 写了支持某版本 → 能用 | 声明可能是错的。有插件声明支持 `0.2.0`，实测启动即抛 `ctx.settings.register is not a function` |
+| `peerDependencies` / `dsh.compatibility` 写了支持 → 能用 | **声明可能是错的。** 有插件声明支持 `0.2.0`，实测启动即抛 `ctx.settings.register is not a function` |
 | DSH 的版本闸门放行了 → 能用 | 闸门只做**字符串范围比对**，它不验证 API 是否真的存在 |
 | 启动没报错 → 能用 | 插件普遍用 `try/catch`、`typeof` 守卫做降级。**API 缺失时它会「激活成功」，但相应功能是死的** |
 | 启动日志干净 → 客户端也没问题 | 客户端代码跑在浏览器里。实测有插件宿主端完全干净、客户端抛错导致 UI 根本不注册 |
 
-结论：靠读声明和看日志都不够，必须**真实启动一次，再把宿主实际的 API 面与插件实际的调用点逐条比对**。这就是本工具做的事。
+所以：**读声明不够，看日志也不够。** 必须真实读一遍已装插件的源码、拿到宿主的真实 API 面，逐条对上。
 
-## 前置要求
+## 三份产物，一个内核
 
-- **DSH CLI**：`dsh` 在 `PATH` 中（桌面端可在菜单栏 → 「管理 dsh 命令…」安装）
-- **POSIX shell 环境**：macOS 或 Linux。Windows 请在 WSL 或 Git Bash 中运行
-- `bash`、`python3`、`curl`、`pgrep`/`pkill`
+同一个 Node 内核（`lib/`），三个入口。**它们的结论不可能不一致**——面板、命令行、对话工具消费的是同一份 `computeReport()` 结果。
+
+| | 插件（进程内） | CLI | skill |
+|---|---|---|---|
+| 体检已装插件的宿主层 | ✅ 主职 | ✅ | 教 agent 何时调用 CLI |
+| 体检客户端半边 | ✅ **独有** | ❌ 命令行永远看不到 | ❌ |
+| 预检**尚未安装**的插件 | ❌ | ✅ **独有** | ❌ |
+| 「装不上」（版本闸门拒绝） | ❌ | ✅ **独有** | ❌ |
+| 宿主起不来时仍能工作 | ❌ 它自己也在里面 | ✅ **独有** | ❌ |
+| 输出到终端 / CI | ❌ | ✅ | ❌ |
+| 在对话里直接答 | 配合工具 ✅ | ❌ | ✅ |
+
+> **插件的能力严格弱于 CLI，不是超集。** 所以本项目的文案里不会出现「装这个插件帮你做安装前检查」这种话——那是 CLI 的活。
 
 ## 快速开始
 
+### 方式一：CLI（最完整，推荐先试）
+
 ```bash
-git clone https://github.com/<你的用户名>/dsh-plugin-compat-check.git
+git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
 cd dsh-plugin-compat-check
-chmod +x dsh-plugin-compat-check.sh
+
+# 体检某个 profile 里已装的插件
+node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop
+
+# 有探针报告时，方法级结论才是「确定」
+node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --probe /tmp/dsh-plugin-compat-check/probe-report.json --dsh-version 0.2.0-rc.2
+
+# 仓库里自带一份可直接对照的运行时面（回归基准用）
+node bin/compat-check.mjs --nm ~/.dsh/profiles/parityfix --probe tools/parity/fixtures/host-surface-parityfix.json --dsh-version 0.2.0-rc.2
+
+# 机器可读 / 只要一行
+node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --json
+node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --quiet
 ```
 
-```bash
-./dsh-plugin-compat-check.sh <spec> [--keep] [--timeout 秒]
-```
-
-`<spec>` 与 `dsh plugin add` 完全一致：
-
-```bash
-# npm 包名
-./dsh-plugin-compat-check.sh dsh-keep-awake
-
-# GitHub 仓库（生态里大量插件未发布到 npm）
-./dsh-plugin-compat-check.sh github:owner/repo
-
-# 本地开发中的插件
-./dsh-plugin-compat-check.sh file:/path/to/my-plugin
-```
+`--nm` 既能给 `node_modules` 目录，也能给 profile 目录（会自动补 `node_modules`）。
 
 | 选项 | 作用 |
 |---|---|
-| `--keep` | 保留临时 profile 与现场，便于人工排查（默认退出时删除） |
-| `--timeout N` | 启动等待秒数，默认 30。插件越重越需要给足 |
+| `--nm <dir>` | **必需**。要体检的 `node_modules` 或 profile 目录 |
+| `--probe <json>` | 宿主运行时面。**给了它，方法级结论才是「确定」**；不给则退回官方目录、降为「疑似」 |
+| `--dsh-version <v>` | 当前 DSH 版本（「声明与实测不符」这类结论的前提） |
+| `--rules` / `--catalog` | 覆盖 `rules/` 下的规则表与官方目录 |
+| `--no-baseline` | 不读写本机基线（CI / 一次性检查用） |
+| `--baseline-file <path>` / `--dry-run` | 指定基线文件 / 算差分但不写 |
+| `--json` / `--quiet` | 机器可读 / 只要一行总结论 |
+
+**退出码**（`1` 与 `2` 只表示**插件的结论**）：
+
+| 码 | 含义 |
+|---|---|
+| `0` | 全部可用 |
+| `1` | 有插件「部分可用」 |
+| `2` | 有插件「不兼容」 |
+| `3` | **这次体检本身没得出可信结论**（用法错误 / 目录不存在 / 工具自身出错） |
+
+> `3` 为什么必须独立存在：把命令写错读成「这个插件不兼容」，会让用户去查**完全错误的方向**。
+
+### 方式二：装成 DSH 插件（有面板）
+
+```bash
+dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
+```
+
+装完在 **设置 → 内置插件 → 兼容性** 看到总览表；点开任一插件详情页，标题行会有它的结论角标，页面里是逐条发现。启动后几秒还会自动跑一次，并把「与上次相比变了没有」打进启动日志。
+
+### 方式三：装 skill（让 agent 会用）
+
+```bash
+./dsh-plugin-compat-check.sh --install-skill
+```
+
+装到 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`。有了它，你问「更新之后这插件还行吗」时 agent 会自己去跑，而不是让你去翻文档。
+
+> ⚠️ **插件包内放 `SKILL.md` 不算数**——DSH 不扫描插件包内的文件。这就是方式二装完还要单独跑这一条的原因；插件形态会通过 `ctx.skills.registerProvider()` 自己注册，而这条命令是给**只用 CLI** 的用户准备的（他们拿不到插件注册的那份）。
+
+### 方式四：端到端脚本（装包 + 起宿主 + 拿探针报告 + 判定）
+
+```bash
+./dsh-plugin-compat-check.sh <spec> [--keep] [--timeout 秒] [--json]
+```
+
+`<spec>` 与 `dsh plugin add` 完全一致：`dsh-keep-awake`、`github:owner/repo`、`file:/path/to/plugin`。
+
+它比 CLI 多做三件事，也因此**能回答 CLI 回答不了的问题**：查 npm 身份（防撞名）、隔离安装（捕获版本闸门拒绝）、真实启动取探针报告（让方法级结论变成「确定」）。
+
+| 选项 | 作用 |
+|---|---|
+| `--keep` | 保留临时 profile 与现场，便于人工排查 |
+| `--timeout N` | 启动等待秒数，默认 30 |
+| `--json` | 机器可读输出 |
+| `--install-skill` | 只装 skill，不体检（不需要判定内核） |
+| `--force` | 配合 `--install-skill`，覆盖已存在的 skill |
+
+> **`--install-skill` 与体检互不干扰**：前者不需要内核；后者在内核缺失时会**直接报错退出**，不会降级成"只打印提取结果"——降级会给出一个看起来正常、**实际没有结论**的输出。
 
 ## 输出怎么读
 
 ```
-✓  agents: list 均存在                      ← 这一项确实能用
-⚠️  settings: 调用了不存在的方法 ['register']
-      宿主实际提供: configure, describe, mutate, replace …
-❌ 服务缺失: xxx                             ← 相关功能确定失效
-◻︎ 客户端服务: locale, slots                 ← 本工具测不到，需界面验证
+插件数: 22    有运行时面: 是
+
+结论: 可用 3    部分可用 19    不兼容 0
+
+与上次相比:
+  与上次相比没有任何变化
+
+部分可用  dsh-keep-awake@0.2.0
+     降级 / 宿主方法缺失  jobs.onJobsChanged  @ lib/index.js:591
+       影响: 任务状态不再实时推送，插件退化为轮询（约 5 秒延迟）
+       依据: 运行时里没有这个方法；规则表给出影响面
+     功能失效 / 宿主方法缺失  settings.register  @ lib/index.js:466
+       影响: 插件的设置页/设置项会消失
+     客户端半边（命令行测不到，需界面验证）: locale, slots
+     无证据可判（只出现名字，没有调用点）: timer
 ```
 
-| 结论 | 含义 |
+每个插件落进**恰好一类**去处，`services` 与去处集合必须相等（有不变式盯着）：
+
+| 去处 | 含义 |
 |---|---|
-| **API 面完整，启动干净** | 宿主端与比对层面可用；客户端部分仍需界面确认 |
-| **部分可用** | 存在 API 缺失 → 相关功能失效或静默降级，其余可用 |
-| **不兼容** | 连安装都过不了 DSH 的版本闸门 |
+| `finding` | 有结论，见上面的逐条发现 |
+| `client-side` | 浏览器侧服务。**命令行测不到**，需要界面验证 |
+| `self-provided` | 插件自己提供的服务，不是宿主服务 |
+| `runtime-facility` | Cordis 上下文内置成员（`loader` / `effect` …），不是 DSH 服务 |
+| `filtered` | 判为噪音/假阳性（JS 内置方法名、无来源变量…），不进结论 |
+| `guarded` | **作者自己做了能力检测**，缺失时它有兜底 —— 报出来是假阳性 |
+| `abstained` | 数据不足以判定（例如宿主目录对某服务没声明任何方法） |
+| `no-calls` | 只出现过名字，没有任何调用点 —— **无证据可判，不是"没问题"** |
 
-## 它做四件事
+后两类是刻意区分出来的。`no-calls` 与 `abstained` 在别处都长得像"没问题"，而它们不是。
 
-### ① 身份核对
+## 三档确定性（这是本工具的诚实机制）
 
-查 npm registry 上同名包**到底属于哪个仓库**。
+| 档 | 什么时候 | 呈现 |
+|---|---|---|
+| **确定** | 有**运行时面**，或插件**自己声明过**这个依赖 | 不带标注 |
+| **疑似** | 只有官方目录（**契约**目录，不是运行时面） | 标 `[疑似]` |
+| 不进结论 | 既没声明、也不在目录里 | 记进 `filtered`，可查 |
 
-这不是多虑——生态里真实存在撞名。例如 `dsh-effort-slider` 这个 npm 名属于一个仓库，而你想装的可能是另一个同名仓库的插件；`aegis` 在 npm 上是个与插件本体无关的包（插件只存在于 GitHub）。**装错包比装不上更糟**——它会静默地做别的事。
+> **官方目录 ≠ 运行时面。** 它对抽象服务（`jobs`）一个方法都不声明、对 `loader` 完全不收录、对 `settings` 声明的方法数也少于运行时实有。拿它断言「方法不存在」不够格叫确定，所以降级为「疑似」。
+>
+> 这不是缺陷，是**判不准时降级标注，而不是升格成确定**。
 
-若 npm 元数据未声明 `repository`，脚本会明确警告。
+## 不做的事（与不撒谎同样重要）
 
-### ② 隔离安装
-
-从 `web` 模板创建一个一次性 profile `plugincheck`，把目标插件装进去。
-
-失败通常意味着 DSH 自带的版本兼容闸门拒绝了它——这类插件连装都装不上。
-
-> **全程不碰你的 `desktop` 等正式 profile。**
-
-### ③ 静态提取插件的实际调用点
-
-从插件源码里找出它**真正调用**的服务与方法，而不只是看它声明了什么。
-
-> 这一步只负责「提取」，不负责判定服务属于宿主端还是客户端——那个归属由第 ④ 步的真实探针决定。原因见下方「实现要点」。
-
-### ④ 真实启动 + API 面比对
-
-启动宿主，用随附探针 dump 出宿主的**真实 API 面**，与 ③ 的调用点逐条比对。
-
-> 探针会把**原型链上的方法**一起枚举出来。这条是踩坑换来的：只枚举自有属性会漏掉原型方法，曾导致「某版本取消了某项能力」的错误结论，而实际只是方法改名了。
+- **不装包、不起子进程、不联网**（插件形态）。为拿一个版本号去破这条边界不值。
+- **不猜**。拿不到 DSH 版本时 `dshVersion` 是 `null`，于是「声明与实测不符」这类结论**自动不成立**——而不是猜一个版本、凭空造出一条结论。
+- **不把「不可比」说成「没问题」**。没有基线时会明说「还没比过」，损坏时会明说「读不出来，这次不比较」。
+- **不用 LLM 判定**。严重度由分层默认档 + `rules/severity.json` 决定。
 
 ## 两条必须知道的边界
 
-**1. 客户端这一层，命令行永远测不到。**
-插件的客户端代码在浏览器中执行。要确认它，只能看**界面上有没有出现该插件自己的 UI 元素**（按钮 / 标签页 / 设置卡片）。本工具会列出客户端服务，但**不会**判定它们——这是刻意的诚实，不是遗漏。
+**1. 客户端这一层，命令行永远测不到。** 客户端代码在浏览器中执行。要确认它，只能看**界面上有没有出现该插件自己的 UI 元素**。本工具会**列出**客户端服务，但**不判定**它们——这是刻意的诚实，不是遗漏。（插件形态的面板也测不到这一层：它自己跑在宿主里。）
 
-**2. 方法级判定是正则启发式。**
-静态扫描可能把非调用点误认成调用。拿不准时加 `--keep`，保留现场查看原始数据：
+**2. 方法级判定建立在静态提取之上，有已知的误报来源。** 每一次真实缺陷都记在 [`docs/extraction-findings.md`](docs/extraction-findings.md)，包括已修的 18 项。拿不准时加 `--keep` 保留现场：
 
 | 路径 | 内容 |
 |---|---|
 | `/tmp/dsh-plugin-compat-check/boot.log` | 宿主启动日志（含 `did not activate`） |
-| `/tmp/dsh-plugin-compat-check/static.json` | 从插件源码提取的服务与调用点 |
+| `/tmp/dsh-plugin-compat-check/static.json` | 从插件源码提取的服务与调用点（带 `file:line`） |
 | `/tmp/dsh-plugin-compat-check/probe-report.json` | 宿主真实 API 面 |
-
-## 产物与清理
-
-脚本退出时通过 `trap EXIT` 自动收尾：
-
-1. 递归杀掉测试服务进程树
-2. 兜底清理 `caffeinate` 等防休眠辅助进程
-   > 这一步是安全底线：防休眠类插件若留下辅助进程，会让机器再也无法睡眠
-3. 删除临时 profile（`--keep` 时保留）
 
 ## 目录结构
 
 ```
 dsh-plugin-compat-check/
-├── dsh-plugin-compat-check.sh   # 编排：身份核对 → 安装 → 提取 → 启动 → 比对
-├── probe/                # 诊断探针（以 file: 方式装进临时 profile）
-│   ├── package.json
-│   ├── cordis.patch.yml
-│   └── index.mjs         # 原型链枚举 + 作用域上下文探测
-├── README.md
-├── README.en.md
-└── LICENSE
+├── lib/                      # 内核：四个纯函数模块，三份产物共用
+│   ├── extract.mjs           #   静态提取：谁调用了什么（带 file:line 与证据形态）
+│   ├── verdict.mjs           #   判定：五元组结论 + 三档确定性 + 每个服务的去处
+│   ├── baseline.mjs          #   差分：与上次比变了没有、往哪个方向变
+│   └── report.mjs            #   渲染：给人看的表（CLI 与对话工具同一口径）
+├── rules/                    # 数据，不是逻辑
+│   ├── severity.json         #   严重度分层表（40 个服务）+ 影响面文案
+│   ├── dsh-api-catalog.json  #   官方双端目录（91 宿主 / 8 客户端服务）
+│   └── usage-inventory.json  #   规则表覆盖依据
+├── bin/compat-check.mjs      # CLI 入口（参数解析 / 退出码 / 两种渲染）
+├── plugin/                   # DSH 插件产物
+│   ├── index.js              #   宿主半边：自省 + 面板数据通道 + 对话工具 + skill 注册
+│   └── lib/client.js         #   客户端半边：**预构建**，宿主不构建
+├── skill/                    # skill 产物（SKILL.md + 注册机制说明）
+├── dsh-plugin-compat-check.sh # 端到端编排：身份核对 → 安装 → 提取 → 启动 → 判定
+├── probe/                    # 诊断探针（以 file: 方式装进一次性 profile）
+├── test/                     # 201 条断言（见下）
+├── tools/                    # 开发工具：对拍、目录抽取、槽位探针
+└── Plan.md                   # **开发计划与作业规程**（改这个仓库前先读）
 ```
 
-## 实现要点（改这个工具前值得先读）
+## 测试
 
-- **探针不声明 `inject`**：声明了就会因缺服务而卡在 `PENDING`，探测能力反而下降。它靠延迟 + `try/catch` 自行兜底。
-- **探针先写 `probe-applied.txt` 标记再探测**：否则「没有报告」无法区分「插件没加载」和「探测中途抛错」。
-- **只扫「实际挂载的入口 + 其本地依赖图」，不是整个包。** 包里常有不会被加载的伴随模块——实测有插件带一个 `lib/invariant.js`，主入口既不 import 它、`cordis.patch.yml` 也没挂载它，其 `apply` 甚至是个空实现。整包扫描会把这类孤儿模块需要的服务当成真实缺口，把判定压得过低。无法解析入口时才退回整包扫描，并在输出里明确标注这一点。
-- **宿主端/客户端的归属由探针判定，不靠文件路径。** 这一点试错了两轮才定下来：用「所有引用文件都在客户端目录」判定，会把共用代码里的客户端服务误报成缺失；改成「任一引用文件在客户端目录」，又会把宿主服务误判成客户端——因为**客户端设置页本来就会引用宿主服务**（例如显示运行中的 agent / job 数量），而共用代码与宿主入口也会提到 `locale`、`slots`。两个方向都错。最终规则：**探针在宿主里找到了就是宿主服务；找不到、且有客户端线索（已知客户端服务名或在客户端路径出现），才归为「需界面验证」**，而不是硬判缺失。
-- **编辑 `probe/index.mjs` 后注意硬链接**：插件装进 profile 后是硬链接/副本，若用会替换 inode 的方式写入（部分编辑器如此），`node_modules` 里的副本不会同步，会出现「改了代码但行为没变」。
+```bash
+node --test test/
+```
+
+201 条断言，分七层，各回答一个不同的问题：
+
+| 文件 | 回答什么 | 抓不到什么 |
+|---|---|---|
+| `invariants.test.mjs` | 结果**自恰**吗（对任何输入都必须成立） | 错误但内部自恰的结果 |
+| `snapshot.test.mjs` | 输出**变了**吗（关键字段 + 内容哈希） | 变了但被如实记进快照 |
+| `__expectations__/` | 结论是不是**产品承诺**的那个（人写） | 自己没想到的情形 |
+| `cli.test.mjs` | 参数真的起了作用吗、失败会不会被静默吞掉 | 界面行为 |
+| `client-structure` / `host-structure` | 组件/宿主会不会**注册成功但什么都没做** | 真实渲染效果 |
+| `baseline.test.mjs` | 差分每一类都对吗、**没有变化时安静吗** | 真实插件 |
+| `skill.test.mjs` | skill 说的每件事工具都做得到吗（文档漂移） | —— |
+
+**三层缺一不可**，这是实测出来的：往代码里注入「fallback 永不触发」这个变异，**69 条不变式全绿，快照立刻变红**；反过来清空某插件的调用点时**快照会红、不变式不会**。它们各自在原理上看不见对方那一类。
+
+> 三层里只有**快照**可以被重建。不变式与判据**永远不该被"重建到全绿"**——那是它们存在的意义。
+>
+> 重建方式：`UPDATE_SNAPSHOTS=1 node --test test/snapshot.test.mjs`（用环境变量而不是 `--update`：`node --test` 会把测试文件之后的参数当成测试文件名，旗标从未生效而退出码正常——**又一类静默空操作**）。
+
+## 维护
+
+| 想干什么 | 怎么做 |
+|---|---|
+| 跟进 DSH 版本 | `python3 tools/catalog/extract-host-api.py` 重新抽官方目录 |
+| 改严重度/影响面文案 | `rules/severity.json`，然后跑测试（有覆盖与新鲜度不变式盯着） |
+| 与 python 参考实现对拍 | `./tools/parity/parity.sh <node_modules 目录>` |
+| 改这个仓库 | **先读 [`Plan.md`](Plan.md)**：10 项已锁定决策、里程碑、作业规程、地雷清单、已实测的 DSH 契约都在里面 |
 
 ## 已知限制
 
-- 输出文案目前为中文
-- 仅覆盖宿主端 API 面；客户端需人工在界面上确认
-- 方法级判定为启发式，存在误报可能
-- 需要能联网（查 npm registry、安装插件）
-- 未在 Windows 原生环境验证
+- 输出文案为中文（`README.en.md` 是英文说明，但工具输出本身未做 i18n）
+- 方法级判定是启发式的，存在误报可能；每一次已知误报都记在 `docs/extraction-findings.md`
+- **客户端半边无法自动验证**，只能列出、需人工看界面
+- 端到端脚本需要联网（查 npm registry、装插件）与 `python3`
+- 未在 Windows 原生环境验证（内核是纯 Node，理论上可移植；脚本部分需要 POSIX shell）
 
 ## License
 

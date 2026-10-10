@@ -318,3 +318,47 @@ describe('--install-skill 补测：参数顺序与「找不到源文件」', () 
     }
   })
 })
+
+/**
+ * 脚本的命令行**契约**：`--help` 与 `--install-skill` 都不需要判定内核。
+ *
+ * 这是一次真实缺陷的回归：`--help` 此前**根本没被处理**，它会掉进「找内核」检查
+ * 并以 1 退出 —— 也就是"想看用法"被当成"内核缺失"报了个错。
+ * 把"想了解用法"当失败，是很糟的第一印象。
+ */
+describe('脚本：不需要内核的那些入口', () => {
+  const runScript = (args, env) => spawnSync('bash', [SCRIPT, ...args], {
+    encoding: 'utf8', timeout: 60000,
+    env: { ...process.env, DSC_KERNEL: '/tmp/definitely-no-kernel-here', ...(env || {}) },
+  })
+
+  test('--help 在没有内核时也成功（退出码 0），并打印用法', () => {
+    for (const flag of ['--help', '-h']) {
+      const r = runScript([flag])
+      assert.equal(r.status, 0, `${flag} 应当以 0 退出，实际 ${r.status}\n${r.stderr}`)
+      assert.match(r.stderr + r.stdout, /用法:/, `${flag} 没打印用法`)
+    }
+  })
+
+  test('没给参数才算用法错误（退出码 2），且不查找内核', () => {
+    const r = runScript([])
+    assert.equal(r.status, 2, `没给参数应当是用法错误，实际 ${r.status}`)
+    assert.match(r.stderr + r.stdout, /用法:/)
+    assert.ok(!/找不到判定内核/.test(r.stderr), '没给参数时不该报"找不到内核"')
+  })
+
+  test('--help 的输出里提到了不需要内核的入口（否则用户不知道它们存在）', () => {
+    const r = runScript(['--help'])
+    const out = r.stderr + r.stdout
+    assert.match(out, /--install-skill/, '用法里没提 --install-skill')
+    assert.match(out, /--help/, '用法里没提 --help')
+    assert.match(out, /bin\/compat-check\.mjs/, '用法里没提体检的直接用法')
+  })
+
+  test('真去体检但缺内核时才报错，且**明确拒绝降级**', () => {
+    const r = runScript(['some-plugin', '--timeout', '3'])
+    assert.notEqual(r.status, 0, '缺内核时不该成功')
+    assert.match(r.stderr, /找不到判定内核/)
+    assert.match(r.stderr, /不接受降级|降级/, '没写清为什么宁可报错也不降级')
+  })
+})
