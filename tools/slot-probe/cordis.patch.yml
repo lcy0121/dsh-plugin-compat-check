@@ -1,0 +1,3 @@
+- insert:
+    - id: compat-slot-probe
+      name: 'compat-slot-probe'

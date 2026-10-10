@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "description": "服务/方法 → 严重度 + 影响面。判定由这张表驱动，不由 LLM 决定；表未覆盖的 API 落到 defaults。",
+  "severityLevels": {
+    "fatal": "致命：插件条目没有激活（pending/failed），整个插件是死的",
+    "feature-dead": "功能失效：某个特性确定不可用",
+    "degraded": "降级：仍可用，但能力缩水（例如事件变轮询）"
+  },
+  "layerDefaults": [
+    {
+      "when": "宿主 loader 里该条目 fiber.state 为 FAILED 或 PENDING",
+      "severity": "fatal",
+      "basis": "运行时事实，无需静态分析"
+    },
+    {
+      "when": "插件在 inject 里声明了某服务，而宿主没有它",
+      "severity": "fatal",
+      "basis": "条目会停在 pending（waiting for service: X），等价于没起来"
+    },
+    {
+      "when": "插件用 ctx.get('x') 取服务，宿主没有 x",
+      "severity": "feature-dead",
+      "basis": "不会导致未激活，但取不到 → 相关功能静默失效或抛错"
+    },
+    {
+      "when": "服务存在、方法不存在，且该方法不在本表中",
+      "severity": "feature-dead",
+      "impact": "影响面未知",
+      "basis": "默认档；必须显式标注“影响面未知”，不得假装判断过"
+    }
+  ],
+  "services": {
+    "slots": {
+      "summary": "客户端唯一往界面里加东西的通道",
+      "methods": {
+        "register": { "severity": "feature-dead", "impact": "插件在界面上的一切都会消失（按钮/标签页/面板）" },
+        "inject": { "severity": "feature-dead", "impact": "插件的 UI 注册永远不会执行" },
+        "entries": { "severity": "degraded", "impact": "只影响插件自己的内省能力" },
+        "get": { "severity": "degraded", "impact": "只影响插件自己的内省能力" },
+        "set": { "severity": "degraded", "impact": "只影响插件自己的内省能力" }
+      }
+    },
+    "locale": {
+      "summary": "客户端文案字典",
+      "methods": {
+        "register": { "severity": "degraded", "impact": "插件的文案回退到 key 或英文，界面仍可用" },
+        "bind": { "severity": "feature-dead", "impact": "取不到翻译函数，插件界面可能直接抛错" },
+        "subscribe": { "severity": "degraded", "impact": "语言切换不再实时生效" },
+        "getSnapshot": { "severity": "degraded", "impact": "只影响插件自己的语言状态读取" }
+      }
+    },
+    "settings": {
+      "summary": "设置文档的读写 seam",
+      "methods": {
+        "register": {
+          "severity": "feature-dead",
+          "impact": "插件的设置页/设置项会消失",
+          "knownGoneIn": ["0.2.0-rc.2"],
+          "note": "0.2.0-rc.2 实际提供 configure/describe/mutate/replace/schema 等"
+        },
+        "describe": { "severity": "feature-dead", "impact": "读不到设置项，插件的配置界面空白" },
+        "update": { "severity": "feature-dead", "impact": "设置改不动" },
+        "get": { "severity": "feature-dead", "impact": "读不到设置值，插件按默认值运行" }
+      }
+    },
+    "jobs": {
+      "summary": "后台任务",
+      "methods": {
+        "onJobsChanged": {
+          "severity": "degraded",
+          "impact": "任务状态不再实时推送，插件退化为轮询（约 5 秒延迟）",
+          "knownGoneIn": ["0.2.0-rc.2"]
+        },
+        "list": { "severity": "feature-dead", "impact": "看不到任务列表，相关面板为空" }
+      }
+    },
+    "tools": {
+      "summary": "向 agent 注册工具",
+      "methods": {
+        "register": { "severity": "feature-dead", "impact": "agent 失去该工具，相关能力在对话里完全不可用" },
+        "get": { "severity": "degraded", "impact": "只影响插件对工具清单的内省" }
+      }
+    },
+    "webServer": {
+      "summary": "宿主侧 HTTP 路由",
+      "methods": {
+        "register": { "severity": "feature-dead", "impact": "插件自己的 HTTP 接口（含其前端资源）全部 404" },
+        "registerUpgrade": { "severity": "feature-dead", "impact": "插件的 WebSocket 通道建不起来" }
+      }
+    },
+    "sessions": {
+      "summary": "会话导航与读取",
+      "methods": {
+        "get": { "severity": "feature-dead", "impact": "定位不到会话，插件相关入口点不动" },
+        "list": { "severity": "feature-dead", "impact": "会话列表为空" },
+        "map": { "severity": "feature-dead", "impact": "同上" },
+        "open": { "severity": "feature-dead", "impact": "点击后无法跳转到会话" },
+        "fork": { "severity": "feature-dead", "impact": "无法从会话分叉" },
+        "binding": { "severity": "feature-dead", "impact": "会话绑定关系读不到" },
+        "getSnapshot": { "severity": "degraded", "impact": "拿不到会话快照，相关 UI 显示不全" }
+      },
+      "serviceMissingSeverity": "fatal",
+      "serviceMissingNote": "需要 sessions 才能挂载客户端半边的插件（如 dsh-plugin-message-edit）会在客户端直接抛错，等同于整个插件不可用"
+    },
+    "agents": {
+      "summary": "agent 实例",
+      "methods": {
+        "list": { "severity": "feature-dead", "impact": "看不到 agent 列表" },
+        "get": { "severity": "feature-dead", "impact": "定位不到 agent，相关功能失效" },
+        "create": { "severity": "feature-dead", "impact": "无法创建 agent" }
+      }
+    },
+    "systemPrompt": {
+      "summary": "系统提示词贡献",
+      "methods": {
+        "section": { "severity": "feature-dead", "impact": "插件注入的提示词消失，agent 行为随之退化" },
+        "getSectionOrder": { "severity": "degraded", "impact": "段落顺序控制失效" }
+      }
+    },
+    "theme": {
+      "summary": "客户端主题",
+      "methods": {
+        "getTheme": { "severity": "degraded", "impact": "读不到当前主题，配色可能不同步" },
+        "setTheme": { "severity": "feature-dead", "impact": "主题切换按钮点了没反应" }
+      }
+    },
+    "logger": {
+      "summary": "日志",
+      "methods": {
+        "warn": { "severity": "degraded", "impact": "日志缺失，功能不受影响（但会让后续排障变难）" },
+        "info": { "severity": "degraded", "impact": "同上" },
+        "error": { "severity": "degraded", "impact": "同上" }
+      }
+    },
+    "loader": {
+      "summary": "插件条目加载器",
+      "methods": {
+        "entries": { "severity": "feature-dead", "impact": "依赖插件清单的功能（如插件管理面板）失效" }
+      }
+    },
+    "commands": {
+      "summary": "斜杠命令",
+      "methods": {
+        "register": { "severity": "feature-dead", "impact": "该命令不存在，输入 /xxx 无反应" }
+      }
+    },
+    "llm": {
+      "summary": "模型访问",
+      "methods": {
+        "listModels": { "severity": "feature-dead", "impact": "模型选择器为空" },
+        "resolveCallConfig": { "severity": "feature-dead", "impact": "无法发起模型调用" }
+      }
+    },
+    "agentDefaultModel": {
+      "summary": "默认模型选择",
+      "methods": {
+        "currentSelection": { "severity": "feature-dead", "impact": "读不到当前模型，插件无法跟随模型变化" }
+      }
+    },
+    "attachments": {
+      "summary": "附件读取",
+      "methods": {
+        "readImage": { "severity": "feature-dead", "impact": "无法读取图片附件，视觉相关功能失效" }
+      }
+    },
+    "subprocess": {
+      "summary": "子进程",
+      "methods": {
+        "spawn": { "severity": "feature-dead", "impact": "插件无法执行外部命令" }
+      }
+    },
+    "workspaceRegistry": {
+      "summary": "工作区注册表",
+      "methods": {
+        "list": { "severity": "feature-dead", "impact": "工作区列表为空" },
+        "create": { "severity": "feature-dead", "impact": "无法新建工作区" },
+        "delete": { "severity": "feature-dead", "impact": "无法删除工作区" }
+      }
+    }
+  },
+  "declarationChecks": {
+    "engines.dsh": {
+      "missing": "插件没有声明 DSH 版本范围——闸门不会拦，但也没有任何兼容保证",
+      "mismatch": "声明的范围不覆盖当前 DSH 版本，却被装上了（通常是被 allow-version 强装）"
+    },
+    "dsh.compatibility.dshReleases": {
+      "mismatch": "声明当前版本 compatible，但实测存在失效项——这是本工具相对既有方案最不可替代的结论",
+      "missing": "插件没有逐版本声明，只能依赖实测"
+    }
+  }
+}
