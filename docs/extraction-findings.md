@@ -115,3 +115,43 @@ const CHUNK_URL = (name) => `/sidebar/bundle/${name}.js`;
 这是精度 vs 召回的取舍，不是纯技术问题。
 
 在第 2、3、4 条解决之前，**确定性标注不是可选项**：凡是从正则得到的调用点，都必须标「疑似」，而不是呈现得像确定的一样。
+
+---
+
+## 9–14. 一条不变式抓出来的一批（2026-10-11）
+
+下面这批不是设计时想到的，而是**一条不变式**在写出来的当天抓出来的：
+「每个调用点都必须能在它声称的 `file:line` 上被源码字节验证」。
+desktop profile 上 942 个调用点里有 **163 个（17%）对不上**。顺着它查出四类缺陷（9–12）；
+之后一次针对 `lib/extract.mjs` 的盲测探针又交出两类（13–14）。
+
+| # | 缺陷 | 实测证据 | 处理 |
+|---|---|---|---|
+| 9 | **裸名规则没有边界**：拿「名字在任何文件的字符串里出现过」去匹配，命中同文件里毫不相干的局部变量 | 中间态调用点从 942 爆到 7477；`store`/`scale`/`root`/`tokens`/`consume` 全被当成服务 | 只对「插件自己声明过（inject / ctx.inject / ctx.get / ctx.&lt;svc&gt;.&lt;m&gt;()）或官方双端目录里有」的名字用这条规则 |
+| 10 | **`ctx.get` 匹配式太紧**：`ctx.get("x", false)`（带第二参数）与 `ctx.get ("x")`（带空白）都匹配不到，真实调用整条丢失 | `dsh-pet` 的 `deepseekAccount` 依赖不可见 | 放宽并识别第二参数（显式软取） |
+| 11 | **转手链只认一跳**：`const store = ctx.get("x")` 之后 `const store2 = store` 就断链 | 断链后 `store2.foo()` 找不到归属，而 `store.foo()` 被记到**另一个**服务头上 | 迭代收敛的绑定图（上限 4 跳），并拒绝像压缩产物的临时变量名 |
+| 12 | **作用域注入的参数被完全忽略**：`ctx.inject(["a","b"], cb)` 的回调形参按**位置**绑定到服务 | 这是该生态最常见的写法之一，原实现一条都看不见 | 按位置绑定；解构形态仅在注入列表恰好一个服务时才断言 |
+| 13 | **CLI 空操作**：脚本路径带符号链接祖先时静默什么都不做 | macOS 上 `/tmp` → `/private/tmp`：argv[1] 是 realpath、import.meta.url 是给定路径，词法比较 false → exit 0、无输出、三个文件一个都不写 | 两边都取 realpath 再比 |
+| 14 | **空白漏报**：服务名与点号之间有空白时调用被整条漏掉 | `ctx.alpha .register(1)`、`ctx.beta\n.register(1)` 一个都没进 services | 统一加 `\s*` |
+| 15 | **fallback 扫描依赖 readdir 顺序** | 把 readdirSync 反转后 fallback 包的 `perPlugin[*].callSites` 顺序会变 | `.sort()` |
+| 16 | **`walkFiles` 看不见符号链接** | readdirSync 的 Dirent 对符号链接 `isFile` 与 `isDirectory` **都是 false**；pnpm 恰恰把包目录做成符号链接 | 用 statSync 补判定，断链跳过不抛 |
+| 17 | **`const inject = [...]`（声明后引用）不被识别** | `dsh-mnemon-strategy-*` 一族被判成「0 个服务 → 可用」，而它们依赖的 `mnemonMemory` 当前 profile 里**无人提供** | 识别 `inject`/`injectDeps` 的数组字面量赋值 |
+| 18 | **顶层 `callSites` 丢插件名** | 两个包都有 `lib/index.js` 时都是 `{file:"lib/index.js",line:1}` —— 按 file:line 定位会取到**错插件的源码** | 调用点新增 `plugin` 字段并进排序键 |
+
+**第 17 条最值得警惕**：它不产生错误结论，它产生**沉默**。工具对一个真实缺口只字不提，
+用户却以为自己拿到了结论。假阳性让人多查一次，假阴性让人以为已经查过 —— 后者更贵。
+
+**判据的自我修正**：第 17 条修好之后，我先给 `@fixture/pending`（声明了
+`noSuchServiceAnywhere` 但从不调用它）写了判据「ok」，因为「代码没调用它」。
+它当场就红了 —— **代码没调用它不是理由，声明本身就是依赖**。判据改为 `broken`。
+这条记下来是因为它说明：判据写错时会被自己的 fixture 抓住（判据层在起作用）。
+
+### 边界与已知残留
+
+- `patchUnparsed`（patch 里读不到 `- name:` 就退回整包扫描）**曾被误当成第 17 条的修法**。
+  实测它会命中 18/21 个真实插件（它们的 patch 都写成 `- insert: [- id: ...]`），
+  把 host-entry 从 118 打到 10、fallback 打到 1359 个文件 —— 那不是修 bug，
+  是把污染面放大一个数量级。已回退，真正的修法是第 17 条。
+- 符号链接**包**仍然会被静默跳过（断链）—— 这是有意的（不抛），但未记账。
+- 两个 `node_modules` 条目同名（pnpm 别名/重复 store 链接）时，
+  `perPlugin` / `provenance` 以包名为键，**先出现的会被静默覆盖**。
