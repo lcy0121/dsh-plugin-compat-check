@@ -60,16 +60,58 @@ ctx.parser.consume(index, token, operatorAssignment)
 
 这是缺陷 3 的入口，也是性能问题的来源。正确做法是优先用 `exports["./client"]`（`dsh.client` 的权威入口），只在它缺席时才回退到路径遍历。
 
+## 6. 懒加载 chunk：**不是**死代码，不要按声明入口收窄
+
+这一条差点让我做错一次决定，所以单独记。
+
+曾经的计划（A4）是「客户端种子只取 `exports["./client"]`，缺席才回退路径遍历」，动机是排除 vendored bundle、减少假阳性。
+
+实测否决了它。`dsh-better-sidebar` 把客户端代码切成多个 chunk，通过**自己宿主半边的 HTTP 路由**取回：
+
+```js
+/** Chunk script endpoint served by the plugin host half (src/bundle-route.ts). */
+const CHUNK_URL = (name) => `/sidebar/bundle/${name}.js`;
+```
+
+于是 `lib/client-editor.js`（2.0 MB）、`lib/client-locale.js`（732 KB）、`lib/client-mermaid.js`（6.9 MB）
+都是**会真实运行的代码**，而从 `lib/client.js` 出发做静态可达性分析**永远够不到它们**
+（`client.js` 里对 `client-mermaid` 的提及次数是 0；对 `client-editor` / `client-locale` 各 1 次，还只出现在一句注释里）。
+
+按原计划收窄 = 静默删掉真代码。**这个方向的错误（假阴性）比多扫（假阳性）严重得多**，
+因为假阳性可以用确定性标注降级，假阴性会让用户以为"没问题"。
+
+**改后的做法**：文件集合不动，给每个文件标来源桶（`host-entry` / `client-entry` / `client-extra` / `fallback`），
+写进单独的 `provenance.json`；`client-extra` 的调用点标**疑似**。
+
+## 7. `.d.ts` 会被当成源码捞进来（已修）
+
+`.d.ts` 文件名以 `.ts` 结尾，所以会被「路径含 client 且扩展名是 `.ts`」的遍历命中，尽管它不含任何可运行代码。
+
+实测 desktop profile 的客户端两个桶共 846 个文件，其中 **342 个是 `.d.ts`**。
+
+排除它**零风险**：客户端桶从 829 降到 487，而 `static.json` 输出**零变化**
+（53 个服务、280 个调用点、clientHints 全等），三个 fixture 的对拍也仍然完全一致。
+
 ---
 
 ## 这些缺陷各自该由哪一批解决
 
 | 缺陷 | 处理方式 | 批次 |
 |---|---|---|
-| 1 无界循环 | 已修（Node + python 双份） | 已完成 |
-| 5 客户端种子过宽 | 改成「优先 `exports["./client"]`，缺席才回退」，并用对拍确认差异是预期的 | 第一批 |
+| 1 无界循环 | 已修（Node + python 双份） | ✅ 已完成 |
+| 7 `.d.ts` 噪音 | 排除（输出零变化） | ✅ 已完成 |
+| 6 懒加载 chunk | **不改文件集合**，改为来源分桶 + 把 `client-extra` 标疑似 | ✅ 已完成（分桶）／取舍待拍板 |
 | 3 `ctx` 遮蔽 | 真解析器做绑定分析，识别 `ctx` 被局部定义遮蔽的情况；在此之前靠确定性标注降级 | 第二批（C） |
 | 2 副作用导入 | 同上，真解析器顺带解决 | 第二批（C） |
-| 4 插件自定义服务 | 识别 `ctx.provide("x")` 的产出，把它们从「宿主服务」里摘出去 | 第一批（数据模型要能表达「插件间依赖」） |
+| 4 插件自定义服务 | 识别 `ctx.provide("x")` 的产出，把它们从「宿主服务」里摘出去 | 第一批（A5） |
+
+**待用户拍板的取舍**：`client-extra` 里剩下的 487 个文件构成为
+「包内 TS 源码 `src/` 320 个 + 嵌套 `node_modules` 110 个 + `lib/` 构建产物 57 个」。
+
+- 真正运行的是构建后的 `lib/*.js`；`src/*.ts` 是它的源，扫它等于把同一份逻辑扫两遍
+- 嵌套 `node_modules` 是第三方依赖，**正是 `ctx.parser` 那类假阳性的来源**
+- 但两者也都是「会真实运行」的代码
+
+这是精度 vs 召回的取舍，不是纯技术问题。
 
 在第 2、3、4 条解决之前，**确定性标注不是可选项**：凡是从正则得到的调用点，都必须标「疑似」，而不是呈现得像确定的一样。

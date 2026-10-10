@@ -17,6 +17,9 @@
 2. 动手前读第 4 节（作业规程）。里面每一条都是踩过坑换来的。
 3. 从第 5 节找第一个未勾选的步骤，按它的验收命令做完、勾上。
 4. 遇到任何"这个结论我是猜的"，回到第 3 节确认它是否已被列为已知假设。
+5. **每完成一小项，立刻回来更新三处**：§9「下一动作」改成下一个未完成项、§5 勾选 checkbox、新踩的坑记进 §6。
+   > 这一条不是形式主义。文档一旦落后于代码，下一次会话就会拿过期的事实做判断——
+   > 而过期事实比没有事实更危险，因为它看起来还很可信。**"文档已过期"应当被当成 bug 对待。**
 
 ---
 
@@ -125,6 +128,8 @@ dsh-keep-awake@0.2.0 → lib/index.js:812  ctx.settings.register(...)
     ```
     git -c user.name="Chenyu Liu" -c user.email="233006721+lcy0121@users.noreply.github.com" commit ...
     ```
+11. **每完成一小项就回来更新本文件**（§9 下一动作 + §5 checkbox + §6 新坑）。见 §0 第 5 条。
+12. **计划本身也可能错，而且证据优先于计划。** A4 就是活例：计划写着"收窄客户端种子"，实测发现那样会删掉真实运行的代码，于是**否决了计划**。发现计划与证据冲突时，改计划，不改证据。
 
 ---
 
@@ -141,9 +146,22 @@ dsh-keep-awake@0.2.0 → lib/index.js:812  ctx.settings.register(...)
 - [x] **A3. 修 `local_graph` 无界循环**（Node + python 双份）
   - 验收：`./tools/parity/parity.sh tools/parity/fixtures/hang-cycle` 秒级完成
   - 验收：`node lib/extract.mjs ~/.dsh/profiles/desktop/node_modules /tmp/x` 约 1 秒完成，21 manifests / 53 服务 / 280 调用点
-- [ ] **A4. 客户端种子收窄**：优先 `exports["./client"]`，只在它缺席时才回退路径遍历
-  - 动机：现在把包里所有路径含 `client` 的 js 都拉进来，包括 `lib/client-mermaid.js` 这种 vendored bundle（缺陷 3 的入口，也是性能来源）
-  - 验收：对拍**会**出现差异；逐条确认差异是"少扫了 vendored 文件"而不是少扫了真代码
+- [x] **A4. 客户端种子的来源分桶 + 排除 `.d.ts`** —— ⚠️ **原计划被证据否决，实际做的是另一件事**
+  - ❌ **原计划「优先 `exports["./client"]`，缺席才回退遍历」已被否决。** 实测 `dsh-better-sidebar` 把客户端代码切成懒加载 chunk，通过**自己宿主半边的 HTTP 路由**取回：
+    `const CHUNK_URL = (name) => \`/sidebar/bundle/${name}.js\``（`src/bundle-route.ts`）。
+    也就是说 `client-editor.js` / `client-locale.js` / `client-mermaid.js` 是会真实运行的代码，
+    而**从声明入口做静态可达性分析永远够不到它们**（`lib/client.js` 里对 `client-mermaid` 的提及次数是 0）。
+    按原计划收窄 = 静默删掉真代码 = 让工具撒谎。
+  - ✅ **改为不动文件集合**，给每个被扫描的文件标来源桶：`host-entry` / `client-entry` / `client-extra` / `fallback`，
+    写进**单独的** `provenance.json`。这样 `static.json` 的契约不变、对拍仍然成立，
+    而判定层可以据此把 `client-extra` 的调用点标成**疑似**而不是确定。
+  - ✅ **附带一刀（零风险）**：排除 `*.d.ts`。纯类型声明不含可运行代码，只因为文件名以 `.ts` 结尾才被误捞。
+    desktop profile 客户端桶 **829 → 487** 个文件，而 **static.json 输出零变化**（53 服务 / 280 调用点全等）。
+  - 验收：`tools/parity/parity.sh` 在三个 fixture 上全部 `✓ 完全一致`
+- [ ] **A4b.（待用户拍板）** `client-extra` 剩下 487 个的构成：**包内 TS 源码 `src/` 320 个**、**嵌套 `node_modules` 110 个**、`lib/` 构建产物 57 个。
+  - 真正运行的是构建后的 `lib/*.js`；`src/*.ts` 是它的源，扫它等于把同一份逻辑扫两遍（且可能扫到没被树摇进去的代码）
+  - 嵌套 `node_modules` 是第三方依赖，**正是 `ctx.parser` 那类假阳性的来源**（`client-mermaid.js` 里的 mermaid/chevrotain）
+  - 但两者也都是「会真实运行」的代码。**这是精度 vs 召回的取舍，不是纯技术问题 —— 必须用户拍板，不要自己决定**
 - [ ] **A5. 识别 `ctx.provide("x")` 的产出**，把插件自定义服务从宿主服务里摘出去
   - 动机：`betterSidebar` / `betterLocale` / `pet` / `agentTeams` 是插件提供的服务；现在会被判成"依赖了不存在的宿主服务" —— 把插件间依赖误报成版本不兼容，方向最危险
   - 验收：desktop profile 的未覆盖服务列表里，插件自有服务不再出现
@@ -224,6 +242,8 @@ dsh-keep-awake@0.2.0 → lib/index.js:812  ctx.settings.register(...)
 | **`undefined` vs `null`** | `JSON.stringify` **省略** `undefined` 键，python `json.dump` 写 `null`。对拍一开始就是被这个抓到的 |
 | **编辑 `probe/index.mjs` 后注意硬链接** | 插件装进 profile 后可能是硬链接/副本；用会替换 inode 的方式写入，`node_modules` 里的副本不会同步，会出现"改了代码但行为没变"。装完务必确认副本内容 |
 | **UI 驱动会假阴性** | 我自己的验证脚本曾把侧边栏 `aria="插件"` 按钮当成设置页导航项，得出"tab 不渲染"的**错误**结论。验证工具本身也会骗人 |
+| **懒加载 chunk 不是死代码** | 插件可以把客户端代码切成 chunk，用自己宿主半边的路由按 URL 取回（`dsh-better-sidebar`：`/sidebar/bundle/${name}.js`）。**从声明入口做可达性分析永远够不到它们。不要按"只扫声明入口"去收窄客户端种子** —— 那会静默删掉真代码 |
+| **`.d.ts` 会被当成源码捞进来** | 文件名以 `.ts` 结尾，纯类型声明却会被路径遍历命中。实测客户端桶 846 个文件里 342 个是它。排除零风险（输出零变化） |
 | **桌面端 web boot 对任何未激活条目直接抛错** | 而 CLI 只是 warn。所以宿主起不来时，装在同一个宿主里的插件也一起看不到界面 —— 脚本产物有不可替代的位置 |
 
 ---
@@ -349,5 +369,10 @@ dsh-plugin-compat-check/
 
 ## 9. 下一动作
 
-第一个未勾选的步骤是 **A4（客户端种子收窄）**。它的特点是**会改变输出**，所以做法是：
-改 → 跑对拍 → 把差异逐条摊开 → 确认差异是"少扫了 vendored 文件"而不是少扫了真代码。
+**A5**（识别 `ctx.provide("x")` 的插件自定义服务，把它们从宿主服务里摘出去）。
+
+它和 A4 性质不同：A4 是**不改输出**的安全改动，A5 **会改变输出**（少掉一批假缺口），
+所以流程是：改 → 跑对拍 → 把差异逐条摊开给用户确认 → 再决定是否回溯到 python 版。
+
+> **上一次更新**：2026-10-10，完成 A4（原计划被否决，改为来源分桶 + 排除 `.d.ts`）。
+> 下一步动作就是本节顶部这一条 —— **每完成一小项都改这里。**
