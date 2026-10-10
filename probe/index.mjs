@@ -30,10 +30,30 @@ function w(file, text) {
   }
 }
 
-/** 连原型链一起枚举，返回 { 方法名: 类型 } —— 这是本次踩坑换来的关键修正 */
+/**
+ * 连原型链一起枚举，返回 `{ 方法名: 类型 }` —— 这是踩坑换来的关键修正。
+ *
+ * ## ⚠️ 不要在这里 dump 属性**值**（一次真实事故）
+ *
+ * 这里曾经还会收集一份 `data`：把所有非函数属性的**字面值**原样写进探针报告。
+ * 当时的想法是"多留点现场便于排查"。后果是：
+ *
+ * - `credentials` 服务的 `text` 属性就是**整份凭据文件**，里面有
+ *   `DEEPSEEK_API_KEY=sk-…` 与若干 session token；
+ * - 那份报告被提交进了仓库（`tools/parity/fixtures/host-surface-parityfix.json`）。
+ *
+ * 而这份 `data` **从来没有被任何消费方读过** —— `lib/verdict.mjs` 只取
+ * `hostSurface.root[svc].methods`。也就是说：我为了一个没人用的字段，
+ * 把用户的密钥写进了 git 历史。**纯亏，且亏得很难看。**
+ *
+ * 所以规则是：**探针只记录"结构"（形参与方法名），绝不记录"内容"。**
+ * 结构足够回答"这个 API 在不在"，而内容除了泄漏之外帮不上任何忙。
+ *
+ * 这不是"少写一个字段"，而是"探针这个角色的边界"：它是一个只读的形状探测器，
+ * 不是快照工具。要排查现场请用 `--keep` 看启动日志，不要把宿主的运行时数据搬出来。
+ */
 function dumpShape(svc) {
   const methods = {};
-  const data = {};
   let obj = svc;
   const seen = new Set();
   let guard = 0;
@@ -49,20 +69,13 @@ function dumpShape(svc) {
       }
       if (t === 'function') {
         if (Object.keys(methods).length < MAX_METHODS) methods[key] = t;
-      } else {
-        try {
-          const v = svc[key];
-          if (v === null || ['string', 'number', 'boolean', 'undefined'].includes(typeof v)) {
-            data[key] = v === undefined ? 'undefined' : v;
-          }
-        } catch {
-          /* 忽略不可读属性 */
-        }
       }
+      // 非函数属性**只记名字不记值**（见上方注释）。名字由 `seen` 收集，
+      // 但报告里不需要它们：判定只问"有没有这个方法"。
     }
     obj = Object.getPrototypeOf(obj);
   }
-  return { methods, data };
+  return { methods };
 }
 
 function readWanted() {
@@ -99,7 +112,7 @@ export function apply(ctx) {
           report.root[n] = { present: false };
         } else {
           const shape = dumpShape(svc);
-          report.root[n] = { present: true, methods: shape.methods, data: shape.data };
+          report.root[n] = { present: true, methods: shape.methods };
         }
       } catch (e) {
         report.root[n] = { present: false, error: String(e && e.message ? e.message : e) };
