@@ -233,11 +233,23 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
 
 #### B. 插件宿主半边
 
-- [ ] **B1. 读 `ctx.loader.entries()`** 拿每条 fiber 状态（PENDING/LOADING/ACTIVE/FAILED/DISPOSED/UNLOADING）与缺失服务
-  - 缺失服务算法：`fiber.ctx.get(key) === undefined`
-- [ ] **B2. `await fiber.await()` 取失败原因**（没有任何官方服务暴露人类可读原因，必须自己重新推导）
-- [ ] **B3. 启动后延迟执行 + 超时 + 全程 `try/catch`**，绝不抛
-  - 验收：故意让内核抛错，宿主仍能正常启动、无 `did not activate`
+- [x] **B1. 读 `ctx.loader.entries()`** —— ✅ 完成，真实启动实测通过
+  - **`ctx.get('loader')` 在 `inject = []` 下直接可用**；`ctx.loader` 属性直读也可，但**不是同一引用**
+    （cordis 每读一次包一层 traceable）—— **不要用 `===` 判断**
+  - **`entries()` 不是数组**：`typeof === 'object'`、`Array.isArray === false`、可迭代。
+    必须 `for..of`。写成"条目数组"会在真实启动时静默得到 `entries=0`
+  - 实测 190 个条目：ACTIVE 158、NO_FIBER 30（全是 `disabled:true`）、PENDING 1、FAILED 1
+  - **反向对照**：把坏插件缺的服务名改掉后重启，自省报告与宿主自带告警**同时**跟着变 → 证明读的是活状态
+- [x] **B2. 取失败原因** —— ✅ 完成，但**措辞要按实测修正**
+  - `await fiber.await()` **只对 FAILED 有效**，能取回原文错误与栈
+  - **PENDING 的 `await()` 会立刻返回且不抛** → PENDING 条目"没有原因"，只有缺失服务列表
+  - **import 失败的条目连 `fiber` 都没有**（`entry.fiber === undefined`）→ **无任何途径**取原因
+  - 所以准确说法是：*能取到原因的只有 FAILED 一类*，不是"唯一途径"
+- [x] **B3. 绝不抛 + 超时** —— ✅ 完成
+  - 实测：`fiber.await()` 永不 settle 的 LOADING fiber → `awaitTimedOut: true`；
+    hostile Proxy ctx（每次属性访问都抛）→ 进程 exit 0、无 unhandled rejection
+  - `inject` 保持 `[]`（不依赖被审计的服务本身）。另实测 `inject: ["loader"]` **也是安全的**
+    （fiber ACTIVE、无 `did not activate`），只是没必要
 
 #### C. 插件客户端半边（面板）
 
@@ -307,6 +319,9 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
 | **JS 内置集合方法名会被当成 API 调用** | 插件里 `const sessions = new Map()` 之后的 `sessions.set/map/sort/values` 会被当成"调用了宿主不存在的方法"。**只靠名字黑名单不安全**（`sessions.get` 是真实宿主方法），必须配合"该方法不在宿主方法表里"一起判 |
 | **客户端服务不能用宿主面判** | `locale` / `slots` / `configForms` / `sidebarRight` / `settingsScope` 活在浏览器里，宿主探针必然 `present=false`。判据两条并用：①在官方客户端目录里 ②它出现的文件**全部**落在客户端桶里。只靠①不够（那份目录只有 8 个条目） |
 | **没有运行时面时不得断言"服务缺失"** | 仅凭目录缺失就判 `fatal` 会把 `dsh-mnemon` / `dsh-catppuccin` 错报成"不兼容"。没有运行时面时必须降级为"疑似 + 降级" |
+| **`entries()` 不是数组** | 它是可迭代对象（`Array.isArray === false`）。按数组写会在真实启动时静默得到 0 条，而合成测试里可能看不出来 |
+| **`ctx.loader` 与 `ctx.get('loader')` 不是同一引用** | cordis 每读一次包一层 traceable，**别用 `===` 判断** |
+| **硬链接坑的新形态** | `perl -pi` / 改名写入会**断链**：profile 里的 `node_modules` 副本保留旧字节（实测 inode 分叉），宿主继续跑旧代码 —— 会造出一次假的"改动没生效"。`edit` 工具同样换 inode。要热更必须 truncate-in-place 或重装 |
 | **别名正则必须带 `\b`** | `const v = ctx.get("x")` 的别名规则构造「变量.方法(」时漏了词边界，于是 `subagents.listDescendants(` 会因子串 `agents.` 被别名 `agents` 命中（实测 better-sidebar 里 2 处）。**已修** |
 | **同文件别名撞名会凭空造方法** | better-sidebar 的 `client.js` 里 `service` 同时绑给 `jobs`(1 处) 与 `betterSidebar`(6 处)，原实现每次声明都扫全文件 → 文件里所有 `service.X()`（**含 JSDoc 注释里的**）被同时记到两个服务头上，造出 13 个假方法（`jobs.getTabs/closeTab/registerTab`）。修法：同名多绑定时**弃权并记录**到 `ambiguousAliases`，不猜 |
 | **`manifests` 是旧兼容视图，不要往里加字段** | 给 `manifests` 加 `engines`/`compatibility` 当场被对拍抓住（"只在 node 版出现"）。新数据放 `perPlugin` |
@@ -315,7 +330,7 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
 | **设置页有两个「插件」** | 侧边栏有 `aria-label="插件"` 的按钮，设置页里有文本为「内置插件」的导航项。选择器必须**精确全等**，松散的 `includes('插件')` 会点到错的那个 —— 我本人已经因此得出过一次**错误结论** |
 | **`--port 0` 启动的宿主不会自己退出** | 任务结束后仍能存活很久，必须显式 kill，且要顺手确认端口释放 |
 | **`.d.ts` 会被当成源码捞进来** | 文件名以 `.ts` 结尾，纯类型声明却会被路径遍历命中。实测客户端桶 846 个文件里 342 个是它。排除零风险（输出零变化） |
-| **桌面端 web boot 对任何未激活条目直接抛错** | 而 CLI 只是 warn。所以宿主起不来时，装在同一个宿主里的插件也一起看不到界面 —— 脚本产物有不可替代的位置 |
+| **宿主只警告，客户端才致命**（实测，曾被记成一条含混的地雷） | **宿主侧（Node/CLI）**：非关键条目未激活 → **只警告**（`dsh: warning: N entry did not activate`），宿主照常启动、URL 照常给出。只有 bootstrap include 与 `{agent-loop, webserver, modules, connection, headless-runner, acp, sdk-jsonrpc-server}` 未激活才 throw。<br>**客户端侧（renderer）**：客户端条目加载失败 → **整个界面被一张错误屏替代**（`Failed to load plugins` + `web boot: N entries did not activate` + 逐条 `import failed`），界面完全不可用。实测：健康的 `#root` 有 35397 字符，坏掉后只剩 450 字符<br>⚠️ 两者的分界是**半边**，不是"桌面端 vs CLI"。别再把它们记成一条 |
 
 ---
 
@@ -448,12 +463,16 @@ dsh-plugin-compat-check/
 **C2 + CLI 接线**：把真实总览表落进 `settings.plugins.tab`（占位组件已在 `plugin/lib/client.js`），
 并把 `dsh-plugin-compat-check.sh` 第 ⑤ 步（那段 python 的比对逻辑）换成 `lib/verdict.mjs`。
 
-> 并行进行中：子代理 A 扩充 `rules/severity.json` 覆盖；子代理 B 做 B1/B2（宿主半边读 `ctx.loader`）。
+> 两个并行板块都已回收并复核：规则表扩充（子代理 A）、宿主半边自省 B1/B2/B3（子代理 B）。
+> 子代理 A 顺带查出的两个提取缺陷已独立复现并修复。
 
 它和 A4 性质不同：A4 是**不改输出**的安全改动，A5 **会改变输出**（少掉一批假缺口），
 所以流程是：改 → 跑对拍 → 把差异逐条摊开给用户确认 → 再决定是否回溯到 python 版。
 
-> **上一次更新**：2026-10-10，完成 **A5 + A8**：判定引擎 `lib/verdict.mjs` 上线，
+> **上一次更新**：2026-10-11，**B1/B2/B3 完成**（宿主半边能看到坏条目、缺失服务名与宿主告警逐字一致）；
+> 并修正了一条含混的地雷 —— **宿主只警告，客户端才致命**（实测确认，见 §6）。
+>
+> 上一次：2026-10-10，完成 **A5 + A8**：判定引擎 `lib/verdict.mjs` 上线，
 > 三个回归基准精确命中（keep-awake → 部分可用，两条发现带行号）；
 > 新增双端官方目录与从 asar 现抽的工具。**踩掉 5 个会造成海量误报的坑**（见 §6）。
 >
