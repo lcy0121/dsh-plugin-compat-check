@@ -96,6 +96,26 @@ dsh-keep-awake@0.2.0 → lib/index.js:812  ctx.settings.register(...)
 
 规则表本体：`rules/severity.json`；覆盖依据：`rules/usage-inventory.json`。
 
+### 2.2 确定性的三档判据（A4b 实测换来的，很值钱）
+
+单靠正则无法区分"真服务"与"第三方代码里的同名变量"。但把**可信声明**与**官方服务目录**组合起来，
+就能在不写解析器的前提下把噪音分成三档：
+
+| 档 | 判据 | 例子 |
+|---|---|---|
+| **确定** | 服务名出现在 `inject: [...]` / `ctx.get("x")` / `ctx.inject(["x"])` 里 | `settings`、`sessions`、`tools` |
+| **疑似** | 没有可信声明，但**在官方目录里** | `credentials`、`storageDomain`、`subprocess`（确实被松散形式访问） |
+| **高概率假阳性** | 没有可信声明，且**不在官方目录里** | `parser`（被凑出 40 个假方法）、`ruleNames`、`topoIndex`、`logger` |
+
+实测（desktop profile，53 个服务）：只保留可信声明会剩 46 个，丢掉的 7 个里有
+**2 个是假阳性、3 个是真宿主服务** —— 所以"可信声明"**不能当硬过滤，只能当分档依据**，
+否则会把 `credentials` / `subprocess` 这类真服务误杀。三个回归基准关心的服务
+（`settings` / `jobs` / `agents` / `tools` / `sessions`）全部落在"确定"档，无一误杀。
+
+**服务目录从哪来**：插件形态下可以在运行时直接从 `ctx` 取（不需要硬编码）；
+CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-catalog.js`
+导出的 `SERVICE_API` 里解析（0.2.0-rc.2 有 91 个宿主服务）。注意它随 DSH 版本变化。
+
 ---
 
 ## 3. 我仍在承担的假设与风险
@@ -158,10 +178,17 @@ dsh-keep-awake@0.2.0 → lib/index.js:812  ctx.settings.register(...)
   - ✅ **附带一刀（零风险）**：排除 `*.d.ts`。纯类型声明不含可运行代码，只因为文件名以 `.ts` 结尾才被误捞。
     desktop profile 客户端桶 **829 → 487** 个文件，而 **static.json 输出零变化**（53 服务 / 280 调用点全等）。
   - 验收：`tools/parity/parity.sh` 在三个 fixture 上全部 `✓ 完全一致`
-- [ ] **A4b.（待用户拍板）** `client-extra` 剩下 487 个的构成：**包内 TS 源码 `src/` 320 个**、**嵌套 `node_modules` 110 个**、`lib/` 构建产物 57 个。
-  - 真正运行的是构建后的 `lib/*.js`；`src/*.ts` 是它的源，扫它等于把同一份逻辑扫两遍（且可能扫到没被树摇进去的代码）
-  - 嵌套 `node_modules` 是第三方依赖，**正是 `ctx.parser` 那类假阳性的来源**（`client-mermaid.js` 里的 mermaid/chevrotain）
-  - 但两者也都是「会真实运行」的代码。**这是精度 vs 召回的取舍，不是纯技术问题 —— 必须用户拍板，不要自己决定**
+- [ ] **A4b. 客户端种子取舍** —— 已实测，结论如下（工具：`tools/parity/a4b-diff.mjs`）
+  - 剩下的 487 个文件构成：包内 TS 源码 `src/` 320、嵌套 `node_modules` 110、`lib/` 构建产物 57
+  - **排 `src/`：零信息损失。** 487 → 167，而服务 −0、调用点 −0、clientHints **零变化**。
+    真正运行的是构建后的 `lib/*.js`；`src/` 是它的源，扫它等于把同一份逻辑扫两遍。
+    （注意：源码直发、入口就指向 `src/` 的插件不受影响 —— 那些文件在 `host-entry` / `client-entry` 桶里，本开关只作用于 `client-extra`。）
+  - **排嵌套 `node_modules/`：只丢 2 个调用点**（`connection.destroy`、`logger.table`），服务 −0。收益只有 110 个文件。
+  - ⚠️ **关键发现：这两刀都碰不到假阳性。** `parser`（40 个假方法）、`ruleNames` 都来自
+    `dsh-better-sidebar/lib/client-mermaid.js`，它在 `lib/` 里，不属于被排的两类。
+    所以 **A4b 是效率问题，不是正确性问题** —— 不要把假阳性的修复寄托在文件集合收窄上。
+  - **建议：只排 `src/`，不排 `node_modules`。** 前者零损失，后者有真实调用点损失却没有正确性收益。
+    （这一条修正了我原先"两者都排"的倾向。）
 - [ ] **A5. 识别 `ctx.provide("x")` 的产出**，把插件自定义服务从宿主服务里摘出去
   - 动机：`betterSidebar` / `betterLocale` / `pet` / `agentTeams` 是插件提供的服务；现在会被判成"依赖了不存在的宿主服务" —— 把插件间依赖误报成版本不兼容，方向最危险
   - 验收：desktop profile 的未覆盖服务列表里，插件自有服务不再出现
@@ -170,7 +197,9 @@ dsh-keep-awake@0.2.0 → lib/index.js:812  ctx.settings.register(...)
 - [ ] **A7. 采集文件:行**（现在完全没有：`static.json` 只有 `services / calls / clientHints / fallbackPackages`）
   - 验收：随手挑一条发现，能打开它指的文件、看到那一行确实是调用
 - [ ] **A8. 五元组结论 + 确定性标注 + 接入规则表**
+  - 确定性按 **§2.2 的三档**实现（可信声明 / 官方目录 / 都不是）；这三档的判据已经实测校准过，不要重新发明
   - 验收：每条发现都有 类别/位置/依据/严重度/影响面 + 确定或疑似；未覆盖 API 显示"影响面未知"
+  - 验收：`parser` / `ruleNames` / `topoIndex` 这类不得出现在"确定"档
 
 #### B. 插件宿主半边
 
@@ -374,5 +403,7 @@ dsh-plugin-compat-check/
 它和 A4 性质不同：A4 是**不改输出**的安全改动，A5 **会改变输出**（少掉一批假缺口），
 所以流程是：改 → 跑对拍 → 把差异逐条摊开给用户确认 → 再决定是否回溯到 python 版。
 
-> **上一次更新**：2026-10-10，完成 A4（原计划被否决，改为来源分桶 + 排除 `.d.ts`）。
+> **上一次更新**：2026-10-10，完成 A4b 的实测分析（`tools/parity/a4b-diff.mjs`）：
+> 排 `src/` 零信息损失、排 `node_modules` 只丢 2 个调用点且两者都碰不到假阳性；
+> 顺带确立了 §2.2 的三档确定性判据。**A4b 的默认行为尚未改动，等用户点头。**
 > 下一步动作就是本节顶部这一条 —— **每完成一小项都改这里。**
