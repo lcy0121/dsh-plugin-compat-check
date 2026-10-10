@@ -1,0 +1,689 @@
+{
+ "_note": "从 DSH 桌面端 app.asar 内**官方生成**的 API 目录解析出的服务与方法清单。host = Node 宿主侧；client = 浏览器客户端侧。它随 DSH 版本变化 —— 换版本后必须重新生成。⚠️ 注意：目录 ≠ 运行时 API 面。抽象服务（如 host.jobs）在目录里**一个方法都不声明**，但运行时实现有方法；方法级判定必须优先用运行时面（探针），拿目录当运行时面会海量误报。",
+ "_source": {
+  "host": "dsh/node_modules/@deepseek-ai/dsh-tool-cordis/lib/types/api-catalog.js",
+  "client": "dsh/node_modules/@deepseek-ai/dsh-cordis-client-runner/lib/client.js"
+ },
+ "_asar": "/Applications/DeepSeek Harness.app/Contents/Resources/app.asar",
+ "host": {
+  "agentDefaultModel": {
+   "methods": [
+    "currentSelection",
+    "saveSelection"
+   ]
+  },
+  "agentLoop": {
+   "methods": [
+    "create",
+    "createAgent",
+    "resume"
+   ]
+  },
+  "agentPresets": {
+   "methods": [
+    "acquireScope",
+    "composeFrom",
+    "composedPreset",
+    "compositionInventory",
+    "list",
+    "mount",
+    "recompose",
+    "register",
+    "resolve"
+   ]
+  },
+  "agentTeams": {
+   "methods": [
+    "createTask",
+    "getTask",
+    "interrupt",
+    "listMembers",
+    "listTasks",
+    "membership",
+    "sendMessage",
+    "spawnTeammate",
+    "tryMembership",
+    "updateTask",
+    "waitForChange"
+   ]
+  },
+  "agents": {
+   "methods": [
+    "announce",
+    "create",
+    "currentInitiator",
+    "enter",
+    "get",
+    "isOwnedBy",
+    "list",
+    "register",
+    "requireInitiator",
+    "resume",
+    "roots",
+    "setFactory"
+   ]
+  },
+  "approval": {
+   "methods": [
+    "overrideOf",
+    "request",
+    "setPolicy"
+   ]
+  },
+  "attachments": {
+   "methods": [
+    "admitEncodedFile",
+    "admitPromptContent",
+    "fileHostPath",
+    "imageHostPath",
+    "isAttachmentError",
+    "readImageRequest",
+    "saveFile",
+    "saveFileStream",
+    "saveImages"
+   ]
+  },
+  "authorization": {
+   "methods": [
+    "begin",
+    "cancel",
+    "describe",
+    "list",
+    "registerFlow"
+   ]
+  },
+  "browserUse": {
+   "methods": [
+    "register"
+   ]
+  },
+  "clientModules": {
+   "methods": [
+    "artifactBaseline",
+    "clientPath",
+    "fetchBundle",
+    "graph",
+    "onGraphChanged",
+    "onRebuilt",
+    "rebuilt"
+   ]
+  },
+  "commands": {
+   "methods": [
+    "find",
+    "register",
+    "registerFileReceiptResolver"
+   ]
+  },
+  "compaction": {
+   "methods": []
+  },
+  "computerUse": {
+   "methods": [
+    "register"
+   ]
+  },
+  "configEditor": {
+   "methods": [
+    "configuration",
+    "edit",
+    "entries"
+   ]
+  },
+  "connection": {
+   "methods": [
+    "admit",
+    "authenticatedUrl",
+    "authorizeIndex",
+    "createSharedFetchHandler",
+    "requestRejection"
+   ]
+  },
+  "credentials": {
+   "methods": []
+  },
+  "credentialsController": {
+   "methods": []
+  },
+  "deepseekAccount": {
+   "methods": []
+  },
+  "deepseekLlmApiExtensions": {
+   "methods": [
+    "prepare"
+   ]
+  },
+  "directoryPicker": {
+   "methods": []
+  },
+  "directoryPickerController": {
+   "methods": []
+  },
+  "fileReferences": {
+   "methods": []
+  },
+  "fileUploads": {
+   "methods": [
+    "bindPrompt",
+    "registerAgentResolver",
+    "resolve",
+    "retirePrompt",
+    "uploadStream"
+   ]
+  },
+  "fs": {
+   "methods": [
+    "processPathFromHostPath",
+    "watch"
+   ]
+  },
+  "goals": {
+   "methods": [
+    "block",
+    "create",
+    "disarm"
+   ]
+  },
+  "hmr": {
+   "methods": [
+    "getLinked",
+    "watchConfig"
+   ]
+  },
+  "inspector": {
+   "methods": [
+    "publish"
+   ]
+  },
+  "invariants": {
+   "methods": [
+    "register"
+   ]
+  },
+  "jobController": {
+   "methods": []
+  },
+  "jobs": {
+   "methods": []
+  },
+  "llm": {
+   "methods": [
+    "discoverModels",
+    "fileRequestText",
+    "imageRequestPricing",
+    "listModels",
+    "prepareCall",
+    "providerRetryPolicy",
+    "registerAdapter",
+    "registerConfigurableProviders",
+    "registerModelDiscovery",
+    "resolveCallConfig",
+    "resolveModelInfo",
+    "stream"
+   ]
+  },
+  "lsp": {
+   "methods": [
+    "query",
+    "registerProvider"
+   ]
+  },
+  "mcpResources": {
+   "methods": [
+    "register"
+   ]
+  },
+  "messageFeedback": {
+   "methods": []
+  },
+  "officeToPdf": {
+   "methods": [
+    "convert"
+   ]
+  },
+  "otel": {
+   "methods": [
+    "createEventReporter",
+    "createSessionLogReporter"
+   ]
+  },
+  "permissionPresets": {
+   "methods": [
+    "current",
+    "optionOf",
+    "registerAuto",
+    "resolve",
+    "set"
+   ]
+  },
+  "planMode": {
+   "methods": [
+    "get",
+    "set"
+   ]
+  },
+  "pluginManager": {
+   "methods": []
+  },
+  "pluginRegistryProbe": {
+   "methods": []
+  },
+  "productAnalytics": {
+   "methods": []
+  },
+  "productTelemetry": {
+   "methods": [
+    "emit"
+   ]
+  },
+  "profileContext": {
+   "methods": []
+  },
+  "ptcRuntime": {
+   "methods": []
+  },
+  "sandbox": {
+   "methods": []
+  },
+  "sandboxPolicy": {
+   "methods": [
+    "overrideOf",
+    "resolve"
+   ]
+  },
+  "schedule": {
+   "methods": [
+    "create"
+   ]
+  },
+  "sessionController": {
+   "methods": [
+    "inspect",
+    "resolveAgent",
+    "workspaceDesktop"
+   ]
+  },
+  "sessionFeedback": {
+   "methods": []
+  },
+  "sessionFileReferences": {
+   "methods": []
+  },
+  "sessionPersistence": {
+   "methods": []
+  },
+  "sessionProjectionCache": {
+   "methods": [
+    "cachedPredecessorTitle",
+    "cachedSnapshot",
+    "coldSnapshot",
+    "hydratePrepared",
+    "write"
+   ]
+  },
+  "sessionProjections": {
+   "methods": [
+    "cachedSnapshot",
+    "checkpoint",
+    "hydrate",
+    "onChanged",
+    "restore",
+    "restoreFloor",
+    "snapshot",
+    "viewCheckpoint"
+   ]
+  },
+  "sessionQuery": {
+   "methods": [
+    "filterEvents",
+    "filterSessions",
+    "listEvents",
+    "listSessions",
+    "observeSession",
+    "readEvent",
+    "readSession",
+    "readSurface",
+    "readTitle",
+    "readTitleSnapshot",
+    "readTitleSnapshots",
+    "traceEvent",
+    "traceSession"
+   ]
+  },
+  "sessionReferenceResolver": {
+   "methods": [
+    "listCandidates",
+    "prepare"
+   ]
+  },
+  "sessionSkillCatalog": {
+   "methods": []
+  },
+  "sessionTelemetry": {
+   "methods": []
+  },
+  "sessionTitle": {
+   "methods": [
+    "get",
+    "refresh",
+    "register",
+    "rename"
+   ]
+  },
+  "sessions": {
+   "methods": [
+    "announce",
+    "create",
+    "enter",
+    "flush",
+    "fork",
+    "get",
+    "list",
+    "prepare",
+    "registerMessageProjection"
+   ]
+  },
+  "settings": {
+   "methods": [
+    "configure",
+    "describe",
+    "mutate",
+    "prepareDocument",
+    "replace",
+    "update"
+   ]
+  },
+  "settingsController": {
+   "methods": []
+  },
+  "shell": {
+   "methods": []
+  },
+  "shellEnv": {
+   "methods": [
+    "collect",
+    "list",
+    "register"
+   ]
+  },
+  "skills": {
+   "methods": [
+    "get",
+    "list",
+    "register",
+    "registerProvider",
+    "snapshot"
+   ]
+  },
+  "speechController": {
+   "methods": []
+  },
+  "speechToText": {
+   "methods": [
+    "cancelPreparation",
+    "configure",
+    "listProviders",
+    "prepare",
+    "register",
+    "resolve",
+    "snapshot",
+    "transcribe"
+   ]
+  },
+  "spillStore": {
+   "methods": []
+  },
+  "ssh": {
+   "methods": [
+    "connectStream",
+    "dispose"
+   ]
+  },
+  "storage": {
+   "methods": []
+  },
+  "storageDomain": {
+   "methods": [
+    "closeAll",
+    "get"
+   ]
+  },
+  "subagentModelSelection": {
+   "methods": [
+    "current"
+   ]
+  },
+  "subagents": {
+   "methods": [
+    "drainContinuableChildren",
+    "drainContinuableDescendants",
+    "getProvider",
+    "interrupt",
+    "list",
+    "listChildren",
+    "listDescendants",
+    "registerProvider",
+    "resolveMaxDepth",
+    "sendMessage",
+    "start",
+    "startContinuable"
+   ]
+  },
+  "subprocess": {
+   "methods": []
+  },
+  "systemPrompt": {
+   "methods": [
+    "assemble",
+    "context",
+    "getContextOrder",
+    "getSectionOrder",
+    "section",
+    "suppressRuntimeContext",
+    "tools",
+    "variable"
+   ]
+  },
+  "terminalController": {
+   "methods": []
+  },
+  "terminals": {
+   "methods": [
+    "hasOwnerActivity",
+    "kill",
+    "list",
+    "listBackends",
+    "read",
+    "registerBackend",
+    "signal",
+    "spawn",
+    "startSend"
+   ]
+  },
+  "timer": {
+   "methods": [
+    "interval",
+    "timeout"
+   ]
+  },
+  "tokenMeter": {
+   "methods": [
+    "estimateMessage",
+    "measure"
+   ]
+  },
+  "toolResultPruner": {
+   "methods": [
+    "measureContent",
+    "pruneContent",
+    "pruneSession"
+   ]
+  },
+  "tools": {
+   "methods": [
+    "execute",
+    "executionMode",
+    "get",
+    "guard",
+    "presentAs",
+    "register",
+    "restrict",
+    "schemas"
+   ]
+  },
+  "typert": {
+   "methods": [
+    "get",
+    "getPackage",
+    "list",
+    "listPackages",
+    "register",
+    "resolve",
+    "toJSONSchema"
+   ]
+  },
+  "typertGateway": {
+   "methods": [
+    "hasLiveClient",
+    "invoke",
+    "registerRemoteEvents",
+    "stream"
+   ]
+  },
+  "userQuestions": {
+   "methods": [
+    "ask",
+    "askTimed"
+   ]
+  },
+  "web": {
+   "methods": [
+    "fetch",
+    "registerFetchProvider",
+    "registerSearchProvider",
+    "search"
+   ]
+  },
+  "webServer": {
+   "methods": [
+    "applyIndexTaps",
+    "collectIndexInjections",
+    "register",
+    "registerFallback",
+    "registerUpgrade",
+    "renderIndex",
+    "tapIndex"
+   ]
+  },
+  "webhookRuntime": {
+   "methods": []
+  },
+  "workflowEngine": {
+   "methods": []
+  },
+  "workspaceChanges": {
+   "methods": [
+    "diff",
+    "summary"
+   ]
+  },
+  "workspaceController": {
+   "methods": []
+  },
+  "workspaceFiles": {
+   "methods": []
+  },
+  "workspaceRegistry": {
+   "methods": [
+    "archiveSession",
+    "create",
+    "delete",
+    "get",
+    "initializeDefault",
+    "insertBefore",
+    "list",
+    "pinSession",
+    "resolveByPath",
+    "unarchiveSession",
+    "unpinSession"
+   ]
+  }
+ },
+ "client": {
+  "layout": {
+   "methods": [
+    "beginNavigation",
+    "closeRightbar",
+    "openRightbar",
+    "selectPanel",
+    "toggleSidebar"
+   ]
+  },
+  "locale": {
+   "methods": [
+    "addLanguage",
+    "bind",
+    "getLocale",
+    "getSnapshot",
+    "register",
+    "setLocale",
+    "subscribe"
+   ]
+  },
+  "sessions": {
+   "methods": [
+    "binding",
+    "fork",
+    "refreshProjections",
+    "retain",
+    "retainInfo",
+    "scope",
+    "search"
+   ]
+  },
+  "slots": {
+   "methods": [
+    "inject"
+   ]
+  },
+  "theme": {
+   "methods": [
+    "getTheme",
+    "overrideTokens",
+    "register",
+    "setFontSize",
+    "setTheme"
+   ]
+  },
+  "timer": {
+   "methods": [
+    "interval",
+    "timeout"
+   ]
+  },
+  "uiWorkspace": {
+   "methods": [
+    "archiveSession",
+    "connectWorkspace",
+    "createDirectory",
+    "forkSession",
+    "listDirectory",
+    "openSession",
+    "openWorkspace",
+    "pickDirectory",
+    "startSession",
+    "unarchiveSession"
+   ]
+  },
+  "workspaces": {
+   "methods": [
+    "archiveSession",
+    "create",
+    "delete",
+    "insertSessionBefore",
+    "rename",
+    "unarchiveSession"
+   ]
+  }
+ }
+}

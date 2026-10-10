@@ -193,13 +193,18 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
     （实测只影响 `webServer`，而它在官方宿主目录里 —— 该线索只在"宿主里找不到"时才起作用，故不影响结论；两个样本上**零危险翻转**）。
     这条有意差异记在 `tools/parity/expected-diffs.json`，对拍脚本会把它列为「预期差异」而不是失败。
   - 排除是**可审计**的：跳过了哪些文件逐条记在 `provenance.json` 的 `skippedClientExtra` 里 —— 空谈"排了什么"没有意义，要能查。
-- [~] **A5. 识别插件自有服务** —— 数据基础已就绪，**行为决定并入 A8**
-  - ✅ 已完成：`ctx.provide("x")` 的产出被采集，进 `perPlugin[].providedServices` 与顶层 `providedServices`
-  - ⚠️ 已知不完整：目前只匹配 `ctx.provide(` 这一种形态。`betterLocale` / `pet` / `agentTeams` / `companionQq`
-    并未由此路径捕获（它们的提供方式未查明）—— 需要再挖一次，**不要以为 providedServices 是完整的**
-  - ⏳ 待定：**怎么用**。原计划是"把它们从宿主服务列表里摘出去"，但 A4b 的实测说明
-    "按名字筛"会误伤真服务（`credentials` / `subprocess` / `storageDomain` 都是真宿主服务却无显式声明）。
-    所以更可能落成 **§2.2 的分档呈现** 而不是硬摘除 —— 这一条与 A8 合并决策
+- [x] **A5. 识别插件自有服务** —— ✅ 完成，但**结论与原计划完全不同**
+  - ❌ 原计划「把插件自有服务从宿主服务里摘出去」**被证据否决**。查证结果：
+    `betterLocale` / `pet` / `agentTeams` / `companionQq` **不是**插件自有服务，而是
+    **被消费、但当前 profile 里无人提供** —— 它们分别被
+    `dsh-better-sidebar`、`dsh-remote-web-ui`、`dsh-better-sidebar`、`dsh-meme`
+    用 `ctx.get(...)` 取走，而没有任何插件 `provide` 它们。
+    真正的「插件自有服务」只有 2 个：`betterSidebar`（dsh-better-sidebar）、`market`（dshmarket）。
+  - ✅ 正确的模型是**按提供方三分**：宿主提供 / 某个已装插件提供 / **无人提供**。
+    第三类才是真缺口，而且它的性质是「**插件间依赖缺失**」，不是「与 DSH 版本不兼容」——
+    这个区别直接决定了它是 `degraded` 还是 `fatal`。
+  - ✅ 数据：`perPlugin[].providedServices`、`perPlugin[].softDeclaredServices`（ctx.get 软取）
+  - ⚠️ 仍不完整：只匹配 `ctx.provide(` 一种形态。若将来发现别的提供机制，`providedServices` 要补
 - [x] **A6. 逐插件归属重构** —— ✅ 完成，而且**顺带证明这是个正确性缺陷，不只是功能缺失**
   - 实测：原实现用**跨插件累积**的服务集合去扫当前插件源码，别的插件的服务名会被套到本插件的**同名局部变量**上。
     desktop profile 的 280 个调用点里 **51 个**是这种污染（`remote.indexOf/slice/replace` 是字符串方法；
@@ -211,10 +216,17 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
   - 实现：扫描从"把所有文件拼成一个大字符串"改为**逐文件**（拼接会抹掉文件边界，行号就无从谈起）
   - 产物：每条调用点带 `{service, method, file, line}`，进 `perPlugin[].callSites` 与顶层 `callSites`
   - 验收：`dsh-keep-awake` 的 `settings.register` 定位到 `lib/index.js:466`，打开文件确认即那一行
-- [ ] **A8. 五元组结论 + 确定性标注 + 接入规则表**
-  - 确定性按 **§2.2 的三档**实现（可信声明 / 官方目录 / 都不是）；这三档的判据已经实测校准过，不要重新发明
-  - 验收：每条发现都有 类别/位置/依据/严重度/影响面 + 确定或疑似；未覆盖 API 显示"影响面未知"
-  - 验收：`parser` / `ruleNames` / `topoIndex` 这类不得出现在"确定"档
+- [x] **A8. 五元组结论 + 确定性标注 + 接入规则表** —— ✅ 完成，回归基准**精确命中**
+  - 产物：`lib/verdict.mjs`（判定引擎，纯函数）+ `rules/dsh-api-catalog.json`（官方双端目录）
+    + `tools/catalog/extract-host-api.py`（从 asar 现抽目录，可随 DSH 版本重新生成）
+  - **验收结果**（三个回归基准，带运行时面）：
+    `@omdsh-dev/dsh-plugin-check` → 可用；`dsh-keep-awake` → **部分可用**
+    （`jobs.onJobsChanged` 降级→轮询、`settings.register` 功能失效→设置页消失，位置精确到行）；
+    `dsh-pet` → 可用
+  - 三档确定性按 §2.2 实现；`parser` / `ruleNames` / `topoIndex` 归入"高概率假阳性"被过滤，不进结论
+  - 在 desktop profile（21 个插件）上：11 可用 / 10 部分可用 / **0 不兼容**
+  - ⚠️ 注意：那次 desktop 跑的是**仅目录、无运行时面**的模式，方法级结论一律降为"疑似"。
+    真正可信的结论需要运行时面（CLI 走探针启动，插件形态直接读 `ctx`）
 
 #### B. 插件宿主半边
 
@@ -287,6 +299,11 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
 | **编辑 `probe/index.mjs` 后注意硬链接** | 插件装进 profile 后可能是硬链接/副本；用会替换 inode 的方式写入，`node_modules` 里的副本不会同步，会出现"改了代码但行为没变"。装完务必确认副本内容 |
 | **UI 驱动会假阴性** | 我自己的验证脚本曾把侧边栏 `aria="插件"` 按钮当成设置页导航项，得出"tab 不渲染"的**错误**结论。验证工具本身也会骗人 |
 | **懒加载 chunk 不是死代码** | 插件可以把客户端代码切成 chunk，用自己宿主半边的路由按 URL 取回（`dsh-better-sidebar`：`/sidebar/bundle/${name}.js`）。**从声明入口做可达性分析永远够不到它们。不要按"只扫声明入口"去收窄客户端种子** —— 那会静默删掉真代码 |
+| **目录 ≠ 运行时 API 面** | 官方生成的 API 目录是**契约**目录，不是运行时清单。实测：`jobs` 在目录里 **0 个方法**、运行时 **29 个**；`settings` 目录 6 个、运行时 10 个；`loader` 目录**完全不收录**。拿目录当运行时面会海量误报 —— 方法级判定必须优先用探针/`ctx` 取到的运行时面 |
+| **Cordis 上下文内置成员不是 DSH 服务** | `loader` / `effect` / `fiber` / `scope` 这些是框架自带的，不在 DSH 服务目录里。不排除的话会得出"宿主服务缺失 → 致命 → 插件不兼容"，实测一个 `loader` 就把 `dshmarket` 误判成"不兼容" |
+| **JS 内置集合方法名会被当成 API 调用** | 插件里 `const sessions = new Map()` 之后的 `sessions.set/map/sort/values` 会被当成"调用了宿主不存在的方法"。**只靠名字黑名单不安全**（`sessions.get` 是真实宿主方法），必须配合"该方法不在宿主方法表里"一起判 |
+| **客户端服务不能用宿主面判** | `locale` / `slots` / `configForms` / `sidebarRight` / `settingsScope` 活在浏览器里，宿主探针必然 `present=false`。判据两条并用：①在官方客户端目录里 ②它出现的文件**全部**落在客户端桶里。只靠①不够（那份目录只有 8 个条目） |
+| **没有运行时面时不得断言"服务缺失"** | 仅凭目录缺失就判 `fatal` 会把 `dsh-mnemon` / `dsh-catppuccin` 错报成"不兼容"。没有运行时面时必须降级为"疑似 + 降级" |
 | **对拍的严格范围已收窄** | python 版在 `calls` 上有**跨插件污染**（51/280）、`clientHints` 上有**顺序相关**缺陷。所以对拍只严格比 `manifests` / `services` / `fallbackPackages`；`calls` 与 `clientHints` 只并排打印数量供人眼核对。**别把"对拍通过"误读成"输出一致"** |
 | **体检插件自己的 `inject` 必须留空** | 写成 `["settings","loader"]` 会让体检插件自己的 fiber 因缺服务停在 PENDING —— 一个体检工具自己变成"未激活"就荒诞了。用到再加 |
 | **设置页有两个「插件」** | 侧边栏有 `aria-label="插件"` 的按钮，设置页里有文本为「内置插件」的导航项。选择器必须**精确全等**，松散的 `includes('插件')` 会点到错的那个 —— 我本人已经因此得出过一次**错误结论** |
@@ -422,13 +439,19 @@ dsh-plugin-compat-check/
 
 ## 9. 下一动作
 
-**A8**（五元组结论 + 三档确定性 + 接入规则表），并把 **A5 的行为决定并进来**——
-`providedServices` 正是三档判据的一部分（"插件自有的服务"不该被当成宿主缺口）。
+**C2 + CLI 接线**：把真实总览表落进 `settings.plugins.tab`（占位组件已在 `plugin/lib/client.js`），
+并把 `dsh-plugin-compat-check.sh` 第 ⑤ 步（那段 python 的比对逻辑）换成 `lib/verdict.mjs`。
+
+> 并行进行中：子代理 A 扩充 `rules/severity.json` 覆盖；子代理 B 做 B1/B2（宿主半边读 `ctx.loader`）。
 
 它和 A4 性质不同：A4 是**不改输出**的安全改动，A5 **会改变输出**（少掉一批假缺口），
 所以流程是：改 → 跑对拍 → 把差异逐条摊开给用户确认 → 再决定是否回溯到 python 版。
 
-> **上一次更新**：2026-10-10，一次完成 **A6（逐插件归属）+ A7（文件:行）**：
+> **上一次更新**：2026-10-10，完成 **A5 + A8**：判定引擎 `lib/verdict.mjs` 上线，
+> 三个回归基准精确命中（keep-awake → 部分可用，两条发现带行号）；
+> 新增双端官方目录与从 asar 现抽的工具。**踩掉 5 个会造成海量误报的坑**（见 §6）。
+>
+> 上一次：一次完成 **A6（逐插件归属）+ A7（文件:行）**：
 > 逐插件归属顺带清掉 51 个跨插件污染点（严格子集），行号落到 `callSites`；
 > 同时**收窄了对拍的严格范围**（python 在 calls/clientHints 上有已知缺陷，不再是合格参照）。
 > 并行线：**C1 插件骨架**已由子代理完成并全项实测通过（宿主激活 + 客户端标签真渲染）。

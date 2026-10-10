@@ -1,0 +1,218 @@
+{
+  "probeVersion": 3,
+  "probedAt": "2026-10-10T15:55:42.311Z",
+  "node": "v24.18.1",
+  "platform": "darwin",
+  "wanted": [
+    "agentDefaultModel",
+    "agents",
+    "commands",
+    "credentials",
+    "jobs",
+    "locale",
+    "settings",
+    "slots",
+    "tools",
+    "webServer"
+  ],
+  "root": {
+    "agentDefaultModel": {
+      "present": true,
+      "methods": {
+        "currentSelection": "function",
+        "saveSelection": "function"
+      }
+    },
+    "agents": {
+      "present": true,
+      "methods": {
+        "currentInitiator": "function",
+        "requireInitiator": "function",
+        "withInitiator": "function",
+        "withoutInitiator": "function",
+        "setFactory": "function",
+        "requireFactory": "function",
+        "create": "function",
+        "resume": "function",
+        "register": "function",
+        "enter": "function",
+        "detachEntered": "function",
+        "emitDisposed": "function",
+        "announce": "function",
+        "get": "function",
+        "isOwnedBy": "function",
+        "list": "function",
+        "roots": "function",
+        "closeInitiators": "function",
+        "disposeInitiators": "function",
+        "runWithInitiator": "function",
+        "hasLifecycleAncestor": "function",
+        "assertInitiatorsReadable": "function",
+        "releaseReentrantInitiatorRuns": "function",
+        "releaseInitiatorRun": "function"
+      }
+    },
+    "commands": {
+      "present": true,
+      "methods": {
+        "register": "function",
+        "registerFileReceiptResolver": "function",
+        "list": "function",
+        "find": "function",
+        "execute": "function",
+        "settleThrown": "function",
+        "mintCommandId": "function",
+        "appendLifecycle": "function",
+        "view": "function",
+        "notifyChange": "function"
+      }
+    },
+    "credentials": {
+      "present": true,
+      "methods": {
+        "isClosed": "function",
+        "inherited": "function",
+        "dotenvFallback": "function",
+        "resolve": "function",
+        "describe": "function",
+        "set": "function",
+        "unset": "function",
+        "readRecord": "function",
+        "describeRecord": "function",
+        "listRecords": "function",
+        "modifyRecord": "function",
+        "deleteRecord": "function",
+        "enqueue": "function",
+        "queueRefresh": "function",
+        "write": "function",
+        "assertUnshadowed": "function",
+        "loadInitial": "function",
+        "migrateFlatDocument": "function",
+        "refresh": "function",
+        "reconcileFromDisk": "function",
+        "changedRefs": "function",
+        "changedRecords": "function",
+        "notifyUpdated": "function",
+        "notifyRecordUpdated": "function",
+        "fanOut": "function",
+        "warnListenerFailure": "function"
+      }
+    },
+    "jobs": {
+      "present": true,
+      "methods": {
+        "start": "function",
+        "list": "function",
+        "get": "function",
+        "read": "function",
+        "readAt": "function",
+        "kill": "function",
+        "wait": "function",
+        "remove": "function",
+        "attachController": "function",
+        "resolveOwner": "function",
+        "servesOwner": "function",
+        "activeJobCount": "function",
+        "expect": "function",
+        "assertAccess": "function",
+        "view": "function",
+        "emit": "function",
+        "readJob": "function",
+        "killJob": "function",
+        "waitJob": "function",
+        "appendRing": "function",
+        "guardSource": "function",
+        "emitOutput": "function",
+        "updateProgress": "function",
+        "settle": "function",
+        "ensureOwnerCleanup": "function",
+        "disposeOwned": "function",
+        "drop": "function",
+        "disposeAll": "function",
+        "cancelForTeardown": "function"
+      }
+    },
+    "locale": {
+      "present": false
+    },
+    "settings": {
+      "present": true,
+      "methods": {
+        "importLegacyDocument": "function",
+        "configure": "function",
+        "invalidate": "function",
+        "prepareDocument": "function",
+        "describe": "function",
+        "update": "function",
+        "replace": "function",
+        "mutate": "function",
+        "write": "function",
+        "schema": "function"
+      }
+    },
+    "slots": {
+      "present": false
+    },
+    "tools": {
+      "present": true,
+      "methods": {
+        "collapseSection": "function",
+        "sdkSection": "function",
+        "modeFor": "function",
+        "requirePtcTransport": "function",
+        "presentAs": "function",
+        "wireSchemas": "function",
+        "requirePtcRuntime": "function",
+        "register": "function",
+        "restrict": "function",
+        "guard": "function",
+        "guardReason": "function",
+        "view": "function",
+        "get": "function",
+        "resolveExecution": "function",
+        "schemas": "function",
+        "sdkSchemas": "function",
+        "schemaOf": "function",
+        "executionMode": "function",
+        "shapeDispatchLog": "function",
+        "collapses": "function",
+        "execute": "function",
+        "completeScheduledExecution": "function",
+        "createExecution": "function",
+        "prepareScheduledExecution": "function",
+        "prepareExecution": "function",
+        "callerCancelled": "function",
+        "cancellationResult": "function",
+        "dispatchToolBody": "function",
+        "dispatchScheduledExecution": "function",
+        "finalizeScheduledExecution": "function",
+        "finishScheduledExecution": "function",
+        "applyFinalContent": "function",
+        "notifyResult": "function",
+        "serviceAsk": "function",
+        "postExecute": "function",
+        "markCanonical": "function",
+        "createSuccessResult": "function",
+        "normalizeDispatchResult": "function",
+        "materializeFinalResult": "function"
+      }
+    },
+    "webServer": {
+      "present": true,
+      "methods": {
+        "fallback": "function",
+        "gzip": "function",
+        "register": "function",
+        "registerUpgrade": "function",
+        "registerFallback": "function",
+        "tapIndex": "function",
+        "match": "function",
+        "applyIndexTaps": "function",
+        "collectIndexInjections": "function",
+        "renderIndex": "function"
+      }
+    }
+  },
+  "scoped": {},
+  "_redacted": "本文件的 `data` 字段（服务内部状态的字面值）已被移除。它从未被任何消费方读取，却把 credentials.text 里的真实密钥带进了 git 历史。探针现在只记录结构（方法名），不记录内容 —— 见 probe/index.mjs 的 dumpShape 注释。"
+}
