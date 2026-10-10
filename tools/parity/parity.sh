@@ -28,31 +28,43 @@ echo "③ node 版输出 OK"
 
 python3 - "$OUT" "$REPO/tools/parity/expected-diffs.json" <<'PY'
 import json, sys, os
+
 out, allow_path = sys.argv[1], sys.argv[2]
 a = json.load(open(os.path.join(out, 'py', 'static.json'), encoding='utf-8'))
 b = json.load(open(os.path.join(out, 'js', 'static.json'), encoding='utf-8'))
 sa = json.load(open(os.path.join(out, 'py', 'services.json'), encoding='utf-8'))
 sb = json.load(open(os.path.join(out, 'js', 'services.json'), encoding='utf-8'))
 
+# 严格对拍的范围：只比「文件集选择」与「服务发现」。
+#   manifests / services / fallbackPackages
+#
+# 不再严格比 calls 与 clientHints，因为 python 版在这两项上有**已知缺陷**：
+#   1) calls：它用跨插件累积的服务集合去扫当前插件的源码，别的插件的服务名会被套到
+#      本插件的同名局部变量上。实测 desktop profile 的 280 个调用点里 51 个是这种污染
+#      （例如 dshmarket 里 `const commands = {...probePnpm...}` 被当成 DSH 的 commands）。
+#      逐插件归属后是**严格子集**（只删不增），python 不再是合格参照。
+#   2) clientHints：顺序相关（拿当时已累积的服务匹配当前插件的文件）。逐插件正确计算
+#      会让 4 个服务 False→True，不反向。
+# 这两项改为并排打印数量供人眼核对，而不是伪装成一条总会通过的断言。
+STRICT = ['manifests', 'services', 'fallbackPackages']
+
 def walk(x, y, path='$', diffs=None):
     if diffs is None: diffs = []
     if type(x) is not type(y) and not (isinstance(x, (int, float)) and isinstance(y, (int, float))):
-        diffs.append(f"{path}: 类型不同 {type(x).__name__} vs {type(y).__name__}"); return diffs
+        diffs.append("%s: 类型不同 %s vs %s" % (path, type(x).__name__, type(y).__name__)); return diffs
     if isinstance(x, dict):
         for k in sorted(set(x) | set(y)):
-            if k not in x: diffs.append(f"{path}.{k}: 只在 node 版出现")
-            elif k not in y: diffs.append(f"{path}.{k}: 只在 python 版出现")
-            else: walk(x[k], y[k], f"{path}.{k}", diffs)
+            if k not in x: diffs.append("%s.%s: 只在 node 版出现" % (path, k))
+            elif k not in y: diffs.append("%s.%s: 只在 python 版出现" % (path, k))
+            else: walk(x[k], y[k], "%s.%s" % (path, k), diffs)
     elif isinstance(x, list):
-        if len(x) != len(y): diffs.append(f"{path}: 长度不同 {len(x)} vs {len(y)}")
-        for i, (p, q) in enumerate(zip(x, y)): walk(p, q, f"{path}[{i}]", diffs)
+        if len(x) != len(y): diffs.append("%s: 长度不同 %d vs %d" % (path, len(x), len(y)))
+        for i, (p, q) in enumerate(zip(x, y)): walk(p, q, "%s[%d]" % (path, i), diffs)
     elif x != y:
-        diffs.append(f"{path}: {x!r} vs {y!r}")
+        diffs.append("%s: %r vs %r" % (path, x, y))
     return diffs
 
-d1 = walk(a, b)
-d2 = walk(sa, sb)
-diffs = d1 + d2
+diffs = walk({k: a.get(k) for k in STRICT}, {k: b.get(k) for k in STRICT}) + walk(sa, sb)
 
 allow = {}
 try:
@@ -60,23 +72,26 @@ try:
 except Exception:
     pass
 
-def path_of(line):
-    # 差异行形如 "$.clientHints.webServer: True vs False"
-    return line.split(":", 1)[0].strip()
-
+path_of = lambda line: line.split(":", 1)[0].strip()
 expected = [l for l in diffs if path_of(l) in allow]
 unexpected = [l for l in diffs if path_of(l) not in allow]
+
+ncalls = lambda d: sum(len(v) for v in d.get('calls', {}).values())
+nhints = lambda d: sum(1 for v in d.get('clientHints', {}).values() if v)
+
 print()
 if expected:
-    print(f"· 预期差异 {len(expected)} 处（已记入 expected-diffs.json）：")
+    print("· 预期差异 %d 处（已记入 expected-diffs.json）：" % len(expected))
     for line in expected[:20]:
-        print("   " + line)
-        print("     原因: " + allow[path_of(line)])
+        print("   " + line); print("     原因: " + allow[path_of(line)])
 if not unexpected:
-    print(f"✓ 除预期差异外完全一致：static.json 与 services.json 逐字段相同")
-    print(f"  manifests={len(a['manifests'])}  服务={len(a['services'])}  调用点={sum(len(v) for v in a['calls'].values())}  退回整包={len(a['fallbackPackages'])}")
+    print("✓ 严格项一致：manifests / services / fallbackPackages 逐字段相同")
+    print("  manifests=%d  服务=%d  退回整包=%d" % (len(a['manifests']), len(a['services']), len(a['fallbackPackages'])))
+    print("· 参考值（python）调用点=%d  客户端线索=%d" % (ncalls(a), nhints(a)))
+    print("· 实际值（node）  调用点=%d  客户端线索=%d" % (ncalls(b), nhints(b)))
+    print("  ↑ 这两项不严格对拍：python 侧有跨插件污染与顺序相关缺陷，原因见脚本内注释")
 else:
-    print(f"✗ 存在 {len(unexpected)} 处**非预期**差异：")
+    print("✗ 存在 %d 处**非预期**差异：" % len(unexpected))
     for line in unexpected[:40]: print("   " + line)
     sys.exit(1)
 PY

@@ -1,0 +1,3 @@
+- insert:
+    - id: dsh-plugin-compat-check
+      name: 'dsh-plugin-compat-check'

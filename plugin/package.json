@@ -1,0 +1,19 @@
+{
+  "name": "dsh-plugin-compat-check",
+  "version": "0.0.1",
+  "private": true,
+  "description": "DSH plugin skeleton: host half + prebuilt client half (settings.plugins.tab placeholder).",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": { "default": "./lib/client.js" },
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": { "platform": "web" }
+  },
+  "engines": { "node": "^22.19.0 || >=24" }
+}
