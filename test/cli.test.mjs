@@ -27,10 +27,30 @@ const MICRO_SURFACE = path.join(REPO, 'test/fixtures/micro/host-surface.json')
 const BASELINE_SURFACE = path.join(REPO, 'tools/parity/fixtures/host-surface-parityfix.json')
 const PARITYFIX = path.join(os.homedir(), '.dsh/profiles/parityfix/node_modules')
 
-const runCLI = (args) => {
-  const r = spawnSync(process.execPath, [CLI, ...args], { encoding: 'utf8', timeout: 120000 })
+/**
+ * 跑一次 CLI —— **把 `DSH_HOME` 钉进临时目录**。
+ *
+ * ⚠️ 这是一次真实事故换来的。CLI 的默认行为会**写基线**到
+ * `$DSH_HOME/dsh-plugin-compat-check/`，而这里很多用例没有传 `--no-baseline`
+ * （`--help`、用法错误、以及一批只关心结论的用例）。于是它们**写进了用户真实的
+ * `~/.dsh`**，我是在自己的 `~/.dsh` 里看到 `baseline.unknown.json` /
+ * `baseline.parityfix.json` 冒出来才发现的 —— 文件名里的 `<profile>` 还是
+ * 从临时 node_modules 路径推出来的垃圾（`unknown`）。
+ *
+ * 一条铁律：**测试永远不碰用户的真实环境**。基线是"只写自己的状态目录"没错，
+ * 但测试跑的时候，"自己的状态目录"必须是临时的那个。
+ */
+const TEST_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-cli-home-'))
+const runCLI = (args, extraEnv) => {
+  const r = spawnSync(process.execPath, [CLI, ...args], {
+    encoding: 'utf8',
+    timeout: 120000,
+    env: { ...process.env, DSH_HOME: TEST_HOME, HOME: TEST_HOME, ...(extraEnv || {}) },
+  })
   return { code: r.status, out: r.stdout || '', err: r.stderr || '' }
 }
+
+process.on('exit', () => { try { fs.rmSync(TEST_HOME, { recursive: true, force: true }) } catch { /* 忽略 */ } })
 
 describe('CLI：参数解析', () => {
   test('--help 打印用法并以 0 退出', () => {
@@ -146,7 +166,7 @@ describe('CLI：--json 真的产出 JSON（不是被静默忽略）', () => {
 
 describe('CLI：真实插件（三个回归基准）', { skip: fs.existsSync(PARITYFIX) ? false : '本机没有 parityfix profile' }, () => {
   test('三个回归基准的结论与 Plan.md §5 G1 一致', () => {
-    const r = runCLI(['--nm', PARITYFIX, '--probe', BASELINE_SURFACE, '--dsh-version', '0.2.0-rc.2', '--json'])
+    const r = runCLI(['--nm', PARITYFIX, '--probe', BASELINE_SURFACE, '--dsh-version', '0.2.0-rc.2', '--json', '--no-baseline'])
     const data = JSON.parse(r.out)
     assert.equal(data.plugins['@omdsh-dev/dsh-plugin-check'].verdict, 'ok')
     assert.equal(data.plugins['dsh-pet'].verdict, 'ok')
@@ -161,8 +181,12 @@ describe('CLI：真实插件（三个回归基准）', { skip: fs.existsSync(PAR
 
   test('CLI 的结论与内核直接调用逐字段一致（不可能有两份答案）', async () => {
     const { run } = await import('../bin/compat-check.mjs')
-    const direct = run({ nm: PARITYFIX, probe: BASELINE_SURFACE, dshVersion: '0.2.0-rc.2' })
-    const viaCLI = JSON.parse(runCLI(['--nm', PARITYFIX, '--probe', BASELINE_SURFACE, '--dsh-version', '0.2.0-rc.2', '--json']).out)
+    // ⚠️ 这条**直调内核**（不走 runCLI），所以上面那个 `DSH_HOME` 隔离对它不生效 ——
+    // 它会真的去写 `$DSH_HOME/dsh-plugin-compat-check/baseline.parityfix.json`。
+    // 这正是"测试写进用户家目录"那个事故的最后一个源头（我是逐个文件跑才定位到的）。
+    // 显式关掉基线：这条测试要验的是"两个入口结论一致"，与基线无关。
+    const direct = run({ nm: PARITYFIX, probe: BASELINE_SURFACE, dshVersion: '0.2.0-rc.2', baseline: false })
+    const viaCLI = JSON.parse(runCLI(['--nm', PARITYFIX, '--probe', BASELINE_SURFACE, '--dsh-version', '0.2.0-rc.2', '--json', '--no-baseline']).out)
     assert.deepEqual(
       Object.keys(viaCLI.plugins).sort(),
       Object.keys(direct.verdict.plugins).sort(),
@@ -290,5 +314,40 @@ describe('CLI：基线差分', () => {
       assert.equal(d.baseline.diff.comparable, true)
       assert.equal(d.baseline.badge.show, false)
     } finally { fs.rmSync(bl, { force: true }) }
+  })
+})
+
+
+/**
+ * 守卫：测试**绝不能**写进用户真实的 `~/.dsh`。
+ *
+ * 上面那次事故的形态很隐蔽：测试全绿、退出码正常，只是用户的家目录里多了两个
+ * 文件 —— 而且文件名还是从临时路径推出来的垃圾。没有这条断言，下次重构还会踩。
+ */
+describe('测试隔离：不碰用户的真实环境', () => {
+  test('跑一批 CLI（故意不带 --no-baseline）后，真实 ~/.dsh 里没有新基线', () => {
+    const real = path.join(os.homedir(), '.dsh', 'dsh-plugin-compat-check')
+    const before = fs.existsSync(real) ? fs.readdirSync(real).sort() : []
+    // 故意跑几个**不带** --no-baseline 的用例 —— 它们本来会写基线
+    runCLI(['--nm', MICRO, '--probe', MICRO_SURFACE, '--dsh-version', '0.2.0-rc.2', '--quiet'])
+    runCLI(['--nm', MICRO, '--dsh-version', '0.2.0-rc.2', '--quiet'])
+    runCLI(['--help'])
+    const after = fs.existsSync(real) ? fs.readdirSync(real).sort() : []
+    assert.deepEqual(after, before,
+      `测试往真实 ~/.dsh 里写了东西：新增 ${JSON.stringify(after.filter((x) => !before.includes(x)))}`)
+  })
+
+  test('基线确实落在了临时 DSH_HOME 里（说明隔离真的生效，而不是没写）', () => {
+    // 只断言"没写进真实目录"是不够的 —— 那在"根本没写"时也成立。
+    // 所以反过来确认：隔离生效时它该写在临时目录里。
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-iso-'))
+    try {
+      const r = runCLI(['--nm', MICRO, '--probe', MICRO_SURFACE, '--dsh-version', '0.2.0-rc.2', '--quiet'], { DSH_HOME: tmp })
+      assert.notEqual(r.code, 3, `不该是"无法判定"：${r.out}`)
+      const dir = path.join(tmp, 'dsh-plugin-compat-check')
+      assert.ok(fs.existsSync(dir), '临时 DSH_HOME 下没有基线目录 —— 隔离参数没起作用？')
+      const files = fs.readdirSync(dir)
+      assert.ok(files.some((f) => f.startsWith('baseline.')), `临时目录里没有基线文件：${files}`)
+    } finally { fs.rmSync(tmp, { recursive: true, force: true }) }
   })
 })
