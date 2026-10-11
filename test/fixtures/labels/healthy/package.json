@@ -1,0 +1,6 @@
+{
+  "name": "@label/healthy",
+  "version": "1.0.0",
+  "description": "合成负例：不依赖任何服务 → 条目 ACTIVE。用来测「不该报 fatal 时有没有乱报」。",
+  "dsh": { "bundle": { "patch": "cordis.patch.yml" } }
+}

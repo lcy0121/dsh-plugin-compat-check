@@ -1,0 +1,6 @@
+{
+  "name": "@label/real-service",
+  "version": "1.0.0",
+  "description": "合成负例之二：注入一个**真实存在**的宿主服务 → 条目 ACTIVE。测「工具会不会把正常依赖报成致命」。",
+  "dsh": { "bundle": { "patch": "cordis.patch.yml" } }
+}

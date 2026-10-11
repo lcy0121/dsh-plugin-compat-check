@@ -1,0 +1,8 @@
+# 真实的 bundle patch 格式 —— **必须**写成 `- insert:` 包一层，且 `@` 开头的值要加引号
+# （YAML 里 `@` 是保留指示符；不引用会直接语法错，而报错只显示一段 YAML 片段）。
+#
+# ⚠️ 这与 `test/fixtures/micro/` 里那些夹具**不同**：那些是给**静态提取器**看的，
+# 提取器接受简化形 `- name: ./index.js`；而这里要被**真实宿主加载**。
+- insert:
+    - id: '@label/broken-service'
+      name: '@label/broken-service'

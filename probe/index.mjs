@@ -36,6 +36,17 @@ const REPORT = `${WORKDIR}/probe-report.json`;
 
 const MAX_METHODS = 200;
 
+/**
+ * Cordis fiber 状态的数字 → 名字。
+ * ⚠️ **必须与 `plugin/index.js` 的 `FIBER_STATES` 逐字相同** ——
+ * 两处不一致的话，同一个条目在插件面板与标注集里会有两个说法，
+ * 而"标注对不对"正是靠这两边比对出来的。
+ * 抄错一次就会让整个度量失效（我会把这条钉进测试）。
+ *
+ * 值取自 cordis：0=PENDING 1=LOADING 2=ACTIVE 3=FAILED 4=DISPOSED 5=UNLOADING
+ */
+const FIBER_STATES = { 0: 'PENDING', 1: 'LOADING', 2: 'ACTIVE', 3: 'FAILED', 4: 'DISPOSED', 5: 'UNLOADING' };
+
 /** 只建一次（模块级），失败也不抛 —— 探针绝不能拖累宿主启动。 */
 let dirReady = false;
 function ensureDir() {
@@ -108,6 +119,76 @@ function dumpShape(svc) {
   return { methods };
 }
 
+/**
+ * 收集每个**插件条目**的激活状态 —— 这是「标注集」的**真值来源**。
+ *
+ * ## 为什么 loader 的状态可以当真值
+ *
+ * 本工具的三层声明里，第一层是「**宿主未激活**」。而"某个条目到底激活没有"
+ * **不需要人来判断** —— 宿主自己就说了：`entry.fiber.state`。
+ * 也就是说这一层可以**免费**拿到标签，而另外两层（静默降级、客户端半边）不行。
+ *
+ * 所以这里记录的是**真值**，不是又一个推断。用它可以双向测工具的声明：
+ *
+ * | 工具说 | loader 说 | 结论 |
+ * |---|---|---|
+ * | 该插件会停在 pending（fatal） | PENDING / FAILED | ✅ 说对了 |
+ * | 该插件会停在 pending（fatal） | **ACTIVE** | ❌ **这条 fatal 是假的**（可测的假阳性） |
+ * | 没有任何致命发现 | **PENDING / FAILED** | ❌ **漏报**（可测的假阴性） |
+ *
+ * ## ⚠️ 只记录"状态"，不记录任何值
+ *
+ * 与 `dumpShape` 同一条规矩：探针是**只读的形状探测器**，不是快照工具。
+ * 这里记的 `id` / `state` / `disabled` / `missingServices` 全是**结构性**的
+ * —— 没有路径、没有配置、没有凭据。
+ *
+ * ## ⚠️ 但**它是插件清单**
+ *
+ * 换句话说：这份报告现在能看出"这台机器装了哪些插件"。
+ * 那不是凭据，但也是本机信息 —— 所以**不要随手把它提交进仓库**。
+ * 仓库里那一份（`tools/parity/fixtures/host-surface-parityfix.json`）来自
+ * **测试 profile**，只含回归基准那几个包，是有意留的。
+ *
+ * ## 实现约束（都是实测踩出来的）
+ *
+ * - `ctx.get('loader')` 在**空 inject** 下可用（探针刻意不声明 inject，否则会卡 PENDING）
+ * - **`entries()` 不是数组**（`Array.isArray === false`，可迭代）—— 按数组写会静默拿到 0 条
+ * - `fiber.state` 是**数字**，映射见下面的 FIBER_STATES
+ * - 整个函数**绝不抛**：探针绝不能拖累宿主启动
+ */
+function collectEntryStates(ctx) {
+  const out = { total: 0, byState: {}, plugins: [], note: null };
+  try {
+    let loader = null;
+    try { loader = ctx.get('loader'); } catch { /* 下一个 */ }
+    if (!loader) { try { loader = ctx.loader; } catch { /* 无 */ } }
+    if (!loader || typeof loader.entries !== 'function') {
+      out.note = '拿不到 loader.entries() —— 这一轮没有标注（不是"全都激活了"）';
+      return out;
+    }
+
+    // ⚠️ `entries()` **不是数组**：必须 for..of。写成 Array.from 之外的数组用法会静默得 0 条。
+    const entries = loader.entries();
+    for (const entry of entries) {
+      out.total++;
+      let state = 'UNREADABLE';
+      let disabled = null;
+      let id = null;
+      try { id = entry?.id ?? entry?.options?.id ?? null; } catch { /* 保持 null */ }
+      try { disabled = Boolean(entry?.disabled); } catch { /* 保持 null */ }
+      try {
+        const code = entry?.fiber?.state;
+        state = typeof code === 'number' ? (FIBER_STATES[code] ?? `UNKNOWN(${code})`) : 'NO_FIBER';
+      } catch { state = 'UNREADABLE'; }
+      out.byState[state] = (out.byState[state] ?? 0) + 1;
+      out.plugins.push({ id, state, disabled });
+    }
+  } catch (error) {
+    out.note = `收集条目状态时出错（不影响服务面）: ${String(error && error.message ? error.message : error)}`;
+  }
+  return out;
+}
+
 function readWanted() {
   try {
     const parsed = JSON.parse(readFileSync(SERVICES_FILE, 'utf8'));
@@ -124,17 +205,22 @@ export function apply(ctx) {
 
   setTimeout(() => {
     const report = {
-      probeVersion: 2,
+      probeVersion: 4,
       probedAt: new Date().toISOString(),
       node: process.version,
       platform: process.platform,
       wanted: [],
       root: {},
       scoped: {},
+      // 标注集的真值来源：每个条目激活没有（见 collectEntryStates 的注释）
+      entries: { total: 0, byState: {}, plugins: [], note: '尚未收集' },
     };
 
     const wanted = readWanted();
     report.wanted = wanted;
+    // 条目状态与"要问哪些服务"无关，所以放在服务扫描**之前** ——
+    // 万一后面某一步抛了，标注这一半仍然留得下来。
+    report.entries = collectEntryStates(ctx);
 
     for (const n of wanted) {
       try {

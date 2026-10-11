@@ -250,7 +250,58 @@ function probeBoot(nm, opts = {}) {
     } else if (!Array.isArray(bundles)) {
       notes.push('目标 profile 里找不到 dsh.profile.bundles —— 探针可能不会加载');
     }
+    // ── 2a. 调用方指定的**额外插件**（给标注集装"已知会坏/已知正常"的合成正负例）──
+    //
+    // 为什么走这个入口而不是另写一套 profile 构造：这条路径**已经被验证可用**
+    // （探针装得进去、能起来、能拿到面）。自己再抄一遍 profile 构造，会连它的坑
+    // 一起抄错 —— 实测就这么翻过车：手工搭的临时 profile 里，探针的 `file:` 依赖
+    // 在复制后解析成了临时目录下的相对路径，pnpm 直接 ENOENT，
+    // 而报错只有一行、还被 wrapper 吞成 "plugin command failed"。
+    //
+    // 格式：JSON 数组，每项是**目录绝对路径**（会被包成 `file:` 依赖）。
+    const extraRaw = process.env.DSC_EXTRA_BUNDLES;
+    if (extraRaw) {
+      try {
+        const extra = JSON.parse(extraRaw);
+        if (!Array.isArray(extra)) throw new Error('不是数组');
+        for (const p of extra) {
+          if (typeof p !== 'string' || !fs.existsSync(p)) {
+            notes.push(`额外插件路径不存在，已跳过：${String(p)}`);
+            continue;
+          }
+          const name = JSON.parse(fs.readFileSync(path.join(p, 'package.json'), 'utf8')).name;
+          pkg.dependencies[name] = `file:${p}`;
+          const bs = pkg?.dsh?.profile?.bundles;
+          if (Array.isArray(bs) && !bs.includes(name)) bs.push(name);
+          notes.push(`额外插件：${name} <- ${p}`);
+        }
+      } catch (error) {
+        notes.push(`DSC_EXTRA_BUNDLES 解析失败（忽略）：${errText(error)}`);
+      }
+    }
+
     fs.writeFileSync(pkgFile, `${JSON.stringify(pkg, null, 2)}\n`);
+
+    // ── 2b. ⚠️ 把 profile 里**已有的**旧探针副本删掉 ──
+    //
+    // 这是实测踩到的：`cp -R` 会把源 profile 里已装的探针一起带过来，
+    // 而 pnpm 看到 `file:` 依赖"已经满足了"就**不会刷新它** —— 于是跑的是**旧代码**，
+    // 而报告里没有任何迹象。实测：`parityfix` 里装的是 `probeVersion: 2`，
+    // 仓库里已经是 4，而 `--probe-boot` 用了 2 跑完、以为成功。
+    //
+    // 这与地雷清单里那条「编辑 probe/index.mjs 后注意副本」是**同一个失败模式**：
+    // 改了代码、跑了、结果跑的是旧的，而**测试全绿**。
+    // 所以这里显式删掉，让 pnpm 必须重新从 `file:` 装一份。
+    for (const stale of [
+      path.join(tmpProfile, 'node_modules', 'dsh-plugin-compat-check-probe'),
+      path.join(tmpProfile, 'node_modules', '.pnpm'),
+    ]) {
+      try {
+        if (fs.existsSync(stale)) fs.rmSync(stale, { recursive: true, force: true });
+      } catch (error) {
+        notes.push(`删旧探针副本失败（${path.basename(stale)}）：${errText(error)}`);
+      }
+    }
 
     // ── 3. 装探针 ──
     const inst = spawnSync('dsh', ['plugin', '--profile', tmpName, 'install'],

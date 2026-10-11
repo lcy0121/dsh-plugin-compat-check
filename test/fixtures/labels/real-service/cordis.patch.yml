@@ -1,0 +1,3 @@
+- insert:
+    - id: '@label/real-service'
+      name: '@label/real-service'

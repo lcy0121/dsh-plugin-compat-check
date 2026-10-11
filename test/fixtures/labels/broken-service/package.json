@@ -1,0 +1,6 @@
+{
+  "name": "@label/broken-service",
+  "version": "1.0.0",
+  "description": "合成正例：注入一个**无人提供**的服务 → 宿主条目会停在 PENDING。这是 loader 亲口说的真值，不需要人来标。",
+  "dsh": { "bundle": { "patch": "cordis.patch.yml" } }
+}
