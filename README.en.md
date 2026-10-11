@@ -194,9 +194,9 @@ The last two are deliberately separated. `no-calls` and `abstained` look like "f
 
 ## Layout
 
-(129 version-controlled files: 54 of code / documentation / data tables, and 66 fixture files
+(132 version-controlled files: 57 of code / documentation / data tables, and 66 fixture files
 (`test/fixtures/micro/node_modules/` with 48 synthetic plugin files, `tools/parity/fixtures/hang-cycle/node_modules/` with 5,
-and one synthetic host runtime surface). All 54 hand-maintained entries are listed below; fixture contents are summarised.)
+and one synthetic host runtime surface). All 57 hand-maintained entries are listed below; fixture contents are summarised.)
 
 ```
 dsh-plugin-compat-check/
@@ -242,7 +242,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # measured extraction defects (numbered) + the probe's two boundaries
 │
-├── test/                       # 228 assertions across seven layers (see below)
+├── test/                       # 230 assertions across seven layers (see below)
 │   ├── helpers.mjs             #   shared fixtures: load tables, snapshot digests, hashing
 │   ├── invariants.test.mjs     #   self-consistency (must hold for any input)
 │   ├── snapshot.test.mjs       #   did the output change (key fields + content hash)
@@ -253,6 +253,8 @@ dsh-plugin-compat-check/
 │   ├── secrets.test.mjs        #   **no credentials in the repository** + the probe must not record values
 │   ├── client-structure.test.mjs  # can a client component register successfully but do nothing?
 │   ├── host-structure.test.mjs    # same for the host half (really calls apply, checks what it registered)
+│   ├── packaging.test.mjs      #   is the npm package self-contained? (really packs it)
+│   ├── probe-boot.test.mjs     #   --probe-boot end to end (**skipped by default**, DSC_SLOW=1)
 │   ├── __expectations__/
 │   │   └── micro.json          #   hand-written product promises: these verdicts **must** hold
 │   ├── __snapshots__/
@@ -314,6 +316,7 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 | `baseline.test.mjs` | Is every diff category right? **Is it quiet when nothing changed?** | Real plugins |
 | `skill.test.mjs` | Can the tool actually do everything the skill claims? (doc drift) | —— |
 | `probe-boot.test.mjs` (**skipped by default**, `DSC_SLOW=1`) | Does `--probe-boot` really boot a host and obtain a surface? | Slow (10-20s), hence not run by default |
+| `packaging.test.mjs` | Is the npm package **self-contained** — really packs it and checks it still reaches a verdict | Slightly slow (~1-2s, runs `npm pack`) |
 
 **All three layers are required** — established by measurement: injecting a "the fallback path never triggers" mutation leaves **all 69 invariants green while the snapshot turns red immediately**; conversely, emptying a plugin's call sites turns **the snapshot red while the invariants stay green**. Each is structurally blind to the other's failure mode.
 

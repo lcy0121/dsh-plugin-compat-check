@@ -594,11 +594,26 @@ function firstLine(text) {
 // ---------------------------------------------------------------------------
 
 /**
- * 内核的位置。插件半边**不自己实现判定** —— 它 import 仓库里的内核。
+ * 内核的位置。插件半边**不自己实现判定** —— 它 import 内核。
  *
- * 三条候选路径，按可靠性排序：
+ * 四条候选路径，按可靠性排序：
  *   1. 环境变量 `DSC_KERNEL`（打包/发布形态下由外层指定）
- *   2. 本包在仓库里的位置（`plugin/` 的上一级）—— 开发与 GitHub 分发时的形态
+ *   2. **本包自己就是自足包**（`here` 下有 `lib/` 与 `rules/`）—— npm 发布形态
+ *   3. 本包在仓库里的位置（`plugin/` 的上一级）—— 开发与 GitHub 分发时的形态
+ *
+ * ## ⚠️ 为什么 `here` 必须排在 `here/..` 前面
+ *
+ * 这两种形态在**文件系统上长得一样但含义相反**：
+ *
+ * | 形态 | `here` | 内核在 |
+ * |---|---|---|
+ * | 仓库检出 | `<repo>/plugin` | `here/..` = `<repo>` |
+ * | npm 装好的包 | `<...>/node_modules/dsh-plugin-compat-check` | **`here/kernel`** |
+ *
+ * 在 npm 形态下，`here/..` 是 `node_modules/` —— 那里当然没有 `lib/extract.mjs`，
+ * 于是**内核永远找不到，插件静默变成一个只会说"找不到判定内核"的壳**。
+ * 而 `here` 先试的代价是零（仓库形态下 `plugin/lib/` 不存在，直接落到下一条）。
+ *
  * 找不到就返回 null，**由调用方决定怎么说**，这里不抛。
  */
 function resolveKernelDir() {
@@ -606,7 +621,9 @@ function resolveKernelDir() {
   const here = dir(fileURLToPath(import.meta.url));
   const candidates = [
     process.env.DSC_KERNEL,
-    path.resolve(here, '..'), // plugin/ → 仓库根
+    path.join(here, 'kernel'), // npm 自足包形态（`npm pack` 时由 prepack 暂存到此）
+    here, // 另一种自足布局：内核与 index.js 同级
+    path.resolve(here, '..'), // 仓库形态：plugin/ → 仓库根
   ].filter(Boolean);
   for (const c of candidates) {
     try {

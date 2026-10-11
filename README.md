@@ -196,9 +196,9 @@ dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
 
 ## 目录结构
 
-（受版本控制共 **129** 个文件：54 个是代码 / 文档 / 规则表，66 个是夹具数据
+（受版本控制共 **132** 个文件：57 个是代码 / 文档 / 规则表，66 个是夹具数据
 （`test/fixtures/micro/node_modules/` 48 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
-以及 1 个合成宿主运行时面）。下面把 54 个人工维护的条目**列全**，夹具内部按样例说明。）
+以及 1 个合成宿主运行时面）。下面把 57 个人工维护的条目**列全**，夹具内部按样例说明。）
 
 ```
 dsh-plugin-compat-check/
@@ -223,6 +223,9 @@ dsh-plugin-compat-check/
 │   ├── package.json            #   dsh.bundle.patch + dsh.client（platform 必须是字面量 "web"）
 │   ├── cordis.patch.yml        #   插件装载清单
 │   ├── index.js                #   宿主半边：自省 + 面板数据通道 + 对话工具 + skill 注册
+│   ├── scripts/                #   prepack 把内核暂存进 kernel/，postpack 清掉
+│   │   ├── stage-kernel.mjs    #     内核**从不进 git**（真源只有仓库根的 lib/ 与 rules/）
+│   │   └── unstage-kernel.mjs
 │   └── lib/
 │       └── client.js           #   客户端半边：**预构建**（宿主不构建），跑在浏览器里
 │
@@ -244,7 +247,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # 已实测的提取缺陷清单（编号）+ 探针的两条边界
 │
-├── test/                       # 228 条断言，分七层（见下节）
+├── test/                       # 230 条断言，分七层（见下节）
 │   ├── helpers.mjs             #   共用夹具：加载规则表/目录、快照摘要、哈希
 │   ├── invariants.test.mjs     #   结果自恰性（对任何输入都必须成立）
 │   ├── snapshot.test.mjs       #   输出变了没有（关键字段 + 内容哈希）
@@ -255,6 +258,8 @@ dsh-plugin-compat-check/
 │   ├── secrets.test.mjs        #   **仓库里不许出现凭据** + 探针不许记值
 │   ├── client-structure.test.mjs  # 客户端组件会不会"注册成功但什么都没做"
 │   ├── host-structure.test.mjs    # 宿主半边同上（真的调用 apply，看它注册了什么）
+│   ├── packaging.test.mjs      #   npm 包自足吗（真打包，看它离开仓库还算不算得出结论）
+│   ├── probe-boot.test.mjs     #   --probe-boot 端到端（**默认跳过**，DSC_SLOW=1 才跑）
 │   ├── __expectations__/
 │   │   └── micro.json          #   人写的产品承诺：这些结论**必须**是这个
 │   ├── __snapshots__/
@@ -263,7 +268,7 @@ dsh-plugin-compat-check/
 │   ├── __baseline-versions.json #  基准版本锁（漂移会以 BASELINE_DRIFT 报出）
 │   └── fixtures/
 │       ├── micro/host-surface.json          # 合成宿主运行时面
-│       └── micro/node_modules/@fixture/*    # 15 个合成插件，每个专测一种判定路径
+│       └── micro/node_modules/@fixture/*    # 21 个合成插件，每个专测一种判定路径
 │
 └── tools/                      # 开发工具（不参与运行时）
     ├── catalog/extract-host-api.py     # 从宿主里抽官方 API 目录（rules/ 的数据来源）
@@ -314,6 +319,7 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 | `baseline.test.mjs` | 差分每一类都对吗、**没有变化时安静吗** | 真实插件 |
 | `skill.test.mjs` | skill 说的每件事工具都做得到吗（文档漂移） | —— |
 | `probe-boot.test.mjs`（**默认跳过**，`DSC_SLOW=1`） | `--probe-boot` 真的能起一次宿主并拿到面吗 | 慢（10~20 秒），所以默认不跑 |
+| `packaging.test.mjs` | npm 包**自足**吗 —— 真打包，看它离开仓库还能不能算出结论 | 慢一点（约 1~2 秒，跑一次 `npm pack`） |
 
 **三层缺一不可**，这是实测出来的：往代码里注入「fallback 永不触发」这个变异，**69 条不变式全绿，快照立刻变红**；反过来清空某插件的调用点时**快照会红、不变式不会**。它们各自在原理上看不见对方那一类。
 

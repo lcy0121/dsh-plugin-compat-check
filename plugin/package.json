@@ -2,7 +2,7 @@
   "name": "dsh-plugin-compat-check",
   "version": "0.0.1",
   "private": true,
-  "description": "Host half + prebuilt client half of dsh-plugin-compat-check. Reports which installed DSH plugins are compatible with the current DSH version, with file:line and reason. Requires the repository kernel (repo-root lib/ and rules/) to be a sibling of this package: install from the repository, not standalone.",
+  "description": "Reports which installed DSH plugins are compatible with the current DSH version, with file:line and reason. The judgement kernel is staged into kernel/ at pack time, so the published tarball is self-contained.",
   "type": "module",
   "main": "index.js",
   "exports": {
@@ -12,6 +12,17 @@
     },
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "lib/",
+    "cordis.patch.yml",
+    "kernel/",
+    "scripts/"
+  ],
+  "scripts": {
+    "prepack": "node scripts/stage-kernel.mjs",
+    "postpack": "node scripts/unstage-kernel.mjs"
   },
   "dsh": {
     "bundle": {
