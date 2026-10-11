@@ -260,6 +260,16 @@
       "targets": [
         "micro"
       ]
+    },
+    "@fixture/thisctx": {
+      "verdict": "ok",
+      "_why": "类式插件的惯用写法 `this.ctx.<svc>.<method>()`。主规则的 lookbehind `(?<![\\w$.])` 挡住了 `myctx.`（对），但顺带也挡住了 `this.ctx.` —— 实测 desktop 上这个形态出现 **32 次**、涉及 4 个服务，全部不可见；其中 `dsh-mnemon` 的 `this.ctx.agents.get(...)` 让它被判成「agents 没有任何调用点」。调用 `tools.register` 在运行时面里存在，所以结论仍该是 ok；但调用点必须出现在 callSites 里（否则这条夹具没测到东西，见 invariants 的同名断言）。",
+      "mustNotReport": [
+        "tools.register"
+      ],
+      "targets": [
+        "micro"
+      ]
     }
   }
 }

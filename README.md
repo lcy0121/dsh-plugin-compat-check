@@ -196,9 +196,9 @@ dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
 
 ## 目录结构
 
-（受版本控制共 **119** 个文件：53 个是代码 / 文档 / 规则表，66 个是夹具数据
+（受版本控制共 **120** 个文件：54 个是代码 / 文档 / 规则表，66 个是夹具数据
 （`test/fixtures/micro/node_modules/` 48 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
-以及 1 个合成宿主运行时面）。下面把 53 个人工维护的条目**列全**，夹具内部按样例说明。）
+以及 1 个合成宿主运行时面）。下面把 54 个人工维护的条目**列全**，夹具内部按样例说明。）
 
 ```
 dsh-plugin-compat-check/
@@ -244,7 +244,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # 已实测的提取缺陷清单（编号）+ 探针的两条边界
 │
-├── test/                       # 221 条断言，分七层（见下节）
+├── test/                       # 224 条断言，分七层（见下节）
 │   ├── helpers.mjs             #   共用夹具：加载规则表/目录、快照摘要、哈希
 │   ├── invariants.test.mjs     #   结果自恰性（对任何输入都必须成立）
 │   ├── snapshot.test.mjs       #   输出变了没有（关键字段 + 内容哈希）
@@ -302,7 +302,7 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > 报告写得出来、**跑完不留垃圾**）。默认跳过时它会打一行提示说明怎么跑，
 > 免得变成"静默消失的测试"。
 
-**221** 条断言（9 个测试文件），分七层，各回答一个不同的问题：
+**224** 条断言（9 个测试文件），分七层，各回答一个不同的问题：
 
 | 文件 | 回答什么 | 抓不到什么 |
 |---|---|---|

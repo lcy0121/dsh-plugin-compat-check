@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "375948b7def34c21452b845916aa236c5a336c1f9e307b6afc34ab7ccca52004",
+    "hash": "d81019f41e0b3b666abd70b826a188996ec4e1ca690cba0216dae4a7c2f6d1f3",
     "manifests": [
       {
         "name": "@fixture/aliased",
@@ -149,6 +149,14 @@
         "peerDependencies": null
       },
       {
+        "name": "@fixture/thisctx",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
         "name": "@fixture/unresolved",
         "version": "1.0.0",
         "dshBundle": true,
@@ -180,7 +188,7 @@
     "providedServices": [
       "vaultService"
     ],
-    "siteTotal": 26,
+    "siteTotal": 29,
     "buckets": {
       "@fixture/aliased": {
         "host-entry": 1,
@@ -285,6 +293,12 @@
         "fallback": 0
       },
       "@fixture/spread": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/thisctx": {
         "host-entry": 1,
         "client-entry": 0,
         "client-extra": 0,
@@ -992,9 +1006,21 @@
           "tools",
           "workspaces"
         ],
-        "calls": {},
-        "via": {},
-        "siteCounts": {},
+        "calls": {
+          "sessions": [
+            "search"
+          ],
+          "workspaces": [
+            "list"
+          ]
+        },
+        "via": {
+          "ctx-member": 2
+        },
+        "siteCounts": {
+          "sessions": 1,
+          "workspaces": 1
+        },
         "localBindings": [],
         "providedServices": [],
         "guardedPairs": [],
@@ -1002,7 +1028,45 @@
         "unresolvedBindings": [],
         "ambiguousAliases": [],
         "subContexts": [
-          "index.js:ctx,other"
+          "index.js:ctx,other,sctx"
+        ]
+      },
+      "@fixture/thisctx": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "tools"
+        ],
+        "declaredServices": [
+          "tools"
+        ],
+        "calls": {
+          "tools": [
+            "register"
+          ]
+        },
+        "via": {
+          "ctx-member": 1
+        },
+        "siteCounts": {
+          "tools": 1
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx,this.ctx"
         ]
       },
       "@fixture/unresolved": {
@@ -1040,9 +1104,9 @@
     }
   },
   "verdict": {
-    "hash": "36cd77cafe9012a7ccd0d300afdb24879ab5c9dfbb7e54be2167d698b5305efc",
+    "hash": "25976c0186a64cca4b6cea53a813e8b0ce7fb9614ff9218b4306aaa9dabc7dc2",
     "summary": {
-      "ok": 13,
+      "ok": 14,
       "partial": 3,
       "broken": 3,
       "unknown": 0,
@@ -1255,6 +1319,16 @@
         "clientSide": [
           "workspaces"
         ],
+        "filtered": [
+          "sessions.search"
+        ],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/thisctx": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
         "filtered": [],
         "abstained": [],
         "runtimeFacilities": []

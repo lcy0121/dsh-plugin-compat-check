@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "772eefd75e8352521708777ebacae23c4ebed0976be010093ccc7bde75fbc97d",
+    "hash": "65cf761548323d6b9a40b404b71a936001390c1a8a6c0da99d31e7773a36db2c",
     "manifests": [
       {
         "name": "@omdsh-dev/dsh-plugin-check",
@@ -80,7 +80,7 @@
     ],
     "fallbackPackages": [],
     "providedServices": [],
-    "siteTotal": 35,
+    "siteTotal": 32,
     "buckets": {
       "@omdsh-dev/dsh-plugin-check": {
         "host-entry": 10,
@@ -220,11 +220,11 @@
           ]
         },
         "via": {
-          "alias": 15
+          "alias": 13
         },
         "siteCounts": {
-          "agents": 2,
-          "jobs": 4,
+          "agents": 1,
+          "jobs": 3,
           "locale": 4,
           "settings": 1,
           "slots": 2,
@@ -316,7 +316,6 @@
             "register"
           ],
           "slots": [
-            "entries",
             "inject",
             "register"
           ],
@@ -326,7 +325,7 @@
         },
         "via": {
           "alias": 6,
-          "ctx-member": 13
+          "ctx-member": 12
         },
         "siteCounts": {
           "agentDefaultModel": 1,
@@ -335,7 +334,7 @@
           "deepseekAccount": 1,
           "llm": 5,
           "locale": 2,
-          "slots": 5,
+          "slots": 4,
           "webServer": 1
         },
         "localBindings": [

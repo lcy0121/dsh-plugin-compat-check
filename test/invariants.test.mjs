@@ -410,3 +410,40 @@ describe('不变式的有效性自证：人为清空必须被抓到', () => {
       '结论变 ok 却既不是 vacuous 也没有 no-calls 记录 —— 翻转无痕')
   })
 })
+
+/**
+ * 夹具的**目的**也要被断言，否则它可能"存在但什么都没测"。
+ *
+ * 这条是实测换来的：`@fixture/spread` 存在的意义就是覆盖 `ctx.inject` 的**两种形参形态**
+ * （单参数 `(sctx) =>` 与双参数 `(tools, other) =>`），而它长期产出 **0 条调用点**，
+ * 快照也如实把 `calls: {}` 记了下来 —— 于是**"夹具失效"被记录成了"预期行为"**。
+ * 那正是快照这一层抓不到的东西：它回答"变了没有"，不回答"这样对不对"。
+ *
+ * 所以这里对几个**有明确目的**的合成夹具直接断言它的产出，作为快照之外的第二道闸门。
+ */
+describe('夹具必须真的测到它声称要测的东西', () => {
+  const MICRO = path.join(REPO, 'test', 'fixtures', 'micro', 'node_modules')
+
+  test('@fixture/spread：ctx.inject 的两种形参形态都要认出来', () => {
+    // `catalog` 是模块级的（第 42 行）——不要在这里重新 load
+    const r = extractWithProvenance(MICRO, { catalog })
+    const p = r.report.perPlugin['@fixture/spread']
+    assert.ok(p, '找不到 @fixture/spread —— 夹具改名了？那这条断言要一起改')
+
+    // ① 单参数 `(sctx) =>` 的上下文对象必须被认出
+    const names = (p.subContexts || []).flatMap((x) => x.names)
+    assert.ok(names.includes('sctx'),
+      `单参数的注入回调形参没被认成上下文对象 —— 正是那类"夹具失效但快照照记"的缺陷。`
+      + `实际认到: ${JSON.stringify(names)}`)
+
+    // ② 由它带来的调用点必须真的出现（0 条就意味着这个夹具白存在）
+    const pairs = Object.entries(p.calls || {}).flatMap(([s, ms]) => ms.map((m) => `${s}.${m}`))
+    assert.ok(pairs.includes('sessions.search') && pairs.includes('workspaces.list'),
+      `通过子上下文调用的方法没被认出来。实际: ${JSON.stringify(pairs)}`)
+
+    // ③ 双参数形态的**第二个**形参也仍然要认（这是原有行为，不能被这次修改弄丢）
+    const twoParam = '(tools, other) =>'
+    assert.ok(names.includes('other'),
+      `双参数 ${twoParam} 里的第二个形参没被认成上下文对象。实际: ${JSON.stringify(names)}`)
+  })
+})

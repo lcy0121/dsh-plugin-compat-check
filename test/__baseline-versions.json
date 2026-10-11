@@ -26,6 +26,7 @@
     "@fixture/providerinternal": "1.0.0",
     "@fixture/silent": "1.0.0",
     "@fixture/spread": "1.0.0",
+    "@fixture/thisctx": "1.0.0",
     "@fixture/unresolved": "1.0.0"
   }
 }
