@@ -23,6 +23,7 @@
     "@fixture/guardalias": "1.0.0",
     "@fixture/guarded": "1.0.0",
     "@fixture/hangcycle": "1.0.0",
+    "@fixture/helperguard": "1.0.0",
     "@fixture/methodexists": "1.0.0",
     "@fixture/missingservice": "1.0.0",
     "@fixture/noisy": "1.0.0",

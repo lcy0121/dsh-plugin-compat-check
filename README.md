@@ -198,8 +198,8 @@ dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
 
 ## 目录结构
 
-（受版本控制共 **158** 个文件：74 个是代码 / 文档 / 规则表，84 个是夹具数据
-（`test/fixtures/micro/node_modules/` 69 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
+（受版本控制共 **161** 个文件：74 个是代码 / 文档 / 规则表，87 个是夹具数据
+（`test/fixtures/micro/node_modules/` 26 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
 以及 1 个合成宿主运行时面）。下面把 74 个人工维护的条目**列全**，夹具内部按样例说明。）
 
 ```
@@ -250,7 +250,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # 已实测的提取缺陷清单（编号）+ 探针的两条边界
 │
-├── test/                       # 256 条断言 / 14 个测试文件（见下节）
+├── test/                       # 258 条断言 / 14 个测试文件（见下节）
 │   ├── helpers.mjs             #   共用夹具：加载规则表/目录、快照摘要、哈希
 │   ├── invariants.test.mjs     #   结果自恰性（对任何输入都必须成立）
 │   ├── snapshot.test.mjs       #   输出变了没有（关键字段 + 内容哈希）
@@ -273,7 +273,7 @@ dsh-plugin-compat-check/
 │   ├── __baseline-versions.json #  基准版本锁（漂移会以 BASELINE_DRIFT 报出）
 │   └── fixtures/
 │       ├── micro/host-surface.json          # 合成宿主运行时面
-│       └── micro/node_modules/@fixture/*    # 25 个合成插件，每个专测一种判定路径
+│       └── micro/node_modules/@fixture/*    # 26 个合成插件，每个专测一种判定路径
 │
 └── tools/                      # 开发工具（不参与运行时）
     ├── catalog/extract-host-api.py     # 从宿主里抽官方 API 目录（rules/ 的数据来源）
@@ -299,7 +299,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-默认 **256 条断言**（14 个测试文件），秒级。其中 `probe-boot.test.mjs` 默认跳过：
+默认 **258 条断言**（14 个测试文件），秒级。其中 `probe-boot.test.mjs` 默认跳过：
 
 ```bash
 # 真的起一次宿主，验证 --probe-boot 端到端可跑（约 10~20 秒）
@@ -319,7 +319,7 @@ node tools/doc-check.mjs     # 文档数字 vs 实测，不一致就 exit 1
 > 报告写得出来、**跑完不留垃圾**）。默认跳过时它会打一行提示说明怎么跑，
 > 免得变成"静默消失的测试"。
 
-**256 条断言，分布在 14 个测试文件里。**
+**258 条断言，分布在 14 个测试文件里。**
 
 「分层」要说清两件**不同**的事 —— 它们以前被混在一起，于是同一份文档里同时写着
 「三层」（`Plan.md` §0）和「七层」（本节）：
@@ -399,3 +399,45 @@ DSC_SLOW=1 node --test test/labels.test.mjs        # 同一件事，进测试层
 实测（本机）：真实 profile 上 **0 个 PENDING / 0 个 FAILED** —— 一个正例都没有，
 所以召回率无从谈起。因此正例**由合成夹具安排**（注入一个无人提供的服务 → 必然 PENDING），
 而**真值仍然来自宿主**：我们只安排病例，不让它自己说"我坏了"。
+
+### 一次「静默降级」声明的审计（2026-10-11）
+
+工具的结论分**两种可信度**，输出里看得出来：
+
+| | 是什么 | 谁确认的 |
+|---|---|---|
+| **事实**（`依据`） | 我们量到了什么 —— 方法不在运行时里、调用点没有能力检测 | 运行时面 + 源码行，可逐条复核 |
+| **影响** | 这意味着用户会失去什么 | **标了「推断，非实测」的，是我们读代码得出的** |
+
+审计范围：本机所有 profile 上**用户实际会看到**的 `method` 级发现。
+
+| 模式 | 发现数 | 确定性 | 审计结果 |
+|---|---|---|---|
+| 默认（无运行时面） | **7** | 全部 `[疑似]` | 都是**线索**：带运行时面后 6 条被证实方法其实存在，1 条在 try/catch 里 |
+| 带运行时面 | 2 → **1** | `certain` | **其中 1 条是假阳性，已修** |
+
+那条假阳性值得单独记，因为它改变了一件设计：
+
+```js
+// dshmarket/lib/settings.js —— 工具报「功能失效 / 设置页会消失」，certainty: certain
+function canRegister(service, ctx) {
+  if (typeof service.register === 'function') return true;   // ← 能力检测在这里
+  logger?.warn('…the market keeps its composed configuration… (#677)');
+  return false;
+}
+if (!canRegister(scoped.settings, scoped)) return;   // ← 调用点守住了
+scoped.settings.register(MARKET_SETTINGS_NS, z.object({}), { base: {} });
+```
+
+**作者早就兜住了**，只是能力检测写在**辅助函数**里 —— 正则看不见。
+于是工具**事实对了、推断错了**。
+
+两件事因此改掉：
+
+1. **识别辅助函数里的能力检测**（`guardRegex` 的第 ④ 种形态）—— 这条假阳性直接消失了
+2. **把「事实」和「推断」在输出里分开**（`impactBasis`）——
+   即使哪天又出现看不见的兜底，用户也知道哪一句是**我们读出来的**，而不是量出来的
+
+> ⚠️ 样本很小（`certain` 级声明：修前 2 条、修后 1 条）。**不要把它读成"精确率 50%"或"100%"**
+> —— 它是一个**发现假阳性并修掉**的记录，不是一个比率。
+> 而且**召回率依然没有数字**：要量化"漏了多少死功能"，只能靠人或功能测试。

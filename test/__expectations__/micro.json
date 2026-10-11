@@ -325,6 +325,14 @@
       "targets": [
         "micro"
       ]
+    },
+    "@fixture/helperguard": {
+      "verdict": "ok",
+      "_why": "能力检测藏在**同文件的辅助函数**里（`if (!canUse(s)) return;` + `canUse` 里 `typeof s.doesNotExist === \"function\"`）。正则看不见它，而实测在 `dshmarket` 上造成了一条 **certain 级**的假阳性：工具报「设置页会消失」，而作者早就兜住、还 log 了降级行为、留了 issue #677。**事实对了（方法确实不在运行时里），推断错了。**",
+      "_asserts": "断言在 test/invariants.test.mjs（调用点层）—— micro 面里这个方法是 filtered，不会进 findings，所以在这个文件里写 mustNotReport 会是空断言。",
+      "targets": [
+        "micro"
+      ]
     }
   }
 }

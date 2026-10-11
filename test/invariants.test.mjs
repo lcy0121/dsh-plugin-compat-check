@@ -447,6 +447,23 @@ describe('夹具必须真的测到它声称要测的东西', () => {
       `双参数 ${twoParam} 里的第二个形参没被认成上下文对象。实际: ${JSON.stringify(names)}`)
   })
 
+  test('@fixture/helperguard：辅助函数里的能力检测也要算兜底', () => {
+    // 跑法照 foreignmember 那条：**断言调用点，不断言 findings** ——
+    // micro 面里 `settings.doesNotExist` 会被 filtered，不进 findings，
+    // 在判据文件里写 mustNotReport 会是一条**空断言**。
+    const catalog = load('rules/dsh-api-catalog.json')
+    const r = extractWithProvenance(MICRO, { catalog })
+    const p = r.report.perPlugin['@fixture/helperguard']
+    assert.ok(p, '找不到 @fixture/helperguard —— 夹具改名了？那这条断言要一起改')
+
+    const sites = (p.callSites || []).map((x) => `${x.service}.${x.method}`)
+    assert.ok(sites.includes('settings.doesNotExist'),
+      `调用点本身要收下（收不下就没得判了）。实际: ${JSON.stringify(sites)}`)
+    const site = (p.callSites || []).find((x) => x.service === 'settings' && x.method === 'doesNotExist')
+    assert.equal(site.guarded, true,
+      '辅助函数里的能力检测没被认成兜底 —— 实测这就造成过一条 certain 级假阳性')
+  })
+
   test('@fixture/foreignmember：别人的成员访问不能被当成本地绑定的调用', () => {
     // ⚠️ 这条**只能断言调用点，不能断言 findings** —— 在 micro 面里 `sessions` 不存在，
     // 那条假调用点会被 filtered 掉、根本不进 findings。我第一版把断言写成了

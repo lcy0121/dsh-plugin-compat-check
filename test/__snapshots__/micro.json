@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "ffb6ca1c3f5d9fb04730f3381bf3757184c1778fc0e8c97768571253e2b70713",
+    "hash": "30ad723ccba4a862367e6a29a4ad868f6164b5e1ae281fc93dc7581243c352d0",
     "manifests": [
       {
         "name": "@fixture/aliased",
@@ -125,6 +125,14 @@
         "peerDependencies": null
       },
       {
+        "name": "@fixture/helperguard",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
         "name": "@fixture/methodexists",
         "version": "1.0.0",
         "dshBundle": true,
@@ -228,7 +236,7 @@
     "providedServices": [
       "vaultService"
     ],
-    "siteTotal": 32,
+    "siteTotal": 33,
     "buckets": {
       "@fixture/aliased": {
         "host-entry": 1,
@@ -315,6 +323,12 @@
         "fallback": 0
       },
       "@fixture/hangcycle": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/helperguard": {
         "host-entry": 1,
         "client-entry": 0,
         "client-extra": 0,
@@ -963,6 +977,48 @@
           "index.js:ctx"
         ]
       },
+      "@fixture/helperguard": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "settings"
+        ],
+        "declaredServices": [
+          "settings"
+        ],
+        "calls": {
+          "settings": [
+            "doesNotExist"
+          ]
+        },
+        "via": {
+          "alias": 1
+        },
+        "siteCounts": {
+          "settings": 1
+        },
+        "localBindings": [
+          "s->settings/ctx-get"
+        ],
+        "providedServices": [],
+        "guardedPairs": [
+          "settings.doesNotExist"
+        ],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
       "@fixture/methodexists": {
         "version": "1.0.0",
         "files": {
@@ -1344,9 +1400,9 @@
     }
   },
   "verdict": {
-    "hash": "878700b7a51ee3d553572805fbe1e56d02456cb8bf0e569fa6a8ecc4b7ca5504",
+    "hash": "34440da7d323ec58c4873ef308d7509d9fad089334a36bf477d6518bdfca5cf8",
     "summary": {
-      "ok": 17,
+      "ok": 18,
       "partial": 3,
       "broken": 5,
       "unknown": 0,
@@ -1532,6 +1588,16 @@
         "findings": [],
         "clientSide": [],
         "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/helperguard": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [
+          "settings.doesNotExist"
+        ],
         "abstained": [],
         "runtimeFacilities": []
       },

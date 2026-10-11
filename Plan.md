@@ -93,11 +93,35 @@
 ### 2.1 结论的数据形态（第 8 题的落地）
 
 ```
-dsh-keep-awake@0.2.0 → lib/index.js:812  ctx.settings.register(...)
-  类别：宿主方法缺失      确定性：确定
-  依据：该调用不在 try/catch 内；宿主实际提供 configure / describe / mutate / replace
-  严重度：功能失效        影响面：设置页会消失
+结论: 部分可用  dsh-keep-awake@0.2.0
+     功能失效 / 宿主方法缺失  settings.register  @ lib/index.js:466
+       影响（推断，非实测）: 插件的设置页/设置项会消失
+       依据: 运行时里没有这个方法；规则表给出影响面
 ```
+
+⚠️ **上面那段示例曾经是假的**（2026-10-11 更正）。它写「依据：该调用**不在** try/catch 内」，
+而：
+
+1. `guardRegex` **完全没有 try/catch 感知** —— 那句话代码根本产不出来；
+2. 真实的 `dsh-keep-awake@:466` **就在** `if (settings !== undefined) { try { … } }` 里。
+
+也就是说：**结论是对的，依据是编的。** 而这比结论错更隐蔽 —— 依据看起来像是量出来的。
+真实能产出的依据只有下面这几种，`guardRegex` 就认这四种形态：
+
+| # | 形态 | 例 |
+|---|---|---|
+| ① | 可选服务 | `svc?.method` |
+| ② | 可选方法（实测最常见，最容易漏） | `svc.method?.(` |
+| ③ | 显式能力检测 | `typeof svc.method === "function"` |
+| ④ | 能力检测在**同文件的辅助函数**里 | `if (!canUse(svc)) return;` + `canUse` 里 `typeof svc.m === "function"` |
+
+**try/catch 不算能力检测** —— 它是错误处理，不是"探测到没有就不调"。
+作者用 try/catch 兜住时，功能**确实**是死的（只是不会崩），所以照报是对的；
+但它不能用"不在 try/catch 内"来论证。
+
+> 形态清单是**去真实插件里 grep 出来的**，不是凭印象写的。要加形态，
+> 先去量它在真实插件里出现多少次 —— `this.ctx`（缺陷 26）与辅助函数守卫（缺陷 32）
+> 都是这么加进来的。
 
 **类别枚举**（插件侧；「安装闸门拒绝」已因第 1 题移出，归脚本）：
 ① 宿主服务缺失 ② 宿主方法缺失 ③ 启动时条目未激活 ④ 客户端注册失败 ⑤ **声明与实测不符**
@@ -585,7 +609,7 @@ npm 发布**公开且近乎不可撤回**（§3 已列为风险），所以停�
 
 ## 6. 已知地雷清单
 
-详细版见 `docs/extraction-findings.md`（31 条，含每条的最小复现）。这里只列最要命的。
+详细版见 `docs/extraction-findings.md`（32 条，含每条的最小复现）。这里只列最要命的。
 
 | 地雷 | 说明 |
 |---|---|
@@ -730,17 +754,17 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 
 | 项 | 值 |
 |---|---|
-| 受版本控制文件 | **158**（74 个人工维护 + 84 个夹具数据） |
+| 受版本控制文件 | **161**（74 个人工维护 + 87 个夹具数据） |
 | 测试 | **240 条**（14 个测试文件，其中 `probe-boot` 默认跳过）；另 2 条慢测试需 `DSC_SLOW=1` |
 | 默认 `node --test test/` | 全绿，约 **7 秒** |
-| 提取缺陷记录 | **31 条**，全部已修（`docs/extraction-findings.md`） |
+| 提取缺陷记录 | **32 条**，全部已修（`docs/extraction-findings.md`） |
 | 三个回归基准 | `@omdsh-dev/dsh-plugin-check` 可用 / `dsh-keep-awake` 部分可用 / `dsh-pet` 可用 |
 | 真实 desktop（静态） | 可用 10 / 部分可用 11 / 不兼容 0 |
 | 真实 desktop（`--probe-boot`） | 可用 **18** / 部分可用 3 / 不兼容 0 |
 
 ### 8.2 仓库结构现状
 
-（受版本控制共 **158** 个文件 = 74 个人工维护的条目 + 84 个夹具数据文件。
+（受版本控制共 **161** 个文件 = 74 个人工维护的条目 + 87 个夹具数据文件。
 **与三份 README 的「目录结构」一节保持同一份事实** —— 两边都要在结构变化时一起改，
 否则又是一处会漂移的文档。计数与下树均由 `git ls-files` 实测，不凭记忆。）
 
@@ -782,7 +806,7 @@ dsh-plugin-compat-check/
 │
 ├── docs/extraction-findings.md               # 实测提取缺陷清单 + 探针的两条边界
 │
-├── test/                                     # 256 条断言 / 14 个测试文件
+├── test/                                     # 258 条断言 / 14 个测试文件
 │   ├── helpers.mjs
 │   ├── invariants.test.mjs                   #   自恰性（69 条）
 │   ├── snapshot.test.mjs                     #   输出变了没有
@@ -796,7 +820,7 @@ dsh-plugin-compat-check/
 │   ├── __expectations__/micro.json           #   人写的产品承诺
 │   ├── __snapshots__/{micro,parityfix}.json  #   内容哈希快照
 │   ├── __baseline-versions.json              #   基准版本锁
-│   └── fixtures/micro/                       #   25 个合成插件 + 合成宿主运行时面
+│   └── fixtures/micro/                       #   26 个合成插件 + 合成宿主运行时面
 │
 └── tools/                                    # 开发工具（不参与运行时）
     ├── doc-check.mjs                        #   文档数字自检（断言条数要比实测）
