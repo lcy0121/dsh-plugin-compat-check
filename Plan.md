@@ -654,10 +654,18 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
    （客户端代码），却被判成 `host-method-missing`。`clientHints` 里 `sessions:true` 已经
    标出来了，但判定层没用它去改类。**这类结论该落到 `client-side`（需界面验证），
    而不是"宿主方法缺失"。**
-2. **`?.()` 这种可选调用没被当成能力检测**。实测
-   `const binding = ctx.sessions.binding?.(newId)` —— 作者用可选调用明确表示
-   "没有就算了"，属于 guarded。现在只认 `typeof x?.m === "function"` 那种形态。
-   与 `dsh-pet` 那条同类（当时就是假阳性）。
+2. **`?.()` 这种可选调用没被当成能力检测** —— ✅ **已修**
+   - 三种形态现在全认：① `svc?.method`、② `svc.method?.(`、③ `typeof svc.method === "function"`。
+   - 而且**两个 bug 叠在一起**，只修一个会更糟：
+     - 调用点正则要求 `method(`，所以 `method?.(` 这种调用**整条不被收下**（假阴性，
+       表现为"这个插件没有依赖、一切正常"）；
+     - 修了它之后如果兜底识别还只看匹配**前面**，立刻变成假阳性（`?.` 在方法名**之后**）。
+   - 另外 `unguardedPairs` 之前**没去重就下结论**：同一个 `svc.method` 常被多条规则
+     在同一行各收一次，两档的 `guarded` 判定不一定一致，于是"输掉去重的那一条"会污染结果
+     —— 表现是**兜底永远不生效**。现在两个集合都从去重后的站点派生。
+   - **顺带更正了一条被写进验收标准的假阳性**（见 §5 G1）：`dsh-keep-awake` 的
+     `jobs.onJobsChanged@:591` 其实有 `typeof` 兜底，是旧正则 `?.` 必选造成的误报。
+     教训：**把假阳性写进验收标准，它就会一直活下来，还会被当成"正确答案"。**
 3. **`probe/index.mjs` 硬编码 `/tmp/...` 且不自建目录** —— ✅ **已修**
    目录不存在时 `writeFileSync` 抛错被 `catch` 咽掉，**探针静默不产出任何报告**
    （我这次就踩到了）。现在进目录前先 `mkdirSync(recursive)`，并尊重 `DSC_OUT_DIR`
@@ -674,6 +682,27 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
    **不能靠"把不变式放宽"来变绿** —— 它抓到的是真的对不上账。
 
 **倾向路径 1**，但先做可行性验证再动手 —— 这条规矩已经兑现了。
+
+### 运行时面：一次受阻的尝试（结论已记，别再重走）
+
+想让探针**不问而全知**（把容器里注册过的服务全列出来），试了 Cordis 的内部结构：
+
+- 服务实现确实在**各层 fiber 的 `store`** 里（键就是服务名），源码见
+  `@deepseek-ai/cordis/lib/index.js` 的 `provide()`。
+- 但**读不到**：`ctx.fiber.store` 会抛
+  `cannot get property "store" without inject` —— Cordis 的上下文代理要求先声明 `inject`。
+- 而探针**刻意不声明 inject**（声明了会因缺服务卡在 PENDING，探测能力反而下降）。
+  两者直接冲突，所以这条路**在保持探针设计的前提下走不通**。
+
+**仍然可行的**是既有的那条：`services.json` 已经由内核写成 `{services: report.services}`
+（即**所有插件的所有服务名**），探针会照单全问。受限的只是**手写的那份 fixture**
+（`tools/parity/fixtures/host-surface-parityfix.json` 的 `wanted` 只有 10 个，
+是某次手跑留下的），而在**真实 CLI 流程里 `--probe-boot` 会用完整的 `services.json`**。
+
+> 顺带排掉一个虚警：`logger` 一度被报成「宿主服务缺失 → 插件会停在 pending」，
+> 我一度以为是真的。用 `git stash` 对照 HEAD 后确认：**HEAD 与当前完全一致**
+> （`logger` 既不在 `services` 也不在 `declaredServices`，两版都不报），
+> 那是我改动过程中的中间态，不是基线问题。**对照 HEAD 是排除自己引入回归最快的一招。**
 
 ---
 
