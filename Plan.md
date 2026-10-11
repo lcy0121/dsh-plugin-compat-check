@@ -560,11 +560,100 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
 
 ### 第二批
 
+- [x] **H4a.（原 H4'）. 修掉 `provide` 数组导致的假阳性** —— ✅ **完成**
+  - 症状：桌面 profile 报 7 个 `dsh-mnemon-*`「依赖的服务由其它插件提供，当前 profile 里没有提供方」，
+    而提供方 `dsh-mnemon` **就装在同一个 node_modules 里**。可用 3 → 修后 **9**。
+  - 根因两层：① `provide` 的**导出数组**形态（`const provide = [...]; export { provide }`）
+    与 `inject` 对偶，但只认了 `ctx.provide(...)`；
+    ② 顺带发现**所有规则都读注释** —— 注释里的示例代码会被当成真调用。
+    后者是我自己撞出来的：夹具的负向对照被我注释里写的那行示例代码拔掉了。
+  - 详见提交 `f3ebcb8`；真实回归基准 **parityfix 快照零改动**。
 - [ ] **H1'（原 H1）. 客户端半边对账**（计划加载的 `__DSH_BOOT__.entries` vs 实际到货）
 - [ ] **H2'. 真解析器**（跟踪 `inject` 列表、`const { tools } = ctx` 解构、变量别名、作用域，解决 `ctx` 被 vendored 代码遮蔽）
   - 验收指标：**"疑似"的比例明显下降**
 - [ ] **H3'. npm 发布**
 - [ ] **H4'. 严重度规则表补全**（覆盖 40 个服务；`rules/README.md` 有覆盖依据）
+
+---
+
+## 5b. ⚠️ 下一件最该做的事：让 CLI 也能拿到运行时面
+
+这一节是**实测后加的**，因为它改变了第二批的优先级。
+
+### 实测到的瓶颈
+
+| 数据集 | 有探针？ | 结论确定性 |
+|---|---|---|
+| synthesised micro | 有 | 确定 6 / 疑似 **0** |
+| parityfix（三个基准） | 有 | 确定 2 / 疑似 **0** |
+| **真实 desktop profile** | **没有** | 确定 **0** / 疑似 **45** |
+
+桌面 profile 是**真实使用场景**，而它 **38 条发现全是「疑似」** —— 因为 CLI 拿不到运行时面。
+
+更要命的是：这 38 条里有相当一部分**大概率是假阳性**。根因已经定位：
+
+> **官方目录不是运行时面。** 它只声明**每个服务一个方法** ——
+> `catalog[sessions]` 1 个方法、`catalog[agents]` 1 个、`catalog[llm]` 1 个、`catalog[attachments]` 1 个。
+> 而运行时里 `agents` 实测有 **24** 个、`tools` **39** 个、`settings` **10** 个。
+
+于是「`sessions.get` 缺失」这类结论，实际含义是"官方目录没声明它"，而不是"宿主没有它"。
+判据层**正确地**把它标成「疑似」而没有硬说确定 —— 但用户看到的是"部分可用"，
+而 21 个插件里 12 个被这么标了。**假阳性正是这个工具唯一卖点的反面。**
+
+### 为什么这件事比 H1'/H2' 优先
+
+- **H2'（真解析器）的验收指标打不动这个**：`suspected/certain` 由**有没有探针**决定，
+  与解析精度无关。解析再准，没探针还是全「疑似」。
+- **H1'（客户端对账）回答的是另一个问题**，而且它的可行路径本身就是"取运行时面"。
+- 把运行时面拿到手，这 38 条会**瞬间变成确定** —— 该报的坐实，不该报的消失。
+
+### 两条候选路径（都还没验证可行性）
+
+1. **CLI 自己启动一次再 dump**：复用 `probe/`（它本来就是这个活），
+   在临时 profile 里 boot 一次拿运行时面。代价：CLI 从"纯静态、秒级"变成"要启动"。
+   建议做成**显式开关**（例如 `--probe-boot`），保持默认路径纯静态。
+2. **从已装插件自己声明的 `provide` + 客户端里用到的服务名反推**：
+   不需要启动，但只能得到"哪些服务存在"，拿不到"每个服务有哪些方法" —— **做不出确定级结论**。
+
+### ✅ 可行性已验证（路径 1 成立）
+
+实测做法：复制 desktop 的插件集到临时 profile、加装 `probe/`、boot 一次、把
+`services.json` 写成那 6 个疑点服务。结果：
+
+| 服务 | 官方目录声明 | **运行时实测** |
+|---|---|---|
+| `sessions` | 1 | **14** |
+| `agents` | 1 | **24** |
+| `llm` | 1 | **29** |
+| `attachments` | 1 | **15** |
+| `sessionProjectionCache` | 1 | **18** |
+| `storageDomain` | 1 | **3** |
+
+**所以路径 1 成立，而且收益是可量化的。** 把它用在那 38 条「疑似」上：
+
+- **确实存在的**（→ 假阳性，会消失）：`attachments.readImage`、`llm.listProviders`、
+  `sessionProjectionCache.put`、`sessions.detachEntered`、`sessions.liveEntryFor`、`storageDomain.open`
+- **确实不存在的**（→ 坐实为确定）：`webServer.get`、`agents.cancel/steer/followup/inject`、
+  `sessions.emit/scope/getSnapshot/subscribe/binding/open/snapshotEvents`
+
+也就是说：**现在这 38 条里有一批是假阳性，而工具既不能证实也不能证伪 —— 只能笼统说"疑似"。**
+
+### 顺带查出两件次要的事（都还没修）
+
+1. **客户端半边被拿宿主面去判**。`sessions` 在 catalog 里**同时**属于 host 与 client，
+   而 `dsh-better-sidebar` 的那些 `sessions.*` 调用来自 `lib/client-registry.js`
+   （客户端代码），却被判成 `host-method-missing`。`clientHints` 里 `sessions:true` 已经
+   标出来了，但判定层没用它去改类。**这类结论该落到 `client-side`（需界面验证），
+   而不是"宿主方法缺失"。**
+2. **`?.()` 这种可选调用没被当成能力检测**。实测
+   `const binding = ctx.sessions.binding?.(newId)` —— 作者用可选调用明确表示
+   "没有就算了"，属于 guarded。现在只认 `typeof x?.m === "function"` 那种形态。
+   与 `dsh-pet` 那条同类（当时就是假阳性）。
+3. **`probe/index.mjs` 硬编码 `/tmp/...` 且不自建目录**：目录不存在时
+   `writeFileSync` 抛错被 `catch` 咽掉，**探针静默不产出任何报告**（我这次就踩到了）。
+   要么自建目录，要么把失败写进一个一定能写的地方。
+
+**倾向路径 1**，但先做可行性验证再动手 —— 这条规矩已经兑现了。
 
 ---
 
