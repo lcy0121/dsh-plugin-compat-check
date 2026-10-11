@@ -2,7 +2,7 @@
 
 > Find out whether the DSH plugins you **already have installed** actually work on **your current DSH version** — and for anything that doesn't, get the **location** (`file:line`) and the **reason**.
 
-[简体中文](README.md) | **English**
+[简体中文](README.md) | **English** | [한국어](README.ko.md)
 
 ---
 
@@ -192,27 +192,91 @@ The last two are deliberately separated. `no-calls` and `abstained` look like "f
 
 ## Layout
 
+(105 version-controlled files: 51 of code / documentation / data tables, and 54 fixture files
+(`test/fixtures/micro/node_modules/` with 48 synthetic plugin files, `tools/parity/fixtures/hang-cycle/node_modules/` with 5,
+and one synthetic host runtime surface). All 51 hand-maintained entries are listed below; fixture contents are summarised.)
+
 ```
 dsh-plugin-compat-check/
-├── lib/                      # kernel: four pure modules shared by all three artifacts
-│   ├── extract.mjs           #   static extraction: who calls what (with file:line and evidence form)
-│   ├── verdict.mjs           #   judgement: findings, certainty tiers, per-service disposition
-│   ├── baseline.mjs          #   diffing: what changed since last time, and in which direction
-│   └── report.mjs            #   rendering: the human table (same wording as the conversation tool)
-├── rules/                    # data, not logic
-│   ├── severity.json         #   severity layering (40 services) + impact wording
-│   ├── dsh-api-catalog.json  #   official catalogue, both halves (91 host / 8 client services)
-│   └── usage-inventory.json  #   evidence for rule-table coverage
-├── bin/compat-check.mjs      # CLI entry (arg parsing / exit codes / two renderings)
-├── plugin/                   # the DSH plugin artifact
-│   ├── index.js              #   host half: introspection + panel data channel + tool + skill
-│   └── lib/client.js         #   client half: **prebuilt**; the host does not build it
-├── skill/                    # the skill artifact (SKILL.md + how registration works)
-├── dsh-plugin-compat-check.sh # end-to-end orchestration
-├── probe/                    # diagnostic probe (installed into a throwaway profile)
-├── test/                     # 205 assertions (see below)
-├── tools/                    # development tooling: parity, catalogue extraction, slot probe
-└── Plan.md                   # **development plan and working rules** (read before changing anything)
+├── README.md                   # Chinese documentation
+├── README.en.md                # English documentation (this file)
+├── README.ko.md                # Korean documentation
+├── Plan.md                     # **development plan and working rules**: locked decisions, milestones, landmines, measured DSH contracts
+├── LICENSE                     # MIT
+├── .gitignore
+├── dsh-plugin-compat-check.sh  # end-to-end orchestration
+│
+├── lib/                        # kernel: four pure modules, shared by all three artifacts
+│   ├── extract.mjs             #   static extraction: who calls what (with file:line and evidence form)
+│   ├── verdict.mjs             #   judgement: verdicts, certainty tiers, per-service disposition
+│   ├── baseline.mjs            #   diffing: what changed since last time, in which direction
+│   └── report.mjs              #   rendering: the human table (same wording as the conversation tool)
+│
+├── bin/
+│   └── compat-check.mjs        # CLI entry: arg parsing / exit codes / table and JSON renderings
+│
+├── plugin/                     # the DSH plugin artifact
+│   ├── package.json            #   dsh.bundle.patch + dsh.client (platform must be the literal "web")
+│   ├── cordis.patch.yml        #   plugin mount manifest
+│   ├── index.js                #   host half: introspection + panel channel + tool + skill
+│   └── lib/
+│       └── client.js           #   client half: **prebuilt** (the host does not build it)
+│
+├── skill/                      # the skill artifact
+│   ├── SKILL.md                #   the skill body (frontmatter has only name / description)
+│   └── README.md               #   how registration works: measurements, scan roots, ranks, frontmatter rules
+│
+├── probe/                      # diagnostic probe (installed into a throwaway profile)
+│   ├── package.json
+│   ├── cordis.patch.yml
+│   └── index.mjs               #   prototype-chain enumeration + scoped-context probing; **structure only, never values**
+│
+├── rules/                      # data, not logic
+│   ├── README.md               #   how to change the tables; how the coverage/freshness invariants work
+│   ├── severity.json           #   severity layering (40 services) + impact wording
+│   ├── dsh-api-catalog.json    #   official catalogue, both halves (91 host / 8 client services)
+│   └── usage-inventory.json    #   evidence that a service is actually used by someone
+│
+├── docs/
+│   └── extraction-findings.md  # measured extraction defects (numbered) + the probe's two boundaries
+│
+├── test/                       # 210 assertions across seven layers (see below)
+│   ├── helpers.mjs             #   shared fixtures: load tables, snapshot digests, hashing
+│   ├── invariants.test.mjs     #   self-consistency (must hold for any input)
+│   ├── snapshot.test.mjs       #   did the output change (key fields + content hash)
+│   ├── cli.test.mjs            #   did the flags take effect? are failures swallowed?
+│   ├── baseline.test.mjs       #   is every diff category right? is it quiet when nothing changed?
+│   ├── cache.test.mjs          #   caching policy, auto-check timing, profile detection
+│   ├── skill.test.mjs          #   doc drift: can the tool do everything the skill claims?
+│   ├── secrets.test.mjs        #   **no credentials in the repository** + the probe must not record values
+│   ├── client-structure.test.mjs  # can a client component register successfully but do nothing?
+│   ├── host-structure.test.mjs    # same for the host half (really calls apply, checks what it registered)
+│   ├── __expectations__/
+│   │   └── micro.json          #   hand-written product promises: these verdicts **must** hold
+│   ├── __snapshots__/
+│   │   ├── micro.json          #   full output snapshot for the synthetic fixture
+│   │   └── parityfix.json      #   full output snapshot for the real plugin set
+│   ├── __baseline-versions.json #  baseline version lock (drift is reported as BASELINE_DRIFT)
+│   └── fixtures/
+│       ├── micro/host-surface.json          # synthetic host runtime surface
+│       └── micro/node_modules/@fixture/*    # 15 synthetic plugins, one per judgement path
+│
+└── tools/                      # development tooling (not part of the runtime)
+    ├── catalog/extract-host-api.py     # extract the official API catalogue from the host (source for rules/)
+    ├── parity/                         # differential testing against a Python reference
+    │   ├── parity.sh
+    │   ├── a4b-diff.mjs
+    │   ├── expected-diffs.json         #   intentional differences, each with a stated reason
+    │   ├── python-reference/extract.py #   frozen Python reference implementation
+    │   └── fixtures/
+    │       ├── host-surface-parityfix.json   # runtime surface of the real plugin set (regression baseline)
+    │       └── hang-cycle/                   # the circular-dependency fixture that once hung extraction
+    └── slot-probe/                     # slot availability probe (measured ctx.slots props contract)
+        ├── package.json
+        ├── cordis.patch.yml
+        ├── index.js
+        ├── lib/client.js
+        └── cdp-diag.mjs                #   drives headless Chrome over CDP to inspect real rendering
 ```
 
 ## Tests
@@ -221,7 +285,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-205 assertions across seven layers, each answering a different question:
+**210** assertions (9 test files) across seven layers, each answering a different question:
 
 | File | Answers | Blind to |
 |---|---|---|

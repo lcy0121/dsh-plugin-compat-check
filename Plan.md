@@ -69,7 +69,7 @@
 | 启动没报错 → 能用 | 插件普遍 `try/catch` 降级，**API 缺失时它"激活成功"但功能是死的** |
 | 启动日志干净 → 客户端也没问题 | 客户端跑在浏览器里 |
 
-最后一行不是理论：本机 `~/Library/Logs/DeepSeek Harness/` 里 11 天内有 3 份 web-boot 崩溃日志，其中 `crash-2026-10-08T14-19-13-911Z-web-boot.log` 正是 `Error: web boot: 2 entries did not activate`，两条是 `dshmarket` 与 `@michengai/dsh-archive-manager`，且是**客户端 bundle 级联失败**（"skipped after an earlier failure of this bundle"）。
+最后一行不是理论：桌面端日志目录（`~/Library/Logs/DeepSeek Harness/`，macOS）里 11 天内出现 3 份 web-boot 崩溃日志，其中一份正是 `Error: web boot: 2 entries did not activate`，两条是 `dshmarket` 与 `@michengai/dsh-archive-manager`，且是**客户端 bundle 级联失败**（"skipped after an earlier failure of this bundle"）。
 
 ---
 
@@ -608,11 +608,11 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
 
 | 项 | 值 |
 |---|---|
-| 仓库 | `/Users/liuchenyu/Documents/deepseek-harness/default-workspace/dsh-plugin-compat-check` |
+| 仓库 | 本仓库根（下称 `$REPO`；文档里一律用相对路径，不写这台机器上的绝对路径） |
 | 远端 | `lcy0121/dsh-plugin-compat-check`（公开，MIT）；已并入 `0xsline/awesome-deepseek-harness`（PR #688 已合并） |
 | DSH 版本 | `0.2.0-rc.2` |
-| `$DSH_HOME` | `/Users/liuchenyu/.dsh` |
-| 正式 profile | `/Users/liuchenyu/.dsh/profiles/desktop` |
+| `$DSH_HOME` | DSH 的状态目录，默认 `~/.dsh`（本机实测值不必记进仓库） |
+| 正式 profile | `$DSH_HOME/profiles/desktop`（桌面端独占，见 §6） |
 | 桌面端内置 Node | 24.18.1（`pnpm` 11.7.0） |
 
 ```bash
@@ -735,38 +735,93 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 | `f895531` | 静态提取移植到 Node + 修无界循环 + 对拍机制 + 缺陷盘点 |
 | `9f5eb5a` | 严重度规则表初稿 + 槽位可用性探针 |
 | `0f60d8d` | 更名 `dsh-plugin-check` → `dsh-plugin-compat-check` |
+| （其后 25 个） | A5–A8 / B1–B3 / C1–C4 / D1 / E1–E2 / F1–F2 / G1–G5 全部完成 |
 
-**全部只在本地，没有 push。**
+**已 push 到 `origin/main`**（首批 25 个提交一次性推送）。
+> ⚠️ 那次推送**之前**做了一次历史重写：一个探针产物含真实凭据，
+> 而它从未 push 过，所以得以在推之前从全部历史里剔除。详见 §6 地雷清单。
 
 ### 8.2 仓库结构现状
 
+（受版本控制共 **105** 个文件 = 51 个人工维护的条目 + 54 个夹具数据文件。
+**与三份 README 的「目录结构」一节保持同一份事实** —— 两边都要在结构变化时一起改，
+否则又是一处会漂移的文档。计数与下树均由 `git ls-files` 实测，不凭记忆。）
+
 ```
 dsh-plugin-compat-check/
-├── dsh-plugin-compat-check.sh    # 现有 CLI（bash + python，仍可用，是移植参考）
-├── lib/extract.mjs               # ★ Node 版静态提取（新增）
-├── rules/
-│   ├── severity.json             # 严重度规则表
-│   ├── usage-inventory.json      # 覆盖依据（内核真实输出）
-│   └── README.md
-├── tools/
-│   ├── parity/parity.sh          # ★ 对拍脚本
-│   ├── parity/fixtures/hang-cycle/   # ★ 无界循环回归 fixture
-│   └── slot-probe/               # ★ 槽位可用性最小插件 + CDP 诊断脚本
-├── plugin/                       # ★ DSH 插件产物（宿主半边 + 预构建客户端半边）
-│   ├── package.json              #   dsh.bundle.patch + dsh.client={platform:"web"}
+├── README.md / README.en.md / README.ko.md   # 中 / 英 / 韩 三版说明（互链）
+├── Plan.md                                   # 本文件
+├── LICENSE                                   # MIT
+├── .gitignore
+├── dsh-plugin-compat-check.sh                # 端到端编排（bash + python3）
+│
+├── lib/                                      # ★ 内核：四个纯模块，三产物共用同一份实现
+│   ├── extract.mjs                           #   静态提取（file:line + 证据形态）
+│   ├── verdict.mjs                           #   判定（结论 / 三档确定性 / 每个服务的去处）
+│   ├── baseline.mjs                          #   差分（变了没有、往哪个方向变）
+│   └── report.mjs                            #   渲染（CLI 与对话工具同一口径）
+│
+├── bin/compat-check.mjs                      # ★ CLI 入口（参数 / 退出码 / 两种渲染）
+│
+├── plugin/                                   # ★ DSH 插件产物
+│   ├── package.json                          #   dsh.bundle.patch + dsh.client={platform:"web"}
 │   ├── cordis.patch.yml
-│   ├── index.js                  #   宿主半边（inject 故意留空）
-│   └── lib/client.js             #   预构建；注册进 settings.plugins.tab
-├── docs/extraction-findings.md   # ★ 提取缺陷的实测记录
-├── probe/                        # 原 CLI 的诊断探针
-├── README.md / README.en.md / LICENSE
-└── Plan.md                       # 本文件
+│   ├── index.js                              #   宿主半边（inject 故意留空）
+│   └── lib/client.js                         #   预构建客户端半边
+│
+├── skill/                                    # ★ skill 产物
+│   ├── SKILL.md                              #   正文（frontmatter 只有 name / description）
+│   └── README.md                             #   注册机制说明（实测证据）
+│
+├── probe/                                    # 诊断探针（一次性 profile 里 file: 装载）
+│   ├── package.json / cordis.patch.yml
+│   └── index.mjs                             #   原型链枚举；**只记结构，不记值**
+│
+├── rules/                                    # 数据，不是逻辑
+│   ├── README.md                             #   怎么改表、覆盖/新鲜度不变式
+│   ├── severity.json                         #   严重度分层（40 个服务）
+│   ├── dsh-api-catalog.json                  #   官方双端目录（91 宿主 / 8 客户端）
+│   └── usage-inventory.json                  #   覆盖依据
+│
+├── docs/extraction-findings.md               # 实测提取缺陷清单 + 探针的两条边界
+│
+├── test/                                     # 210 条断言 / 9 个测试文件 / 七层
+│   ├── helpers.mjs
+│   ├── invariants.test.mjs                   #   自恰性（69 条）
+│   ├── snapshot.test.mjs                     #   输出变了没有
+│   ├── cli.test.mjs                          #   参数真的起作用吗、失败会不会被吞
+│   ├── baseline.test.mjs                     #   差分各类 + 无变化时要安静
+│   ├── cache.test.mjs                        #   缓存策略 / 自动体检时机 / profile 判断
+│   ├── skill.test.mjs                        #   文档漂移
+│   ├── secrets.test.mjs                      #   ★ 仓库里不许出现凭据
+│   ├── client-structure.test.mjs             #   组件会不会"注册成功但什么都没做"
+│   ├── host-structure.test.mjs               #   宿主半边同上（真的调用 apply）
+│   ├── __expectations__/micro.json           #   人写的产品承诺
+│   ├── __snapshots__/{micro,parityfix}.json  #   内容哈希快照
+│   ├── __baseline-versions.json              #   基准版本锁
+│   └── fixtures/micro/                       #   15 个合成插件 + 合成宿主运行时面
+│
+└── tools/                                    # 开发工具（不参与运行时）
+    ├── catalog/extract-host-api.py           #   抽官方 API 目录（rules/ 的数据来源）
+    ├── parity/{parity.sh,a4b-diff.mjs,expected-diffs.json,python-reference/}
+    │   └── fixtures/{host-surface-parityfix.json,hang-cycle/}
+    └── slot-probe/                           #   槽位可用性探针（含 CDP 诊断脚本）
 ```
+
+> 上面这棵树是**从 `git ls-files` 实测出来的**，不是凭记忆写的。
+> 上一版（A 阶段写的）严重过时：漏了 `bin/`、`lib/baseline.mjs`、`lib/report.mjs`、
+> 整个 `skill/`、9 个测试文件里的 8 个、两个规则表，以及两份 README。
+> **"结构节"是最容易腐烂的文档**，所以它必须能被一条命令复核。
 
 ### 8.3 临时环境（可随时删）
 
-- `~/.dsh/profiles/parityfix` —— 装了三个回归基准插件，供对拍用
+- `$DSH_HOME/profiles/parityfix` —— 装了三个回归基准插件，供对拍用（**唯一需要长期保留的临时 profile**）
+- `$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.json` —— 基线；可随时删，删了就是"第一次体检"
+- `/tmp/dsh-plugin-compat-check/` —— 探针现场（boot.log / static.json / probe-report.json）
 - `/tmp/one-nm`、`/tmp/hang-nm`、`/tmp/js-*` —— 对拍产物，可删
+
+> 收尾规矩（G5）：**不留下**除 `parityfix` 之外的临时 profile、**不留下**任何进程、
+> `pgrep caffeinate` 必须为空。
 
 ---
 
@@ -800,7 +855,7 @@ dsh-plugin-compat-check/
 > 于是它换了个地方又来一次。现在两边都有了（`test/client-structure.test.mjs` +
 > `test/host-structure.test.mjs`），且两条都做了**有效性自证**（人为削成空壳，测试确实变红）。
 >
-> `node --test test/` → **209 条全过**。
+> `node --test test/` → **209 条全过**（当时；本轮增到 **210**）。
 >
 > ### ⚠️ 一次安全缺陷（不属于提取逻辑，但必须记）
 >
@@ -817,10 +872,29 @@ dsh-plugin-compat-check/
 > 泄漏 blobs 从全部历史重写掉 —— 当时**尚未 push**，故未外泄到远程。
 > 详见 `docs/extraction-findings.md` 末尾一节。
 >
-> **README 两版按实际形态重写**（此前描述的其实是"安装前检查"那个旧工具）：
+> **README 三版按实际形态重写**（此前描述的其实是"安装前检查"那个旧工具）：
 > 现在讲清三份产物各自的能力与**边界**（插件严格弱于 CLI，不是超集）、四条用法、
 > 退出码语义、三档确定性、以及它**刻意不做**的事。写 README 时还查出并修掉一个真缺陷：
 > **`--help` 此前根本没被处理**，会掉进"找内核"检查并以 1 退出 —— 想看用法被报成内核缺失。
+>
+> #### 文档结构节为什么要复核（一次实际翻车）
+>
+> 写 README 时发现「目录结构」那一节**漏了一大半**：`bin/`、`docs/`、
+> `lib/baseline.mjs`、`lib/report.mjs`、整个 `skill/`、9 个测试文件里的 8 个、
+> 两份 README 自己、以及 `rules/README.md` 都没写进去。
+>
+> 原因不是粗心，是**写法错了**：那棵树是照着当时脑子里的印象画的，而不是从
+> `git ls-files` 生成再删掉噪音。**凭记忆画的结构图一定会腐烂**，所以现在：
+>
+> 1. 三份 README 的「目录结构」与本节 §8.2 使用**同一份事实**，结构变化时必须一起改；
+> 2. 收尾时用 `git ls-files` 复核，逐条确认树上每个路径都真实存在
+>    （这次复核确实抓到了 `README.ko.md` 还没创建）。
+>
+> #### 顺带：README 从两版变三版
+>
+> 新增**韩文版** `README.ko.md`，三版互链。
+> ⚠️ 但**工具输出本身仍然只有中文** —— 三版 README 里都写了这条限制，
+> 不要因为有了韩文文档就以为界面上也是韩文。
 
 > ### 本轮（2026-10-11）：C3 + C4 + D1 + E1 + E2 五项并行完成
 >
@@ -843,4 +917,4 @@ dsh-plugin-compat-check/
 > 退出码语义也修正了：**1 与 2 只表示插件的结论**，3 表示这次体检没得出可信结论
 > （含用法错误）——把命令写错读成"插件不兼容"会让用户查错方向。
 >
-> `node --test test/` → **192 条全过**。三个回归基准仍精确命中（466 / 591 两行）。
+> `node --test test/` → **192 条全过**（当时）。三个回归基准仍精确命中（466 / 591 两行）。

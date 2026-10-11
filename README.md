@@ -2,7 +2,7 @@
 
 > 体检你**已经装了的** DSH 插件与**当前 DSH 版本**是否兼容；不兼容的，给出**位置**（`file:line`）和**原因**。
 
-**简体中文** | [English](README.en.md)
+**简体中文** | [English](README.en.md) | [한국어](README.ko.md)
 
 ---
 
@@ -194,27 +194,91 @@ dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
 
 ## 目录结构
 
+（受版本控制共 **105** 个文件：51 个是代码 / 文档 / 规则表，54 个是夹具数据
+（`test/fixtures/micro/node_modules/` 48 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
+以及 1 个合成宿主运行时面）。下面把 51 个人工维护的条目**列全**，夹具内部按样例说明。）
+
 ```
 dsh-plugin-compat-check/
-├── lib/                      # 内核：四个纯函数模块，三份产物共用
-│   ├── extract.mjs           #   静态提取：谁调用了什么（带 file:line 与证据形态）
-│   ├── verdict.mjs           #   判定：五元组结论 + 三档确定性 + 每个服务的去处
-│   ├── baseline.mjs          #   差分：与上次比变了没有、往哪个方向变
-│   └── report.mjs            #   渲染：给人看的表（CLI 与对话工具同一口径）
-├── rules/                    # 数据，不是逻辑
-│   ├── severity.json         #   严重度分层表（40 个服务）+ 影响面文案
-│   ├── dsh-api-catalog.json  #   官方双端目录（91 宿主 / 8 客户端服务）
-│   └── usage-inventory.json  #   规则表覆盖依据
-├── bin/compat-check.mjs      # CLI 入口（参数解析 / 退出码 / 两种渲染）
-├── plugin/                   # DSH 插件产物
-│   ├── index.js              #   宿主半边：自省 + 面板数据通道 + 对话工具 + skill 注册
-│   └── lib/client.js         #   客户端半边：**预构建**，宿主不构建
-├── skill/                    # skill 产物（SKILL.md + 注册机制说明）
-├── dsh-plugin-compat-check.sh # 端到端编排：身份核对 → 安装 → 提取 → 启动 → 判定
-├── probe/                    # 诊断探针（以 file: 方式装进一次性 profile）
-├── test/                     # 201 条断言（见下）
-├── tools/                    # 开发工具：对拍、目录抽取、槽位探针
-└── Plan.md                   # **开发计划与作业规程**（改这个仓库前先读）
+├── README.md                   # 中文说明（本文件）
+├── README.en.md                # 英文说明
+├── README.ko.md                # 韩文说明
+├── Plan.md                     # **开发计划与作业规程**：已锁定决策、里程碑、地雷清单、已实测的 DSH 契约
+├── LICENSE                     # MIT
+├── .gitignore
+├── dsh-plugin-compat-check.sh  # 端到端编排：身份核对 → 隔离安装 → 提取 → 真实启动 → 判定
+│
+├── lib/                        # 内核：四个纯模块，三份产物共用同一份实现
+│   ├── extract.mjs             #   静态提取：谁调用了什么（带 file:line 与证据形态）
+│   ├── verdict.mjs             #   判定：结论、三档确定性、每个服务的去处
+│   ├── baseline.mjs            #   差分：与上次比变了没有、往哪个方向变（含徽标文案）
+│   └── report.mjs              #   渲染：给人看的表（CLI 与对话工具同一口径）
+│
+├── bin/
+│   └── compat-check.mjs        # CLI 入口：参数解析 / 退出码 / 表格与 JSON 两种渲染
+│
+├── plugin/                     # DSH 插件产物
+│   ├── package.json            #   dsh.bundle.patch + dsh.client（platform 必须是字面量 "web"）
+│   ├── cordis.patch.yml        #   插件装载清单
+│   ├── index.js                #   宿主半边：自省 + 面板数据通道 + 对话工具 + skill 注册
+│   └── lib/
+│       └── client.js           #   客户端半边：**预构建**（宿主不构建），跑在浏览器里
+│
+├── skill/                      # skill 产物
+│   ├── SKILL.md                #   正文（frontmatter 只有 name / description）
+│   └── README.md               #   注册机制说明：实测证据、扫描根、rank、frontmatter 规则
+│
+├── probe/                      # 诊断探针（以 file: 方式装进一次性 profile）
+│   ├── package.json
+│   ├── cordis.patch.yml
+│   └── index.mjs               #   原型链枚举 + 作用域上下文探测；**只记结构，不记值**
+│
+├── rules/                      # 数据，不是逻辑
+│   ├── README.md               #   规则表怎么改、覆盖与新鲜度不变式怎么看
+│   ├── severity.json           #   严重度分层表（40 个服务）+ 影响面文案
+│   ├── dsh-api-catalog.json    #   官方双端目录（91 宿主 / 8 客户端服务）
+│   └── usage-inventory.json    #   规则表覆盖依据（"这个服务确实有人用"）
+│
+├── docs/
+│   └── extraction-findings.md  # 已实测的提取缺陷清单（编号）+ 探针的两条边界
+│
+├── test/                       # 210 条断言，分七层（见下节）
+│   ├── helpers.mjs             #   共用夹具：加载规则表/目录、快照摘要、哈希
+│   ├── invariants.test.mjs     #   结果自恰性（对任何输入都必须成立）
+│   ├── snapshot.test.mjs       #   输出变了没有（关键字段 + 内容哈希）
+│   ├── cli.test.mjs            #   参数真的起作用吗、失败会不会被静默吞掉
+│   ├── baseline.test.mjs       #   差分每一类都对吗、没有变化时安静吗
+│   ├── cache.test.mjs          #   缓存策略 + 自动体检时机 + profile 判断
+│   ├── skill.test.mjs          #   文档漂移：skill 说的每件事工具都做得到吗
+│   ├── secrets.test.mjs        #   **仓库里不许出现凭据** + 探针不许记值
+│   ├── client-structure.test.mjs  # 客户端组件会不会"注册成功但什么都没做"
+│   ├── host-structure.test.mjs    # 宿主半边同上（真的调用 apply，看它注册了什么）
+│   ├── __expectations__/
+│   │   └── micro.json          #   人写的产品承诺：这些结论**必须**是这个
+│   ├── __snapshots__/
+│   │   ├── micro.json          #   合成夹具的完整输出快照
+│   │   └── parityfix.json      #   真实插件集的输出快照
+│   ├── __baseline-versions.json #  基准版本锁（漂移会以 BASELINE_DRIFT 报出）
+│   └── fixtures/
+│       ├── micro/host-surface.json          # 合成宿主运行时面
+│       └── micro/node_modules/@fixture/*    # 15 个合成插件，每个专测一种判定路径
+│
+└── tools/                      # 开发工具（不参与运行时）
+    ├── catalog/extract-host-api.py     # 从宿主里抽官方 API 目录（rules/ 的数据来源）
+    ├── parity/                         # 与 python 参考实现对拍
+    │   ├── parity.sh
+    │   ├── a4b-diff.mjs
+    │   ├── expected-diffs.json         #   有意的差异，逐条写明理由
+    │   ├── python-reference/extract.py #   冻结的 python 参考实现
+    │   └── fixtures/
+    │       ├── host-surface-parityfix.json   # 真实插件集的运行时面（回归基准）
+    │       └── hang-cycle/                   # 曾让提取挂死的循环依赖夹具
+    └── slot-probe/                     # 槽位可用性探针（实测 ctx.slots 的 props 契约）
+        ├── package.json
+        ├── cordis.patch.yml
+        ├── index.js
+        ├── lib/client.js
+        └── cdp-diag.mjs                #   用 CDP 驱动无头 Chrome 看真实渲染
 ```
 
 ## 测试
@@ -223,7 +287,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-201 条断言，分七层，各回答一个不同的问题：
+**210** 条断言（9 个测试文件），分七层，各回答一个不同的问题：
 
 | 文件 | 回答什么 | 抓不到什么 |
 |---|---|---|

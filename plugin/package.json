@@ -2,18 +2,39 @@
   "name": "dsh-plugin-compat-check",
   "version": "0.0.1",
   "private": true,
-  "description": "DSH plugin skeleton: host half + prebuilt client half (settings.plugins.tab placeholder).",
+  "description": "Host half + prebuilt client half of dsh-plugin-compat-check. Reports which installed DSH plugins are compatible with the current DSH version, with file:line and reason. Requires the repository kernel (repo-root lib/ and rules/) to be a sibling of this package: install from the repository, not standalone.",
   "type": "module",
   "main": "index.js",
   "exports": {
     ".": "./index.js",
-    "./client": { "default": "./lib/client.js" },
+    "./client": {
+      "default": "./lib/client.js"
+    },
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
   },
   "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" },
-    "client": { "platform": "web" }
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
   },
-  "engines": { "node": "^22.19.0 || >=24" }
+  "engines": {
+    "node": "^22.19.0 || >=24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lcy0121/dsh-plugin-compat-check.git"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/lcy0121/dsh-plugin-compat-check#readme",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "compatibility",
+    "health-check"
+  ]
 }
