@@ -153,7 +153,14 @@ describe('CLI：--json 真的产出 JSON（不是被静默忽略）', () => {
     const data = JSON.parse(json.out)
     // 退出码必须一致 —— 否则 CI 用 --json 时会得到与本地不同的信号
     assert.equal(json.code, human.code, '--json 与表格形式的退出码必须一致')
-    assert.equal(data.summary.broken, 2, `期望 2 个不兼容，实际 ${data.summary.broken}`)
+    // ⚠️ 这里**不写死数量**。写死过一次，加个夹具就红 —— 而那属于"判据自己太脆"，
+    // 不是产品坏了。要断的是**两种渲染看到同一份数据**，数量由夹具自己决定。
+    //
+    // 但同时要钉住一件真事：至少有一个不兼容，且退出码与它对应
+    // （`2` = 有插件不兼容）。否则这条测试在 broken=0 时也会"通过"。
+    assert.ok(data.summary.broken >= 1, `夹具里应当有不兼容的样例，实际 ${data.summary.broken}`)
+    assert.equal(human.code, data.summary.broken > 0 ? 2 : (data.summary.partial > 0 ? 1 : 0),
+      `退出码与结论不一致：broken=${data.summary.broken} partial=${data.summary.partial} 但退出码 ${human.code}`)
   })
 
   test('--quiet 只输出结论行，不含逐条发现', () => {

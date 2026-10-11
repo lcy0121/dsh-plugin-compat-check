@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "b633b136171588835732f50d92458d1bfe147c0c53512967696e50f07b2d5420",
+    "hash": "375948b7def34c21452b845916aa236c5a336c1f9e307b6afc34ab7ccca52004",
     "manifests": [
       {
         "name": "@fixture/aliased",
@@ -25,6 +25,22 @@
         "version": "1.0.0",
         "dshBundle": true,
         "clientPlatform": "web",
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/consumerofexported",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/consumerofinternal",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
         "clientInject": null,
         "peerDependencies": null
       },
@@ -101,6 +117,22 @@
         "peerDependencies": null
       },
       {
+        "name": "@fixture/provideexported",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/providerinternal",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
         "name": "@fixture/silent",
         "version": "1.0.0",
         "dshBundle": true,
@@ -128,6 +160,7 @@
     "services": [
       "deepseekAccount",
       "definitelyNotAHostService",
+      "internalOnlyService",
       "jobs",
       "llm",
       "locale",
@@ -138,13 +171,16 @@
       "slots",
       "tools",
       "totallyUnknownThing",
+      "vaultService",
       "workspaces"
     ],
     "fallbackPackages": [
       "@fixture/fallback"
     ],
-    "providedServices": [],
-    "siteTotal": 23,
+    "providedServices": [
+      "vaultService"
+    ],
+    "siteTotal": 26,
     "buckets": {
       "@fixture/aliased": {
         "host-entry": 1,
@@ -161,6 +197,18 @@
       "@fixture/clientonly": {
         "host-entry": 1,
         "client-entry": 1,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/consumerofexported": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/consumerofinternal": {
+        "host-entry": 1,
+        "client-entry": 0,
         "client-extra": 0,
         "fallback": 0
       },
@@ -213,6 +261,18 @@
         "fallback": 0
       },
       "@fixture/pending": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/provideexported": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/providerinternal": {
         "host-entry": 1,
         "client-entry": 0,
         "client-extra": 0,
@@ -377,6 +437,82 @@
         "subContexts": [
           "index.js:ctx",
           "lib/client.js:ctx"
+        ]
+      },
+      "@fixture/consumerofexported": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "vaultService"
+        ],
+        "declaredServices": [
+          "vaultService"
+        ],
+        "calls": {
+          "vaultService": [
+            "find"
+          ]
+        },
+        "via": {
+          "ctx-member": 1
+        },
+        "siteCounts": {
+          "vaultService": 1
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/consumerofinternal": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "internalOnlyService"
+        ],
+        "declaredServices": [
+          "internalOnlyService"
+        ],
+        "calls": {
+          "internalOnlyService": [
+            "find"
+          ]
+        },
+        "via": {
+          "ctx-member": 1
+        },
+        "siteCounts": {
+          "internalOnlyService": 1
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
         ]
       },
       "@fixture/declaredbutok": {
@@ -725,6 +861,72 @@
           "index.js:ctx"
         ]
       },
+      "@fixture/provideexported": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [],
+        "declaredServices": [],
+        "calls": {},
+        "via": {},
+        "siteCounts": {},
+        "localBindings": [],
+        "providedServices": [
+          "vaultService"
+        ],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/providerinternal": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "logger"
+        ],
+        "declaredServices": [
+          "logger"
+        ],
+        "calls": {
+          "logger": [
+            "info"
+          ]
+        },
+        "via": {
+          "ctx-member": 1
+        },
+        "siteCounts": {
+          "logger": 1
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
       "@fixture/silent": {
         "version": "1.0.0",
         "files": {
@@ -838,12 +1040,13 @@
     }
   },
   "verdict": {
-    "hash": "20df633134a8539bfffc9d869937db68bc38c55a7049504fdf168d27f0929869",
+    "hash": "06e44eee3ea9f019f729ea6b01b06d4a9a42d0856088c802286ea9e74a361398",
     "summary": {
-      "ok": 10,
+      "ok": 13,
       "partial": 3,
-      "broken": 2,
-      "unknown": 0
+      "broken": 3,
+      "unknown": 0,
+      "vacuousOk": 1
     },
     "plugins": {
       "@fixture/aliased": {
@@ -869,6 +1072,31 @@
           "locale",
           "slots"
         ],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/consumerofexported": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/consumerofinternal": {
+        "verdict": "broken",
+        "findings": [
+          {
+            "category": "host-service-missing",
+            "certainty": "certain",
+            "severity": "fatal",
+            "api": "internalOnlyService",
+            "location": null,
+            "impact": "插件条目会停在 pending（等待该服务），等同于没起来"
+          }
+        ],
+        "clientSide": [],
         "filtered": [],
         "abstained": [],
         "runtimeFacilities": []
@@ -988,6 +1216,22 @@
             "impact": "插件条目会停在 pending（等待该服务），等同于没起来"
           }
         ],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/provideexported": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/providerinternal": {
+        "verdict": "ok",
+        "findings": [],
         "clientSide": [],
         "filtered": [],
         "abstained": [],

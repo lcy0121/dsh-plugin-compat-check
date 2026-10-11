@@ -223,6 +223,43 @@
       "targets": [
         "parityfix"
       ]
+    },
+    "@fixture/provideexported": {
+      "verdict": "ok",
+      "_why": "服务通过**导出的数组**声明（`const provide = [...]; export { provide }`）。实测 `dsh-mnemon` 就是这个形态，而它提供的 `mnemonMemory` 被一整个插件族依赖 —— 只认 `ctx.provide(...)` 时，7 个消费者被报成「无人提供」的假阳性。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/providerinternal": {
+      "verdict": "ok",
+      "_why": "负向对照：同名数组**没导出**、运行时也没注册，所以它提供的服务不算数。这条防的是「为了修上面那个假阳性，把正则放松到见 provide 就算」——那会把包内无关代码也算成提供方，制造假阴性（真实缺失被掩盖）。",
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/consumerofexported": {
+      "verdict": "ok",
+      "_why": "硬依赖一个**由另一个插件提供**的服务。提供方在场就应当 ok。判成 broken/partial 就是把装好了报成缺依赖，是本工具最刺眼的一类假阳性。",
+      "mustNotReport": [
+        "vaultService"
+      ],
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/consumerofinternal": {
+      "verdict": "broken",
+      "_why": "对照组：它的依赖**确实无人提供**（提供方数组没导出、运行时也没注册）。这里报 broken 是正确的 —— 如果它也变 ok，说明上一条的正则放松过头了。两条一起才构成一次有效校准：一条拦假阳性，一条拦修假阳性时制造假阴性。",
+      "mustReport": [
+        {
+          "category": "host-service-missing",
+          "api": "internalOnlyService"
+        }
+      ],
+      "targets": [
+        "micro"
+      ]
     }
   }
 }
