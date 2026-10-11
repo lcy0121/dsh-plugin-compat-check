@@ -130,3 +130,39 @@ describe('单版本：一处真源，多处出现，全部钉住', () => {
     assert.ok(fs.existsSync(path.join(REPO, 'lib/version.mjs')))
   })
 })
+
+/**
+ * 面板是本插件的**主要入口**（用户主要在设置页里看结论）。
+ * 它的报告里也必须带版本 —— 否则"面板说部分可用"这条结论同样无法追溯，
+ * 而追溯正是这个版本字段存在的全部理由。
+ *
+ * 不给浏览器：这里用假 ctx 驱动 `apply()`，抓住面板路由再真调一次。
+ * 与 `host-structure.test.mjs` 同一手法（那一层已经证明过它抓得住真事故）。
+ */
+describe('面板报告也带版本', () => {
+  test('面板 payload 的 toolVersion = 真源', async () => {
+    const mod = await import(new URL('../plugin/index.js', import.meta.url).href)
+    let route = null
+    const ctx = {
+      get: () => undefined,
+      inject: (deps, cb) => cb({
+        webServer: { register: (r) => { route = r } },
+        tools: null, agents: null, skills: null,
+      }),
+      effect: () => {},
+      logger: { info: () => {}, warn: () => {} },
+    }
+    mod.apply(ctx)
+    await new Promise((r) => setTimeout(r, 600))
+    assert.ok(route, '面板路由没注册 —— 这条断言要跟着改')
+
+    let body = ''
+    await route.handler(
+      { headers: { host: '127.0.0.1:1' }, url: '/plugin-compat-check/report' },
+      { writeHead: () => {}, setHeader: () => {}, end: (s) => { body = s } },
+    )
+    const payload = JSON.parse(body)
+    assert.equal(payload.toolVersion, TOOL_VERSION,
+      '面板报告里没有正确的 toolVersion —— 用户从界面上看到的结论就无法追溯了')
+  })
+})

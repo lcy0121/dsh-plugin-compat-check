@@ -878,6 +878,10 @@ async function computeReport(state, ctx) {
     ok: false,
     error: null,
     kernelDir: null,
+    // 「这份结论是哪一版工具给的」。面板是本插件的主要入口，
+    // 少了它，用户来问"凭什么"时第一句就卡住 —— 而同一插件在不同版本的
+    // 规则表/提取器下结论会变（见 lib/version.mjs 与 Plan.md §5.2.8）。
+    toolVersion: null,
     nodeModules: null,
     nodeModulesWhy: null,
     // C4：与上次体检的差分包（没有基线时为 null，并带 note 说明为什么）
@@ -887,6 +891,17 @@ async function computeReport(state, ctx) {
   try {
     const kernel = resolveKernelDir();
     out.kernelDir = kernel;
+    // 版本要**尽早**拿到：连"找不到内核"这条错误路径上，用户也需要知道
+    // 是哪一版工具报的这个错。`version.mjs` 只在有内核时才读得到 ——
+    // 读不到就保持 null，**不猜**。
+    if (kernel) {
+      try {
+        const vmod = await import(pathToFileURL(join(kernel, 'lib', 'version.mjs')).href);
+        out.toolVersion = vmod.TOOL_VERSION ?? null;
+      } catch (error) {
+        log(`版本读不到（${errText(error)}）—— 报告里的 toolVersion 将是 null`);
+      }
+    }
     if (!kernel) {
       out.error = '找不到判定内核（lib/extract.mjs + lib/verdict.mjs）。'
         + '插件形态下它们是同仓库的相邻目录；发布形态请设 DSC_KERNEL。';

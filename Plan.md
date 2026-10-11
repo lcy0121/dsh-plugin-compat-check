@@ -626,7 +626,7 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 
 | 项 | 值 |
 |---|---|
-| 受版本控制文件 | **140**（59 个人工维护 + 81 个夹具数据） |
+| 受版本控制文件 | **144**（63 个人工维护 + 81 个夹具数据） |
 | 测试 | **240 条**（13 个测试文件，其中 `probe-boot` 默认跳过）；另 2 条慢测试需 `DSC_SLOW=1` |
 | 默认 `node --test test/` | 全绿，约 **7 秒** |
 | 提取缺陷记录 | **30 条**，全部已修（`docs/extraction-findings.md`） |
@@ -636,7 +636,7 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 
 ### 8.2 仓库结构现状
 
-（受版本控制共 **140** 个文件 = 59 个人工维护的条目 + 81 个夹具数据文件。
+（受版本控制共 **144** 个文件 = 63 个人工维护的条目 + 81 个夹具数据文件。
 **与三份 README 的「目录结构」一节保持同一份事实** —— 两边都要在结构变化时一起改，
 否则又是一处会漂移的文档。计数与下树均由 `git ls-files` 实测，不凭记忆。）
 
@@ -678,7 +678,7 @@ dsh-plugin-compat-check/
 │
 ├── docs/extraction-findings.md               # 实测提取缺陷清单 + 探针的两条边界
 │
-├── test/                                     # 253 条断言 / 13 个测试文件
+├── test/                                     # 254 条断言 / 13 个测试文件
 │   ├── helpers.mjs
 │   ├── invariants.test.mjs                   #   自恰性（69 条）
 │   ├── snapshot.test.mjs                     #   输出变了没有
