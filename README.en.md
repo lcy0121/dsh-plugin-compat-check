@@ -71,6 +71,8 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --quiet
 |---|---|
 | `--nm <dir>` | **Required.** The `node_modules` or profile directory to audit |
 | `--probe <json>` | Host runtime surface. **Only with this does a method-level finding become "certain"**; without it the tool falls back to the official catalogue and marks it "suspected" |
+| `--probe-boot` | **Boot a host yourself to obtain the runtime surface** (no pre-existing probe report needed). **Off by default** — it copies a profile, runs pnpm and boots a host (~10-20s). On a real desktop profile: usable 9 -> **14**, incompatible 0, and findings go from "suspected" to "certain" |
+| `--probe-timeout <s>` / `--probe-keep-dir <dir>` | `--probe-boot` wait limit (default 40) / keep a copy of the probe report in that directory (for debugging) |
 | `--dsh-version <v>` | Current DSH version (prerequisite for the "declaration vs. reality" category) |
 | `--rules` / `--catalog` | Override the tables under `rules/` |
 | `--no-baseline` | Don't read or write the local baseline (CI / one-shot checks) |
@@ -192,9 +194,9 @@ The last two are deliberately separated. `no-calls` and `abstained` look like "f
 
 ## Layout
 
-(105 version-controlled files: 51 of code / documentation / data tables, and 54 fixture files
+(119 version-controlled files: 53 of code / documentation / data tables, and 66 fixture files
 (`test/fixtures/micro/node_modules/` with 48 synthetic plugin files, `tools/parity/fixtures/hang-cycle/node_modules/` with 5,
-and one synthetic host runtime surface). All 51 hand-maintained entries are listed below; fixture contents are summarised.)
+and one synthetic host runtime surface). All 53 hand-maintained entries are listed below; fixture contents are summarised.)
 
 ```
 dsh-plugin-compat-check/
@@ -240,7 +242,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # measured extraction defects (numbered) + the probe's two boundaries
 │
-├── test/                       # 210 assertions across seven layers (see below)
+├── test/                       # 221 assertions across seven layers (see below)
 │   ├── helpers.mjs             #   shared fixtures: load tables, snapshot digests, hashing
 │   ├── invariants.test.mjs     #   self-consistency (must hold for any input)
 │   ├── snapshot.test.mjs       #   did the output change (key fields + content hash)
@@ -300,7 +302,7 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > **leaving no litter behind**). When skipped it prints a line saying how to run it, so it
 > does not become a silently missing test.
 
-**210** assertions (9 test files) across seven layers, each answering a different question:
+**221** assertions (9 test files) across seven layers, each answering a different question:
 
 | File | Answers | Blind to |
 |---|---|---|

@@ -38,6 +38,8 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 |---|---|
 | `--nm <dir>` | 必需。要体检的 `node_modules` 目录，或一个 profile 目录（会自动补 `node_modules`） |
 | `--probe <json>` | 宿主的**真实运行时面**（探针报告）。给了它，方法级结论才是「确定」 |
+| `--probe-boot` | **自己起一次宿主拿运行时面**（不必先有报告）。默认不开，约 10~20 秒。**关键是它把「疑似」变成「确定」** —— 用户要一个可信结论时用它 |
+| `--probe-timeout <秒>` / `--probe-keep-dir <dir>` | `--probe-boot` 的等待上限（默认 40）/ 留一份探针报告到该目录（排查用） |
 | `--dsh-version <v>` | 当前 DSH 版本，用于「声明与实测不符」那类结论 |
 | `--json` / `--quiet` | 机器可读 / 只输出结论行 |
 | `--no-baseline` | 不读写本机基线。**一次性检查用这个**，见下面的「副作用」 |
@@ -45,7 +47,17 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 
 `--nm` 指哪里：`$DSH_HOME/profiles/<name>`（默认 `~/.dsh/profiles/<name>`）。用户说「我的插件」时，先弄清楚是哪个 profile，别默认 `desktop`。
 
-探针报告从哪来：`--probe` 要的是一份由**真实启动一次宿主**产生的 JSON（`./dsh-plugin-compat-check.sh` 跑完会落在 `/tmp/dsh-plugin-compat-check/probe-report.json`；放在 `node_modules` 旁边时 CLI 也会自动找到）。**没有它就别假装有**——见下面「疑似」。
+探针报告从哪来，三条路（**优先级从高到低**）：
+
+1. **`--probe-boot`**：让 CLI 自己起一次宿主去拿（推荐 —— 不需要任何前置准备）。
+   它只在你显式要求时才跑（约 10~20 秒），默认路径是只读静态的。
+2. `--probe <json>`：你手上已经有一份探针报告。`./dsh-plugin-compat-check.sh` 跑完会落在
+   `/tmp/dsh-plugin-compat-check/probe-report.json`；放在 `node_modules` 旁边时 CLI 也会自动找到。
+3. 都没有 → 方法级结论一律降为「疑似」。**这时不要假装有**。
+
+> 为什么值得主动提 `--probe-boot`：实测在真实 desktop profile 上，**没有运行时面时
+> 38 条发现全是「疑似」**，而跑一次之后可用数从 9 升到 14、不兼容从 4 降到 0
+> —— 换句话说，**不给面就只能给出"判不准"，给面才能给出结论**。
 
 ## 输出怎么读
 
@@ -55,15 +67,24 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 结论: 可用 3    部分可用 1    不兼容 0    （其中 1 个「可用」是空洞的：它没有任何可检查的依赖）
 
 部分可用  dsh-keep-awake@0.2.0
-     降级 / 宿主方法缺失  jobs.onJobsChanged  @ lib/index.js:591
-       影响: 任务状态不再实时推送，插件退化为轮询（约 5 秒延迟）
-       依据: 运行时里没有这个方法；规则表给出影响面
      功能失效 / 宿主方法缺失  settings.register  @ lib/index.js:466
        影响: 插件的设置页/设置项会消失
        依据: 运行时里没有这个方法；规则表给出影响面
      客户端半边（命令行测不到，需界面验证）: locale, slots
+     已过滤（判为噪音/有兜底）: jobs.onJobsChanged
      无证据可判（只出现名字，没有调用点）: timer
+可用  @omdsh-dev/dsh-plugin-check@0.1.0
+可用  dsh-pet@0.3.6
+     客户端半边（命令行测不到，需界面验证）: commandUi, locale, remote, remote.commands, slots
+     已过滤（判为噪音/有兜底）: llm.listConfigurableProviders, llm.listProviders
+可用  dsh-plugin-compat-check-probe@0.0.1   [空洞的结论：无可检查对象]
 ```
+
+> ⚠️ 上面这段是**从真实运行里抄的**，不是编的。它曾经是编的 —— 里面写着
+> `jobs.onJobsChanged @ lib/index.js:591` 是"降级"，而查源码 :590 是
+> `if (jobs !== undefined && typeof jobs.onJobsChanged === 'function')`，
+> **作者明明写了能力检测**，那是一条**假阳性**（已修）。
+> 教训：**示例输出也必须从运行里抄**，否则 skill 会教 agent 去期待一个不存在的结论。
 
 - **总结论**每插件一个：`可用` / `部分可用` / `不兼容` / `未知`。
 - **每条发现**四件事：严重度（`致命` / `功能失效` / `降级`）、类别（`宿主服务缺失` / `宿主方法缺失` / `无人提供的依赖` / `声明与实测不符`）、`服务.方法`、`@ 文件:行`。

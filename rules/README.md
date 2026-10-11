@@ -60,29 +60,58 @@
 
 ## 覆盖率
 
-基准：desktop profile，`node lib/extract.mjs ~/.dsh/profiles/desktop/node_modules <out>`（2026-10-10，DSH 0.2.0-rc.2）实测 **21 个插件 / 58 个服务 / 234 个 (服务,方法) 对**。
-
-| 口径 | 改前 | 改后 |
-|---|---|---|
-| 表中描述的服务（占实际用到的 58 个） | 18 | **40** |
-| 表中有方法级严重度判定的服务 | 18 | **32** |
-| 方法级条目总数 | 46 | **80** |
-| 实际用到的 (服务,方法) 对里有规则的 | 44 / 234 | **78 / 234** |
-| 其中服务属于官方目录的那 140 对 | 40 / 140 | **74 / 140** |
-| **引擎实测：发现总数 / 规则表命中 / 落到"影响面未知"** | 47 / 31 / **16** | 47 / 40 / **7** |
-
-最后一行是唯一真正有意义的口径——前几行都只是它的分解。改后剩下的 7 个"影响面未知"里，**6 个已确证是提取误报**（`agents.listDescendants` 是别名正则漏词边界，5 个 `settings.*` 来自 KaTeX 与插件自有的设置面，见 `knownExtractionArtifacts`），最后 1 个是 `sessions.refresh`——两个官方目录里都没有它，**分不清是旧版 API 还是误报**，所以按"判不准就不填"留着。
-
-保守的说法是：**在这个 profile 上，凡是能确认是真实 API 的地方，规则表都已经给出了影响面**；剩下的未知全部来自提取噪音或无法定性的旧 API。
-
-复现命令（只读，不改仓库）：
+> ⚠️ **这张表由 `node tools/coverage.mjs` 生成，是一台机器的一个 profile 的快照，不是生态普查。**
+> 它以前是**手工算的**，于是必然过期 —— 实测就是这么烂掉的：表里写「58 个服务 / 234 个对」，
+> 而同一时刻真实值是 **48 / 206**（数字来自不同的两天，混在一张表里）。
+> **一张会过期却没人知道的覆盖率表比没有表更糟：它看起来像证据。**
+> 所以现在它是**一条命令**，数字只从命令里抄。
 
 ```bash
-node lib/extract.mjs ~/.dsh/profiles/desktop/node_modules /tmp/sev-extract
-# 判定引擎口径：跑 buildVerdicts 后统计 basis 里是"规则表给出影响面"还是"规则表未覆盖该 API"
+node tools/coverage.mjs            # 给人看
+node tools/coverage.mjs --json     # 机器可读
+node tools/coverage.mjs --write    # 顺带刷新 rules/usage-inventory.json
 ```
 
-统计各档依据的条数：`catalog` 24 条、`catalog-description` 3 条、`callsite` 7 条，其余 46 条为既有条目。
+**口径**（必须固定，否则数字之间不可比）：
+
+- **"有调用点的服务"**：`perPlugin[*].calls` 的键的并集 —— **真的被调用过**的服务。
+  它**不是** `report.services`：后者还包含"只被声明过"和"只出现过名字"的，
+  拿它当分母会把覆盖率算**低**（分母里有永远不会被规则的项）。
+- **排除已知提取产物**，且**按方法粒度**：`rules/severity.json` 的
+  `knownExtractionArtifacts` 逐条写了"不要为这些补规则"。但条目里大多是
+  "某服务下的**某几个方法**"是产物（`sessions` 11 个、`jobs` 13 个是集合方法名），
+  而 `sessions` / `jobs` 本身是**真宿主服务** —— 按服务粒度排会把真服务一起排掉
+  （实测第一版就这么干了，把 `agents`/`locale`/`sessions`/`settings`/`tools` 全排除，
+  覆盖率被算**高**）。
+
+**当前值（2026-10-11，desktop profile，DSH 0.2.0-rc.2）**：
+
+| 口径 | 值 |
+|---|---|
+| 插件 | 21 |
+| 有调用点的服务 | **48**（原始 49，排掉 1 个纯产物服务） |
+| 表中覆盖的服务 | **34 / 48 = 71%** |
+| (服务,方法) 对 | **206**（原始 227，排掉 12 个产物对） |
+| 表中有方法级规则的对 | **66 / 206 = 32%** |
+| 表中服务总数 / 其中有方法级子表 | 40 / 32 |
+| **引擎实测：发现总数 / 规则表命中 / 落到默认档** | 20 / 6 / **14** |
+
+**最后一行才是唯一真正有意义的口径** —— 前几行都只是它的分解。
+
+> ⚠️ 这 14 条"落到默认档"里有一部分是**已知提取误报**（见 `knownExtractionArtifacts`：
+   `agents.listDescendants` 是别名正则漏词边界、`settings.*` 来自 KaTeX 与插件自有设置面）。
+> 剩下的也分不清是"旧版 API"还是"又一个误报"。所以**不能**把它读成"规则表缺 14 条" ——
+> 那正是这条度量想防的误读：**把假阳性当缺口去填，等于把假阳性升格成"看起来确定"的结论。**
+
+现在**没有规则**的服务（12 个，都是客户端半边或插件间依赖，不是宿主 API）：
+
+```
+betterLocale  betterSidebar  companionQq   conversation  deepseekAccount
+desktopProfiles  remote  shell  sidebarRight  sidebarRightTabs  styles  webUiSettings
+```
+
+`shell` 是唯一值得注意的：它在**官方宿主目录**里，却没有规则。这是真实的**规则表缺口**，
+不是产物（见下节 `needsReview`）。
 
 ## 新增条目的证据分列
 

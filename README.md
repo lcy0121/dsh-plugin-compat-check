@@ -71,6 +71,8 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --quiet
 |---|---|
 | `--nm <dir>` | **必需**。要体检的 `node_modules` 或 profile 目录 |
 | `--probe <json>` | 宿主运行时面。**给了它，方法级结论才是「确定」**；不给则退回官方目录、降为「疑似」 |
+| `--probe-boot` | **自己起一次宿主拿运行时面**（不必先有探针报告）。默认**不开** —— 它要复制 profile、跑 pnpm、起宿主（约 10~20 秒）。真实 desktop 上的效果：可用 9→**14**、不兼容 0，且发现从「疑似」变「确定」 |
+| `--probe-timeout <秒>` / `--probe-keep-dir <dir>` | `--probe-boot` 的等待上限（默认 40）/ 把探针报告留一份到该目录（排查用） |
 | `--dsh-version <v>` | 当前 DSH 版本（「声明与实测不符」这类结论的前提） |
 | `--rules` / `--catalog` | 覆盖 `rules/` 下的规则表与官方目录 |
 | `--no-baseline` | 不读写本机基线（CI / 一次性检查用） |
@@ -194,9 +196,9 @@ dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
 
 ## 目录结构
 
-（受版本控制共 **105** 个文件：51 个是代码 / 文档 / 规则表，54 个是夹具数据
+（受版本控制共 **119** 个文件：53 个是代码 / 文档 / 规则表，66 个是夹具数据
 （`test/fixtures/micro/node_modules/` 48 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
-以及 1 个合成宿主运行时面）。下面把 51 个人工维护的条目**列全**，夹具内部按样例说明。）
+以及 1 个合成宿主运行时面）。下面把 53 个人工维护的条目**列全**，夹具内部按样例说明。）
 
 ```
 dsh-plugin-compat-check/
@@ -242,7 +244,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # 已实测的提取缺陷清单（编号）+ 探针的两条边界
 │
-├── test/                       # 210 条断言，分七层（见下节）
+├── test/                       # 221 条断言，分七层（见下节）
 │   ├── helpers.mjs             #   共用夹具：加载规则表/目录、快照摘要、哈希
 │   ├── invariants.test.mjs     #   结果自恰性（对任何输入都必须成立）
 │   ├── snapshot.test.mjs       #   输出变了没有（关键字段 + 内容哈希）
@@ -300,7 +302,7 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > 报告写得出来、**跑完不留垃圾**）。默认跳过时它会打一行提示说明怎么跑，
 > 免得变成"静默消失的测试"。
 
-**210** 条断言（9 个测试文件），分七层，各回答一个不同的问题：
+**221** 条断言（9 个测试文件），分七层，各回答一个不同的问题：
 
 | 文件 | 回答什么 | 抓不到什么 |
 |---|---|---|
