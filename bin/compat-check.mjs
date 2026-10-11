@@ -227,16 +227,25 @@ function probeBoot(nm, opts = {}) {
   const tmpProfile = path.join(profilesDir, tmpName);
   const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-boot-'));
 
+  // 清理只做一次，且**记下结果** —— 「尽力而为」的清理如果失败，
+  // 外面看到的只是"有个目录没删掉"，而不知道是谁留下的。
+  let cleaned = null;
   const cleanup = () => {
+    if (cleaned !== null) return;
     try { spawnSync('pkill', ['-f', tmpName], { stdio: 'ignore' }); } catch { /* 尽力而为 */ }
     try { fs.rmSync(tmpProfile, { recursive: true, force: true }); } catch { /* 尽力而为 */ }
     try { fs.rmSync(workDir, { recursive: true, force: true }); } catch { /* 尽力而为 */ }
+    cleaned = { tmpProfile, stillExists: fs.existsSync(tmpProfile) };
   };
+  // 供测试与调试：**这个调用自己**用的临时 profile 是哪一个。
+  // （不要让别人去 `ls profiles | grep dsc-probe-boot` —— 那是**全局**命名空间，
+  //   并发跑两条 `--probe-boot` 时，别人正在用的那个会被当成"残留"。实测踩到过。）
+  tmpProfile, tmpName;
 
   try {
     // ── 1. 复制 profile ──
     const cp = spawnSync('cp', ['-R', srcProfile, tmpProfile], { encoding: 'utf8', timeout: 60000 });
-    if (cp.status !== 0) return { surface: null, error: `复制 profile 失败: ${(cp.stderr || '').trim()}` };
+    if (cp.status !== 0) { cleanup(); return { surface: null, tempProfile: tmpProfile, error: `复制 profile 失败: ${(cp.stderr || '').trim()}` }; }
 
     // ── 2. 加探针依赖（dependencies + bundles 都要）──
     const pkgFile = path.join(tmpProfile, 'package.json');
@@ -307,7 +316,8 @@ function probeBoot(nm, opts = {}) {
     const inst = spawnSync('dsh', ['plugin', '--profile', tmpName, 'install'],
       { encoding: 'utf8', timeout: 180000, env: { ...process.env, DSH_HOME: home } });
     if (inst.status !== 0) {
-      return { surface: null, error: `装探针失败（dsh plugin install 退出码 ${inst.status}）: ${(inst.stderr || '').trim().slice(0, 300)}` };
+      cleanup();
+      return { surface: null, tempProfile: tmpProfile, error: `装探针失败（dsh plugin install 退出码 ${inst.status}）: ${(inst.stderr || '').trim().slice(0, 300)}` };
     }
 
     // ── 4. services.json：**本次提取到的全部服务**（探针照单全问）──
@@ -362,9 +372,11 @@ function probeBoot(nm, opts = {}) {
         notes.push(`报告已留一份到 ${opts.keepDir}`);
       } catch { /* 尽力而为 */ }
     }
-    return { surface, notes, error: null };
+    cleanup();
+    return { surface, notes, tempProfile: tmpProfile, cleanup: cleaned, error: null };
   } catch (error) {
-    return { surface: null, notes, error: `--probe-boot 失败: ${error.message}` };
+    cleanup();
+    return { surface: null, notes, tempProfile: tmpProfile, cleanup: cleaned, error: `--probe-boot 失败: ${error.message}` };
   } finally {
     cleanup();
   }
@@ -408,7 +420,14 @@ export function run(options = {}) {
         services: (extracted.report && extracted.report.services) || [],
         keepDir: options.probeKeepDir,
       });
-      result.inputs.probeBoot = { notes: boot.notes || [], error: boot.error || null };
+      result.inputs.probeBoot = {
+        notes: boot.notes || [],
+        error: boot.error || null,
+        // **这一次调用自己**用的临时 profile 与清理结果 —— 让调用方（与测试）
+        // 能断言"我这次清干净了"，而不是去扫全局命名空间（并发时那是错的）。
+        tempProfile: boot.tempProfile ?? null,
+        tempProfileRemoved: boot.cleanup ? !boot.cleanup.stillExists : null,
+      };
       if (boot.surface) {
         hostSurface = boot.surface;
         result.inputs.probe = '(--probe-boot 实时采集)';

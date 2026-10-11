@@ -52,16 +52,6 @@ if (!SLOW && !process.env.DSC_QUIET_SKIP_NOTICE) {
   )
 }
 
-/** 列出 `$DSH_HOME/profiles` 下所有临时 profile —— 用来断言"跑完没留垃圾" */
-function bootProfiles() {
-  const dir = path.join(REAL_HOME, 'profiles')
-  try {
-    return fs.readdirSync(dir).filter((n) => n.startsWith('dsc-probe-boot-'))
-  } catch {
-    return []
-  }
-}
-
 describe('--probe-boot 慢测试：真的起一次宿主', { skip }, () => {
   // 一次 boot 十几秒，给足余量；测试框架默认可能不够
   /**
@@ -84,7 +74,6 @@ describe('--probe-boot 慢测试：真的起一次宿主', { skip }, () => {
   }
 
   test('真的能拿到运行时面，而且发现全部是「确定」', () => {
-    const before = bootProfiles()
 
     const r = run([
       '--nm', PARITYFIX,
@@ -121,7 +110,16 @@ describe('--probe-boot 慢测试：真的起一次宿主', { skip }, () => {
 
     // ── 跑完不许留垃圾 ──
     // 一个往用户 ~/.dsh/profiles 里留临时 profile 的工具，用户不会跑第二次。
-    assert.deepEqual(bootProfiles(), before, '--probe-boot 留下了临时 profile')
+    //
+    // ⚠️ **断言「我这一次清干净了」，不要去扫全局命名空间。**
+    // 第一版写的是 `assert.deepEqual(bootProfiles(), before)` —— 那是**全局**的
+    // `dsc-probe-boot-*` 列表，于是**并发跑别的慢测试时必然误报**：
+    // `labels.test.mjs` 自己也在跑 `--probe-boot`，它**正在用**的那个临时 profile
+    // 会被这里当成"残留"（实测：三个慢测试一起跑时，这条红了而单独跑是绿的）。
+    const pb = data.inputs.probeBoot || {}
+    assert.ok(pb.tempProfile, '--probe-boot 没报出自己用的临时 profile —— 那这条断言只能退回去扫全局')
+    assert.equal(pb.tempProfileRemoved, true, `临时 profile 没被清掉：${pb.tempProfile}`)
+    assert.ok(!fs.existsSync(pb.tempProfile), `临时 profile 还在磁盘上：${pb.tempProfile}`)
   })
 
   test('拿到面之后结论与静态不同（否则这个开关是白加的）', () => {
