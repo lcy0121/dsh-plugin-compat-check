@@ -312,15 +312,14 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > **leaving no litter behind**). When skipped it prints a line saying how to run it, so it
 > does not become a silently missing test.
 
-**263 assertions, spread across 15 test files.**
-
-"Layers" here means two **different** things — they used to be conflated, which is why the same
-docs said both "three layers" (`Plan.md` §0) and "seven layers" (this section):
+**263 assertions, spread across 15 test files.** Two **different** things need separating here
+(they used to be conflated into "seven layers"):
 
 * **3 epistemic layers** (`invariants` / `__expectations__` / `__snapshots__`) — each is, in
-  principle, blind to the class of error the others catch; all three are required;
-* **15 test files** — 8 further files each watch one concrete concern (arguments, cache, drift,
-  doc drift, secrets, structure, packaging…). They are **not** part of those three layers, but they fail just the same.
+  principle, blind to the class of error the others catch. `__expectations__` is **judgement data**,
+  not a test file: `invariants` and `snapshot` consume it;
+* **15 test files** = the 2 those layers use (`invariants` / `snapshot`) + **13** more, each
+  watching one concrete concern (arguments, cache, drift, doc drift, secrets, structure, packaging…).
 
 What each file answers:
 
@@ -348,6 +347,67 @@ What each file answers:
 >
 > Regenerate with `UPDATE_SNAPSHOTS=1 node --test test/snapshot.test.mjs` (an environment variable, not `--update`: `node --test` treats arguments after the test file as *test filenames*, so the flag never takes effect while the exit code stays normal — **yet another silent no-op**).
 
+## Measurement and audit: is the tool right?
+
+Whether a conclusion can be checked is itself **measurable**. Three metrics, each with a command and
+each **recomputable**:
+
+| Metric | How it is measured | Current value |
+|---|---|---|
+| **Call-site recall** | An enumeration using a **plain regex, independent of the extractor**, reconciled against it | **88.3%** (after excluding recorded deliberate abstentions; 56 to review) |
+| Layer (1) (host entry not activated) | The host's own `fiber.state` as ground truth, reconciled with synthetic positives/negatives | 1 true positive / 0 false positives / 0 misses |
+| Client entry **arrival** | CDP's Network domain: did each batch actually get fetched? | 66/66 entries, 3/3 batches |
+
+```bash
+node tools/extractor-recall.mjs              # call-site recall (a bounded, item-by-item queue)
+node tools/labels.mjs --nm web --synthetic   # two-way reconciliation for layer (1)
+node tools/client-arrival.mjs                # client arrival (needs a browser)
+```
+
+**Which layer is covered must be stated explicitly**:
+
+| Layer | What the tool claims | Where ground truth comes from |
+|---|---|---|
+| (1) Host entry not activated | "this entry will stay pending" | ✅ the host's own `fiber.state` |
+| (2) **Silent degradation** | "it activated, but a feature is dead" | ❌ **no machine ground truth** |
+| (3) Client half | "that half does not load in the browser" | ⚠️ arrival is measurable (CDP); **rendering/behaviour** needs a human |
+
+> ⚠️ **There is no "silent-degradation recall" number, and we are not going to chase one.**
+> It asks "of all the dead features, how many did we report?" — and that denominator is the
+> **plugin author's** knowledge. Obtaining it would mean writing a functional test for **every**
+> plugin, while the plugin set is **open** (14 community plugins on this machine; another machine
+> brings another set; every author release can silently invalidate such a test).
+> **That is not "expensive", it is unbounded.** We measure the layer **upstream** of it instead:
+> "of all the call sites that will fail, how many did we find?" — that layer is ours, can be
+> measured independently, and yields a **bounded** queue.
+>
+> Positives cannot simply be waited for either: this machine's real profiles have **0 PENDING /
+> 0 FAILED**, so cases are *arranged* with synthetic fixtures (inject a service nobody provides →
+> necessarily PENDING). But **ground truth still comes from the host** — we arrange the case, we do
+> not let it declare itself broken.
+
+**The audit record**: a conclusion carries two levels of confidence, visible in the output (`impactBasis`):
+
+| | What it is | Who confirmed it |
+|---|---|---|
+| **Fact** (`basis`) | what we *measured* — the method is absent at runtime, the call site has no capability check | runtime surface + source line, checkable one by one |
+| **Impact** | what the user *loses* | **marked "inferred, not measured" when it is our reading of the code** |
+
+Auditing every `method`-level finding a user actually sees, across all local profiles:
+
+| Mode | Findings | Certainty | Result |
+|---|---|---|---|
+| Default (no runtime surface) | **7** | all `[suspected]` | all **leads**: with a surface, 6 were shown to exist; 1 sits in a try/catch |
+| With runtime surface | 2 → **1** | `certain` | **1 of them was a false positive, now fixed** |
+
+That false positive (the author put the capability check inside a **helper function**, invisible to
+regex) changed the design: we now recognise capability checks in same-file helpers, and separate
+"fact" from "inference" in the output.
+
+> ⚠️ The sample is tiny (`certain`-level claims: 2 before, 1 after). **Do not read it as "50%
+> precision" or "100%"** — it is a record of *finding and fixing a false positive*, not a rate.
+> Per-item detail lives in [`docs/extraction-findings.md`](docs/extraction-findings.md).
+
 ## Maintenance
 
 | To do this | Do that |
@@ -363,7 +423,7 @@ What each file answers:
 - Method-level judgement is heuristic and can produce false positives; every known one is in `docs/extraction-findings.md`
 - **The client half cannot be verified automatically** — it can only be listed, and needs a human to look at the UI
 - The end-to-end script needs network access (npm registry, installing plugins) and `python3`
-- Not verified on native Windows (the kernel is pure Node and should port; the script needs a POSIX shell)
+- **Windows is not verified here — by decision.** We primarily serve macOS / Linux; Windows is supported (pure Node, no platform-specific APIs) but verification is left to users. The kernel carries no platform-specific calls; the orchestration script needs a POSIX shell.
 
 ## License
 
