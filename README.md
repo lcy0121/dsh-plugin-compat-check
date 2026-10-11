@@ -198,9 +198,9 @@ dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
 
 ## 目录结构
 
-（受版本控制共 **161** 个文件：74 个是代码 / 文档 / 规则表，87 个是夹具数据
+（受版本控制共 **168** 个文件：81 个是代码 / 文档 / 规则表，87 个是夹具数据
 （`test/fixtures/micro/node_modules/` 26 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
-以及 1 个合成宿主运行时面）。下面把 74 个人工维护的条目**列全**，夹具内部按样例说明。）
+以及 1 个合成宿主运行时面）。下面把 81 个人工维护的条目**列全**，夹具内部按样例说明。）
 
 ```
 dsh-plugin-compat-check/
@@ -250,7 +250,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # 已实测的提取缺陷清单（编号）+ 探针的两条边界
 │
-├── test/                       # 258 条断言 / 14 个测试文件（见下节）
+├── test/                       # 261 条断言 / 15 个测试文件（见下节）
 │   ├── helpers.mjs             #   共用夹具：加载规则表/目录、快照摘要、哈希
 │   ├── invariants.test.mjs     #   结果自恰性（对任何输入都必须成立）
 │   ├── snapshot.test.mjs       #   输出变了没有（关键字段 + 内容哈希）
@@ -276,6 +276,7 @@ dsh-plugin-compat-check/
 │       └── micro/node_modules/@fixture/*    # 26 个合成插件，每个专测一种判定路径
 │
 └── tools/                      # 开发工具（不参与运行时）
+    ├── client-arrival.mjs             # 客户端条目「到货」对账（H1'，需要浏览器）
     ├── catalog/extract-host-api.py     # 从宿主里抽官方 API 目录（rules/ 的数据来源）
     ├── parity/                         # 与 python 参考实现对拍
     │   ├── parity.sh
@@ -299,7 +300,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-默认 **258 条断言**（14 个测试文件），秒级。其中 `probe-boot.test.mjs` 默认跳过：
+默认 **261 条断言**（15 个测试文件），秒级。其中 `probe-boot.test.mjs` 默认跳过：
 
 ```bash
 # 真的起一次宿主，验证 --probe-boot 端到端可跑（约 10~20 秒）
@@ -319,14 +320,14 @@ node tools/doc-check.mjs     # 文档数字 vs 实测，不一致就 exit 1
 > 报告写得出来、**跑完不留垃圾**）。默认跳过时它会打一行提示说明怎么跑，
 > 免得变成"静默消失的测试"。
 
-**258 条断言，分布在 14 个测试文件里。**
+**261 条断言，分布在 15 个测试文件里。**
 
 「分层」要说清两件**不同**的事 —— 它们以前被混在一起，于是同一份文档里同时写着
 「三层」（`Plan.md` §0）和「七层」（本节）：
 
 * **3 个认识论分层**（`invariants` / `__expectations__` / `__snapshots__`）—— 这三层各自在
   **原理上**看不见对方那一类错误，缺一不可；
-* **14 个测试文件** —— 另外 8 个文件各自盯一个具体问题（参数、缓存、差分、文档漂移、凭据、
+* **15 个测试文件** —— 另外 8 个文件各自盯一个具体问题（参数、缓存、差分、文档漂移、凭据、
   结构、打包…）。它们**不属于**那三层，但同样会失败。
 
 各文件回答什么：

@@ -408,3 +408,80 @@ describe('skill 的示例输出必须与真实输出一致', () => {
     }
   })
 })
+
+/**
+ * 「随包的 SKILL.md 到底在哪」—— 一条**安装形态**的回归。
+ *
+ * ## 它守的是一次真实的静默失效
+ *
+ * `plugin/index.js` 的 `readPackagedSkill()` 原来只找 `join(here, '..', 'skill', 'SKILL.md')`
+ * （仓库形态）。而**装进 profile 之后**它是
+ * `<profile>/node_modules/dsh-plugin-compat-check`，上一层是 `node_modules/`
+ * —— 那里当然没有 `skill/`。
+ *
+ * 根因：pnpm 按 `package.json` 的 `files` 字段**复制**目录（不是符号链接），
+ * 而当时 `files` 里没有 `skill/`。后果是宿主日志只有一句
+ * `SKILL registration skipped` —— **skill 是本项目三类产物之一，而它在正常安装路径下是死的。**
+ *
+ * E1 当年报"跑通"，是因为那次**在仓库里**跑的 —— 而 `plugin/` 的上一层正好是仓库根。
+ */
+describe('随包 skill：安装形态下必须能找到、且与权威副本逐字节相同', () => {
+  test('plugin/skill/SKILL.md 与 skill/SKILL.md 逐字节相同', () => {
+    // 副本必须存在（`file:` 安装不跑 prepack，只能提交副本），
+    // 而副本会漂移 —— 所以钉住它。同款模式：lib/version.mjs ↔ plugin/package.json。
+    const canonical = fs.readFileSync(path.join(REPO, 'skill', 'SKILL.md'))
+    const shipped = fs.readFileSync(path.join(REPO, 'plugin', 'skill', 'SKILL.md'))
+    assert.ok(Buffer.compare(canonical, shipped) === 0,
+      'plugin/skill/SKILL.md 与 skill/SKILL.md 不一致 —— 跑 `node plugin/scripts/stage-skill.mjs` 同步。'
+      + '两份不一致时，装进 profile 的插件会注册一份**过期**的 skill 正文，而且没有任何提示。')
+  })
+
+  test('files 里有 skill/（否则 pnpm 复制时不会带它）', () => {
+    const pkg = JSON.parse(fs.readFileSync(path.join(REPO, 'plugin', 'package.json'), 'utf8'))
+    assert.ok(pkg.files.includes('skill/'),
+      `plugin/package.json 的 files 里没有 skill/ —— pnpm 按它复制目录，`
+      + `于是装进 profile 后 skill/ 根本不在，readPackagedSkill() 三条候选路径全落空。`)
+  })
+
+  test('「安装形态」的布局下真的能注册出 skill（端到端，不是看一个函数）', async () => {
+    // 造一个**最小安装形态**：一个目录，里面有 index.js / lib/client.js / skill/SKILL.md，
+    // 而**上一级没有 skill/**（模拟 `<profile>/node_modules/`）。
+    //
+    // 然后**真的 import 那个副本、真的驱动 apply()**，看 skill 注册出来没有。
+    // 一开始我写的是"从源码里正则抽出 readPackagedSkill 再求值" —— 太聪明、
+    // 而且它验的是"那个函数"，不是"用户拿到的东西"。端到端才是有意义的断言。
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-installed-'))
+    const dest = path.join(tmp, 'dsh-plugin-compat-check')
+    try {
+      fs.cpSync(path.join(REPO, 'plugin'), dest, { recursive: true })
+      // 必须先确认这个布局确实是"安装形态"：上一级没有 skill/
+      assert.ok(!fs.existsSync(path.join(tmp, 'skill')), '测试布局造错了：上一级不该有 skill/')
+
+      const mod = await import(path.join(dest, 'index.js'))
+      let provider = null
+      const ctx = {
+        get: () => undefined,
+        inject: (deps, cb) => cb({ skills: { registerProvider: (p) => { provider = p } } }),
+        effect: () => {},
+        logger: { info: () => {}, warn: () => {} },
+      }
+      mod.apply(ctx)
+      await new Promise((r) => setTimeout(r, 300))
+
+      assert.ok(provider !== null,
+        '安装形态下**没有注册 skill** —— 这正是那次静默失效的形状：'
+        + '宿主日志只有一句 `SKILL registration skipped`，而 skill 是三类产物之一。'
+        + '排查顺序：plugin/package.json 的 files 里有没有 skill/、'
+        + 'readPackagedSkill() 的候选里有没有 `<here>/skill/SKILL.md`。')
+      const listed = await provider().get('dsh-plugin-compat-check')
+      assert.ok(listed && listed.content && listed.content.length > 500,
+        `注册出来的 skill 正文不对：${JSON.stringify(listed).slice(0, 200)}`)
+      // 正文必须与权威那份一致 —— 否则装上去的是一份**过期**的说法
+      const canonical = frontmatter(fs.readFileSync(path.join(REPO, 'skill', 'SKILL.md'), 'utf8')).body
+      assert.equal(listed.content.trim(), canonical.trim(),
+        '随包注册的正文与 skill/SKILL.md 不一致 —— 跑 node plugin/scripts/stage-skill.mjs')
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true })
+    }
+  })
+})

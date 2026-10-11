@@ -7,7 +7,7 @@
 | 批次 | 日期 | 怎么发现的 |
 |---|---|---|
 | 第一批（1–17） | 2026-10-10 | 移植到 Node 的过程中逐个撞上；后期靠**一条不变式**成批抓出（见下） |
-| 第二批（18–32） | 2026-10-11 | 同一个工具体检**自己的依赖**时暴露；以及写夹具的自证过程 |
+| 第二批（18–34） | 2026-10-11 | 同一个工具体检**自己的依赖**时暴露；以及写夹具的自证过程 |
 
 > **不变的规矩**：每修一条，都要能造出一个**会变红的最小夹具**。
 > 只改代码而不留夹具，这条缺陷迟早以另一种形状回来——这个仓库里已经发生过两次（见缺陷 20 与 22 的"最小复现"栏）。
@@ -50,6 +50,8 @@
 | 30 | 守卫检测只认**服务名**，不认调用点用的**变量** | ✅ 已修 |
 | 31 | 别人的成员访问（`ws.sessions.has()`）被当成**本地绑定**的调用 | ✅ 已修 |
 | 32 | 能力检测藏在**同文件的辅助函数**里 → 认不出兜底 | ✅ 已修 |
+| 33 | 随包的 `SKILL.md` 在**安装形态**下找不到 | ✅ 已修 |
+| 34 | `startup failed` 打在 **stderr** 上（工具只收了 stdout） | ✅ 已修 |
 
 ---
 
@@ -562,3 +564,51 @@ scoped.settings.register(MARKET_SETTINGS_NS, z.object({}), { base: {} });
 **④ 只问 `services.json` 里点名的服务 —— 所以那份名单必须完整。**
 
 探针不问的服务，在报告里与"不存在"**长得一模一样**（缺陷 23 的 `logger` 就是这么暴露的）。所以 `--probe-boot` 的流程是**先提取、再拿面**：把本次涉及的**全部**服务名交给探针。
+
+### 33. 随包的 `SKILL.md` 在**安装形态**下找不到（已修）
+
+`readPackagedSkill()` 只找了 `join(here, '..', 'skill', 'SKILL.md')` —— 那是**仓库形态**
+（`<repo>/plugin/index.js` 的上一层正好是 `<repo>`）。而装进 profile 之后它是
+`<profile>/node_modules/dsh-plugin-compat-check`，**上一层是 `node_modules/`**，那里没有 `skill/`。
+
+根因：pnpm 按 `package.json` 的 `files` 字段**复制**目录（不是符号链接），而当时 `files` 里
+没有 `skill/`。实测安装后的目录里只有 `README.md / cordis.patch.yml / index.js / lib / package.json / scripts`。
+
+**后果是静默失效**：宿主日志只有一句
+`SKILL registration skipped: 找不到随包的 skill/SKILL.md`，
+而 **skill 是本项目三类产物之一**。E1 当年报"跑通"，是因为那次**在仓库里**跑的。
+
+**修法**（两件事一起做）：
+
+1. `plugin/skill/SKILL.md` 是**提交的副本**，`files` 里加了 `skill/`。
+   为什么不能像 `kernel/` 那样只在 `prepack` 时暂存 —— **`dsh plugin add file:…` 不跑 `prepack`**，
+   pnpm 直接按 `files` 复制。
+2. `readPackagedSkill()` 的候选顺序把**`<here>/skill/SKILL.md`（安装形态）**放第一位。
+
+副本会漂移，所以 `test/skill.test.mjs` 有两条断言：两份**逐字节相同**；
+以及**端到端**——把一个安装形态的布局拷到临时目录、真的 `import` 它、驱动 `apply()`，
+看 skill 注册出来没有（而不是"看某个函数对不对"）。
+
+> 这一条与 `lib/version.mjs ↔ plugin/package.json` 是同一个模式：
+> **必须出现在多处 + 只能有一处真源 ⇒ 只能靠测试钉住。**
+
+### 34. `startup failed` 打在 stderr 上（工具自身的坑，已修）
+
+`tools/client-arrival.mjs` 第一版只收宿主的 **stdout**。而客户端半边缺文件时，
+宿主是**拒绝启动**并把原因打在 **stderr**：
+
+```
+dsh: startup failed: 1 required plugin did not activate
+  modules (required)
+    AggregateError: client-modules: 1 client package failed to compose:
+      client bundles not found; run `pnpm run build` before launch:
+        - package: @label/broken-client
+```
+
+于是"宿主拒绝启动"退化成一句没用的"没给出 URL" —— **最重要的证据差点被丢掉**。
+
+**这条值得记的原因**：它又一次是「**收窄了观察面，于是失败看起来像"没有结果"**」。
+同一形状在这个项目里出现过很多次（探针的 `w()` 吞 ENOENT、`--probe-boot` 用旧探针副本……）。
+
+---
+

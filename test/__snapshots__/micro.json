@@ -1400,7 +1400,7 @@
     }
   },
   "verdict": {
-    "hash": "34440da7d323ec58c4873ef308d7509d9fad089334a36bf477d6518bdfca5cf8",
+    "hash": "e471573a492ca005e2de1f2718ec59c6af2db17ffd7a8b050b8d29c86ee45c98",
     "summary": {
       "ok": 18,
       "partial": 3,
@@ -1436,7 +1436,7 @@
             "severity": "fatal",
             "api": null,
             "location": null,
-            "impact": "客户端半边加载不出来 —— 这个插件的界面部分不可用；插件条目加载失败时整个界面会被错误屏替代"
+            "impact": "客户端半边取不到 —— 宿主会在启动时拒绝加载（`startup failed: … did not activate`），用户连界面都进不去；若文件在但导入失败，界面会被一张错误屏替代"
           }
         ],
         "clientSide": [],
@@ -1453,7 +1453,7 @@
             "severity": "fatal",
             "api": null,
             "location": null,
-            "impact": "客户端半边加载不出来 —— 这个插件的界面部分不可用；插件条目加载失败时整个界面会被错误屏替代"
+            "impact": "客户端半边取不到 —— 宿主会在启动时拒绝加载（`startup failed: … did not activate`），用户连界面都进不去；若文件在但导入失败，界面会被一张错误屏替代"
           }
         ],
         "clientSide": [],

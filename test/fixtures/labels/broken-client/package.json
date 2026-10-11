@@ -1,0 +1,14 @@
+{
+  "name": "@label/broken-client",
+  "version": "1.0.0",
+  "description": "合成正例：声明了客户端半边，但 exports[\"./client\"] 指向不存在的文件 → 那个批次取不到 → 整个界面被错误屏替代。给 H1' 到货侧做**负向对照**。",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": { "default": "./lib/does-not-exist.js" }
+  },
+  "dsh": {
+    "bundle": { "patch": "cordis.patch.yml" },
+    "client": { "platform": "web" }
+  }
+}

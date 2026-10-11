@@ -1240,11 +1240,32 @@ const SKILL_NAME = 'dsh-plugin-compat-check';
 const SKILL_PROVIDER = 'dsh-plugin-compat-check';
 const SKILL_RANK = 600;
 
-/** 仓库形态下 SKILL.md 在 plugin/ 的上一级；打包形态允许与 index.js 同级。 */
+/**
+ * 随包的 SKILL.md 在哪。
+ *
+ * ## ⚠️ 候选顺序是**实测换来的**，不要随手调
+ *
+ * 原来只有 `join(here, '..', 'skill', 'SKILL.md')`（仓库形态）。
+ * 而**装进 profile 之后**它是 `<profile>/node_modules/dsh-plugin-compat-check`，
+ * 上一层是 `node_modules/` —— 那里当然没有 `skill/`。
+ *
+ * 实测的后果是**静默失效**：宿主日志只有一句
+ * `SKILL registration skipped: 找不到随包的 skill/SKILL.md`，
+ * 而 skill 是本项目三类产物之一。E1 当年报"跑通"是因为那次**在仓库里**跑的。
+ *
+ * 根因是 pnpm 按 `package.json` 的 `files` 字段**复制**目录（不是符号链接），
+ * 而当时 `files` 里没有 `skill/`。所以现在两件事一起做：
+ *   1. `files` 加了 `skill/`，且 `plugin/skill/SKILL.md` 是**提交的副本**
+ *      （`file:` 安装路径**不跑 `prepack`**，所以不能像 kernel/ 那样只在打包时暂存）；
+ *   2. 候选顺序把**包内**的放第一位 —— 那才是安装后的真实位置。
+ *
+ * 副本会漂移，所以 `test/skill.test.mjs` 有一条断言：两份必须逐字节相同。
+ */
 function readPackagedSkill() {
   const here = path.dirname(fileURLToPath(import.meta.url));
   const candidates = [
-    join(here, '..', 'skill', 'SKILL.md'), // <repo>/plugin/index.js → <repo>/skill/SKILL.md
+    join(here, 'skill', 'SKILL.md'),        // **安装形态**：包内自带（files 里有 skill/）
+    join(here, '..', 'skill', 'SKILL.md'),  // 仓库形态：<repo>/plugin/index.js → <repo>/skill/SKILL.md
     join(here, 'SKILL.md'),
     join(here, 'assets', 'SKILL.md'),
   ];

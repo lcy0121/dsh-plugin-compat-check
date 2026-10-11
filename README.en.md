@@ -195,9 +195,9 @@ The last two are deliberately separated. `no-calls` and `abstained` look like "f
 
 ## Layout
 
-(161 version-controlled files: 74 of code / documentation / data tables, and 87 fixture files
+(168 version-controlled files: 81 of code / documentation / data tables, and 87 fixture files
 (`test/fixtures/micro/node_modules/` with 48 synthetic plugin files, `tools/parity/fixtures/hang-cycle/node_modules/` with 5,
-and one synthetic host runtime surface). All 74 hand-maintained entries are listed below; fixture contents are summarised.)
+and one synthetic host runtime surface). All 81 hand-maintained entries are listed below; fixture contents are summarised.)
 
 ```
 dsh-plugin-compat-check/
@@ -244,7 +244,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # measured extraction defects (numbered) + the probe's two boundaries
 │
-├── test/                       # 258 assertions / 14 test files (see below)
+├── test/                       # 261 assertions / 15 test files (see below)
 │   ├── helpers.mjs             #   shared fixtures: load tables, snapshot digests, hashing
 │   ├── invariants.test.mjs     #   self-consistency (must hold for any input)
 │   ├── snapshot.test.mjs       #   did the output change (key fields + content hash)
@@ -259,6 +259,8 @@ dsh-plugin-compat-check/
 │   ├── probe-boot.test.mjs     #   --probe-boot end to end (**skipped by default**, DSC_SLOW=1)
 │   ├── docs.test.mjs           #   are the numbers in the docs still right?
 │   ├── version.test.mjs        #   do all entries report the same version?
+│   ├── labels.test.mjs         #   label-set reconciliation (**skipped by default**, DSC_SLOW=1)
+│   ├── client-arrival.test.mjs #   did the planned client entries actually arrive? (**skipped**, DSC_SLOW=1)
 │   ├── __expectations__/
 │   │   └── micro.json          #   hand-written product promises: these verdicts **must** hold
 │   ├── __snapshots__/
@@ -270,6 +272,7 @@ dsh-plugin-compat-check/
 │       └── micro/node_modules/@fixture/*    # 15 synthetic plugins, one per judgement path
 │
 └── tools/                      # development tooling (not part of the runtime)
+    ├── client-arrival.mjs             # client entry "arrival" reconciliation (H1', needs a browser)
     ├── catalog/extract-host-api.py     # extract the official API catalogue from the host (source for rules/)
     ├── parity/                         # differential testing against a Python reference
     │   ├── parity.sh
@@ -293,7 +296,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-**258 assertions** (14 test files) by default, in seconds. `probe-boot.test.mjs` is skipped by default:
+**261 assertions** (15 test files) by default, in seconds. `probe-boot.test.mjs` is skipped by default:
 
 ```bash
 # really boot a host to verify --probe-boot end to end (about 10-20s)
@@ -308,14 +311,14 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > **leaving no litter behind**). When skipped it prints a line saying how to run it, so it
 > does not become a silently missing test.
 
-**258 assertions, spread across 14 test files.**
+**261 assertions, spread across 15 test files.**
 
 "Layers" here means two **different** things — they used to be conflated, which is why the same
 docs said both "three layers" (`Plan.md` §0) and "seven layers" (this section):
 
 * **3 epistemic layers** (`invariants` / `__expectations__` / `__snapshots__`) — each is, in
   principle, blind to the class of error the others catch; all three are required;
-* **14 test files** — 8 further files each watch one concrete concern (arguments, cache, drift,
+* **15 test files** — 8 further files each watch one concrete concern (arguments, cache, drift,
   doc drift, secrets, structure, packaging…). They are **not** part of those three layers, but they fail just the same.
 
 What each file answers:
@@ -329,6 +332,8 @@ What each file answers:
 | `client-structure` / `host-structure` | Can a component/host **register successfully but do nothing**? | Real rendering |
 | `cache.test.mjs` | Is the cache policy right, does a concurrent burst refresh **only once**, is the auto-check timing right? | Real startup ordering |
 | `version.test.mjs` | Do all three entries + the report JSON report the **same** version? (guardian of the single-version promise) | The real publish flow |
+| `labels.test.mjs` (**skipped by default**, `DSC_SLOW=1`) | Does the tool's "this entry will stay pending" match what the **host itself** reports? | Covers layer (1) only — silent degradation is unmeasurable |
+| `client-arrival.test.mjs` (**skipped by default**, `DSC_SLOW=1`) | Did the planned client entries **actually arrive in the browser**? (with a negative control) | Slow (~45s): boots a host + headless Chrome |
 | `docs.test.mjs` | Are the numbers in the **documentation** still right (continuous numbering, valid cross-refs, three-language consistency)? | Assertion counts (needs the suite; see `tools/doc-check.mjs`) |
 | `secrets.test.mjs` | Are there credentials in the repo, would the **probe copy values out**? | Credentials in other shapes |
 | `baseline.test.mjs` | Is every diff category right? **Is it quiet when nothing changed?** | Real plugins |
