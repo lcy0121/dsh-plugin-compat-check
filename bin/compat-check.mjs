@@ -26,6 +26,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { extractWithProvenance } from '../lib/extract.mjs';
@@ -42,6 +43,12 @@ const USAGE = `用法: node bin/compat-check.mjs --nm <node_modules 目录> [选
                    会自动补 node_modules 子目录。
   --probe <json>   宿主运行时面（探针报告）。给了它，方法级结论才是「确定」；
                    不给则退回官方目录，结论降为「疑似」。
+  --probe-boot     自己起一次宿主来拿运行时面（不需要已有的探针报告）。
+                   会建一个临时 profile、装探针、真实启动、回收报告、删掉临时 profile。
+                   默认**不开**：它要起进程、要等几十秒，而多数检查不需要它。
+                   给了它就不必再给 --probe（两者同时给时以 --probe 为准）。
+  --probe-timeout <秒>  --probe-boot 的启动等待上限（默认 40）
+  --probe-keep-dir <dir>  把探针报告与 services.json 留一份到该目录（排查用）
   --dsh-version <v> 当前 DSH 版本（用于「声明与实测不符」这一类结论）。
   --rules <json>   覆盖 severity 规则表（默认 rules/severity.json）
   --catalog <json> 覆盖官方 API 目录（默认 rules/dsh-api-catalog.json）
@@ -63,12 +70,13 @@ const USAGE = `用法: node bin/compat-check.mjs --nm <node_modules 目录> [选
 
 function parseArgs(argv) {
   const out = { json: false, quiet: false };
-  const takesValue = new Set(['--nm', '--probe', '--dsh-version', '--rules', '--catalog', '--baseline-file', '--profile']);
+  const takesValue = new Set(['--nm', '--probe', '--dsh-version', '--rules', '--catalog', '--baseline-file', '--profile', '--probe-timeout', '--probe-keep-dir']);
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--json') { out.json = true; continue; }
     if (a === '--no-baseline') { out.baseline = false; continue; }
     if (a === '--dry-run') { out.dryRun = true; continue; }
+    if (a === '--probe-boot') { out.probeBoot = true; continue; }
     if (a === '--quiet') { out.quiet = true; continue; }
     if (a === '--help' || a === '-h') { out.help = true; continue; }
     if (takesValue.has(a)) {
@@ -158,6 +166,152 @@ function writeBaseline(file, snapshot) {
   }
 }
 
+/* ── 拿到运行时面：自己起一次宿主（--probe-boot） ───────────────────── */
+
+/**
+ * 自己起一次宿主，把**运行时面**拿回来。
+ *
+ * ## 为什么值得做这件事
+ *
+ * 没有运行时面时，方法级结论一律只能标「确定不了」—— 实测真实 desktop profile 上
+ * **38 条发现没有一条是确定的**。因为**官方目录不是运行时面**：它给每个服务只声明
+ * **1 个方法**，而运行时实测 `sessions` 有 14 个、`agents` 24 个、`llm` 29 个。
+ * 于是「`sessions.get` 缺失」的真实含义只是"目录没写它"。
+ *
+ * 拿到面之后，同一批发现会立刻分成两类：**确实存在的（假阳性，消失）** 与
+ * **确实不存在的（坐实为确定）**。
+ *
+ * ## 为什么默认不开
+ *
+ * 它要复制 profile、跑一次 pnpm、起一个宿主进程、等几十秒。默认路径（只读静态提取）
+ * 是秒级且无副作用的，不该因为一个可选能力把它拖慢。
+ *
+ * ## 做法（每一步都是实测过的）
+ *
+ *  1. 复制目标 profile 到 `$DSH_HOME/profiles/dsc-probe-boot-<pid>`（`cp -R`）
+ *  2. 把探针加进它的 dependencies 与 bundles（`file:<repo>/probe`）
+ *  3. `dsh plugin --profile <tmp> install` —— 把探针装进 node_modules
+ *  4. `services.json` 写**本次提取到的全部服务名**（探针照单全问）
+ *  5. `DSC_OUT_DIR=<临时目录> dsh --profile <tmp> -- --port 0 --no-open`，轮询等报告
+ *  6. 无论成败都删掉临时 profile 与临时目录
+ *
+ * ⚠️ 第 4 步是要点：探针**只会问 `services.json` 里点名的那几个**。
+ * 不定制它就只能拿到一份固定的十来个服务，而真正关心的服务大概率不在里面
+ * （实测 `logger` 就是因为从不被问，才会在报告里和"不存在"长得一模一样）。
+ */
+function probeBoot(nm, opts = {}) {
+  const timeoutSec = Number(opts.probeTimeout) > 0 ? Number(opts.probeTimeout) : 40;
+  const home = process.env.DSH_HOME || path.join(os.homedir(), '.dsh');
+  const profilesDir = path.join(home, 'profiles');
+  // `nm` 是 …/profiles/<name>/node_modules，profile 目录就是它的上一级
+  const srcProfile = path.dirname(nm);
+  const notes = [];
+
+  if (!fs.existsSync(path.join(srcProfile, 'package.json'))) {
+    return { surface: null, error: `拿不到 profile 目录（${srcProfile} 里没有 package.json）—— --probe-boot 需要 profile 形态的 --nm` };
+  }
+  const probeSrc = path.join(REPO, 'probe');
+  if (!fs.existsSync(path.join(probeSrc, 'index.mjs'))) {
+    return { surface: null, error: `找不到探针源码 ${probeSrc} —— --probe-boot 需要完整的仓库` };
+  }
+
+  const stamp = `${process.pid}-${Date.now().toString(36)}`;
+  const tmpName = `dsc-probe-boot-${stamp}`;
+  const tmpProfile = path.join(profilesDir, tmpName);
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-boot-'));
+
+  const cleanup = () => {
+    try { spawnSync('pkill', ['-f', tmpName], { stdio: 'ignore' }); } catch { /* 尽力而为 */ }
+    try { fs.rmSync(tmpProfile, { recursive: true, force: true }); } catch { /* 尽力而为 */ }
+    try { fs.rmSync(workDir, { recursive: true, force: true }); } catch { /* 尽力而为 */ }
+  };
+
+  try {
+    // ── 1. 复制 profile ──
+    const cp = spawnSync('cp', ['-R', srcProfile, tmpProfile], { encoding: 'utf8', timeout: 60000 });
+    if (cp.status !== 0) return { surface: null, error: `复制 profile 失败: ${(cp.stderr || '').trim()}` };
+
+    // ── 2. 加探针依赖（dependencies + bundles 都要）──
+    const pkgFile = path.join(tmpProfile, 'package.json');
+    const pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8'));
+    pkg.name = `dsh-profile-${tmpName}`;
+    pkg.dependencies = pkg.dependencies || {};
+    pkg.dependencies['dsh-plugin-compat-check-probe'] = `file:${probeSrc}`;
+    const bundles = pkg?.dsh?.profile?.bundles;
+    if (Array.isArray(bundles) && !bundles.includes('dsh-plugin-compat-check-probe')) {
+      bundles.push('dsh-plugin-compat-check-probe');
+    } else if (!Array.isArray(bundles)) {
+      notes.push('目标 profile 里找不到 dsh.profile.bundles —— 探针可能不会加载');
+    }
+    fs.writeFileSync(pkgFile, `${JSON.stringify(pkg, null, 2)}\n`);
+
+    // ── 3. 装探针 ──
+    const inst = spawnSync('dsh', ['plugin', '--profile', tmpName, 'install'],
+      { encoding: 'utf8', timeout: 180000, env: { ...process.env, DSH_HOME: home } });
+    if (inst.status !== 0) {
+      return { surface: null, error: `装探针失败（dsh plugin install 退出码 ${inst.status}）: ${(inst.stderr || '').trim().slice(0, 300)}` };
+    }
+
+    // ── 4. services.json：**本次提取到的全部服务**（探针照单全问）──
+    //
+    // 用刚算出来的 `services`，而不是探针里那份硬编码的默认集合 ——
+    // 后者会让"没被问到"和"不存在"在报告里长得一样。
+    const wanted = [...(opts.services || [])].filter((x) => typeof x === 'string' && x).sort();
+    fs.writeFileSync(path.join(workDir, 'services.json'),
+      JSON.stringify({ services: wanted }, null, 2));
+    notes.push(`问了 ${wanted.length} 个服务`);
+
+    // ── 5. 起宿主，**轮询**等报告 ──
+    //
+    // ⚠️ 这里**不能**用 `spawnSync` 同步等：宿主是长驻进程，永远不会自己退出，
+    // 于是 `spawnSync` 必然一直等到超时才返回 —— 实测每次都白等满 60 秒，
+    // 而报告其实 3~5 秒就写好了。改成"后台起 + 轮询文件"。
+    const reportFile = path.join(workDir, 'probe-report.json');
+    const child = spawn('dsh', ['--profile', tmpName, '--', '--port', '0', '--no-open'], {
+      stdio: 'ignore',
+      env: { ...process.env, DSH_HOME: home, DSC_OUT_DIR: workDir },
+    });
+    let bootPatience = 0;
+    while (bootPatience < timeoutSec * 1000) {
+      if (fs.existsSync(reportFile)) break;
+      if (child.exitCode !== null) break; // 自己退了（起不来），不必等满
+      try {
+        spawnSync('sleep', ['0.25']);
+      } catch { /* 尽力而为 */ }
+      bootPatience += 250;
+    }
+    try { child.kill('SIGTERM'); } catch { /* 尽力而为 */ }
+    if (!fs.existsSync(reportFile)) {
+      return {
+        surface: null,
+        notes,
+        error: `宿主起了 ${Math.round(bootPatience / 1000)} 秒也没写出探针报告。`
+          + '常见原因：探针没被加载（bundles 里没有它）、或该 profile 起不来。',
+      };
+    }
+
+    const surface = JSON.parse(fs.readFileSync(reportFile, 'utf8'));
+    const present = Object.values(surface.root || {}).filter((v) => v && v.present).length;
+    notes.push(`运行时面拿到 ${present}/${(surface.wanted || []).length} 个服务`);
+
+    // ⚠️ 把报告留一份到临时目录，好让人能 `--probe-boot --probe-keep-dir <dir>` 排查。
+    // 默认不留（免得散落文件），但**在失败排查时它是唯一的现场**。
+    if (opts.keepDir) {
+      try {
+        fs.mkdirSync(opts.keepDir, { recursive: true });
+        fs.copyFileSync(reportFile, path.join(opts.keepDir, 'probe-report.json'));
+        fs.copyFileSync(path.join(workDir, 'services.json'), path.join(opts.keepDir, 'services.json'));
+        notes.push(`报告已留一份到 ${opts.keepDir}`);
+      } catch { /* 尽力而为 */ }
+    }
+    return { surface, notes, error: null };
+  } catch (error) {
+    return { surface: null, notes, error: `--probe-boot 失败: ${error.message}` };
+  } finally {
+    cleanup();
+  }
+}
+
 /* ── 内核 ──────────────────────────────────────────────────────────── */
 
 /**
@@ -178,16 +332,36 @@ export function run(options = {}) {
     result.inputs.catalog = catalogPath;
     result.inputs.rules = rulesPath;
 
+    // ⚠️ **先提取，再拿运行时面**。顺序不能反：`--probe-boot` 要把"这次到底涉及
+    // 哪些服务"交给探针去问，而那份名单只有提取之后才知道。
+    // 反过来（先起宿主）就只能拿一份固定的服务清单，关心的服务大概率不在里面。
+    const extracted = extractWithProvenance(nm, { catalog });
+    result.extract = extracted;
+
     const probePath = options.probe || findProbeReport(nm);
     let hostSurface = null;
     if (probePath) {
       hostSurface = readJSON(probePath, '探针报告');
       result.inputs.probe = probePath;
+    } else if (options.probeBoot) {
+      // 没给报告、也没在旁边找到，而用户要求自己起一次 —— 那就起。
+      const boot = probeBoot(nm, {
+        probeTimeout: options.probeTimeout,
+        services: (extracted.report && extracted.report.services) || [],
+        keepDir: options.probeKeepDir,
+      });
+      result.inputs.probeBoot = { notes: boot.notes || [], error: boot.error || null };
+      if (boot.surface) {
+        hostSurface = boot.surface;
+        result.inputs.probe = '(--probe-boot 实时采集)';
+      } else if (boot.error) {
+        // 起不动**不算体检失败**：没有运行时面只是让结论降级为「疑似」，
+        // 那是这个工具的常规工作模式，不是错误。但要把原因如实带出去 ——
+        // 静默降级会让用户以为"我已经看到确定结论了"。
+        result.inputs.probeBootWarn = boot.error;
+      }
     }
     result.inputs.hasRuntimeSurface = Boolean(hostSurface);
-
-    const extracted = extractWithProvenance(nm, { catalog });
-    result.extract = extracted;
 
     result.verdict = buildVerdicts({
       report: extracted.report,

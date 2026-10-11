@@ -1040,7 +1040,7 @@
     }
   },
   "verdict": {
-    "hash": "06e44eee3ea9f019f729ea6b01b06d4a9a42d0856088c802286ea9e74a361398",
+    "hash": "36cd77cafe9012a7ccd0d300afdb24879ab5c9dfbb7e54be2167d698b5305efc",
     "summary": {
       "ok": 13,
       "partial": 3,
@@ -1063,7 +1063,9 @@
         "clientSide": [],
         "filtered": [],
         "abstained": [],
-        "runtimeFacilities": []
+        "runtimeFacilities": [
+          "logger"
+        ]
       },
       "@fixture/clientonly": {
         "verdict": "ok",
@@ -1235,7 +1237,9 @@
         "clientSide": [],
         "filtered": [],
         "abstained": [],
-        "runtimeFacilities": []
+        "runtimeFacilities": [
+          "logger"
+        ]
       },
       "@fixture/silent": {
         "verdict": "ok",

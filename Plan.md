@@ -683,6 +683,54 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
 
 **倾向路径 1**，但先做可行性验证再动手 —— 这条规矩已经兑现了。
 
+### ✅ `--probe-boot` 已实现（2026-10-11）
+
+`node bin/compat-check.mjs --nm <profile 目录> --probe-boot`
+
+做法（每一步都实测过）：复制目标 profile → 加探针依赖进 `dependencies` 与 `bundles` →
+`dsh plugin install` → 把**本次提取到的全部服务名**写进 `services.json` →
+`DSC_OUT_DIR=<临时目录> dsh --profile <临时> -- --port 0 --no-open` → 轮询等报告 →
+**无论成败都删掉临时 profile 与临时目录**。
+
+实测数据（真实 desktop profile，80 个服务问出去、40 个有面）：
+
+| | 静态（无运行时面） | `--probe-boot` |
+|---|---|---|
+| 结论 | 可用 9 / 部分可用 12 / **不兼容 0** | 可用 **14** / 部分可用 **7** / 不兼容 0 |
+| 确定性 | 发现全是「疑似」 | 全是**确定** |
+
+耗时：parityfix 约 9 秒，desktop 约 18 秒（首次实测 61 秒，因为用了 `spawnSync`
+同步等一个**长驻进程**，必然等满超时 —— 改成"后台起 + 轮询文件"后降到 9 秒）。
+
+**默认不开**：它要复制 profile、跑 pnpm、起宿主。默认路径保持"只读静态、秒级、无副作用"。
+
+顺带修掉两个在实现过程中暴露的问题：
+
+1. **`logger` 不是服务**，它是 Cordis 的上下文便利成员。这是**实测**出来的：
+   把 `logger` 放进探针名单，结果是 `present: false`（同一批里 `tools` 39 个方法、
+   `agents` 24 个都在）。所以插件写 `inject: ['logger']` 并不会让它停在 pending。
+   已加进 `CORDIS_CONTEXT_BUILTINS`。
+2. **"没被问到"与"确证不存在"必须分清**。实现里先做提取、再拿面，就是为了把
+   本次涉及的**全部服务名**交给探针；否则没被问到的服务在报告里与"不存在"长得一样
+   （实测 `wanted` 80 个、回答 80 个，无遗漏）。
+
+### ✅ 客户端半边被拿宿主面判 —— 已修（三档判据 + 调用点分侧）
+
+实测真实 desktop profile 上，**同一个服务两端都有**（`sessions` 宿主 14 个方法、
+浏览器侧另一套）。于是三类假阳性全都出现过：
+
+| 假阳性 | 根因 | 修法 |
+|---|---|---|
+| `modules` / `settingsScope` / `configForms` / `remote` 被判「宿主服务缺失」 | 服务只在浏览器侧，宿主探针必然看不到 | 判据 c：插件自己的 `dsh.client.inject` 点了名；判据 d：在插件的客户端文件里被用到而宿主没有 |
+| `sessions.scope` / `sessions.emit` / `sessions.subscribe`（写在 `lib/client.js`）被判「宿主方法缺失」 | 命令行的宿主面**看不见客户端那套方法** | 方法级判定**只看宿主侧调用点**；只在客户端调用的方法归「客户端半边，需界面验证」"
+
+**效果：不兼容 4 → 0，可用 9 → 14。** 三个回归基准一字未变。
+
+剩下的 7 条「部分可用」逐条看过，都是真实结论：
+`webServer.get`、`sessionPersistence.prepare/readFrom`、`agents.steer`、
+`sessions.snapshotEvents`（宿主侧）确实不在宿主面里；
+`desktopProfiles` / `companionQq` 确实无人提供。
+
 ### 运行时面：一次受阻的尝试（结论已记，别再重走）
 
 想让探针**不问而全知**（把容器里注册过的服务全列出来），试了 Cordis 的内部结构：
