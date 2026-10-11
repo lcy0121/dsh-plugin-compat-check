@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "3f3f54b5a411de7abec40e2a2f8c0ca8141834046653d8b98036371296417000",
+    "hash": "2d5a0a64c87d1d68b488e89bc46a7eb97891bfc7463e9f0b10058c0599eae27c",
     "manifests": [
       {
         "name": "@fixture/aliased",
@@ -69,6 +69,14 @@
         "peerDependencies": null
       },
       {
+        "name": "@fixture/derivedobj",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
         "name": "@fixture/fallback",
         "version": "1.0.0",
         "dshBundle": true,
@@ -78,6 +86,14 @@
       },
       {
         "name": "@fixture/fatalmethod",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/guardalias",
         "version": "1.0.0",
         "dshBundle": true,
         "clientPlatform": null,
@@ -204,7 +220,7 @@
     "providedServices": [
       "vaultService"
     ],
-    "siteTotal": 29,
+    "siteTotal": 31,
     "buckets": {
       "@fixture/aliased": {
         "host-entry": 1,
@@ -254,6 +270,12 @@
         "client-extra": 0,
         "fallback": 0
       },
+      "@fixture/derivedobj": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
       "@fixture/fallback": {
         "host-entry": 0,
         "client-entry": 0,
@@ -261,6 +283,12 @@
         "fallback": 1
       },
       "@fixture/fatalmethod": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/guardalias": {
         "host-entry": 1,
         "client-entry": 0,
         "client-extra": 0,
@@ -647,6 +675,44 @@
           "index.js:ctx"
         ]
       },
+      "@fixture/derivedobj": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "settings"
+        ],
+        "declaredServices": [
+          "settings"
+        ],
+        "calls": {
+          "settings": [
+            "get"
+          ]
+        },
+        "via": {
+          "ctx-member": 1
+        },
+        "siteCounts": {
+          "settings": 1
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
       "@fixture/fallback": {
         "version": "1.0.0",
         "files": {
@@ -717,6 +783,48 @@
         "localBindings": [],
         "providedServices": [],
         "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/guardalias": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "jobs"
+        ],
+        "declaredServices": [
+          "jobs"
+        ],
+        "calls": {
+          "jobs": [
+            "noSuchMethod"
+          ]
+        },
+        "via": {
+          "alias": 1
+        },
+        "siteCounts": {
+          "jobs": 1
+        },
+        "localBindings": [
+          "s->jobs/ctx-get"
+        ],
+        "providedServices": [],
+        "guardedPairs": [
+          "jobs.noSuchMethod"
+        ],
         "shadowedBare": [],
         "unresolvedBindings": [],
         "ambiguousAliases": [],
@@ -1184,9 +1292,9 @@
     }
   },
   "verdict": {
-    "hash": "fdf63ece4aa50c631c59292107aab8cdcb6ce5788f4e93cf6ac352848a998f83",
+    "hash": "2357972715c8d07ce0738e915dce4f4add6c70e554f74a36523ca92968eeacef",
     "summary": {
-      "ok": 14,
+      "ok": 16,
       "partial": 3,
       "broken": 5,
       "unknown": 0,
@@ -1306,6 +1414,14 @@
         "abstained": [],
         "runtimeFacilities": []
       },
+      "@fixture/derivedobj": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
       "@fixture/fallback": {
         "verdict": "ok",
         "findings": [],
@@ -1328,6 +1444,16 @@
         ],
         "clientSide": [],
         "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/guardalias": {
+        "verdict": "ok",
+        "findings": [],
+        "clientSide": [],
+        "filtered": [
+          "jobs.noSuchMethod"
+        ],
         "abstained": [],
         "runtimeFacilities": []
       },

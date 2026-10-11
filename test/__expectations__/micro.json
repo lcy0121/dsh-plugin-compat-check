@@ -298,6 +298,26 @@
       "targets": [
         "micro"
       ]
+    },
+    "@fixture/derivedobj": {
+      "verdict": "ok",
+      "_why": "`const live = ctx.settings.get('ns')` 拿到的是**方法返回值**，不是服务本身。于是 `live.notAsettingsMethod()` **不得**被归到 `settings` 头上。实测这个类别的两个真实实例（`sessions.snapshotEvents`、`agents.steer`）各自在真实 desktop profile 上把一个插件误判成「部分可用」。还有同型的 `const lanBases = ctx.webServer.host === '0.0.0.0' ? … : …`（三元表达式里的属性比较）。",
+      "mustNotReport": [
+        "settings.notAsettingsMethod"
+      ],
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/guardalias": {
+      "verdict": "ok",
+      "_why": "作者是对着**变量**做能力检测（`typeof s.noSuchMethod !== 'function'`），而调用点的归属是 `jobs` —— 源码里根本没有 `jobs.noSuchMethod` 这几个字。只看服务名就认不出兜底，会报一条假阳性。实测这类真实命中 20 处。",
+      "mustNotReport": [
+        "jobs.noSuchMethod"
+      ],
+      "targets": [
+        "micro"
+      ]
     }
   }
 }

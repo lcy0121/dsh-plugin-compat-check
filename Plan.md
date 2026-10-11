@@ -399,6 +399,34 @@ ok: true | 插件数: 21 | 结论 {ok:10, partial:11, broken:0} | 3835ms
 **剩下的一步**：去掉 `private: true` 并跑 `npm publish`。
 npm 发布**公开且近乎不可撤回**（§3 已列为风险），所以停在这里等确认。
 
+#### 5.2.7 一对成对作恶的假阳性（2026-10-11）
+
+用户点名要做的那件事：修「**在派生对象上调用方法**」这一类。做下来发现是**两条缺陷**，
+而且**必须一起修** —— 只修一条会把假阳性换成另一种假阳性。
+
+| # | 缺陷 | 实测 |
+|---|---|---|
+| **29** | 绑定规则**没看赋值右边的尾巴**：`const X = ctx.<svc>.get(...)` 里 X 拿到的是**返回值**，却被绑成服务 | 2 个真实插件被误判；还有一个同型的：三元表达式里的属性比较（`const lanBases = ctx.webServer.host === … ? … : …`） |
+| **30** | 守卫检测只认**服务名**，不认调用点用的**变量**（`typeof s.noSuchMethod !== "function"` 里的 `s`） | **20 处真实命中**；被冤枉的作者写得比大多数人都仔细 |
+
+**效果**（真实 desktop profile，`--probe-boot`）：
+
+| | 修前 | 修后 |
+|---|---|---|
+| 可用 / 部分可用 | 10 / 11 | **18 / 3** |
+| 消失的发现 | —— | 6 条，**逐条核对源码，全部是假阳性** |
+
+那 6 条里有一类值得单独记：`sessionPersistence.prepare` / `readFrom` **不是绑错** ——
+它们真的调用了服务上不存在的方法，**但作者做了 `typeof` 兜底**。
+它们从「发现」变成「已过滤（有兜底）」，是**正确**的去处（缺陷 30 修好之后才认得出来）。
+
+**三个回归基准一字未变**；新增两个夹具（`@fixture/derivedobj`、`@fixture/guardalias`），
+都已自证「撤掉对应修复就变红」。
+
+> ⚠️ **H4'（补规则表）现在更不能做了**：这 6 条里原本有 4 条挂着「影响面未知」，
+> 如果按 H4' 去给它们补影响面，等于**给假阳性盖章**。
+> 规则表自己的 `knownExtractionArtifacts` 注释就写着这句话。
+
 ### 5.3 被证据否决过的计划（比选中的理由更值钱）
 
 **这些都是"计划写着 A，实测证明必须做 B"**。它们全部来自实测，不是推演：
@@ -417,7 +445,7 @@ npm 发布**公开且近乎不可撤回**（§3 已列为风险），所以停�
 
 ## 6. 已知地雷清单
 
-详细版见 `docs/extraction-findings.md`（27 条，含每条的最小复现）。这里只列最要命的。
+详细版见 `docs/extraction-findings.md`（30 条，含每条的最小复现）。这里只列最要命的。
 
 | 地雷 | 说明 |
 |---|---|
@@ -564,10 +592,10 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 | 受版本控制文件 | **134**（59 个人工维护 + 75 个夹具数据） |
 | 测试 | **240 条**（12 个测试文件，其中 `probe-boot` 默认跳过）；另 2 条慢测试需 `DSC_SLOW=1` |
 | 默认 `node --test test/` | 全绿，约 **7 秒** |
-| 提取缺陷记录 | **27 条**，全部已修（`docs/extraction-findings.md`） |
+| 提取缺陷记录 | **30 条**，全部已修（`docs/extraction-findings.md`） |
 | 三个回归基准 | `@omdsh-dev/dsh-plugin-check` 可用 / `dsh-keep-awake` 部分可用 / `dsh-pet` 可用 |
-| 真实 desktop（静态） | 可用 **10** / 部分可用 11 / 不兼容 0 |
-| 真实 desktop（`--probe-boot`） | 可用 14 / 部分可用 7 / 不兼容 0 |
+| 真实 desktop（静态） | 可用 10 / 部分可用 11 / 不兼容 0 |
+| 真实 desktop（`--probe-boot`） | 可用 **18** / 部分可用 3 / 不兼容 0 |
 
 ### 8.2 仓库结构现状
 
@@ -613,7 +641,7 @@ dsh-plugin-compat-check/
 │
 ├── docs/extraction-findings.md               # 实测提取缺陷清单 + 探针的两条边界
 │
-├── test/                                     # 241 条断言 / 12 个测试文件
+├── test/                                     # 245 条断言 / 12 个测试文件
 │   ├── helpers.mjs
 │   ├── invariants.test.mjs                   #   自恰性（69 条）
 │   ├── snapshot.test.mjs                     #   输出变了没有
@@ -627,7 +655,7 @@ dsh-plugin-compat-check/
 │   ├── __expectations__/micro.json           #   人写的产品承诺
 │   ├── __snapshots__/{micro,parityfix}.json  #   内容哈希快照
 │   ├── __baseline-versions.json              #   基准版本锁
-│   └── fixtures/micro/                       #   22 个合成插件 + 合成宿主运行时面
+│   └── fixtures/micro/                       #   24 个合成插件 + 合成宿主运行时面
 │
 └── tools/                                    # 开发工具（不参与运行时）
     ├── doc-check.mjs                        #   文档数字自检（断言条数要比实测）

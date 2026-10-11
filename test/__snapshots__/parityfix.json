@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "65cf761548323d6b9a40b404b71a936001390c1a8a6c0da99d31e7773a36db2c",
+    "hash": "5698045c5af440526b9770660e791a786c5a54e681a6cdae85834b1bdd0b8f73",
     "manifests": [
       {
         "name": "@omdsh-dev/dsh-plugin-check",
@@ -340,9 +340,7 @@
         "localBindings": [
           "account->deepseekAccount/ctx-get-soft",
           "commandUi->get/ctx-member",
-          "llm->llm/ctx-member",
-          "sel->agentDefaultModel/ctx-member",
-          "t->locale/ctx-member"
+          "llm->llm/ctx-member"
         ],
         "providedServices": [],
         "guardedPairs": [

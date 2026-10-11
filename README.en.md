@@ -242,7 +242,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # measured extraction defects (numbered) + the probe's two boundaries
 │
-├── test/                       # 241 assertions / 12 test files (see below)
+├── test/                       # 245 assertions / 12 test files (see below)
 │   ├── helpers.mjs             #   shared fixtures: load tables, snapshot digests, hashing
 │   ├── invariants.test.mjs     #   self-consistency (must hold for any input)
 │   ├── snapshot.test.mjs       #   did the output change (key fields + content hash)
@@ -290,7 +290,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-**241 assertions** (12 test files) by default, in seconds. `probe-boot.test.mjs` is skipped by default:
+**245 assertions** (12 test files) by default, in seconds. `probe-boot.test.mjs` is skipped by default:
 
 ```bash
 # really boot a host to verify --probe-boot end to end (about 10-20s)
@@ -305,7 +305,7 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > **leaving no litter behind**). When skipped it prints a line saying how to run it, so it
 > does not become a silently missing test.
 
-**241 assertions, spread across 12 test files.**
+**245 assertions, spread across 12 test files.**
 
 "Layers" here means two **different** things — they used to be conflated, which is why the same
 docs said both "three layers" (`Plan.md` §0) and "seven layers" (this section):
