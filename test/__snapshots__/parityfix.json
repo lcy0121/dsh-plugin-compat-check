@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "5698045c5af440526b9770660e791a786c5a54e681a6cdae85834b1bdd0b8f73",
+    "hash": "38ff7f37fb9700813bcf42de37aa7977329903a681f1c5a4076cd6dec68d1dda",
     "manifests": [
       {
         "name": "@omdsh-dev/dsh-plugin-check",
@@ -51,7 +51,7 @@
       },
       {
         "name": "dsh-plugin-compat-check-probe",
-        "version": "0.0.1",
+        "version": "0.1.0",
         "dshBundle": true,
         "clientPlatform": null,
         "clientInject": null,
@@ -359,7 +359,7 @@
         ]
       },
       "dsh-plugin-compat-check-probe": {
-        "version": "0.0.1",
+        "version": "0.1.0",
         "files": {
           "host-entry": [
             "index.mjs"

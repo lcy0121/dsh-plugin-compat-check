@@ -32,7 +32,8 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --json
 node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 ```
 
-完整的参数表以 `node bin/compat-check.mjs --help` 为准（**跑一遍再引用**，别凭记忆写旗标）：
+完整的参数表以 `node bin/compat-check.mjs --help` 为准（**跑一遍再引用**，别凭记忆写旗标）。
+`--help` 与 `--version` 都不需要 `--nm`，也不碰任何状态：
 
 | 旗标 | 作用 |
 |---|---|
@@ -44,6 +45,7 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 | `--json` / `--quiet` | 机器可读 / 只输出结论行 |
 | `--no-baseline` | 不读写本机基线。**一次性检查用这个**，见下面的「副作用」 |
 | `--rules` / `--catalog` | 覆盖规则表与官方 API 目录（默认在 `rules/`） |
+| `--version` | 工具版本。**报结论时要带上它** —— 同一个插件在不同版本的规则表/提取器下结论会变，不带版本无法追溯 |
 
 `--nm` 指哪里：`$DSH_HOME/profiles/<name>`（默认 `~/.dsh/profiles/<name>`）。用户说「我的插件」时，先弄清楚是哪个 profile，别默认 `desktop`。
 
@@ -78,7 +80,7 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
      客户端半边（命令行测不到，需界面验证）: commandUi, locale, remote, remote.commands, slots
      已过滤（判为噪音/有兜底）: llm.listConfigurableProviders, llm.listProviders
      无证据可判（只出现名字，没有调用点）: connection
-可用  dsh-plugin-compat-check-probe@0.0.1   [空洞的结论：无可检查对象]
+可用  dsh-plugin-compat-check-probe@0.1.0   [空洞的结论：无可检查对象]
 ```
 
 > ⚠️ 上面这段是**从真实运行里抄的**，而且**有一条测试盯着它**（`test/skill.test.mjs`：
@@ -96,6 +98,9 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 - `客户端半边（命令行测不到，需界面验证）`：列出来的服务**命令行永远测不到**，只能让用户去看界面上有没有该插件的元素。**不要替它下结论**。
 - `已过滤（判为噪音/有兜底）`：报了但被判定为不构成问题（例如插件自己写了 `typeof x?.y === 'function'` 能力检测）。过滤与弃权**也是结论的一部分**，要如实转述，不要只报红叉。
 - `无证据可判`：只出现名字、没有调用点。这是弃权，不是清白。
+- **转述结论时带上 `--version` 报出的工具版本**（`--json` 里是 `toolVersion`）。
+  同一个插件在「规则表还没覆盖这个方法」和「已经覆盖」的两个版本下，
+  结论会从「影响面未知」变成「设置页会消失」—— 不带版本，用户无法判断该不该信。
 
 ## 退出码
 

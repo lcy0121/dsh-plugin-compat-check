@@ -5,7 +5,7 @@
     "@omdsh-dev/dsh-plugin-check": "0.1.0",
     "dsh-keep-awake": "0.2.0",
     "dsh-pet": "0.3.6",
-    "dsh-plugin-compat-check-probe": "0.0.1"
+    "dsh-plugin-compat-check-probe": "0.1.0"
   },
   "micro": {
     "@fixture/aliased": "1.0.0",

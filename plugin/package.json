@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-compat-check",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "description": "Reports which installed DSH plugins are compatible with the current DSH version, with file:line and reason. The judgement kernel is staged into kernel/ at pack time, so the published tarball is self-contained.",
   "type": "module",

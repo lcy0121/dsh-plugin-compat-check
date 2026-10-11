@@ -14,7 +14,9 @@
  *
  * ## 为什么 `lib/` 只取三个文件
  *
- * 插件半边只 import `extract` / `verdict` / `baseline`（见 index.js 的 `resolveKernelDir` 调用点）。
+ * 插件半边 import `extract` / `verdict` / `baseline` / `version`（见 index.js 的 `resolveKernelDir` 调用点）。
+ * `version.mjs` 必须带上 —— 少了它，装好的包**报不出自己的版本**，
+ * 而"结论可追溯"恰恰依赖它（Plan.md §2 第 9 题的「单版本」）。
  * `report.mjs` 是 CLI 的渲染层，插件半边不用它 —— 少打一个文件就少一处漂移面。
  * 但它**不影响正确性**（多打一个也无害），所以这里是"按实际 import 收窄"，
  * 而不是"少打能省空间"。
@@ -30,7 +32,7 @@ const REPO = path.resolve(PLUGIN, '..');
 const DEST = path.join(PLUGIN, 'kernel');
 
 // 插件半边真正 import 的内核模块（改 index.js 的 import 时要同步这里）
-const KERNEL_LIBS = ['extract.mjs', 'verdict.mjs', 'baseline.mjs'];
+const KERNEL_LIBS = ['extract.mjs', 'verdict.mjs', 'baseline.mjs', 'version.mjs'];
 
 function bail(message) {
   process.stderr.write(`[stage-kernel] ${message}\n`);

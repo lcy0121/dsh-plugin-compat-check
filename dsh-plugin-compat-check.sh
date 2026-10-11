@@ -136,10 +136,18 @@ fi
 # 用法文本抽成函数，因为它现在有两个调用点（显式求助 / 没给参数），
 # 两份副本迟早会漂移。
 usage() {
-  cat >&2 <<'USAGE'
+  # 版本号实时问真源（`lib/version.mjs`），而不是在这里写一个字面量 ——
+  # 写了就是第二个真源，迟早与内核报的不是同一个数。
+  # heredoc 因此不能加引号（要展开），里面的 `$` 与反引号都已转义。
+  local tool_version
+  tool_version="$(detect_tool_version)"
+  cat >&2 <<USAGE
 用法: dsh-plugin-compat-check <spec> [--keep] [--timeout 秒] [--json]
        dsh-plugin-compat-check --install-skill [--force]
+       dsh-plugin-compat-check --version
        dsh-plugin-compat-check --help
+
+$tool_version
 
   spec 可为 npm 包名 / github:owner/repo / file:/本地路径 / git+https://...
 
@@ -152,6 +160,7 @@ usage() {
   --json            机器可读输出
   --install-skill   把随包的 skill/SKILL.md 装进 ~/.agents/skills/<name>/
                     （不需要判定内核；已有文件不会静默覆盖，要覆盖加 --force）
+  --version         显示工具版本（不需要判定内核）
   --help            显示这段文字（不需要判定内核）
 
 示例:
@@ -161,6 +170,37 @@ usage() {
   dsh-plugin-compat-check --install-skill
 USAGE
 }
+
+# ── 版本号：**与内核同一个真源** ──
+#
+# 不从脚本里再写一个字面量 —— 那份「单版本」承诺（Plan.md §2 第 9 题）只有
+# 一处真源才算数。所以直接问内核：`lib/version.mjs` 导出 `versionLine()`。
+#
+# 拿不到就退回一个明确的占位符，而不是猜一个版本号：猜出来的版本会让
+# 用户拿着一份**错的**可追溯信息去排查，比"不知道"更糟。
+# 注意这一步**不需要**跑体检，也不该因为内核缺失而让 `--version` 失败 ——
+# 所以它自己算候选路径，而**不依赖**下面那段（那段找不到内核就 exit 1）。
+detect_tool_version() {
+  # 与下面「找内核」用的是同一组候选：DSC_KERNEL → 脚本同目录
+  local here
+  here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  local kernel="${DSC_KERNEL:-$here}"
+  if [ -f "$kernel/lib/version.mjs" ] && command -v node >/dev/null 2>&1; then
+    node -e "import('file://$kernel/lib/version.mjs').then(m=>process.stdout.write(m.versionLine()))" 2>/dev/null && return 0
+  fi
+  # ⚠️ **兜底里不写版本号。** 写了就是第二个真源，而且它会在内核升级后
+  # 继续报一个旧数 —— 一份**错的**可追溯信息比"不知道"更糟。
+  printf 'dsh-plugin-compat-check (版本未知：找不到内核 lib/version.mjs)'
+}
+
+case "$SPEC" in
+  --version|-V|version)
+    # 与 --help 同理：报版本是**成功**（退出码 0），不需要判定内核。
+    detect_tool_version
+    printf '\n'
+    exit 0
+    ;;
+esac
 
 case "$SPEC" in
   --help|-h|help)

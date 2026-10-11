@@ -43,8 +43,8 @@ dsh --profile skillverify --port 0 --no-open &
 
 | 形态 | 注册 | `ctx.skills.list()` 可见 | `ctx.skills.get()` 取回正文 |
 |---|---|---|---|
-| 静态 `inject = ['skills']` + `ctx.skills.registerProvider()` | ✅ 返回 disposer（`function`） | ✅ | ✅ 5203 字符，与 SKILL.md 正文一致 |
-| 无静态 inject，`ctx.inject(['skills'], cb)` 里注册 | ✅ | ✅ | ✅ 5203 字符 |
+| 静态 `inject = ['skills']` + `ctx.skills.registerProvider()` | ✅ 返回 disposer（`function`） | ✅ | ✅ 5460 字符，与 SKILL.md 正文一致 |
+| 无静态 inject，`ctx.inject(['skills'], cb)` 里注册 | ✅ | ✅ | ✅ 5460 字符 |
 
 `report-static.json`（节选，真实输出）：
 
@@ -60,7 +60,7 @@ dsh --profile skillverify --port 0 --no-open &
     "dsh-plugin-compat-check|source=user-agents|provider=filesystem-probe",
     "flat-probe|source=user-agents|provider=filesystem-probe"
   ],
-  "compat-check-probe-static": { "found": true, "source": "probe", "contentLength": 5203 }
+  "compat-check-probe-static": { "found": true, "source": "probe", "contentLength": 5460 }
 }
 ```
 
@@ -72,7 +72,7 @@ dsh --profile skillverify --port 0 --no-open &
 | frontmatter 里写了**旧键** `disableModelInvocation` | ❌ 整条 frontmatter 被丢弃 → 文件被忽略 |
 | frontmatter 的 `name` 不是 kebab-case（`Bad_Name`） | ❌ 文件被忽略 |
 | 放在扫描根下的**扁平** `<root>/<name>.md`（`flat-probe.md`） | ✅ 被发现（深度 1 层，两种形态都行） |
-| 放在 `<root>/<name>/SKILL.md`（就是 `--install-skill` 的目标） | ✅ 被发现，`source=user-agents`，`get()` 能取回 5203 字符正文 |
+| 放在 `<root>/<name>/SKILL.md`（就是 `--install-skill` 的目标） | ✅ 被发现，`source=user-agents`，`get()` 能取回 5460 字符正文 |
 
 前两条尤其重要：**「文件在那里」与「skill 存在」是两件事**，而它们失败时都是
 **静默的**（没有报错，只是目录里没有）。
@@ -222,7 +222,7 @@ function registerSkill(ctx) {
 - 实测（正向）：把真实的 `skill/SKILL.md` 放到
   `$DSH_AGENTS_HOME/skills/dsh-plugin-compat-check/SKILL.md`，重启后
   `ctx.skills.get('dsh-plugin-compat-check', {cwd})` 返回 `found: true`、
-  `source: user-agents`、`contentLength: 5203`。
+  `source: user-agents`、`contentLength: 5460`。
 - 实测（生产）：本机 `~/.agents/skills/` 下有 267 个 skill 目录，
   其中 `adaptyv`、`aeon`、`biopython`、`c-drive-cleaner`、`kz-design` 等
   **只存在于这个目录**（`~/.dsh/skills` 不存在），而它们确实出现在真实

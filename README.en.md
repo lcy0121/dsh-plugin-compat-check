@@ -78,6 +78,7 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --quiet
 | `--no-baseline` | Don't read or write the local baseline (CI / one-shot checks) |
 | `--baseline-file <path>` / `--dry-run` | Point at a specific baseline / compute the diff without writing |
 | `--json` / `--quiet` | Machine-readable / summary line only |
+| `--version` | Tool version (also `toolVersion` in `--json`). **Include it when reporting a verdict** — the same plugin can differ across versions |
 
 **Exit codes** (`1` and `2` describe **the plugins**; `3` never does):
 
@@ -194,7 +195,7 @@ The last two are deliberately separated. `no-calls` and `abstained` look like "f
 
 ## Layout
 
-(134 version-controlled files: 59 of code / documentation / data tables, and 75 fixture files
+(140 version-controlled files: 59 of code / documentation / data tables, and 81 fixture files
 (`test/fixtures/micro/node_modules/` with 48 synthetic plugin files, `tools/parity/fixtures/hang-cycle/node_modules/` with 5,
 and one synthetic host runtime surface). All 59 hand-maintained entries are listed below; fixture contents are summarised.)
 
@@ -210,6 +211,7 @@ dsh-plugin-compat-check/
 │
 ├── lib/                        # kernel: four pure modules, shared by all three artifacts
 │   ├── extract.mjs             #   static extraction: who calls what (with file:line and evidence form)
+│   ├── version.mjs             #   the **single source** of the version number
 │   ├── verdict.mjs             #   judgement: verdicts, certainty tiers, per-service disposition
 │   ├── baseline.mjs            #   diffing: what changed since last time, in which direction
 │   └── report.mjs              #   rendering: the human table (same wording as the conversation tool)
@@ -242,7 +244,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # measured extraction defects (numbered) + the probe's two boundaries
 │
-├── test/                       # 245 assertions / 12 test files (see below)
+├── test/                       # 253 assertions / 13 test files (see below)
 │   ├── helpers.mjs             #   shared fixtures: load tables, snapshot digests, hashing
 │   ├── invariants.test.mjs     #   self-consistency (must hold for any input)
 │   ├── snapshot.test.mjs       #   did the output change (key fields + content hash)
@@ -256,6 +258,7 @@ dsh-plugin-compat-check/
 │   ├── packaging.test.mjs      #   is the npm package self-contained? (really packs it)
 │   ├── probe-boot.test.mjs     #   --probe-boot end to end (**skipped by default**, DSC_SLOW=1)
 │   ├── docs.test.mjs           #   are the numbers in the docs still right?
+│   ├── version.test.mjs        #   do all entries report the same version?
 │   ├── __expectations__/
 │   │   └── micro.json          #   hand-written product promises: these verdicts **must** hold
 │   ├── __snapshots__/
@@ -290,7 +293,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-**245 assertions** (12 test files) by default, in seconds. `probe-boot.test.mjs` is skipped by default:
+**253 assertions** (13 test files) by default, in seconds. `probe-boot.test.mjs` is skipped by default:
 
 ```bash
 # really boot a host to verify --probe-boot end to end (about 10-20s)
@@ -305,14 +308,14 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > **leaving no litter behind**). When skipped it prints a line saying how to run it, so it
 > does not become a silently missing test.
 
-**245 assertions, spread across 12 test files.**
+**253 assertions, spread across 13 test files.**
 
 "Layers" here means two **different** things — they used to be conflated, which is why the same
 docs said both "three layers" (`Plan.md` §0) and "seven layers" (this section):
 
 * **3 epistemic layers** (`invariants` / `__expectations__` / `__snapshots__`) — each is, in
   principle, blind to the class of error the others catch; all three are required;
-* **12 test files** — 8 further files each watch one concrete concern (arguments, cache, drift,
+* **13 test files** — 8 further files each watch one concrete concern (arguments, cache, drift,
   doc drift, secrets, structure, packaging…). They are **not** part of those three layers, but they fail just the same.
 
 What each file answers:
@@ -325,6 +328,7 @@ What each file answers:
 | `cli.test.mjs` | Did the flags actually take effect? Are failures swallowed? | UI behaviour |
 | `client-structure` / `host-structure` | Can a component/host **register successfully but do nothing**? | Real rendering |
 | `cache.test.mjs` | Is the cache policy right, does a concurrent burst refresh **only once**, is the auto-check timing right? | Real startup ordering |
+| `version.test.mjs` | Do all three entries + the report JSON report the **same** version? (guardian of the single-version promise) | The real publish flow |
 | `docs.test.mjs` | Are the numbers in the **documentation** still right (continuous numbering, valid cross-refs, three-language consistency)? | Assertion counts (needs the suite; see `tools/doc-check.mjs`) |
 | `secrets.test.mjs` | Are there credentials in the repo, would the **probe copy values out**? | Credentials in other shapes |
 | `baseline.test.mjs` | Is every diff category right? **Is it quiet when nothing changed?** | Real plugins |

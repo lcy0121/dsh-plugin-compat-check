@@ -33,10 +33,13 @@ import { extractWithProvenance } from '../lib/extract.mjs';
 import { buildVerdicts } from '../lib/verdict.mjs';
 import { render, toJSON } from '../lib/report.mjs';
 import { snapshotForBaseline, diffAgainstBaseline, badgeFor, BASELINE_SCHEMA } from '../lib/baseline.mjs';
+import { TOOL_VERSION, versionLine } from '../lib/version.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const USAGE = `用法: node bin/compat-check.mjs --nm <node_modules 目录> [选项]
+
+${versionLine()}
 
 选项:
   --nm <dir>       要体检的 node_modules 目录（必需）。也接受 profile 目录，
@@ -57,6 +60,7 @@ const USAGE = `用法: node bin/compat-check.mjs --nm <node_modules 目录> [选
   --dry-run        算出差分但不写基线
   --json           输出机器可读的完整结论，而不是给人看的表
   --quiet          只输出结论行，不输出逐条发现
+  --version        显示工具版本（结论的可追溯性依赖它，见 lib/version.mjs）
   --help           显示这段文字
 
 退出码（**1 与 2 只表示插件的结论**，3 表示这次体检本身没得出可信结论）:
@@ -67,6 +71,8 @@ const USAGE = `用法: node bin/compat-check.mjs --nm <node_modules 目录> [选
 `;
 
 /* ── 参数解析：手写，零依赖；未知参数一律报错而不是忽略 ────────────── */
+
+
 
 function parseArgs(argv) {
   const out = { json: false, quiet: false };
@@ -79,6 +85,7 @@ function parseArgs(argv) {
     if (a === '--probe-boot') { out.probeBoot = true; continue; }
     if (a === '--quiet') { out.quiet = true; continue; }
     if (a === '--help' || a === '-h') { out.help = true; continue; }
+    if (a === '--version' || a === '-V') { out.version = true; continue; }
     if (takesValue.has(a)) {
       const v = argv[++i];
       if (v === undefined) throw new Error(`${a} 需要一个值`);
@@ -406,6 +413,12 @@ function main() {
   } catch (error) {
     process.stderr.write(`${error.message}\n\n${USAGE}`);
     process.exit(3);
+  }
+  // `--version` 先于一切：它不该需要 --nm，也不该碰任何状态。
+  // 结论的可追溯性靠它 —— 用户拿着一条结论来问，第一句就得知道是哪一版给的。
+  if (opts.version) {
+    process.stdout.write(`${versionLine()}\n`);
+    process.exit(0);
   }
   if (opts.help || !opts.nm) {
     process.stdout.write(USAGE);

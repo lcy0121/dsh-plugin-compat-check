@@ -78,6 +78,7 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --quiet
 | `--no-baseline` | 不读写本机基线（CI / 一次性检查用） |
 | `--baseline-file <path>` / `--dry-run` | 指定基线文件 / 算差分但不写 |
 | `--json` / `--quiet` | 机器可读 / 只要一行总结论 |
+| `--version` | 工具版本。`--json` 里是 `toolVersion`。**报结论时该带上它** —— 同一插件在不同版本下结论会变 |
 
 **退出码**（`1` 与 `2` 只表示**插件的结论**）：
 
@@ -197,7 +198,7 @@ dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
 
 ## 目录结构
 
-（受版本控制共 **134** 个文件：59 个是代码 / 文档 / 规则表，75 个是夹具数据
+（受版本控制共 **140** 个文件：59 个是代码 / 文档 / 规则表，81 个是夹具数据
 （`test/fixtures/micro/node_modules/` 69 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
 以及 1 个合成宿主运行时面）。下面把 59 个人工维护的条目**列全**，夹具内部按样例说明。）
 
@@ -213,6 +214,7 @@ dsh-plugin-compat-check/
 │
 ├── lib/                        # 内核：四个纯模块，三份产物共用同一份实现
 │   ├── extract.mjs             #   静态提取：谁调用了什么（带 file:line 与证据形态）
+│   ├── version.mjs             #   版本号的**唯一真源**（三个入口 + 报告都读它）
 │   ├── verdict.mjs             #   判定：结论、三档确定性、每个服务的去处
 │   ├── baseline.mjs            #   差分：与上次比变了没有、往哪个方向变（含徽标文案）
 │   └── report.mjs              #   渲染：给人看的表（CLI 与对话工具同一口径）
@@ -248,7 +250,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # 已实测的提取缺陷清单（编号）+ 探针的两条边界
 │
-├── test/                       # 245 条断言 / 12 个测试文件（见下节）
+├── test/                       # 253 条断言 / 13 个测试文件（见下节）
 │   ├── helpers.mjs             #   共用夹具：加载规则表/目录、快照摘要、哈希
 │   ├── invariants.test.mjs     #   结果自恰性（对任何输入都必须成立）
 │   ├── snapshot.test.mjs       #   输出变了没有（关键字段 + 内容哈希）
@@ -262,6 +264,7 @@ dsh-plugin-compat-check/
 │   ├── packaging.test.mjs      #   npm 包自足吗（真打包，看它离开仓库还算不算得出结论）
 │   ├── probe-boot.test.mjs     #   --probe-boot 端到端（**默认跳过**，DSC_SLOW=1 才跑）
 │   ├── docs.test.mjs           #   文档信息里的数字还对吗（编号、交叉引用、三语一致）
+│   ├── version.test.mjs        #   三个入口 + 报告 JSON 报的是不是同一个版本
 │   ├── __expectations__/
 │   │   └── micro.json          #   人写的产品承诺：这些结论**必须**是这个
 │   ├── __snapshots__/
@@ -296,7 +299,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-默认 **245 条断言**（12 个测试文件），秒级。其中 `probe-boot.test.mjs` 默认跳过：
+默认 **253 条断言**（13 个测试文件），秒级。其中 `probe-boot.test.mjs` 默认跳过：
 
 ```bash
 # 真的起一次宿主，验证 --probe-boot 端到端可跑（约 10~20 秒）
@@ -316,14 +319,14 @@ node tools/doc-check.mjs     # 文档数字 vs 实测，不一致就 exit 1
 > 报告写得出来、**跑完不留垃圾**）。默认跳过时它会打一行提示说明怎么跑，
 > 免得变成"静默消失的测试"。
 
-**245 条断言，分布在 12 个测试文件里。**
+**253 条断言，分布在 13 个测试文件里。**
 
 「分层」要说清两件**不同**的事 —— 它们以前被混在一起，于是同一份文档里同时写着
 「三层」（`Plan.md` §0）和「七层」（本节）：
 
 * **3 个认识论分层**（`invariants` / `__expectations__` / `__snapshots__`）—— 这三层各自在
   **原理上**看不见对方那一类错误，缺一不可；
-* **12 个测试文件** —— 另外 8 个文件各自盯一个具体问题（参数、缓存、差分、文档漂移、凭据、
+* **13 个测试文件** —— 另外 8 个文件各自盯一个具体问题（参数、缓存、差分、文档漂移、凭据、
   结构、打包…）。它们**不属于**那三层，但同样会失败。
 
 各文件回答什么：
@@ -336,6 +339,7 @@ node tools/doc-check.mjs     # 文档数字 vs 实测，不一致就 exit 1
 | `cli.test.mjs` | 参数真的起了作用吗、失败会不会被静默吞掉 | 界面行为 |
 | `client-structure` / `host-structure` | 组件/宿主会不会**注册成功但什么都没做** | 真实渲染效果 |
 | `cache.test.mjs` | 缓存策略对吗、**并发只刷一次**吗、自动体检的时机对不对 | 真实启动时序 |
+| `version.test.mjs` | 三个入口 + 报告 JSON 报的是不是**同一个**版本（「单版本」承诺的守门人） | 真实发布流程 |
 | `docs.test.mjs` | **文档信息**里的数字还对吗（编号连续、交叉引用有效、三语文档一致） | 断言条数（那要跑套件，见 `tools/doc-check.mjs`） |
 | `secrets.test.mjs` | 仓库里有没有凭据、**探针会不会把值抄下来** | 不在这两个形态里的凭据 |
 | `baseline.test.mjs` | 差分每一类都对吗、**没有变化时安静吗** | 真实插件 |
