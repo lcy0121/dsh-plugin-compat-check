@@ -285,6 +285,21 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
+**221 assertions** (9 test files) by default, in seconds. One **slow test** is skipped by default:
+
+```bash
+# really boot a host to verify --probe-boot end to end (about 10-20s)
+DSC_SLOW=1 node --test test/probe-boot.test.mjs
+```
+
+> It is skipped by default because it copies a profile, runs pnpm, boots a host and waits
+> for the report — tens of seconds. Folding that into every run just teaches people to skip
+> the tests. It cannot be deleted either: whether the arguments are right can be checked in
+> seconds, but **whether the flow actually works can only be known by running it**
+> (copying the profile, getting the probe into `bundles`, producing the report, and
+> **leaving no litter behind**). When skipped it prints a line saying how to run it, so it
+> does not become a silently missing test.
+
 **210** assertions (9 test files) across seven layers, each answering a different question:
 
 | File | Answers | Blind to |
@@ -296,6 +311,7 @@ node --test test/
 | `client-structure` / `host-structure` | Can a component/host **register successfully but do nothing**? | Real rendering |
 | `baseline.test.mjs` | Is every diff category right? **Is it quiet when nothing changed?** | Real plugins |
 | `skill.test.mjs` | Can the tool actually do everything the skill claims? (doc drift) | —— |
+| `probe-boot.test.mjs` (**skipped by default**, `DSC_SLOW=1`) | Does `--probe-boot` really boot a host and obtain a surface? | Slow (10-20s), hence not run by default |
 
 **All three layers are required** — established by measurement: injecting a "the fallback path never triggers" mutation leaves **all 69 invariants green while the snapshot turns red immediately**; conversely, emptying a plugin's call sites turns **the snapshot red while the invariants stay green**. Each is structurally blind to the other's failure mode.
 
