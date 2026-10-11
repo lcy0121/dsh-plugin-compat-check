@@ -28,6 +28,7 @@
     "@fixture/missingservice": "1.0.0",
     "@fixture/noisy": "1.0.0",
     "@fixture/pending": "1.0.0",
+    "@fixture/propctx": "1.0.0",
     "@fixture/provideexported": "1.0.0",
     "@fixture/providerinternal": "1.0.0",
     "@fixture/silent": "1.0.0",

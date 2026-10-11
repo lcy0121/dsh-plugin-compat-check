@@ -195,9 +195,9 @@ The last two are deliberately separated. `no-calls` and `abstained` look like "f
 
 ## Layout
 
-(168 version-controlled files: 81 of code / documentation / data tables, and 87 fixture files
+(172 version-controlled files: 82 of code / documentation / data tables, and 90 fixture files
 (`test/fixtures/micro/node_modules/` with 48 synthetic plugin files, `tools/parity/fixtures/hang-cycle/node_modules/` with 5,
-and one synthetic host runtime surface). All 81 hand-maintained entries are listed below; fixture contents are summarised.)
+and one synthetic host runtime surface). All 82 hand-maintained entries are listed below; fixture contents are summarised.)
 
 ```
 dsh-plugin-compat-check/
@@ -244,7 +244,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # measured extraction defects (numbered) + the probe's two boundaries
 │
-├── test/                       # 261 assertions / 15 test files (see below)
+├── test/                       # 263 assertions / 15 test files (see below)
 │   ├── helpers.mjs             #   shared fixtures: load tables, snapshot digests, hashing
 │   ├── invariants.test.mjs     #   self-consistency (must hold for any input)
 │   ├── snapshot.test.mjs       #   did the output change (key fields + content hash)
@@ -273,6 +273,7 @@ dsh-plugin-compat-check/
 │
 └── tools/                      # development tooling (not part of the runtime)
     ├── client-arrival.mjs             # client entry "arrival" reconciliation (H1', needs a browser)
+    ├── extractor-recall.mjs            # call-site recall (independent enumeration)
     ├── catalog/extract-host-api.py     # extract the official API catalogue from the host (source for rules/)
     ├── parity/                         # differential testing against a Python reference
     │   ├── parity.sh
@@ -296,7 +297,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-**261 assertions** (15 test files) by default, in seconds. `probe-boot.test.mjs` is skipped by default:
+**263 assertions** (15 test files) by default, in seconds. `probe-boot.test.mjs` is skipped by default:
 
 ```bash
 # really boot a host to verify --probe-boot end to end (about 10-20s)
@@ -311,7 +312,7 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > **leaving no litter behind**). When skipped it prints a line saying how to run it, so it
 > does not become a silently missing test.
 
-**261 assertions, spread across 15 test files.**
+**263 assertions, spread across 15 test files.**
 
 "Layers" here means two **different** things — they used to be conflated, which is why the same
 docs said both "three layers" (`Plan.md` §0) and "seven layers" (this section):

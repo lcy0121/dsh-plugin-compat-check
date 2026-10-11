@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "30ad723ccba4a862367e6a29a4ad868f6164b5e1ae281fc93dc7581243c352d0",
+    "hash": "619d4087c9de339017fd9ad27f97a9edd2b2fc04fda0ded358a18bc43572849a",
     "manifests": [
       {
         "name": "@fixture/aliased",
@@ -165,6 +165,14 @@
         "peerDependencies": null
       },
       {
+        "name": "@fixture/propctx",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
         "name": "@fixture/provideexported",
         "version": "1.0.0",
         "dshBundle": true,
@@ -236,7 +244,7 @@
     "providedServices": [
       "vaultService"
     ],
-    "siteTotal": 33,
+    "siteTotal": 35,
     "buckets": {
       "@fixture/aliased": {
         "host-entry": 1,
@@ -353,6 +361,12 @@
         "fallback": 0
       },
       "@fixture/pending": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/propctx": {
         "host-entry": 1,
         "client-entry": 0,
         "client-extra": 0,
@@ -1171,6 +1185,50 @@
           "index.js:ctx"
         ]
       },
+      "@fixture/propctx": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "jobs",
+          "tools"
+        ],
+        "declaredServices": [
+          "jobs",
+          "tools"
+        ],
+        "calls": {
+          "jobs": [
+            "list"
+          ],
+          "tools": [
+            "register"
+          ]
+        },
+        "via": {
+          "ctx-member": 2
+        },
+        "siteCounts": {
+          "jobs": 1,
+          "tools": 1
+        },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx,host.ctx"
+        ]
+      },
       "@fixture/provideexported": {
         "version": "1.0.0",
         "files": {
@@ -1400,9 +1458,9 @@
     }
   },
   "verdict": {
-    "hash": "e471573a492ca005e2de1f2718ec59c6af2db17ffd7a8b050b8d29c86ee45c98",
+    "hash": "e9374cdf1ec2a30803c78daf8d74c606827b46ae9fa64286919d48e94ebd6d31",
     "summary": {
-      "ok": 18,
+      "ok": 19,
       "partial": 3,
       "broken": 5,
       "unknown": 0,
@@ -1648,6 +1706,14 @@
             "impact": "插件条目会停在 pending（等待该服务），等同于没起来"
           }
         ],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/propctx": {
+        "verdict": "ok",
+        "findings": [],
         "clientSide": [],
         "filtered": [],
         "abstained": [],

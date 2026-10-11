@@ -198,9 +198,9 @@ dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
 
 ## 目录结构
 
-（受版本控制共 **168** 个文件：81 个是代码 / 文档 / 规则表，87 个是夹具数据
-（`test/fixtures/micro/node_modules/` 26 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
-以及 1 个合成宿主运行时面）。下面把 81 个人工维护的条目**列全**，夹具内部按样例说明。）
+（受版本控制共 **172** 个文件：82 个是代码 / 文档 / 规则表，90 个是夹具数据
+（`test/fixtures/micro/node_modules/` 27 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
+以及 1 个合成宿主运行时面）。下面把 82 个人工维护的条目**列全**，夹具内部按样例说明。）
 
 ```
 dsh-plugin-compat-check/
@@ -250,7 +250,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # 已实测的提取缺陷清单（编号）+ 探针的两条边界
 │
-├── test/                       # 261 条断言 / 15 个测试文件（见下节）
+├── test/                       # 263 条断言 / 15 个测试文件（见下节）
 │   ├── helpers.mjs             #   共用夹具：加载规则表/目录、快照摘要、哈希
 │   ├── invariants.test.mjs     #   结果自恰性（对任何输入都必须成立）
 │   ├── snapshot.test.mjs       #   输出变了没有（关键字段 + 内容哈希）
@@ -273,10 +273,11 @@ dsh-plugin-compat-check/
 │   ├── __baseline-versions.json #  基准版本锁（漂移会以 BASELINE_DRIFT 报出）
 │   └── fixtures/
 │       ├── micro/host-surface.json          # 合成宿主运行时面
-│       └── micro/node_modules/@fixture/*    # 26 个合成插件，每个专测一种判定路径
+│       └── micro/node_modules/@fixture/*    # 27 个合成插件，每个专测一种判定路径
 │
 └── tools/                      # 开发工具（不参与运行时）
     ├── client-arrival.mjs             # 客户端条目「到货」对账（H1'，需要浏览器）
+    ├── extractor-recall.mjs            # 调用点层召回（独立枚举对账，不依赖提取器）
     ├── catalog/extract-host-api.py     # 从宿主里抽官方 API 目录（rules/ 的数据来源）
     ├── parity/                         # 与 python 参考实现对拍
     │   ├── parity.sh
@@ -300,7 +301,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-默认 **261 条断言**（15 个测试文件），秒级。其中 `probe-boot.test.mjs` 默认跳过：
+默认 **263 条断言**（15 个测试文件），秒级。其中 `probe-boot.test.mjs` 默认跳过：
 
 ```bash
 # 真的起一次宿主，验证 --probe-boot 端到端可跑（约 10~20 秒）
@@ -320,7 +321,7 @@ node tools/doc-check.mjs     # 文档数字 vs 实测，不一致就 exit 1
 > 报告写得出来、**跑完不留垃圾**）。默认跳过时它会打一行提示说明怎么跑，
 > 免得变成"静默消失的测试"。
 
-**261 条断言，分布在 15 个测试文件里。**
+**263 条断言，分布在 15 个测试文件里。**
 
 「分层」要说清两件**不同**的事 —— 它们以前被混在一起，于是同一份文档里同时写着
 「三层」（`Plan.md` §0）和「七层」（本节）：
@@ -442,3 +443,30 @@ scoped.settings.register(MARKET_SETTINGS_NS, z.object({}), { base: {} });
 > ⚠️ 样本很小（`certain` 级声明：修前 2 条、修后 1 条）。**不要把它读成"精确率 50%"或"100%"**
 > —— 它是一个**发现假阳性并修掉**的记录，不是一个比率。
 > 而且**召回率依然没有数字**：要量化"漏了多少死功能"，只能靠人或功能测试。
+
+### 度量：我们到底漏了多少？
+
+工具的结论能核到什么程度，是一件**可度量**的事 —— 而度量方式决定了这个数字值不值得信。
+
+| 指标 | 怎么测 | 当前值 |
+|---|---|---|
+| **调用点层召回** | 用一条**与提取器无关**的正则枚举扫同样的文件，再对账 | **88.3%**（扣掉有记录的"有意弃权"后） |
+| 第 ① 层（宿主未激活）的准确度 | 宿主自己报的 `fiber.state` 当真值，用合成正反例对账 | 真阳性 1 / 假阳性 0 / 漏报 0 |
+| 客户端条目**到货** | CDP 的网络域，看每个批次真的取到了没有 | 66/66 条目、3/3 批次 |
+
+```bash
+node tools/extractor-recall.mjs        # 调用点层召回（有界、可逐条查的队列）
+node tools/labels.mjs --nm web --synthetic   # 第 ① 层的双向对账
+node tools/client-arrival.mjs          # 客户端到货（要浏览器）
+```
+
+> ⚠️ **没有"静默降级的召回率"这个数字，而且我们不打算去追它。**
+>
+> 它问的是「所有死掉的功能里我们报出了几个」—— 而那个分母是**插件作者的知识**：
+> 一个插件有哪些功能、哪些死了，作者知道，我们不知道。要拿到它就得给**每一个**插件
+> 写功能测试，而插件集合是**开放**的（本机 14 个社区插件，换台机器换一批，
+> 作者发版还会让测试静默失效）。**那不是"贵"，是没有上界。**
+>
+> 我们改测它**上游**那一层：**所有会失败的调用点里我们找到了几个** ——
+> 这一层属于我们、可以独立测量，而且给出的是**有界**的队列（当前 56 条待查）。
+> 这一个数字在本 README 里是可复算的，那个不是。

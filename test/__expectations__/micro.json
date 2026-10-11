@@ -333,6 +333,14 @@
       "targets": [
         "micro"
       ]
+    },
+    "@fixture/propctx": {
+      "verdict": "ok",
+      "_why": "上下文对象**穿过了另一个对象**：`host.ctx.tools.register(...)`。实测这类形态 19 处（`this.ctx` 14 处已处理，剩下 5 处是 `input.ctx`/`target.ctx`/`agent.ctx` 等），此前一条都看不见 —— `tools/extractor-recall.mjs` 的独立枚举把它们报成\"对不上账\"，逐条看源码确认都是真漏报。",
+      "_asserts": "断言在 test/invariants.test.mjs（调用点层）。",
+      "targets": [
+        "micro"
+      ]
     }
   }
 }

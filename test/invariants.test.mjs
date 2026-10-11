@@ -447,6 +447,23 @@ describe('夹具必须真的测到它声称要测的东西', () => {
       `双参数 ${twoParam} 里的第二个形参没被认成上下文对象。实际: ${JSON.stringify(names)}`)
   })
 
+  test('@fixture/propctx：`X.ctx.<服务>.<方法>` 也要认出来', () => {
+    const catalog = load('rules/dsh-api-catalog.json')
+    const r = extractWithProvenance(MICRO, { catalog })
+    const p = r.report.perPlugin['@fixture/propctx']
+    assert.ok(p, '找不到 @fixture/propctx —— 夹具改名了？那这条断言要一起改')
+    const sites = (p.callSites || []).map((x) => `${x.service}.${x.method}`);
+    assert.ok(sites.includes('tools.register') && sites.includes('jobs.list'),
+      `经由「另一个对象上的 ctx」发出的调用没被认出来。实际: ${JSON.stringify(sites)}`)
+    // `subContexts` 是**审计记录**，注释里的示例文字不许进去。
+    // （我在这个夹具的注释里写了「任何 \`X.ctx\`」，第一版就把 `X.ctx` 收了进来 ——
+    //   因为 `contextObjectNames` 当时读的是**原文**，不是抹过注释的 `decl`。）
+    const names = (p.subContexts || []).flatMap((x) => x.names)
+    assert.ok(!names.includes('X.ctx'),
+      `注释里写的 \`X.ctx\` 被当成了真的上下文对象 —— contextObjectNames 读错了掩码。实际: ${JSON.stringify(names)}`)
+    assert.ok(names.includes('host.ctx'), '真正用到的 host.ctx 反而没认出来')
+  })
+
   test('@fixture/helperguard：辅助函数里的能力检测也要算兜底', () => {
     // 跑法照 foreignmember 那条：**断言调用点，不断言 findings** ——
     // micro 面里 `settings.doesNotExist` 会被 filtered，不进 findings，
