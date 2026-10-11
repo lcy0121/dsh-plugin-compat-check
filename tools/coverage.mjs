@@ -40,12 +40,13 @@ import { buildVerdicts } from '../lib/verdict.mjs';
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function parseArgs(argv) {
-  const out = { json: false, write: false, nm: null };
+  const out = { json: false, write: false, nm: null, probe: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--json') { out.json = true; continue; }
     if (a === '--write') { out.write = true; continue; }
     if (a === '--nm') { out.nm = argv[++i]; continue; }
+    if (a === '--probe') { out.probe = argv[++i]; continue; }
     throw new Error(`无法识别的参数: ${a}`);
   }
   return out;
@@ -62,7 +63,7 @@ function ruleFor(rules, svc, method) {
   return { service: true, method: hasMethod || hasDefault };
 }
 
-function measure(nmDir) {
+function measure(nmDir, probePath = null) {
   const catalog = readJSON(path.join(REPO, 'rules', 'dsh-api-catalog.json'));
   const rules = readJSON(path.join(REPO, 'rules', 'severity.json'));
   const extract = extractWithProvenance(nmDir, { catalog });
@@ -125,8 +126,13 @@ function measure(nmDir) {
     if (ruleFor(rules, pr.slice(0, i), pr.slice(i + 1)).method) pairCovered++;
   }
 
-  // 引擎实测：真的跑一遍判定，看有多少发现落到「影响面未知」的默认档
-  const hostSurface = null; // 覆盖率和运行时面无关，故意不给 —— 数字更容易复现
+  // 引擎实测：真的跑一遍判定，看有多少发现落到「影响面未知」的默认档。
+  //
+  // ⚠️ **要给 `--probe` 才接近真实用法。** 不给运行时面时，方法级结论一律降为
+  // 「疑似」而**不进 findings**，于是这条数字既不是"覆盖率的缺口"，也不是
+  // "用户会看到的东西" —— 它只是一堆假阳性检测不到之后的残影。
+  // 实测差别很大：同一台机器同一个 profile，不给面是 7、给面是 3。
+  const hostSurface = probePath === null ? null : readJSON(probePath)
   const verdict = buildVerdicts({
     report: extract.report, hostSurface, rules, catalog, dshVersion: null,
   });
@@ -151,6 +157,7 @@ function measure(nmDir) {
     engineFindings: findings.length,
     engineRuleHit: findings.length - unknownImpact.length,
     engineUnknownImpact: unknownImpact.length,
+    hostSurface: hostSurface === null ? 'none' : 'probe',
     uncoveredServices: uncoveredServices.sort(),
     perPlugin: Object.fromEntries(
       Object.entries(extract.report.perPlugin).map(([n, p]) => [n, {
@@ -174,6 +181,7 @@ function render(m) {
     `  (服务,方法) 对   ${m.pairs}     表中覆盖 ${m.coveredPairs} / ${m.pairs}（${pct(m.coveredPairs, m.pairs)}）`,
     `  表中服务总数     ${m.servicesInTable}   其中有方法级子表 ${m.servicesWithMethods}`,
     '',
+    `  运行时面         ${m.hostSurface === 'probe' ? '给了（数字接近真实用法）' : '**没给** —— 方法级结论会降为「疑似」而不进发现，这个数字偏大'}`,
     `  引擎实测发现     ${m.engineFindings}`,
     `    规则表命中     ${m.engineRuleHit}`,
     `    落到默认档     ${m.engineUnknownImpact}   ← 这一项才是真正有意义的指标`,
@@ -189,7 +197,7 @@ function main() {
   try {
     opts = parseArgs(process.argv.slice(2));
   } catch (error) {
-    process.stderr.write(`${error.message}\n用法: node tools/coverage.mjs [--nm <目录>] [--json] [--write]\n`);
+    process.stderr.write(`${error.message}\n用法: node tools/coverage.mjs [--nm <目录>] [--probe <探针报告>] [--json] [--write]\n`);
     process.exit(3);
   }
   const nm = opts.nm
@@ -200,7 +208,7 @@ function main() {
   }
   let m;
   try {
-    m = measure(nm);
+    m = measure(nm, opts.probe);
   } catch (error) {
     process.stderr.write(`度量失败: ${error.message}\n`);
     process.exit(3);

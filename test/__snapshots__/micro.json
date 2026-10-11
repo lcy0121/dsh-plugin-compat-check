@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "2d5a0a64c87d1d68b488e89bc46a7eb97891bfc7463e9f0b10058c0599eae27c",
+    "hash": "ffb6ca1c3f5d9fb04730f3381bf3757184c1778fc0e8c97768571253e2b70713",
     "manifests": [
       {
         "name": "@fixture/aliased",
@@ -86,6 +86,14 @@
       },
       {
         "name": "@fixture/fatalmethod",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/foreignmember",
         "version": "1.0.0",
         "dshBundle": true,
         "clientPlatform": null,
@@ -220,7 +228,7 @@
     "providedServices": [
       "vaultService"
     ],
-    "siteTotal": 31,
+    "siteTotal": 32,
     "buckets": {
       "@fixture/aliased": {
         "host-entry": 1,
@@ -283,6 +291,12 @@
         "fallback": 1
       },
       "@fixture/fatalmethod": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/foreignmember": {
         "host-entry": 1,
         "client-entry": 0,
         "client-extra": 0,
@@ -781,6 +795,44 @@
           "settings": 2
         },
         "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/foreignmember": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [
+          "sessions"
+        ],
+        "declaredServices": [],
+        "calls": {
+          "sessions": [
+            "list"
+          ]
+        },
+        "via": {
+          "alias": 1
+        },
+        "siteCounts": {
+          "sessions": 1
+        },
+        "localBindings": [
+          "sessions->sessions/ctx-member"
+        ],
         "providedServices": [],
         "guardedPairs": [],
         "shadowedBare": [],
@@ -1292,9 +1344,9 @@
     }
   },
   "verdict": {
-    "hash": "2357972715c8d07ce0738e915dce4f4add6c70e554f74a36523ca92968eeacef",
+    "hash": "878700b7a51ee3d553572805fbe1e56d02456cb8bf0e569fa6a8ecc4b7ca5504",
     "summary": {
-      "ok": 16,
+      "ok": 17,
       "partial": 3,
       "broken": 5,
       "unknown": 0,
@@ -1442,6 +1494,14 @@
             "impact": "走旧版 settings.installSection 通道注册的设置项不会出现（该通道在 0.2.0-rc.2 已被移除，插件需改用 Config 投影）"
           }
         ],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/foreignmember": {
+        "verdict": "ok",
+        "findings": [],
         "clientSide": [],
         "filtered": [],
         "abstained": [],

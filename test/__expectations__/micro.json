@@ -318,6 +318,13 @@
       "targets": [
         "micro"
       ]
+    },
+    "@fixture/foreignmember": {
+      "verdict": "ok",
+      "_why": "`ws.sessions.has('sid')` 里的 `sessions` 是**别人的 Map 字段**，不是变量 `sessions` 上的调用。词边界 `\\b` 允许前面是 `.`，所以它一度被归到服务头上（实测 dsh-recall-plugin 上一次归属错误造出 5 个假方法 has/set/values/sort/reduce）。判据：前面是 `.` 时只认接收者 `this`。\n\n⚠️ **这条夹具断言的是「调用点」，不是「发现」** —— 在 micro 面里 `sessions` 不存在，那条假调用点会被 filtered 掉、不进 findings。所以 `mustNotReport` 在这里是**空断言**（我第一版就写成了它，撤掉修复时**没变红**）。真正的断言在 `test/invariants.test.mjs` 的「夹具必须真的测到它声称要测的东西」里，直接看 callSites。",
+      "targets": [
+        "micro"
+      ]
     }
   }
 }

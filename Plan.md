@@ -216,7 +216,7 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
 | **H1'** | **客户端半边对账**：计划加载的 `__DSH_BOOT__.entries` vs 实际到货 | 🟡 **宿主侧那一半已完成**（§5.2.5）；**"到货"那一半仍需浏览器** |
 | **H2'** | 真解析器 | 🟡 **已吃掉三整类假阴性**（§5.2.3）；剩"跨函数追踪"一类 —— 需要真 AST，已定边界 |
 | **H3'** | npm 发布 | 🟡 **工程部分已完成、打包产物已端到端验证**（§5.2.6）；**`npm publish` 那一步等你点头** |
-| **H4'** | 严重度规则表补全（现覆盖 40 个服务，官方目录有 91 个宿主服务） | ⬜ 待开工 |
+| **H4'** | 严重度规则表补全 | ✅ **在「DSH API」这个范围内已完整**（§5.2.9）：方法级覆盖 41%→**61%**；**有运行时面时没有任何方法级发现落到「影响面未知」** |
 
 > ⚠️ **P/Q 完成 ≠ H1' 完成。** 我一度把 H1' 标成"已完成"，那是标错了：
 > H1' 问的是「**计划要加载的客户端条目，实际到货了几个**」——
@@ -464,6 +464,46 @@ npm 发布**公开且近乎不可撤回**（§3 已列为风险），所以停�
 > 快照里也有。自检（`skill.test.mjs` 的示例比对 + `BASELINE_DRIFT`）**当场全抓到了**。
 > 这就是那几层自检的价值：版本升级的连锁反应靠人眼是查不干净的。
 
+#### 5.2.9 H4'：规则表在「DSH API」范围内已完整（2026-10-11）
+
+**先修假阳性，再补规则** —— 这个顺序不是原则问题，是实测问题：数的过程中发现
+代码里"缺规则的方法"有五个（`sessions.has`/`set`/`values`/`sort`/`reduce`）
+**根本不该存在**，它们是缺陷 31 造的假阳性。给它们补规则 = **给假阳性盖章**。
+
+**补了什么**（32 条方法级规则 + 1 个此前整缺的服务）：
+
+| 服务 | 新增 |
+|---|---|
+| `llm` | `resolveModelInfo` / `stream` / `providerRetryPolicy` / `registerAdapter` / `listConfigurableProviders` |
+| `sessionPersistence` | `acquireLease` / `locate` / `prepare` / `readFrom` / `readZstdPrefix` / `stat` |
+| `sessionProjectionCache` | `cachedSnapshot` / `put` / `delete` / `clearTombstone` / `whenIdle` |
+| `sessions` | `announce` / `create` / `enter` / `flush` / `openSubagent` |
+| `shell` | **整个服务此前没有条目**，而 `dsh-recall-plugin` 在用它跑命令 → `run` / `execute` / `resolve` |
+| 其余 | `agents.resume` / `agents.roots` / `settings.configure` / `settings.replace` / `connection.authenticatedUrl` / `deepseekAccount.getBalance` / `sessionProjections.restore` / `webServer.tapIndex` |
+
+**每条的依据都写死在 `basis` 里**：在官方目录里 → `catalog`；
+目录里没有但真实调用点证实 → `callsite` + **具体的 `file:line` 证据**。
+
+**效果**：
+
+| 口径 | 修前 | 修后 |
+|---|---|---|
+| 方法级覆盖 | 67 / 164（41%） | **99 / 161（61%）** |
+| 表中服务 / 有方法级子表 | 40 / 32 | **42 / 37** |
+| **有运行时面时落到「影响面未知」的方法级发现** | 若干 | **0** |
+
+**剩下的 3 条「落到默认档」不该补规则**：全是 `unprovided-dependency`
+（**插件间依赖**，`method` 为 null，`inHostCatalog === false`）——
+它们**不是 DSH API**，类别级判定已经给出准确影响面。
+
+**未覆盖的 75 对里，只有 1 对的服务在官方宿主目录里**（`sessions.has`，已确证是产物）；
+其余 74 对全是**插件自有服务**（`betterSidebar`/`betterLocale`/`configForms`/…）
+或已知产物。**规则表不该管它们。**
+
+**顺带把度量口径修对了**：`tools/coverage.mjs` 加了 `--probe` ——
+不给运行时面时方法级结论降为「疑似」而不进 findings，于是"落到默认档"
+既不是真实缺口也不是用户会看到的东西（同一个 profile：不给面 7、给面 **3**）。
+
 ### 5.3 被证据否决过的计划（比选中的理由更值钱）
 
 **这些都是"计划写着 A，实测证明必须做 B"**。它们全部来自实测，不是推演：
@@ -482,7 +522,7 @@ npm 发布**公开且近乎不可撤回**（§3 已列为风险），所以停�
 
 ## 6. 已知地雷清单
 
-详细版见 `docs/extraction-findings.md`（30 条，含每条的最小复现）。这里只列最要命的。
+详细版见 `docs/extraction-findings.md`（31 条，含每条的最小复现）。这里只列最要命的。
 
 | 地雷 | 说明 |
 |---|---|
@@ -626,17 +666,17 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 
 | 项 | 值 |
 |---|---|
-| 受版本控制文件 | **144**（63 个人工维护 + 81 个夹具数据） |
+| 受版本控制文件 | **147**（63 个人工维护 + 84 个夹具数据） |
 | 测试 | **240 条**（13 个测试文件，其中 `probe-boot` 默认跳过）；另 2 条慢测试需 `DSC_SLOW=1` |
 | 默认 `node --test test/` | 全绿，约 **7 秒** |
-| 提取缺陷记录 | **30 条**，全部已修（`docs/extraction-findings.md`） |
+| 提取缺陷记录 | **31 条**，全部已修（`docs/extraction-findings.md`） |
 | 三个回归基准 | `@omdsh-dev/dsh-plugin-check` 可用 / `dsh-keep-awake` 部分可用 / `dsh-pet` 可用 |
 | 真实 desktop（静态） | 可用 10 / 部分可用 11 / 不兼容 0 |
 | 真实 desktop（`--probe-boot`） | 可用 **18** / 部分可用 3 / 不兼容 0 |
 
 ### 8.2 仓库结构现状
 
-（受版本控制共 **144** 个文件 = 63 个人工维护的条目 + 81 个夹具数据文件。
+（受版本控制共 **147** 个文件 = 63 个人工维护的条目 + 84 个夹具数据文件。
 **与三份 README 的「目录结构」一节保持同一份事实** —— 两边都要在结构变化时一起改，
 否则又是一处会漂移的文档。计数与下树均由 `git ls-files` 实测，不凭记忆。）
 
@@ -678,7 +718,7 @@ dsh-plugin-compat-check/
 │
 ├── docs/extraction-findings.md               # 实测提取缺陷清单 + 探针的两条边界
 │
-├── test/                                     # 254 条断言 / 13 个测试文件
+├── test/                                     # 256 条断言 / 13 个测试文件
 │   ├── helpers.mjs
 │   ├── invariants.test.mjs                   #   自恰性（69 条）
 │   ├── snapshot.test.mjs                     #   输出变了没有
@@ -692,7 +732,7 @@ dsh-plugin-compat-check/
 │   ├── __expectations__/micro.json           #   人写的产品承诺
 │   ├── __snapshots__/{micro,parityfix}.json  #   内容哈希快照
 │   ├── __baseline-versions.json              #   基准版本锁
-│   └── fixtures/micro/                       #   24 个合成插件 + 合成宿主运行时面
+│   └── fixtures/micro/                       #   25 个合成插件 + 合成宿主运行时面
 │
 └── tools/                                    # 开发工具（不参与运行时）
     ├── doc-check.mjs                        #   文档数字自检（断言条数要比实测）

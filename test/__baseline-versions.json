@@ -19,6 +19,7 @@
     "@fixture/derivedobj": "1.0.0",
     "@fixture/fallback": "1.0.0",
     "@fixture/fatalmethod": "1.0.0",
+    "@fixture/foreignmember": "1.0.0",
     "@fixture/guardalias": "1.0.0",
     "@fixture/guarded": "1.0.0",
     "@fixture/hangcycle": "1.0.0",

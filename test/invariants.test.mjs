@@ -446,4 +446,24 @@ describe('夹具必须真的测到它声称要测的东西', () => {
     assert.ok(names.includes('other'),
       `双参数 ${twoParam} 里的第二个形参没被认成上下文对象。实际: ${JSON.stringify(names)}`)
   })
+
+  test('@fixture/foreignmember：别人的成员访问不能被当成本地绑定的调用', () => {
+    // ⚠️ 这条**只能断言调用点，不能断言 findings** —— 在 micro 面里 `sessions` 不存在，
+    // 那条假调用点会被 filtered 掉、根本不进 findings。我第一版把断言写成了
+    // `mustNotReport: ["jobs.has"]`，结果**撤掉修复时它没变红** —— 一条空断言。
+    // 教训：断言要指向**这个缺陷真正污染的那一层**，而不是它顺带路过的那一层。
+    const catalog = load('rules/dsh-api-catalog.json')
+    const r = extractWithProvenance(MICRO, { catalog })
+    const p = r.report.perPlugin['@fixture/foreignmember']
+    assert.ok(p, '找不到 @fixture/foreignmember —— 夹具改名了？那这条断言要一起改')
+
+    const sites = (p.callSites || []).map((x) => `${x.service}.${x.method}`)
+    // `ws.sessions.has('sid')` 里的 `sessions` 是**别人的 Map 字段**。
+    // 词边界 `\b` 允许前面是 `.`，所以它一度被归到服务头上。
+    assert.ok(!sites.includes('sessions.has'),
+      `别人的成员访问被当成了本地绑定的调用（假阳性）。实际站点: ${JSON.stringify(sites)}`)
+    // 而真调用必须留着 —— 只堵假阳性、把真调用一起堵掉，是更糟的修法。
+    assert.ok(sites.includes('sessions.list'),
+      `真调用丢了 —— 修假阳性时不能把真调用一起弄没。实际站点: ${JSON.stringify(sites)}`)
+  })
 })

@@ -8,27 +8,27 @@
     "`engineUnknownImpact` 是唯一真正有意义的口径，前几行都只是它的分解。"
   ],
   "manifests": 21,
-  "services": 48,
-  "pairs": 206,
-  "pairsRaw": 227,
+  "services": 49,
+  "pairs": 161,
+  "pairsRaw": 174,
   "artifactServicesExcluded": [
     "parser"
   ],
-  "artifactPairsExcluded": 12,
-  "coveredServices": 34,
-  "coveredPairs": 66,
-  "engineFindings": 20,
-  "engineRuleHit": 6,
-  "engineUnknownImpact": 14,
+  "artifactPairsExcluded": 4,
+  "coveredServices": 36,
+  "coveredPairs": 99,
+  "engineFindings": 4,
+  "engineRuleHit": 1,
+  "engineUnknownImpact": 3,
   "uncoveredServices": [
     "betterLocale",
     "betterSidebar",
     "companionQq",
+    "configForms",
     "conversation",
-    "deepseekAccount",
-    "desktopProfiles",
-    "remote",
-    "shell",
+    "events",
+    "pluginNavigation",
+    "reflect",
     "sidebarRight",
     "sidebarRightTabs",
     "styles",
@@ -37,13 +37,13 @@
   "perPlugin": {
     "@changfenhuang/dsh-genui": {
       "version": "0.11.4",
-      "usedServices": 1,
-      "pairs": 2
+      "usedServices": 4,
+      "pairs": 5
     },
     "@linxin666/dsh-client-ui-git-graph": {
       "version": "0.4.6",
-      "usedServices": 5,
-      "pairs": 7
+      "usedServices": 10,
+      "pairs": 14
     },
     "@linxin666/dsh-client-ui-skill-explorer": {
       "version": "0.4.6",
@@ -53,22 +53,22 @@
     "@linxin666/dsh-remote-web-ui": {
       "version": "0.4.6",
       "usedServices": 5,
-      "pairs": 13
+      "pairs": 8
     },
     "@liustack/modlens": {
       "version": "3.26.6",
-      "usedServices": 5,
+      "usedServices": 6,
       "pairs": 12
     },
     "@michengai/dsh-archive-manager": {
       "version": "1.0.16",
-      "usedServices": 7,
+      "usedServices": 8,
       "pairs": 24
     },
     "@nanmicoder/dsh-agent-teams": {
       "version": "0.1.23",
-      "usedServices": 9,
-      "pairs": 21
+      "usedServices": 11,
+      "pairs": 19
     },
     "@nonamelego/dsh-catppuccin": {
       "version": "0.6.1",
@@ -77,18 +77,18 @@
     },
     "dsh-better-sidebar": {
       "version": "0.25.0",
-      "usedServices": 24,
-      "pairs": 108
+      "usedServices": 22,
+      "pairs": 91
     },
     "dsh-meme": {
       "version": "0.1.47",
-      "usedServices": 6,
-      "pairs": 9
+      "usedServices": 5,
+      "pairs": 7
     },
     "dsh-mnemon": {
       "version": "0.5.27",
-      "usedServices": 11,
-      "pairs": 50
+      "usedServices": 12,
+      "pairs": 25
     },
     "dsh-mnemon-source-documents": {
       "version": "0.5.10",
@@ -128,16 +128,16 @@
     "dsh-pet": {
       "version": "0.3.6",
       "usedServices": 8,
-      "pairs": 14
+      "pairs": 13
     },
     "dsh-recall-plugin": {
       "version": "2.4.10",
       "usedServices": 10,
-      "pairs": 29
+      "pairs": 23
     },
     "dshmarket": {
       "version": "1.66.15",
-      "usedServices": 3,
+      "usedServices": 4,
       "pairs": 6
     }
   }
