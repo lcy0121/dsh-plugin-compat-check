@@ -194,9 +194,9 @@ The last two are deliberately separated. `no-calls` and `abstained` look like "f
 
 ## Layout
 
-(132 version-controlled files: 57 of code / documentation / data tables, and 75 fixture files
+(134 version-controlled files: 59 of code / documentation / data tables, and 75 fixture files
 (`test/fixtures/micro/node_modules/` with 48 synthetic plugin files, `tools/parity/fixtures/hang-cycle/node_modules/` with 5,
-and one synthetic host runtime surface). All 57 hand-maintained entries are listed below; fixture contents are summarised.)
+and one synthetic host runtime surface). All 59 hand-maintained entries are listed below; fixture contents are summarised.)
 
 ```
 dsh-plugin-compat-check/

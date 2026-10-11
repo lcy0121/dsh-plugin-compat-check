@@ -197,9 +197,9 @@ dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
 
 ## 目录结构
 
-（受版本控制共 **132** 个文件：57 个是代码 / 文档 / 规则表，75 个是夹具数据
+（受版本控制共 **134** 个文件：59 个是代码 / 文档 / 规则表，75 个是夹具数据
 （`test/fixtures/micro/node_modules/` 69 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
-以及 1 个合成宿主运行时面）。下面把 57 个人工维护的条目**列全**，夹具内部按样例说明。）
+以及 1 个合成宿主运行时面）。下面把 59 个人工维护的条目**列全**，夹具内部按样例说明。）
 
 ```
 dsh-plugin-compat-check/
