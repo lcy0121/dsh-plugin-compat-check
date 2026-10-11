@@ -649,9 +649,20 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
    `const binding = ctx.sessions.binding?.(newId)` —— 作者用可选调用明确表示
    "没有就算了"，属于 guarded。现在只认 `typeof x?.m === "function"` 那种形态。
    与 `dsh-pet` 那条同类（当时就是假阳性）。
-3. **`probe/index.mjs` 硬编码 `/tmp/...` 且不自建目录**：目录不存在时
-   `writeFileSync` 抛错被 `catch` 咽掉，**探针静默不产出任何报告**（我这次就踩到了）。
-   要么自建目录，要么把失败写进一个一定能写的地方。
+3. **`probe/index.mjs` 硬编码 `/tmp/...` 且不自建目录** —— ✅ **已修**
+   目录不存在时 `writeFileSync` 抛错被 `catch` 咽掉，**探针静默不产出任何报告**
+   （我这次就踩到了）。现在进目录前先 `mkdirSync(recursive)`，并尊重 `DSC_OUT_DIR`
+   （与 `plugin/index.js` 同一个覆盖点）。**"尽力而为"的 catch 不是安全网 ——
+   它只是把失败藏起来。**
+4. **⚠️ 不变式 ⑤ 在 `desktop` profile 上是红的（已提交状态就是红的，不是本轮引入）**
+   `dsh-better-sidebar` 的 `session` 变量在 `lib/client-registry.js` 里是**歧义**绑定
+   （同时承载 `remote` 与 `sessions`），在 `lib/index.js` 里是**确定**绑定。
+   而 `localBindings` 是 `Map<变量名, 一条记录>`、**后写覆盖先写** ——
+   于是别处那条有效绑定被歧义那条盖掉了，别名调用点归属就"对不上账"。
+   这是**测试在我之前就没跑出来**的一类：不变式只在 `desktop` 存在时跑（机器相关），
+   我第一次跑它是在改别的功能时顺带看到的。
+   修法方向：`localBindings` 改成按 `(变量名, 文件)` 记录，不变式按同一个键对账。
+   **不能靠"把不变式放宽"来变绿** —— 它抓到的是真的对不上账。
 
 **倾向路径 1**，但先做可行性验证再动手 —— 这条规矩已经兑现了。
 

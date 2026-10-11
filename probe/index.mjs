@@ -11,22 +11,52 @@
  * 刻意不声明 inject：保证自己一定激活，不因缺服务而卡在 PENDING。
  * 立刻写 applied 标记（失败也要留痕），延迟后写正式报告。
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 export const name = 'dsh-plugin-compat-check-probe';
 
-const WORKDIR = '/tmp/dsh-plugin-compat-check';
+/**
+ * ⚠️ 输出目录必须**自己建**，而且要和调用方约定一致。
+ *
+ * 这里踩过一次，症状很难查：探针之前硬编码 `/tmp/dsh-plugin-compat-check`，
+ * 而 `w()` 的 `try/catch` 会把 `ENOENT`（目录不存在）**咽掉** —— 于是
+ * **探针一声不响地什么都不产出**：没有 applied 标记、没有报告、没有报错。
+ * 调用方只看到"等了 40 秒没等到文件"，而原因被一个 `catch {}` 藏住了。
+ *
+ * 所以现在两件事都做：
+ *   1. **进目录前先建目录**（`mkdirSync(..., {recursive:true})`），
+ *      这样"目录不存在"这个失败模式根本不会发生；
+ *   2. 仍然尊重 `DSC_OUT_DIR` —— 与 `plugin/index.js` 用的是同一个覆盖点，
+ *      三份产物因此可以共用一份配置，而不是各记一个常量。
+ */
+const WORKDIR = process.env.DSC_OUT_DIR || '/tmp/dsh-plugin-compat-check';
 const SERVICES_FILE = `${WORKDIR}/services.json`;
 const APPLIED = `${WORKDIR}/probe-applied.txt`;
 const REPORT = `${WORKDIR}/probe-report.json`;
 
 const MAX_METHODS = 200;
 
+/** 只建一次（模块级），失败也不抛 —— 探针绝不能拖累宿主启动。 */
+let dirReady = false;
+function ensureDir() {
+  if (dirReady) return true;
+  try {
+    mkdirSync(WORKDIR, { recursive: true });
+    dirReady = true;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function w(file, text) {
   try {
+    ensureDir();
     writeFileSync(file, text);
   } catch {
-    /* 尽力而为：探针自身绝不能影响宿主启动 */
+    /* 尽力而为：探针自身绝不能影响宿主启动。
+       注意：这里的"尽力而为"是**有代价**的（见上方注释），
+       所以进目录这一步不再依赖它 —— 目录是我们自己建的。 */
   }
 }
 
@@ -89,6 +119,7 @@ function readWanted() {
 }
 
 export function apply(ctx) {
+  ensureDir() // 先建目录：applied 标记是"探针确实起来了"的唯一证据
   w(APPLIED, 'apply() ok @ ' + new Date().toISOString() + '\n');
 
   setTimeout(() => {
