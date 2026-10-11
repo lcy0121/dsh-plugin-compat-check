@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "ad374d4e64a4962d3c3f35e37053a7547c9e0679cccd7038f89929a99c2cb21d",
+    "hash": "772eefd75e8352521708777ebacae23c4ebed0976be010093ccc7bde75fbc97d",
     "manifests": [
       {
         "name": "@omdsh-dev/dsh-plugin-check",
@@ -239,7 +239,9 @@
           "webServer->webServer/ctx-get"
         ],
         "providedServices": [],
-        "guardedPairs": [],
+        "guardedPairs": [
+          "jobs.onJobsChanged"
+        ],
         "shadowedBare": [],
         "unresolvedBindings": [],
         "ambiguousAliases": [],
@@ -346,7 +348,8 @@
         "providedServices": [],
         "guardedPairs": [
           "llm.listConfigurableProviders",
-          "llm.listProviders"
+          "llm.listProviders",
+          "llm.resolveModelInfo"
         ],
         "shadowedBare": [],
         "unresolvedBindings": [
@@ -387,7 +390,7 @@
     }
   },
   "verdict": {
-    "hash": "b9d3fc02a666f097f4a80806cc17e51bec233f8ae7f9b1f9d1ba9b9928339b30",
+    "hash": "fc7c55674539fab670ebf56f0328f922fd7afeb411a6fc31d9149f7efdae2702",
     "summary": {
       "ok": 3,
       "partial": 1,
@@ -410,14 +413,6 @@
           {
             "category": "host-method-missing",
             "certainty": "certain",
-            "severity": "degraded",
-            "api": "jobs.onJobsChanged",
-            "location": "lib/index.js:591",
-            "impact": "任务状态不再实时推送，插件退化为轮询（约 5 秒延迟）"
-          },
-          {
-            "category": "host-method-missing",
-            "certainty": "certain",
             "severity": "feature-dead",
             "api": "settings.register",
             "location": "lib/index.js:466",
@@ -428,7 +423,9 @@
           "locale",
           "slots"
         ],
-        "filtered": [],
+        "filtered": [
+          "jobs.onJobsChanged"
+        ],
         "abstained": [],
         "runtimeFacilities": []
       },

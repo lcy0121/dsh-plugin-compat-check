@@ -498,7 +498,16 @@ CLI 形态下可从 `app.asar` 内 `@deepseek-ai/dsh-tool-cordis/lib/types/api-c
 
 - [x] **G1.** 三个回归基准结论仍与今天一致（**已自动化为 H1 的判据，每次 `node --test` 都跑**）：
   - `omdsh-dev/dsh-plugin-check` → 可用
-  - `dsh-keep-awake` → 部分可用（`settings.register@lib/index.js:466`、`jobs.onJobsChanged@lib/index.js:591`）
+  - `dsh-keep-awake` → 部分可用（**只有** `settings.register@lib/index.js:466`）
+    - ⚠️ **基线在 2026-10-11 更正过**：原先还报一条
+      `jobs.onJobsChanged@lib/index.js:591`「降级 → 退化为轮询」，
+      而查源码 :590 是 `if (jobs !== undefined && typeof jobs.onJobsChanged === 'function')`
+      —— **作者明明写了 `typeof` 能力检测**。旧正则把 `?.` 写成**必选**，
+      于是这种（不带 `?.` 的）最普通的写法认不出来，报了一条**假阳性**。
+      这正好是本项目「假阳性是唯一卖点的反面」那条规矩的一个实例，
+      而且它在仓库存活了好几轮 —— 因为它被写进了验收标准，被当成"正确答案"。
+      更正后：`jobs.onJobsChanged` 进 `已过滤（判为有兜底）`，`settings.register` 照旧报
+      （:466 确实是裸调用，没有兜底）。
   - `dsh-pet` → 可用（**曾经误报为「部分可用」**：它写 `typeof llm?.listProviders === "function"`，
     自己做了能力检测，报出来就是假阳性）
 - [x] **G2.** `tools/parity/fixtures/hang-cycle` 秒级通过（实测 0.12 秒，且确实比到 1 个包）

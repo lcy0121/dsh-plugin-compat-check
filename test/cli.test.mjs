@@ -180,10 +180,18 @@ describe('CLI：真实插件（三个回归基准）', { skip: fs.existsSync(PAR
     const ka = data.plugins['dsh-keep-awake']
     assert.equal(ka.verdict, 'partial')
     const found = ka.findings.map((f) => `${f.service}.${f.method}@${f.location.file}:${f.location.line}`).sort()
-    assert.deepEqual(found, [
-      'jobs.onJobsChanged@lib/index.js:591',
-      'settings.register@lib/index.js:466',
-    ])
+    // ⚠️ 这里曾经锁了**两条**，其中 `jobs.onJobsChanged@lib/index.js:591` 是**假阳性**：
+    // 查源码 :590 是 `if (jobs !== undefined && typeof jobs.onJobsChanged === 'function')`
+    // —— 作者明明写了能力检测。旧正则把 `?.` 写成**必选**，认不出这种不带 `?.` 的写法。
+    //
+    // 教训：**把假阳性写进验收标准，它就会一直活下来**（还被称为"正确答案"）。
+    // 所以这条断言只锁**确实无兜底**的那一条，并显式断言兜底那条**不得**出现 ——
+    // 否则下次又把 false positive 锁回来的成本很低。
+    assert.deepEqual(found, ['settings.register@lib/index.js:466'])
+    assert.ok(
+      !found.some((x) => x.startsWith('jobs.onJobsChanged')),
+      '`jobs.onJobsChanged` 有 typeof 兜底，报它就是假阳性',
+    )
   })
 
   test('CLI 的结论与内核直接调用逐字段一致（不可能有两份答案）', async () => {
