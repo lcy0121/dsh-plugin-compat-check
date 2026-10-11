@@ -10,6 +10,8 @@
   "micro": {
     "@fixture/aliased": "1.0.0",
     "@fixture/clean": "1.0.0",
+    "@fixture/clientmissingfile": "1.0.0",
+    "@fixture/clientnoentry": "1.0.0",
     "@fixture/clientonly": "1.0.0",
     "@fixture/consumerofexported": "1.0.0",
     "@fixture/consumerofinternal": "1.0.0",

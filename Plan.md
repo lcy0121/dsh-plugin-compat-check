@@ -484,8 +484,8 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 
 | 项 | 值 |
 |---|---|
-| 受版本控制文件 | **120**（54 个人工维护 + 66 个夹具数据） |
-| 测试 | **224 条**（9 个测试文件）+ 2 条慢测试（`DSC_SLOW=1`） |
+| 受版本控制文件 | **129**（54 个人工维护 + 75 个夹具数据） |
+| 测试 | **228 条**（9 个测试文件）+ 2 条慢测试（`DSC_SLOW=1`） |
 | 默认 `node --test test/` | 全绿，约 **7 秒** |
 | 提取缺陷记录 | **27 条**，全部已修（`docs/extraction-findings.md`） |
 | 三个回归基准 | `@omdsh-dev/dsh-plugin-check` 可用 / `dsh-keep-awake` 部分可用 / `dsh-pet` 可用 |
@@ -494,7 +494,7 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 
 ### 8.2 仓库结构现状
 
-（受版本控制共 **120** 个文件 = 54 个人工维护的条目 + 66 个夹具数据文件。
+（受版本控制共 **129** 个文件 = 54 个人工维护的条目 + 75 个夹具数据文件。
 **与三份 README 的「目录结构」一节保持同一份事实** —— 两边都要在结构变化时一起改，
 否则又是一处会漂移的文档。计数与下树均由 `git ls-files` 实测，不凭记忆。）
 
@@ -536,7 +536,7 @@ dsh-plugin-compat-check/
 │
 ├── docs/extraction-findings.md               # 实测提取缺陷清单 + 探针的两条边界
 │
-├── test/                                     # 224 条断言 / 9 个测试文件 / 七层
+├── test/                                     # 228 条断言 / 9 个测试文件 / 七层
 │   ├── helpers.mjs
 │   ├── invariants.test.mjs                   #   自恰性（69 条）
 │   ├── snapshot.test.mjs                     #   输出变了没有

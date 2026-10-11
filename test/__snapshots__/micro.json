@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "d81019f41e0b3b666abd70b826a188996ec4e1ca690cba0216dae4a7c2f6d1f3",
+    "hash": "3f3f54b5a411de7abec40e2a2f8c0ca8141834046653d8b98036371296417000",
     "manifests": [
       {
         "name": "@fixture/aliased",
@@ -17,6 +17,22 @@
         "version": "1.0.0",
         "dshBundle": true,
         "clientPlatform": null,
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/clientmissingfile",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": "web",
+        "clientInject": null,
+        "peerDependencies": null
+      },
+      {
+        "name": "@fixture/clientnoentry",
+        "version": "1.0.0",
+        "dshBundle": true,
+        "clientPlatform": "web",
         "clientInject": null,
         "peerDependencies": null
       },
@@ -197,6 +213,18 @@
         "fallback": 0
       },
       "@fixture/clean": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/clientmissingfile": {
+        "host-entry": 1,
+        "client-entry": 0,
+        "client-extra": 0,
+        "fallback": 0
+      },
+      "@fixture/clientnoentry": {
         "host-entry": 1,
         "client-entry": 0,
         "client-extra": 0,
@@ -395,6 +423,58 @@
           "logger": 1,
           "tools": 1
         },
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/clientmissingfile": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [],
+        "declaredServices": [],
+        "calls": {},
+        "via": {},
+        "siteCounts": {},
+        "localBindings": [],
+        "providedServices": [],
+        "guardedPairs": [],
+        "shadowedBare": [],
+        "unresolvedBindings": [],
+        "ambiguousAliases": [],
+        "subContexts": [
+          "index.js:ctx"
+        ]
+      },
+      "@fixture/clientnoentry": {
+        "version": "1.0.0",
+        "files": {
+          "host-entry": [
+            "index.js"
+          ],
+          "client-entry": [],
+          "client-extra": [],
+          "fallback": []
+        },
+        "fallback": false,
+        "services": [],
+        "declaredServices": [],
+        "calls": {},
+        "via": {},
+        "siteCounts": {},
         "localBindings": [],
         "providedServices": [],
         "guardedPairs": [],
@@ -1104,11 +1184,11 @@
     }
   },
   "verdict": {
-    "hash": "25976c0186a64cca4b6cea53a813e8b0ce7fb9614ff9218b4306aaa9dabc7dc2",
+    "hash": "fdf63ece4aa50c631c59292107aab8cdcb6ce5788f4e93cf6ac352848a998f83",
     "summary": {
       "ok": 14,
       "partial": 3,
-      "broken": 3,
+      "broken": 5,
       "unknown": 0,
       "vacuousOk": 1
     },
@@ -1130,6 +1210,40 @@
         "runtimeFacilities": [
           "logger"
         ]
+      },
+      "@fixture/clientmissingfile": {
+        "verdict": "broken",
+        "findings": [
+          {
+            "category": "client-entry-missing",
+            "certainty": "certain",
+            "severity": "fatal",
+            "api": null,
+            "location": null,
+            "impact": "客户端半边加载不出来 —— 这个插件的界面部分不可用；插件条目加载失败时整个界面会被错误屏替代"
+          }
+        ],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
+      },
+      "@fixture/clientnoentry": {
+        "verdict": "broken",
+        "findings": [
+          {
+            "category": "client-entry-missing",
+            "certainty": "certain",
+            "severity": "fatal",
+            "api": null,
+            "location": null,
+            "impact": "客户端半边加载不出来 —— 这个插件的界面部分不可用；插件条目加载失败时整个界面会被错误屏替代"
+          }
+        ],
+        "clientSide": [],
+        "filtered": [],
+        "abstained": [],
+        "runtimeFacilities": []
       },
       "@fixture/clientonly": {
         "verdict": "ok",

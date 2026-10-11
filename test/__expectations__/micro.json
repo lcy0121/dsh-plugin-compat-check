@@ -270,6 +270,34 @@
       "targets": [
         "micro"
       ]
+    },
+    "@fixture/clientnoentry": {
+      "verdict": "broken",
+      "_why": "声明了 dsh.client（platform=web）却没有 exports[\"./client\"]。后果不是\"某个功能没了\"，而是**整个界面没了**（客户端条目加载失败时 renderer 把 UI 换成错误屏）。所以判定层单列 client-entry-missing 且严重度 fatal —— 混进服务级发现会低估它。",
+      "mustReport": [
+        {
+          "category": "client-entry-missing",
+          "certainty": "certain",
+          "severity": "fatal"
+        }
+      ],
+      "targets": [
+        "micro"
+      ]
+    },
+    "@fixture/clientmissingfile": {
+      "verdict": "broken",
+      "_why": "另一个分支：exports[\"./client\"] 写了、也能解析到路径，但**文件不存在**。这类错很容易发生（打包漏了 files 字段、或 .npmignore 把 lib/ 排掉）——正是 H3'（npm 发布）要防的那一类。",
+      "mustReport": [
+        {
+          "category": "client-entry-missing",
+          "certainty": "certain",
+          "severity": "fatal"
+        }
+      ],
+      "targets": [
+        "micro"
+      ]
     }
   }
 }

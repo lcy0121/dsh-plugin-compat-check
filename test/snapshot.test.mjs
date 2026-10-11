@@ -220,9 +220,15 @@ describe('判据：结论必须是我们要的那个', () => {
           for (const m of want.mustReport) {
             test(`${pkg} 必须报 ${m.category} ${m.api}`, () => {
               const got = r.verdict.plugins[pkg]
+              // `m.api` 省略或写成 null 都表示「这条是**插件级**发现，没有 服务.方法」。
+              // 用 `== null` 而不是 `=== null` —— 省略时是 undefined，写死 `=== null`
+              // 会让一条完全正确的判据失败，而失败信息看起来像"产品没报"（实测踩过）。
+              // `client-entry-missing` 就是这种插件级发现（客户端半边端不出来）。
+              const wantApi = m.api ?? null
               const hit = got.findings.filter((f) => f.category === m.category
-                && (m.api === null || (f.service ? (f.method ? `${f.service}.${f.method}` : f.service) : null) === m.api))
-              assert.ok(hit.length, `没有报 ${m.category} ${m.api}。实际：${JSON.stringify(got.findings.map((f) => `${f.category}/${f.service}.${f.method}`))}`)
+                && ((f.service ? (f.method ? `${f.service}.${f.method}` : f.service) : null) === wantApi))
+              assert.ok(hit.length, `没有报 ${m.category} @${wantApi ?? '(插件级)'}。`
+                + `实际：${JSON.stringify(got.findings.map((f) => `${f.category}/${f.service ?? ''}.${f.method ?? ''}`))}`)
               if (m.location) {
                 const loc = hit[0].location && `${hit[0].location.file}:${hit[0].location.line}`
                 assert.equal(loc, m.location, `位置不对：${JSON.stringify(hit[0].location)}`)
