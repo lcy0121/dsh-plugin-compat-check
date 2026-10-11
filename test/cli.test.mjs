@@ -366,3 +366,50 @@ describe('测试隔离：不碰用户的真实环境', () => {
     } finally { fs.rmSync(tmp, { recursive: true, force: true }) }
   })
 })
+
+/**
+ * `--probe-boot` 的**契约**测试（不真的起宿主 —— 那个要 10~20 秒，属人工验证）。
+ *
+ * 我要钉住的是三件容易悄悄坏掉的事：
+ *   ① 参数被认下（不是"无法识别的参数"）
+ *   ② 用法里写了它（否则没人知道它能用）
+ *   ③ 传错形态时**明确报错**，而不是静默当成"没有运行时面"
+ *      —— 后者最坏：用户以为拿到的是确定结论，其实退回了「疑似」。
+ */
+describe('CLI：--probe-boot 的参数契约', () => {
+  test('--probe-boot 被认下（不被当成未知参数）', () => {
+    const r = runCLI(['--nm', MICRO, '--probe-boot', '--json', '--no-baseline', '--dsh-version', '0.2.0-rc.2'])
+    assert.notEqual(r.code, 3, `不该是"无法判定"：${r.err || r.out.slice(0, 200)}`)
+    assert.ok(!/无法识别的参数/.test(r.err + r.out), '--probe-boot 被当成未知参数了')
+  })
+
+  test('--probe-timeout 需要一个值（缺值时报错，不静默忽略）', () => {
+    const r = runCLI(['--nm', MICRO, '--probe-timeout'])
+    assert.equal(r.code, 3)
+    assert.match(r.err, /需要一个值/)
+  })
+
+  test('--probe-keep-dir 需要一个值', () => {
+    const r = runCLI(['--nm', MICRO, '--probe-keep-dir'])
+    assert.equal(r.code, 3)
+    assert.match(r.err, /需要一个值/)
+  })
+
+  test('用法里说明了 --probe-boot 与"默认不开"', () => {
+    const r = runCLI(['--help'])
+    assert.match(r.out, /--probe-boot/)
+    assert.match(r.out, /默认\*\*不开\*\*|默认不开/, '没说明它默认不开 —— 用户会以为每次都起宿主')
+    assert.match(r.out, /--probe-keep-dir/, '没写保留报告的排查开关')
+  })
+
+  test('给了 --nm 但不是 profile 形态时，--probe-boot 明确报错而不是静默降级', () => {
+    // 直接给 node_modules 目录（不是 profile 目录）→ 拿不到 profile 就没法复制
+    const bare = path.join(REPO, 'test/fixtures/micro/node_modules')
+    const r = runCLI(['--nm', bare, '--probe-boot', '--json', '--no-baseline', '--dsh-version', '0.2.0-rc.2'])
+    const data = JSON.parse(r.out)
+    // 必须是"降级为疑似 + 把原因说清楚"，不能假装拿到了面
+    assert.equal(data.inputs.hasRuntimeSurface, false, '不该声称拿到了运行时面')
+    assert.ok(data.inputs.probeBootWarn || data.inputs.probeBoot?.error,
+      '起不来时必须留下原因，否则用户不知道结论为什么是"疑似"')
+  })
+})
