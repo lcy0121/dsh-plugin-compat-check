@@ -362,3 +362,49 @@ describe('脚本：不需要内核的那些入口', () => {
     assert.match(r.stderr, /不接受降级|降级/, '没写清为什么宁可报错也不降级')
   })
 })
+
+/**
+ * 示例输出必须**从真实运行里抄**，而不是手写。
+ *
+ * ## 为什么值得一条测试
+ *
+ * 这段示例是 skill 里信息密度最高的部分：agent 读完它就知道"该期待看到什么"。
+ * 而它**是产品输出的一份渲染** —— 输出的格式一改（哪怕只是多一行
+ * `无证据可判: connection`），示例就变成了**在教 agent 期待一个不存在的形状**。
+ *
+ * 这是**已经真实发生过**的：示例里曾经写着
+ * `jobs.onJobsChanged @ lib/index.js:591`「降级」，而那是后来被证伪的**假阳性**。
+ * 也就是说 skill 一度在教 agent 去报一条不存在的问题。
+ *
+ * 手写示例必然会腐烂，所以这里把它变成**可校验的**：抽出示例块，
+ * 与同一输入的真实输出逐行比对。改输出就必须改示例，反之亦然。
+ *
+ * 示例**故意省略**了尾部那段「说明: ...」（那是给终端读者的排版，不是结论），
+ * 所以比对时按前缀匹配，而不是要求全文相等。
+ */
+describe('skill 的示例输出必须与真实输出一致', () => {
+  test('示例块 = 真实运行的前缀（逐行）', () => {
+    const body = frontmatter(readSkill()).body
+    const m = /```\n(插件数: \d[\s\S]*?)\n```/.exec(body)
+    assert.ok(m, '找不到示例输出块 —— 它被删了还是改了开头？这条测试要跟着改')
+
+    const PARITYFIX = path.join(os.homedir(), '.dsh', 'profiles', 'parityfix')
+    if (!fs.existsSync(PARITYFIX)) {
+      // 与别的 skill 测试一致：本机没有这个 profile 就跳过并说明，不静默通过
+      assert.ok(true, '本机没有 parityfix profile，跳过')
+      return
+    }
+    const r = runCLI(['--nm', PARITYFIX,
+      '--probe', path.join(REPO, 'tools/parity/fixtures/host-surface-parityfix.json'),
+      '--dsh-version', '0.2.0-rc.2', '--no-baseline'])
+    const example = m[1].split('\n').map((l) => l.trimEnd())
+    const real = (r.out || '').split('\n').map((l) => l.trimEnd())
+
+    for (let i = 0; i < example.length; i++) {
+      if (example[i] === '') continue
+      assert.equal(example[i], real[i],
+        `skill 的示例输出与真实输出第 ${i + 1} 行不一致 —— `
+        + `示例是手写的就必然会腐烂。把真实输出抄回 SKILL.md（或改这条测试）。`)
+    }
+  })
+})

@@ -49,7 +49,7 @@
 
 | 能力 | 插件（进程内） | 脚本（npx） | skill |
 |---|---|---|---|
-| 体检已装插件的宿主层 | 主职 | 可以（要起一次性 profile，40–80 秒） | 不实现，只教 agent 何时调用 |
+| 体检已装插件的宿主层 | 主职 | 可以：`--probe-boot` 起一次性 profile 拿运行时面，**实测 ~9 秒（parityfix）/ ~18 秒（desktop）**；编排脚本那条全流程更慢（它还要查 npm 身份、隔离安装） | 不实现，只教 agent 何时调用 |
 | 体检客户端半边 | ✅ 独有 | ❌ 命令行永远看不到 | ❌ |
 | 预检尚未安装的插件 | ❌ 被只读约束排除 | ✅ 独有 | ❌ |
 | 「装不上」（闸门拒绝）类结论 | ❌ | ✅ 独有 | ❌ |
@@ -522,7 +522,7 @@ window.__COMPAT_CHECK__ = { slot, label, body, renders: (…||0)+1, at: Date.now
 
 ### 7.3 已实测的 DSH 契约（不要再重新调查）
 
-**客户端 UI 只有 `ctx.slots` 一条通道**，90 个槽位，每个带 `replaceRisk`。注册写法：
+**客户端 UI 只有 `ctx.slots` 一条通道**，90 个槽位（`tools/slot-probe/` 实测，2026-10-10 / DSH 0.2.0-rc.2；要复算就起一次 profile 跑那个探针），每个带 `replaceRisk`。注册写法：
 
 ```js
 ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
@@ -562,7 +562,7 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 | 项 | 值 |
 |---|---|
 | 受版本控制文件 | **132**（57 个人工维护 + 75 个夹具数据） |
-| 测试 | **230 条**（10 个测试文件）+ 2 条慢测试（`DSC_SLOW=1`） |
+| 测试 | **240 条**（12 个测试文件，其中 `probe-boot` 默认跳过）；另 2 条慢测试需 `DSC_SLOW=1` |
 | 默认 `node --test test/` | 全绿，约 **7 秒** |
 | 提取缺陷记录 | **27 条**，全部已修（`docs/extraction-findings.md`） |
 | 三个回归基准 | `@omdsh-dev/dsh-plugin-check` 可用 / `dsh-keep-awake` 部分可用 / `dsh-pet` 可用 |
@@ -613,7 +613,7 @@ dsh-plugin-compat-check/
 │
 ├── docs/extraction-findings.md               # 实测提取缺陷清单 + 探针的两条边界
 │
-├── test/                                     # 230 条断言 / 10 个测试文件 / 七层
+├── test/                                     # 241 条断言 / 12 个测试文件
 │   ├── helpers.mjs
 │   ├── invariants.test.mjs                   #   自恰性（69 条）
 │   ├── snapshot.test.mjs                     #   输出变了没有
@@ -627,9 +627,10 @@ dsh-plugin-compat-check/
 │   ├── __expectations__/micro.json           #   人写的产品承诺
 │   ├── __snapshots__/{micro,parityfix}.json  #   内容哈希快照
 │   ├── __baseline-versions.json              #   基准版本锁
-│   └── fixtures/micro/                       #   15 个合成插件 + 合成宿主运行时面
+│   └── fixtures/micro/                       #   22 个合成插件 + 合成宿主运行时面
 │
 └── tools/                                    # 开发工具（不参与运行时）
+    ├── doc-check.mjs                        #   文档数字自检（断言条数要比实测）
     ├── catalog/extract-host-api.py           #   抽官方 API 目录（rules/ 的数据来源）
     ├── parity/{parity.sh,a4b-diff.mjs,expected-diffs.json,python-reference/}
     │   └── fixtures/{host-surface-parityfix.json,hang-cycle/}
@@ -638,7 +639,7 @@ dsh-plugin-compat-check/
 
 > 上面这棵树是**从 `git ls-files` 实测出来的**，不是凭记忆写的。
 > 上一版（A 阶段写的）严重过时：漏了 `bin/`、`lib/baseline.mjs`、`lib/report.mjs`、
-> 整个 `skill/`、9 个测试文件里的 8 个、两个规则表，以及两份 README。
+> 整个 `skill/`、绝大多数测试文件、两个规则表，以及两份 README。
 > **"结构节"是最容易腐烂的文档**，所以它必须能被一条命令复核。
 
 ### 8.3 临时环境（可随时删）

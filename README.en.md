@@ -194,7 +194,7 @@ The last two are deliberately separated. `no-calls` and `abstained` look like "f
 
 ## Layout
 
-(132 version-controlled files: 57 of code / documentation / data tables, and 66 fixture files
+(132 version-controlled files: 57 of code / documentation / data tables, and 75 fixture files
 (`test/fixtures/micro/node_modules/` with 48 synthetic plugin files, `tools/parity/fixtures/hang-cycle/node_modules/` with 5,
 and one synthetic host runtime surface). All 57 hand-maintained entries are listed below; fixture contents are summarised.)
 
@@ -242,7 +242,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # measured extraction defects (numbered) + the probe's two boundaries
 │
-├── test/                       # 230 assertions across seven layers (see below)
+├── test/                       # 241 assertions / 12 test files (see below)
 │   ├── helpers.mjs             #   shared fixtures: load tables, snapshot digests, hashing
 │   ├── invariants.test.mjs     #   self-consistency (must hold for any input)
 │   ├── snapshot.test.mjs       #   did the output change (key fields + content hash)
@@ -255,6 +255,7 @@ dsh-plugin-compat-check/
 │   ├── host-structure.test.mjs    # same for the host half (really calls apply, checks what it registered)
 │   ├── packaging.test.mjs      #   is the npm package self-contained? (really packs it)
 │   ├── probe-boot.test.mjs     #   --probe-boot end to end (**skipped by default**, DSC_SLOW=1)
+│   ├── docs.test.mjs           #   are the numbers in the docs still right?
 │   ├── __expectations__/
 │   │   └── micro.json          #   hand-written product promises: these verdicts **must** hold
 │   ├── __snapshots__/
@@ -289,7 +290,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-**221 assertions** (9 test files) by default, in seconds. One **slow test** is skipped by default:
+**241 assertions** (12 test files) by default, in seconds. `probe-boot.test.mjs` is skipped by default:
 
 ```bash
 # really boot a host to verify --probe-boot end to end (about 10-20s)
@@ -304,7 +305,17 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > **leaving no litter behind**). When skipped it prints a line saying how to run it, so it
 > does not become a silently missing test.
 
-**228** assertions (9 test files) across seven layers, each answering a different question:
+**241 assertions, spread across 12 test files.**
+
+"Layers" here means two **different** things — they used to be conflated, which is why the same
+docs said both "three layers" (`Plan.md` §0) and "seven layers" (this section):
+
+* **3 epistemic layers** (`invariants` / `__expectations__` / `__snapshots__`) — each is, in
+  principle, blind to the class of error the others catch; all three are required;
+* **12 test files** — 8 further files each watch one concrete concern (arguments, cache, drift,
+  doc drift, secrets, structure, packaging…). They are **not** part of those three layers, but they fail just the same.
+
+What each file answers:
 
 | File | Answers | Blind to |
 |---|---|---|
@@ -313,6 +324,9 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 | `__expectations__/` | Is the verdict the one we **promised**? (hand-written) | Cases nobody thought of |
 | `cli.test.mjs` | Did the flags actually take effect? Are failures swallowed? | UI behaviour |
 | `client-structure` / `host-structure` | Can a component/host **register successfully but do nothing**? | Real rendering |
+| `cache.test.mjs` | Is the cache policy right, does a concurrent burst refresh **only once**, is the auto-check timing right? | Real startup ordering |
+| `docs.test.mjs` | Are the numbers in the **documentation** still right (continuous numbering, valid cross-refs, three-language consistency)? | Assertion counts (needs the suite; see `tools/doc-check.mjs`) |
+| `secrets.test.mjs` | Are there credentials in the repo, would the **probe copy values out**? | Credentials in other shapes |
 | `baseline.test.mjs` | Is every diff category right? **Is it quiet when nothing changed?** | Real plugins |
 | `skill.test.mjs` | Can the tool actually do everything the skill claims? (doc drift) | —— |
 | `probe-boot.test.mjs` (**skipped by default**, `DSC_SLOW=1`) | Does `--probe-boot` really boot a host and obtain a surface? | Slow (10-20s), hence not run by default |

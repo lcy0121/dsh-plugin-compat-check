@@ -125,6 +125,7 @@ dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
 | `--json` | 机器可读输出 |
 | `--install-skill` | 只装 skill，不体检（不需要判定内核） |
 | `--force` | 配合 `--install-skill`，覆盖已存在的 skill |
+| `--help` | 用法（**不查内核、直接退 0**）|
 
 > **`--install-skill` 与体检互不干扰**：前者不需要内核；后者在内核缺失时会**直接报错退出**，不会降级成"只打印提取结果"——降级会给出一个看起来正常、**实际没有结论**的输出。
 
@@ -196,8 +197,8 @@ dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
 
 ## 目录结构
 
-（受版本控制共 **132** 个文件：57 个是代码 / 文档 / 规则表，66 个是夹具数据
-（`test/fixtures/micro/node_modules/` 48 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
+（受版本控制共 **132** 个文件：57 个是代码 / 文档 / 规则表，75 个是夹具数据
+（`test/fixtures/micro/node_modules/` 69 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
 以及 1 个合成宿主运行时面）。下面把 57 个人工维护的条目**列全**，夹具内部按样例说明。）
 
 ```
@@ -247,7 +248,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # 已实测的提取缺陷清单（编号）+ 探针的两条边界
 │
-├── test/                       # 230 条断言，分七层（见下节）
+├── test/                       # 241 条断言 / 12 个测试文件（见下节）
 │   ├── helpers.mjs             #   共用夹具：加载规则表/目录、快照摘要、哈希
 │   ├── invariants.test.mjs     #   结果自恰性（对任何输入都必须成立）
 │   ├── snapshot.test.mjs       #   输出变了没有（关键字段 + 内容哈希）
@@ -260,6 +261,7 @@ dsh-plugin-compat-check/
 │   ├── host-structure.test.mjs    # 宿主半边同上（真的调用 apply，看它注册了什么）
 │   ├── packaging.test.mjs      #   npm 包自足吗（真打包，看它离开仓库还算不算得出结论）
 │   ├── probe-boot.test.mjs     #   --probe-boot 端到端（**默认跳过**，DSC_SLOW=1 才跑）
+│   ├── docs.test.mjs           #   文档信息里的数字还对吗（编号、交叉引用、三语一致）
 │   ├── __expectations__/
 │   │   └── micro.json          #   人写的产品承诺：这些结论**必须**是这个
 │   ├── __snapshots__/
@@ -268,7 +270,7 @@ dsh-plugin-compat-check/
 │   ├── __baseline-versions.json #  基准版本锁（漂移会以 BASELINE_DRIFT 报出）
 │   └── fixtures/
 │       ├── micro/host-surface.json          # 合成宿主运行时面
-│       └── micro/node_modules/@fixture/*    # 21 个合成插件，每个专测一种判定路径
+│       └── micro/node_modules/@fixture/*    # 22 个合成插件，每个专测一种判定路径
 │
 └── tools/                      # 开发工具（不参与运行时）
     ├── catalog/extract-host-api.py     # 从宿主里抽官方 API 目录（rules/ 的数据来源）
@@ -294,11 +296,18 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-默认 **221 条断言**（9 个测试文件），秒级。另有一条**慢测试**默认跳过：
+默认 **241 条断言**（12 个测试文件），秒级。其中 `probe-boot.test.mjs` 默认跳过：
 
 ```bash
 # 真的起一次宿主，验证 --probe-boot 端到端可跑（约 10~20 秒）
 DSC_SLOW=1 node --test test/probe-boot.test.mjs
+```
+
+还有一件事**测试层做不到**：验证文档里写的断言条数是不是真的。
+在测试里跑套件会自己调自己（无限递归，实测踩过），所以它是**独立脚本**：
+
+```bash
+node tools/doc-check.mjs     # 文档数字 vs 实测，不一致就 exit 1
 ```
 
 > 慢测试默认不跑，是因为它要复制 profile、跑 pnpm、起宿主、等报告 —— 十几秒。
@@ -307,7 +316,17 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > 报告写得出来、**跑完不留垃圾**）。默认跳过时它会打一行提示说明怎么跑，
 > 免得变成"静默消失的测试"。
 
-**228** 条断言（9 个测试文件），分七层，各回答一个不同的问题：
+**241 条断言，分布在 12 个测试文件里。**
+
+「分层」要说清两件**不同**的事 —— 它们以前被混在一起，于是同一份文档里同时写着
+「三层」（`Plan.md` §0）和「七层」（本节）：
+
+* **3 个认识论分层**（`invariants` / `__expectations__` / `__snapshots__`）—— 这三层各自在
+  **原理上**看不见对方那一类错误，缺一不可；
+* **12 个测试文件** —— 另外 8 个文件各自盯一个具体问题（参数、缓存、差分、文档漂移、凭据、
+  结构、打包…）。它们**不属于**那三层，但同样会失败。
+
+各文件回答什么：
 
 | 文件 | 回答什么 | 抓不到什么 |
 |---|---|---|
@@ -316,6 +335,9 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 | `__expectations__/` | 结论是不是**产品承诺**的那个（人写） | 自己没想到的情形 |
 | `cli.test.mjs` | 参数真的起了作用吗、失败会不会被静默吞掉 | 界面行为 |
 | `client-structure` / `host-structure` | 组件/宿主会不会**注册成功但什么都没做** | 真实渲染效果 |
+| `cache.test.mjs` | 缓存策略对吗、**并发只刷一次**吗、自动体检的时机对不对 | 真实启动时序 |
+| `docs.test.mjs` | **文档信息**里的数字还对吗（编号连续、交叉引用有效、三语文档一致） | 断言条数（那要跑套件，见 `tools/doc-check.mjs`） |
+| `secrets.test.mjs` | 仓库里有没有凭据、**探针会不会把值抄下来** | 不在这两个形态里的凭据 |
 | `baseline.test.mjs` | 差分每一类都对吗、**没有变化时安静吗** | 真实插件 |
 | `skill.test.mjs` | skill 说的每件事工具都做得到吗（文档漂移） | —— |
 | `probe-boot.test.mjs`（**默认跳过**，`DSC_SLOW=1`） | `--probe-boot` 真的能起一次宿主并拿到面吗 | 慢（10~20 秒），所以默认不跑 |

@@ -77,10 +77,12 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 可用  dsh-pet@0.3.6
      客户端半边（命令行测不到，需界面验证）: commandUi, locale, remote, remote.commands, slots
      已过滤（判为噪音/有兜底）: llm.listConfigurableProviders, llm.listProviders
+     无证据可判（只出现名字，没有调用点）: connection
 可用  dsh-plugin-compat-check-probe@0.0.1   [空洞的结论：无可检查对象]
 ```
 
-> ⚠️ 上面这段是**从真实运行里抄的**，不是编的。它曾经是编的 —— 里面写着
+> ⚠️ 上面这段是**从真实运行里抄的**，而且**有一条测试盯着它**（`test/skill.test.mjs`：
+> 把这段示例抽出来与真实输出逐行比对）。它曾经是编的 —— 里面写着
 > `jobs.onJobsChanged @ lib/index.js:591` 是"降级"，而查源码 :590 是
 > `if (jobs !== undefined && typeof jobs.onJobsChanged === 'function')`，
 > **作者明明写了能力检测**，那是一条**假阳性**（已修）。
