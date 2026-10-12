@@ -2,6 +2,7 @@
   "name": "dsh-plugin-compat-check",
   "version": "0.1.0",
   "description": "Reports which installed DSH plugins are compatible with the current DSH version, with file:line and reason. The judgement kernel is staged into kernel/ at pack time, so the published tarball is self-contained.",
+  "license": "MIT",
   "type": "module",
   "main": "index.js",
   "exports": {
@@ -12,6 +13,14 @@
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
   },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  },
   "files": [
     "index.js",
     "README.md",
@@ -21,34 +30,28 @@
     "kernel/",
     "scripts/"
   ],
+  "engines": {
+    "node": "^22.19.0 || >=24"
+  },
   "scripts": {
     "prepack": "node scripts/stage-skill.mjs && node scripts/stage-kernel.mjs",
     "postpack": "node scripts/unstage-kernel.mjs",
     "prepublishOnly": "node scripts/prepublish-check.mjs",
     "stage-skill": "node scripts/stage-skill.mjs"
   },
-  "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
-    "client": {
-      "platform": "web"
-    }
-  },
-  "engines": {
-    "node": "^22.19.0 || >=24"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lcy0121/dsh-plugin-compat-check.git"
-  },
-  "license": "MIT",
-  "homepage": "https://github.com/lcy0121/dsh-plugin-compat-check#readme",
   "keywords": [
     "dsh",
     "deepseek-harness",
     "plugin",
     "compatibility",
     "health-check"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lcy0121/dsh-plugin-compat-check.git"
+  },
+  "homepage": "https://github.com/lcy0121/dsh-plugin-compat-check#readme",
+  "bugs": {
+    "url": "https://github.com/lcy0121/dsh-plugin-compat-check/issues"
+  }
 }
