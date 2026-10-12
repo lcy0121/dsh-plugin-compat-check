@@ -15,6 +15,18 @@
 | 结构树、用法、目录说明 | 三份 `README` |
 | 做过什么（时间顺序） | `git log`（**本文件不抄**） |
 
+**「文档信息」= 那 7 份文件 + 仓库的对外面孔。** 后者容易漏，所以有独立的自检：
+
+| 自检 | 盯什么 | 命令 |
+|---|---|---|
+| `test/docs.test.mjs` + `tools/doc-check.mjs` | 7 份文件里的**可复算数字**与交叉引用 | 离线，进发布闸门 |
+| **`tools/meta-check.mjs`** + `test/meta-check.test.mjs` | **GitHub 简介/标签/主页 · npm 的 version/keywords/README** | **联网**，不进闸门 |
+
+> ⚠️ **这个边界是踩出来的**：GitHub 简介曾挂着「在**安装前**判断…」很久，而
+> `README.md:44` 与 §1 明写禁止那句话 —— 此前几轮核查**一次都没扫到**，
+> 因为范围只限定在仓库内的 7 份文件里。同一天还发现 `plugin/README.md`（= npm 页面）
+> 的示例过期。**元数据与包页面也是文档，也会腐烂。**
+
 ---
 
 ## 0. 怎么用这份文档
@@ -522,6 +534,12 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 
 **日常维护**（改代码时）：三层测试都要过；改完跑 `node tools/doc-check.mjs` 与
 `plugin/scripts/prepublish-check.mjs`；每完成一小项回来更新本文件。
+
+**改了对外说明时**，另外跑一次 `node tools/meta-check.mjs` ——
+它盯 GitHub 简介/标签与 npm 上的 version/keywords/README。
+⚠️ **它的 `⏳ notice` 是预期内的**（npm 的 tarball 不可变，本地改了当然与线上不一致），
+只有 `❌ error` 才要动。**别把 notice 当错** —— 那会让这个守卫在两次发布之间天天红，
+然后被忽略（同 `docs/extraction-findings.md`「探针的四条边界」第 ② 条）。
 
 ### 9.0 下次发版怎么做（首次发布时踩过一遍）
 

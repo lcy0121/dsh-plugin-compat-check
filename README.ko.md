@@ -248,7 +248,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # 실측한 추출 결함 목록 (번호) + 프로브의 두 경계
 │
-├── test/                       # 263개 단언 / 15개 테스트 파일 (아래 참조)
+├── test/                       # 282개 단언 / 16개 테스트 파일 (아래 참조)
 │   ├── helpers.mjs             #   공용 픽스처: 표 로딩, 스냅샷 요약, 해싱
 │   ├── invariants.test.mjs     #   결과의 자기 일관성 (어떤 입력에도 성립해야 함)
 │   ├── snapshot.test.mjs       #   출력이 바뀌었는가 (핵심 필드 + 내용 해시)
@@ -262,6 +262,7 @@ dsh-plugin-compat-check/
 │   ├── packaging.test.mjs      #   npm 패키지가 자족적인가 (실제로 pack 해서 검증)
 │   ├── probe-boot.test.mjs     #   --probe-boot 종단 검증 (**기본 건너뜀**, DSC_SLOW=1)
 │   ├── docs.test.mjs           #   문서의 숫자가 아직 맞는가
+│   ├── meta-check.test.mjs     #   저장소의 외부 얼굴(GitHub/npm 메타데이터) 규칙
 │   ├── version.test.mjs        #   모든 진입점이 같은 버전을 보고하는가
 │   ├── labels.test.mjs         #   라벨셋 대조 (**기본 건너뜀**, DSC_SLOW=1)
 │   ├── client-arrival.test.mjs #   계획한 클라이언트 항목이 실제로 도착했는가 (**건너뜀**, DSC_SLOW=1)
@@ -276,6 +277,8 @@ dsh-plugin-compat-check/
 │       └── micro/node_modules/@fixture/*    # 판정 경로별 합성 플러그인 15개
 │
 └── tools/                      # 개발 도구 (런타임에 포함되지 않음)
+    ├── doc-check.mjs                  # 문서 숫자 자체 점검 (오프라인, 배포 게이트에 포함)
+    ├── meta-check.mjs                 # 외부 얼굴 자체 점검 (GitHub 설명/태그 · npm, 네트워크 필요)
     ├── client-arrival.mjs             # 클라이언트 항목 "도착" 대조 (H1', 브라우저 필요)
     ├── extractor-recall.mjs            # 호출 지점 재현율 (독립 열거)
     ├── catalog/extract-host-api.py     # 호스트에서 공식 API 카탈로그 추출 (rules/의 출처)
@@ -301,7 +304,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-기본 **263개 단언**(테스트 파일 15개), 몇 초. `probe-boot.test.mjs`는 기본적으로 건너뜁니다:
+기본 **282개 단언**(테스트 파일 16개), 몇 초. `probe-boot.test.mjs`는 기본적으로 건너뜁니다:
 
 ```bash
 # 실제로 호스트를 한 번 띄워 --probe-boot 종단 검증 (약 10~20초)
@@ -315,11 +318,11 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > 보고서 생성, **끝나고 쓰레기를 남기지 않기**). 건너뛸 때는 어떻게 실행하는지 한 줄
 > 알려 주어 조용히 사라진 테스트가 되지 않게 합니다.
 
-**263개 단언**이 **15개 테스트 파일**에 흩어져 있습니다. 여기서는 서로 다른 두 가지를 구분해야 합니다
+**282개 단언**이 **16개 테스트 파일**에 흩어져 있습니다. 여기서는 서로 다른 두 가지를 구분해야 합니다
 (예전에는 "일곱 계층"으로 뒤섞여 있었습니다):
 
 * **3개의 인식론적 계층**(`invariants` / `__expectations__` / `__snapshots__`) — 각 계층은 원리상 다른 계층이 잡는 오류를 보지 못합니다. `__expectations__`는 테스트 파일이 아니라 **판정 데이터**이며 `invariants`와 `snapshot`이 소비합니다;
-* **15개 테스트 파일** = 그 두 계층이 쓰는 2개(`invariants` / `snapshot`) + 나머지 **13**개. 각각 하나의 구체적인 문제(인자, 캐시, 드리프트, 문서 드리프트, 자격 증명, 구조, 패키징…)를 봅니다.
+* **16개 테스트 파일** = 그 두 계층이 쓰는 2개(`invariants` / `snapshot`) + 나머지 **13**개. 각각 하나의 구체적인 문제(인자, 캐시, 드리프트, 문서 드리프트, 자격 증명, 구조, 패키징…)를 봅니다.
 
 각 파일이 답하는 것:
 
@@ -335,6 +338,7 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 | `labels.test.mjs` (**기본 건너뜀**, `DSC_SLOW=1`) | 도구가 말하는 "이 항목은 pending에 머문다"가 **호스트 자신이** 보고하는 것과 맞는가 | ① 계층만 커버 — 조용한 성능 저하는 측정 불가 |
 | `client-arrival.test.mjs` (**기본 건너뜀**, `DSC_SLOW=1`) | 계획한 클라이언트 항목이 **브라우저에 실제로 도착했는가** (부정 대조 포함) | 느림(약 45초): 호스트 + 헤드리스 Chrome 기동 |
 | `docs.test.mjs` | **문서**의 숫자가 아직 맞는가(번호 연속성, 상호 참조 유효성, 3개 언어 일치) | 단언 개수(스위트 실행 필요, `tools/doc-check.mjs` 참조) |
+| `meta-check.test.mjs` | 저장소의 **외부 얼굴**(GitHub 설명/태그, npm version/keywords/README)이 제품 정의와 일치하는가 | 네트워크 부분(데이터는 `tools/meta-check.mjs`, gh/npm 필요) |
 | `secrets.test.mjs` | 저장소에 자격 증명이 있는가, **프로브가 값을 복사해 오지 않는가** | 다른 형태의 자격 증명 |
 | `baseline.test.mjs` | 모든 차분 범주가 맞는가, **변화가 없을 때 조용한가** | 실제 플러그인 |
 | `skill.test.mjs` | 도구가 skill이 주장하는 모든 것을 할 수 있는가 (문서 표류) | —— |
@@ -410,6 +414,7 @@ node tools/client-arrival.mjs                # 클라이언트 도착 (브라우
 | 새 DSH 버전 추적 | `python3 tools/catalog/extract-host-api.py`로 공식 카탈로그 재추출 |
 | 심각도 / 영향 문구 변경 | `rules/severity.json` 수정 후 테스트 실행 (커버리지·신선도 불변식이 알아챕니다) |
 | 파이썬 참조 구현과 대조 | `./tools/parity/parity.sh <node_modules 디렉터리>` |
+| 외부에 보이는 설명(설명/태그/README)을 수정 | `node tools/meta-check.mjs`로 GitHub와 npm의 얼굴을 대조 |
 | 이 저장소를 변경 | **먼저 [`Plan.md`](Plan.md)를 읽으세요**: 확정 결정 10건, 마일스톤, 작업 규칙, 지뢰 목록, 실측한 DSH 계약 |
 
 ## 알려진 제한

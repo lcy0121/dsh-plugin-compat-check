@@ -248,7 +248,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # measured extraction defects (numbered) + the probe's two boundaries
 │
-├── test/                       # 263 assertions / 15 test files (see below)
+├── test/                       # 282 assertions / 16 test files (see below)
 │   ├── helpers.mjs             #   shared fixtures: load tables, snapshot digests, hashing
 │   ├── invariants.test.mjs     #   self-consistency (must hold for any input)
 │   ├── snapshot.test.mjs       #   did the output change (key fields + content hash)
@@ -262,6 +262,7 @@ dsh-plugin-compat-check/
 │   ├── packaging.test.mjs      #   is the npm package self-contained? (really packs it)
 │   ├── probe-boot.test.mjs     #   --probe-boot end to end (**skipped by default**, DSC_SLOW=1)
 │   ├── docs.test.mjs           #   are the numbers in the docs still right?
+│   ├── meta-check.test.mjs     #   rules for the repo's outward face (GitHub/npm metadata)
 │   ├── version.test.mjs        #   do all entries report the same version?
 │   ├── labels.test.mjs         #   label-set reconciliation (**skipped by default**, DSC_SLOW=1)
 │   ├── client-arrival.test.mjs #   did the planned client entries actually arrive? (**skipped**, DSC_SLOW=1)
@@ -276,6 +277,8 @@ dsh-plugin-compat-check/
 │       └── micro/node_modules/@fixture/*    # 15 synthetic plugins, one per judgement path
 │
 └── tools/                      # development tooling (not part of the runtime)
+    ├── doc-check.mjs                  # documentation number self-check (offline; runs in the publish gate)
+    ├── meta-check.mjs                 # outward-face self-check (GitHub description/topics · npm; needs network)
     ├── client-arrival.mjs             # client entry "arrival" reconciliation (H1', needs a browser)
     ├── extractor-recall.mjs            # call-site recall (independent enumeration)
     ├── catalog/extract-host-api.py     # extract the official API catalogue from the host (source for rules/)
@@ -301,7 +304,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-**263 assertions** (15 test files) by default, in seconds. `probe-boot.test.mjs` is skipped by default:
+**282 assertions** (16 test files) by default, in seconds. `probe-boot.test.mjs` is skipped by default:
 
 ```bash
 # really boot a host to verify --probe-boot end to end (about 10-20s)
@@ -316,13 +319,13 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > **leaving no litter behind**). When skipped it prints a line saying how to run it, so it
 > does not become a silently missing test.
 
-**263 assertions, spread across 15 test files.** Two **different** things need separating here
+**282 assertions, spread across 16 test files.** Two **different** things need separating here
 (they used to be conflated into "seven layers"):
 
 * **3 epistemic layers** (`invariants` / `__expectations__` / `__snapshots__`) — each is, in
   principle, blind to the class of error the others catch. `__expectations__` is **judgement data**,
   not a test file: `invariants` and `snapshot` consume it;
-* **15 test files** = the 2 those layers use (`invariants` / `snapshot`) + **13** more, each
+* **16 test files** = the 2 those layers use (`invariants` / `snapshot`) + **13** more, each
   watching one concrete concern (arguments, cache, drift, doc drift, secrets, structure, packaging…).
 
 What each file answers:
@@ -339,6 +342,7 @@ What each file answers:
 | `labels.test.mjs` (**skipped by default**, `DSC_SLOW=1`) | Does the tool's "this entry will stay pending" match what the **host itself** reports? | Covers layer (1) only — silent degradation is unmeasurable |
 | `client-arrival.test.mjs` (**skipped by default**, `DSC_SLOW=1`) | Did the planned client entries **actually arrive in the browser**? (with a negative control) | Slow (~45s): boots a host + headless Chrome |
 | `docs.test.mjs` | Are the numbers in the **documentation** still right (continuous numbering, valid cross-refs, three-language consistency)? | Assertion counts (needs the suite; see `tools/doc-check.mjs`) |
+| `meta-check.test.mjs` | Does the repo's **outward face** (GitHub description/topics, npm version/keywords/README) still match the product definition? | The networked part (data comes from `tools/meta-check.mjs`; needs gh/npm) |
 | `secrets.test.mjs` | Are there credentials in the repo, would the **probe copy values out**? | Credentials in other shapes |
 | `baseline.test.mjs` | Is every diff category right? **Is it quiet when nothing changed?** | Real plugins |
 | `skill.test.mjs` | Can the tool actually do everything the skill claims? (doc drift) | —— |
@@ -419,6 +423,7 @@ regex) changed the design: we now recognise capability checks in same-file helpe
 | Track a new DSH version | `python3 tools/catalog/extract-host-api.py` to re-extract the official catalogue |
 | Change severity / impact wording | `rules/severity.json`, then run the tests (coverage and freshness invariants will notice) |
 | Compare against the Python reference | `./tools/parity/parity.sh <node_modules dir>` |
+| Change anything outward-facing (description/topics/README) | `node tools/meta-check.mjs` reconciles GitHub and npm |
 | Change this repository | **Read [`Plan.md`](Plan.md) first**: 10 locked decisions, milestones, working rules, landmine list, and the measured DSH contracts |
 
 ## Known limitations

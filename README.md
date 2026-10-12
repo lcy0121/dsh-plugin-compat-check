@@ -254,7 +254,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # 已实测的提取缺陷清单（编号）+ 探针的两条边界
 │
-├── test/                       # 263 条断言 / 15 个测试文件（见下节）
+├── test/                       # 282 条断言 / 16 个测试文件（见下节）
 │   ├── helpers.mjs             #   共用夹具：加载规则表/目录、快照摘要、哈希
 │   ├── invariants.test.mjs     #   结果自恰性（对任何输入都必须成立）
 │   ├── snapshot.test.mjs       #   输出变了没有（关键字段 + 内容哈希）
@@ -268,6 +268,8 @@ dsh-plugin-compat-check/
 │   ├── packaging.test.mjs      #   npm 包自足吗（真打包，看它离开仓库还算不算得出结论）
 │   ├── probe-boot.test.mjs     #   --probe-boot 端到端（**默认跳过**，DSC_SLOW=1 才跑）
 │   ├── docs.test.mjs           #   文档信息里的数字还对吗（编号、交叉引用、三语一致）
+│   ├── meta-check.test.mjs     #   仓库对外面孔（GitHub/npm 元数据）的规则
+│   ├── meta-check.test.mjs     #   仓库对外面孔（GitHub/npm 元数据）的规则
 │   ├── version.test.mjs        #   三个入口 + 报告 JSON 报的是不是同一个版本
 │   ├── __expectations__/
 │   │   └── micro.json          #   人写的产品承诺：这些结论**必须**是这个
@@ -280,6 +282,8 @@ dsh-plugin-compat-check/
 │       └── micro/node_modules/@fixture/*    # 27 个合成插件，每个专测一种判定路径
 │
 └── tools/                      # 开发工具（不参与运行时）
+    ├── doc-check.mjs                  # 文档数字自检（断言条数要比实测；**离线**，进发布闸门）
+    ├── meta-check.mjs                 # 仓库对外面孔自检（GitHub 简介/标签 · npm 包；**联网**）
     ├── client-arrival.mjs             # 客户端条目「到货」对账（H1'，需要浏览器）
     ├── extractor-recall.mjs            # 调用点层召回（独立枚举对账，不依赖提取器）
     ├── catalog/extract-host-api.py     # 从宿主里抽官方 API 目录（rules/ 的数据来源）
@@ -305,7 +309,7 @@ dsh-plugin-compat-check/
 node --test test/
 ```
 
-默认 **263 条断言**（15 个测试文件），秒级。其中 `probe-boot.test.mjs` 默认跳过：
+默认 **282 条断言**（16 个测试文件），秒级。其中 `probe-boot.test.mjs` 默认跳过：
 
 ```bash
 # 真的起一次宿主，验证 --probe-boot 端到端可跑（约 10~20 秒）
@@ -325,12 +329,12 @@ node tools/doc-check.mjs     # 文档数字 vs 实测，不一致就 exit 1
 > 报告写得出来、**跑完不留垃圾**）。默认跳过时它会打一行提示说明怎么跑，
 > 免得变成"静默消失的测试"。
 
-**263 条断言，分布在 15 个测试文件里。** 要说清两件**不同**的事（它们以前被混成过"七层"）：
+**282 条断言，分布在 16 个测试文件里。** 要说清两件**不同**的事（它们以前被混成过"七层"）：
 
 * **3 个认识论分层**（`invariants` / `__expectations__` / `__snapshots__`）—— 各自在
   **原理上**看不见对方那一类错误。其中 `__expectations__` 是**判据数据**不是测试文件，
   由 `invariants` 与 `snapshot` 消费；
-* **15 个测试文件** = 那两层用的 2 个（`invariants` / `snapshot`）+ 另外 **13** 个，
+* **16 个测试文件** = 那两层用的 2 个（`invariants` / `snapshot`）+ 另外 **13** 个，
   各自盯一个具体问题（参数、缓存、差分、文档漂移、凭据、结构、打包…）。
 
 | 文件 | 回答什么 | 抓不到什么 |
@@ -343,6 +347,7 @@ node tools/doc-check.mjs     # 文档数字 vs 实测，不一致就 exit 1
 | `cache.test.mjs` | 缓存策略对吗、**并发只刷一次**吗、自动体检的时机对不对 | 真实启动时序 |
 | `version.test.mjs` | 三个入口 + 报告 JSON 报的是不是**同一个**版本（「单版本」承诺的守门人） | 真实发布流程 |
 | `docs.test.mjs` | **文档信息**里的数字还对吗（编号连续、交叉引用有效、三语文档一致） | 断言条数（那要跑套件，见 `tools/doc-check.mjs`） |
+| `meta-check.test.mjs` | **仓库的对外面孔**（GitHub 简介/标签、npm 的 version/keywords/README）与产品定义一致吗 | 联网那部分（取数用 `tools/meta-check.mjs`，需 gh/npm） |
 | `secrets.test.mjs` | 仓库里有没有凭据、**探针会不会把值抄下来** | 不在这两个形态里的凭据 |
 | `baseline.test.mjs` | 差分每一类都对吗、**没有变化时安静吗** | 真实插件 |
 | `skill.test.mjs` | skill 说的每件事工具都做得到吗（文档漂移） | —— |
@@ -418,6 +423,7 @@ node tools/client-arrival.mjs                # 客户端到货（要浏览器）
 | 跟进 DSH 版本 | `python3 tools/catalog/extract-host-api.py` 重新抽官方目录 |
 | 改严重度/影响面文案 | `rules/severity.json`，然后跑测试（有覆盖与新鲜度不变式盯着） |
 | 与 python 参考实现对拍 | `./tools/parity/parity.sh <node_modules 目录>` |
+| 改对外说明（简介/标签/README） | `node tools/meta-check.mjs` 核对 GitHub 与 npm 上的面孔 |
 | 改这个仓库 | **先读 [`Plan.md`](Plan.md)**：10 项已锁定决策、里程碑、作业规程、地雷清单、已实测的 DSH 契约都在里面 |
 
 ## 已知限制
