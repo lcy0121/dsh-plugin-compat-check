@@ -94,6 +94,10 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --quiet
 ### 方式二：装成 DSH 插件（有面板）
 
 ```bash
+# 推荐：从 npm（快，且能拿到版本号）
+dsh plugin --profile <你的 profile> add dsh-plugin-compat-check
+
+# 或者直接从 GitHub（不用等 npm 同步）
 dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
 ```
 

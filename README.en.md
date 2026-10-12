@@ -94,7 +94,11 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --quiet
 ### 2. Install as a DSH plugin (gives you a panel)
 
 ```bash
-dsh plugin --profile <your-profile> add github:lcy0121/dsh-plugin-compat-check
+# Recommended: from npm (fast, and you get a version number)
+dsh plugin --profile <your profile> add dsh-plugin-compat-check
+
+# Or straight from GitHub (no need to wait for npm propagation)
+dsh plugin --profile <your profile> add github:lcy0121/dsh-plugin-compat-check
 ```
 
 Then look under **Settings → Built-in plugins → Compatibility** for the overview table. Open any plugin's detail page and its verdict badge sits in the title row, with the individual findings below. A few seconds after startup it also runs once by itself and logs whether anything **changed since last time**.

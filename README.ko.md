@@ -94,7 +94,11 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --quiet
 ### 2. DSH 플러그인으로 설치 (패널 제공)
 
 ```bash
-dsh plugin --profile <프로필> add github:lcy0121/dsh-plugin-compat-check
+# 권장: npm에서 설치 (빠르고 버전 번호를 얻을 수 있음)
+dsh plugin --profile <사용 중인 profile> add dsh-plugin-compat-check
+
+# 또는 GitHub에서 직접 (npm 전파를 기다리지 않아도 됨)
+dsh plugin --profile <사용 중인 profile> add github:lcy0121/dsh-plugin-compat-check
 ```
 
 설치 후 **설정 → 내장 플러그인 → 호환성**에서 전체 표를 볼 수 있습니다. 아무 플러그인의 상세 페이지를 열면 제목 줄에 판정 배지가, 아래에는 개별 발견 사항이 있습니다. 시작 후 몇 초 뒤에 스스로 한 번 실행하며, **지난번과 비교해 바뀐 것이 있는지**를 로그에 남깁니다.
