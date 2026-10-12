@@ -41,10 +41,15 @@
   },
   "keywords": [
     "dsh",
+    "deepseek",
     "deepseek-harness",
+    "dsh-plugin",
     "plugin",
     "compatibility",
-    "health-check"
+    "health-check",
+    "cordis",
+    "agent-skills",
+    "cli"
   ],
   "repository": {
     "type": "git",
