@@ -1,7 +1,9 @@
 # macOS
 .DS_Store
+/node_modules/
+/plugin/node_modules/
 
-# 运行产物（工具默认写到 /tmp/dsh-plugin-compat-check，此处仅作兜底）
+# 运行产物（显式检查使用唯一私有临时目录，此处仅作兜底）
 /tmp/
 *.log
 
@@ -13,3 +15,5 @@
 # npm pack 时暂存的内核副本（由 prepack 生成、postpack 清掉）。
 # 内核只有一份真源：仓库根的 lib/ 与 rules/ —— 这里永远不该有提交物。
 plugin/kernel/
+
+/plugin/LICENSE

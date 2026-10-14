@@ -1,5 +1,19 @@
 # dsh-plugin-compat-check
 
+## 0.1.1 refactor status (local, unpublished)
+
+The npm artifact remains a **DSH plugin**. The CLI and install-check shell wrapper are distributed from this repository; the npm package has no CLI `bin`. After cloning, run `npm ci --ignore-scripts` before using the repository CLI. Node support is `^22.19.0 || >=24`.
+
+The analyzer now parses JS/TS with pinned Babel ASTs, follows relative side-effect imports, and keeps lexical bindings and individual call spans. It does not execute inspected plugin source. Dynamic resolution and cross-function data flow remain limited; parse/read/budget failures appear as coverage limitations. `coverage.status=limited`, `vacuous`, and observation provenance must be retained when reporting an `ok` verdict: absence of a finding is not proof of every feature working.
+
+Runtime services have distinct present/absent/unobserved/unreadable states. Missing probe keys never mean absence. Bound observations must match the target profile and DSH version, and expire after 24 hours. Legacy fixture reports remain usable only for explicit keys and are labeled unbound. Host hard injects and client requirements are assessed separately. Optional receivers do not guard missing methods. `certainty` describes evidence; `impactBasis` distinguishes observed loader state from inferred functional impact. The plugin samples the running host in process and includes mapped FAILED/PENDING loader entries. An explicitly requested different profile is inspected statically; current-host observations cannot prove its runtime behavior.
+
+Baselines use schema 2, canonical profile identity, evidence mode and rule/catalog/tool digests. Old baselines restart comparison. Severity/certainty changes are visible; a version-only change is neutral. Updates are atomic and locked; incomplete source scans do not advance the baseline. Files live under `$DSH_HOME/dsh-plugin-compat-check/` with profile/path-hash/mode in their names.
+
+Static CLI inspection does not launch DSH. `--probe-boot` and the shell install-check explicitly install packages and start inspected plugins in an owned temporary profile: this is real plugin execution, not a sandbox for untrusted code. They use unique private directories and terminate only owned child processes. Installation/network/setup errors return 3; explicit DSH peer-gate rejection returns 2. `--json` writes one JSON document to stdout. `--keep` retains the owned profile and private work directory; use the returned paths. There is no fixed shared `/tmp` output. Probe output requires a private `DSC_OUT_DIR`, and service inspection reads descriptors without invoking getters. Client arrival verification remains an opt-in developer command; Chrome CDP uses inherited pipes without a TCP debugger endpoint. It measures delivery and browser errors, not complete UI feature behavior.
+
+Current verification and generated inventory: [current-state.json](docs/current-state.json), [refactor results](docs/refactor-results.md). Historical measurements below describe their original inputs and are not a current certification. Real DSH startup/browser integration and Windows execution require separate verification.
+
 > Find out whether the DSH plugins you **already have installed** actually work on **your current DSH version** — and for anything that doesn't, get the **location** (`file:line`) and the **reason**.
 
 [简体中文](README.md) | **English** | [한국어](README.ko.md)
@@ -55,7 +69,7 @@ cd dsh-plugin-compat-check
 node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop
 
 # with a probe report, method-level findings become "certain"
-node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --probe /tmp/dsh-plugin-compat-check/probe-report.json --dsh-version 0.2.0-rc.2
+node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --probe /path/to/private-run/probe-report.json --dsh-version 0.2.0-rc.2
 
 # the repo ships one you can compare against directly (used by the regression baseline)
 node bin/compat-check.mjs --nm ~/.dsh/profiles/parityfix --probe tools/parity/fixtures/host-surface-parityfix.json --dsh-version 0.2.0-rc.2
@@ -193,9 +207,9 @@ The last two are deliberately separated. `no-calls` and `abstained` look like "f
 
 | Path | Contents |
 |---|---|
-| `/tmp/dsh-plugin-compat-check/boot.log` | Host boot log (including `did not activate`) |
-| `/tmp/dsh-plugin-compat-check/static.json` | Extracted services and call sites, with `file:line` |
-| `/tmp/dsh-plugin-compat-check/probe-report.json` | The host's real API surface |
+| `/path/to/private-run/boot.log` | Host boot log (including `did not activate`) |
+| `/path/to/private-run/static.json` | Extracted services and call sites, with `file:line` |
+| `/path/to/private-run/probe-report.json` | The host's real API surface |
 
 ## Layout
 
@@ -248,7 +262,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # measured extraction defects (numbered) + the probe's two boundaries
 │
-├── test/                       # 282 assertions / 16 test files (see below)
+├── test/                       # generated test totals / test files (see below)
 │   ├── helpers.mjs             #   shared fixtures: load tables, snapshot digests, hashing
 │   ├── invariants.test.mjs     #   self-consistency (must hold for any input)
 │   ├── snapshot.test.mjs       #   did the output change (key fields + content hash)
@@ -301,10 +315,10 @@ dsh-plugin-compat-check/
 ## Tests
 
 ```bash
-node --test test/
+npm test
 ```
 
-**282 assertions** (16 test files) by default, in seconds. `probe-boot.test.mjs` is skipped by default:
+Run the default suite; current counts are in `docs/current-state.json`. `probe-boot.test.mjs` is skipped by default:
 
 ```bash
 # really boot a host to verify --probe-boot end to end (about 10-20s)
@@ -319,13 +333,13 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > **leaving no litter behind**). When skipped it prints a line saying how to run it, so it
 > does not become a silently missing test.
 
-**282 assertions, spread across 16 test files.** Two **different** things need separating here
+**Current test counts are generated in `docs/current-state.json`.** Two **different** things need separating here
 (they used to be conflated into "seven layers"):
 
 * **3 epistemic layers** (`invariants` / `__expectations__` / `__snapshots__`) — each is, in
   principle, blind to the class of error the others catch. `__expectations__` is **judgement data**,
   not a test file: `invariants` and `snapshot` consume it;
-* **16 test files** = the 2 those layers use (`invariants` / `snapshot`) + **13** more, each
+* **test files** = the 2 those layers use (`invariants` / `snapshot`) + **13** more, each
   watching one concrete concern (arguments, cache, drift, doc drift, secrets, structure, packaging…).
 
 What each file answers:

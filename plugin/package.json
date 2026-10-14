@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-compat-check",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Reports which installed DSH plugins are compatible with the current DSH version, with file:line and reason. The judgement kernel is staged into kernel/ at pack time, so the published tarball is self-contained.",
   "license": "MIT",
   "type": "module",
@@ -28,7 +28,8 @@
     "lib/",
     "cordis.patch.yml",
     "kernel/",
-    "scripts/"
+    "scripts/",
+    "LICENSE"
   ],
   "engines": {
     "node": "^22.19.0 || >=24"
@@ -58,5 +59,9 @@
   "homepage": "https://github.com/lcy0121/dsh-plugin-compat-check#readme",
   "bugs": {
     "url": "https://github.com/lcy0121/dsh-plugin-compat-check/issues"
+  },
+  "dependencies": {
+    "@babel/parser": "7.29.9",
+    "semver": "7.7.3"
   }
 }

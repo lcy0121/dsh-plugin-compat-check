@@ -1,5 +1,19 @@
 # dsh-plugin-compat-check
 
+## 0.1.1 重构状态（本地，尚未发布）
+
+npm 包提供 DSH 插件；CLI 和安装检查脚本从本仓库使用，npm 包没有 CLI `bin`。克隆后先运行 `npm ci --ignore-scripts`。支持 Node `^22.19.0 || >=24`。
+
+提取器使用固定版本 Babel 解析 JS/TS AST，追踪词法绑定、每次调用的位置和包内相对导入，包括副作用 import；不执行被检查的源码。动态解析与跨函数数据流仍有限，解析、读取、资源上限失败会记录为覆盖限制。转述 `ok` 时必须保留 `coverage.status=limited`、`vacuous` 和采样来源；没有发现不能证明所有功能正常。
+
+运行时服务区分存在、明确不存在、未采样、读取失败。探针缺项不等于缺失。现代采样需匹配 profile、DSH 版本，超过24小时失效；旧格式只使用明确记录的键并标记未绑定。宿主硬依赖与客户端需求分别判定。`certainty` 表示证据确定性，`impactBasis` 区分 loader 实际状态与功能影响推断。插件在当前宿主内采样并纳入可映射的 FAILED/PENDING 条目；明确查询其它 profile 时使用静态证据，不借用当前宿主观测。
+
+基线 schema 2 按 canonical profile、采样模式、工具和规则/目录摘要比较；旧基线重新建立。严重度/确定性变化可见，纯版本升级为中性变化。更新使用锁和原子替换，源码扫描不完整不推进基线。文件位于 `$DSH_HOME/dsh-plugin-compat-check/`，名称包含 profile、路径哈希、采样模式。
+
+默认静态 CLI 不启动 DSH。显式 `--probe-boot` 和安装检查会安装包、在自己的临时 profile 中执行目标插件；临时 profile 不是操作系统沙箱。流程使用唯一私有目录，只关闭自己启动的进程。安装、网络、准备和启动失败返回3；明确的 DSH peer 闸门拒绝返回2。`--json` 的 stdout 是一份 JSON。`--keep` 返回保留的 profile/私有现场路径，不再使用共享 `/tmp` 固定路径。探针要求私有 `DSC_OUT_DIR`，读取描述符而不调用 getter。客户端到货核验仍是显式开发工具；Chrome CDP 使用继承管道，无 TCP 调试端口，只核对到货与浏览器错误，不认证完整业务功能。
+
+当前验证与自动统计见 [current-state.json](docs/current-state.json)、[重构实施记录](docs/refactor-results.md)。下文历史测量对应当时的输入；本轮真实 DSH 启动、浏览器界面和 Windows 集成尚待单独验证。
+
 > 体检你**已经装了的** DSH 插件与**当前 DSH 版本**是否兼容；不兼容的，给出**位置**（`file:line`）和**原因**。
 
 **简体中文** | [English](README.en.md) | [한국어](README.ko.md)
@@ -21,7 +35,7 @@ DeepSeek Harness（DSH）是「万物皆插件」的 agent harness：模型、�
 | 你可能会以为 | 实际情况 |
 |---|---|
 | `peerDependencies` / `dsh.compatibility` 写了支持 → 能用 | **声明可能是错的。** 有插件声明支持 `0.2.0`，实测启动即抛 `ctx.settings.register is not a function` |
-| DSH 的版本闸门放行了 → 能用 | 闸门只做**字符串范围比对**，它不验证 API 是否真的存在 |
+| DSH 的版本闸门放行了 → 能用 | 闸门按 semver 检查官方 peer 范围，它不验证 API 是否真的存在 |
 | 启动没报错 → 能用 | 插件普遍用 `try/catch`、`typeof` 守卫做降级。**API 缺失时它会「激活成功」，但相应功能是死的** |
 | 启动日志干净 → 客户端也没问题 | 客户端代码跑在浏览器里。实测有插件宿主端完全干净、客户端抛错导致 UI 根本不注册 |
 
@@ -29,7 +43,7 @@ DeepSeek Harness（DSH）是「万物皆插件」的 agent harness：模型、�
 
 ## 三份产物，一个内核
 
-同一个 Node 内核（`lib/`），三个入口。**它们的结论不可能不一致**——面板、命令行、对话工具消费的是同一份 `computeReport()` 结果。
+同一个 Node 内核（`lib/`），三个入口。相同输入与采样证据使用同一份判定函数；运行时/静态模式的覆盖不同，结果可能不同。
 
 | | 插件（进程内） | CLI | skill |
 |---|---|---|---|
@@ -55,7 +69,7 @@ cd dsh-plugin-compat-check
 node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop
 
 # 有探针报告时，方法级结论才是「确定」
-node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --probe /tmp/dsh-plugin-compat-check/probe-report.json --dsh-version 0.2.0-rc.2
+node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --probe /path/to/private-run/probe-report.json --dsh-version 0.2.0-rc.2
 
 # 仓库里自带一份可直接对照的运行时面（回归基准用）
 node bin/compat-check.mjs --nm ~/.dsh/profiles/parityfix --probe tools/parity/fixtures/host-surface-parityfix.json --dsh-version 0.2.0-rc.2
@@ -196,15 +210,13 @@ dsh plugin --profile <你的 profile> add github:lcy0121/dsh-plugin-compat-check
 
 | 路径 | 内容 |
 |---|---|
-| `/tmp/dsh-plugin-compat-check/boot.log` | 宿主启动日志（含 `did not activate`） |
-| `/tmp/dsh-plugin-compat-check/static.json` | 从插件源码提取的服务与调用点（带 `file:line`） |
-| `/tmp/dsh-plugin-compat-check/probe-report.json` | 宿主真实 API 面 |
+| `/path/to/private-run/boot.log` | 宿主启动日志（含 `did not activate`） |
+| `/path/to/private-run/static.json` | 从插件源码提取的服务与调用点（带 `file:line`） |
+| `/path/to/private-run/probe-report.json` | 宿主真实 API 面 |
 
 ## 目录结构
 
-（受版本控制共 **172** 个文件：82 个是代码 / 文档 / 规则表，90 个是夹具数据
-（`test/fixtures/micro/node_modules/` 27 个合成插件文件、`tools/parity/fixtures/hang-cycle/node_modules/` 5 个，
-以及 1 个合成宿主运行时面）。下面把 82 个人工维护的条目**列全**，夹具内部按样例说明。）
+（文件清单由 `docs/current-state.json` 生成；下面展示主要结构。）
 
 ```
 dsh-plugin-compat-check/
@@ -254,7 +266,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # 已实测的提取缺陷清单（编号）+ 探针的两条边界
 │
-├── test/                       # 282 条断言 / 16 个测试文件（见下节）
+├── test/                       # 自动统计的测试用例 / 测试文件（见下节）
 │   ├── helpers.mjs             #   共用夹具：加载规则表/目录、快照摘要、哈希
 │   ├── invariants.test.mjs     #   结果自恰性（对任何输入都必须成立）
 │   ├── snapshot.test.mjs       #   输出变了没有（关键字段 + 内容哈希）
@@ -306,10 +318,10 @@ dsh-plugin-compat-check/
 ## 测试
 
 ```bash
-node --test test/
+npm test
 ```
 
-默认 **282 条断言**（16 个测试文件），秒级。其中 `probe-boot.test.mjs` 默认跳过：
+默认运行整套测试；数量见 `docs/current-state.json`。其中 `probe-boot.test.mjs` 默认跳过：
 
 ```bash
 # 真的起一次宿主，验证 --probe-boot 端到端可跑（约 10~20 秒）
@@ -329,12 +341,12 @@ node tools/doc-check.mjs     # 文档数字 vs 实测，不一致就 exit 1
 > 报告写得出来、**跑完不留垃圾**）。默认跳过时它会打一行提示说明怎么跑，
 > 免得变成"静默消失的测试"。
 
-**282 条断言，分布在 16 个测试文件里。** 要说清两件**不同**的事（它们以前被混成过"七层"）：
+**当前测试数量见 `docs/current-state.json`。** 要说清两件**不同**的事（它们以前被混成过"七层"）：
 
 * **3 个认识论分层**（`invariants` / `__expectations__` / `__snapshots__`）—— 各自在
   **原理上**看不见对方那一类错误。其中 `__expectations__` 是**判据数据**不是测试文件，
   由 `invariants` 与 `snapshot` 消费；
-* **16 个测试文件** = 那两层用的 2 个（`invariants` / `snapshot`）+ 另外 **13** 个，
+* **测试文件**包括 `invariants` / `snapshot` 及下面列出的入口与行为测试；新增回归见实施记录，
   各自盯一个具体问题（参数、缓存、差分、文档漂移、凭据、结构、打包…）。
 
 | 文件 | 回答什么 | 抓不到什么 |

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "619d4087c9de339017fd9ad27f97a9edd2b2fc04fda0ded358a18bc43572849a",
+    "hash": "515d915953ebc5aec270471b763435c269ce00e3f6b613147ccdcda074828ccf",
     "manifests": [
       {
         "name": "@fixture/aliased",
@@ -244,7 +244,7 @@
     "providedServices": [
       "vaultService"
     ],
-    "siteTotal": 35,
+    "siteTotal": 37,
     "buckets": {
       "@fixture/aliased": {
         "host-entry": 1,
@@ -331,7 +331,7 @@
         "fallback": 0
       },
       "@fixture/hangcycle": {
-        "host-entry": 1,
+        "host-entry": 3,
         "client-entry": 0,
         "client-extra": 0,
         "fallback": 0
@@ -445,10 +445,10 @@
           "jobs": 1
         },
         "localBindings": [
-          "account->deepseekAccount/ctx-get-soft",
-          "jobsList->jobs/alias",
+          "account->deepseekAccount/ctx-get",
+          "store->deepseekAccount/ctx-get",
           "narrow->jobs/ctx-get",
-          "store->deepseekAccount/alias"
+          "jobsList->jobs/ctx-get"
         ],
         "providedServices": [],
         "guardedPairs": [],
@@ -844,11 +844,13 @@
         },
         "fallback": false,
         "services": [
-          "sessions"
+          "jobs"
         ],
-        "declaredServices": [],
+        "declaredServices": [
+          "jobs"
+        ],
         "calls": {
-          "sessions": [
+          "jobs": [
             "list"
           ]
         },
@@ -856,10 +858,10 @@
           "alias": 1
         },
         "siteCounts": {
-          "sessions": 1
+          "jobs": 1
         },
         "localBindings": [
-          "sessions->sessions/ctx-member"
+          "sessions->jobs/ctx-member"
         ],
         "providedServices": [],
         "guardedPairs": [],
@@ -957,6 +959,8 @@
         "version": "1.0.0",
         "files": {
           "host-entry": [
+            "a.js",
+            "b.js",
             "index.js"
           ],
           "client-entry": [],
@@ -1144,9 +1148,7 @@
         "localBindings": [],
         "providedServices": [],
         "guardedPairs": [],
-        "shadowedBare": [
-          "index.js:slots"
-        ],
+        "shadowedBare": [],
         "unresolvedBindings": [],
         "ambiguousAliases": [],
         "subContexts": [
@@ -1240,7 +1242,9 @@
           "fallback": []
         },
         "fallback": false,
-        "services": [],
+        "services": [
+          "vaultService"
+        ],
         "declaredServices": [],
         "calls": {},
         "via": {},
@@ -1364,15 +1368,19 @@
           "sessions": [
             "search"
           ],
+          "tools": [
+            "register"
+          ],
           "workspaces": [
             "list"
           ]
         },
         "via": {
-          "ctx-member": 2
+          "ctx-member": 3
         },
         "siteCounts": {
           "sessions": 1,
+          "tools": 1,
           "workspaces": 1
         },
         "localBindings": [],
@@ -1382,7 +1390,7 @@
         "unresolvedBindings": [],
         "ambiguousAliases": [],
         "subContexts": [
-          "index.js:ctx,other,sctx"
+          "index.js:ctx,sctx,tools"
         ]
       },
       "@fixture/thisctx": {
@@ -1420,7 +1428,7 @@
         "unresolvedBindings": [],
         "ambiguousAliases": [],
         "subContexts": [
-          "index.js:ctx,this.ctx"
+          "index.js:ctx"
         ]
       },
       "@fixture/unresolved": {
@@ -1440,11 +1448,20 @@
         "declaredServices": [
           "totallyUnknownThing"
         ],
-        "calls": {},
-        "via": {},
-        "siteCounts": {},
+        "calls": {
+          "totallyUnknownThing": [
+            "someMethod"
+          ]
+        },
+        "via": {
+          "alias": 1
+        },
+        "siteCounts": {
+          "totallyUnknownThing": 1
+        },
         "localBindings": [
-          "mystery->totallyUnknownThing/ctx-get"
+          "mystery->totallyUnknownThing/ctx-get",
+          "m2->totallyUnknownThing/ctx-get"
         ],
         "providedServices": [],
         "guardedPairs": [],
@@ -1458,13 +1475,14 @@
     }
   },
   "verdict": {
-    "hash": "e9374cdf1ec2a30803c78daf8d74c606827b46ae9fa64286919d48e94ebd6d31",
+    "hash": "edf280abdb37ca2c4951eeb18ac1a691e18f9d45c34e93a48ab12c78bae58b9a",
     "summary": {
       "ok": 19,
       "partial": 3,
       "broken": 5,
       "unknown": 0,
-      "vacuousOk": 1
+      "limited": 27,
+      "vacuousOk": 4
     },
     "plugins": {
       "@fixture/aliased": {
@@ -1494,7 +1512,7 @@
             "severity": "fatal",
             "api": null,
             "location": null,
-            "impact": "客户端半边取不到 —— 宿主会在启动时拒绝加载（`startup failed: … did not activate`），用户连界面都进不去；若文件在但导入失败，界面会被一张错误屏替代"
+            "impact": "声明的客户端入口不可交付，宿主可能拒绝加载客户端"
           }
         ],
         "clientSide": [],
@@ -1511,7 +1529,7 @@
             "severity": "fatal",
             "api": null,
             "location": null,
-            "impact": "客户端半边取不到 —— 宿主会在启动时拒绝加载（`startup failed: … did not activate`），用户连界面都进不去；若文件在但导入失败，界面会被一张错误屏替代"
+            "impact": "声明的客户端入口不可交付，宿主可能拒绝加载客户端"
           }
         ],
         "clientSide": [],
@@ -1546,8 +1564,8 @@
             "certainty": "certain",
             "severity": "fatal",
             "api": "internalOnlyService",
-            "location": null,
-            "impact": "插件条目会停在 pending（等待该服务），等同于没起来"
+            "location": "index.js:3",
+            "impact": "插件顶层硬依赖在本次运行时面中明确不存在"
           }
         ],
         "clientSide": [],
@@ -1572,7 +1590,7 @@
             "severity": "feature-dead",
             "api": null,
             "location": null,
-            "impact": "声明自己与 DSH 0.2.0-rc.2 兼容，但实测有 1 处失效"
+            "impact": "声明兼容 DSH 0.2.0-rc.2，但发现 1 项有证据的冲突"
           }
         ],
         "clientSide": [],
@@ -1675,8 +1693,8 @@
             "certainty": "certain",
             "severity": "fatal",
             "api": "definitelyNotAHostService",
-            "location": null,
-            "impact": "插件条目会停在 pending（等待该服务），等同于没起来"
+            "location": "index.js:1",
+            "impact": "插件顶层硬依赖在本次运行时面中明确不存在"
           }
         ],
         "clientSide": [],
@@ -1687,9 +1705,7 @@
       "@fixture/noisy": {
         "verdict": "ok",
         "findings": [],
-        "clientSide": [
-          "slots"
-        ],
+        "clientSide": [],
         "filtered": [],
         "abstained": [],
         "runtimeFacilities": []
@@ -1702,8 +1718,8 @@
             "certainty": "certain",
             "severity": "fatal",
             "api": "noSuchServiceAnywhere",
-            "location": null,
-            "impact": "插件条目会停在 pending（等待该服务），等同于没起来"
+            "location": "index.js:1",
+            "impact": "插件顶层硬依赖在本次运行时面中明确不存在"
           }
         ],
         "clientSide": [],
@@ -1748,12 +1764,8 @@
       "@fixture/spread": {
         "verdict": "ok",
         "findings": [],
-        "clientSide": [
-          "workspaces"
-        ],
-        "filtered": [
-          "sessions.search"
-        ],
+        "clientSide": [],
+        "filtered": [],
         "abstained": [],
         "runtimeFacilities": []
       },
@@ -1770,11 +1782,11 @@
         "findings": [
           {
             "category": "unprovided-dependency",
-            "certainty": "certain",
+            "certainty": "suspected",
             "severity": "degraded",
             "api": "totallyUnknownThing",
-            "location": null,
-            "impact": "依赖的服务由其它插件提供，当前 profile 里没有提供方 —— 相关功能降级或不可用"
+            "location": "index.js:2",
+            "impact": "该依赖没有足够运行时或目录证据，不能确认可用或缺失"
           }
         ],
         "clientSide": [],

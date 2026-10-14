@@ -106,7 +106,7 @@ describe('skill：它说的每件事，工具都真的做得到', () => {
     assert.ok(mentioned.size > 0, 'skill 里一个旗标都没提 —— 那它没法教 agent 怎么跑')
     // 只检查**属于 CLI 的**旗标：`--keep` / `--timeout` 是编排脚本的旗标，
     // 在 CLI 的 help 里找不到它们是正确的，不是文档漂移。
-    const SCRIPT_ONLY = new Set(['--keep', '--timeout', '--install-skill', '--force'])
+    const SCRIPT_ONLY = new Set(['--keep', '--timeout', '--install-skill', '--force', '--ignore-scripts'])
     const cliFlags = [...mentioned].filter((f) => !SCRIPT_ONLY.has(f))
     const missing = cliFlags.filter((flag) => !help.includes(flag))
     assert.deepEqual(missing, [], `skill 提到了 CLI 不认识的旗标：${missing.join(', ')}（文档漂移）`)

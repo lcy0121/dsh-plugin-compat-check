@@ -1,3 +1,4 @@
+import {serviceShape} from '../lib/observation.mjs'
 /**
  * 守卫：**仓库里不许出现凭据**。
  *
@@ -145,24 +146,11 @@ describe('安全：仓库里不许出现凭据', () => {
 
   test('探针只记录结构，**绝不记录属性值**', () => {
     // 根因守卫。上面那条"仓库里没有密钥"是结果；这条盯的是**产生泄漏的那个机制**。
-    const src = fs.readFileSync(path.join(REPO, 'probe', 'index.mjs'), 'utf8')
-    // 取 dumpShape 的函数体
-    const i = src.indexOf('function dumpShape(')
-    assert.ok(i > 0, '找不到 dumpShape')
-    let depth = 0, j = src.indexOf('{', i)
-    for (let k = j; k < src.length; k++) {
-      if (src[k] === '{') depth++
-      else if (src[k] === '}') { depth--; if (depth === 0) { j = k + 1; break } }
-    }
-    const body = src.slice(i, j)
-    // 不许出现任何"把值存进结果"的写法
-    for (const bad of ['data[key]', 'data[']) {
-      assert.ok(!body.includes(bad),
-        `dumpShape 里又出现 ${bad} —— 这会把服务内部状态（可能是凭据）搬进报告`)
-    }
-    assert.ok(!/\bdata\b\s*[:=]\s*\{\}/.test(body), 'dumpShape 里又建了 data 容器')
-    // 而且必须真的还在工作（不能靠"什么都不做"通过）
-    assert.match(body, /methods\[key\]\s*=/, 'dumpShape 不再记录方法名了 —— 那是它的正职')
+    const secret='dummy-private-value';
+    const shape=serviceShape({credential:secret,method(){}});
+    assert.equal(shape.methods.method,'function');
+    assert.ok(!JSON.stringify(shape).includes(secret));
+
   })
 
   test('提交进来的探针报告里不带 data 字段', () => {

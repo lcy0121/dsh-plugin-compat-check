@@ -145,8 +145,9 @@ describe('基线：差分', () => {
       p: { version: '1.0.1', verdict: 'ok', findings: [] },
     }, '0.2.0-rc.2'), '0.2.0-rc.2')
     const d = diffAgainstBaseline(prev, next)
-    assert.equal(d.improved.length, 1)
-    assert.match(d.improved[0].reason, /版本变了，但结论与发现都没变/)
+    assert.equal(d.improved.length, 0)
+    assert.equal(d.updated.length,1)
+    assert.match(d.updated[0].reason, /版本变了，但结论未变/)
   })
 
   test('DSH 版本变化被单独记下 —— 它常常是上面那些变化的原因', () => {

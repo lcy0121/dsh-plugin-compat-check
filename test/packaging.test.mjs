@@ -23,7 +23,7 @@
 
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
+import {execFileSync}  from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -59,9 +59,34 @@ describe('打包自足性：npm pack 出来的包必须自己能算结论', () =
       const list = execFileSync('tar', ['-tzf', tgz], { encoding: 'utf8' })
       for (const need of ['kernel/lib/extract.mjs', 'kernel/lib/verdict.mjs',
         'kernel/lib/baseline.mjs', 'kernel/rules/dsh-api-catalog.json',
-        'kernel/rules/severity.json', 'lib/client.js', 'index.js']) {
+        'kernel/rules/severity.json','kernel/lib/source-analysis.mjs','kernel/lib/extract-worker.mjs','kernel/lib/state-store.mjs','LICENSE', 'lib/client.js', 'index.js']) {
         assert.ok(list.includes(need), `tarball 里缺少 ${need} —— 装上去就是"找不到判定内核"`)
       }
+      const install=path.join(tmp,'installed');fs.mkdirSync(install);
+      execFileSync('npm',['install','--offline','--ignore-scripts','--no-audit','--no-fund',tgz],{cwd:install,stdio:'pipe',timeout:120000});
+      const artifact=path.join(install,'node_modules','dsh-plugin-compat-check');
+      const home=path.join(tmp,'home'),profile=path.join(home,'profiles','test');fs.mkdirSync(profile,{recursive:true});
+      fs.cpSync(path.join(REPO,'test/fixtures/micro/node_modules'),path.join(profile,'node_modules'),{recursive:true});
+      const entry=path.join(tmp,'run.mjs');
+      fs.writeFileSync(entry,`
+        import {pathToFileURL} from 'node:url';
+        const plugin=await import(pathToFileURL(${JSON.stringify(artifact+'/index.js')}).href);
+        let tool;
+        const loader={entries:()=>[]};
+        const ctx={get:k=>k==='loader'?loader:undefined,effect:()=>{},inject:(deps,fn)=>{
+          const sub={get:ctx.get};if(deps.includes('tools'))sub.tools={register:t=>tool=t};fn(sub);
+        }};
+        plugin.apply(ctx);
+        const out=await tool.execute({profile:'test'});
+        if(out.summary==='无法判定')throw new Error(JSON.stringify(out));
+        const report=await globalThis.__DSH_COMPAT_CHECK__.compatReport();
+        if(report.toolVersion!==${JSON.stringify(JSON.parse(fs.readFileSync(path.join(PLUGIN,'package.json'),'utf8')).version)})throw new Error('Artifact lost its kernel version');
+        if(!report.ok||report.report.manifests.length!==27)throw new Error('Artifact did not analyze the fixture');
+        console.log('packaged host computed 27 plugins');
+      `);
+      const executed=execFileSync(process.execPath,[entry],{cwd:install,encoding:'utf8',timeout:20000,env:{...process.env,DSH_HOME:home,DSC_AUTORUN_MS:'0',DSC_PROFILE:'test'}});
+      assert.match(executed,/packaged host computed 27 plugins/);
+
     } finally {
       fs.rmSync(tmp, { recursive: true, force: true })
     }

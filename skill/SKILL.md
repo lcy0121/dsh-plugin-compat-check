@@ -66,21 +66,22 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 ```
 插件数: 4    有运行时面: 是
 
+采样说明: 旧格式探针未绑定 profile/DSH 版本；仅使用显式记录的服务，不推断缺项
+工具版本: 0.1.1    证据覆盖有限: 4 个插件
 结论: 可用 3    部分可用 1    不兼容 0    （其中 1 个「可用」是空洞的：它没有任何可检查的依赖）
 
 部分可用  dsh-keep-awake@0.2.0
      功能失效 / 宿主方法缺失  settings.register  @ lib/index.js:466
        影响（推断，非实测）: 插件的设置页/设置项会消失
-       依据: 运行时里没有这个方法；规则表给出影响面
+       依据: 运行时方法集没有此方法；源码存在未被方法能力检查保护的宿主调用
      客户端半边（命令行测不到，需界面验证）: locale, slots
      已过滤（判为噪音/有兜底）: jobs.onJobsChanged
      无证据可判（只出现名字，没有调用点）: timer
 可用  @omdsh-dev/dsh-plugin-check@0.1.0
 可用  dsh-pet@0.3.6
-     客户端半边（命令行测不到，需界面验证）: commandUi, locale, remote, remote.commands, slots
-     已过滤（判为噪音/有兜底）: llm.listConfigurableProviders, llm.listProviders
-     无证据可判（只出现名字，没有调用点）: connection
-可用  dsh-plugin-compat-check-probe@0.1.0   [空洞的结论：无可检查对象]
+     客户端半边（命令行测不到，需界面验证）: commandUi, connection, locale, remote, remote.commands, slots
+     已过滤（判为噪音/有兜底）: llm.listProviders, llm.listConfigurableProviders
+可用  dsh-plugin-compat-check-probe@0.1.1   [空洞的结论：无可检查对象]
 ```
 
 > ⚠️ 上面这段是**从真实运行里抄的**，而且**有一条测试盯着它**（`test/skill.test.mjs`：
@@ -95,7 +96,7 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 - `影响` 与 `依据` 是给人验证用的：告诉用户**凭什么**这么判，而不是只给一个红叉。
 - `[疑似]`：这一条没有运行时面支撑。转述时**必须**带上「疑似」，不能抹平成确定。
 - `[空洞的结论：无可检查对象]`：这个插件没有任何可检查的依赖，"可用"是空的。别把它当成通过。
-- `客户端半边（命令行测不到，需界面验证）`：列出来的服务**命令行永远测不到**，只能让用户去看界面上有没有该插件的元素。**不要替它下结论**。
+- `客户端半边（命令行测不到，需界面验证）`：列出来的服务**默认 CLI 不验证**，只能让用户去看界面上有没有该插件的元素。**不要替它下结论**。
 - `已过滤（判为噪音/有兜底）`：报了但被判定为不构成问题（例如插件自己写了 `typeof x?.y === 'function'` 能力检测）。过滤与弃权**也是结论的一部分**，要如实转述，不要只报红叉。
 - `无证据可判`：只出现名字、没有调用点。这是弃权，不是清白。
 - **分清「事实」和「推断」**（`impactBasis` 字段）：
@@ -105,7 +106,7 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
     **转述时必须保留这个限定**，不要说成"确定会消失"。
     实测有过一条 certain 级假阳性：工具说「设置页会消失」，而作者把能力检测写在了
     一个辅助函数里、早就兜住了，还 log 了降级行为。
-  - 没标的 —— 有独立机器信号确认（目前只有「条目会停在 pending」这一类，
+  - 没标的 —— 有独立机器信号确认（仅明确记录 loader FAILED / PENDING 的观测，
     宿主自己报 `fiber.state`，`tools/labels.mjs` 用合成正负例量过它）。
 - **转述结论时带上 `--version` 报出的工具版本**（`--json` 里是 `toolVersion`）。
   同一个插件在「规则表还没覆盖这个方法」和「已经覆盖」的两个版本下，
@@ -115,7 +116,7 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 
 | 码 | 含义 |
 |---|---|
-| `0` | 可用（全体无问题） |
+| `0` | 可用（未发现问题，仍需检查 coverage / vacuous） |
 | `1` | 部分可用（有 API 缺失，相关功能降级或失效） |
 | `2` | 不兼容（有插件连基本依赖都不满足） |
 | `3` | **无法判定**——工具/输入出了问题，**这不是插件的结论** |
@@ -136,14 +137,17 @@ CI 里可以直接用：`0` 过，`1`/`2` 按你的策略处理，`3` 是**工�
 - `插件数: 0` + 退出码 `0` 是**最危险**的输出：它意味着一个插件都没检到，不是"全都好"。看到这个先回头确认 `--nm` 指对了没有。
 
 **3. 「激活成功」不等于「功能可用」。**
-这个生态的插件普遍用 `try/catch`、`typeof` 守卫做降级：API 没了它照样激活成功，只是相应功能是**死的**。所以「启动没报错」「日志干净」都不能当结论；同理，插件的 `peerDependencies` / `engines.dsh` 声明也不等于事实——DSH 自带的版本闸门只做**字符串范围比对**，不验证 API 是否存在。
+这个生态的插件普遍用 `try/catch`、`typeof` 守卫做降级：API 没了它照样激活成功，只是相应功能是**死的**。所以「启动没报错」「日志干净」都不能当结论；同理，插件的 `peerDependencies` / `engines.dsh` 声明也不等于事实——DSH 自带的版本闸门按 semver 比对官方 peerDependencies，不验证 API 是否存在。
 
 ## 边界（不要越界承诺）
 
-- **客户端半边命令行测不到。** 插件在浏览器里跑的部分（面板、标签页、设置卡片）需要人工在界面上确认；本工具只列出待确认项，不判定。
-- **方法级判定是正则启发式**，可能有误报。拿不准时建议用户加 `--keep`（脚本形态）查看现场：`static.json`（提取到的调用点）、`probe-report.json`（宿主真实 API 面）、`boot.log`（启动日志）。
+- **默认报告不验证客户端功能；可选开发工具能验证条目到货与浏览器错误。** 插件在浏览器里跑的部分（面板、标签页、设置卡片）需要人工在界面上确认；本工具只列出待确认项，不判定。
+- **方法级判定使用 AST，但动态绑定与跨函数数据流仍有限**，可能有误报。拿不准时建议用户加 `--keep`（脚本形态）查看现场：`static.json`（提取到的调用点）、`probe-report.json`（宿主真实 API 面）、`boot.log`（启动日志）。
 - **副作用只有一个，要主动说清**：默认会把这次结论写成本机基线
-  （`$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.json`），好让下次对比出「相比上次变了什么」。
+  （`$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`），好让下次对比出「相比上次变了什么」。
   一次性检查（CI、替别人看一眼）加 `--no-baseline`；`--dry-run` 是只算差分不写。除此之外它不装包、
-  不改用户的 profile、不联网（除脚本形态的 npm 身份核对）。不要用它去"顺便修一下"。
+  不改用户的 profile、不联网（显式 `--probe-boot` 和安装检查会安装并执行目标插件）。不要用它去"顺便修一下"。
 - 报结论时**带上位置和依据**。只说「不兼容」而不给 `file:line`，等于让用户无法验证我们凭什么判——那正是这个工具存在的理由。
+
+
+0.1.1：`root` 缺项是未采样，不能称为不存在；`coverage.status=limited` 与 `vacuous` 必须转述。现代探针绑定 profile/DSH/采样时间；旧报告明确标为未绑定。解析、读取、资源上限等诊断会限制覆盖，完整性不足不更新基线。当前统计见 `docs/current-state.json`；npm 包是插件，CLI 从仓库使用并先运行 `npm ci --ignore-scripts`。显式安装检查会执行目标插件，临时 profile 不是不可信代码隔离沙箱。

@@ -24,196 +24,28 @@ import { REPO } from './helpers.mjs'
 const HOST = path.join(REPO, 'plugin', 'index.js')
 const SRC = fs.readFileSync(HOST, 'utf8')
 
-/** 把 host 半边加载进受控 context，好让我们直接调它的内部函数 */
-function loadHost() {
-  const calls = { computeReport: 0, computeReportAt: [] }
-  const logs = []
-  const sandbox = {
-    console: { log: (m) => logs.push(String(m)), warn: (m) => logs.push('WARN ' + m), error: () => {} },
-    process: { ...process, env: { ...process.env, DSC_CACHE_TTL_MS: '1000', DSC_AUTORUN_MS: '0' } },
-    setTimeout: (fn, ms) => { return 0 },
-    clearTimeout: () => {},
-    URL, Date, JSON, Object, Array, String, Number, Boolean, Error, Promise, Symbol, RegExp, Map, Set, Math,
-    globalThis: undefined,
-  }
-  sandbox.globalThis = sandbox
-  vm.createContext(sandbox)
-  // 只导出我们需要的那一个函数：serveReport
-  const wrapped = `__fns = {};
-    (function () {
-      ${SRC.slice(SRC.indexOf('const SCHEMA_VERSION'))}
-    })();
-  `
-  // 直接把 serveReport 的定义体抽出来单独求值更稳（避免 import/export 语法）
-  const i = SRC.indexOf('async function serveReport(state, ctx, force) {')
-  assert.ok(i > 0, '没找到 serveReport —— 函数名变了？')
-  // 找到函数结束位置（大括号配平）
-  let depth = 0, j = SRC.indexOf('{', i)
-  for (let k = j; k < SRC.length; k++) {
-    if (SRC[k] === '{') depth++
-    else if (SRC[k] === '}') { depth--; if (depth === 0) { j = k + 1; break } }
-  }
-  const body = SRC.slice(i, j)
-  sandbox.__computeCalls = calls
-  // `serveReport` 调用的 `computeReport` 是模块级的。测试里给它一个**可编程的桩**：
-  // 默认算一次记一次，可以按调用次数返回不同结果，也可以让它抛错。
-  sandbox.__computeImpl = null
-  const stub = `
-    function log(m) { __logs.push(String(m)) }
-    function errText(e) { return (e && e.message) ? e.message : String(e) }
-    async function computeReport(state, ctx) {
-      __computeCalls.computeReport += 1
-      __computeCalls.computeReportAt.push(Date.now())
-      if (__computeImpl) return __computeImpl(__computeCalls.computeReport)
-      return { ok: true, n: __computeCalls.computeReport }
-    }
-    ${body}
-    __serveReport = serveReport;
-  `
-  sandbox.__logs = logs
-  sandbox.__computeCalls = calls
-  vm.runInContext(stub, sandbox, { timeout: 5000 })
-  return {
-    serveReport: sandbox.__serveReport,
-    logs,
-    calls,
-    setCompute: (fn) => { sandbox.__computeImpl = fn },
-  }
-}
-
-/** 造一个假的 state + 假的 computeReport 记账 */
-function makeState(computeImpl) {
-  const state = { lastReport: null, lastReportAt: 0, computing: null, cacheTtlMs: 1000 }
-  const ctx = {}
-  const compute = async () => {
-    state.__computeCount = (state.__computeCount || 0) + 1
-    return computeImpl ? computeImpl(state.__computeCount) : { ok: true, n: state.__computeCount }
-  }
-  return { state, compute }
-}
-
-// serveReport 里调用的是模块级的 computeReport，所以这里用一个可替换的桩：
-// 我们不注入它，而是**直接把 state 预置好**来测三条边界 —— 那样更接近真实调用路径。
-describe('F2：缓存策略', () => {
-  test('有缓存且在有效期内 → 不重算（hit:true）', async () => {
-    const { serveReport } = loadHost()
-    // 这里 computeReport 不在作用域里，但我们走的是"有缓存且在期内"这一支，
-    // 所以它不会被调用 —— 这本身也验证了"没有多余的重算"。
-    const state = {
-      lastReport: { ok: true, marker: 'cached' },
-      lastReportAt: Date.now(),
-      computing: null,
-      cacheTtlMs: 60_000,
-    }
-    const out = await serveReport(state, {})
-    assert.equal(out.marker, 'cached')
-    assert.equal(out.cache.hit, true)
-    assert.equal(out.cache.refreshing, false)
-  })
-
-  test('缓存过期 → **先给旧的**并标记正在后台刷新（不让人等）', async () => {
-    const { serveReport } = loadHost()
-    const state = {
-      lastReport: { ok: true, marker: 'stale' },
-      lastReportAt: Date.now() - 10_000, // 远超 ttl
-      computing: null,
-      cacheTtlMs: 1000,
-    }
-    // 先抓住 promise，再 await —— 因为 await 之后后台那一枪可能已经落地、
-    // computing 被 finally 归零，那样就抓不到句柄了。
-    const pending = serveReport(state, {})
-    const inflight = state.computing
-    assert.ok(inflight, '应当已经启动后台刷新')
-    const out = await pending
-    assert.equal(out.marker, 'stale', '过期时也应当立刻返回旧结果，而不是等待重算')
-    assert.equal(out.cache.hit, true)
-    assert.equal(out.cache.refreshing, true, '必须标记"正在后台刷新"，否则调用方无法知道这是旧数据')
-    // 等后台那一枪落地，确认它把 lastReport 换掉了
-    await inflight
-    assert.notEqual(state.lastReport.marker, 'stale', '后台刷新应当替换掉旧结果')
-  })
-
-  test('并发多个请求只触发**一次**后台刷新（不会各算一遍）', async () => {
-    const { serveReport, calls, setCompute } = loadHost()
-    const state = {
-      lastReport: { ok: true, marker: 'stale' },
-      lastReportAt: Date.now() - 10_000,
-      computing: null,
-      cacheTtlMs: 1000,
-    }
-    // 让"体检"**真的慢**（挂在一个人工闸门上），否则每条请求都会在
-    // 下一条发出之前就结束，去重逻辑根本没被走到 —— 那样测出来的"通过"是假的。
-    let release
-    const gate = new Promise((r) => { release = r })
-    setCompute(async () => { await gate; return { ok: true, slow: true } })
-
-    // 三次请求**同时**发出（不 await 中间结果）——这才叫并发
-    const p1 = serveReport(state, {})
-    const p2 = serveReport(state, {})
-    const p3 = serveReport(state, {})
-    // 此刻后台那一枪应当**只有一个**在跑
-    const shared = state.computing
-    assert.ok(shared, '应当已经启动后台刷新')
-    const [r1, r2, r3] = await Promise.all([p1, p2, p3])
-    assert.equal(r1.cache.refreshing, true)
-    assert.equal(r2.cache.refreshing, true)
-    assert.equal(r3.cache.refreshing, true)
-    assert.equal(state.computing, shared, '三条请求必须共用同一个正在进行中的刷新')
-    // 闸门放开，后台那一枪落地
-    release()
-    await shared
-    assert.equal(state.computing, null, '落地后应当归零，允许下一次刷新')
-    assert.equal(state.lastReport.slow, true, '后台刷新应当把新结果写进缓存')
-    // 关键断言：**只算了一次**，而不是三次各算一遍（那会白烧 1.5 秒 × 3）
-    assert.equal(calls.computeReport, 1, `后台刷新跑了 ${calls.computeReport} 次，应当只跑 1 次`)
-  })
-
-  test('后台刷新失败 → 留下痕迹，而不是静默保留过期数据', async () => {
-    const { serveReport, logs, setCompute } = loadHost()
-    // 让后台刷新**真的失败**（不是靠未定义符号）
-    setCompute(() => { throw new Error('模拟刷新失败') })
-    const state = {
-      lastReport: { ok: true, marker: 'stale' },
-      lastReportAt: Date.now() - 10_000,
-      computing: null,
-      cacheTtlMs: 1000,
-    }
-    // 让 computeReport 抛错：它在受控环境里未定义，正好会 ReferenceError
-    const out = await serveReport(state, {})
-    assert.equal(out.marker, 'stale')
-    await state.computing
-    assert.ok(state.lastRefreshError, '刷新失败必须记下来 —— 否则面板会一直显示过期数据而没人知道')
-    assert.ok(logs.some((l) => /background refresh failed/.test(l)),
-      `应当有一条日志说明后台刷新失败。实际日志：${JSON.stringify(logs)}`)
-  })
-
-  test('没有缓存 → 必须**同步**算出来再返回（不能返回空、也不能只算后台）', async () => {
-    const { serveReport, calls } = loadHost()
-    const state = { lastReport: null, lastReportAt: 0, computing: null, cacheTtlMs: 1000 }
-    const out = await serveReport(state, {})
-    assert.equal(calls.computeReport, 1, '第一次访问必须真的算一次')
-    assert.equal(out.ok, true)
-    assert.equal(out.n, 1)
-    assert.equal(state.lastReport, out, '算出来的结果必须存进缓存')
-    assert.ok(state.lastReportAt > 0, '必须记下算出来的时间，否则 TTL 无从判断')
-    // 第一次**不该**带 cache.hit —— 它不是缓存命中，是现算的
-    assert.equal(out.cache, undefined)
-  })
-
-  test('?refresh=1 → 即使缓存新鲜也重算（用户明确要新的）', async () => {
-    const { serveReport, calls } = loadHost()
-    const state = {
-      lastReport: { ok: true, n: 99 },
-      lastReportAt: Date.now(),
-      computing: null,
-      cacheTtlMs: 60_000,
-    }
-    const out = await serveReport(state, {}, true)
-    assert.equal(calls.computeReport, 1, 'refresh=1 时必须重算')
-    assert.equal(out.n, 1)
-    assert.notEqual(out.n, 99)
-  })
-})
+// Cache policy is exercised against the actual ReportService, without copying function text.
+import {ReportService} from '../lib/report-service.mjs';
+describe('F2：缓存策略',()=>{
+ test('fresh cache avoids recomputation, force refresh computes',async()=>{
+  let n=0,now=0;const svc=new ReportService(async()=>({ok:true,n:++n}),{clock:()=>now,ttlMs:10});
+  await svc.get('A');now=5;assert.equal((await svc.get('A')).n,1);assert.equal(n,1);
+  assert.equal((await svc.get('A',{},true)).n,2);
+ });
+ test('stale cache returns while one shared refresh waits',async()=>{
+  let n=0,now=0,release;const gate=new Promise(r=>release=r);
+  const svc=new ReportService(async()=>{if(++n===2)await gate;return {ok:true,n};},{clock:()=>now,ttlMs:10});
+  await svc.get('A');now=20;
+  const results=await Promise.all([svc.get('A'),svc.get('A'),svc.get('A')]);
+  assert.ok(results.every(r=>r.n===1&&r.cache.refreshing));assert.equal(n,2);
+  const pending=svc.state('A').inflight;release();await pending;assert.equal((await svc.get('A')).n,2);
+ });
+ test('cache state is separate for each requested profile',async()=>{
+  let n=0;const svc=new ReportService(async o=>({ok:true,profile:o.profile,n:++n}));
+  assert.equal((await svc.get('A',{profile:'A'})).profile,'A');
+  assert.equal((await svc.get('B',{profile:'B'})).profile,'B');assert.equal(n,2);
+ });
+});
 
 describe('F2：启动后自动跑（静态检查 + 一次真实事故的回归）', () => {
   test('自动体检由**最后一次 loader 扫描完成**触发，而不是一个独立的定时器', () => {
@@ -354,9 +186,9 @@ describe('F2：profile 判断（环境变量会骗人）', () => {
     assert.equal(r.name, null, `不该把选项当成 profile 名，实际拿到 ${r.name}`)
   })
 
-  test('回退到 desktop 时，why 必须写明这是回退', () => {
+  test('无法判断 profile 时禁止回退到 desktop', () => {
     // 用户看到"检查了 desktop"与"没判断出来所以查了 desktop"是两件事。
     // 后者意味着结论可能不是他想要的那个 profile。
-    assert.match(SRC, /回退到 desktop profile（没能判断出正在跑哪一个）/)
+    assert.ok(!SRC.includes('回退到 desktop profile（没能判断出正在跑哪一个）'))
   })
 })

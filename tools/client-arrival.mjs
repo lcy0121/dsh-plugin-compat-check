@@ -46,6 +46,8 @@
  *     node tools/client-arrival.mjs --keep             # 留下临时 profile 与 Chrome 数据目录
  */
 
+import {launchChromePipe} from '../lib/debugger.mjs';
+import {randomUUID} from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -73,27 +75,11 @@ function parseArgs(argv) {
 }
 
 /** cdp 的最小封装：够用就好，零依赖 */
-function makeCdp(ws) {
-  let id = 0;
-  const pending = new Map();
-  const events = [];
-  ws.addEventListener('message', (e) => {
-    const m = JSON.parse(e.data);
-    if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); return; }
-    if (m.method) events.push(m);
-  });
-  const send = (method, params = {}) => new Promise((res) => {
-    const i = ++id;
-    pending.set(i, (r) => res(r.result ?? r.error));
-    ws.send(JSON.stringify({ id: i, method, params }));
-  });
-  return { send, events };
-}
-
 function log(msg, quiet) { if (!quiet) process.stderr.write(`${msg}\n`); }
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
+  if(!/^[\w.-]+$/.test(opts.profile)||['.','..'].includes(opts.profile))throw new Error('Invalid profile name');
   const base = path.join(HOME, 'profiles', opts.profile);
   if (!fs.existsSync(base)) {
     process.stderr.write(`基准 profile 不存在：${base}\n`);
@@ -104,16 +90,17 @@ async function main() {
     process.exit(3);
   }
 
-  const tmpName = `dsc-arrival-${process.pid}-${Date.now()}`;
+  const tmpName = `dsc-arrival-${randomUUID()}`;
   const tmpProfile = path.join(HOME, 'profiles', tmpName);
+  fs.mkdirSync(tmpProfile,{mode:0o700});
   const chromeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-arrival-chrome-'));
   let host = null;
   let chrome = null;
-  const cleanup = () => {
-    try { if (host) host.kill('SIGTERM'); } catch { /* 尽力而为 */ }
-    try { if (chrome) chrome.kill('SIGTERM'); } catch { /* 尽力而为 */ }
+  const cleanup = async () => {
+    try { if (host?.pid) {if(process.platform!=='win32')process.kill(-host.pid,'SIGTERM');else host.kill('SIGTERM');} } catch { /* 尽力而为 */ }
+    try { await chrome?.close(); } catch { /* 尽力而为 */ }
     // 兜底：确认端口进程真的没了（`--port 0` 起的宿主不会自己退）
-    try { spawnSync('pkill', ['-f', tmpName], { stdio: 'ignore' }); } catch { /* 尽力而为 */ }
+    // Never scan a global process namespace. Only this launch's child handles are owned.
     if (!opts.keep) {
       try { fs.rmSync(tmpProfile, { recursive: true, force: true }); } catch { /* 尽力而为 */ }
       try { fs.rmSync(chromeDir, { recursive: true, force: true }); } catch { /* 尽力而为 */ }
@@ -123,8 +110,7 @@ async function main() {
   try {
     // ── 1. 造一个临时 profile（**必须从干净的模板复制** —— 装过社区插件的 profile
     //      带着 `file:` 依赖，复制后 pnpm 会 ENOENT，报错还被收成一行）──
-    const cp = spawnSync('cp', ['-R', base, tmpProfile], { encoding: 'utf8', timeout: 60000 });
-    if (cp.status !== 0) throw new Error(`复制 profile 失败: ${(cp.stderr || '').trim()}`);
+    fs.cpSync(base,tmpProfile,{recursive:true});
     // `--break`：装一个**已知会坏**的客户端插件做负向对照。
     // 没有它的话，"0 条未到货"既可能是工具对，也可能是工具瞎 ——
     // 一个从没见过红的检查与永远绿的检查，在证据上没有区别。
@@ -144,7 +130,7 @@ async function main() {
 
     // ── 2. 起宿主，从 stdout 抓 URL+token ──
     host = spawn('dsh', ['--profile', tmpName, '--', '--port', '0', '--no-open'],
-      { env: { ...process.env, DSH_HOME: HOME } });
+      { detached:process.platform!=='win32',env: { ...process.env, DSH_HOME: HOME } });
     // ⚠️ **stderr 也要收。** `startup failed: …` 是打在 stderr 上的 ——
     // 只收 stdout 的话，"宿主拒绝启动"的原因会退化成一句没用的
     // "没给出 URL"（我第一版就是这样，差点把最重要的证据丢了）。
@@ -196,26 +182,14 @@ async function main() {
           process.stdout.write('  ❌ 非预期的启动失败 —— 检查这个 profile 的客户端条目。\n');
         }
       }
-      cleanup();
+      await cleanup();
       process.exit(opts.breakClient ? 0 : 1);
     }
     log(`宿主就绪 ${url.replace(/token=.*/, 'token=…')}`, opts.json);
 
     // ── 3. 无头 Chrome + CDP ──
-    const port = 9445 + (process.pid % 500);
-    chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--no-first-run',
-      `--remote-debugging-port=${port}`, `--user-data-dir=${chromeDir}`, 'about:blank'],
-    { stdio: 'ignore' });
-    let list = null;
-    for (let i = 0; i < 30 && list === null; i++) {
-      await new Promise((r) => setTimeout(r, 500));
-      try { list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json(); } catch { /* 再等 */ }
-    }
-    if (list === null) throw new Error('连不上 Chrome 的调试端口');
-    const page = list.find((t) => t.type === 'page');
-    const ws = new WebSocket(page.webSocketDebuggerUrl);
-    await new Promise((r) => ws.addEventListener('open', r, { once: true }));
-    const cdp = makeCdp(ws);
+    chrome=await launchChromePipe(CHROME,{timeoutMs:opts.timeoutMs,userDataDir:chromeDir});
+    const cdp=chrome;
 
     // ⚠️ `Network.enable` **必须在 navigate 之前** —— 否则早期请求收不到，
     // 而"遗漏的请求"看起来与"没到货"一模一样（实测会少记一批）。
@@ -274,7 +248,8 @@ async function main() {
     }
     const exceptions = cdp.events.filter((e) => e.method === 'Runtime.exceptionThrown');
 
-    const boot = bootRaw === null ? { entries: [], batches: [] } : JSON.parse(bootRaw);
+    if(!bootRaw)throw new Error('浏览器没有返回启动条目清单，不能将空清单当成全部到货');
+    const boot=JSON.parse(bootRaw);
     const batches = (boot.batches ?? []).map((b) => {
       const needle = String(b.url).split('&')[0];
       let status = null;
@@ -338,11 +313,11 @@ async function main() {
 
     // 退出码：有未到货或有异常就是**发现问题**
     const bad = missing.length > 0 || exceptions.length > 0 || errorScreen !== null;
-    cleanup();
+    await cleanup();
     process.exit(bad ? 1 : 0);
   } catch (error) {
     process.stderr.write(`${error.message}\n`);
-    cleanup();
+    await cleanup();
     process.exit(3);
   }
 }

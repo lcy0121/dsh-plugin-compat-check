@@ -1,5 +1,8 @@
 # dsh-plugin-compat-check
 
+
+0.1.1 is a local unpublished candidate. This npm artifact provides the DSH plugin and staged shared kernel, not the repository CLI. Runtime dependencies are pinned `@babel/parser` and `semver`; `LICENSE` is included. Source installs require the repository and `npm ci --ignore-scripts` at its root, or a prepacked artifact. The host samples services without executing getters, reports mapped loader failures, and preserves coverage/provenance and inferred impact. Full browser feature verification remains separate. Release state: repository `docs/refactor-results.md`.
+
 告诉你**已经装好的 DSH 插件**跟**当前 DSH 版本**到底兼不兼容；不兼容的，给出**位置**
 （`file:line`）和**原因**。
 

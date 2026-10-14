@@ -27,6 +27,8 @@ import path, { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire as __createRequire } from 'node:module';
 
+import {loaderObservations,privateDiagnostic} from './lib/host-resources.js';
+
 export const name = 'dsh-plugin-compat-check';
 
 /**
@@ -53,8 +55,8 @@ const FIBER_STATES = {
   5: 'UNLOADING',
 };
 
-const OUT_DIR = process.env.DSC_OUT_DIR || join(tmpdir(), 'dsh-plugin-compat-check');
-const OUT_JSON = join(OUT_DIR, 'loader-introspect.json');
+const OUT_DIR = process.env.DSC_OUT_DIR || null;
+const OUT_JSON = OUT_DIR ? join(OUT_DIR, 'loader-introspect.json') : null;
 
 /** Defensive cap: a pathological iterable must not exhaust the host's heap. */
 const MAX_ENTRIES = 20000;
@@ -125,21 +127,7 @@ function describe(value) {
   }
 }
 
-function writeReport(report) {
-  try {
-    mkdirSync(OUT_DIR, { recursive: true });
-  } catch {
-    /* 目录已存在或不可写 */
-  }
-  let written = false;
-  try {
-    writeFileSync(OUT_JSON, `${JSON.stringify(report, null, 2)}\n`);
-    written = true;
-  } catch (error) {
-    log(`WARN could not write ${OUT_JSON}: ${errText(error)}`);
-  }
-  return written;
-}
+function writeReport(report) { return privateDiagnostic(OUT_JSON, report); }
 
 // ---------------------------------------------------------------------------
 // B1: loader access
@@ -769,29 +757,17 @@ function resolveActiveProfile() {
   return { name: null, why: '无法判断' };
 }
 
-function resolveNodeModules() {
-  const dshHome = process.env.DSH_HOME || join(homedir(), '.dsh');
-  const candidates = [];
-
-  const inferred = resolveActiveProfile();
-  if (inferred.name) {
-    candidates.push({ dir: join(dshHome, 'profiles', inferred.name, 'node_modules'), why: inferred.why });
+function resolveNodeModules(requestedProfile = null) {
+  const dshHome=process.env.DSH_HOME || join(homedir(),'.dsh');
+  const inferred=resolveActiveProfile();
+  const selected=requestedProfile || inferred.name;
+  if(selected){
+    if(!/^[\w.-]+$/.test(selected) || selected==='.' || selected==='..')return {dir:null,why:'profile 名称非法'};
+    const dir=join(dshHome,'profiles',selected,'node_modules');
+    return existsSync(dir)?{dir,why:requestedProfile?'请求明确指定的 profile '+selected:inferred.why}:{dir:null,why:'指定 profile 不存在: '+selected};
   }
-
-  // 兜底：从 `DSH_PROFILE_DIR` 直接拿目录（它指向 profile 根，不是 node_modules）
-  if (process.env.DSH_PROFILE_DIR) {
-    candidates.push({ dir: join(process.env.DSH_PROFILE_DIR, 'node_modules'), why: `DSH_PROFILE_DIR=${process.env.DSH_PROFILE_DIR}` });
-  }
-  // 最后回退。到这一步说明前面都没中（例如插件是从仓库直接跑的、或发布形态装在别处），
-  // 那就只能挑一个 —— 但 why 里会**写明这是回退**，否则用户会以为它检查的是当前 profile。
-  candidates.push({ dir: join(dshHome, 'profiles', 'desktop', 'node_modules'), why: '回退到 desktop profile（没能判断出正在跑哪一个）' });
-
-  for (const c of candidates) {
-    try {
-      if (existsSync(c.dir)) return { dir: c.dir, why: c.why };
-    } catch { /* 下一个 */ }
-  }
-  return { dir: null, why: '没有任何候选目录存在' };
+  if(process.env.DSH_PROFILE_DIR){const dir=join(process.env.DSH_PROFILE_DIR,'node_modules');return existsSync(dir)?{dir,why:'显式 DSH_PROFILE_DIR'}:{dir:null,why:'DSH_PROFILE_DIR 不存在'};}
+  return {dir:null,why:'无法确认当前 profile；请显式指定'};
 }
 
 /**
@@ -812,38 +788,15 @@ function resolveNodeModules() {
  * 并发安全：`state.computing` 保存"正在跑的那一个 promise"，所以十个面板请求
  * 同时到达也只会算一次 —— 否则它们会各自算一遍，白烧 1.5 秒 × 10。
  */
-async function serveReport(state, ctx, force) {
-  const now = Date.now();
-  const age = now - state.lastReportAt;
-
-  if (force || !state.lastReport) {
-    // 没有缓存时不并发去重：第一次访问就该拿到真结果。
-    const out = await computeReport(state, ctx);
-    state.lastReport = out;
-    state.lastReportAt = Date.now();
-    return out;
+async function serveReport(state, ctx, force, options = {}) {
+  if(!state.reportService){
+    const kernel=resolveKernelDir();
+    if(!kernel)return {ok:false,error:'找不到判定内核'};
+    const {ReportService}=await import(pathToFileURL(join(kernel,'lib','report-service.mjs')).href);
+    if(!state.reportService)state.reportService=new ReportService(options=>computeReport(state,ctx,options),{ttlMs:state.cacheTtlMs});
   }
-  if (age <= state.cacheTtlMs) {
-    return { ...state.lastReport, cache: { hit: true, ageMs: age, refreshing: false } };
-  }
-  // 过期：**不等它**。给旧的，后台刷。
-  if (!state.computing) {
-    state.computing = computeReport(state, ctx)
-      .then((out) => {
-        state.lastReport = out;
-        state.lastReportAt = Date.now();
-        return out;
-      })
-      .catch((error) => {
-        // 后台刷新失败**不能影响已经发出去的那份**，但必须留下痕迹：
-        // 静默失败的刷新会让面板一直显示过期数据，而用户以为那是当前的。
-        try { log(`WARN F2 background refresh failed: ${errText(error)}`); } catch { /* 忽略 */ }
-        state.lastRefreshError = errText(error);
-        return null;
-      })
-      .finally(() => { state.computing = null; });
-  }
-  return { ...state.lastReport, cache: { hit: true, ageMs: age, refreshing: true } };
+  const key=options.profile?`profile:${options.profile}`:'current';
+  return state.reportService.get(key,options,force);
 }
 
 /**
@@ -869,7 +822,7 @@ function baselineFileFor(nmDir) {
  *   - 客户端跑在浏览器里，读不了文件系统；
  *   - 结论（五元组 + 确定性）是内核的产物，算出唯一一份才不会两边漂移。
  */
-async function computeReport(state, ctx) {
+async function computeReport(state, ctx, options = {}) {
   const started = Date.now();
   const out = {
     schemaVersion: 1,
@@ -907,7 +860,7 @@ async function computeReport(state, ctx) {
         + '插件形态下它们是同仓库的相邻目录；发布形态请设 DSC_KERNEL。';
       return out;
     }
-    const nm = resolveNodeModules();
+    const nm = resolveNodeModules(options.profile || null);
     out.nodeModules = nm.dir;
     out.nodeModulesWhy = nm.why;
     if (!nm.dir) {
@@ -915,7 +868,7 @@ async function computeReport(state, ctx) {
       return out;
     }
 
-    const { extractWithProvenance } = await import(pathToFileURL(join(kernel, 'lib', 'extract.mjs')).href);
+    const { extractInWorker } = await import(pathToFileURL(join(kernel, 'lib', 'worker-analysis.mjs')).href);
     const { buildVerdicts } = await import(pathToFileURL(join(kernel, 'lib', 'verdict.mjs')).href);
 
     const catalogPath = join(kernel, 'rules', 'dsh-api-catalog.json');
@@ -938,13 +891,27 @@ async function computeReport(state, ctx) {
     }
     out.surfaceWhy = surfaceWhy;
 
-    const extracted = extractWithProvenance(nm.dir, { catalog });
+    const extracted = await extractInWorker(nm.dir, { catalog });
+    const { sampleServices } = await import(pathToFileURL(join(kernel,'lib','observation.mjs')).href);
+    const currentTarget=resolveNodeModules();
+    const sameHost=currentTarget.dir&&path.resolve(currentTarget.dir)===path.resolve(nm.dir);
+    if(!hostSurface && sameHost){
+      hostSurface=sampleServices(ctx,extracted.report.services,{profileId:nm.dir,dshVersion:resolveDshVersion()});
+      surfaceWhy='当前宿主进程内采集的服务结构；未采集或读取失败不等于缺失';
+    }
+    const itemListing=await (async()=>{try{const listing=await ctx.get?.('pluginManager',false)?.list?.();return (Array.isArray(listing)?listing:listing?.items||listing?.plugins||[]).map(i=>({id:i.id??i.entryId??i.slotId,packageName:i.packageName??i.package??i.name}));}catch{return [];}})();
+    const loaderState=sameHost?loaderObservations(ctx,extracted.report.manifests,itemListing):{rows:[],unmapped:[],available:false};
+    out.loaderCoverage=loaderState;
+
+    out.surfaceWhy=surfaceWhy;
     const verdict = buildVerdicts({
       report: extracted.report,
       hostSurface,
       rules,
       catalog,
       dshVersion: resolveDshVersion(),
+      entryStates: loaderState.rows,
+      observationTarget: {profileId:nm.dir,maxAgeMs:24*60*60*1000},
     });
 
     // ── C4：基线差分 ──
@@ -954,29 +921,11 @@ async function computeReport(state, ctx) {
     try {
       const { snapshotForBaseline, diffAgainstBaseline, badgeFor } =
         await import(pathToFileURL(join(kernel, 'lib', 'baseline.mjs')).href);
-      const snap = snapshotForBaseline(verdict, resolveDshVersion());
-      const bfile = baselineFileFor(nm.dir);
-      let prev = null;
-      let readNote = null;
-      try {
-        if (existsSync(bfile)) prev = JSON.parse(readFileSync(bfile, 'utf8'));
-        else readNote = '还没有基线（这是第一次体检）';
-      } catch (error) {
-        // 读不出来**不是**"没有变化"。必须区分"你没跑过"与"你的基线坏了" ——
-        // 后者会让用户以为一切照旧，继续用着已经变坏的环境。
-        readNote = `基线读不出来（${errText(error)}）—— 这次不做比较`;
-      }
-      const diff = diffAgainstBaseline(prev, snap);
-      baseline = { file: bfile, note: readNote, diff, badge: badgeFor(diff), wrote: false };
-      // 只有这一次真的算出了结论才写基线：一次失败的体检写下的基线，
-      // 会把"读不到"记成"这些插件都没了"，下次比较全是假变化。
-      try {
-        mkdirSync(path.dirname(bfile), { recursive: true });
-        writeFileSync(bfile, `${JSON.stringify(snap, null, 2)}\n`);
-        baseline.wrote = true;
-      } catch (error) {
-        baseline.writeError = `基线写不进去（${errText(error)}）`;
-      }
+      const store=await import(pathToFileURL(join(kernel,'lib','state-store.mjs')).href);
+      const identity=store.baselineIdentity(nm.dir,verdict.observation.mode,rules,catalog);
+      const snap = snapshotForBaseline(verdict, resolveDshVersion(),identity);
+      const bfile = store.baselinePath(nm.dir,verdict.observation.mode);
+      baseline=store.baselineTransaction(bfile,snap,{advance:extracted.report.scanComplete});
     } catch (error) {
       baseline = { error: errText(error), note: '基线差分没算成（不影响本次结论）' };
     }
@@ -1011,7 +960,9 @@ async function computeReport(state, ctx) {
     out.report = {
       summary: verdict.summary,
       dshVersion: verdict.dshVersion,
-      hasRuntimeSurface: Boolean(hostSurface),
+      hasRuntimeSurface: verdict.observation.usable,
+      observation:verdict.observation,
+      loaderCoverage:out.loaderCoverage,
       surfaceWhy,
       plugins: verdict.plugins,
       // 逐条发现的证据形态：面板要能回答「凭什么这么判」
@@ -1067,9 +1018,12 @@ function renderForModel(compat) {
     const s = r.summary || {};
     L.push(`结论：可用 ${s.ok || 0}　部分可用 ${s.partial || 0}　不兼容 ${s.broken || 0}`
       + (s.vacuousOk ? `（其中 ${s.vacuousOk} 个「可用」是空洞的：该插件没有用过任何 DSH 服务，因此没有可检查的东西）` : ''));
+    L.push(`工具版本：${compat.toolVersion || '未知'}`);
+    for(const note of r.observation?.notes||[])L.push(`采样说明：${note}`);
+    if(s.limited)L.push(`证据覆盖有限：${s.limited} 个插件尚有未验证部分`);
     L.push(`体检对象：${compat.nodeModules}（${compat.nodeModulesWhy}）`);
     L.push(r.hasRuntimeSurface
-      ? '方法级判定依据：宿主运行时面 —— 这类结论是确定的。'
+      ? '方法级判定依据：宿主运行时面；具体确定性仍以每条发现和覆盖限制为准。'
       : '方法级判定依据：官方 API 目录（**契约目录，不是运行时面**）—— 因此方法级结论一律标「疑似」。'
         + '「疑似」不是缺陷，是诚实：判不准时降级标注，而不是升格成确定。');
     L.push('');
@@ -1088,10 +1042,12 @@ function renderForModel(compat) {
         const cat = {
           'host-service-missing': '服务缺失', 'host-method-missing': '方法缺失',
           'unprovided-dependency': '无人提供的依赖', 'declaration-mismatch': '声明与实测不符',
+      'declared-incompatible':'版本声明不支持',
         }[f.category] || f.category;
         const sev = { fatal: '致命', 'feature-dead': '功能失效', degraded: '降级' }[f.severity] || f.severity;
         L.push(`    ${sev} / ${cat}${f.certainty === 'certain' ? '' : ' [疑似]'}  ${api}  @ ${loc}`);
-        if (f.impact) L.push(`      影响：${f.impact}`);
+        if (f.impact) L.push(`      影响${f.impactBasis==='inferred'?'（推断，非实测）':''}：${f.impact}`);
+        if(f.basis)L.push(`      依据：${f.basis}`);
       }
       const cs = p.clientSide || [];
       if (cs.length) L.push(`    客户端半边（命令行测不到，需界面验证）：${cs.map((c) => c.service).join('、')}`);
@@ -1102,9 +1058,9 @@ function renderForModel(compat) {
 
     L.push('');
     L.push('读这个结果时注意两点：');
-    L.push('  1) 「可用」不等于"功能验证过"。它只说明**用到的 DSH 服务与 API 都在**。'
+    L.push('  1) 「可用」不等于"功能验证过"。它只说明本轮未发现冲突；请同时看证据覆盖与未验证项。'
       + '插件仍然可能因为自身逻辑、配置或第三方依赖而出问题。');
-    L.push('  2) 「客户端半边」的那些服务命令行永远测不到 —— 它们活在浏览器里，'
+    L.push('  2) 「客户端半边」的那些服务默认报告不验证 —— 它们活在浏览器里，'
       + '只能靠"界面上有没有出现该插件的 UI"来验证。别把"没报错"当成"没问题"。');
     return L.join('\n');
   } catch (error) {
@@ -1179,21 +1135,11 @@ function registerTool(ctx, state) {
             const wanted = args && typeof args.profile === 'string' && args.profile.trim() !== ''
               ? args.profile.trim()
               : null;
-            const prev = process.env.DSC_PROFILE;
-            if (wanted) process.env.DSC_PROFILE = wanted;
-            let compat;
-            try {
-              compat = await computeReport(state, ctx);
-            } finally {
-              if (wanted) {
-                if (prev === undefined) delete process.env.DSC_PROFILE;
-                else process.env.DSC_PROFILE = prev;
-              }
-            }
+            const compat = await serveReport(state,ctx,false,wanted?{profile:wanted}:{});
             const text = renderForModel(compat);
             const s = (compat.report && compat.report.summary) || {};
             return {
-              summary: `可用 ${s.ok || 0} / 部分可用 ${s.partial || 0} / 不兼容 ${s.broken || 0}`,
+              summary: compat.ok ? `可用 ${s.ok || 0} / 部分可用 ${s.partial || 0} / 不兼容 ${s.broken || 0}` : '无法判定',
               nodeModules: compat.nodeModules || '',
               hasRuntimeSurface: Boolean(compat.report && compat.report.hasRuntimeSurface),
               text,
@@ -1530,7 +1476,7 @@ export function apply(ctx) {
       if (state.autoCheckStarted) return;   // 幂等：只跑一次
       state.autoCheckStarted = true;
       try {
-        computeReport(state, ctx)
+        serveReport(state, ctx, false)
           .then((out) => {
             state.lastReport = out;
             state.lastReportAt = Date.now();

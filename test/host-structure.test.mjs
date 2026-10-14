@@ -43,6 +43,7 @@ import { REPO } from './helpers.mjs'
 // （fs / os / path / url / module），这样替身的行为与真身完全一致。
 const nodeRequire = createRequire(import.meta.url)
 
+import * as hostResources from '../plugin/lib/host-resources.js'
 const HOST = path.join(REPO, 'plugin', 'index.js')
 const SRC = fs.readFileSync(HOST, 'utf8')
 
@@ -66,7 +67,7 @@ function loadHost(env = {}) {
   sandbox.globalThis = sandbox
   vm.createContext(sandbox)
   // 把 ESM 的 import 换成受控替身；导出换成赋值
-  const cjs = SRC
+  const cjs = SRC.replace(/^import.*from '\.\/lib\/host-resources\.js';?$/gm, 'const {privateDiagnostic,loaderObservations}=__hostResources;')
     .replace(/^import\s+\{([^}]+)\}\s+from\s+'node:([^']+)';?$/gm, (m, names, mod) => {
       const pairs = names.split(',').map((s) => s.trim()).filter(Boolean)
       return pairs.map((p) => {
@@ -88,6 +89,7 @@ function loadHost(env = {}) {
     .replace(/\bexport\s+const\s+/g, 'const ')
     .replace(/\bexport\s+function\s+/g, 'function ')
     .replace(/\bexport\s+default\s+/g, 'const __default = ')
+  sandbox.__hostResources=hostResources
   sandbox.__importMetaUrl = pathToFileURL(HOST).href
   sandbox.__node = (mod, name) => {
     const m = name === 'default' ? nodeRequire(`node:${mod}`) : nodeRequire(`node:${mod}`)[name]

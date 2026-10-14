@@ -41,6 +41,9 @@ const PARITYFIX = path.join(os.homedir(), '.dsh/profiles/parityfix/node_modules'
  * 但测试跑的时候，"自己的状态目录"必须是临时的那个。
  */
 const TEST_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-cli-home-'))
+const BASELINE_NM=path.join(TEST_HOME,'fixtures','node_modules');
+fs.mkdirSync(BASELINE_NM,{recursive:true});
+fs.cpSync(path.join(MICRO,'@fixture/clean'),path.join(BASELINE_NM,'clean'),{recursive:true});
 const runCLI = (args, extraEnv) => {
   const r = spawnSync(process.execPath, [CLI, ...args], {
     encoding: 'utf8',
@@ -256,8 +259,8 @@ describe('CLI：工具自身出错必须非零退出（回归）', () => {
  * 所以这里既测"变化被认出来"，也测"没有变化时确实安静"。
  */
 describe('CLI：基线差分', () => {
-  const tmpBaseline = () => path.join(os.tmpdir(), `dsc-bl-${process.pid}-${Math.random().toString(36).slice(2)}.json`)
-  const args = (bl) => ['--nm', MICRO, '--probe', MICRO_SURFACE, '--dsh-version', '0.2.0-rc.2', '--baseline-file', bl]
+  const tmpBaseline = () => path.join(TEST_HOME, `dsc-bl-${process.pid}-${Math.random().toString(36).slice(2)}.json`)
+  const args = (bl) => ['--nm', BASELINE_NM, '--probe', MICRO_SURFACE, '--dsh-version', '0.2.0-rc.2', '--baseline-file', bl]
 
   test('第一次：说明「还没有基线」，而不是「没有变化」', () => {
     const bl = tmpBaseline()
@@ -357,7 +360,7 @@ describe('测试隔离：不碰用户的真实环境', () => {
     // 所以反过来确认：隔离生效时它该写在临时目录里。
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-iso-'))
     try {
-      const r = runCLI(['--nm', MICRO, '--probe', MICRO_SURFACE, '--dsh-version', '0.2.0-rc.2', '--quiet'], { DSH_HOME: tmp })
+      const r = runCLI(['--nm', BASELINE_NM, '--probe', MICRO_SURFACE, '--dsh-version', '0.2.0-rc.2', '--quiet'], { DSH_HOME: tmp })
       assert.notEqual(r.code, 3, `不该是"无法判定"：${r.out}`)
       const dir = path.join(tmp, 'dsh-plugin-compat-check')
       assert.ok(fs.existsSync(dir), '临时 DSH_HOME 下没有基线目录 —— 隔离参数没起作用？')
@@ -379,7 +382,7 @@ describe('测试隔离：不碰用户的真实环境', () => {
 describe('CLI：--probe-boot 的参数契约', () => {
   test('--probe-boot 被认下（不被当成未知参数）', () => {
     const r = runCLI(['--nm', MICRO, '--probe-boot', '--json', '--no-baseline', '--dsh-version', '0.2.0-rc.2'])
-    assert.notEqual(r.code, 3, `不该是"无法判定"：${r.err || r.out.slice(0, 200)}`)
+    assert.equal(r.code,3,'Micro is not a runnable profile; input failure must not silently fall back to a static verdict')
     assert.ok(!/无法识别的参数/.test(r.err + r.out), '--probe-boot 被当成未知参数了')
   })
 

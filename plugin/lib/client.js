@@ -56,6 +56,7 @@ window.__ModuleLoader__.load({
       "host-method-missing": "方法缺失",
       "unprovided-dependency": "无人提供的依赖",
       "declaration-mismatch": "声明与实测不符",
+      "declared-incompatible": "版本声明不支持",
     };
 
     // 渲染侧标记：只在我们的组件体里设置。页面上出现同名文字**不能**证明
@@ -199,7 +200,9 @@ window.__ModuleLoader__.load({
           f.certainty !== "certain"
             ? React.createElement("span", { style: styles.suspect, title: "没有运行时面，只能靠官方目录推断" }, " [疑似]")
             : null,
-          f.impact ? React.createElement("div", { style: styles.dim }, f.impact) : null);
+          f.impact ? React.createElement("div", { style: styles.dim },
+            (f.impactBasis === "inferred" ? "影响（推断，非实测）：" : "影响：") + f.impact) : null,
+          f.basis ? React.createElement("div", { style: styles.dim }, "依据：" + f.basis) : null);
       }));
     }
 
@@ -459,10 +462,11 @@ window.__ModuleLoader__.load({
               React.createElement("td", { style: styles.td }, React.createElement(Findings, { plugin: pl })));
           }))),
         React.createElement("div", { style: styles.note },
-          report.hasRuntimeSurface
-            ? "方法级判定依据：宿主运行时面（确定）。"
+          "工具版本：" + (data.toolVersion || "未知") + " · " + (report.summary.limited ? "部分证据尚未验证。 " : "") + (report.hasRuntimeSurface
+            ? "方法级判定依据：宿主运行时面；确定性以每条证据为准。"
             : "方法级判定依据：官方 API 目录（契约目录，不是运行时面）—— 因此方法级结论标为「疑似」。"
-              + "「疑似」不是缺陷，是诚实：判不准时降级标注，而不是升格成确定。"),
+              + "「疑似」不是缺陷，是诚实：判不准时降级标注，而不是升格成确定。")),
+        React.createElement("div", { style: styles.note }, (report.observation && report.observation.notes || []).join("；")),
         React.createElement("div", { style: styles.note },
           "判定内核：" + (data.kernelDir || "?")
           + " · 体检对象：" + (data.nodeModules || "?") + "（" + (data.nodeModulesWhy || "?") + "）"

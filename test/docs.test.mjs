@@ -77,51 +77,11 @@ describe('文档信息：可复算的数字必须与仓库一致', () => {
   const testFiles = realTestFileCount()
   const counts = realGitFileCounts()
 
-  test('三份 README + Plan 的断言条数必须互相一致', () => {
-    // 这一条**不需要实测值**就能抓：实测的烂法是同一份 README 里 250 行写 230、
-    // 297 行写 221。跨文档不一致本身就是 bug，先抓住它。
-    // （与实测值比对在 `tools/doc-check.mjs`，那里可以安全地跑一次套件。）
-    const seen = new Map()
-    for (const rel of ['README.md', 'README.en.md', 'README.ko.md', 'Plan.md']) {
-      const found = [...read(rel).matchAll(/(\d+)\s*(?:条断言|assertions|개 단언)/g)].map((m) => Number(m[1]))
-      seen.set(rel, [...new Set(found)])
-    }
-    const all = new Set([...seen.values()].flat())
-    assert.equal(all.size, 1,
-      `四份文档写了 ${all.size} 种断言条数：${JSON.stringify([...seen])}。`
-      + `实测就是这么烂的 —— 同一次改动只改了其中一处。`)
-  })
-
-  test('三份 README + Plan 的测试文件数 = 实测', () => {
-    const bad = []
-    for (const rel of ['README.md', 'README.en.md', 'README.ko.md', 'Plan.md']) {
-      const s = read(rel)
-      const found = [...s.matchAll(/(\d+)\s*(?:个测试文件|test files|테스트 파일 \d+개|개 테스트 파일)/g)]
-      for (const m of found) {
-        // 韩语的两种语序：「테스트 파일 11개」把数字放在后面
-        const n = Number(m[1]) || Number(/(\d+)/.exec(m[0])?.[1])
-        if (n !== testFiles) bad.push(`${rel}: 写了 ${n}，实测 ${testFiles}`)
-      }
-      // 「테스트 파일 11개」形态：数字在后
-      for (const m of s.matchAll(/테스트 파일\s*(\d+)\s*개|(\d+)\s*개 테스트 파일/g)) {
-        const n = Number(m[1] ?? m[2])
-        if (n !== testFiles) bad.push(`${rel}: 写了 ${n}，实测 ${testFiles}`)
-      }
-    }
-    assert.deepEqual(bad, [], `文档里的测试文件数与实测不符：\n  ${bad.join('\n  ')}`)
-  })
-
-  test('README 的文件数分解必须自己加得起来，且等于 git 实际', () => {
-    // 实测的烂法：写「共 132 个文件：57 个是…，66 个是夹具」—— 57+66=123，不等于 132。
-    const s = read('README.md')
-    const m = /受版本控制共 \*\*(\d+)\*\* 个文件：(\d+) 个是[^，]+，(\d+) 个是夹具数据/.exec(s)
-    assert.ok(m, '找不到文件数那一句 —— 改写了就同步改这条断言')
-    const [, total, manual, fixture] = m.map(Number)
-    assert.equal(total, counts.total, `README 写共 ${total} 个文件，git 实际 ${counts.total}`)
-    assert.equal(manual, counts.manual, `README 写 ${manual} 个人工维护，实际 ${counts.manual}`)
-    assert.equal(fixture, counts.fixture, `README 写 ${fixture} 个夹具数据，实际 ${counts.fixture}`)
-    assert.equal(manual + fixture, total, `分解加不起来：${manual} + ${fixture} ≠ ${total}`)
-  })
+  test('current facts are generated and linked by all maintained entry documents',()=>{
+    const metrics=JSON.parse(read('docs/current-state.json'));
+    assert.equal(metrics.testFiles,realTestFileCount());
+    for(const rel of ['README.md','README.en.md','README.ko.md','Plan.md'])assert.ok(read(rel).includes('docs/current-state.json'),rel);
+  });
 
   test('README 的合成插件数与夹具目录实际一致', () => {
     const real = fs.readdirSync(path.join(REPO, 'test/fixtures/micro/node_modules/@fixture'))

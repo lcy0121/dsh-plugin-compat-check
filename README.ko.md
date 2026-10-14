@@ -1,5 +1,19 @@
 # dsh-plugin-compat-check
 
+## 0.1.1 리팩터링 상태 (로컬, 미배포)
+
+npm 패키지는 DSH 플러그인입니다. CLI와 설치 점검 스크립트는 이 저장소에서 사용하며, npm 패키지에는 CLI `bin`이 없습니다. 복제한 뒤 `npm ci --ignore-scripts`를 실행하세요. Node 지원 범위는 `^22.19.0 || >=24`입니다.
+
+분석기는 고정 버전 Babel로 JS/TS AST를 파싱하고, 렉시컬 바인딩·각 호출 위치·상대 경로의 부작용 import를 추적합니다. 검사 대상 코드는 실행하지 않습니다. 동적 해석과 함수 간 데이터 흐름에는 한계가 있으며, 파싱·읽기·자원 제한 실패는 커버리지에 표시됩니다. `ok`를 전달할 때 `coverage.status=limited`, `vacuous`, 관측 출처를 보존해야 합니다. 발견이 없다는 사실은 모든 기능이 검증됐다는 뜻이 아닙니다.
+
+서비스 관측은 present/absent/unobserved/unreadable로 구분합니다. 누락된 키는 부재가 아닙니다. 새 관측은 profile/DSH 버전이 일치해야 하며 24시간 뒤 만료됩니다. 기존 보고서는 명시된 키만 사용하고 unbound로 표시합니다. 호스트 필수 의존성과 클라이언트 요구는 따로 판정합니다. `certainty`는 증거의 확실성, `impactBasis`는 실제 loader 상태와 기능 영향의 추론을 구별합니다. 현재 호스트에서 직접 수집하며, 다른 profile 요청에는 현재 호스트 관측을 재사용하지 않습니다.
+
+기준선 schema 2는 canonical profile, 관측 모드, 도구/규칙/카탈로그 digest를 사용합니다. 버전만 바뀐 경우 중립 변화입니다. 잠금과 원자 교체로 갱신하며, 불완전한 소스 스캔은 이전 기준선을 보존합니다. 저장 위치는 `$DSH_HOME/dsh-plugin-compat-check/`이고 파일명에 profile/경로 hash/mode가 포함됩니다.
+
+기본 CLI는 DSH를 시작하지 않습니다. 명시적 `--probe-boot`와 설치 점검은 소유한 임시 profile에서 플러그인을 설치하고 실행합니다. 이는 OS 샌드박스가 아닙니다. 고유한 비공개 임시 경로와 소유한 자식 프로세스만 사용합니다. 설치·네트워크·준비·시작 오류는3, 명시적 DSH peer 거절은2입니다. `--json` stdout은 JSON 하나입니다. `--keep`은 실제 보존 경로를 반환합니다. 탐침은 비공개 `DSC_OUT_DIR`을 요구하고 getter를 실행하지 않습니다. 선택적 클라이언트 점검의 CDP는 TCP 대신 상속 pipe를 사용하며, 전달/브라우저 오류만 검사합니다.
+
+현재 통계: [current-state.json](docs/current-state.json), [실행 기록](docs/refactor-results.md). 아래 과거 측정은 당시 입력에 해당합니다. 실제 DSH/Chrome/Windows 통합은 이번에 실행하지 않았습니다.
+
 > **이미 설치한** DSH 플러그인이 **현재 DSH 버전**에서 실제로 동작하는지 확인하고, 동작하지 않는 항목에 대해서는 **위치**(`file:line`)와 **이유**를 알려줍니다.
 
 [简体中文](README.md) | [English](README.en.md) | **한국어**
@@ -55,7 +69,7 @@ cd dsh-plugin-compat-check
 node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop
 
 # 프로브 리포트가 있으면 메서드 단위 판정이 "확정"이 됩니다
-node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --probe /tmp/dsh-plugin-compat-check/probe-report.json --dsh-version 0.2.0-rc.2
+node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --probe /path/to/private-run/probe-report.json --dsh-version 0.2.0-rc.2
 
 # 저장소에 들어 있는 런타임 표면으로 바로 대조
 node bin/compat-check.mjs --nm ~/.dsh/profiles/parityfix --probe tools/parity/fixtures/host-surface-parityfix.json --dsh-version 0.2.0-rc.2
@@ -193,9 +207,9 @@ CLI가 못 하는 세 가지를 하며, 그래서 CLI가 답할 수 없는 질�
 
 | 경로 | 내용 |
 |---|---|
-| `/tmp/dsh-plugin-compat-check/boot.log` | 호스트 부팅 로그(`did not activate` 포함) |
-| `/tmp/dsh-plugin-compat-check/static.json` | 추출된 서비스와 호출 지점(`file:line` 포함) |
-| `/tmp/dsh-plugin-compat-check/probe-report.json` | 호스트의 실제 API 표면 |
+| `/path/to/private-run/boot.log` | 호스트 부팅 로그(`did not activate` 포함) |
+| `/path/to/private-run/static.json` | 추출된 서비스와 호출 지점(`file:line` 포함) |
+| `/path/to/private-run/probe-report.json` | 호스트의 실제 API 표면 |
 
 ## 디렉터리 구조
 
@@ -248,7 +262,7 @@ dsh-plugin-compat-check/
 ├── docs/
 │   └── extraction-findings.md  # 실측한 추출 결함 목록 (번호) + 프로브의 두 경계
 │
-├── test/                       # 282개 단언 / 16개 테스트 파일 (아래 참조)
+├── test/                       # generated test totals / test files (아래 참조)
 │   ├── helpers.mjs             #   공용 픽스처: 표 로딩, 스냅샷 요약, 해싱
 │   ├── invariants.test.mjs     #   결과의 자기 일관성 (어떤 입력에도 성립해야 함)
 │   ├── snapshot.test.mjs       #   출력이 바뀌었는가 (핵심 필드 + 내용 해시)
@@ -301,10 +315,10 @@ dsh-plugin-compat-check/
 ## 테스트
 
 ```bash
-node --test test/
+npm test
 ```
 
-기본 **282개 단언**(테스트 파일 16개), 몇 초. `probe-boot.test.mjs`는 기본적으로 건너뜁니다:
+기본 테스트를 실행합니다. 현재 수는 `docs/current-state.json`에 있습니다. `probe-boot.test.mjs`는 기본적으로 건너뜁니다:
 
 ```bash
 # 실제로 호스트를 한 번 띄워 --probe-boot 종단 검증 (약 10~20초)
@@ -318,11 +332,11 @@ DSC_SLOW=1 node --test test/probe-boot.test.mjs
 > 보고서 생성, **끝나고 쓰레기를 남기지 않기**). 건너뛸 때는 어떻게 실행하는지 한 줄
 > 알려 주어 조용히 사라진 테스트가 되지 않게 합니다.
 
-**282개 단언**이 **16개 테스트 파일**에 흩어져 있습니다. 여기서는 서로 다른 두 가지를 구분해야 합니다
+현재 테스트 수는 `docs/current-state.json`에서 생성됩니다. 여기서는 서로 다른 두 가지를 구분해야 합니다
 (예전에는 "일곱 계층"으로 뒤섞여 있었습니다):
 
 * **3개의 인식론적 계층**(`invariants` / `__expectations__` / `__snapshots__`) — 각 계층은 원리상 다른 계층이 잡는 오류를 보지 못합니다. `__expectations__`는 테스트 파일이 아니라 **판정 데이터**이며 `invariants`와 `snapshot`이 소비합니다;
-* **16개 테스트 파일** = 그 두 계층이 쓰는 2개(`invariants` / `snapshot`) + 나머지 **13**개. 각각 하나의 구체적인 문제(인자, 캐시, 드리프트, 문서 드리프트, 자격 증명, 구조, 패키징…)를 봅니다.
+* **test files** = 그 두 계층이 쓰는 2개(`invariants` / `snapshot`) + 나머지 **13**개. 각각 하나의 구체적인 문제(인자, 캐시, 드리프트, 문서 드리프트, 자격 증명, 구조, 패키징…)를 봅니다.
 
 각 파일이 답하는 것:
 
