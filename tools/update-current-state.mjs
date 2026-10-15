@@ -12,7 +12,7 @@ if(i<0)throw new Error('Supply --test-summary <successful TAP log>');
 const log=fs.readFileSync(process.argv[i+1],'utf8');
 const tests=Number(/^# tests (\d+)/m.exec(log)?.[1]),failed=Number(/^# fail (\d+)/m.exec(log)?.[1]);
 if(!Number.isFinite(tests)||failed!==0)throw new Error('Refusing to record a missing or failing test result');
-const files=[...new Set(execFileSync('git',['ls-files','--cached','--others','--exclude-standard','-z'],{cwd:root,encoding:'utf8'}).split('\0').filter(Boolean))];
+const files=[...new Set(execFileSync('git',['ls-files','--cached','--others','--exclude-standard','-z'],{cwd:root,encoding:'utf8'}).split('\0').filter(f=>f && fs.existsSync(path.join(root,f))))];
 const fixtures=files.filter(f=>f.includes('node_modules/')||f==='test/fixtures/micro/host-surface.json');
 const previous=JSON.parse(fs.readFileSync(path.join(root,'docs/current-state.json'),'utf8'));
 const state={toolVersion:TOOL_VERSION,recordedAt:new Date().toISOString(),testFiles:fs.readdirSync(path.join(root,'test')).filter(f=>f.endsWith('.test.mjs')).length,tests,

@@ -1,6 +1,6 @@
 # Plan.md — dsh-plugin-compat-check 开发计划与作业规程
 
-> **2026-10-15 状态更新：0.1.1 本地重构已实施，尚未发布。** 当前契约与验证以 [实施记录](docs/refactor-results.md)、[实施计划](docs/refactor-implementation.md) 和 [自动统计](docs/current-state.json) 为准。下文历史施工记录保留，但正则提取、固定临时目录、升级视为变好、npm 同时提供 CLI 等旧决策已被本轮替代。历史“实测”只对应当时的输入，不证明当前版本已做真实启动验证。原始 [GPT 审计](GPT审计及重构方案文档.md) 保留，便于追溯问题。
+> **2026-10-15 状态更新：0.1.1 本地重构已实施，尚未发布。** 当前契约与验证以 [实施记录](refactor-results.md)、[实施计划](refactor-implementation.md) 和 [自动统计](current-state.json) 为准。本文件已从仓库根迁至 `docs/Plan.md`；当前入口为 [文档索引与现行契约](README.md)，后续工作见 [开发路线](roadmap.md)。文中代码路径仍相对仓库根。下文 §0–§7、§9.1 历史施工记录保留，但正则提取、固定临时目录、升级视为变好、npm 同时提供 CLI 等旧决策已被本轮替代。历史“实测”只对应当时的输入，不证明当前版本已做真实启动验证。原始 [GPT 审计](GPT审计及重构方案文档.md) 保留，便于追溯问题。
 
 
 > **这份文档是写给"未来的自己"看的。** 一次会话结束，上下文就没了：为什么否掉方案 B、
@@ -52,7 +52,7 @@
 
 ---
 
-## 1. 产品定义
+## 1. 产品定义（历史决策，现行契约见 docs/README.md）
 
 **一句话**：让 DSH 使用者知道自己**已经装了的**插件跟**当前 DSH 版本**是否兼容；
 不兼容的，给出**位置**和**原因**。
@@ -526,41 +526,20 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 
 ## 9. 下一动作
 
-**能做的工作已经清空。** 剩下的都**不是工程问题**：
+剩余工程工作见 [开发路线与验收条件](roadmap.md)。优先验证真实 DSH 安装/启动与浏览器路径，再校准规则与辅助度量工具；不再沿用“能做的工作已经清空”的旧结论。
 
-| 事项 | 卡在哪 |
-|---|---|
-| **真正用起来** | 装进 desktop profile 用几天 —— 唯一能回答"这东西有用吗"的方式 |
-| **角标频率调优** | 等真实使用数据 |
+日常修改后运行 `npm test`、`node tools/doc-check.mjs` 与 `node plugin/scripts/prepublish-check.mjs`。改动 skill 后先运行 `node plugin/scripts/stage-skill.mjs`。更新公开说明时再运行 `node tools/meta-check.mjs`；网络不可用必须记录为未核验，本地版本高于 npm 已发布版本是 notice。
 
-**日常维护**（改代码时）：三层测试都要过；改完跑 `node tools/doc-check.mjs` 与
-`plugin/scripts/prepublish-check.mjs`；每完成一小项回来更新本文件。
+### 9.0 下次发版怎么做
 
-**改了对外说明时**，另外跑一次 `node tools/meta-check.mjs` ——
-它盯 GitHub 简介/标签与 npm 上的 version/keywords/README。
-⚠️ **它的 `⏳ notice` 是预期内的**（npm 的 tarball 不可变，本地改了当然与线上不一致），
-只有 `❌ error` 才要动。**别把 notice 当错** —— 那会让这个守卫在两次发布之间天天红，
-然后被忽略（同 `docs/extraction-findings.md`「探针的四条边界」第 ② 条）。
+本地候选为0.1.1；公开发布状态以 [元数据核验记录](documentation-review.md) 的核验时间为准，不能用历史测试数量作为发版凭证。
 
-### 9.0 下次发版怎么做（首次发布时踩过一遍）
-
-发布**不可撤回，而且版本号永不能重用** —— 即使 `npm unpublish`，那个号也废了。所以顺序固定：
-
-1. 改 `lib/version.mjs` 的 `TOOL_VERSION`，同步 `plugin/package.json` / `probe/package.json` /
-   `tools/slot-probe/package.json`（`test/version.test.mjs` 会红着告诉你哪处没改）
-2. 重建快照：`UPDATE_SNAPSHOTS=1 node --test test/snapshot.test.mjs`（版本进快照与
-   `test/__baseline-versions.json`，会报 `BASELINE_DRIFT` —— **单独提交那一次版本变更**）
-3. 更新文档里的版本与数字（`node tools/doc-check.mjs` 会核对）
-4. `cd plugin && npm publish`
-   - `prepublishOnly` 自动跑闸门（版本一致 + 263 条测试全过）
-   - `prepack` 自动暂存内核与 skill，`postpack` 自动清掉
-   - **npm 要求 2FA**：非交互环境会报 `EOTP`，得在**你自己的终端**里跑（浏览器授权）。
-     想让它可脚本化，在 npm 建一个 *Granular Access Token + Bypass 2FA* 写进 `~/.npmrc`
-5. 验证：`npm view <name> version` 与 `npm view <name> dist.shasum`（与发布时打印的比对）
-
-> **首次发布前核出的两处**（值得复用这个动作）：① 全仓唯一一处 `npx` 说法是错的
-> —— 这个包没有 `bin`，`npx dsh-plugin-compat-check` **不可用**（见 §1.1）；
-> ② `bugs` 字段缺失。**发布前把文档里的承诺逐条核一遍**，因为发出去就收不回来了。
+1. 核对 `lib/version.mjs`、`plugin/package.json`、`probe/package.json`、`tools/slot-probe/package.json` 与说明文档。
+2. 先审查行为和基准版本变化，再有意更新快照；不以重建快照代替修复失败。
+3. 用成功 TAP 摘要运行 `node tools/update-current-state.mjs --test-summary <log>`，再运行 `node tools/doc-check.mjs --test-summary <log>`。
+4. 运行 `node plugin/scripts/prepublish-check.mjs`，并完成 roadmap 中发版前集成验收。
+5. 取得发布授权后，在 `plugin/` 执行 `npm publish`，按 npm 实际提示完成认证；`prepack` 暂存 kernel 与 skill，`postpack` 清理 kernel。
+6. 重新核验 registry 版本、tarball、README 与依赖，并更新公开状态记录。发布0.1.1时将 npm README 中“本地候选”文字改为相应发布状态；不能提前声称已发布。
 
 ### 9.1 已被实测推翻、不要再试的方向
 

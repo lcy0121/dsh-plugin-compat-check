@@ -1,10 +1,10 @@
-// Client half of dsh-plugin-compat-check — the overview table (Plan.md §5 C2).
+// Client half of dsh-plugin-compat-check — the overview table (docs/Plan.md §5 C2).
 //
 // This file is a PREBUILT artifact: the host does not build plugin client code.
 // If it moves to src/ the entry fails to activate with "run pnpm build before
 // launch", so it stays here as plain, dependency-free JS.
 //
-// Contract (Plan.md §7.3, verified on 0.2.0-rc.2):
+// Contract (docs/Plan.md §7.3, verified on 0.2.0-rc.2):
 //   window.__ModuleLoader__.load({ id: "<package name>", factory })
 //   factory(require) -> { name, inject: ["slots"], apply(ctx) }
 //
@@ -32,7 +32,7 @@ window.__ModuleLoader__.load({
     var SLOT = "settings.plugins.tab";
     var LABEL = "兼容性";
     var ROUTE = "/plugin-compat-check/report";
-    // C3：单插件视图的两个槽位。实测（Plan.md §5 C3）：
+    // C3：单插件视图的两个槽位。实测（docs/Plan.md §5 C3）：
     //   - 详情页不是「抽屉」，是侧栏插件面板**换了 React 视图状态**：
     //     侧栏轨道按钮 [class*="panelRow"][aria-label="插件"] → 卡片标题
     //     button[class*="cardOpen"][aria-label="查看 <名字>"] → 返回用 button[class*="crumb"]。
@@ -60,7 +60,7 @@ window.__ModuleLoader__.load({
     };
 
     // 渲染侧标记：只在我们的组件体里设置。页面上出现同名文字**不能**证明
-    // 是我们渲染的，这个标记能 —— 验收要经得起这个追问（Plan.md §7.2.1 ③）。
+    // 是我们渲染的，这个标记能 —— 验收要经得起这个追问（docs/Plan.md §7.2.1 ③）。
     function mark(extra) {
       try {
         var prev = window.__COMPAT_CHECK__ || {};
@@ -292,7 +292,7 @@ window.__ModuleLoader__.load({
     /**
      * C4 · 基线角标：回答「**和上次比变了没有**」，并给出方向。
      *
-     * 规则是 Plan.md §2 第 5 题的落地：**任何变化都打**，不只是变差。
+     * 规则是 docs/Plan.md §2 第 5 题的落地：**任何变化都打**，不只是变差。
      * 只有变差才亮会漏掉"某个插件被修好了、你可以放心留着了" —— 那同样是用户要知道的事。
      * 没有基线时**不打**角标，但要说清是「还没比过」而不是「没问题」。
      */
@@ -542,7 +542,7 @@ window.__ModuleLoader__.load({
      * 注册一个槽位，并把结果**记在标记里**。
      *
      * 为什么要记账：注册失败必须是**响的**。静默失败会让人以为"这个槽位不渲染"，
-     * 而真相是"我们没注册上" —— 两者要查的方向完全不同。实测（Plan.md §5 C3）
+     * 而真相是"我们没注册上" —— 两者要查的方向完全不同。实测（docs/Plan.md §5 C3）
      * 三个 detail 槽位都真的渲染，所以一旦它们不出现，第一个该怀疑的是注册。
      */
     function registerSlot(ctx, slot, spec, Comp, tag) {

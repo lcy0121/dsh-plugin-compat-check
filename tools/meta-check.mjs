@@ -5,7 +5,7 @@
  * ## 为什么要有它
  *
  * 2026-10-12 发现的：GitHub 简介写着「**在安装前**判断一个 DSH 插件…是否真的可用」，
- * 而 `README.md:44` 与 `Plan.md` §1 **明写禁止**这句话 ——
+ * 而 `README.md 的能力边界` 与 `docs/Plan.md` §1 **明写禁止**这句话 ——
  * 插件形态做不到安装前检查（被只读约束排除），只有 CLI 能。
  *
  * 它在首页挂了很久，而此前几轮文档核查**一次都没扫到**，因为检查范围一直限定在
@@ -36,6 +36,7 @@
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import semver from 'semver';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -50,9 +51,9 @@ const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
  * 与本项目其它规则一样：不许凭印象写规则。
  */
 export const PRODUCT = {
-  // README.md 第一句 / Plan.md §1：产品管的是**已经装了**的插件
+  // README.md 第一句 / docs/Plan.md §1：产品管的是**已经装了**的插件
   SUBJECT: /已装|已经装|installed/i,
-  // README.md:44 与 Plan.md §1 明写：插件形态做不到安装前检查
+  // README.md 的能力边界 与 docs/Plan.md §1 明写：插件形态做不到安装前检查
   FORBIDDEN: /(安装前|安装之前|before\s+install|pre-?install)/i,
   // 核心识别词：别人至少能用这几个词搜到
   REQUIRED_TOPICS: ['dsh', 'deepseek-harness', 'compatibility'],
@@ -88,7 +89,7 @@ const NOTICE = 'notice';
 export const GITHUB_RULES = [
   {
     id: 'gh.no-preinstall-claim',
-    why: 'README.md:44 / Plan.md §1 明写禁止：插件形态做不到安装前检查（被只读约束排除），只有 CLI 能。「说过头」是本项目最在意的错误',
+    why: 'README.md 的能力边界 / docs/Plan.md §1 明写禁止：插件形态做不到安装前检查（被只读约束排除），只有 CLI 能。「说过头」是本项目最在意的错误',
     check: (gh) => {
       const m = PRODUCT.FORBIDDEN.exec(gh.description || '');
       if (!m) return null;
@@ -99,7 +100,7 @@ export const GITHUB_RULES = [
   },
   {
     id: 'gh.mentions-installed',
-    why: 'README.md 第一句 / Plan.md §1：产品管的是**已经装了**的插件。简介不提这个就等于说错了对象',
+    why: 'README.md 第一句 / docs/Plan.md §1：产品管的是**已经装了**的插件。简介不提这个就等于说错了对象',
     check: (gh) => (PRODUCT.SUBJECT.test(gh.description || '')
       ? null : 'GitHub 简介里没有「已装 / installed」—— 它应该先讲清楚管的是已经装了的那批'),
   },
@@ -144,9 +145,33 @@ export const GITHUB_RULES = [
 export const NPM_RULES = [
   {
     id: 'npm.version-matches',
-    why: 'npm 上的版本必须等于本地 package.json —— 不等要么是"本地有未发布的改动"，要么是"发布错了包"',
-    check: (npm, local) => (npm.version === local.version
-      ? null : `npm 上是 ${npm.version}，本地 package.json 是 ${local.version}`),
+    why: '本地候选可领先 npm 已发布版本并提示 notice；npm 高于本地或版本无效时必须调查，不能把未发布候选当作发布错误',
+    check: (npm, local) => {
+      if (npm.version === local.version) return null;
+      const pending = semver.valid(npm.version) && semver.valid(local.version)
+        && semver.gt(local.version, npm.version);
+      return { severity: pending ? NOTICE : ERROR,
+        message: `npm 上是 ${npm.version}，本地 package.json 是 ${local.version}`
+          + (pending ? ' —— 本地候选尚未发布，不要求版本强行一致' : ' —— 公开版本领先本地或版本无效，请核对检出和发布记录') };
+    },
+  },
+  {
+    id: 'npm.description-matches',
+    why: '包描述与本地候选不同需要明确记录；该文字随新版本发布生效，不能把候选说明冒充线上状态',
+    check: (npm, local) => npm.description === local.description ? null : {
+      severity: NOTICE, message: 'npm description 与本地候选不同 —— 下一版发布才生效' },
+  },
+  {
+    id: 'npm.runtime-metadata-matches',
+    why: 'Node要求、运行时依赖和产物入口决定包是否可用；与候选不同须记录，不能用本地测试背书旧包',
+    check: (npm, local) => {
+      const fields = ['engines', 'dependencies', 'main', 'bin', 'license', 'homepage'];
+      const provided = fields.filter(key => Object.hasOwn(npm, key));
+      const stable = value => JSON.stringify(value && typeof value === 'object'
+        ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b))) : value ?? null);
+      const different = provided.filter(key => stable(npm[key]) !== stable(local[key]));
+      return different.length ? { severity: NOTICE, message: `npm 与候选的 ${different.join(', ')} 不同 —— 需在发布验收时核对` } : null;
+    },
   },
   {
     id: 'npm.no-preinstall-claim',
@@ -269,6 +294,8 @@ function fetchNpm(name) {
     description: v.description ?? '',
     keywords: v.keywords ?? [],
     repository: v.repository ?? null,
+    engines: v.engines ?? {}, dependencies: v.dependencies ?? {},
+    main: v.main ?? null, bin: v.bin ?? null, license: v.license ?? null, homepage: v.homepage ?? null,
   };
 }
 
@@ -311,13 +338,14 @@ function main() {
 
   const results = [];
   const skipped = [];
+  const observed = {};
 
   if (opts.github) {
     if (!slug) skipped.push('GitHub：package.json 里解析不出仓库地址');
     else {
       const gh = fetchGithub(slug);
       if (gh.error) skipped.push(`GitHub：${gh.error}`);
-      else results.push(...runRules(GITHUB_RULES, gh, local).map((r) => ({ ...r, side: 'GitHub' })));
+      else { observed.github = gh; results.push(...runRules(GITHUB_RULES, gh, local).map((r) => ({ ...r, side: 'GitHub' }))); }
     }
   }
 
@@ -325,22 +353,25 @@ function main() {
     const npm = fetchNpm(pkg.name);
     if (npm.error) skipped.push(`npm：${npm.error}`);
     else {
-      results.push(...runRules(NPM_RULES, npm, local, { npmReadme: fetchNpmReadme(pkg.name) })
+      observed.npm = npm;
+      const npmReadme = fetchNpmReadme(pkg.name);
+      observed.npmReadmeFetched = npmReadme !== null;
+      results.push(...runRules(NPM_RULES, npm, local, { npmReadme })
         .map((r) => ({ ...r, side: 'npm' })));
     }
   }
 
   if (opts.json) {
     process.stdout.write(`${JSON.stringify({ local: { name: pkg.name, version: pkg.version },
-      slug, problems: results, skipped }, null, 2)}\n`);
+      slug, observedAt: new Date().toISOString(), observed, problems: results, skipped }, null, 2)}\n`);
   } else {
     process.stdout.write('仓库元数据检查（GitHub 简介/标签/主页 · npm 包）\n\n');
     for (const s of skipped) process.stdout.write(`  ⏭  ${s}\n`);
     if (skipped.length) process.stdout.write('\n');
     const errors = results.filter((r) => r.severity === ERROR);
     const notices = results.filter((r) => r.severity !== ERROR);
-    if (!results.length) {
-      process.stdout.write('  ✅ 全部一致\n');
+    if (!results.length && !skipped.length) {
+      process.stdout.write('  ✅ 全部已查询数据一致\n');
     } else {
       for (const r of errors) {
         process.stdout.write(`  ❌ [${r.side}] ${r.message}\n`);
@@ -354,8 +385,8 @@ function main() {
       process.stdout.write('\n  ✅ 没有错误 —— 上面的是**预期内的漂移**（本地有还没发布的改动）。\n');
     }
     process.stdout.write('\n');
-    process.stdout.write('  ⚠️ 这些是**仓库的对外面孔**，不在「文档信息」那 7 份文件里，\n');
-    process.stdout.write('     所以没有任何自检盯着它们 —— 这个工具就是那个自检。\n');
+    process.stdout.write('  ⚠️ 这些是**仓库的对外面孔**，也是文档信息的一部分，\n');
+    process.stdout.write('     所以本工具联网核验；本地链接与事实由 doc-check 独立核验。\n');
   }
 
   // 全部数据源都不可用 → 3（不是"全过"）

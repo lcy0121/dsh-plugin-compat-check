@@ -1,444 +1,148 @@
 # dsh-plugin-compat-check
 
-## 0.1.1 리팩터링 상태 (로컬, 미배포)
+**설치된 DSH 플러그인**과 대상 DSH 버전의 호환성을 검사하고 소스 위치, 근거, 증거 범위를 제공합니다. 선언 통과나 활성화 성공만으로 모든 기능의 정상 동작을 보장하지 않습니다.
 
-npm 패키지는 DSH 플러그인입니다. CLI와 설치 점검 스크립트는 이 저장소에서 사용하며, npm 패키지에는 CLI `bin`이 없습니다. 복제한 뒤 `npm ci --ignore-scripts`를 실행하세요. Node 지원 범위는 `^22.19.0 || >=24`입니다.
+**简体中文** | [English](README.en.md) | [한국어](README.ko.md)
 
-분석기는 고정 버전 Babel로 JS/TS AST를 파싱하고, 렉시컬 바인딩·각 호출 위치·상대 경로의 부작용 import를 추적합니다. 검사 대상 코드는 실행하지 않습니다. 동적 해석과 함수 간 데이터 흐름에는 한계가 있으며, 파싱·읽기·자원 제한 실패는 커버리지에 표시됩니다. `ok`를 전달할 때 `coverage.status=limited`, `vacuous`, 관측 출처를 보존해야 합니다. 발견이 없다는 사실은 모든 기능이 검증됐다는 뜻이 아닙니다.
+## 버전과 배포
 
-서비스 관측은 present/absent/unobserved/unreadable로 구분합니다. 누락된 키는 부재가 아닙니다. 새 관측은 profile/DSH 버전이 일치해야 하며 24시간 뒤 만료됩니다. 기존 보고서는 명시된 키만 사용하고 unbound로 표시합니다. 호스트 필수 의존성과 클라이언트 요구는 따로 판정합니다. `certainty`는 증거의 확실성, `impactBasis`는 실제 loader 상태와 기능 영향의 추론을 구별합니다. 현재 호스트에서 직접 수집하며, 다른 profile 요청에는 현재 호스트 관측을 재사용하지 않습니다.
+로컬 소스는 **미배포0.1.1 후보 버전**입니다. 2026-10-15에 확인한 npm `latest`는 **0.1.0**이며 미배포 수정 사항을 포함하지 않습니다. [공개 메타데이터 검토](docs/documentation-review.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
 
-기준선 schema 2는 canonical profile, 관측 모드, 도구/규칙/카탈로그 digest를 사용합니다. 버전만 바뀐 경우 중립 변화입니다. 잠금과 원자 교체로 갱신하며, 불완전한 소스 스캔은 이전 기준선을 보존합니다. 저장 위치는 `$DSH_HOME/dsh-plugin-compat-check/`이고 파일명에 profile/경로 hash/mode가 포함됩니다.
-
-기본 CLI는 DSH를 시작하지 않습니다. 명시적 `--probe-boot`와 설치 점검은 소유한 임시 profile에서 플러그인을 설치하고 실행합니다. 이는 OS 샌드박스가 아닙니다. 고유한 비공개 임시 경로와 소유한 자식 프로세스만 사용합니다. 설치·네트워크·준비·시작 오류는3, 명시적 DSH peer 거절은2입니다. `--json` stdout은 JSON 하나입니다. `--keep`은 실제 보존 경로를 반환합니다. 탐침은 비공개 `DSC_OUT_DIR`을 요구하고 getter를 실행하지 않습니다. 선택적 클라이언트 점검의 CDP는 TCP 대신 상속 pipe를 사용하며, 전달/브라우저 오류만 검사합니다.
-
-현재 통계: [current-state.json](docs/current-state.json), [실행 기록](docs/refactor-results.md). 아래 과거 측정은 당시 입력에 해당합니다. 실제 DSH/Chrome/Windows 통합은 이번에 실행하지 않았습니다.
-
-> **이미 설치한** DSH 플러그인이 **현재 DSH 버전**에서 실제로 동작하는지 확인하고, 동작하지 않는 항목에 대해서는 **위치**(`file:line`)와 **이유**를 알려줍니다.
-
-[简体中文](README.md) | [English](README.en.md) | **한국어**
-
----
-
-## 무엇을 답하는가
-
-DeepSeek Harness(DSH)는 *모든 것이 플러그인*인 하네스입니다. 모델, 도구, 샌드박스, UI, 심지어 에이전트 루프 자체까지 플러그인입니다. 생태계는 크지만 — **플러그인의 선언은 호스트의 현실이 아닙니다.**
-
-이 도구가 답하는 질문은 정확히 하나입니다.
-
-> **이 버전의 DSH에서, 내가 이미 설치한 플러그인들이 아직 쓸 만한가?**
-
-동작하는 부분에 대해서는 조용히 있습니다. 동작하지 않는 부분에 대해서는 **어느 줄**인지, **왜**인지를 반드시 말합니다.
-
-### 네 가지 오판 — 모두 이 프로젝트에서 실제로 겪은 것
-
-| 이렇게 생각하기 쉽습니다 | 실제로는 |
+| 진입점 | 역할 |
 |---|---|
-| `peerDependencies` / `dsh.compatibility`에 지원한다고 쓰여 있으니 동작한다 | **선언이 틀릴 수 있습니다.** `0.2.0` 지원을 선언한 한 플러그인은 부팅 시 `ctx.settings.register is not a function`을 던졌습니다 |
-| DSH 버전 게이트가 통과시켰으니 동작한다 | 게이트는 **문자열 범위 비교**만 합니다. API가 실제로 존재하는지는 확인하지 않습니다 |
-| 시작할 때 오류가 없었으니 동작한다 | 플러그인은 습관적으로 `try/catch`와 `typeof` 가드로 성능을 낮춥니다. **API가 없어도 "정상 활성화"되지만, 그 기능은 죽어 있습니다** |
-| 시작 로그가 깨끗하니 클라이언트도 괜찮다 | 클라이언트 코드는 브라우저에서 실행됩니다. 호스트 로그는 완전히 깨끗한데 클라이언트가 예외를 던져 UI가 아예 등록되지 않은 플러그인이 있었습니다 |
+| npm 플러그인 | 현재 호스트 샘플링, 호환성 패널, `compat_check`, skill provider; 설치 전 검사는 불가 |
+| 저장소 CLI | 설치된 패키지 정적 검사; 기존 관측 파일 또는 명시적 임시 호스트 검사 |
+| 저장소 설치 검사 | spec을 임시 profile에 설치해 설치·시작·호환성 확인 |
+| skill | 등록된 도구 또는 저장소 CLI 사용 방법 안내 |
 
-즉, **선언을 읽는 것도 로그를 보는 것도 충분하지 않습니다.** 설치된 플러그인의 소스를 읽고, 호스트의 실제 API 표면을 얻어, 줄 단위로 대조해야 합니다.
+하나의 판정 커널을 공유합니다. **입력과 관측 증거가 같을 때만** 동일한 결과를 기대할 수 있습니다. npm 패키지에는 CLI `bin`이 없어 `npx dsh-plugin-compat-check`를 사용할 수 없습니다. 클라이언트 도착 검사는 별도 개발 도구이며 패널 기능이나 전체 UI 검증이 아닙니다.
 
-## 세 가지 산출물, 하나의 커널
+## 사용법
 
-하나의 Node 커널(`lib/`)에 세 개의 진입점이 있습니다. **셋의 결론이 다를 수 없습니다** — 패널, CLI, 대화 도구가 모두 같은 `computeReport()` 결과를 소비합니다.
+### 저장소 CLI
 
-| | 플러그인(프로세스 내) | CLI | skill |
-|---|---|---|---|
-| 설치된 플러그인의 호스트 계층 점검 | ✅ 주 역할 | ✅ | 에이전트에게 언제 CLI를 부를지 가르침 |
-| 클라이언트 절반 점검 | ✅ **고유** | ❌ 터미널에서는 보이지 않음 | ❌ |
-| **아직 설치하지 않은** 플러그인 사전 점검 | ❌ | ✅ **고유** | ❌ |
-| "설치조차 안 됨"(버전 게이트 거부) | ❌ | ✅ **고유** | ❌ |
-| 호스트가 부팅되지 않을 때도 동작 | ❌ 자신이 호스트 안에 있음 | ✅ **고유** | ❌ |
-| 터미널 / CI 출력 | ❌ | ✅ | ❌ |
-| 대화 중 즉시 답변 | 도구와 함께 ✅ | ❌ | ✅ |
-
-> **플러그인은 CLI의 상위 집합이 아니라 엄격한 부분 집합입니다.** 그래서 이 프로젝트는 "이 플러그인을 설치하면 설치 전 검사를 해 줍니다"라고 말하지 않습니다 — 그건 CLI의 일입니다.
-
-## 빠른 시작
-
-### 1. CLI (가장 완전함. 여기서 시작하세요)
+아래 명령은 이미 확보한0.1.1 후보 소스에 적용됩니다. 현재 공개main에는 새 루트 워크스페이스가 없으며 후보 버전의 공개ref는 아직 push되지 않았습니다.
 
 ```bash
-git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
-cd dsh-plugin-compat-check
+cd /path/to/dsh-plugin-compat-check
+npm ci --ignore-scripts
 
-# 프로필에 설치된 플러그인 점검
-node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop
-
-# 프로브 리포트가 있으면 메서드 단위 판정이 "확정"이 됩니다
-node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --probe /path/to/private-run/probe-report.json --dsh-version 0.2.0-rc.2
-
-# 저장소에 들어 있는 런타임 표면으로 바로 대조
-node bin/compat-check.mjs --nm ~/.dsh/profiles/parityfix --probe tools/parity/fixtures/host-surface-parityfix.json --dsh-version 0.2.0-rc.2
-
-# 기계 판독 / 한 줄 요약
-node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --json
-node bin/compat-check.mjs --nm ~/.dsh/profiles/desktop --quiet
+node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
+node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --probe /path/to/probe-report.json --dsh-version <version> --no-baseline --json
+node bin/compat-check.mjs --help
 ```
 
-`--nm`에는 `node_modules` 디렉터리든 프로필 디렉터리든 줄 수 있습니다(`node_modules` 접미사는 자동으로 붙습니다).
+실제 profile을 선택하세요. desktop을 기본으로 가정하지 않습니다. `--nm`은 profile 또는 node_modules 디렉터리를 받습니다. 런타임 관측이 없으면 메서드 판정은 suspected입니다. 관측 파일이 있어도 신원·시간·완전성·소스 귀속에 따라 certain이 아닐 수 있습니다.
 
-| 옵션 | 효과 |
+| 옵션 | 기능 |
 |---|---|
-| `--nm <dir>` | **필수.** 점검할 `node_modules` 또는 프로필 디렉터리 |
-| `--probe <json>` | 호스트 런타임 표면. **이것이 있어야** 메서드 단위 발견이 "확정"이 됩니다. 없으면 공식 카탈로그로 물러나 "의심"으로 표시합니다 |
-| `--probe-boot` | **직접 호스트를 한 번 띄워 런타임 표면을 얻습니다** (기존 프로브 리포트 불필요). 기본 **꺼짐** — 프로필 복사, pnpm 실행, 호스트 기동(약 10~20초). 실제 desktop에서: 사용 가능 9 -> **14**, 호환 안 됨 0, 발견이 "의심"에서 "확정"으로 |
-| `--probe-timeout <초>` / `--probe-keep-dir <dir>` | `--probe-boot` 대기 상한(기본 40) / 프로브 리포트를 해당 디렉터리에 보관(디버깅용) |
-| `--dsh-version <v>` | 현재 DSH 버전("선언과 실측 불일치" 범주의 전제 조건) |
-| `--rules` / `--catalog` | `rules/` 아래의 표를 덮어씁니다 |
-| `--no-baseline` | 로컬 베이스라인을 읽거나 쓰지 않음(CI / 일회성 점검) |
-| `--baseline-file <path>` / `--dry-run` | 특정 베이스라인 지정 / 차이는 계산하되 쓰지 않음 |
-| `--json` / `--quiet` | 기계 판독 / 요약 한 줄 |
-| `--version` | 도구 버전(`--json`에서는 `toolVersion`). **결론을 전달할 때 함께 알려야 합니다** — 같은 플러그인도 버전에 따라 결론이 달라집니다 |
+| `--nm <dir>` | 검사 대상 디렉터리, 필수 |
+| `--probe <json>` | 기존 관측 파일; `--probe-boot`보다 우선 |
+| `--probe-boot` | 명시적으로 profile 복사, probe 설치, 임시 호스트 시작; 대상 플러그인 실행 |
+| `--probe-timeout <초>` / `--probe-keep-dir <dir>` | 시작 제한 기본40초; 명시적 비공개 디렉터리에 현장 보존 |
+| `--dsh-version <v>` | 대상 버전; 명시 값은 시작 관측 버전보다 우선 |
+| `--rules <json>` / `--catalog <json>` | 규칙 및 API 카탈로그 지정 |
+| `--no-baseline` | 기준선 읽기·쓰기 비활성화 |
+| `--baseline-file <path>` / `--dry-run` | 기준선 지정; 쓰지 않고 비교 |
+| `--json` / `--quiet` | JSON 문서 하나; 또는 요약만 출력 |
+| `--version` / `--help` | 버전·도움말, 대상 불필요 |
 
-**종료 코드** (`1`과 `2`는 오직 **플러그인**에 대한 판정입니다):
-
-| 코드 | 의미 |
-|---|---|
-| `0` | 전부 사용 가능 |
-| `1` | "부분 사용 가능"인 플러그인이 있음 |
-| `2` | "호환되지 않음"인 플러그인이 있음 |
-| `3` | **이번 점검이 신뢰할 판정을 내지 못함** (잘못된 사용법 / 디렉터리 없음 / 도구 자체 오류) |
-
-> `3`이 따로 있어야 하는 이유: 명령을 잘못 쳤을 때 나오는 결과를 "이 플러그인은 호환되지 않음"으로 읽으면, 사용자는 **완전히 엉뚱한 것**을 조사하게 됩니다.
-
-### 2. DSH 플러그인으로 설치 (패널 제공)
+### 플러그인과 skill
 
 ```bash
-# 권장: npm에서 설치 (빠르고 버전 번호를 얻을 수 있음)
-dsh plugin --profile <사용 중인 profile> add dsh-plugin-compat-check
+# npm 배포 버전 설치 (현재0.1.0)
+dsh plugin --profile <profile> add dsh-plugin-compat-check
 
-# 또는 GitHub에서 직접 (npm 전파를 기다리지 않아도 됨)
-dsh plugin --profile <사용 중인 profile> add github:lcy0121/dsh-plugin-compat-check
-```
-
-설치 후 **설정 → 내장 플러그인 → 호환성**에서 전체 표를 볼 수 있습니다. 아무 플러그인의 상세 페이지를 열면 제목 줄에 판정 배지가, 아래에는 개별 발견 사항이 있습니다. 시작 후 몇 초 뒤에 스스로 한 번 실행하며, **지난번과 비교해 바뀐 것이 있는지**를 로그에 남깁니다.
-
-### 3. skill 설치 (에이전트가 사용법을 알게 함)
-
-```bash
+# CLI 사용자의 독립 skill
 ./dsh-plugin-compat-check.sh --install-skill
 ```
 
-`${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`에 설치됩니다. 이를 통해 "업데이트 후에도 이 플러그인이 동작하나요?"라는 질문에 에이전트가 직접 점검을 돌려 답합니다.
+플러그인은 호환성 패널, 상세 배지, `compat_check`, skill provider를 등록합니다. 이번 후보 버전에서는 mock과 설치 tarball로 등록 경로를 검증했으며 실제 UI 검증은 남아 있습니다. 독립 skill은 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`에 설치되며 기존 파일 덮어쓰기는 `--force`가 필요합니다.
 
-> ⚠️ **플러그인 패키지 안에 `SKILL.md`를 넣는 것은 효과가 없습니다** — DSH는 플러그인 패키지 내부 파일을 스캔하지 않습니다. 그래서 플러그인을 설치한 뒤에도 이 단계가 별도로 필요합니다. 플러그인 형태는 `ctx.skills.registerProvider()`로 직접 등록하며, 이 명령은 **CLI만 쓰는** 사용자를 위한 것입니다(그들은 플러그인이 등록한 것을 받지 못합니다).
+저장소 루트는 **비공개 개발 워크스페이스**이며 설치 가능한 DSH bundle이 아닙니다. 루트 GitHub spec은 `plugin/` 설치와 같지 않습니다. 후보 버전 검사 시 루트에서 `npm ci --ignore-scripts`를 실행하고 `plugin/`에서 `npm pack --pack-destination <이미있는절대출력경로>`를 실행한 뒤 생성된 `.tgz`를 DSH로 설치하세요. pack이 커널과 LICENSE를 준비합니다. 준비되지 않은 `plugin/` 복사본에는 커널이 없습니다. [플러그인 배포 설명](plugin/README.md)을 참고하세요.
 
-### 4. 엔드투엔드 스크립트 (설치 + 부팅 + 프로브 + 판정)
+### 설치 검사
 
 ```bash
 ./dsh-plugin-compat-check.sh <spec> [--keep] [--timeout 초] [--json]
+node bin/check-install.mjs <spec> --json
 ```
 
-`<spec>`은 `dsh plugin add`가 받는 것과 완전히 같습니다: `dsh-keep-awake`, `github:owner/repo`, `file:/path/to/plugin`.
+Node, DSH, pnpm이 필요하며 npm 조회와 설치는 네트워크를 사용할 수 있습니다. spec은 DSH의 npm/GitHub/git/file 형식을 따릅니다. 실행마다 고유한 임시 profile과 비공개 디렉터리를 사용하고 자신이 시작한 프로세스만 정리합니다. **임시 profile은 운영체제 샌드박스가 아닙니다.**
 
-CLI가 못 하는 세 가지를 하며, 그래서 CLI가 답할 수 없는 질문에 답합니다: npm 정체 조회(이름 충돌 방지), 격리 설치(버전 게이트 거부 포착), 실제 부팅으로 프로브 리포트 확보(메서드 단위 판정을 "확정"으로 만드는 것).
-
-| 옵션 | 효과 |
+| 옵션 | 기능 |
 |---|---|
-| `--keep` | 임시 프로필과 현장을 보존(수동 조사용) |
-| `--timeout N` | 부팅 대기 초, 기본 30 |
-| `--json` | 기계 판독 출력 |
-| `--install-skill` | skill만 설치, 점검 없음(커널 불필요) |
-| `--force` | `--install-skill`과 함께, 기존 skill 덮어쓰기 |
-| `--help` | 사용법(커널 불필요) |
+| `--keep` | 이번 profile·현장 보존, 반환 경로 사용 |
+| `--timeout N` | 시작 대기 초, 기본30 |
+| `--json` | stdout에 JSON 하나, 진행 출력 분리 |
+| `--install-skill` / `--force` | shell의 독립 skill 설치 및 명시적 덮어쓰기 |
+| `--help` / `--version` | shell 도움말·버전 |
 
-> **`--install-skill`과 점검은 서로 독립적입니다.** 전자는 커널이 필요 없고, 후자는 커널이 없으면 **그냥 실패**합니다 — "추출 결과만 출력"으로 성능을 낮추지 않습니다. 성능을 낮추면 정상처럼 보이지만 **아무 판정도 담기지 않은** 출력이 나오고, 그건 오류보다 훨씬 나쁩니다.
+CLI 및 Node 설치 검사 결과 코드:
 
-## 출력 읽는 법
-
-```
-插件数: 22    有运行时面: 是
-
-结论: 可用 3    部分可用 19    不兼容 0
-
-部分可用  dsh-keep-awake@0.2.0
-     降级 / 宿主方法缺失  jobs.onJobsChanged  @ lib/index.js:591
-       影响: 任务状态不再实时推送，插件退化为轮询（约 5 秒延迟）
-     功能缺失 / 宿主方法缺失  settings.register  @ lib/index.js:466
-     客户端半边（命令行测不到，需界面验证）: locale, slots
-     无证据可判（只出现名字，没有调用点）: timer
-```
-
-*(도구 출력은 아직 중국어뿐입니다. 이 문서는 한국어로 설명하지만 출력 문자열 자체는 현지화되지 않았습니다 — 알려진 제한 사항을 참고하세요.)*
-
-플러그인은 **정확히 하나**의 처분(disposition)에 들어가며, 처분 집합은 서비스 집합과 반드시 같아야 합니다(불변식이 이를 강제합니다).
-
-| 처분 | 의미 |
+| 코드 | 의미 |
 |---|---|
-| `finding` | 판정이 있음 — 위의 개별 발견 참조 |
-| `client-side` | 브라우저에서 실행됨. **터미널에서는 볼 수 없고** UI 확인이 필요 |
-| `self-provided` | 플러그인 자신이 제공하는 서비스이며 호스트 서비스가 아님 |
-| `runtime-facility` | Cordis 컨텍스트 내장(`loader`, `effect` …). DSH 서비스가 아님 |
-| `filtered` | 노이즈/거짓 양성으로 판단(JS 내장 메서드명, 신뢰할 출처가 없는 변수) |
-| `guarded` | **작성자가 스스로 검사**하고 폴백을 갖춤 — 보고하면 거짓 양성 |
-| `abstained` | 판단할 데이터가 부족(예: 카탈로그가 그 서비스의 메서드를 선언하지 않음) |
-| `no-calls` | 이름은 나타나지만 호출 지점이 없음 — **증거 없음은 "문제 없음"이 아님** |
+| `0` | 보고된 문제 없음; coverage·vacuous·관측 제한 확인 필요 |
+| `1` | 부분 사용 가능한 플러그인 존재 |
+| `2` | 호환되지 않는 플러그인 또는 명확한 설치 peer 차단 |
+| `3` | 입력·설치·네트워크·준비·시작 오류, 판정 불가 |
 
-마지막 두 개는 의도적으로 분리했습니다. `no-calls`와 `abstained`는 다른 곳에서는 "괜찮음"처럼 보이지만, 괜찮지 않습니다.
+shell은 Node 진입 전 기존 사용법·커널 오류 코드를 유지합니다. 자동화에는 Node 진입점과 `status`를 사용하고 래퍼 오류를 플러그인 판정으로 해석하지 마세요.
 
-## 세 단계 확정성 (이것이 정직성 장치입니다)
+## 증거와 한계
 
-| 단계 | 언제 | 표시 |
-|---|---|---|
-| **확정** | **런타임 표면**이 있거나, 플러그인이 그 의존성을 **스스로 선언**했을 때 | 표시 없음 |
-| **의심** | 공식 카탈로그만 있을 때(**계약** 카탈로그이며 런타임 표면이 아님) | `[의심]` |
-| 제외 | 선언도 없고 카탈로그에도 없음 | `filtered`에 기록, 검증 가능 |
+서비스는 present, absent, unobserved, unreadable로 구분합니다. 누락된 키는 미관측입니다. 현대 관측은 profile·DSH 버전이 일치해야 하고 기본24시간 후 만료됩니다. 구형 보고서는 명시된 키만 사용하며 unbound 경고를 표시합니다.
 
-> **공식 카탈로그는 런타임 표면이 아닙니다.** 추상 서비스(`jobs`)에는 메서드를 전혀 선언하지 않고, `loader`는 아예 빠져 있으며, `settings`에 대해서도 런타임이 실제로 가진 것보다 적게 선언합니다. 그것으로 "이 메서드는 존재하지 않는다"고 단정할 자격은 없으므로, 해당 발견은 "의심"으로 내립니다.
->
-> 이것은 결함이 아닙니다: **판단할 수 없을 때는 확정으로 올리는 대신 표시를 내립니다.**
+`certainty`는 certain 또는 suspected이며 filtered/abstained는 별도 처리 분류입니다. 선언은 의존 관계를 증명할 수 있지만 메서드 부재를 증명하지 못합니다. `impactBasis=inferred`의 기능 영향은 추론임을 유지하세요. 신뢰할 수 있게 매핑된 loader FAILED/PENDING은 실제 미활성 증거입니다. 공식 peer 충돌은 declared-incompatible 및 추론 영향·degraded로 표시하고 미관측 예외를 고려해 fatal로 단정하지 않습니다. `engines.dsh`는 권고 선언입니다.
 
-## 의도적으로 하지 않는 일
+`coverage.status=limited`, vacuous, 파싱·읽기·예산 진단, 매핑 불가능한 loader 제한을 항상 함께 전달하세요. 문제 없음이 기능 인증은 아닙니다. 호스트·클라이언트·공유 호출을 구분합니다. provide 선언은 제공자 단서일 뿐 활성화 증거가 아니며 존재하는 서비스의 완전한 메서드 관측은 계속 사용합니다.
 
-- **패키지 설치, 하위 프로세스 실행, 네트워크 사용을 하지 않습니다**(플러그인 형태). 버전 문자열 하나를 얻으려고 그 경계를 깨는 것은 가치가 없습니다.
-- **추측하지 않습니다.** DSH 버전을 얻지 못하면 `dshVersion`은 `null`이 되고 "선언과 실측 불일치" 범주는 **아예 발동하지 않습니다** — 버전을 지어내어 결론을 만들어 내는 대신입니다.
-- **"비교 불가"를 "문제 없음"이라고 하지 않습니다.** 베이스라인이 없으면 "아직 비교한 적 없음"이라고, 손상되었으면 "읽을 수 없어 이번 비교는 건너뜀"이라고 말합니다.
-- **판정에 LLM을 쓰지 않습니다.** 심각도는 계층적 기본값과 `rules/severity.json`에서 나옵니다.
+고정 버전 Babel JS/TS AST로 어휘 바인딩, 호출 위치, 능력 검사, 부작용 import를 포함한 패키지 내부 상대 import를 분석하며 대상 소스를 실행하지 않습니다. 동적 속성, factory/proxy, 함수·모듈 간 데이터 흐름은 제한적입니다. 파일·바이트·디렉터리·시간 예산을 두며 호스트 분석은 시간·메모리 제한 worker에서 실행합니다.
 
-## 반드시 알아야 할 두 가지 경계
+기본 정적 CLI는 DSH를 시작하거나 대상을 설치하지 않습니다. 호스트 플러그인은 분석 worker를 사용하지만 검사를 위해 외부 명령·네트워크를 호출하지 않으며 자신의 기준선을 기본 기록합니다. schema2는 canonical profile, 경로 해시, 모드, 도구·규칙·카탈로그를 구분합니다. 경로는 `$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`이며 잠금과 원자적 교체를 사용합니다. 불완전한 소스 검사는 기준선을 갱신하지 않습니다. 정적·파일·프로세스 내부 관측은 모드가 다릅니다.
 
-**1. 클라이언트 절반은 터미널에서 절대 검증할 수 없습니다.** 클라이언트 코드는 브라우저에서 실행되며, 확인하려면 **그 플러그인 고유의 UI 요소가 나타나는지**를 봐야 합니다. 이 도구는 클라이언트 서비스를 **나열**하지만 **판정하지는 않습니다** — 의도적 정직이며 누락이 아닙니다. (플러그인 형태의 패널도 이 계층을 검증할 수 없습니다: 패널은 호스트 안에서 돌아갑니다.)
+descriptor 샘플링은 getter를 실행하지 않으며 접근자 메서드는 미확인으로 남깁니다. 진단 출력에는 명시적 비공개 `DSC_OUT_DIR`이 필요합니다. 다른 profile 조회는 현재 호스트의 서비스를 빌리지 않고 정적 증거를 사용합니다. 보존된 현장에는 로컬 정보가 포함될 수 있으므로 공유 전 확인하세요.
 
-**2. 메서드 단위 판정은 정적 추출에 기대며, 알려진 거짓 양성 원천이 있습니다.** 실제 결함은 모두 [`docs/extraction-findings.md`](docs/extraction-findings.md)에 기록되어 있습니다(현재 18건 수정). 확신이 서지 않으면 `--keep`으로 원본 데이터를 확인하세요.
+## 저장소 구조
 
-| 경로 | 내용 |
-|---|---|
-| `/path/to/private-run/boot.log` | 호스트 부팅 로그(`did not activate` 포함) |
-| `/path/to/private-run/static.json` | 추출된 서비스와 호출 지점(`file:line` 포함) |
-| `/path/to/private-run/probe-report.json` | 호스트의 실제 API 표면 |
-
-## 디렉터리 구조
-
-(버전 관리 대상 파일 **172**개: 82개가 코드 / 문서 / 데이터 표이고 90개가 픽스처 파일입니다
-(`test/fixtures/micro/node_modules/`의 합성 플러그인 파일 48개, `tools/parity/fixtures/hang-cycle/node_modules/`의 5개,
-그리고 합성 호스트 런타임 표면 1개). 아래에는 사람이 관리하는 82개 항목을 **모두** 나열했고, 픽스처 내부는 요약했습니다.)
-
-```
+```text
 dsh-plugin-compat-check/
-├── README.md                   # 중국어 문서
-├── README.en.md                # 영어 문서
-├── README.ko.md                # 한국어 문서 (이 파일)
-├── Plan.md                     # **개발 계획과 작업 규칙**: 확정된 결정, 마일스톤, 지뢰 목록, 실측한 DSH 계약
-├── LICENSE                     # MIT
-├── .gitignore
-├── dsh-plugin-compat-check.sh  # 엔드투엔드 오케스트레이션
-│
-├── lib/                        # 커널: 네 개의 순수 모듈, 세 산출물이 공유
-│   ├── extract.mjs             #   정적 추출: 누가 무엇을 호출하는가 (file:line과 증거 형태 포함)
-│   ├── version.mjs             #   버전 번호의 **유일한 진원**
-│   ├── verdict.mjs             #   판정: 결론, 확정성 단계, 서비스별 처분
-│   ├── baseline.mjs            #   차분: 지난번과 무엇이 바뀌었고 어느 방향인가
-│   └── report.mjs              #   렌더링: 사람이 보는 표 (대화 도구와 같은 문구)
-│
-├── bin/
-│   └── compat-check.mjs        # CLI 진입점: 인자 파싱 / 종료 코드 / 표와 JSON 렌더링
-│
-├── plugin/                     # DSH 플러그인 산출물
-│   ├── package.json            #   dsh.bundle.patch + dsh.client (platform은 리터럴 "web")
-│   ├── cordis.patch.yml        #   플러그인 마운트 매니페스트
-│   ├── index.js                #   호스트 절반: 자기 성찰 + 패널 채널 + 도구 + skill
-│   └── lib/
-│       └── client.js           #   클라이언트 절반: **미리 빌드됨** (호스트는 빌드하지 않음)
-│
-├── skill/                      # skill 산출물
-│   ├── SKILL.md                #   본문 (frontmatter에는 name / description만)
-│   └── README.md               #   등록 방식 설명: 실측 증거, 스캔 루트, rank, frontmatter 규칙
-│
-├── probe/                      # 진단 프로브 (일회용 프로필에 file:로 설치)
-│   ├── package.json
-│   ├── cordis.patch.yml
-│   └── index.mjs               #   프로토타입 체인 열거 + 스코프 컨텍스트 탐침; **구조만, 값은 절대 아님**
-│
-├── rules/                      # 논리가 아닌 데이터
-│   ├── README.md               #   표를 고치는 방법, 커버리지/신선도 불변식
-│   ├── severity.json           #   심각도 계층 (서비스 40개) + 영향 문구
-│   ├── dsh-api-catalog.json    #   공식 양쪽 카탈로그 (호스트 91 / 클라이언트 8)
-│   └── usage-inventory.json    #   "이 서비스는 실제로 쓰인다"는 증거
-│
-├── docs/
-│   └── extraction-findings.md  # 실측한 추출 결함 목록 (번호) + 프로브의 두 경계
-│
-├── test/                       # generated test totals / test files (아래 참조)
-│   ├── helpers.mjs             #   공용 픽스처: 표 로딩, 스냅샷 요약, 해싱
-│   ├── invariants.test.mjs     #   결과의 자기 일관성 (어떤 입력에도 성립해야 함)
-│   ├── snapshot.test.mjs       #   출력이 바뀌었는가 (핵심 필드 + 내용 해시)
-│   ├── cli.test.mjs            #   플래그가 실제로 작동하는가, 실패가 조용히 삼켜지는가
-│   ├── baseline.test.mjs       #   모든 차분 범주가 맞는가, 변화가 없을 때 조용한가
-│   ├── cache.test.mjs          #   캐시 정책, 자동 점검 시점, 프로필 판별
-│   ├── skill.test.mjs          #   문서 표류: skill이 주장하는 모든 것을 도구가 할 수 있는가
-│   ├── secrets.test.mjs        #   **저장소에 자격 증명 금지** + 프로브는 값을 기록하지 않음
-│   ├── client-structure.test.mjs  # 클라이언트 컴포넌트가 "등록만 되고 아무것도 안 하는" 경우
-│   ├── host-structure.test.mjs    # 호스트 절반도 동일 (실제로 apply를 호출해 무엇을 등록했는지 확인)
-│   ├── packaging.test.mjs      #   npm 패키지가 자족적인가 (실제로 pack 해서 검증)
-│   ├── probe-boot.test.mjs     #   --probe-boot 종단 검증 (**기본 건너뜀**, DSC_SLOW=1)
-│   ├── docs.test.mjs           #   문서의 숫자가 아직 맞는가
-│   ├── meta-check.test.mjs     #   저장소의 외부 얼굴(GitHub/npm 메타데이터) 규칙
-│   ├── version.test.mjs        #   모든 진입점이 같은 버전을 보고하는가
-│   ├── labels.test.mjs         #   라벨셋 대조 (**기본 건너뜀**, DSC_SLOW=1)
-│   ├── client-arrival.test.mjs #   계획한 클라이언트 항목이 실제로 도착했는가 (**건너뜀**, DSC_SLOW=1)
-│   ├── __expectations__/
-│   │   └── micro.json          #   사람이 쓴 제품 약속: 이 결론이어야 **한다**
-│   ├── __snapshots__/
-│   │   ├── micro.json          #   합성 픽스처의 전체 출력 스냅샷
-│   │   └── parityfix.json      #   실제 플러그인 집합의 전체 출력 스냅샷
-│   ├── __baseline-versions.json #  기준 버전 잠금 (드리프트는 BASELINE_DRIFT로 보고)
-│   └── fixtures/
-│       ├── micro/host-surface.json          # 합성 호스트 런타임 표면
-│       └── micro/node_modules/@fixture/*    # 판정 경로별 합성 플러그인 15개
-│
-└── tools/                      # 개발 도구 (런타임에 포함되지 않음)
-    ├── doc-check.mjs                  # 문서 숫자 자체 점검 (오프라인, 배포 게이트에 포함)
-    ├── meta-check.mjs                 # 외부 얼굴 자체 점검 (GitHub 설명/태그 · npm, 네트워크 필요)
-    ├── client-arrival.mjs             # 클라이언트 항목 "도착" 대조 (H1', 브라우저 필요)
-    ├── extractor-recall.mjs            # 호출 지점 재현율 (독립 열거)
-    ├── catalog/extract-host-api.py     # 호스트에서 공식 API 카탈로그 추출 (rules/의 출처)
-    ├── parity/                         # 파이썬 참조 구현과의 차분 테스트
-    │   ├── parity.sh
-    │   ├── a4b-diff.mjs
-    │   ├── expected-diffs.json         #   의도된 차이, 각각 이유 명시
-    │   ├── python-reference/extract.py #   동결된 파이썬 참조 구현
-    │   └── fixtures/
-    │       ├── host-surface-parityfix.json   # 실제 플러그인 집합의 런타임 표면 (회귀 기준)
-    │       └── hang-cycle/                   # 추출을 한 번 멈추게 했던 순환 의존 픽스처
-    └── slot-probe/                     # 슬롯 가용성 프로브 (ctx.slots props 계약 실측)
-        ├── package.json
-        ├── cordis.patch.yml
-        ├── index.js
-        ├── lib/client.js
-        └── cdp-diag.mjs                #   CDP로 헤드리스 Chrome을 구동해 실제 렌더링 확인
+├── README.md / README.en.md / README.ko.md
+├── package.json / package-lock.json   # private development workspace
+├── bin/                              # compat-check.mjs, check-install.mjs
+├── lib/                              # shared analysis, evidence, state and runner modules
+├── plugin/                           # npm plugin, client, packaging scripts and skill copy
+├── probe/                            # opt-in runtime probe, staged by the owned runner
+├── skill/                            # authoritative SKILL.md and delivery notes
+├── rules/                            # severity rules, API catalogue and historical inventory
+├── docs/                             # current contracts, verification and history
+│   ├── README.md
+│   ├── Plan.md
+│   ├── GPT审计及重构方案文档.md
+│   ├── refactor-implementation.md / refactor-results.md
+│   ├── current-state.json / public-metadata.json
+│   ├── documentation-review.md / roadmap.md
+│   └── extraction-findings.md
+├── test/                             # behavior, invariants, snapshots and artifact tests
+└── tools/                            # documentation, metadata and diagnostic utilities
 ```
 
-## 테스트
+## 검증과 유지보수
 
 ```bash
 npm test
+npm run format:check
+node tools/doc-check.mjs
+node plugin/scripts/prepublish-check.mjs
+node tools/meta-check.mjs --json
 ```
 
-기본 테스트를 실행합니다. 현재 수는 `docs/current-state.json`에 있습니다. `probe-boot.test.mjs`는 기본적으로 건너뜁니다:
+`doc-check`는 링크·버전·문서 진입점·skill 복사본을 오프라인 검사하며 테스트를 실행하지 않습니다. 성공한 TAP 로그로 `node tools/update-current-state.mjs --test-summary <log>` 후 `node tools/doc-check.mjs --test-summary <log>`를 실행하세요. 배포 전 검사는 기본 전체 테스트를 한 번 실행하고 요약을 재사용하며 독립 tarball 설치 후 실제 호스트 도구를 호출합니다. 메타데이터 검사는 네트워크와 gh/npm이 필요합니다. 미배포 로컬 버전·README 차이는 notice이고 조회 실패는 미검증입니다.
 
-```bash
-# 실제로 호스트를 한 번 띄워 --probe-boot 종단 검증 (약 10~20초)
-DSC_SLOW=1 node --test test/probe-boot.test.mjs
-```
+느린 통합 검사는 명시적 `DSC_SLOW=1`이 필요합니다. 이번 후보의 실제 DSH·Chrome·Windows 검증은 없으며 Linux CI는 설정만 있고 원격 실행 성공을 주장하지 않습니다. 과거88.3% 재현율과66/66 도착 수치는 [역사 기록](docs/Plan.md)의 입력에만 해당합니다. Python parity는 구형 정규식 참고 구현이며 AST의 정답이 아닙니다.
 
-> 기본적으로 건너뛰는 이유는 프로필 복사, pnpm 실행, 호스트 기동, 보고서 대기 — 수십 초가
-> 걸리기 때문입니다. 매번 돌리면 사람들이 테스트를 건너뛰는 법을 배우게 됩니다.
-> 그렇다고 지울 수도 없습니다: 인자가 맞는지는 몇 초에 확인되지만
-> **흐름이 실제로 도는지는 한 번 돌려야만 압니다**(프로필 복사, 번들에 프로브 넣기,
-> 보고서 생성, **끝나고 쓰레기를 남기지 않기**). 건너뛸 때는 어떻게 실행하는지 한 줄
-> 알려 주어 조용히 사라진 테스트가 되지 않게 합니다.
-
-현재 테스트 수는 `docs/current-state.json`에서 생성됩니다. 여기서는 서로 다른 두 가지를 구분해야 합니다
-(예전에는 "일곱 계층"으로 뒤섞여 있었습니다):
-
-* **3개의 인식론적 계층**(`invariants` / `__expectations__` / `__snapshots__`) — 각 계층은 원리상 다른 계층이 잡는 오류를 보지 못합니다. `__expectations__`는 테스트 파일이 아니라 **판정 데이터**이며 `invariants`와 `snapshot`이 소비합니다;
-* **test files** = 그 두 계층이 쓰는 2개(`invariants` / `snapshot`) + 나머지 **13**개. 각각 하나의 구체적인 문제(인자, 캐시, 드리프트, 문서 드리프트, 자격 증명, 구조, 패키징…)를 봅니다.
-
-각 파일이 답하는 것:
-
-| 파일 | 답하는 것 | 못 보는 것 |
-|---|---|---|
-| `invariants.test.mjs` | 결과가 **자기 일관적**인가 (어떤 입력에도) | 틀렸지만 내부적으로 일관된 결과 |
-| `snapshot.test.mjs` | 출력이 **바뀌었는가** (핵심 필드 + 내용 해시) | 스냅샷에 충실히 기록된 변경 |
-| `__expectations__/` | 그 결론이 우리가 **약속한** 것인가 (사람이 작성) | 아무도 생각하지 못한 경우 |
-| `cli.test.mjs` | 플래그가 실제로 작동했는가, 실패가 삼켜지지 않는가 | UI 동작 |
-| `client-structure` / `host-structure` | 컴포넌트/호스트가 **등록만 되고 아무것도 안 할 수 있는가** | 실제 렌더링 |
-| `cache.test.mjs` | 캐시 정책이 맞는가, 동시 요청이 **한 번만** 갱신하는가, 자동 점검 시점이 맞는가 | 실제 기동 순서 |
-| `version.test.mjs` | 세 진입점 + 보고서 JSON이 **같은** 버전을 보고하는가("단일 버전" 약속의 수문장) | 실제 배포 흐름 |
-| `labels.test.mjs` (**기본 건너뜀**, `DSC_SLOW=1`) | 도구가 말하는 "이 항목은 pending에 머문다"가 **호스트 자신이** 보고하는 것과 맞는가 | ① 계층만 커버 — 조용한 성능 저하는 측정 불가 |
-| `client-arrival.test.mjs` (**기본 건너뜀**, `DSC_SLOW=1`) | 계획한 클라이언트 항목이 **브라우저에 실제로 도착했는가** (부정 대조 포함) | 느림(약 45초): 호스트 + 헤드리스 Chrome 기동 |
-| `docs.test.mjs` | **문서**의 숫자가 아직 맞는가(번호 연속성, 상호 참조 유효성, 3개 언어 일치) | 단언 개수(스위트 실행 필요, `tools/doc-check.mjs` 참조) |
-| `meta-check.test.mjs` | 저장소의 **외부 얼굴**(GitHub 설명/태그, npm version/keywords/README)이 제품 정의와 일치하는가 | 네트워크 부분(데이터는 `tools/meta-check.mjs`, gh/npm 필요) |
-| `secrets.test.mjs` | 저장소에 자격 증명이 있는가, **프로브가 값을 복사해 오지 않는가** | 다른 형태의 자격 증명 |
-| `baseline.test.mjs` | 모든 차분 범주가 맞는가, **변화가 없을 때 조용한가** | 실제 플러그인 |
-| `skill.test.mjs` | 도구가 skill이 주장하는 모든 것을 할 수 있는가 (문서 표류) | —— |
-| `probe-boot.test.mjs` (**기본 건너뜀**, `DSC_SLOW=1`) | `--probe-boot`가 실제로 호스트를 띄워 표면을 얻는가 | 느림(10~20초)이라 기본 미실행 |
-| `packaging.test.mjs` | npm 패키지가 **자족적인가** — 실제로 pack 해서 저장소를 떠나도 결론을 내는지 | 조금 느림(약 1~2초, `npm pack` 실행) |
-
-**세 계층 모두 필요합니다** — 측정으로 확립했습니다: "폴백 경로가 절대 발동하지 않는다"는 변이를 주입하면 **불변식 69개가 모두 초록인 채로 스냅샷이 즉시 빨개집니다.** 반대로 어떤 플러그인의 호출 지점을 비우면 **스냅샷이 빨개지고 불변식은 초록으로 남습니다.** 각 계층은 상대의 실패 모드에 구조적으로 눈이 멀어 있습니다.
-
-> 재생성해도 되는 것은 **스냅샷** 계층뿐입니다. 불변식과 기대값은 **절대 "초록이 되도록 재생성"해서는 안 됩니다** — 그것이 바로 그들의 존재 이유입니다.
->
-> 재생성: `UPDATE_SNAPSHOTS=1 node --test test/snapshot.test.mjs` (플래그가 아니라 환경 변수입니다: `node --test`는 테스트 파일 뒤의 인자를 *테스트 파일 이름*으로 취급하므로 플래그는 적용되지 않으면서 종료 코드는 정상으로 남습니다 — **또 하나의 조용한 무동작**).
-
-## 측정과 감사: 이 도구는 과연 맞는가?
-
-결론을 검증할 수 있는지는 그 자체로 **측정 가능**합니다. 세 가지 지표가 있고, 각각 명령이 있으며 **재계산 가능**합니다:
-
-| 지표 | 측정 방법 | 현재 값 |
-|---|---|---|
-| **호출 지점 재현율** | 추출기와 **무관한 순수 정규식** 열거로 같은 파일을 훑어 대조 | **88.3%** (기록된 의도적 기권을 제외한 뒤, 56개 검토 대기) |
-| ① 계층(호스트 미활성) | 호스트가 스스로 보고하는 `fiber.state`를 진값으로, 합성 정·반례 양방향 대조 | 진양성 1 / 위양성 0 / 누락 0 |
-| 클라이언트 항목 **도착** | CDP 네트워크 도메인 — 각 배치가 실제로 받아졌는가 | 66/66 항목, 3/3 배치 |
-
-```bash
-node tools/extractor-recall.mjs              # 호출 지점 재현율 (유계, 항목별 확인 가능)
-node tools/labels.mjs --nm web --synthetic   # ① 계층 양방향 대조
-node tools/client-arrival.mjs                # 클라이언트 도착 (브라우저 필요)
-```
-
-**어느 계층까지 커버하는지 반드시 명시합니다**:
-
-| 계층 | 도구의 약속 | 진값의 출처 |
-|---|---|---|
-| ① 호스트 미활성 | "이 항목은 pending에 머문다" | ✅ 호스트가 스스로 보고하는 `fiber.state` |
-| ② **조용한 성능 저하** | "활성화됐지만 기능 하나가 죽었다" | ❌ **기계적 진값 없음** |
-| ③ 클라이언트 반쪽 | "브라우저에서 그 반쪽이 로드되지 않는다" | ⚠️ 도착은 측정 가능(CDP), **렌더링/동작**은 사람이 봐야 함 |
-
-> ⚠️ **"조용한 성능 저하 재현율"이라는 숫자는 없고, 앞으로도 쫓지 않습니다.**
-> 이는 "죽은 기능 전부 중 몇 개를 보고했는가"를 묻는데, 그 분모는 **플러그인 저자의 지식**입니다.
-> 그것을 얻으려면 **모든** 플러그인에 기능 테스트를 써야 하고, 플러그인 집합은 **개방**되어 있습니다
-> (이 머신에 커뮤니티 플러그인 14개, 다른 머신은 또 다른 세트, 저자가 배포할 때마다 테스트가 조용히 무효화될 수 있음).
-> **그것은 "비싼" 일이 아니라 상한이 없는 일입니다.** 대신 그 **상류** 계층을 측정합니다:
-> "실패할 모든 호출 지점 중 몇 개를 찾았는가" — 이 계층은 우리 것이고, 독립적으로 측정 가능하며, **유계** 대기열을 줍니다.
->
-> 양성 사례를 기다릴 수도 없습니다: 이 머신의 실제 프로필은 **PENDING 0 / FAILED 0**이므로,
-> 사례는 합성 픽스처로 **마련**합니다(아무도 제공하지 않는 서비스를 주입 → 반드시 PENDING).
-> 그러나 **진값은 여전히 호스트에서 옵니다** — 우리는 사례만 마련하고, 스스로 "나 망가졌다"고 말하게 하지 않습니다.
-
-**감사 기록**: 결론에는 두 가지 신뢰도가 있고 출력에서 구분됩니다(`impactBasis`):
-
-| | 무엇인가 | 누가 확인했는가 |
-|---|---|---|
-| **사실**(`basis`) | 우리가 **측정한** 것 — 메서드가 런타임에 없음, 호출 지점에 능력 검사가 없음 | 런타임 면 + 소스 행, 항목별 재확인 가능 |
-| **영향** | 사용자가 **잃는** 것 | **"추론, 미측정"으로 표시된 것은 우리가 코드를 읽어 낸 것** |
-
-모든 로컬 프로필에서 사용자가 실제로 보게 되는 `method` 수준 발견을 감사한 결과:
-
-| 모드 | 발견 수 | 확정성 | 결과 |
-|---|---|---|---|
-| 기본(런타임 면 없음) | **7** | 전부 `[의심]` | 모두 **단서**: 면을 얻으면 6개는 메서드가 실재함이 확인되고, 1개는 try/catch 안 |
-| 런타임 면 있음 | 2 → **1** | `certain` | **그중 1개가 위양성이었고 수정됨** |
-
-그 위양성(저자가 능력 검사를 **헬퍼 함수** 안에 두어 정규식이 볼 수 없었음)은 설계를 바꿨습니다:
-이제 같은 파일 헬퍼 안의 능력 검사도 인식하고, 출력에서 "사실"과 "추론"을 구분합니다.
-
-> ⚠️ 표본이 매우 작습니다(`certain` 수준 주장: 수정 전 2개, 수정 후 1개). **"정밀도 50%"나 "100%"로 읽지 마세요**
-> — 그것은 **위양성을 발견해 고친 기록**이지 비율이 아닙니다. 항목별 세부는
-> [`docs/extraction-findings.md`](docs/extraction-findings.md)에 있습니다.
-
-## 유지보수
-
-| 이렇게 하려면 | 이렇게 |
-|---|---|
-| 새 DSH 버전 추적 | `python3 tools/catalog/extract-host-api.py`로 공식 카탈로그 재추출 |
-| 심각도 / 영향 문구 변경 | `rules/severity.json` 수정 후 테스트 실행 (커버리지·신선도 불변식이 알아챕니다) |
-| 파이썬 참조 구현과 대조 | `./tools/parity/parity.sh <node_modules 디렉터리>` |
-| 외부에 보이는 설명(설명/태그/README)을 수정 | `node tools/meta-check.mjs`로 GitHub와 npm의 얼굴을 대조 |
-| 이 저장소를 변경 | **먼저 [`Plan.md`](Plan.md)를 읽으세요**: 확정 결정 10건, 마일스톤, 작업 규칙, 지뢰 목록, 실측한 DSH 계약 |
-
-## 알려진 제한
-
-- 도구 출력은 중국어뿐입니다 (이 문서는 한국어지만 출력 문자열에는 i18n이 없습니다)
-- 메서드 단위 판정은 휴리스틱이며 거짓 양성이 있을 수 있습니다. 알려진 것은 모두 `docs/extraction-findings.md`에 있습니다
-- **클라이언트 절반은 자동으로 검증할 수 없습니다** — 나열만 가능하며 사람이 UI를 봐야 합니다
-- 엔드투엔드 스크립트는 네트워크 접근(npm 레지스트리, 플러그인 설치)과 `python3`가 필요합니다
-- **Windows는 검증하지 않습니다 — 이것은 결정입니다.** 주 사용 환경은 macOS / Linux이고, Windows는 호환을 제공하지만(순수 Node, 플랫폼 전용 API 없음) 검증은 사용자에게 맡깁니다. 커널에는 플랫폼 전용 호출이 없고, 오케스트레이션 스크립트는 POSIX 셸이 필요합니다.
+[현재 계약과 문서 목록](docs/README.md) · [리팩터 검증](docs/refactor-results.md) · [역사 감사](docs/GPT审计及重构方案文档.md) · [후속 개발](docs/roadmap.md) · [규칙](rules/README.md) · [skill 배포](skill/README.md). [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)에 수록되어 있습니다.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE).

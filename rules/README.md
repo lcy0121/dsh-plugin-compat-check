@@ -1,64 +1,38 @@
-# 严重度规则表
+# 严重度规则表与维护
 
-`severity.json` 是判定「一条发现有多严重」的唯一依据。判定**不由 LLM 决定**——LLM 只能润色措辞。这样做的理由很直接：这个工具的价值全在结论可信，而"某处 API 缺失意味着设置页会消失"这种判断必须可复核、可被反驳、可被社区提 PR 修正。
+适用于0.1.1本地候选。当前契约见 [文档索引](../docs/README.md)，验证见 [自动统计](../docs/current-state.json)。本页后半保留2026-10-11旧提取器的规则依据；其中表格不是当前覆盖率，也不是当前运行时真值。
 
-## 两份文件
+## 文件与运行时消费者
 
-| 文件 | 作用 |
+| 文件 | 用途 |
 |---|---|
-| `severity.json` | 规则本体：`服务.方法 → 严重度 + 影响面`，外加四条**分层默认档** |
-| `usage-inventory.json` | 覆盖依据：从作者本机 21 个社区插件静态提取的真实调用点快照，用来说明"为什么是这些服务" |
+| severity.json | 方法严重度/影响文案；引擎读取services下的方法规则，并与代码内默认档合用 |
+| dsh-api-catalog.json | 指定DSH版本生成的宿主/客户端契约目录；不证明当次运行时提供某方法 |
+| usage-inventory.json | 历史调用库存和覆盖依据，不由每次体检自动重建 |
 
-判定引擎实际读的只有一样东西：`services[服务].methods[方法].severity` 与 `.impact`（见 `lib/verdict.mjs` 的 `lookupSeverity`）。**其余字段是给人看的、给 PR 用的**，不影响输出：
+严重度由 `lib/verdict.mjs` 的确定性逻辑、缺失证据、方法规则及默认档共同决定，不由LLM决定。JSON中的layer/summary/basis/evidence/knownGoneIn/needsReview等主要用于解释与维护；knownExtractionArtifacts是历史反例登记，不是自动过滤黑名单。
 
-| 字段 | 含义 |
+## 当前证据与严重度
+
+| 情形 | 处理 |
 |---|---|
-| `layer` | `host` = Node 宿主侧；`client` = 浏览器客户端侧；`both` = 同名服务两侧都有但语义/签名不同 |
-| `summary` | 这个服务是干什么的（人话，取自官方 API 目录） |
-| `basis` | 这条判定的证据等级：`catalog` / `catalog-description` / `callsite`（含义见下） |
-| `evidence` | `basis: callsite` 时必须给的具体文件:行 |
-| `knownGoneIn` | 已知从哪个 DSH 版本起不再提供（沿用既有写法） |
+| 可映射loader条目FAILED/PENDING | fatal，影响依据measured；禁用、LOADING、无法映射不冒充同一事实 |
+| 宿主硬依赖且明确absent | 可判fatal；仅catalog缺项不冒充运行时缺失 |
+| 非硬依赖服务明确absent，或有足够方法证据 | 按规则/默认档给feature-dead或degraded；用户影响通常是inferred |
+| 官方peer范围冲突 | declared-incompatible，degraded及推断影响；不是实测加载失败，engines.dsh仅建议 |
+| 未采样、读取失败、访问器未知、源码不完整 | 保留覆盖限制；不以省略键认定不存在 |
 
-`basis` 的三档不是形式主义，它决定了这条规则**可以被怎么反驳**：
+方法规则中的degraded应有具体降级/回退依据；peer声明冲突的degraded是引擎针对声明风险的独立默认，不代表观察到回退。方法缺失但没有语义规则时会明确“影响面未知”。声明provide只是候选提供方，不证明已激活，不能遮住完整的present方法观测。
 
-- `catalog`：官方 API 目录的 `summary`/`description` 直接支持。最硬。
-- `catalog-description`：目录**没有声明任何方法**（抽象服务），但官方 `description` 里明确写了这个方法存在。`credentials.resolve`、`sessionPersistence.open/list` 属于这一档——这正是"目录 ≠ 运行时 API 面"的活例。
-- `callsite`：目录里查不到，依据是真实插件在那个调用点上的代码。**这是最弱的一档**，跟着 `evidence` 给的 `文件:行` 去读一眼就能推翻它。
+宿主、客户端及shared调用点必须分开。客户端方法不能拿宿主probe判缺失；同名服务也不保证同一语义。对源码归属不确定的Context/别名保留suspected。certainty与impactBasis分别表达证据强度和影响是否实测。
 
-## 三档严重度
+## 如何更新
 
-| 档 | 含义 | 典型来源 |
-|---|---|---|
-| `fatal` | 插件条目没激活，整个插件是死的 | 运行时事实（`ctx.loader.entries()` 的 fiber 状态） |
-| `feature-dead` | 某个特性确定不可用 | 表里有明确语义的 API 缺失 |
-| `degraded` | 仍可用但能力缩水 | 有回退路径的 API 缺失（如事件变轮询） |
+先读调用点和目标版本的真实描述符/官方源码，再修改规则，添加行为回归并审查快照差异。待复核列表见本页历史条目与 [roadmap](../docs/roadmap.md)。
 
-**`degraded` 的硬门槛：必须能说出回退路径是什么。** 说不出回退路径的一律 `feature-dead`。本表里 `degraded` 的每一条都写了回退到哪（`jobs.onJobsChanged` → 轮询；`timer.timeout` → 原生 `setTimeout`；`sessions.using` → `sessions.binding`；`layout.selectPanel` → 侧栏入口），这不是措辞，是判据。
+`tools/coverage.mjs` 可按指定profile和probe计算当前输入的报告统计；`--write`会刷新inventory，必须有意执行并复核。结果依赖输入及默认/确定发现的口径，不是生态准确率。历史Python参考实现不能当作当前AST的真值。
 
-## 分层默认档（不查表也能判的部分）
-
-判定顺序是：**先看运行时事实，再查表，最后落默认档**。
-
-1. 条目 `FAILED`/`PENDING` → `fatal`，这是运行时事实，不需要静态分析。
-2. 插件在 `inject` 里声明了宿主没有的服务 → `fatal`（条目会停在 pending）。
-3. 用 `ctx.get('x')` 取不到服务 → `feature-dead`（不会导致未激活，但功能静默失效）。
-4. 方法不存在且不在表中 → `feature-dead` + **影响面未知**。
-
-第 4 条必须显眼：它是在承认规则表没覆盖到，而不是在假装判断过。
-
-## 客户端服务与宿主服务不是一回事
-
-`locale` / `slots` / `theme` / `layout` / `uiWorkspace` / `workspaces` 活在浏览器里，宿主探针必然看不到；而 `sessions`、`timer`、`jobs` **两侧都有同名服务却语义不同**：
-
-| 服务 | 宿主侧 | 客户端侧 |
-|---|---|---|
-| `sessions` | `create`/`enter`/`flush`/`fork`/`get`/`list`/`announce`（内存 session store） | `binding`/`scope`/`search`/`retain`/`using`（会话引用与作用域的面） |
-| `timer` | `timeout(delay): Promise<void>` | `timeout(callback, delay): () => void` |
-| `jobs` | 后台任务注册表（`list`/`observe`/`kill`） | 由 dsh-better-sidebar 软取的客户端任务面（`watchRows`/`state`） |
-
-所以方法级判定**必须按调用点所在的那一侧去比目录**。本表已给这些服务的方法逐条标 `layer`。拿宿主方法集去比客户端调用（或反过来）会造出成片假阳性——`sessions.scope`（客户端方法）被判成"宿主缺方法"就是这种错法。
-
-## 覆盖率
+## 历史依据：覆盖率、方法与反例（2026-10-11，旧提取器）
 
 > ⚠️ **这张表由 `node tools/coverage.mjs` 生成，是一台机器的一个 profile 的快照，不是生态普查。**
 > 它以前是**手工算的**，于是必然过期。**一张会过期却没人知道的覆盖率表比没有表更糟：它看起来像证据。**
@@ -79,7 +53,7 @@ node tools/coverage.mjs --probe <报告> --write             # 顺带刷新 rule
   于是"落到默认档"这个数字既不是真实的缺口、也不是用户会看到的东西。
   实测差别：同一个 profile，不给面 7、给面 **3**。
 
-### 当前值（2026-10-11，desktop profile，DSH 0.2.0-rc.2，**带运行时面**）
+### 当时值（2026-10-11，desktop profile，DSH 0.2.0-rc.2，**带运行时面**）
 
 | 口径 | 值 |
 |---|---|
@@ -194,22 +168,22 @@ node tools/coverage.mjs --probe <报告> --write             # 顺带刷新 rule
 
 ### F. 提取器已正确处理，无需规则（1 个）
 
-`betterSidebar` —— 它是插件自己 `ctx.provide()` 出来的服务，**提取器已正确记入 `providedServices`**（同类的还有 dshmarket 的 `market`），因此不会产生假缺口。`pet` / `agentTeams` / `companionQq` / `betterLocale` 这些**没有**被 `ctx.provide()` 捕获的（见 `Plan.md` §5 A5），就落进了上面 A 组。
+`betterSidebar` —— 它是插件自己 `ctx.provide()` 出来的服务，**提取器已正确记入 `providedServices`**（同类的还有 dshmarket 的 `market`），因此不会产生假缺口。`pet` / `agentTeams` / `companionQq` / `betterLocale` 这些**没有**被 `ctx.provide()` 捕获的（见 `docs/Plan.md` §5 A5），就落进了上面 A 组。
 
 ## 已知提取误报：不要为它们补规则
 
 `severity.json` 里有一个 `knownExtractionArtifacts` 段，逐条登记了"看起来是 API 缺口、其实是正则产物"的 `服务.方法`，并给出证据。**这一节存在的意义是防止后来者（包括未来的我）出于好心把假阳性升格成"有影响面的确定结论"。**
 
-最值得记住的两个（都是本轮新查出来的，不只是继承 `usage-inventory.json` 的已知缺陷）：
+最值得记住的两个（当时新查出来的，不只是继承 `usage-inventory.json` 的已知缺陷）：
 
 1. **alias 正则漏了词边界**：`lib/extract.mjs` 里 `ctx.get("x")` 的别名规则构造的正则是 `别名\.方法(`，**没有 `\b`**。于是源码里的 `subagents.listDescendants(` 会同时命中 `agents.listDescendants`——因为 `subagents` 里含子串 `agents.`。desktop profile 上正好 2 处。改前它一直以"影响面未知"的形式出现在结论里。
 2. **同文件内别名撞名**：dsh-better-sidebar 的 `lib/client.js` 里同时有 `const service = ctx.get("jobs")`（1 处）和 `const service = ctx.get("betterSidebar")`（6 处）。别名规则对文件内**每一次**匹配都按每个别名目标各记一次，于是文件里所有 `service.X()`——**包括 JSDoc 注释里的**——都被算到 `jobs` 头上。`jobs.getTabs`/`closeTab`/`registerTab` 等 13 个"方法"就是这么来的（`lib/client.js:977` 那处原文是注释里的一句 `service.getTabs()`）。
 
 其余登记项：`settings.isTrusted`/`reportNonstrict`/`useStrictBehavior`（KaTeX 的 `parser.settings`）、`settings.settingsGet`/`externalDisable`（better-sidebar 自有的 `SidebarSettingsFace`）、`locale.startsWith`（字符串方法）、`tools.filter/join/push` 与 `sessions.map/filter/slice/...`（数组方法）。
 
-## 待复核的既有条目（本轮**没有改**）
+## 待复核的既有条目（0.1.1未重标规则，仍保留待办）
 
-改这些条目会改变输出，按 `Plan.md` §4 第 3 条应先摊开差异再决定，所以只登记证据，列在 `severity.json` 的 `needsReview` 段：
+改这些条目会改变输出，按 `docs/Plan.md` §4 第 3 条应先摊开差异再决定，所以只登记证据，列在 `severity.json` 的 `needsReview` 段：
 
 - `sessions.open` / `sessions.getSnapshot`：两个目录里都没有；客户端真正的跳转入口是 `uiWorkspace.openSession`。
 - `sessions.refresh`：两个目录里都没有（客户端目录里的是 `refreshProjections`）。
@@ -218,10 +192,9 @@ node tools/coverage.mjs --probe <报告> --write             # 顺带刷新 rule
 
 ## 已知的提取缺陷（会影响本表的解读）
 
-`usage-inventory.json` 用的是与内核同源的正则启发式，里面有肉眼可见的误报。这带来两个后果，都已经写进设计：
+`usage-inventory.json` 来源于旧正则提取器；Babel AST替代提取器后，没有把旧inventory伪装成新扫描结果。knownExtractionArtifacts也保留历史反例用途，并非当前引擎的黑名单。新的规则刷新必须记录DSH版本、目标profile、probe身份与时间，并逐条复核源码归属。
 
-- 每条发现必须带**确定性标注**（确定/疑似），提取不可靠时降级标注，而不是升格成确定；
-- 换真解析器（跟踪 `inject` 列表、`const { tools } = ctx` 解构、变量别名、作用域）是**必须完成的最终状态**，不是可选项。验收指标之一就是"疑似"比例明显下降。
+真解析器已经落地；“疑似比例明显下降”不作为验收指标，因为该比例还受运行时采样覆盖影响。当前实现仍不做完整跨函数/模块分析，边界见 [现行契约](../docs/README.md)。
 
 ## 怎么改
 

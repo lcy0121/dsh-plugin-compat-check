@@ -1,8 +1,8 @@
 // Host half of the dsh-plugin-compat-check plugin — loader self-introspection
-// (Plan.md §5 B1/B2/B3: read ctx.loader.entries(), recover failure reasons,
+// (docs/Plan.md §5 B1/B2/B3: read ctx.loader.entries(), recover failure reasons,
 // never throw).
 //
-// HARD RULE (Plan.md §4 第 6 条：绝不抛、绝不拖累宿主): this plugin must never
+// HARD RULE (docs/Plan.md §4 第 6 条：绝不抛、绝不拖累宿主): this plugin must never
 // throw and must never keep the host from booting. A health-check plugin that
 // breaks host startup becomes an instance of the very class of problem it is
 // meant to detect. Every host object in here is touched behind try/catch, and
@@ -11,14 +11,14 @@
 // Why `inject` stays empty: `ctx.loader` is a Cordis service, and the context
 // proxy resolves it by walking the fiber chain — declaring it in `inject` is
 // not required to read it. Declaring a service we do not strictly need is the
-// exact way to park this plugin's own fiber in PENDING (Plan.md §6 地雷清单).
+// exact way to park this plugin's own fiber in PENDING (docs/Plan.md §6 地雷清单).
 // `resolveLoader()` below therefore tries the inject-free lookup first, and the
 // plugin additionally runs a one-shot child-fiber probe (`ctx.inject`) to
 // record, empirically, whether `inject: ["loader"]` *would* have been safe —
 // without risking its own activation.
 //
 // Output (the verifiable form required before any UI exists):
-//   ${DSC_OUT_DIR:-$TMPDIR/dsh-plugin-compat-check}/loader-introspect.json
+//   ${DSC_OUT_DIR}/loader-introspect.json (explicit owned private directory only)
 // plus structured console lines prefixed with [dsh-plugin-compat-check].
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -305,7 +305,7 @@ function declaredInjectKeys(fiber) {
   }
 }
 
-/** 缺服务 = fiber.ctx.get(key) === undefined (Plan.md §5 B1). */
+/** 缺服务 = fiber.ctx.get(key) === undefined (docs/Plan.md §5 B1). */
 function missingServices(fiber, keys) {
   const missing = [];
   const present = [];
@@ -626,7 +626,7 @@ function resolveKernelDir() {
 /**
  * 当前 profile 的 node_modules。
  *
- * 优先级：显式覆盖 → DSH 正在跑的 profile → `desktop`。
+ * 优先级：显式请求/覆盖 → DSH 正在跑的 profile；无法确认时返回错误，不回退 desktop。
  * 「正在跑的是哪个 profile」没有正式服务暴露，只能靠环境变量与目录推断 ——
  * 所以这里把推断的**依据**一起放进报告，让结论可追溯，而不是猜一个就不吭声。
  */
@@ -635,7 +635,7 @@ function resolveKernelDir() {
  *
  * ## 为什么必须拿到它
  *
- * `dshVersion` 是基线的三个字段之一（Plan.md §5 F1），也是「**声明与实测不符**」
+ * `dshVersion` 是基线的三个字段之一（docs/Plan.md §5 F1），也是「**声明与实测不符**」
  * 这类结论的**前提** —— 没有它就没法把插件的 `dsh.compatibility` 声明与实际版本对上，
  * 于是那一类发现（本工具相对既有方案唯一不可替代的结论）在插件形态下根本不成立。
  *
@@ -654,7 +654,7 @@ function resolveKernelDir() {
  * ### 被否掉的方案，以及为什么
  *
  * - **`process.env.DSH_VERSION`**：不存在（就是这次要解决的缺口本身）。
- * - **`dsh --version` 起子进程**：不行，而且**不是**能力问题 —— Plan.md §2 第 1 题锁定了
+ * - **`dsh --version` 起子进程**：不行，而且**不是**能力问题 —— docs/Plan.md §2 第 1 题锁定了
  *   「插件严格只读：不装包、不起子进程、不联网」。为拿一个版本号破这条边界不值。
  * - **`Info.plist`**：macOS 专有（`CFBundleShortVersionString` = 0.2.0-rc.2，能读到）。
  *   本产品要跨平台（§2 第 6 题），不能把它当主路。
@@ -833,7 +833,7 @@ async function computeReport(state, ctx, options = {}) {
     kernelDir: null,
     // 「这份结论是哪一版工具给的」。面板是本插件的主要入口，
     // 少了它，用户来问"凭什么"时第一句就卡住 —— 而同一插件在不同版本的
-    // 规则表/提取器下结论会变（见 lib/version.mjs 与 Plan.md §5.2.8）。
+    // 规则表/提取器下结论会变（见 lib/version.mjs 与 docs/Plan.md §5.2.8）。
     toolVersion: null,
     nodeModules: null,
     nodeModulesWhy: null,

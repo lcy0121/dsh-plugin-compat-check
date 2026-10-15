@@ -12,7 +12,7 @@
  * ## 三个入口共用一个内核
  *
  *   插件（进程内）→ 直接 import 这个文件里的 run()
- *   脚本（npx）  → `node bin/compat-check.mjs --nm <dir> --probe <json>`
+ *   仓库安装检查脚本  → `node bin/compat-check.mjs --nm <dir> --probe <json>`
  *   skill        → 教 agent 何时调用上面这一条
  *
  * ## 设计约束
@@ -20,7 +20,7 @@
  * - **绝不抛**给调用方看栈：任何失败都变成一条 `error` 结论 + 非零退出码。
  *   一个体检工具自己抛栈，用户无法区分「插件坏了」还是「工具坏了」。
  * - **结论必须带确定性**。没有运行时面时（只给了目录、没有探针报告），
- *   方法级结论一律降为「疑似」—— 这是 Plan.md §2.2 的三档判据，不是可选项。
+ *   方法级结论一律降为「疑似」—— 这是 docs/Plan.md §2.2 的三档判据，不是可选项。
  */
 
 import fs from 'node:fs';
@@ -46,15 +46,15 @@ ${versionLine()}
 选项:
   --nm <dir>       要体检的 node_modules 目录（必需）。也接受 profile 目录，
                    会自动补 node_modules 子目录。
-  --probe <json>   宿主运行时面（探针报告）。给了它，方法级结论才是「确定」；
-                   不给则退回官方目录，结论降为「疑似」。
+  --probe <json>   宿主运行时观测（探针报告）。身份/时间/完整性及源码归属满足要求时，
+                   可支持确定结论；无观测则方法级目录结论降为「疑似」。
   --probe-boot     自己起一次宿主来拿运行时面（不需要已有的探针报告）。
                    会建一个临时 profile、装探针、真实启动、回收报告、删掉临时 profile。
                    默认**不开**：它要起进程、要等几十秒，而多数检查不需要它。
                    给了它就不必再给 --probe（两者同时给时以 --probe 为准）。
   --probe-timeout <秒>  --probe-boot 的启动等待上限（默认 40）
   --probe-keep-dir <dir>  把探针报告与 services.json 留一份到该目录（排查用）
-  --dsh-version <v> 当前 DSH 版本（用于「声明与实测不符」这一类结论）。
+  --dsh-version <v> 目标 DSH 版本（用于声明/peer范围判断；显式值优先）。
   --rules <json>   覆盖 severity 规则表（默认 rules/severity.json）
   --catalog <json> 覆盖官方 API 目录（默认 rules/dsh-api-catalog.json）
   --no-baseline    不读写本机基线（CI / 一次性检查用）
@@ -66,7 +66,7 @@ ${versionLine()}
   --help           显示这段文字
 
 退出码（**1 与 2 只表示插件的结论**，3 表示这次体检本身没得出可信结论）:
-  0  全部可用
+  0  未发现问题（仍需检查 coverage / vacuous / 观测限制）
   1  有插件"部分可用"
   2  有插件"不兼容"
   3  无法判定（用法错误 / 目录不存在 / 工具自身出错 —— 都不是插件的结论）

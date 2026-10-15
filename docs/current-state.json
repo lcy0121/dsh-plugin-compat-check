@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-14T19:48:39.307Z",
+  "recordedAt": "2026-10-15T07:08:19.121Z",
   "testFiles": 25,
-  "tests": 341,
+  "tests": 343,
   "repositoryFiles": {
-    "total": 206,
+    "total": 210,
     "fixtures": 90,
-    "other": 116
+    "other": 120
   },
   "verification": {
     "platform": "darwin",
@@ -20,7 +20,6 @@
     "windows": false,
     "nodeVersions": [
       "22.19.0",
-      "24.21.0",
       "26.11.1"
     ],
     "independentReview": {
@@ -29,9 +28,27 @@
       "targetedTests": 42,
       "additionalVariants": 6,
       "finalTargetedTests": 46,
-      "remainingFinalBlockers": 0
+      "remainingFinalBlockers": 0,
+      "reviewedCommit": "110361d"
     },
-    "prepublishCheck": true
+    "prepublishCheck": true,
+    "priorRefactorVerification": {
+      "commit": "110361d",
+      "tests": 341,
+      "nodeVersions": [
+        "22.19.0",
+        "24.21.0",
+        "26.11.1"
+      ]
+    },
+    "documentationReview": {
+      "date": "2026-10-15",
+      "documents": 16,
+      "focusedTests": 55,
+      "publicSnapshot": "docs/public-metadata.json",
+      "publicErrors": 0,
+      "publicNotices": 5
+    }
   },
   "scope": "npm test default suite; optional profile counts depend on local inputs; real DSH/browser slow suites were not enabled"
 }

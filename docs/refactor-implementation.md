@@ -1,6 +1,8 @@
 # Compatibility evidence refactor implementation plan
 
-Spec: `GPT审计及重构方案文档.md` (2026-10-14), user authorized implementation.
+> Completed plan for refactor commit110361d. Current documentation and subsequent verification are indexed in [docs/README](README.md); the341-test results below belong to that refactor, not subsequent documentation work.
+
+Spec: [historical audit](GPT审计及重构方案文档.md) (2026-10-14), user authorized implementation.
 
 Global constraints: local only; preserve original audit as historical evidence; no publication, remote changes, or formal-profile writes. Keep deterministic rules, one kernel, JS/TS static inspection without executing inspected source. Unknown evidence stays visible. Keep npm plugin-only delivery (CLI remains repository distribution), explicitly document it. Version next local release 0.1.1, not published.
 

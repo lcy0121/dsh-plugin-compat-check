@@ -175,7 +175,7 @@ describe('CLI：--json 真的产出 JSON（不是被静默忽略）', () => {
 })
 
 describe('CLI：真实插件（三个回归基准）', { skip: fs.existsSync(PARITYFIX) ? false : '本机没有 parityfix profile' }, () => {
-  test('三个回归基准的结论与 Plan.md §5 G1 一致', () => {
+  test('三个回归基准的结论与 docs/Plan.md §5 G1 一致', () => {
     const r = runCLI(['--nm', PARITYFIX, '--probe', BASELINE_SURFACE, '--dsh-version', '0.2.0-rc.2', '--json', '--no-baseline'])
     const data = JSON.parse(r.out)
     assert.equal(data.plugins['@omdsh-dev/dsh-plugin-check'].verdict, 'ok')

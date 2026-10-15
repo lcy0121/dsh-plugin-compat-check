@@ -9,7 +9,7 @@
  * ① **版本号与内核不一致**。版本的真源是 `lib/version.mjs`，但 `package.json`
  *    只能写字面量（npm 只认字面量）。改了一处忘了另一处，发布出去的就是
  *    「包的版本是 A、它自己 `--version` 报 B」—— 而这恰恰是这次发布的**主题**
- *    （见 Plan.md §5.2.8：「单版本」）。
+ *    （见 docs/Plan.md §5.2.8：「单版本」）。
  *
  * ② **测试没过就发**。`npm publish` 默认**不跑测试**。测试没过的包发出去，
  *    用户拿到的是我们已知有问题的版本，而他还以为那是"刚发布的最新版"。
@@ -64,7 +64,7 @@ if (pkg.version !== kernel.TOOL_VERSION) {
 if (pkg.private === true) {
   fail([
     'plugin/package.json 里还写着 `"private": true`，npm 会拒绝发布。',
-    '  要去掉它 —— 但**先确认版本号已经定下来**（见 Plan.md §5.2.8）。',
+    '  要去掉它 —— 但**先确认版本号已经定下来**（见 docs/Plan.md §5.2.8）。',
   ]);
 }
 

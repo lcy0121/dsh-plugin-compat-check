@@ -3,7 +3,7 @@
  *
  * ## 这一层要防的事，已经真实发生过两次
  *
- * 用户的原话是「文档信息」指这 7 份：`docs/extraction-findings.md`、`Plan.md`、
+ * 用户的原话是「文档信息」指这 7 份：`docs/extraction-findings.md`、`docs/Plan.md`、
  * 三份 README、`skill/SKILL.md`、`skill/README.md`。
  *
  * 而实测发现它们**同时**写着互相矛盾的东西：
@@ -45,15 +45,31 @@ import path from 'node:path'
 const REPO = path.resolve(new URL('.', import.meta.url).pathname, '..')
 const read = (rel) => fs.readFileSync(path.join(REPO, rel), 'utf8')
 
-/** 用户定义的「文档信息」这 7 份 */
+test('文档核验能发现迁移后断开的相对链接，忽略代码块里的演示链接', async () => {
+  const mod = await import('../tools/doc-check.mjs')
+  assert.equal(typeof mod.checkDocumentLinks, 'function')
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-doc-links-'))
+  try {
+    fs.mkdirSync(path.join(root, 'docs'))
+    fs.writeFileSync(path.join(root, 'docs', 'Plan.md'), '# Plan\n')
+    fs.writeFileSync(path.join(root, 'README.md'), '[计划](docs/Plan.md)\n```md\n[演示](not-real.md)\n```\n')
+    assert.deepEqual(mod.checkDocumentLinks(root, ['README.md']), [])
+    fs.writeFileSync(path.join(root, 'README.md'), '[旧计划](Plan.md)\n')
+    assert.match(mod.checkDocumentLinks(root, ['README.md']).join('\n'), /README.md.*Plan.md/)
+  } finally { fs.rmSync(root, { recursive: true, force: true }) }
+})
+
+/** 原始七份入口加上目前维护的docs/npm文档。 */
 const DOCS = [
   'docs/extraction-findings.md',
-  'Plan.md',
+  'docs/Plan.md',
   'README.md',
   'README.en.md',
   'README.ko.md',
   'skill/SKILL.md',
   'skill/README.md',
+  'plugin/README.md',
+  ...fs.readdirSync(path.join(REPO, 'docs')).filter(f=>f.endsWith('.md')).map(f=>`docs/${f}`),
 ]
 
 function realTestFileCount() {
@@ -80,7 +96,7 @@ describe('文档信息：可复算的数字必须与仓库一致', () => {
   test('current facts are generated and linked by all maintained entry documents',()=>{
     const metrics=JSON.parse(read('docs/current-state.json'));
     assert.equal(metrics.testFiles,realTestFileCount());
-    for(const rel of ['README.md','README.en.md','README.ko.md','Plan.md'])assert.ok(read(rel).includes('docs/current-state.json'),rel);
+    for(const rel of ['README.md','README.en.md','README.ko.md','docs/Plan.md'])assert.ok(read(rel).includes('docs/current-state.json'),rel);
   });
 
   test('README 的合成插件数与夹具目录实际一致', () => {
@@ -88,7 +104,7 @@ describe('文档信息：可复算的数字必须与仓库一致', () => {
       .filter((d) => fs.statSync(path.join(REPO, 'test/fixtures/micro/node_modules/@fixture', d)).isDirectory())
       .length
     const bad = []
-    for (const rel of ['README.md', 'README.en.md', 'README.ko.md', 'Plan.md']) {
+    for (const rel of ['README.md', 'README.en.md', 'README.ko.md', 'docs/Plan.md']) {
       const s = read(rel)
       // ⚠️ 别把「69 个合成插件**文件**」当成「22 个合成插件」。
       // 我自己第一版就这么错了 —— 度量写错会把一条正确的文档判成错的。
@@ -112,8 +128,8 @@ describe('文档信息：可复算的数字必须与仓库一致', () => {
       + `而标题写 9–14、表里其实到 18。`)
   })
 
-  test('Plan.md 里的 §N 交叉引用都能落到真实小节上', () => {
-    const s = read('Plan.md')
+  test('docs/Plan.md 里的 §N 交叉引用都能落到真实小节上', () => {
+    const s = read('docs/Plan.md')
     const refs = [...new Set([...s.matchAll(/§(\d+(?:\.\d+)*)/g)].map((m) => m[1]))]
     const heads = new Set([
       ...[...s.matchAll(/^#{2,4} (\d+(?:\.\d+)*)\.?/gm)].map((m) => m[1]),
@@ -122,7 +138,7 @@ describe('文档信息：可复算的数字必须与仓库一致', () => {
     const bad = refs.filter((r) => !heads.has(r)
       && ![...heads].some((h) => h.startsWith(`${r}.`)))
     assert.deepEqual(bad, [],
-      `Plan.md 引用了不存在的小节：${bad.join(', ')}（引用腐烂比笔误更难发现）`)
+      `docs/Plan.md 引用了不存在的小节：${bad.join(', ')}（引用腐烂比笔误更难发现）`)
   })
 
   test('skill/README.md 记的正文长度 = SKILL.md 真实正文长度', () => {
@@ -194,7 +210,7 @@ describe('文档信息：可复算的数字必须与仓库一致', () => {
     }
   })
 
-  test('这 7 份文档都存在（它们是「文档信息」的定义）', () => {
+  test('维护中的信息文档都存在', () => {
     for (const rel of DOCS) {
       assert.ok(fs.existsSync(path.join(REPO, rel)), `${rel} 不见了`)
     }
