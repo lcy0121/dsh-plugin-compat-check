@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-15T18:42:22.037Z",
-  "testFiles": 27,
-  "tests": 371,
+  "recordedAt": "2026-10-15T19:39:21.864Z",
+  "testFiles": 28,
+  "tests": 432,
   "repositoryFiles": {
-    "total": 210,
+    "total": 213,
     "fixtures": 90,
-    "other": 120
+    "other": 123
   },
   "verification": {
     "platform": "darwin",
@@ -182,6 +182,43 @@
       "liveDshStartup": false,
       "liveChrome": false,
       "scope": "Default CI suite and package execution only; no formal profiles, actual DSH runtime or browser integration."
+    },
+    "p2Analysis": {
+      "verifiedAt": "2026-10-16",
+      "baseCommit": "1905662",
+      "defaultSuiteTests": 432,
+      "p2RegressionTests": 58,
+      "smallItemRegressionTests": 17,
+      "nodeVersions": [
+        "22.19.0",
+        "26.11.1"
+      ],
+      "counterexampleQueue": {
+        "cases": 21,
+        "before": {
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 14,
+          "diagnosedUnknown": 0
+        },
+        "after": {
+          "truePositive": 14,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "diagnosedUnknown": 4
+        },
+        "scope": "Literal expected ownership for this bounded queue, including a minimized installed dsh-pet forwarding pattern; not ecosystem accuracy."
+      },
+      "desktopObservation": {
+        "plugins": 21,
+        "scanComplete": false,
+        "callSites": 603,
+        "sideSpecificPairs": 136,
+        "workerMilliseconds": 4947,
+        "workerBudgetMilliseconds": 10000,
+        "scope": "Single local readonly observation; not a benchmark. Does not replace the separately dated rules inventory."
+      },
+      "linuxFeatureCiVerified": false
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

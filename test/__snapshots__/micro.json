@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "515d915953ebc5aec270471b763435c269ce00e3f6b613147ccdcda074828ccf",
+    "hash": "994658b4a1682e6791daaac81faf740126f0d9ae63df5bb535617b59ac7925b7",
     "manifests": [
       {
         "name": "@fixture/aliased",
@@ -1024,7 +1024,8 @@
           "settings": 1
         },
         "localBindings": [
-          "s->settings/ctx-get"
+          "s->settings/ctx-get",
+          "service->settings/ctx-get"
         ],
         "providedServices": [],
         "guardedPairs": [

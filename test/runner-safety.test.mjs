@@ -66,6 +66,21 @@ fs.writeFileSync(path.join(process.env.DSH_HOME,'pack-record.json'),JSON.stringi
   assert.equal(fs.existsSync(record.dest),false);
  });
 });
+test('arrival --break never labels an unrelated startup failure as expected',()=>{
+ withFakeDsh(`const fs=require('node:fs'),path=require('node:path'),a=process.argv.slice(2);if(a.includes('--dump-config'))fs.mkdirSync(path.join(process.env.DSH_HOME,'profiles',a[a.indexOf('--profile')+1]),{recursive:true});else if(!a.includes('plugin')){console.error('startup failed: controlled unrelated failure');process.exit(1);}`,({env})=>{
+  const r=spawnSync(process.execPath,['tools/client-arrival.mjs','--no-plugin','--break','--timeout','1000'],{env:{...env,DSC_CHROME:process.execPath},encoding:'utf8',timeout:10000});
+  assert.equal(r.status,1,r.stdout+r.stderr);
+  assert.match(r.stdout,/非预期/);
+  assert.doesNotMatch(r.stdout,/正是负向对照期望|不是工具出错/);
+ });
+});
+test('arrival text includes failed compatibility report details despite complete delivery',async()=>{
+ const {compatibilityText}=await import('../tools/arrival-text.mjs');
+ assert.match(compatibilityText({ok:false,error:'controlled backend failure',toolVersion:'0.1.1'}),/controlled backend failure/);
+ assert.match(compatibilityText({ok:false,error:null}),/无法读取|失败/);
+ assert.equal(compatibilityText(null),'');
+ assert.match(compatibilityText({ok:true,error:null,toolVersion:'0.1.1'}),/0\.1\.1/);
+});
 test('only an explicit DSH compatibility rejection is classified incompatible',()=>{
   withFakeDsh('const a=process.argv.slice(2);if(a.includes("--version")){console.log("0.2.0");}else if(a.includes("--dump-config")){process.exit(0);}else{console.error("Plugin sample@1 is incompatible with dsh 0.2.0: peerDependencies mismatch");process.exit(1);}',({env,scriptPath})=>{
     const r=spawnSync('bash',[scriptPath,'file:/fake-plugin','--json','--timeout','1'],{env,encoding:'utf8',timeout:5000});

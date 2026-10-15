@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { run } from "../bin/compat-check.mjs";
 import { methodRule } from "../lib/verdict.mjs";
 import { digest } from "../lib/state-store.mjs";
+import semver from "semver";
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 function args(argv) {
   const out = {};
@@ -157,9 +158,9 @@ function main() {
       );
     const measured = measure(nm, options);
     if (options.write) {
-      if (!measured._dshVersion)
+      if (!measured._dshVersion || !semver.valid(measured._dshVersion))
         throw new Error(
-          "Writing an inventory requires an explicit or observed DSH version",
+          "Writing an inventory requires a valid explicit or observed DSH semver version",
         );
       if (!measured.scanComplete && !options.allowPartial)
         throw new Error(

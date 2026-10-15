@@ -50,6 +50,7 @@
 
 import { launchChromePipe } from "../lib/debugger.mjs";
 import { command } from "../lib/probe-runner.mjs";
+import { compatibilityText } from "./arrival-text.mjs";
 import { randomUUID } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -397,11 +398,13 @@ async function main() {
         process.stdout.write(
           `客户端到货对账 —— ${opts.profile}${opts.breakClient ? " + 已知会坏的客户端插件" : ""}\n\n`,
         );
-        process.stdout.write(`  ⚠️ **宿主没有启动**（不是工具出错）\n\n`);
+        process.stdout.write(
+          `  宿主没有启动（${payload.expected ? "预期负向对照" : "非预期失败"}）\n\n`,
+        );
         for (const line of payload.hostError.split("\n"))
           process.stdout.write(`    ${line}\n`);
         process.stdout.write("\n");
-        if (opts.breakClient) {
+        if (payload.expected) {
           process.stdout.write(
             "  ✅ 这正是负向对照期望的结果：客户端半边缺文件 → **宿主拒绝启动**，\n",
           );
@@ -612,6 +615,7 @@ async function main() {
         process.stdout.write(
           `  本插件条目  ${ourEntry.arrived ? "✅ 到货" : "❌ 未到货"}（批次 ${ourEntry.batchRev}）\n`,
         );
+      process.stdout.write(compatibilityText(compatibility));
       process.stdout.write(
         "\n  批次明细（**一个批次 = 一个请求** —— 它挂了，这一批每条都到不了）\n",
       );

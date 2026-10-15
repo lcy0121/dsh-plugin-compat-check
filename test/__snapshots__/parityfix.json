@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "6da38f735fc57f7520552681801af2148ac83b1820518abe749985664ae49e00",
+    "hash": "ee06710a156b9e9a28f9d28d47662c47088414eab0bac7ad62ab94e42f1a0bb4",
     "manifests": [
       {
         "name": "@omdsh-dev/dsh-plugin-check",
@@ -80,7 +80,7 @@
     ],
     "fallbackPackages": [],
     "providedServices": [],
-    "siteTotal": 40,
+    "siteTotal": 42,
     "buckets": {
       "@omdsh-dev/dsh-plugin-check": {
         "host-entry": 10,
@@ -312,7 +312,8 @@
             "listConfigurableProviders",
             "listModels",
             "listProviders",
-            "resolveModelInfo"
+            "resolveModelInfo",
+            "stream"
           ],
           "locale": [
             "bind",
@@ -331,7 +332,7 @@
           ]
         },
         "via": {
-          "alias": 6,
+          "alias": 8,
           "ctx-member": 18
         },
         "siteCounts": {
@@ -340,7 +341,7 @@
           "commands": 3,
           "credentials": 1,
           "deepseekAccount": 1,
-          "llm": 4,
+          "llm": 6,
           "locale": 2,
           "logger": 5,
           "slots": 4,
@@ -350,8 +351,10 @@
           "llm->llm/ctx-member",
           "llm->llm/ctx-member",
           "llm->llm/ctx-member",
-          "account->deepseekAccount/ctx-get",
           "llm->llm/ctx-member",
+          "llm->llm/ctx-member",
+          "llm->llm/ctx-member",
+          "account->deepseekAccount/ctx-get",
           "commandUi->commandUi/ctx-get",
           "commandUi->commandUi/ctx-get"
         ],

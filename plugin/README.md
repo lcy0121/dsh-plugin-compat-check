@@ -38,4 +38,4 @@ npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检�
 
 MIT。源码、问题反馈与仓库文档：[GitHub](https://github.com/lcy0121/dsh-plugin-compat-check)。
 
-报告结构由仓库lib/contracts.mjs校验：HTTP envelope.report与compat_check.report均保留完整发现、覆盖、观测和基线；工具原summary/text字段保留。新面板拒绝损坏或不支持版本的负载，提示刷新和对齐版本。旧probe保持未绑定警告，旧schema1基线中性重建；具体字段与错误码见 [Plan契约记录](../docs/Plan.md#23-报告结构与兼容策略)。
+报告结构由仓库lib/contracts.mjs校验：HTTP envelope.report与compat_check.report均保留完整发现、覆盖、观测和基线；工具原summary/text字段保留。新面板拒绝损坏或不支持版本的负载，提示刷新和对齐版本。旧probe保持未绑定警告，旧schema1基线中性重建；内核现支持有界常量属性、函数参数/返回值、包内模块别名及透明Proxy；未知动态行为与超预算继续显示覆盖限制。具体字段与错误码见 [Plan契约记录](../docs/Plan.md#23-报告结构与兼容策略)。

@@ -30,7 +30,7 @@
 
 先读调用点和目标版本的真实描述符/官方源码，再修改规则，添加行为回归并审查快照差异。原needsReview已在2026-10-15逐条复核，决定与证据保留于severity.json的needsReview.reviewed/evidence及 [Plan](../docs/Plan.md)。
 
-`tools/coverage.mjs` 从AST调用点按host/client/shared分端计数，规则命中与默认影响、类别发现分列。**knownExtractionArtifacts只保留历史反例，不过滤现在的真实调用**；纯客户端规则不用于宿主同名方法。probe须为现代格式并绑定本目标/版本/时间，不能借别的profile的面。
+`tools/coverage.mjs` 从AST调用点按host/client/shared分端计数，规则命中与默认影响、类别发现分列。**knownExtractionArtifacts只保留历史反例，不过滤现在的真实调用**；纯客户端规则不用于宿主同名方法。probe须为现代格式并绑定本目标/版本/时间，不能借别的profile的面。写库存要求显式或观测到的合法semver版本，非法版本退出3且不覆盖旧文件。
 
 ```bash
 node tools/coverage.mjs --nm <node_modules目录> --dsh-version <已核验版本> --json

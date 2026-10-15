@@ -148,3 +148,36 @@ test("coverage counts concrete rules, not Object.prototype members inherited by 
       assert.equal(data.coveredPairs, 1);
     },
   ));
+
+test("inventory rejects malformed explicit and observed versions without overwriting output", () =>
+  coverageCase(
+    "export function apply(ctx){ctx.settings.describe()}",
+    (f, run) => {
+      const out = path.join(f.root, "inventory.json");
+      fs.writeFileSync(out, "preserved");
+      for (const version of ["not-a-version", "0.2", "1.2.3.4", "1.2.3-01"]) {
+        const r = run(["--write", "--out", out, "--dsh-version", version]);
+        assert.equal(r.status, 3);
+        assert.match(JSON.parse(r.stdout).error, /version|版本/i);
+        assert.equal(fs.readFileSync(out, "utf8"), "preserved");
+      }
+      const probe = path.join(f.root, "probe.json");
+      fs.writeFileSync(
+        probe,
+        JSON.stringify({
+          observationVersion: 1,
+          profileId: f.nm,
+          dshVersion: "not-a-version",
+          probedAt: new Date().toISOString(),
+          root: {},
+        }),
+      );
+      assert.equal(run(["--write", "--out", out, "--probe", probe]).status, 3);
+      assert.equal(fs.readFileSync(out, "utf8"), "preserved");
+      for (const version of ["0.2.0-rc.2", "1.2.3+build.4"]) {
+        const r = run(["--write", "--out", out, "--dsh-version", version]);
+        assert.equal(r.status, 0, r.stdout);
+        assert.equal(JSON.parse(fs.readFileSync(out))._dshVersion, version);
+      }
+    },
+  ));
