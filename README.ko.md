@@ -134,7 +134,7 @@ node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-`doc-check`는 링크·버전·문서 진입점·skill 복사본을 오프라인 검사하며 테스트를 실행하지 않습니다. 성공한 TAP 로그로 `node tools/update-current-state.mjs --test-summary <log>` 후 `node tools/doc-check.mjs --test-summary <log>`를 실행하세요. 배포 전 검사는 기본 전체 테스트를 한 번 실행하고 요약을 재사용하며 독립 tarball 설치 후 실제 호스트 도구를 호출합니다. 메타데이터 검사는 네트워크와 gh/npm이 필요합니다. 미배포 로컬 버전·README 차이는 notice이고 조회 실패는 미검증입니다.
+`doc-check`는 링크·버전·문서 진입점·skill 복사본을 오프라인 검사하며 테스트를 실행하지 않습니다. 성공한 TAP 로그로 `node tools/update-current-state.mjs --test-summary <log>` 후 `node tools/doc-check.mjs --test-summary <log>`를 실행하세요. 배포 전 검사는 기본 전체 테스트를 한 번 실행하고 요약을 재사용하며 독립 tarball 설치 후 실제 호스트 도구를 호출합니다. 이 패키지 검증은 비공개 빈 npm 캐시와 npm registry 접속을 사용하며 기존 로컬 캐시에 의존하지 않습니다. 메타데이터 검사는 네트워크와 gh/npm이 필요합니다. 미배포 로컬 버전·README 차이는 notice이고 조회 실패는 미검증입니다.
 
 느린 통합 검사는 명시적 `DSC_SLOW=1`이 필요합니다. 2026-10-15에 정상 도착, 클라이언트 파일 누락, import 예외 및 런타임 음성 대조를 포함한 실제 DSH·Chrome 테스트6개가 통과했습니다. 환경과 명령은 [Plan](docs/Plan.md)을 참고하세요. Windows는 미검증이며 Linux CI 원격 실행 성공도 주장하지 않습니다. 과거88.3% 재현율과 이번66/66 도착 수치는 기능 정확도가 아닙니다. Python parity는 구형 정규식 참고 구현이며 AST의 정답이 아닙니다.
 

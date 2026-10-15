@@ -61,7 +61,7 @@ describe('打包自足性：npm pack 出来的包必须自己能算结论', () =
     assert.match(src, /dsh-api-catalog\.json/, '暂存器没有复查 rules/ 里的目录文件')
   })
 
-  test('npm pack 的产物里有内核，且暂存目录用完即清', () => {
+  test('npm pack 产物从空缓存安装后可执行，且暂存目录用完即清', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-pack-'))
     try {
       const out = execFileSync('npm', ['pack', '--pack-destination', tmp], {
@@ -82,7 +82,9 @@ describe('打包自足性：npm pack 出来的包必须自己能算结论', () =
         assert.ok(list.includes(need), `tarball 里缺少 ${need} —— 装上去就是"找不到判定内核"`)
       }
       const install=path.join(tmp,'installed');fs.mkdirSync(install);
-      execFileSync('npm',['install','--offline','--ignore-scripts','--no-audit','--no-fund',tgz],{cwd:install,stdio:'pipe',timeout:120000});
+      // npm ci caches tarballs, but need not cache registry metadata. Resolve
+      // dependencies normally in an owned empty cache, as a fresh user would.
+      execFileSync('npm',['install','--ignore-scripts','--no-audit','--no-fund',tgz],{cwd:install,stdio:'pipe',timeout:120000,env:{...process.env,npm_config_cache:path.join(tmp,'npm-cache')}});
       const artifact=path.join(install,'node_modules','dsh-plugin-compat-check');
       const home=path.join(tmp,'home'),profile=path.join(home,'profiles','test');fs.mkdirSync(profile,{recursive:true});
       fs.cpSync(path.join(REPO,'test/fixtures/micro/node_modules'),path.join(profile,'node_modules'),{recursive:true});
