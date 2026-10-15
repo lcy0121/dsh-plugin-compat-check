@@ -20,7 +20,7 @@ dsh plugin --profile <临时profile> add file:<生成的tgz绝对路径>
 
 prepack复制权威skill并暂存共享kernel和MIT LICENSE，postpack清理kernel。固定运行时依赖为 `@babel/parser@7.29.9` 与 `semver@7.7.3`，支持 Node `^22.19.0 || >=24`。源码裸复制或file安装不保证prepack运行，应使用完整仓库开发布局或预打包tarball。
 
-npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检查从仓库使用；本插件不能做安装前检查。仓库使用说明：[README](https://github.com/lcy0121/dsh-plugin-compat-check#readme)。未推送的候选文档不能靠该公开链接取得，本地请读仓库docs/README.md。
+npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检查从仓库使用；本插件不能做安装前检查。仓库使用说明：[README](https://github.com/lcy0121/dsh-plugin-compat-check#readme)。未推送的候选文档不能靠该公开链接取得，本地请读仓库docs/Plan.md。
 
 ## 判定与边界
 
@@ -32,7 +32,7 @@ npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检�
 
 插件体检不安装包、不调用外部命令或联网；会启动分析worker，并默认写自己的schema2基线：`$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`。模式分离、锁内比较、原子替换；源码扫描不完整不推进基线。默认不输出共享loader诊断；诊断需显式私有DSC_OUT_DIR。若需完全禁止基线读写，请使用仓库CLI的 `--no-baseline`。
 
-当前候选已通过默认回归和独立tarball安装后实际工具执行；真实DSH启动、Chrome界面、Windows集成尚未验证。具体测试数量与证据见仓库docs/current-state.json、docs/refactor-results.md；不把历史测试数字作为当前版本的完整功能认证。
+当前候选已通过默认回归和独立tarball安装后实际工具执行；真实DSH启动、Chrome界面、Windows集成尚未验证。具体测试数量与证据见仓库docs/current-state.json、docs/Plan.md；不把历史测试数字作为当前版本的完整功能认证。
 
 ## License
 

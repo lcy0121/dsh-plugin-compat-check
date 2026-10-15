@@ -148,4 +148,4 @@ CI 里可以直接用：`0` 过，`1`/`2` 按你的策略处理，`3` 是**工�
 
 0.1.1：`root` 缺项是未采样，不能称为不存在；`coverage.status=limited` 与 `vacuous` 必须转述。现代探针绑定 profile/DSH/采样时间；旧报告明确标为未绑定。解析、读取、资源上限等诊断会限制覆盖，完整性不足不更新基线。当前统计见仓库 `docs/current-state.json`；npm 包是插件，CLI 从仓库使用并先运行 `npm ci --ignore-scripts`。显式安装检查会执行目标插件，临时 profile 不是不可信代码隔离沙箱。
 
-官方 peer 范围冲突是 declared-incompatible：影响为推断，不能凭声明写成实际加载失败；engines.dsh 只作建议声明。当前文档索引为仓库 docs/README.md，历史施工为 docs/Plan.md，原始审计位于 docs/GPT审计及重构方案文档.md。本地0.1.1未发布；npm最新状态须实时核验，不把本地修复说成已在公开包生效。
+官方 peer 范围冲突是 declared-incompatible：影响为推断，不能凭声明写成实际加载失败；engines.dsh 只作建议声明。当前契约、施工记录和后续计划统一见仓库 docs/Plan.md，原始审计位于 docs/GPT审计及重构方案文档.md。本地0.1.1未发布；npm最新状态须实时核验，不把本地修复说成已在公开包生效。

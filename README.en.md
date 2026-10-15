@@ -6,7 +6,7 @@ Check the compatibility of **installed DSH plugins** with a target DSH version, 
 
 ## Version and delivery
 
-Local source is the **unpublished 0.1.1 candidate**. The npm `latest` version verified on 2026-10-15 is **0.1.0**; installing it does not include unpublished fixes. See [publication and documentation review](docs/documentation-review.md) and [generated verification facts](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
+Local source is the **unpublished 0.1.1 candidate**. The npm `latest` version verified on 2026-10-15 is **0.1.0**; installing it does not include unpublished fixes. See [publication and verification records in Plan](docs/Plan.md) and [generated verification facts](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
 
 | Entry | Purpose |
 |---|---|
@@ -116,12 +116,9 @@ dsh-plugin-compat-check/
 ├── skill/                            # authoritative SKILL.md and delivery notes
 ├── rules/                            # severity rules, API catalogue and historical inventory
 ├── docs/                             # current contracts, verification and history
-│   ├── README.md
 │   ├── Plan.md
 │   ├── GPT审计及重构方案文档.md
-│   ├── refactor-implementation.md / refactor-results.md
-│   ├── current-state.json / public-metadata.json
-│   ├── documentation-review.md / roadmap.md
+│   ├── current-state.json
 │   └── extraction-findings.md
 ├── test/                             # behavior, invariants, snapshots and artifact tests
 └── tools/                            # documentation, metadata and diagnostic utilities
@@ -141,7 +138,7 @@ node tools/meta-check.mjs --json
 
 Slow integrations need explicit `DSC_SLOW=1`. This candidate has no new live DSH/Chrome/Windows validation; Linux CI is configured but no remote run is claimed. Older88.3% recall and66/66 arrival figures belong to [historical inputs](docs/Plan.md), not current accuracy. Python parity utilities are a legacy regex reference, not AST ground truth.
 
-[Current contracts and document index](docs/README.md) · [Refactor verification](docs/refactor-results.md) · [Historical audit](docs/GPT审计及重构方案文档.md) · [Next development](docs/roadmap.md) · [Rules](rules/README.md) · [Skill delivery](skill/README.md). Listed in [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness).
+[Development history and next steps](docs/Plan.md) · [Historical audit](docs/GPT审计及重构方案文档.md) · [Rules](rules/README.md) · [Skill delivery](skill/README.md). Listed in [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness).
 
 ## License
 

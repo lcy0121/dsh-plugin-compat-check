@@ -6,7 +6,7 @@
 
 ## 버전과 배포
 
-로컬 소스는 **미배포0.1.1 후보 버전**입니다. 2026-10-15에 확인한 npm `latest`는 **0.1.0**이며 미배포 수정 사항을 포함하지 않습니다. [공개 메타데이터 검토](docs/documentation-review.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
+로컬 소스는 **미배포0.1.1 후보 버전**입니다. 2026-10-15에 확인한 npm `latest`는 **0.1.0**이며 미배포 수정 사항을 포함하지 않습니다. [공개 메타데이터 검토](docs/Plan.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
 
 | 진입점 | 역할 |
 |---|---|
@@ -116,12 +116,9 @@ dsh-plugin-compat-check/
 ├── skill/                            # authoritative SKILL.md and delivery notes
 ├── rules/                            # severity rules, API catalogue and historical inventory
 ├── docs/                             # current contracts, verification and history
-│   ├── README.md
 │   ├── Plan.md
 │   ├── GPT审计及重构方案文档.md
-│   ├── refactor-implementation.md / refactor-results.md
-│   ├── current-state.json / public-metadata.json
-│   ├── documentation-review.md / roadmap.md
+│   ├── current-state.json
 │   └── extraction-findings.md
 ├── test/                             # behavior, invariants, snapshots and artifact tests
 └── tools/                            # documentation, metadata and diagnostic utilities
@@ -141,7 +138,7 @@ node tools/meta-check.mjs --json
 
 느린 통합 검사는 명시적 `DSC_SLOW=1`이 필요합니다. 이번 후보의 실제 DSH·Chrome·Windows 검증은 없으며 Linux CI는 설정만 있고 원격 실행 성공을 주장하지 않습니다. 과거88.3% 재현율과66/66 도착 수치는 [역사 기록](docs/Plan.md)의 입력에만 해당합니다. Python parity는 구형 정규식 참고 구현이며 AST의 정답이 아닙니다.
 
-[현재 계약과 문서 목록](docs/README.md) · [리팩터 검증](docs/refactor-results.md) · [역사 감사](docs/GPT审计及重构方案文档.md) · [후속 개발](docs/roadmap.md) · [규칙](rules/README.md) · [skill 배포](skill/README.md). [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)에 수록되어 있습니다.
+[개발 기록 및 후속 계획](docs/Plan.md) · [역사 감사](docs/GPT审计及重构方案文档.md) · [규칙](rules/README.md) · [skill 배포](skill/README.md). [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)에 수록되어 있습니다.
 
 ## License
 

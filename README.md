@@ -6,7 +6,7 @@
 
 ## 当前版本与交付
 
-本地源码为 **0.1.1 未发布候选版**；2026-10-15联网核验，npm `latest` 为 **0.1.0**。`npm install` 或 `dsh plugin add` 不会取得本地尚未发布的修复。公开状态和差异见 [文档核验记录](docs/documentation-review.md)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
+本地源码为 **0.1.1 未发布候选版**；2026-10-15联网核验，npm `latest` 为 **0.1.0**。`npm install` 或 `dsh plugin add` 不会取得本地尚未发布的修复。公开状态和差异见 [Plan中的核验记录](docs/Plan.md#85-信息文档与公开状态)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
 
 插件、CLI、skill三种形态共享判定内核；安装检查脚本是CLI编排入口。只有**相同输入与采样证据**才应得出相同结果。
 
@@ -119,12 +119,9 @@ dsh-plugin-compat-check/
 ├── skill/                            # authoritative SKILL.md and delivery notes
 ├── rules/                            # severity rules, API catalogue and historical inventory
 ├── docs/                             # current contracts, verification and history
-│   ├── README.md
 │   ├── Plan.md
 │   ├── GPT审计及重构方案文档.md
-│   ├── refactor-implementation.md / refactor-results.md
-│   ├── current-state.json / public-metadata.json
-│   ├── documentation-review.md / roadmap.md
+│   ├── current-state.json
 │   └── extraction-findings.md
 ├── test/                             # behavior, invariants, snapshots and artifact tests
 └── tools/                            # documentation, metadata and diagnostic utilities
@@ -144,7 +141,7 @@ node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 
 默认套件不启用 `DSC_SLOW=1` 集成；本轮真实 DSH、Chrome、Windows 未测，Linux CI 已配置但没有本轮远端执行证明。旧的88.3%召回、66/66到货等只属于 [历史施工记录](docs/Plan.md)，不是0.1.1准确率。Python parity 工具也是旧正则参考，不能把它当作 AST 实现的真值。
 
-[文档索引与现行契约](docs/README.md) · [重构验证](docs/refactor-results.md) · [历史审计](docs/GPT审计及重构方案文档.md) · [后续开发](docs/roadmap.md) · [规则说明](rules/README.md) · [skill 交付](skill/README.md)。项目已收录于 [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)。
+[施工记录与后续计划](docs/Plan.md) · [历史审计](docs/GPT审计及重构方案文档.md) · [规则说明](rules/README.md) · [skill交付](skill/README.md)。项目已收录于 [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)。
 
 ## License
 

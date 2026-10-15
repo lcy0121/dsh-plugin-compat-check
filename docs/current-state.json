@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-15T07:08:19.121Z",
+  "recordedAt": "2026-10-15T07:24:34.392Z",
   "testFiles": 25,
   "tests": 343,
   "repositoryFiles": {
-    "total": 210,
+    "total": 204,
     "fixtures": 90,
-    "other": 120
+    "other": 114
   },
   "verification": {
     "platform": "darwin",
@@ -19,7 +19,6 @@
     "realChrome": false,
     "windows": false,
     "nodeVersions": [
-      "22.19.0",
       "26.11.1"
     ],
     "independentReview": {
@@ -40,14 +39,6 @@
         "24.21.0",
         "26.11.1"
       ]
-    },
-    "documentationReview": {
-      "date": "2026-10-15",
-      "documents": 16,
-      "focusedTests": 55,
-      "publicSnapshot": "docs/public-metadata.json",
-      "publicErrors": 0,
-      "publicNotices": 5
     }
   },
   "scope": "npm test default suite; optional profile counts depend on local inputs; real DSH/browser slow suites were not enabled"

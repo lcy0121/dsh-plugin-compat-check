@@ -1,6 +1,6 @@
 # Plan.md — dsh-plugin-compat-check 开发计划与作业规程
 
-> **2026-10-15 状态更新：0.1.1 本地重构已实施，尚未发布。** 当前契约与验证以 [实施记录](refactor-results.md)、[实施计划](refactor-implementation.md) 和 [自动统计](current-state.json) 为准。本文件已从仓库根迁至 `docs/Plan.md`；当前入口为 [文档索引与现行契约](README.md)，后续工作见 [开发路线](roadmap.md)。文中代码路径仍相对仓库根。下文 §0–§7、§9.1 历史施工记录保留，但正则提取、固定临时目录、升级视为变好、npm 同时提供 CLI 等旧决策已被本轮替代。历史“实测”只对应当时的输入，不证明当前版本已做真实启动验证。原始 [GPT 审计](GPT审计及重构方案文档.md) 保留，便于追溯问题。
+> **2026-10-15 状态更新：0.1.1 本地重构已实施，尚未发布。** 本文件统一记录当前契约、施工摘要和后续计划：§8为现状与已完成工作，§9为待办及验收条件；统计由 [current-state.json](current-state.json) 生成。使用方法与目录结构见 [仓库README](../README.md)。下文§0–§7、§9.1保留历史施工记录，旧正则、固定临时目录、升级视为变好、npm同时提供CLI等决定已被§8替代，历史“实测”不代表当前版本已做真实启动验证。[原始GPT审计](GPT审计及重构方案文档.md) 保留以追溯问题；代码路径相对仓库根。
 
 
 > **这份文档是写给"未来的自己"看的。** 一次会话结束，上下文就没了：为什么否掉方案 B、
@@ -52,7 +52,7 @@
 
 ---
 
-## 1. 产品定义（历史决策，现行契约见 docs/README.md）
+## 1. 产品定义（历史决策，现行契约见 §8.3）
 
 **一句话**：让 DSH 使用者知道自己**已经装了的**插件跟**当前 DSH 版本**是否兼容；
 不兼容的，给出**位置**和**原因**。
@@ -522,22 +522,77 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 
 > 收尾规矩：**不留下**除 `parityfix` 之外的临时 profile、**不留下**任何进程。
 
+### 8.3 当前契约与边界
+
+- 插件、CLI、skill共用判定内核；相同目标、版本、规则与采样证据才要求结果一致。npm只提供插件，不含CLI bin；根目录是private工作区，候选安装使用plugin子目录打出的tgz。
+- present/absent/unobserved/unreadable分开；省略键不能冒充缺失。声明不等于激活，catalog不等于运行时面，激活不等于功能验收。certain/suspected为确定性，过滤/守卫/弃权为去处，保留impactBasis、coverage及vacuous。
+- 静态、文件probe、进程内观测分模式；其它profile不能借用当前宿主服务。现代观测绑定profile、DSH版本和时间，默认24小时过期；旧格式只使用明确键并标记未绑定。
+- 默认静态检查不执行目标源码；宿主使用有时限/内存上限的worker，默认写自己的schema2基线。分析不完整不推进基线，锁内比较、原子替换；异常退出可能留下锁，确认没有写进程后再清理。
+- 显式probe启动和安装检查会安装并执行目标插件，临时profile不是OS沙箱。描述符采样不调用getter，诊断只写显式私有目录，运行器只清理自己拥有的进程和目录。
+- API源码发现通常有file:line，loader/声明发现可能没有源码位置。动态属性、工厂/代理、跨函数与模块数据流仍有限；provide是提供方线索，不能遮住完整方法观测。客户端到货工具独立于面板，不能认证业务功能。
+- 真实DSH/Chrome/Windows集成仍未在本轮验证，Linux CI配置不等于远端已通过；历史Codex Security扫描为部分覆盖，本轮修复及复核不等于重新取得全量安全认证。
+
+### 8.4 0.1.1施工摘要（已完成）
+
+依据原始GPT审计，2026-10-14至15在本地分支codex/compat-evidence-refactor完成；重构提交110361d，文档整理提交30f8ce4。没有推送、发布或写入正式DSH profile。已执行的实施计划不再单列文件。
+
+| 原审计问题 | 已完成处理与验证 |
+|---|---|
+| B04–B07：提取、作用域、守卫、导入 | Babel JS/TS AST、词法绑定、逐调用span及有界源码图；实际入口apply/inject首参证明Context，普通ctx保留推断；赋值/delete撤销守卫；精确导出角色；extraction回归、不变式、判据、快照 |
+| B01–B03：缺项、依赖和双端证据 | 独立observation，身份/版本/时效校验，硬软及host/client/shared保留；访问器未知不遮住其它明确缺失；verdict回归 |
+| B08–B10：运行时、声明及profile | 当前宿主采样及可映射FAILED/PENDING；其它profile静态检查；错误明确无法判定；官方peer semver适配，engines.dsh仅建议，peer冲突为推断degraded；runtime回归 |
+| B13–B14：基线、缓存和展示 | schema2身份及严重度/确定性变化，升级中性；单次并发计算、失败保留上次成功；CLI/UI/model不丢证据；state-store/report-service回归 |
+| B11–B12、S01–S03：运行器及安全 | UUID私有现场和拥有的进程组；安装/启动失败3、明确peer闸门2、单份JSON；拒绝诊断链接；CDP继承管道；canonical包边界、资源预算及worker上限；runner/probe/debugger受控子进程测试 |
+| 发布链与信息文档 | 固定parser/semver，暂存完整内核及LICENSE；独立tarball安装后实际调用宿主工具；一次完整测试复用摘要；Node CI；三语README、npm说明、skill、规则说明与核验脚本修正 |
+
+历史纠正：Cordis inject回调第一参数为Context、第二参数为config；旧夹具及别名误归属已改。旧“副作用import已修”“npm同时提供CLI”“打包测试真执行产物”不适用于0.1.0。本轮未用重建快照代替行为审查；旧schema1基线重新建立。scoped包清单EACCES必须报错，不能空清单成功；probe-boot采用采集到的DSH版本（显式值优先）。
+
+独立复核发现并修复六项Important：外部probe条目绕过身份校验、provide掩盖方法证据、普通ctx/var误认、未调用函数污染外层别名、runner漏传manifests、错误probe envelope被当成功；先反例重现再修复。原针对性42项及6个变体通过，最终范围46项通过，未发现剩余阻塞；复核不代替真实集成。
+
+验证记录按批次保留：重构时Node22.19/24.21/26.11默认341项通过；文档整理时Node22.19/26.11默认343项通过，文档/skill/元数据55项通过，发布前闸门通过。测试数量会随代码和可选本机输入变化，最新结果见current-state.json，不把这些旧批次计数当跨环境常量。旧脚本回归测试初次隔离曾漏掉全局清理命令和固定路径，已补假pkill/pgrep及私有路径后重验，初次运行不作为安全流程证明。
+
+### 8.5 信息文档与公开状态
+
+2026-10-15已将Plan和原审计迁入docs，修正三语README、npm README、skill及包内副本、规则说明；纠正固定/tmp、过时基线名、无条件确定性、客户端能力、根GitHub安装规格等说明。roadmap及重构/文档报告已合入本文件，不再为同一状态另建索引或快照。原审计正文仍针对旧代码，提取历史保留编号及当时输入。
+
+同日联网核验快照：GitHub main=4722716，About简介/标签/主页与产品定位一致；npm latest=0.1.0，本地=0.1.1。meta-check取到两个数据源及npm README，0项error、5项notice，分别为版本、描述、依赖、keywords、README的未发布差异。Awesome DeepSeek Harness确认收录。此为带日期的历史核验，发布前必须重新查询；线上旧README与包不会因本地编辑自动更新。
+
+文档分工：三语README负责用法和结构，Plan负责现状/施工/后续，GPT审计负责原问题证据，extraction-findings负责提取反例，current-state.json供核验脚本记录统计；skill和rules各保留本目录说明。更详细的旧报告可从Git历史读取，无须全部留在当前目录。
+
+维护时运行npm test、format:check、doc-check与prepublish-check；元数据检查另需联网。doc-check只检查本地链接/版本/skill副本，不递归跑测试；用成功TAP运行update-current-state后，再向doc-check传入同一摘要。原审计的本机安全附件不承诺跨机器可访问。
+
+本次合并后docs仅保留Plan、GPT审计、extraction-findings及current-state.json。Node26.11默认343项测试通过，发布前闸门通过，离线链接/版本/skill核验覆盖11份维护文档；实际文件数由current-state.json记录。
+
 ---
 
 ## 9. 下一动作
 
-剩余工程工作见 [开发路线与验收条件](roadmap.md)。优先验证真实 DSH 安装/启动与浏览器路径，再校准规则与辅助度量工具；不再沿用“能做的工作已经清空”的旧结论。
+下表统一记录尚未开发或验收的工作，不表示已经完成；不再另维护roadmap。
+
+| 优先级 | 工作 | 完成条件 |
+|---|---|---|
+| P0 发版前 | 真实DSH安装、启动和宿主功能验收 | 在自己创建的私有DSH_HOME与临时profile，从实际tgz安装；记录DSH/Node/OS版本；验证compat_check、当前与其它profile、FAILED/PENDING、错误无法判定、skills.list/get、第二次基线差分；验证0/1/2/3及清理无残留 |
+| P0 发版前 | 真实Chrome到货与界面验收 | 用当前CDP pipe路径运行开发工具；正常和故意破坏客户端两例都生效；人工确认面板、插件详情角标及错误状态；网络到货与业务交互分别记录 |
+| P1 度量可信度 | 适配旧辅助度量工具并隔离真值 | tools/labels.mjs仍固定DSH0.2.0-rc.2，且将LOADING归为未运行，和当前verdict语义不同；使用同一probe.entries参与判定又作为标签会发生循环验证。需要将独立loader标签和预测输入分离，统一状态/版本，并添加受控反例。Python parity只留历史比较，不能要求AST与旧正则结果相等 |
+| P1 规则质量 | 复核severity.needsReview与刷新历史inventory | 在明确DSH版本、profile、probe身份下逐条核对sessions.open/getSnapshot/refresh、settings.get、attachments.readImage等；区分源码归属与服务实际方法；只以证据更新规则、影响文案、夹具及回归，不把历史coverage数字当现状 |
+| P1 契约稳定 | 固化报告结构与消费者一致性 | 为observation/coverage/finding/baseline建立可校验schema或类型契约，覆盖CLI JSON、HTTP、model tool和面板；旧格式兼容策略和错误码有文档及回归，避免字段增加后某个通道丢证据 |
+| P2 分析能力 | 以真实误报/漏报推进AST支持 | 对动态属性、工厂/代理、跨模块别名与函数调用建立有界反例队列；每次先复现再修复，并量化精确归属/覆盖变化，不以“疑似比例降低”代替正确性 |
+| P2 工程验证 | 补齐平台和资源验证 | 真跑Linux CI并记录结果；Windows仅在获得实际环境后验收进程清理/路径/安装器，验证前不宣称已兼容。增加大包、超时、内存压力及并发基线的性能基准，保持宿主响应 |
+| 发布阶段 | 同步公开源码与npm候选 | 完成上述发版验收后，经授权推送/合并并发布；移除候选README中的未发布措辞，核验registry版本、README、依赖、tarball、简介与标签，再更新本文件的公开状态记录 |
+
+建议顺序：先完成两项P0；然后处理辅助度量和规则复核，再扩展语法覆盖或新UI。当前主要缺口是实际安装后的证据链与可信度量，继续大规模拆文件的收益较低。
+
 
 日常修改后运行 `npm test`、`node tools/doc-check.mjs` 与 `node plugin/scripts/prepublish-check.mjs`。改动 skill 后先运行 `node plugin/scripts/stage-skill.mjs`。更新公开说明时再运行 `node tools/meta-check.mjs`；网络不可用必须记录为未核验，本地版本高于 npm 已发布版本是 notice。
 
 ### 9.0 下次发版怎么做
 
-本地候选为0.1.1；公开发布状态以 [元数据核验记录](documentation-review.md) 的核验时间为准，不能用历史测试数量作为发版凭证。
+本地候选为0.1.1；公开发布状态以§8.5记录的核验时间为准，不能用历史测试数量作为发版凭证。
 
 1. 核对 `lib/version.mjs`、`plugin/package.json`、`probe/package.json`、`tools/slot-probe/package.json` 与说明文档。
 2. 先审查行为和基准版本变化，再有意更新快照；不以重建快照代替修复失败。
 3. 用成功 TAP 摘要运行 `node tools/update-current-state.mjs --test-summary <log>`，再运行 `node tools/doc-check.mjs --test-summary <log>`。
-4. 运行 `node plugin/scripts/prepublish-check.mjs`，并完成 roadmap 中发版前集成验收。
+4. 运行 `node plugin/scripts/prepublish-check.mjs`，并完成本节两项P0发版前集成验收。
 5. 取得发布授权后，在 `plugin/` 执行 `npm publish`，按 npm 实际提示完成认证；`prepack` 暂存 kernel 与 skill，`postpack` 清理 kernel。
 6. 重新核验 registry 版本、tarball、README 与依赖，并更新公开状态记录。发布0.1.1时将 npm README 中“本地候选”文字改为相应发布状态；不能提前声称已发布。
 
