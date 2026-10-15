@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "node tools/run-tests.mjs",
-    "format:check": "prettier --check lib/source-analysis.mjs lib/source-graph.mjs lib/syntax.mjs lib/extract.mjs lib/verdict.mjs lib/observation.mjs lib/declarations.mjs lib/report-service.mjs lib/state-store.mjs lib/debugger.mjs lib/probe-runner.mjs lib/worker-analysis.mjs lib/extract-worker.mjs bin/check-install.mjs plugin/lib/host-resources.js"
+    "format:check": "prettier --check lib/source-analysis.mjs lib/source-graph.mjs lib/syntax.mjs lib/extract.mjs lib/verdict.mjs lib/observation.mjs lib/declarations.mjs lib/report-service.mjs lib/state-store.mjs lib/debugger.mjs lib/probe-runner.mjs lib/worker-analysis.mjs lib/extract-worker.mjs bin/check-install.mjs plugin/lib/host-resources.js probe/index.mjs tools/labels.mjs tools/label-metrics.mjs test/labels.test.mjs"
   },
   "engines": {
     "node": "^22.19.0 || >=24"

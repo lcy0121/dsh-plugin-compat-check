@@ -138,6 +138,8 @@ node tools/meta-check.mjs --json
 
 느린 통합 검사는 명시적 `DSC_SLOW=1`이 필요합니다. 2026-10-15에 정상 도착, 클라이언트 파일 누락, import 예외 및 런타임 음성 대조를 포함한 실제 DSH·Chrome 테스트6개가 통과했습니다. 환경과 명령은 [Plan](docs/Plan.md)을 참고하세요. Windows는 미검증이며 Linux CI 원격 실행 성공도 주장하지 않습니다. 과거88.3% 재현율과 이번66/66 도착 수치는 기능 정확도가 아닙니다. Python parity는 구형 정규식 참고 구현이며 AST의 정답이 아닙니다.
 
+보조 측정은 독립 loader 원시 라벨과 서비스 관측만 받는 예측기를 분리합니다. [Plan §8.7](docs/Plan.md)을 참고하세요. `node tools/labels.mjs --nm web --synthetic --json`은 비공개 환경을 만들고 실제 누락을 보고하면 exit1을 반환합니다. 기존 대상은 `--probe-boot`, 파일 입력은 `--probe`와 `--labels`를 함께 사용합니다. 이 수치는 첫 계층의 해당 표본에만 적용되며 생태계 정확도가 아닙니다.
+
 [개발 기록 및 후속 계획](docs/Plan.md) · [역사 감사](docs/GPT审计及重构方案文档.md) · [규칙](rules/README.md) · [skill 배포](skill/README.md). [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)에 수록되어 있습니다.
 
 ## License

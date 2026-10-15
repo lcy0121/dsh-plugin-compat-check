@@ -141,6 +141,8 @@ node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 
 默认套件不启用 `DSC_SLOW=1` 集成。2026-10-15另行通过6项真实DSH/Chrome集成测试，包含正常到货、缺失客户端文件、导入抛错及运行时负向对照；环境与复现命令见 [Plan](docs/Plan.md#86-真实集成验收2026-10-15)。Windows未测，Linux CI尚无本轮远端执行证明。历史88.3%召回和本次66/66到货均不是0.1.1功能准确率。Python parity 工具也是旧正则参考，不能把它当作 AST 实现的真值。
 
+辅助度量使用 [Plan §8.7](docs/Plan.md#87-p1辅助度量真值隔离2026-10-15) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
+
 [施工记录与后续计划](docs/Plan.md) · [历史审计](docs/GPT审计及重构方案文档.md) · [规则说明](rules/README.md) · [skill交付](skill/README.md)。项目已收录于 [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)。
 
 ## License

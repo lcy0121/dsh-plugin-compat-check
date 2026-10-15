@@ -138,6 +138,8 @@ node tools/meta-check.mjs --json
 
 Slow integrations need explicit `DSC_SLOW=1`. Six real DSH/Chrome tests passed on 2026-10-15, covering healthy arrival, a missing client file, an import exception and runtime negative controls; see [Plan](docs/Plan.md) for the environment and commands. Windows remains untested and no remote Linux CI run is claimed. The historical88.3% recall and current66/66 arrival figures are not functional accuracy measurements. Python parity utilities are a legacy regex reference, not AST ground truth.
 
+Auxiliary measurement uses independent raw loader labels; the predictor receives service observations only. See [Plan §8.7](docs/Plan.md). `node tools/labels.mjs --nm web --synthetic --json` creates a private environment and can correctly report a false negative (exit1). Use `--probe-boot` for an existing target, or paired `--probe` and `--labels` files. These sample metrics cover the first layer only, not ecosystem accuracy.
+
 [Development history and next steps](docs/Plan.md) · [Historical audit](docs/GPT审计及重构方案文档.md) · [Rules](rules/README.md) · [Skill delivery](skill/README.md). Listed in [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness).
 
 ## License

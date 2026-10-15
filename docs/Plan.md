@@ -417,7 +417,7 @@ node bin/compat-check.mjs --nm <dir> --quiet    # 只要一行总结论
 # 度量与端到端
 node tools/extractor-recall.mjs               # 调用点层召回（有界、可逐条查）
 node tools/client-arrival.mjs                 # 客户端到货（要浏览器）
-node tools/labels.mjs --nm web --synthetic    # 第 ① 层双向对账
+node tools/labels.mjs --nm web --synthetic    # 独立初始化私有web模板；可能诚实返回漏报（exit1）
 DSC_SLOW=1 node --test test/probe-boot.test.mjs test/labels.test.mjs test/client-arrival.test.mjs
 ./dsh-plugin-compat-check.sh <spec>           # 端到端（装包+起宿主+拿报告+判定）
 ```
@@ -599,6 +599,35 @@ node plugin/scripts/prepublish-check.mjs
 
 最终独立复核的两项Important（相对依赖、共享打包）均按反例先红后绿修复。两项Minor延后：到货工具文本模式在非预期启动失败时仍可能称“预期失败”；文本摘要未展开compatibility.error。JSON和退出码正确，排错时使用--json；后续统一文本提示。
 
+### 8.7 P1辅助度量真值隔离（2026-10-15）
+
+旧labels脚本固定DSH0.2.0-rc.2、将LOADING当未运行，并把同一probe.entries既交给判定器又拿来当标签；历史“零漏报”不能证明独立预测能力。本轮只修复这项度量链，不把旧Python正则对拍升级为AST真值。
+
+- **独立标签来源**：探针额外写loader-labels.json，直接遍历宿主loader的原始条目，保存完整身份和数值状态；不调用生产loaderObservations映射、不使用提取器manifests来裁剪标签。与服务观测共享sampleId、profile、DSH版本、采样时间，先落标签再发布probe就绪文件。
+- **预测输入隔离**：labels调用同一CLI内核，显式仅传root服务形状和身份/时效字段，不传任何loader条目；同时关闭相邻probe报告自动发现。标签文件不被判定器消费；修改标签只能改变计分，不能改变预测。
+- **身份与状态**：只按完整包名唯一匹配，不猜scoped包尾段或前缀；一包多条目有任一启用PENDING/FAILED即为正例，所有启用条目均ACTIVE才为负例。LOADING、DISPOSED、UNLOADING、无fiber/不可读、停用、组、无法映射条目均不充当成功或失败；输出不计分及未映射项。
+- **有效性**：从本次采样取DSH版本，显式版本必须一致；配对sampleId、profile、版本、时间校验失败或标签不完整、源码分析不完整时退出3。无正例/无预测正例时对应召回率/精确率为null；全无可计分样本也退出3。
+- **现场所有权**：synthetic从官方web模板初始化自己的DSH_HOME，不再复制正式web；任一安装失败中止，finally清理合成目录，probe运行器清理拥有的宿主与profile。keep-dir仅保留私有诊断报告，不保留进程和临时profile。
+
+新工具文件模式需要两份配对产物；旧只有entries的报告不再作为独立度量输入，需重新采样。此变更限开发度量工具；普通兼容性报告仍可使用验证过身份的loader实测发现。
+
+```bash
+# 直接采样现有目标；预测不读取采样中的loader答案
+node tools/labels.mjs --nm <profile或node_modules> --probe-boot --json
+# 同时留出服务报告和独立标签（诊断目录须私有且由本人拥有）
+node tools/labels.mjs --nm <profile或node_modules> --probe-boot --keep-dir <私有目录> --json
+node tools/labels.mjs --nm <原目标> --probe <私有目录>/probe-report.json --labels <私有目录>/loader-labels.json --json
+# 合成病例；初始化私有web模板，无须本机已有web profile
+node tools/labels.mjs --nm web --synthetic --json
+DSC_SLOW=1 node --test --test-reporter=tap test/labels.test.mjs
+```
+
+度量退出码：0=有计分样本且无FP/FN；1=有误报或漏报；3=用法/采样/身份/分析错误或没有可计分样本。0仍不代表静默降级和客户端功能通过，也不等于所有loader条目均纳入分母。
+
+真实DSH0.2.0-rc.2、macOS arm64、宿主Node24.18.1中，四个受控病例实测：broken-service=PENDING且预测fatal（TP）；healthy/real-service=ACTIVE且无fatal（TN×2）；failed-apply=FAILED而源码/服务检查无fatal（FN）。结果TP1、FP0、FN1、TN2，精确率1、召回率0.5，CLI退出1；测试应通过，因为它要求如实暴露漏报。failed-apply故意在激活时抛错，属于判定器未承诺静态预测的任意插件逻辑故障，是防止答案泄漏的挑战例，**不能将这四例的50%读作产品或生态准确率**。不为得到满分扩展分析范围。
+
+回归覆盖标签篡改而预测不变、相邻答案文件、LOADING/停用/未知/同尾包名/多条目、身份版本过期及错配、空分母、源码不完整、真实原始采集独立于生产映射。默认套件351项通过；独立标签6项离线回归与1项真实合成测试通过，连同P0探针/Chrome共13项测试通过（其中7项真实集成）。文档、格式和发布前检查结果另行核验，事实记录见current-state.json；P0的界面/网络到货范围声明继续有效。
+
 ---
 
 ## 9. 下一动作
@@ -609,14 +638,14 @@ node plugin/scripts/prepublish-check.mjs
 |---|---|---|
 | P0 已完成 | 真实DSH安装、启动和宿主功能验收 | 2026-10-15在§8.6环境从实际tgz安装；compat_check、profile隔离、FAILED/PENDING、错误、skills.list/get、基线及0/1/2/3均通过；发布或环境变化时重跑 |
 | P0 已完成 | 真实Chrome到货与界面验收 | CDP pipe正向、缺文件及import抛错反例通过；Computer Use确认面板、详情角标、受控错误和重新检查；限于§8.6环境和已操作交互 |
-| P1 度量可信度 | 适配旧辅助度量工具并隔离真值 | tools/labels.mjs仍固定DSH0.2.0-rc.2，且将LOADING归为未运行，和当前verdict语义不同；使用同一probe.entries参与判定又作为标签会发生循环验证。需要将独立loader标签和预测输入分离，统一状态/版本，并添加受控反例。Python parity只留历史比较，不能要求AST与旧正则结果相等 |
+| P1 已完成 | 适配旧辅助度量工具并隔离真值 | §8.7：独立原始loader标签、仅服务观测预测、关闭自动读取、状态/包身份/版本对齐；受控反例和真实DSH测试暴露真实FN；Python parity保留历史比较 |
 | P1 规则质量 | 复核severity.needsReview与刷新历史inventory | 在明确DSH版本、profile、probe身份下逐条核对sessions.open/getSnapshot/refresh、settings.get、attachments.readImage等；区分源码归属与服务实际方法；只以证据更新规则、影响文案、夹具及回归，不把历史coverage数字当现状 |
 | P1 契约稳定 | 固化报告结构与消费者一致性 | 为observation/coverage/finding/baseline建立可校验schema或类型契约，覆盖CLI JSON、HTTP、model tool和面板；旧格式兼容策略和错误码有文档及回归，避免字段增加后某个通道丢证据 |
 | P2 分析能力 | 以真实误报/漏报推进AST支持 | 对动态属性、工厂/代理、跨模块别名与函数调用建立有界反例队列；每次先复现再修复，并量化精确归属/覆盖变化，不以“疑似比例降低”代替正确性 |
 | P2 工程验证 | 补齐平台和资源验证 | 真跑Linux CI并记录结果；Windows仅在获得实际环境后验收进程清理/路径/安装器，验证前不宣称已兼容。增加大包、超时、内存压力及并发基线的性能基准，保持宿主响应 |
 | 发布阶段 | 同步公开源码与npm候选 | 完成上述发版验收后，经授权推送/合并并发布；移除候选README中的未发布措辞，核验registry版本、README、依赖、tarball、简介与标签，再更新本文件的公开状态记录 |
 
-下一步建议先做P1辅助度量真值隔离，再做规则复核与报告结构契约。两项P0已完成本机验收；跨平台、跨DSH版本及全业务功能仍不在已验证范围内，继续大规模拆文件的收益较低。
+下一步建议做P1规则复核，再固化报告结构契约。P1辅助度量隔离及两项P0已完成本机验收；跨平台、跨DSH版本及全业务功能仍不在已验证范围内，继续大规模拆文件的收益较低。
 
 
 日常修改后运行 `npm test`、`node tools/doc-check.mjs` 与 `node plugin/scripts/prepublish-check.mjs`。改动 skill 后先运行 `node plugin/scripts/stage-skill.mjs`。更新公开说明时再运行 `node tools/meta-check.mjs`；网络不可用必须记录为未核验，本地版本高于 npm 已发布版本是 notice。
