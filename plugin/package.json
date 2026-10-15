@@ -35,7 +35,7 @@
     "node": "^22.19.0 || >=24"
   },
   "scripts": {
-    "prepack": "node scripts/stage-skill.mjs && node scripts/stage-kernel.mjs",
+    "prepack": "node scripts/stage-skill.mjs && node scripts/stage-contract.mjs && node scripts/stage-kernel.mjs",
     "postpack": "node scripts/unstage-kernel.mjs",
     "prepublishOnly": "node scripts/prepublish-check.mjs",
     "stage-skill": "node scripts/stage-skill.mjs"

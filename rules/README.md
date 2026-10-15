@@ -8,7 +8,7 @@
 |---|---|
 | severity.json | 方法严重度/影响文案；引擎读取services下的方法规则，并与代码内默认档合用 |
 | dsh-api-catalog.json | 指定DSH版本生成的宿主/客户端契约目录；不证明当次运行时提供某方法 |
-| usage-inventory.json | 历史调用库存和覆盖依据，不由每次体检自动重建 |
+| usage-inventory.json | 指定版本/profile的当前AST调用库存，含完整性、分端方法对与来源摘要；由coverage显式刷新 |
 
 严重度由 `lib/verdict.mjs` 的确定性逻辑、缺失证据、方法规则及默认档共同决定，不由LLM决定。JSON中的layer/summary/basis/evidence/knownGoneIn/needsReview等主要用于解释与维护；knownExtractionArtifacts是历史反例登记，不是自动过滤黑名单。
 
@@ -28,9 +28,20 @@
 
 ## 如何更新
 
-先读调用点和目标版本的真实描述符/官方源码，再修改规则，添加行为回归并审查快照差异。待复核列表见本页历史条目与 [Plan后续计划](../docs/Plan.md)。
+先读调用点和目标版本的真实描述符/官方源码，再修改规则，添加行为回归并审查快照差异。原needsReview已在2026-10-15逐条复核，决定与证据保留于severity.json的needsReview.reviewed/evidence及 [Plan](../docs/Plan.md)。
 
-`tools/coverage.mjs` 可按指定profile和probe计算当前输入的报告统计；`--write`会刷新inventory，必须有意执行并复核。结果依赖输入及默认/确定发现的口径，不是生态准确率。历史Python参考实现不能当作当前AST的真值。
+`tools/coverage.mjs` 从AST调用点按host/client/shared分端计数，规则命中与默认影响、类别发现分列。**knownExtractionArtifacts只保留历史反例，不过滤现在的真实调用**；纯客户端规则不用于宿主同名方法。probe须为现代格式并绑定本目标/版本/时间，不能借别的profile的面。
+
+```bash
+node tools/coverage.mjs --nm <node_modules目录> --dsh-version <已核验版本> --json
+node tools/coverage.mjs --nm <node_modules目录> --probe <同目标的现代probe> --write --json
+# 默认拒绝将不完整扫描写成库存；审查diagnostics后方可显式接受部分样本
+node tools/coverage.mjs --nm <node_modules目录> --dsh-version <已核验版本> --write --allow-partial --json
+```
+
+当前库存是2026-10-15的desktop21插件样本，DSH0.2.0-rc.2，静态catalogue模式，不借用规则复核的私有web探针。扫描受默认字节预算和缺失CSS入口限制，明确为partial：50个有调用服务、125个分端方法对，其中88个有对应规则（host69/79、client19/46）。这些是本次读到的部分集合，不是完整覆盖率或准确率；同名方法不同端分别计数，不能直接和下面旧口径61%比较。sourceDigest记录规范化AST分析摘要，不承诺所有包字节的完整性。历史Python参考不是AST真值。
+
+本次复核：attachments.readImage由官方实现和真实描述符互证，保留仅该读取路径的影响；sessions.open保留明确的客户端旧回退语义；删除sessions.getSnapshot、settings.get及sessions.map的无依据影响条目；sessions.refresh有守卫且无足够语义证据，不新增规则。客户端运行时未采样，不宣称对应API已被删除。
 
 ## 历史依据：覆盖率、方法与反例（2026-10-11，旧提取器）
 
@@ -181,9 +192,9 @@ node tools/coverage.mjs --probe <报告> --write             # 顺带刷新 rule
 
 其余登记项：`settings.isTrusted`/`reportNonstrict`/`useStrictBehavior`（KaTeX 的 `parser.settings`）、`settings.settingsGet`/`externalDisable`（better-sidebar 自有的 `SidebarSettingsFace`）、`locale.startsWith`（字符串方法）、`tools.filter/join/push` 与 `sessions.map/filter/slice/...`（数组方法）。
 
-## 待复核的既有条目（0.1.1未重标规则，仍保留待办）
+## 历史待复核登记（2026-10-11；现已按上文处理）
 
-改这些条目会改变输出，按 `docs/Plan.md` §4 第 3 条应先摊开差异再决定，所以只登记证据，列在 `severity.json` 的 `needsReview` 段：
+改这些条目会改变输出，按 `docs/Plan.md` §4 第 3 条应先摊开差异再决定，当时仅登记证据。以下保留当时的疑问；当前处理决定在needsReview.reviewed中：
 
 - `sessions.open` / `sessions.getSnapshot`：两个目录里都没有；客户端真正的跳转入口是 `uiWorkspace.openSession`。
 - `sessions.refresh`：两个目录里都没有（客户端目录里的是 `refreshProjections`）。
@@ -192,7 +203,7 @@ node tools/coverage.mjs --probe <报告> --write             # 顺带刷新 rule
 
 ## 已知的提取缺陷（会影响本表的解读）
 
-`usage-inventory.json` 来源于旧正则提取器；Babel AST替代提取器后，没有把旧inventory伪装成新扫描结果。knownExtractionArtifacts也保留历史反例用途，并非当前引擎的黑名单。新的规则刷新必须记录DSH版本、目标profile、probe身份与时间，并逐条复核源码归属。
+旧inventory来源于正则提取器；当前JSON已由有版本和完整性标记的AST样本替换，旧数值只保留在本页历史表。knownExtractionArtifacts也保留历史反例用途，并非当前引擎的黑名单。新的规则刷新必须记录DSH版本、目标profile、probe身份与时间，并逐条复核源码归属。
 
 真解析器已经落地；“疑似比例明显下降”不作为验收指标，因为该比例还受运行时采样覆盖影响。当前实现仍不做完整跨函数/模块分析，边界见 [现行契约](../docs/Plan.md)。
 

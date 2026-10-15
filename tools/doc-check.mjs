@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /** Offline document contracts and local links. Tests are never run recursively. */
 import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -44,6 +45,7 @@ export function checkDocumentLinks(root, documents) {
 
 function main(argv) {
   const problems = [];
+  try { execFileSync(process.execPath,[path.join(ROOT,'plugin/scripts/stage-contract.mjs'),'--check'],{stdio:'pipe'}); } catch { problems.push('Generated report contracts differ from lib/contracts.mjs; run stage-contract.mjs'); }
   const read = rel => fs.readFileSync(path.join(ROOT, rel), 'utf8');
   const current = JSON.parse(read('docs/current-state.json'));
   const count = fs.readdirSync(path.join(ROOT, 'test')).filter(f => f.endsWith('.test.mjs')).length;

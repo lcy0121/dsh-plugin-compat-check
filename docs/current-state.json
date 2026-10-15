@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-15T12:37:09.235Z",
-  "testFiles": 25,
-  "tests": 354,
+  "recordedAt": "2026-10-15T13:20:13.677Z",
+  "testFiles": 27,
+  "tests": 367,
   "repositoryFiles": {
-    "total": 205,
+    "total": 210,
     "fixtures": 90,
-    "other": 115
+    "other": 120
   },
   "verification": {
     "platform": "darwin",
@@ -115,6 +115,37 @@
         "dshVersion": "0.2.0-rc.2",
         "tempProfileRemoved": true
       }
+    },
+    "rulesAndContracts": {
+      "verifiedAt": "2026-10-15",
+      "dshVersion": "0.2.0-rc.2",
+      "platform": "darwin",
+      "arch": "arm64",
+      "ruleRegressionTests": 7,
+      "contractRegressionTests": 6,
+      "targetedTests": 13,
+      "combinedTests": 28,
+      "combinedFailures": 0,
+      "realIntegrationTests": 7,
+      "privateTarballUiVerified": true,
+      "httpToolCoreFieldsEqual": true,
+      "normalToolExitCode": 1,
+      "invalidProfileToolExitCode": 3,
+      "canonicalReportSchema": 1,
+      "baselineSchema": 2,
+      "contractArtifactsChecked": true,
+      "inventory": {
+        "profile": "desktop",
+        "mode": "catalogue",
+        "plugins": 21,
+        "scanComplete": false,
+        "services": 50,
+        "sideSpecificPairs": 125,
+        "coveredPairs": 88
+      },
+      "runtimeRulesProfile": "owned official web template; independent from inventory profile",
+      "scope": "Listed needsReview APIs only; client runtime and other platforms/DSH versions not certified.",
+      "cleanupVerified": true
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

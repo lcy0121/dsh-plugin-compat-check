@@ -143,6 +143,8 @@ node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 
 辅助度量使用 [Plan §8.7](docs/Plan.md#87-p1辅助度量真值隔离2026-10-15) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
 
+报告契约以 [lib/contracts.mjs](lib/contracts.mjs) 为单一真源，CLI JSON、HTTP、工具与面板保留完整证据；新字段可扩展，缺少必需字段或不支持的版本明确报工具错误。规则已按0.2.0-rc.2官方实现/运行时复核，库存为明确标记不完整的AST样本，详见 [Plan §8.8–8.9](docs/Plan.md)。
+
 [施工记录与后续计划](docs/Plan.md) · [历史审计](docs/GPT审计及重构方案文档.md) · [规则说明](rules/README.md) · [skill交付](skill/README.md)。项目已收录于 [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)。
 
 ## License

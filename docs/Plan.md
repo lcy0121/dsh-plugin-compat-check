@@ -628,6 +628,42 @@ DSC_SLOW=1 node --test --test-reporter=tap test/labels.test.mjs
 
 回归覆盖标签篡改而预测不变、相邻答案文件、LOADING/停用/未知/同尾包名/多条目、身份版本过期及错配、空分母、源码不完整、真实原始采集独立于生产映射。最终独立复核发现三项Important：标签错误类型可隐藏漏报、过滤扫描集合前未检查包身份冲突、版本查询失败可能继承旧值。均先用完整CLI或运行器反例验证失败再修复，针对性15项通过；没有Minor遗留。默认套件354项通过；独立标签8项离线回归与1项真实合成测试，连同P0探针/Chrome共15项通过（其中7项真实集成）；另行健康夹具安装检查实测退出0、版本正确并清理。文档、格式与发布前检查通过，事实记录见current-state.json；P0的界面/网络到货范围声明继续有效。
 
+### 8.8 P1规则质量复核（2026-10-15）
+
+从已安装DSH0.2.0-rc.2的官方app.asar重新提取目录，host/client方法目录与仓库一致。另在自己的官方web模板profile采集sessions/settings/attachments描述符；未调用业务方法，宿主与源profile均已按所有权收尾。采样身份/时间、完整方法集和官方/插件源码摘要保留在severity.json的needsReview.evidence；此探针**不当作desktop运行时面**。
+
+| 原登记 | 结论与实际修改 |
+|---|---|
+| sessions.open | 宿主无此方法，archive-manager1.0.19客户端在uiWorkspace.openSession不可用时才走旧回退；保留明确client规则，影响收窄为该旧路径，不宣称客户端API已删除 |
+| sessions.getSnapshot | 当前证据对应observable store等对象，不支持sessions服务级影响；删除旧degraded规则，真实Context上的缺失调用落默认“影响面未知” |
+| sessions.refresh | 客户端源码有typeof/可选调用守卫；宿主观测无此方法，维持不新增规则 |
+| settings.get | 宿主无get；better-sidebar0.26.0远程操作里的settings来自getSettings返回的局部settingsFace，不是ctx.settings；删除“插件按默认值运行”这一无依据影响 |
+| attachments.readImage | **目录没列，但运行时存在**；官方attachment-local实现也存在该方法。保留规则，影响只描述readImage读取路径，不能扩大为全部视觉功能失效 |
+| sessions.map | 删除旧集合误报遗留的“同上”影响；真实AST Context调用既不能被历史黑名单删去，也不能套用旧误报文案 |
+
+方法规则按方法layer优先、服务layer兜底匹配；客户端规则不再影响宿主同名调用。七项受控回归先失败再修复，包含Object.prototype成员不能冒充显式规则。needsReview.items已清空，有限复核决定在reviewed保留；未采样客户端运行时仍明确未知。
+
+coverage已适配AST与身份约束：取消knownExtractionArtifacts自动过滤，按端统计方法对，默认影响/方法规则/类别发现分列；--write要求版本，不完整扫描默认不写，审查后可显式--allow-partial。当前刷新的是desktop21插件**部分静态样本**，50服务、125分端方法对、88规则命中（host69/79，client19/46）；默认源码预算及缺失CSS使扫描不完整，diagnostics完整保留。不是完整覆盖率，不能和旧61%直接比较，也不是生态准确率。源摘要是规范化AST分析摘要，不是整包完整性证明。正式profile只读，没有为刷新库存运行社区插件。
+
+### 8.9 P1报告契约稳定（2026-10-15）
+
+`lib/contracts.mjs`为纯JS运行时类型契约和JSDoc真源，覆盖observation、finding、coverage、完整报告、HTTP envelope及schema2基线。导出validateReportBody/validateEnvelope/validateBaseline及assert函数；校验返回字段路径，不推断缺失证据。摘要计数、结论与发现严重度、退出码、coverage状态和源码span需自洽，未知新增字段保留以支持兼容扩展。
+
+| 通道 | 当前契约 |
+|---|---|
+| CLI --json | schemaVersion=1、kind=plugin-compat-check/result；保留原plugins/summary/observation/baseline/extraction/inputs，加ok/error/exitCode |
+| HTTP | schemaVersion=1、kind=plugin-compat-check/report；report就是同一完整报告本体，外层保留items/路径/缓存等宿主元数据 |
+| compat_check | 保留summary/nodeModules/hasRuntimeSurface/text，新增完整report、baseline、schemaVersion、ok/error/exitCode/toolVersion及cache；output.schema同步声明，不能只靠文本传证据 |
+| 面板 | 网络响应先经同源契约验证再渲染；损坏、缺少证据或不支持版本显示“体检报告无法读取”，不显示成无发现。正常面板、详情和基线交互保留 |
+
+退出码0=未发现冲突、1=部分可用/未知、2=不兼容、3=工具无法判定；CLI参数错误/缺nm在--json下也返回单份错误JSON。CLI和安装器共用退出码函数；安装器的gate-rejected等编排状态仍属于安装结果包装。HTTP的非成功传输状态另行处理，不当作插件结论。
+
+兼容策略：schema1旧baseline仍中性重建，损坏的schema2发现也先拒绝比较；旧probe继续由normalizer接受明确键并附未绑定警告。此前未携带新report头或必需证据的HTTP负载，新面板明确拒绝并提示刷新/对齐版本；本候选会同时交付配套宿主和客户端。原CLI/工具字段未删除，旧消费者仍可读取；新增字段可透传，未来不兼容结构需提升版本。
+
+宿主与浏览器的校验副本均由`node plugin/scripts/stage-contract.mjs`从同一真源生成，前者为plugin/lib/report-contract.js，后者内联进预构建client.js。prepack自动同步，--check与doc-check离线核验漂移，回归实际证明“只改真源→检查失败→同步后两端同时更新”。没有手写三套契约，也不要求浏览器读取Node模块。
+
+本轮六项契约回归覆盖CLI错误JSON、损坏基线、字段丢失/新增、结论和span自洽、HTTP/工具/CLI核心一致、真实客户端接受/拒绝及生成副本漂移。默认367项、最终联合28项通过（含7项真实DSH/Chrome）；计数及输入见current-state.json；实际tgz另在私有DSH安装，tools成功注册、正常/错误profile分别返回1/3、完整结构保留；HTTP与工具核心字段一致，Computer Use确认面板的受控settings.get默认影响与重新检查。无模型对话，无正式profile修改。测试观察插件初次误持失效注入Context，已改为在作用域内保存服务及按生命周期清理计时器后重验；此为验收夹具修正。
+
 ---
 
 ## 9. 下一动作
@@ -639,13 +675,13 @@ DSC_SLOW=1 node --test --test-reporter=tap test/labels.test.mjs
 | P0 已完成 | 真实DSH安装、启动和宿主功能验收 | 2026-10-15在§8.6环境从实际tgz安装；compat_check、profile隔离、FAILED/PENDING、错误、skills.list/get、基线及0/1/2/3均通过；发布或环境变化时重跑 |
 | P0 已完成 | 真实Chrome到货与界面验收 | CDP pipe正向、缺文件及import抛错反例通过；Computer Use确认面板、详情角标、受控错误和重新检查；限于§8.6环境和已操作交互 |
 | P1 已完成 | 适配旧辅助度量工具并隔离真值 | §8.7：独立原始loader标签、仅服务观测预测、关闭自动读取、状态/包身份/版本对齐；受控反例和真实DSH测试暴露真实FN；Python parity保留历史比较 |
-| P1 规则质量 | 复核severity.needsReview与刷新历史inventory | 在明确DSH版本、profile、probe身份下逐条核对sessions.open/getSnapshot/refresh、settings.get、attachments.readImage等；区分源码归属与服务实际方法；只以证据更新规则、影响文案、夹具及回归，不把历史coverage数字当现状 |
-| P1 契约稳定 | 固化报告结构与消费者一致性 | 为observation/coverage/finding/baseline建立可校验schema或类型契约，覆盖CLI JSON、HTTP、model tool和面板；旧格式兼容策略和错误码有文档及回归，避免字段增加后某个通道丢证据 |
+| P1 已完成 | 复核severity.needsReview与刷新历史inventory | §8.8：逐条复核并保留决定/证据；分端规则、AST库存及部分扫描标记；不将目录缺项误当运行时不存在 |
+| P1 已完成 | 固化报告结构与消费者一致性 | §8.9：单源运行时契约、完整报告本体、CLI/HTTP/tool/UI一致；旧格式/错误码/副本漂移及损坏负载回归 |
 | P2 分析能力 | 以真实误报/漏报推进AST支持 | 对动态属性、工厂/代理、跨模块别名与函数调用建立有界反例队列；每次先复现再修复，并量化精确归属/覆盖变化，不以“疑似比例降低”代替正确性 |
 | P2 工程验证 | 补齐平台和资源验证 | 真跑Linux CI并记录结果；Windows仅在获得实际环境后验收进程清理/路径/安装器，验证前不宣称已兼容。增加大包、超时、内存压力及并发基线的性能基准，保持宿主响应 |
 | 发布阶段 | 同步公开源码与npm候选 | 完成上述发版验收后，经授权推送/合并并发布；移除候选README中的未发布措辞，核验registry版本、README、依赖、tarball、简介与标签，再更新本文件的公开状态记录 |
 
-下一步建议做P1规则复核，再固化报告结构契约。P1辅助度量隔离及两项P0已完成本机验收；跨平台、跨DSH版本及全业务功能仍不在已验证范围内，继续大规模拆文件的收益较低。
+全部P1与两项P0已完成本机验收。下一步可按真实反例推进P2分析能力，或优先做平台/资源验证后准备发布；跨平台、跨DSH版本及全业务功能仍不在已验证范围内，继续大规模拆文件的收益较低。
 
 
 日常修改后运行 `npm test`、`node tools/doc-check.mjs` 与 `node plugin/scripts/prepublish-check.mjs`。改动 skill 后先运行 `node plugin/scripts/stage-skill.mjs`。更新公开说明时再运行 `node tools/meta-check.mjs`；网络不可用必须记录为未核验，本地版本高于 npm 已发布版本是 notice。

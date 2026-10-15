@@ -140,6 +140,8 @@ Slow integrations need explicit `DSC_SLOW=1`. Six real DSH/Chrome tests passed o
 
 Auxiliary measurement uses independent raw loader labels; the predictor receives service observations only. See [Plan §8.7](docs/Plan.md). `node tools/labels.mjs --nm web --synthetic --json` creates a private environment and can correctly report a false negative (exit1). Use `--probe-boot` for an existing target, or paired `--probe` and `--labels` files. These sample metrics cover the first layer only, not ecosystem accuracy.
 
+[lib/contracts.mjs](lib/contracts.mjs) is the single report contract source; CLI JSON, HTTP, tools and the panel preserve full evidence. Additive fields are retained; missing required fields and unsupported versions fail as tool errors. Rules were checked against official0.2.0-rc.2 sources/runtime; the refreshed AST inventory explicitly records partial coverage. See [Plan §8.8–8.9](docs/Plan.md).
+
 [Development history and next steps](docs/Plan.md) · [Historical audit](docs/GPT审计及重构方案文档.md) · [Rules](rules/README.md) · [Skill delivery](skill/README.md). Listed in [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness).
 
 ## License

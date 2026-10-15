@@ -18,7 +18,7 @@ npm pack --pack-destination <已存在的绝对输出目录>
 dsh plugin --profile <临时profile> add file:<生成的tgz绝对路径>
 ```
 
-prepack复制权威skill并暂存共享kernel和MIT LICENSE，postpack清理kernel。固定运行时依赖为 `@babel/parser@7.29.9` 与 `semver@7.7.3`，支持 Node `^22.19.0 || >=24`。源码裸复制或file安装不保证prepack运行，应使用完整仓库开发布局或预打包tarball。
+prepack复制权威skill、同步单源报告契约的宿主/客户端产物，并暂存共享kernel和MIT LICENSE，postpack清理kernel。固定运行时依赖为 `@babel/parser@7.29.9` 与 `semver@7.7.3`，支持 Node `^22.19.0 || >=24`。源码裸复制或file安装不保证prepack运行，应使用完整仓库开发布局或预打包tarball。
 
 npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检查从仓库使用；本插件不能做安装前检查。仓库使用说明：[README](https://github.com/lcy0121/dsh-plugin-compat-check#readme)。未推送的候选文档不能靠该公开链接取得，本地请读仓库docs/Plan.md。
 
@@ -37,3 +37,5 @@ npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检�
 ## License
 
 MIT。源码、问题反馈与仓库文档：[GitHub](https://github.com/lcy0121/dsh-plugin-compat-check)。
+
+报告结构由仓库lib/contracts.mjs校验：HTTP envelope.report与compat_check.report均保留完整发现、覆盖、观测和基线；工具原summary/text字段保留。新面板拒绝损坏或不支持版本的负载，提示刷新和对齐版本。旧probe保持未绑定警告，旧schema1基线中性重建；具体字段与错误码见 [Plan契约记录](../docs/Plan.md#89-p1报告契约稳定2026-10-15)。

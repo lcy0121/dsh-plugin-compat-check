@@ -36,6 +36,7 @@ import { snapshotForBaseline, diffAgainstBaseline, badgeFor, BASELINE_SCHEMA } f
 import {baselinePath,baselineIdentity,baselineTransaction,readBaseline as readStoredBaseline,writeBaseline as writeStoredBaseline} from '../lib/state-store.mjs';
 import {probeProfile} from '../lib/probe-runner.mjs';
 import { TOOL_VERSION, versionLine } from '../lib/version.mjs';
+import {createFailure,exitCodeForSummary} from '../lib/contracts.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -254,7 +255,7 @@ async function main() {
   try {
     opts = parseArgs(process.argv.slice(2));
   } catch (error) {
-    process.stderr.write(`${error.message}\n\n${USAGE}`);
+    if(process.argv.includes('--json'))process.stdout.write(JSON.stringify(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');else process.stderr.write(`${error.message}\n\n${USAGE}`);
     process.exit(3);
   }
   // `--version` 先于一切：它不该需要 --nm，也不该碰任何状态。
@@ -264,7 +265,7 @@ async function main() {
     process.exit(0);
   }
   if (opts.help || !opts.nm) {
-    process.stdout.write(USAGE);
+    if(!opts.help && opts.json)process.stdout.write(JSON.stringify(createFailure('需要 --nm',{toolVersion:TOOL_VERSION}))+'\n');else process.stdout.write(USAGE);
     process.exit(opts.help ? 0 : 3);
   }
 
@@ -289,9 +290,9 @@ async function main() {
     if (result.error) process.exit(3);
     // 退出码：不兼容给 2，部分可用给 1，可用给 0 —— 让 CI 能直接用。
     const s = result.verdict.summary;
-    process.exit(s.broken > 0 ? 2 : (s.partial > 0 ? 1 : 0));
+    process.exit(exitCodeForSummary(s));
   } catch (error) {
-    process.stderr.write(`✗ 体检工具自身出错（不是插件的问题）：${error && error.stack ? error.stack : error}\n`);
+    if(opts.json)process.stdout.write(JSON.stringify(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');else process.stderr.write(`✗ 体检工具自身出错（不是插件的问题）：${error && error.stack ? error.stack : error}\n`);
     process.exit(3);
   }
 }

@@ -1,34 +1,315 @@
 {
-  "_note": "由 `node tools/coverage.mjs --write` 生成的真实输出，用作严重度规则表的覆盖依据。**不是规范。** 口径：`usedServices` 与 `pairs` 只算**真的有调用点**的（`perPlugin[*].calls` 的并集），不是 `report.services` —— 后者含只被声明过的项，拿它当分母会把覆盖率算低。",
-  "_capturedAt": "2026-10-11",
-  "_dshVersion": null,
-  "_generatedBy": "tools/coverage.mjs",
-  "_knownGaps": [
-    "这是**一台机器的一个 profile** 的快照，不是生态普查。",
-    "`engineUnknownImpact` 是唯一真正有意义的口径，前几行都只是它的分解。"
+  "schemaVersion": 2,
+  "capturedAt": "2026-10-15T13:19:13.916Z",
+  "_dshVersion": "0.2.0-rc.2",
+  "profile": {
+    "name": "desktop",
+    "profileIdDigest": "d98c0e33d86980a274bed6c5a7fa781d3329edf80c09d0bfb0346fd5482b8028"
+  },
+  "sourceDigest": "a3539e8f3a707dcf114a843c0d11ff2205c752d2586e172be61bde5acd274dc3",
+  "sourceDigestBasis": "normalized AST analysis, not a hash of every package byte",
+  "rulesDigest": "102486bb2422a37b3d86224a30a0b6dfbbf65d0253b97ff05cdd6fbc8f1da610",
+  "scanComplete": false,
+  "diagnostics": [
+    {
+      "plugin": "@linxin666/dsh-client-ui-git-graph",
+      "kind": "source-unresolved",
+      "file": "lib/types/client/chips/context.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@linxin666/dsh-client-ui-git-graph",
+      "kind": "source-unresolved",
+      "file": "lib/types/client/chips/context.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@linxin666/dsh-client-ui-git-graph",
+      "kind": "source-unresolved",
+      "file": "lib/types/client/chips/context.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@linxin666/dsh-client-ui-git-graph",
+      "kind": "source-unresolved",
+      "file": "lib/types/client/chips/context.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@linxin666/dsh-client-ui-git-graph",
+      "kind": "source-unresolved",
+      "file": "lib/types/client/chips/context.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@linxin666/dsh-client-ui-git-graph",
+      "kind": "source-unresolved",
+      "file": "lib/types/client/chips/context.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@linxin666/dsh-client-ui-git-graph",
+      "kind": "source-unresolved",
+      "file": "lib/types/client/chips/context.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@linxin666/dsh-remote-web-ui",
+      "kind": "source-unresolved",
+      "file": "lib/types/client/settings-card.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@linxin666/dsh-remote-web-ui",
+      "kind": "source-unresolved",
+      "file": "lib/types/client/remote.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@linxin666/dsh-remote-web-ui",
+      "kind": "source-unresolved",
+      "file": "lib/types/client/remote.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@linxin666/dsh-remote-web-ui",
+      "kind": "source-unresolved",
+      "file": "lib/types/client/remote.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@linxin666/dsh-remote-web-ui",
+      "kind": "source-unresolved",
+      "file": "lib/types/client/remote.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@nanmicoder/dsh-agent-teams",
+      "kind": "source-unresolved",
+      "file": "lib/client/WorkspaceActivity.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@nanmicoder/dsh-agent-teams",
+      "kind": "source-unresolved",
+      "file": "lib/client/AgentTeamsCard.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@nanmicoder/dsh-agent-teams",
+      "kind": "source-unresolved",
+      "file": "lib/client/ActivityPanel.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@nanmicoder/dsh-agent-teams",
+      "kind": "source-unresolved",
+      "file": "lib/client/ActivityPanel.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "@nanmicoder/dsh-agent-teams",
+      "kind": "source-unresolved",
+      "file": "lib/client/AgentTeamsCard.module.css",
+      "message": "Entry or relative import cannot be read"
+    },
+    {
+      "plugin": "dsh-better-sidebar",
+      "kind": "scan-budget-exceeded",
+      "file": "lib/client-mermaid.js",
+      "message": "Source byte limit reached"
+    },
+    {
+      "plugin": "dsh-better-sidebar",
+      "kind": "scan-budget-exceeded",
+      "file": "lib/client-editor.js",
+      "message": "Source byte limit reached"
+    },
+    {
+      "plugin": "dsh-better-sidebar",
+      "kind": "scan-budget-exceeded",
+      "file": "lib/client-editor.js",
+      "message": "Source byte limit reached"
+    },
+    {
+      "plugin": "dsh-better-sidebar",
+      "kind": "scan-budget-exceeded",
+      "file": "lib/client-mermaid.js",
+      "message": "Source byte limit reached"
+    }
   ],
+  "observation": {
+    "notes": [],
+    "bound": false,
+    "usable": false,
+    "mode": "catalogue"
+  },
   "manifests": 21,
-  "services": 49,
-  "pairs": 161,
-  "pairsRaw": 174,
-  "artifactServicesExcluded": [
-    "parser"
+  "usedServices": 50,
+  "usedServicesRaw": 50,
+  "pairs": 125,
+  "pairsRaw": 125,
+  "usedPairs": [
+    "client:betterLocale.register",
+    "client:betterSidebar.closeTab",
+    "client:betterSidebar.getTabs",
+    "client:betterSidebar.isTabEnabled",
+    "client:betterSidebar.nativePathTabs",
+    "client:betterSidebar.openTab",
+    "client:betterSidebar.registerTab",
+    "client:betterSidebar.updateTab",
+    "client:commandUi.decorate",
+    "client:configForms.get",
+    "client:configForms.whileServed",
+    "client:get.call",
+    "client:layout.selectPanel",
+    "client:locale.addLanguage",
+    "client:locale.bind",
+    "client:locale.getLocale",
+    "client:locale.getSnapshot",
+    "client:locale.register",
+    "client:locale.subscribe",
+    "client:remote.$on",
+    "client:sessions.binding",
+    "client:sessions.create",
+    "client:sessions.scope",
+    "client:settingsScope.bind",
+    "client:sidebarRight.active",
+    "client:sidebarRight.isExpanded",
+    "client:sidebarRight.openResource",
+    "client:sidebarRight.toggleExpanded",
+    "client:sidebarRightTabs.candidates",
+    "client:sidebarRightTabs.get",
+    "client:sidebarRightTabs.register",
+    "client:slots.entries",
+    "client:slots.entriesOfSlot",
+    "client:slots.getVersion",
+    "client:slots.inject",
+    "client:slots.register",
+    "client:slots.subscribe",
+    "client:styles.insert",
+    "client:theme.getTheme",
+    "client:theme.register",
+    "client:theme.setTheme",
+    "client:timer.timeout",
+    "client:uiWorkspace.openSession",
+    "client:webUiSettings.bind",
+    "client:workspaces.create",
+    "client:workspaces.delete",
+    "host:agentDefaultModel.currentSelection",
+    "host:agentPresets.mount",
+    "host:agentPresets.resolve",
+    "host:agentTeams.tryMembership",
+    "host:agents.create",
+    "host:agents.get",
+    "host:agents.list",
+    "host:agents.resume",
+    "host:agents.roots",
+    "host:attachments.readImage",
+    "host:attachments.saveImage",
+    "host:commands.register",
+    "host:companionQq.sendImage",
+    "host:connection.authenticatedUrl",
+    "host:credentials.resolve",
+    "host:deepseekAccount.getBalance",
+    "host:get.call",
+    "host:llm.listConfigurableProviders",
+    "host:llm.listModels",
+    "host:llm.listProviders",
+    "host:llm.providerRetryPolicy",
+    "host:llm.registerAdapter",
+    "host:llm.resolveCallConfig",
+    "host:llm.resolveModelInfo",
+    "host:llm.stream",
+    "host:loader.await",
+    "host:loader.entries",
+    "host:loader.import",
+    "host:loader.locate",
+    "host:logger.debug",
+    "host:logger.info",
+    "host:logger.warn",
+    "host:reflect.get",
+    "host:sessionController.modelCatalog",
+    "host:sessionPersistence.acquireLease",
+    "host:sessionPersistence.list",
+    "host:sessionPersistence.locate",
+    "host:sessionPersistence.prepare",
+    "host:sessionPersistence.readZstdPrefix",
+    "host:sessionPersistence.stat",
+    "host:sessionProjectionCache.clearTombstone",
+    "host:sessionProjectionCache.delete",
+    "host:sessionProjectionCache.put",
+    "host:sessionProjectionCache.whenIdle",
+    "host:sessionProjections.register",
+    "host:sessionProjections.restore",
+    "host:sessionQuery.listSessions",
+    "host:sessionQuery.observeSession",
+    "host:sessionQuery.readSession",
+    "host:sessionTitle.rename",
+    "host:sessions.detachEntered",
+    "host:sessions.flush",
+    "host:sessions.get",
+    "host:sessions.list",
+    "host:sessions.liveEntryFor",
+    "host:settings.configure",
+    "host:settings.describe",
+    "host:settings.installSection",
+    "host:settings.register",
+    "host:settings.update",
+    "host:shell.resolve",
+    "host:skills.registerProvider",
+    "host:storageDomain.open",
+    "host:subagents.drainContinuableChildren",
+    "host:subagents.getProvider",
+    "host:subagents.interrupt",
+    "host:subagents.list",
+    "host:subagents.listDescendants",
+    "host:subagents.startContinuable",
+    "host:subprocess.spawn",
+    "host:systemPrompt.getSectionOrder",
+    "host:systemPrompt.section",
+    "host:tools.register",
+    "host:typert.register",
+    "host:webServer.register",
+    "host:webServer.registerUpgrade",
+    "host:workspaceRegistry.create",
+    "host:workspaceRegistry.delete",
+    "host:workspaceRegistry.list"
   ],
-  "artifactPairsExcluded": 4,
+  "artifactServicesExcluded": [],
+  "artifactPairsExcluded": 0,
+  "servicesInTable": 42,
   "coveredServices": 36,
-  "coveredPairs": 99,
-  "engineFindings": 4,
-  "engineRuleHit": 1,
-  "engineUnknownImpact": 3,
+  "coveredPairs": 88,
+  "perLayer": {
+    "host": {
+      "pairs": 79,
+      "covered": 69
+    },
+    "client": {
+      "pairs": 46,
+      "covered": 19
+    },
+    "shared": {
+      "pairs": 0,
+      "covered": 0
+    }
+  },
+  "engineFindings": 30,
+  "engineRuleHit": 8,
+  "engineUnknownImpact": 13,
+  "engineCategoryFindings": 0,
   "uncoveredServices": [
     "betterLocale",
     "betterSidebar",
+    "commandUi",
     "companionQq",
     "configForms",
-    "conversation",
-    "events",
-    "pluginNavigation",
+    "get",
     "reflect",
+    "remote",
+    "sessionController",
+    "settingsScope",
     "sidebarRight",
     "sidebarRightTabs",
     "styles",
@@ -36,109 +317,136 @@
   ],
   "perPlugin": {
     "@changfenhuang/dsh-genui": {
-      "version": "0.11.4",
-      "usedServices": 4,
-      "pairs": 5
+      "version": "0.12.0",
+      "usedServices": 5,
+      "pairs": 6,
+      "scanComplete": true
     },
     "@linxin666/dsh-client-ui-git-graph": {
       "version": "0.4.6",
       "usedServices": 10,
-      "pairs": 14
+      "pairs": 14,
+      "scanComplete": false
     },
     "@linxin666/dsh-client-ui-skill-explorer": {
       "version": "0.4.6",
-      "usedServices": 5,
-      "pairs": 7
+      "usedServices": 7,
+      "pairs": 9,
+      "scanComplete": true
     },
     "@linxin666/dsh-remote-web-ui": {
       "version": "0.4.6",
-      "usedServices": 5,
-      "pairs": 8
+      "usedServices": 6,
+      "pairs": 9,
+      "scanComplete": false
     },
     "@liustack/modlens": {
       "version": "3.26.6",
       "usedServices": 6,
-      "pairs": 12
+      "pairs": 12,
+      "scanComplete": true
     },
     "@michengai/dsh-archive-manager": {
-      "version": "1.0.16",
+      "version": "1.0.19",
       "usedServices": 8,
-      "pairs": 24
+      "pairs": 20,
+      "scanComplete": true
     },
     "@nanmicoder/dsh-agent-teams": {
       "version": "0.1.23",
       "usedServices": 11,
-      "pairs": 19
+      "pairs": 20,
+      "scanComplete": false
     },
     "@nonamelego/dsh-catppuccin": {
-      "version": "0.6.1",
-      "usedServices": 5,
-      "pairs": 11
+      "version": "0.6.2",
+      "usedServices": 7,
+      "pairs": 15,
+      "scanComplete": true
     },
     "dsh-better-sidebar": {
-      "version": "0.25.0",
-      "usedServices": 22,
-      "pairs": 91
+      "version": "0.26.0",
+      "usedServices": 21,
+      "pairs": 44,
+      "scanComplete": false
     },
     "dsh-meme": {
-      "version": "0.1.47",
+      "version": "0.1.52",
       "usedServices": 5,
-      "pairs": 7
+      "pairs": 7,
+      "scanComplete": true
     },
     "dsh-mnemon": {
-      "version": "0.5.27",
-      "usedServices": 12,
-      "pairs": 25
+      "version": "0.5.29",
+      "usedServices": 10,
+      "pairs": 18,
+      "scanComplete": true
     },
     "dsh-mnemon-source-documents": {
       "version": "0.5.10",
       "usedServices": 1,
-      "pairs": 1
+      "pairs": 1,
+      "scanComplete": true
     },
     "dsh-mnemon-source-memory-spaces": {
-      "version": "0.5.18",
+      "version": "0.5.19",
       "usedServices": 2,
-      "pairs": 3
+      "pairs": 3,
+      "scanComplete": true
     },
     "dsh-mnemon-source-runtime": {
       "version": "0.5.14",
       "usedServices": 1,
-      "pairs": 1
+      "pairs": 1,
+      "scanComplete": true
     },
     "dsh-mnemon-strategy-auto-capture": {
       "version": "0.5.5",
       "usedServices": 0,
-      "pairs": 0
+      "pairs": 0,
+      "scanComplete": true
     },
     "dsh-mnemon-strategy-general": {
       "version": "0.5.1",
       "usedServices": 0,
-      "pairs": 0
+      "pairs": 0,
+      "scanComplete": true
     },
     "dsh-mnemon-strategy-light-context": {
       "version": "0.5.5",
       "usedServices": 0,
-      "pairs": 0
+      "pairs": 0,
+      "scanComplete": true
     },
     "dsh-mnemon-strategy-scoped": {
       "version": "0.5.5",
       "usedServices": 0,
-      "pairs": 0
+      "pairs": 0,
+      "scanComplete": true
     },
     "dsh-pet": {
-      "version": "0.3.6",
-      "usedServices": 8,
-      "pairs": 13
+      "version": "0.3.7",
+      "usedServices": 11,
+      "pairs": 17,
+      "scanComplete": true
     },
     "dsh-recall-plugin": {
-      "version": "2.4.10",
-      "usedServices": 10,
-      "pairs": 23
+      "version": "2.4.11",
+      "usedServices": 7,
+      "pairs": 14,
+      "scanComplete": true
     },
     "dshmarket": {
-      "version": "1.66.15",
-      "usedServices": 4,
-      "pairs": 6
+      "version": "1.66.22",
+      "usedServices": 5,
+      "pairs": 8,
+      "scanComplete": true
     }
-  }
+  },
+  "_capturedAt": "2026-10-15T13:19:13.916Z",
+  "_generatedBy": "tools/coverage.mjs",
+  "_note": "Versioned AST sample, not ecosystem accuracy. Counts include uncertain calls; partial scans are explicitly labeled. Historical regex artifact lists are not automatic filters.",
+  "_knownGaps": [
+    "Partial source scan: inspect diagnostics; these counts are lower bounds, not complete coverage."
+  ]
 }

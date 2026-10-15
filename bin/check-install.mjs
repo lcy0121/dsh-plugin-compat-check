@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { exitCodeForSummary } from "../lib/contracts.mjs";
 import { installAndProbe } from "../lib/probe-runner.mjs";
 import { extractWithProvenance } from "../lib/extract.mjs";
 import { run } from "./compat-check.mjs";
@@ -42,7 +43,7 @@ try {
       );
     else process.stdout.write(render(output, {}) + "\n");
     const s = output.verdict?.summary;
-    process.exitCode = output.error ? 3 : s.broken ? 2 : s.partial ? 1 : 0;
+    process.exitCode = output.error ? 3 : exitCodeForSummary(s);
   } else {
     if (json) process.stdout.write(JSON.stringify(result) + "\n");
     else process.stderr.write(result.status + ": " + result.error + "\n");

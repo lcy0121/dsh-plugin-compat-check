@@ -28,6 +28,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire as __createRequire } from 'node:module';
 
 import {loaderObservations,privateDiagnostic} from './lib/host-resources.js';
+import {assertEnvelope,failureEnvelope} from './lib/report-contract.js';
 
 export const name = 'dsh-plugin-compat-check';
 
@@ -791,12 +792,12 @@ function resolveNodeModules(requestedProfile = null) {
 async function serveReport(state, ctx, force, options = {}) {
   if(!state.reportService){
     const kernel=resolveKernelDir();
-    if(!kernel)return {ok:false,error:'找不到判定内核'};
+    if(!kernel)return failureEnvelope('找不到判定内核');
     const {ReportService}=await import(pathToFileURL(join(kernel,'lib','report-service.mjs')).href);
-    if(!state.reportService)state.reportService=new ReportService(options=>computeReport(state,ctx,options),{ttlMs:state.cacheTtlMs});
+    if(!state.reportService)state.reportService=new ReportService(async options=>{const out=await computeReport(state,ctx,options);return out.ok?assertEnvelope(out):failureEnvelope(out.error,out);},{ttlMs:state.cacheTtlMs});
   }
   const key=options.profile?`profile:${options.profile}`:'current';
-  return state.reportService.get(key,options,force);
+  const out=await state.reportService.get(key,options,force);return out?.ok?assertEnvelope(out):failureEnvelope(out?.error,out||{});
 }
 
 /**
@@ -955,24 +956,12 @@ async function computeReport(state, ctx, options = {}) {
       out.itemsError = errText(error);
     }
 
-    out.baseline = baseline;
-    out.dshVersion = resolveDshVersion();
-    out.report = {
-      summary: verdict.summary,
-      dshVersion: verdict.dshVersion,
-      hasRuntimeSurface: verdict.observation.usable,
-      observation:verdict.observation,
-      loaderCoverage:out.loaderCoverage,
-      surfaceWhy,
-      plugins: verdict.plugins,
-      // 逐条发现的证据形态：面板要能回答「凭什么这么判」
-      // 条目台账（id → 包名），客户端解析角标归属时用
-      items: out.items || [],
-      itemsError: out.itemsError || null,
-      manifests: extracted.report.manifests,
-      serviceCount: extracted.report.services.length,
-      siteTotal: (extracted.report.callSites || []).length,
-    };
+    const {toJSON}=await import(pathToFileURL(join(kernel,'lib','report.mjs')).href);
+    const canonical=toJSON({error:null,extract:extracted,verdict,baseline,inputs:{nodeModules:nm.dir,hasRuntimeSurface:verdict.observation.usable,catalog:catalogPath,rules:rulesPath}});
+    out.baseline = canonical.baseline;
+    out.dshVersion = canonical.dshVersion;
+    out.exitCode = canonical.exitCode;
+    out.report = {...canonical,hasRuntimeSurface:verdict.observation.usable,loaderCoverage:out.loaderCoverage,surfaceWhy,items:out.items||[],itemsError:out.itemsError||null,manifests:extracted.report.manifests,serviceCount:extracted.report.services.length,siteTotal:(extracted.report.callSites||[]).length};
     out.ok = true;
     out.elapsedMs = Date.now() - started;
   } catch (error) {
@@ -1071,6 +1060,12 @@ function renderForModel(compat) {
 /** 工具的服务集合：`tools`；`agents` 用来把相对路径解析到会话工作目录。 */
 const TOOL_SERVICES = ['tools', 'agents'];
 
+function toolResult(compat,text){
+ const s=compat.report?.summary||{};
+ return {schemaVersion:1,kind:'plugin-compat-check/tool-result',ok:compat.ok,error:compat.error,toolVersion:compat.toolVersion,exitCode:compat.exitCode,report:compat.report,baseline:compat.baseline,cache:compat.cache||null,
+ summary:compat.ok?`可用 ${s.ok||0} / 部分可用 ${s.partial||0} / 不兼容 ${s.broken||0}`:'无法判定',nodeModules:compat.nodeModules||'',hasRuntimeSurface:!!compat.report?.hasRuntimeSurface,text};
+}
+
 function registerTool(ctx, state) {
   // 与 C2 路由同一个理由：走作用域 ctx.inject，headless/CLI 形态下 `tools` 不在场时
   // 这段根本不注册，本插件的 fiber 也就不会去等一个不存在的服务（`inject` 保持 []）。
@@ -1114,12 +1109,21 @@ function registerTool(ctx, state) {
             type: 'object',
             additionalProperties: false,
             properties: {
+              schemaVersion: {type:'integer',enum:[1]},
+              kind: {type:'string'},
+              ok: {type:'boolean'},
+              error: {oneOf:[{type:'string'},{type:'null'}]},
+              exitCode: {type:'integer',enum:[0,1,2,3]},
+              toolVersion: {oneOf:[{type:'string'},{type:'null'}]},
+              report: {type:'object',additionalProperties:true},
+              baseline: {oneOf:[{type:'object',additionalProperties:true},{type:'null'}]},
+              cache: {oneOf:[{type:'object',additionalProperties:true},{type:'null'}]},
               summary: { type: 'string' },
               nodeModules: { type: 'string' },
               hasRuntimeSurface: { type: 'boolean' },
               text: { type: 'string' },
             },
-            required: ['summary', 'nodeModules', 'hasRuntimeSurface', 'text'],
+            required: ['schemaVersion','kind','ok','error','exitCode','toolVersion','report','baseline','summary','nodeModules','hasRuntimeSurface','text'],
           },
           render: (_args, value) => [{ type: 'text', text: value && typeof value.text === 'string' ? value.text : '' }],
         },
@@ -1137,23 +1141,11 @@ function registerTool(ctx, state) {
               : null;
             const compat = await serveReport(state,ctx,false,wanted?{profile:wanted}:{});
             const text = renderForModel(compat);
-            const s = (compat.report && compat.report.summary) || {};
-            return {
-              summary: compat.ok ? `可用 ${s.ok || 0} / 部分可用 ${s.partial || 0} / 不兼容 ${s.broken || 0}` : '无法判定',
-              nodeModules: compat.nodeModules || '',
-              hasRuntimeSurface: Boolean(compat.report && compat.report.hasRuntimeSurface),
-              text,
-            };
+            return toolResult(compat,text);
           } catch (error) {
             // 工具的 execute 抛错会把整轮对话变成错误 —— 而"体检失败"不是用户的错，
             // 也不该让他重来一遍。所以这里**不抛**，把失败也变成一段可读的文本。
-            return {
-              summary: '无法判定',
-              nodeModules: '',
-              hasRuntimeSurface: false,
-              text: `体检没跑成（这是工具的问题，不是插件的结论）：${errText(error)}\n`
-                + '请不要据此判断兼容性。',
-            };
+            return toolResult(failureEnvelope(errText(error)),`体检没跑成（这是工具的问题，不是插件的结论）：${errText(error)}`);
           }
         },
       });
@@ -1374,7 +1366,7 @@ export function apply(ctx) {
                 } catch (error) {
                   // 连处理器里都不抛：把错误变成一条可读的 JSON，而不是 500 空响应。
                   res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-                  res.end(JSON.stringify({ ok: false, error: errText(error) }));
+                  res.end(JSON.stringify(failureEnvelope(errText(error))));
                 }
               },
             });

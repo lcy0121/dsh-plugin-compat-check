@@ -44,6 +44,7 @@ import { REPO } from './helpers.mjs'
 const nodeRequire = createRequire(import.meta.url)
 
 import * as hostResources from '../plugin/lib/host-resources.js'
+import * as reportContract from '../plugin/lib/report-contract.js'
 const HOST = path.join(REPO, 'plugin', 'index.js')
 const SRC = fs.readFileSync(HOST, 'utf8')
 
@@ -68,6 +69,7 @@ function loadHost(env = {}) {
   vm.createContext(sandbox)
   // 把 ESM 的 import 换成受控替身；导出换成赋值
   const cjs = SRC.replace(/^import.*from '\.\/lib\/host-resources\.js';?$/gm, 'const {privateDiagnostic,loaderObservations}=__hostResources;')
+    .replace(/^import.*from '\.\/lib\/report-contract\.js';?$/gm, 'const {assertEnvelope,failureEnvelope}=__reportContract;')
     .replace(/^import\s+\{([^}]+)\}\s+from\s+'node:([^']+)';?$/gm, (m, names, mod) => {
       const pairs = names.split(',').map((s) => s.trim()).filter(Boolean)
       return pairs.map((p) => {
@@ -90,6 +92,7 @@ function loadHost(env = {}) {
     .replace(/\bexport\s+function\s+/g, 'function ')
     .replace(/\bexport\s+default\s+/g, 'const __default = ')
   sandbox.__hostResources=hostResources
+  sandbox.__reportContract=reportContract
   sandbox.__importMetaUrl = pathToFileURL(HOST).href
   sandbox.__node = (mod, name) => {
     const m = name === 'default' ? nodeRequire(`node:${mod}`) : nodeRequire(`node:${mod}`)[name]
