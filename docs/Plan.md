@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-更新于2026-10-15，适用于`dsh-plugin-compat-check`本地0.1.1候选版。P0真实集成验收和三项P1已完成，尚未推送或发布；后续工作见[§6](#6-后续工作与发布)。
+更新于2026-10-15，适用于`dsh-plugin-compat-check`的0.1.1候选版。P0真实集成验收和三项P1已完成，源码在`codex/compat-evidence-refactor`工作分支维护，尚未发布npm；后续工作见[§6](#6-后续工作与发布)。
 
 本文只维护现行约束、关键决策、验证边界和下一步。用法与目录见[README](../README.md)，测试及环境事实以[docs/current-state.json](current-state.json)为准；原始问题见[历史审计](GPT审计及重构方案文档.md)，旧提取器反例见[extraction-findings](extraction-findings.md)。详细施工过程从Git历史查阅，不再逐轮累加报告。
 
