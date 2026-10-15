@@ -605,8 +605,8 @@ node plugin/scripts/prepublish-check.mjs
 
 - **独立标签来源**：探针额外写loader-labels.json，直接遍历宿主loader的原始条目，保存完整身份和数值状态；不调用生产loaderObservations映射、不使用提取器manifests来裁剪标签。与服务观测共享sampleId、profile、DSH版本、采样时间，先落标签再发布probe就绪文件。
 - **预测输入隔离**：labels调用同一CLI内核，显式仅传root服务形状和身份/时效字段，不传任何loader条目；同时关闭相邻probe报告自动发现。标签文件不被判定器消费；修改标签只能改变计分，不能改变预测。
-- **身份与状态**：只按完整包名唯一匹配，不猜scoped包尾段或前缀；一包多条目有任一启用PENDING/FAILED即为正例，所有启用条目均ACTIVE才为负例。LOADING、DISPOSED、UNLOADING、无fiber/不可读、停用、组、无法映射条目均不充当成功或失败；输出不计分及未映射项。
-- **有效性**：从本次采样取DSH版本，显式版本必须一致；配对sampleId、profile、版本、时间校验失败或标签不完整、源码分析不完整时退出3。无正例/无预测正例时对应召回率/精确率为null；全无可计分样本也退出3。
+- **身份与状态**：只按完整包名唯一匹配，不猜scoped包尾段或前缀；先检查显式packageName/name冲突，再与扫描集合匹配，冲突或指向其它包的条目不会借弱身份计分；一包多条目有任一启用PENDING/FAILED即为正例，所有启用条目均ACTIVE才为负例。LOADING、DISPOSED、UNLOADING、无fiber/不可读、停用、组、无法映射条目均不充当成功或失败；输出不计分及未映射项。
+- **有效性**：从本次采样取DSH版本，显式版本必须一致；配对sampleId、profile、版本、时间校验失败或标签不完整、源码分析不完整时退出3。标签身份字段可省略或为string/null，disabled/group可省略（视为false）或为boolean；错误类型拒绝而不作排除项。运行器清除继承的DSC_DSH_VERSION，查询失败、空值或非semver版本均退出3，不能伪装成本次观测。无正例/无预测正例时对应召回率/精确率为null；全无可计分样本也退出3。
 - **现场所有权**：synthetic从官方web模板初始化自己的DSH_HOME，不再复制正式web；任一安装失败中止，finally清理合成目录，probe运行器清理拥有的宿主与profile。keep-dir仅保留私有诊断报告，不保留进程和临时profile。
 
 新工具文件模式需要两份配对产物；旧只有entries的报告不再作为独立度量输入，需重新采样。此变更限开发度量工具；普通兼容性报告仍可使用验证过身份的loader实测发现。
@@ -626,7 +626,7 @@ DSC_SLOW=1 node --test --test-reporter=tap test/labels.test.mjs
 
 真实DSH0.2.0-rc.2、macOS arm64、宿主Node24.18.1中，四个受控病例实测：broken-service=PENDING且预测fatal（TP）；healthy/real-service=ACTIVE且无fatal（TN×2）；failed-apply=FAILED而源码/服务检查无fatal（FN）。结果TP1、FP0、FN1、TN2，精确率1、召回率0.5，CLI退出1；测试应通过，因为它要求如实暴露漏报。failed-apply故意在激活时抛错，属于判定器未承诺静态预测的任意插件逻辑故障，是防止答案泄漏的挑战例，**不能将这四例的50%读作产品或生态准确率**。不为得到满分扩展分析范围。
 
-回归覆盖标签篡改而预测不变、相邻答案文件、LOADING/停用/未知/同尾包名/多条目、身份版本过期及错配、空分母、源码不完整、真实原始采集独立于生产映射。默认套件351项通过；独立标签6项离线回归与1项真实合成测试通过，连同P0探针/Chrome共13项测试通过（其中7项真实集成）。文档、格式和发布前检查结果另行核验，事实记录见current-state.json；P0的界面/网络到货范围声明继续有效。
+回归覆盖标签篡改而预测不变、相邻答案文件、LOADING/停用/未知/同尾包名/多条目、身份版本过期及错配、空分母、源码不完整、真实原始采集独立于生产映射。最终独立复核发现三项Important：标签错误类型可隐藏漏报、过滤扫描集合前未检查包身份冲突、版本查询失败可能继承旧值。均先用完整CLI或运行器反例验证失败再修复，针对性15项通过；没有Minor遗留。默认套件354项通过；独立标签8项离线回归与1项真实合成测试，连同P0探针/Chrome共15项通过（其中7项真实集成）；另行健康夹具安装检查实测退出0、版本正确并清理。文档、格式与发布前检查通过，事实记录见current-state.json；P0的界面/网络到货范围声明继续有效。
 
 ---
 

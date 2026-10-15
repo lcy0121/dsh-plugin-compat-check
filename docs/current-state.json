@@ -1,8 +1,8 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-15T09:14:37.980Z",
+  "recordedAt": "2026-10-15T12:37:09.235Z",
   "testFiles": 25,
-  "tests": 351,
+  "tests": 354,
   "repositoryFiles": {
     "total": 205,
     "fixtures": 90,
@@ -80,10 +80,10 @@
       "dshVersion": "0.2.0-rc.2",
       "platform": "darwin",
       "arch": "arm64",
-      "offlineTests": 6,
+      "offlineTests": 8,
       "liveSyntheticTests": 1,
       "p0LiveRegressionTests": 6,
-      "combinedRunTests": 13,
+      "combinedRunTests": 15,
       "combinedRunFailures": 0,
       "independentArtifacts": [
         "probe-report.json",
@@ -99,7 +99,22 @@
       "precision": 1,
       "recall": 0.5,
       "cleanupVerified": true,
-      "scope": "Four controlled first-layer cases only; failed-apply intentionally exposes a blind spot for arbitrary plugin logic errors. Not ecosystem or functional accuracy."
+      "scope": "Four controlled first-layer cases only; failed-apply intentionally exposes a blind spot for arbitrary plugin logic errors. Not ecosystem or functional accuracy.",
+      "independentReview": {
+        "reviewedCommit": "6868c4b",
+        "importantFindings": 3,
+        "fixedImportantFindings": 3,
+        "minorFindings": 0,
+        "newRegressionTests": 3,
+        "targetedTests": 15,
+        "singleRepairPass": true
+      },
+      "installPositiveSmoke": {
+        "status": "checked",
+        "exitCode": 0,
+        "dshVersion": "0.2.0-rc.2",
+        "tempProfileRemoved": true
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

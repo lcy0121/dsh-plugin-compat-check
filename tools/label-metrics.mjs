@@ -62,6 +62,18 @@ export function predictionInput(surface, labels, nm, explicitVersion) {
           row.stateCode > 5))
     )
       throw new Error("Malformed independent loader label row");
+    // Optional identity fields may be omitted/null; flags may be omitted and
+    // then mean false. Wrong types are corrupt input, never exclusion signals.
+    for (const field of ["id", "name", "packageName"])
+      if (
+        row[field] !== undefined &&
+        row[field] !== null &&
+        typeof row[field] !== "string"
+      )
+        throw new Error(`Malformed loader label identity: ${field}`);
+    for (const field of ["disabled", "group"])
+      if (row[field] !== undefined && typeof row[field] !== "boolean")
+        throw new Error(`Malformed loader label flag: ${field}`);
   }
   // Allowlist, not a delete-list: no current or future answer-bearing field can
   // flow into buildVerdicts. CLI auto-discovery is disabled by the caller too.
@@ -85,21 +97,25 @@ export function scoreLabels(tool, labels) {
   for (const entry of labels.entries) {
     if (entry.group) continue;
     // No suffix/prefix matching: @one/foo and @two/foo cannot share a label.
-    const declared = [entry.packageName, entry.name].filter(
-      (n) => typeof n === "string",
-    );
-    const matches = [...new Set(declared.filter((n) => names.has(n)))];
-    if (!matches.length && !declared.length && typeof entry.id === "string") {
-      const id = entry.id.replace(/^include:/, "");
-      if (names.has(id)) matches.push(id);
-    }
-    if (matches.length !== 1) {
+    const declared = [
+      ...new Set(
+        [entry.packageName, entry.name].filter(
+          (n) => typeof n === "string" && n.length > 0,
+        ),
+      ),
+    ];
+    // Check conflicts before filtering to the prediction set: an unknown
+    // explicit owner cannot lend its state to a known but different name.
+    let identity = declared.length === 1 ? declared[0] : null;
+    if (!declared.length && typeof entry.id === "string")
+      identity = entry.id.replace(/^include:/, "");
+    if (!identity || !names.has(identity)) {
       unmappedLabels.push(entry);
       continue;
     }
-    const rows = mapped.get(matches[0]) || [];
+    const rows = mapped.get(identity) || [];
     rows.push(entry);
-    mapped.set(matches[0], rows);
+    mapped.set(identity, rows);
   }
   const rows = [],
     unmatched = [],

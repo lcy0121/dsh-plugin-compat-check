@@ -99,3 +99,29 @@ test('owned runner passes inventory to the actual probe and reports mapped loade
   assert.ok(out.plugins.sample.findings.some(f=>f.category==='host-entry-inactive'&&f.impactBasis==='measured'));
  });
 });
+
+test('owned runners reject failed, empty or invalid version queries without inheriting a stale version',()=>{
+ const fake=`const fs=require('node:fs'),path=require('node:path');
+ (async()=>{const a=process.argv.slice(2),name=a[a.indexOf('--profile')+1],profile=path.join(process.env.DSH_HOME,'profiles',name);
+ if(a.includes('--version')){fs.writeFileSync(process.env.DSC_VERSION_TRACE,JSON.stringify({inherited:Object.hasOwn(process.env,'DSC_DSH_VERSION')}));if(process.env.DSC_VERSION_MODE==='failed')process.exit(7);if(process.env.DSC_VERSION_MODE==='invalid')console.log('not-a-dsh-version');return;}
+ if(a.includes('--dump-config')){fs.mkdirSync(profile,{recursive:true});return;}
+ if(a.includes('plugin'))return;
+ global.setTimeout=fn=>{queueMicrotask(fn);return {unref(){}}};
+ const probe=await import('file://'+path.join(process.env.DSC_OUT_DIR,'probe','index.mjs'));
+ probe.apply({get:n=>n==='loader'?{entries:()=>[]}:undefined,effect(){}});setInterval(()=>{},1000);
+ })().catch(e=>{console.error(e);process.exit(1)});`;
+ withFakeDsh(fake,({dir,home,env})=>{
+  const source=path.join(home,'profiles','source');fs.mkdirSync(path.join(source,'node_modules'),{recursive:true});fs.writeFileSync(path.join(source,'package.json'),JSON.stringify({dsh:{profile:{bundles:[]}}}));
+  for(const mode of ['failed','empty','invalid'])for(const api of ['probeProfile','installAndProbe']){
+   const expr=api==='probeProfile'?`probeProfile(${JSON.stringify(path.join(source,'node_modules'))},{timeoutSec:5})`:`installAndProbe('file:/fake-plugin',{timeoutSec:5,servicesFor:()=>({services:[],manifests:[]})})`;
+   const code=`import {probeProfile,installAndProbe} from ${JSON.stringify(new URL('../lib/probe-runner.mjs',import.meta.url).href)};console.log(JSON.stringify(await ${expr}));`;
+   const trace=path.join(dir,'version-trace.json');
+   const child=spawnSync(process.execPath,['--input-type=module','-e',code],{env:{...env,DSC_VERSION_MODE:mode,DSC_VERSION_TRACE:trace,DSC_DSH_VERSION:'inherited-not-observed'},encoding:'utf8',timeout:15000});
+   assert.equal(child.status,0,child.stderr);const out=JSON.parse(child.stdout);
+   assert.match(out.error||'',/DSH version/i,JSON.stringify({api,mode,out}));
+   if(api==='probeProfile'){assert.equal(out.surface,null);assert.equal(out.tempProfileRemoved,true);}
+   else{assert.equal(out.status,'tool-error');assert.equal(out.exitCode,3);assert.equal(out.cleanup.tempProfileRemoved,true);}
+   assert.equal(JSON.parse(fs.readFileSync(trace)).inherited,false);
+  }
+ });
+});

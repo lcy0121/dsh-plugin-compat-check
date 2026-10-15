@@ -228,6 +228,52 @@ test("incomplete source analysis cannot count as a successful prediction", () =>
     assert.equal(r.data?.metrics, undefined);
   }));
 
+test("malformed identity and boolean label fields must fail instead of removing false negatives", () =>
+  offlineCase(({ labels, run }) => {
+    const failed = labels.entries.find((e) => e.name === "throws");
+    for (const [field, value] of [
+      ["disabled", "false"],
+      ["group", "false"],
+      ["disabled", 0],
+      ["group", {}],
+      ["name", 42],
+      ["packageName", 42],
+      ["id", 42],
+    ]) {
+      const before = failed[field];
+      failed[field] = value;
+      const r = run();
+      assert.equal(r.code, 3, JSON.stringify({ field, value, ...r }));
+      assert.equal(typeof r.data?.error, "string");
+      assert.equal(r.data?.metrics, undefined);
+      if (before === undefined) delete failed[field];
+      else failed[field] = before;
+    }
+  }));
+
+test("conflicting explicit package identities cannot borrow a known name to manufacture a true negative", () =>
+  offlineCase(({ labels, run }) => {
+    for (const explicit of ["@foreign/actual", "throws"]) {
+      labels.entries = [
+        {
+          packageName: explicit,
+          name: "healthy",
+          stateCode: 2,
+          disabled: false,
+          group: false,
+        },
+      ];
+      const r = run();
+      assert.equal(r.code, 3, JSON.stringify(r));
+      assert.equal(r.data.metrics.scored, 0);
+      assert.equal(r.data.unmappedLabels.length, 1);
+      assert.equal(
+        r.data.rows.find((row) => row.plugin === "healthy").verdict,
+        "unscored",
+      );
+    }
+  }));
+
 test("real probe writes raw independent labels even when production package mapping has no manifests", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-label-capture-"));
   try {
