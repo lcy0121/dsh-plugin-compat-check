@@ -23,13 +23,32 @@
 
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
-import {execFileSync}  from 'node:child_process'
+import {execFileSync, spawnSync}  from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
 const REPO = path.resolve(new URL('.', import.meta.url).pathname, '..')
 const PLUGIN = path.join(REPO, 'plugin')
+
+test('发布闸门保留TAP失败详情和文档校验错误', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-release-errors-'));
+  try {
+    for (const sub of ['lib', 'plugin/scripts', 'tools']) fs.mkdirSync(path.join(dir, sub), {recursive:true});
+    fs.copyFileSync(path.join(PLUGIN,'scripts/prepublish-check.mjs'), path.join(dir,'plugin/scripts/prepublish-check.mjs'));
+    fs.writeFileSync(path.join(dir,'lib/version.mjs'), 'export const TOOL_VERSION="0.1.1";');
+    fs.writeFileSync(path.join(dir,'plugin/package.json'), JSON.stringify({version:'0.1.1'}));
+    for (const mode of ['test', 'docs']) {
+      fs.writeFileSync(path.join(dir,'tools/run-tests.mjs'), mode === 'test'
+        ? 'console.log("TAP version 13\\nnot ok 1 - controlled failing case\\n  error: controlled assertion\\n# tests 1\\n# fail 1");process.exitCode=1;'
+        : 'console.log("TAP version 13\\nok 1 - sample\\n# tests 1\\n# fail 0");');
+      fs.writeFileSync(path.join(dir,'tools/doc-check.mjs'), 'console.error("controlled document mismatch");process.exitCode=1;');
+      const out = spawnSync(process.execPath,[path.join(dir,'plugin/scripts/prepublish-check.mjs')],{encoding:'utf8'});
+      assert.equal(out.status,1);
+      assert.match(out.stderr, mode === 'test' ? /controlled failing case[\s\S]*controlled assertion/ : /controlled document mismatch/);
+    }
+  } finally { fs.rmSync(dir,{recursive:true,force:true}); }
+});
 
 describe('打包自足性：npm pack 出来的包必须自己能算结论', () => {
   test('prepack 暂存器本身是可用的、且自证会失败', () => {

@@ -78,9 +78,8 @@ try {
   execFileSync(process.execPath,['tools/doc-check.mjs','--test-summary',file],{cwd:REPO,stdio:'pipe'});
 } catch (error) {
   const out = `${error.stdout ?? ''}${error.stderr ?? ''}`;
-  const failed = out.split('\n').filter((l) => /^✖|^ℹ fail/.test(l)).slice(-12).join('\n');
   fs.rmSync(summaryDir,{recursive:true,force:true});
-  fail(['仓库的测试或文档检查没有全过：', '', failed || '(拿不到失败摘要)', '',
+  fail(['仓库的测试或文档检查没有全过：', '', out.trim() || error.message || String(error), '',
     '  跑 `npm test` 看全部输出。']);
 }
 
