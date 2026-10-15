@@ -6,7 +6,7 @@
 
 ## 当前版本与交付
 
-本地源码为 **0.1.1 未发布候选版**；2026-10-15联网核验，npm `latest` 为 **0.1.0**。`npm install` 或 `dsh plugin add` 不会取得本地尚未发布的修复。公开状态和差异见 [Plan中的核验记录](docs/Plan.md#85-信息文档与公开状态)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
+本地源码为 **0.1.1 未发布候选版**；2026-10-15联网核验，npm `latest` 为 **0.1.0**。`npm install` 或 `dsh plugin add` 不会取得本地尚未发布的修复。公开状态和差异见 [Plan中的核验记录](docs/Plan.md#1-项目定位与交付状态)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
 
 插件、CLI、skill三种形态共享判定内核；安装检查脚本是CLI编排入口。只有**相同输入与采样证据**才应得出相同结果。
 
@@ -139,11 +139,11 @@ node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 
 `doc-check` 离线检查文档链接、版本、入口与 skill 副本；**不会自己运行测试**。记录新结果时先保存 TAP 摘要，再执行 `node tools/update-current-state.mjs --test-summary <log>` 和 `node tools/doc-check.mjs --test-summary <log>`。发布前检查只运行一次完整默认套件并复用摘要，含独立 tarball 安装后的实际宿主工具调用。GitHub/npm 元数据检查为联网步骤；未发布候选的版本和 README 差异是 notice，取数失败不能称“全部一致”。
 
-默认套件不启用 `DSC_SLOW=1` 集成。2026-10-15另行通过6项真实DSH/Chrome集成测试，包含正常到货、缺失客户端文件、导入抛错及运行时负向对照；环境与复现命令见 [Plan](docs/Plan.md#86-真实集成验收2026-10-15)。Windows未测，Linux CI尚无本轮远端执行证明。历史88.3%召回和本次66/66到货均不是0.1.1功能准确率。Python parity 工具也是旧正则参考，不能把它当作 AST 实现的真值。
+默认套件不启用 `DSC_SLOW=1` 集成。2026-10-15另行通过6项真实DSH/Chrome集成测试，包含正常到货、缺失客户端文件、导入抛错及运行时负向对照；环境与复现命令见 [Plan](docs/Plan.md#5-验证记录与复现)。Windows未测，Linux CI尚无本轮远端执行证明。历史88.3%召回和本次66/66到货均不是0.1.1功能准确率。Python parity 工具也是旧正则参考，不能把它当作 AST 实现的真值。
 
-辅助度量使用 [Plan §8.7](docs/Plan.md#87-p1辅助度量真值隔离2026-10-15) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
+辅助度量使用 [Plan辅助度量记录](docs/Plan.md#51-已验证范围) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
 
-报告契约以 [lib/contracts.mjs](lib/contracts.mjs) 为单一真源，CLI JSON、HTTP、工具与面板保留完整证据；新字段可扩展，缺少必需字段或不支持的版本明确报工具错误。规则已按0.2.0-rc.2官方实现/运行时复核，库存为明确标记不完整的AST样本，详见 [Plan §8.8–8.9](docs/Plan.md)。
+报告契约以 [lib/contracts.mjs](lib/contracts.mjs) 为单一真源，CLI JSON、HTTP、工具与面板保留完整证据；新字段可扩展，缺少必需字段或不支持的版本明确报工具错误。规则已按0.2.0-rc.2官方实现/运行时复核，库存为明确标记不完整的AST样本，详见 [Plan规则与契约记录](docs/Plan.md#2-现行判定与集成契约)。
 
 [施工记录与后续计划](docs/Plan.md) · [历史审计](docs/GPT审计及重构方案文档.md) · [规则说明](rules/README.md) · [skill交付](skill/README.md)。项目已收录于 [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)。
 

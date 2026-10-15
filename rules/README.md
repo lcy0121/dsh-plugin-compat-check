@@ -179,7 +179,7 @@ node tools/coverage.mjs --probe <报告> --write             # 顺带刷新 rule
 
 ### F. 提取器已正确处理，无需规则（1 个）
 
-`betterSidebar` —— 它是插件自己 `ctx.provide()` 出来的服务，**提取器已正确记入 `providedServices`**（同类的还有 dshmarket 的 `market`），因此不会产生假缺口。`pet` / `agentTeams` / `companionQq` / `betterLocale` 这些**没有**被 `ctx.provide()` 捕获的（见 `docs/Plan.md` §5 A5），就落进了上面 A 组。
+`betterSidebar` —— 它是插件自己 `ctx.provide()` 出来的服务，**提取器已正确记入 `providedServices`**（同类的还有 dshmarket 的 `market`），因此不会产生假缺口。`pet` / `agentTeams` / `companionQq` / `betterLocale` 这些**没有**被 `ctx.provide()` 捕获的（见 `docs/Plan.md` §2.1 的提供方证据约束），就落进了上面 A 组。
 
 ## 已知提取误报：不要为它们补规则
 
@@ -194,7 +194,7 @@ node tools/coverage.mjs --probe <报告> --write             # 顺带刷新 rule
 
 ## 历史待复核登记（2026-10-11；现已按上文处理）
 
-改这些条目会改变输出，按 `docs/Plan.md` §4 第 3 条应先摊开差异再决定，当时仅登记证据。以下保留当时的疑问；当前处理决定在needsReview.reviewed中：
+改这些条目会改变输出，按 `docs/Plan.md` §3 第 2 条应先摊开差异再决定，当时仅登记证据。以下保留当时的疑问；当前处理决定在needsReview.reviewed中：
 
 - `sessions.open` / `sessions.getSnapshot`：两个目录里都没有；客户端真正的跳转入口是 `uiWorkspace.openSession`。
 - `sessions.refresh`：两个目录里都没有（客户端目录里的是 `refreshProjections`）。
