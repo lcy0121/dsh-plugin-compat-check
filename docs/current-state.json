@@ -1,8 +1,8 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-15T07:24:34.392Z",
+  "recordedAt": "2026-10-15T08:02:14.569Z",
   "testFiles": 25,
-  "tests": 343,
+  "tests": 345,
   "repositoryFiles": {
     "total": 204,
     "fixtures": 90,
@@ -15,8 +15,8 @@
       "parityfix": true,
       "desktop": true
     },
-    "realDshStartup": false,
-    "realChrome": false,
+    "realDshStartup": true,
+    "realChrome": true,
     "windows": false,
     "nodeVersions": [
       "26.11.1"
@@ -39,7 +39,42 @@
         "24.21.0",
         "26.11.1"
       ]
+    },
+    "liveIntegration": {
+      "verifiedAt": "2026-10-15",
+      "platform": "darwin",
+      "arch": "arm64",
+      "dshVersion": "0.2.0-rc.2",
+      "hostNodeVersion": "24.18.1",
+      "runnerNodeVersion": "26.11.1",
+      "chromeVersion": "155.0.8059.41",
+      "automatedTests": 6,
+      "automatedFailures": 0,
+      "installedArtifactVersion": "0.1.1",
+      "manualUi": [
+        "compatibility panel",
+        "plugin detail and badge",
+        "controlled FAILED/PENDING",
+        "refresh and baseline difference"
+      ],
+      "hostServices": [
+        "compat_check current/other/invalid profile",
+        "skills.list/get and source body hash"
+      ],
+      "installExitCodes": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "clientControls": [
+        "healthy arrival and report",
+        "missing client file blocks startup",
+        "client import throws"
+      ],
+      "scope": "Private local profiles only; no model conversation, Windows, Linux CI or other DSH versions verified.",
+      "cleanupVerified": true
     }
   },
-  "scope": "npm test default suite; optional profile counts depend on local inputs; real DSH/browser slow suites were not enabled"
+  "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."
 }

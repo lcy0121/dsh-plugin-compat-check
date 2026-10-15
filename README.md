@@ -59,7 +59,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 ./dsh-plugin-compat-check.sh --install-skill
 ```
 
-插件注册兼容性面板、插件详情角标、`compat_check` 与 skill provider；本轮仅以 mock/独立包执行验证注册链，真实界面仍待验收。独立 skill 安装至 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`，已有文件需 `--force` 才覆盖。
+插件注册兼容性面板、插件详情角标、`compat_check` 与 skill provider；2026-10-15已从实际tgz安装，在DSH0.2.0-rc.2/macOS arm64中验证工具和skill，并通过真实Chrome操作确认面板、角标及基线差分。独立 skill 安装至 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`，已有文件需 `--force` 才覆盖。
 
 源码仓库根是私有开发工作区，**不是可直接激活的 DSH 插件包**。根目录 GitHub spec 不等同于安装 `plugin/`。测试本地候选时，在仓库根运行 `npm ci --ignore-scripts`，再在 `plugin/` 中执行 `npm pack --pack-destination <已存在的绝对输出目录>`，最后让 DSH 安装生成的 `.tgz`。打包会暂存内核和 LICENSE；不要直接复制裸 `plugin/` 并假定内核已在包内。细节见 [插件说明](plugin/README.md)。
 
@@ -139,7 +139,7 @@ node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 
 `doc-check` 离线检查文档链接、版本、入口与 skill 副本；**不会自己运行测试**。记录新结果时先保存 TAP 摘要，再执行 `node tools/update-current-state.mjs --test-summary <log>` 和 `node tools/doc-check.mjs --test-summary <log>`。发布前检查只运行一次完整默认套件并复用摘要，含独立 tarball 安装后的实际宿主工具调用。GitHub/npm 元数据检查为联网步骤；未发布候选的版本和 README 差异是 notice，取数失败不能称“全部一致”。
 
-默认套件不启用 `DSC_SLOW=1` 集成；本轮真实 DSH、Chrome、Windows 未测，Linux CI 已配置但没有本轮远端执行证明。旧的88.3%召回、66/66到货等只属于 [历史施工记录](docs/Plan.md)，不是0.1.1准确率。Python parity 工具也是旧正则参考，不能把它当作 AST 实现的真值。
+默认套件不启用 `DSC_SLOW=1` 集成。2026-10-15另行通过6项真实DSH/Chrome集成测试，包含正常到货、缺失客户端文件、导入抛错及运行时负向对照；环境与复现命令见 [Plan](docs/Plan.md#86-真实集成验收2026-10-15)。Windows未测，Linux CI尚无本轮远端执行证明。历史88.3%召回和本次66/66到货均不是0.1.1功能准确率。Python parity 工具也是旧正则参考，不能把它当作 AST 实现的真值。
 
 [施工记录与后续计划](docs/Plan.md) · [历史审计](docs/GPT审计及重构方案文档.md) · [规则说明](rules/README.md) · [skill交付](skill/README.md)。项目已收录于 [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)。
 

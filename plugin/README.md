@@ -32,7 +32,7 @@ npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检�
 
 插件体检不安装包、不调用外部命令或联网；会启动分析worker，并默认写自己的schema2基线：`$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`。模式分离、锁内比较、原子替换；源码扫描不完整不推进基线。默认不输出共享loader诊断；诊断需显式私有DSC_OUT_DIR。若需完全禁止基线读写，请使用仓库CLI的 `--no-baseline`。
 
-当前候选已通过默认回归和独立tarball安装后实际工具执行；真实DSH启动、Chrome界面、Windows集成尚未验证。具体测试数量与证据见仓库docs/current-state.json、docs/Plan.md；不把历史测试数字作为当前版本的完整功能认证。
+当前候选已通过默认回归、独立tarball执行及2026-10-15的真实DSH0.2.0-rc.2/macOS arm64验收：工具、skill、面板、详情角标、基线及Chrome正负向对照。Windows未测，Linux CI没有本轮远端执行记录。具体测试数量与证据见仓库docs/current-state.json、docs/Plan.md；不把历史测试数字作为当前版本的完整功能认证。
 
 ## License
 

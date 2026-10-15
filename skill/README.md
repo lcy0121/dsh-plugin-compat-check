@@ -27,6 +27,6 @@ provider name与skill name均为dsh-plugin-compat-check，source=bundled、rank=
 
 DSH0.2.0-rc.2/macOS的历史机制实验确认：静态inject或子fiber inject均能注册provider；包内未注册文件不被自动发现；扁平markdown和name/SKILL.md两种扫描形态可被发现。旧实验不是当前候选的真实启动验收。
 
-本轮默认测试实际调用宿主apply、检查注册行为、skill内容、隔离安装落点，以及独立npm tarball安装后的宿主工具执行。它们不证明当前真实DSH会话的catalog已展示skill。剩余验收见 [开发路线](../docs/Plan.md)：在自己创建的临时profile启动真实宿主，检查skills.list/get及正文，记录精确DSH版本后只清理自己拥有的进程和目录。
+默认测试检查宿主apply、注册、正文、隔离安装及独立tarball工具执行。2026-10-15另从实际tgz在私有profile启动真实DSH0.2.0-rc.2（macOS arm64，宿主Node24.18.1）：skills.list包含本skill，skills.get返回provider=dsh-plugin-compat-check，正文6548字符且SHA-256与源码一致。实际调用compat_check亦成功；这验证宿主目录和工具，不表示已经发送模型对话或覆盖其它DSH版本。环境、清理与后续见 [Plan](../docs/Plan.md#86-真实集成验收2026-10-15)。
 
 旧说明中的“未改plugin/index.js”“files尚未决定”“打包未验证”已被实际实现与测试替代。历史注册细节在 [施工记录](../docs/Plan.md)；当前使用语义以 [SKILL.md](SKILL.md) 为准。

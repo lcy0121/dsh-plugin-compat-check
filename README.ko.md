@@ -57,7 +57,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 ./dsh-plugin-compat-check.sh --install-skill
 ```
 
-플러그인은 호환성 패널, 상세 배지, `compat_check`, skill provider를 등록합니다. 이번 후보 버전에서는 mock과 설치 tarball로 등록 경로를 검증했으며 실제 UI 검증은 남아 있습니다. 독립 skill은 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`에 설치되며 기존 파일 덮어쓰기는 `--force`가 필요합니다.
+플러그인은 호환성 패널, 상세 배지, `compat_check`, skill provider를 등록합니다. 2026-10-15에 실제 tarball을 macOS arm64의 DSH0.2.0-rc.2에 설치하고 도구·skill 호출 및 실제 Chrome의 패널·배지·기준선 변화를 검증했습니다. 독립 skill은 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`에 설치되며 기존 파일 덮어쓰기는 `--force`가 필요합니다.
 
 저장소 루트는 **비공개 개발 워크스페이스**이며 설치 가능한 DSH bundle이 아닙니다. 루트 GitHub spec은 `plugin/` 설치와 같지 않습니다. 후보 버전 검사 시 루트에서 `npm ci --ignore-scripts`를 실행하고 `plugin/`에서 `npm pack --pack-destination <이미있는절대출력경로>`를 실행한 뒤 생성된 `.tgz`를 DSH로 설치하세요. pack이 커널과 LICENSE를 준비합니다. 준비되지 않은 `plugin/` 복사본에는 커널이 없습니다. [플러그인 배포 설명](plugin/README.md)을 참고하세요.
 
@@ -136,7 +136,7 @@ node tools/meta-check.mjs --json
 
 `doc-check`는 링크·버전·문서 진입점·skill 복사본을 오프라인 검사하며 테스트를 실행하지 않습니다. 성공한 TAP 로그로 `node tools/update-current-state.mjs --test-summary <log>` 후 `node tools/doc-check.mjs --test-summary <log>`를 실행하세요. 배포 전 검사는 기본 전체 테스트를 한 번 실행하고 요약을 재사용하며 독립 tarball 설치 후 실제 호스트 도구를 호출합니다. 메타데이터 검사는 네트워크와 gh/npm이 필요합니다. 미배포 로컬 버전·README 차이는 notice이고 조회 실패는 미검증입니다.
 
-느린 통합 검사는 명시적 `DSC_SLOW=1`이 필요합니다. 이번 후보의 실제 DSH·Chrome·Windows 검증은 없으며 Linux CI는 설정만 있고 원격 실행 성공을 주장하지 않습니다. 과거88.3% 재현율과66/66 도착 수치는 [역사 기록](docs/Plan.md)의 입력에만 해당합니다. Python parity는 구형 정규식 참고 구현이며 AST의 정답이 아닙니다.
+느린 통합 검사는 명시적 `DSC_SLOW=1`이 필요합니다. 2026-10-15에 정상 도착, 클라이언트 파일 누락, import 예외 및 런타임 음성 대조를 포함한 실제 DSH·Chrome 테스트6개가 통과했습니다. 환경과 명령은 [Plan](docs/Plan.md)을 참고하세요. Windows는 미검증이며 Linux CI 원격 실행 성공도 주장하지 않습니다. 과거88.3% 재현율과 이번66/66 도착 수치는 기능 정확도가 아닙니다. Python parity는 구형 정규식 참고 구현이며 AST의 정답이 아닙니다.
 
 [개발 기록 및 후속 계획](docs/Plan.md) · [역사 감사](docs/GPT审计及重构方案文档.md) · [규칙](rules/README.md) · [skill 배포](skill/README.md). [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)에 수록되어 있습니다.
 

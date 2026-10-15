@@ -57,7 +57,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 ./dsh-plugin-compat-check.sh --install-skill
 ```
 
-The plugin registers a compatibility panel, detail badges, `compat_check` and a skill provider. Registration was checked using mocks and the installed tarball; real UI integration remains unverified for this candidate. Standalone skill destination: `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`; existing files require `--force` to overwrite.
+The plugin registers a compatibility panel, detail badges, `compat_check` and a skill provider. On 2026-10-15, the actual tarball was installed into DSH0.2.0-rc.2 on macOS arm64; tool and skill calls, the panel, badges and baseline changes were verified with a real Chrome session. Standalone skill destination: `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`; existing files require `--force` to overwrite.
 
 The repository root is a **private development workspace**, not the installable DSH bundle. A root GitHub spec is not equivalent to installing `plugin/`. To test the candidate, run `npm ci --ignore-scripts` at the root, then `npm pack --pack-destination <existing-absolute-output-dir>` inside `plugin/`, and install the resulting `.tgz` through DSH. Packing stages the kernel and LICENSE. Copying a bare `plugin/` directory does not stage the kernel; see [plugin delivery](plugin/README.md).
 
@@ -136,7 +136,7 @@ node tools/meta-check.mjs --json
 
 `doc-check` checks links, versions, document entry points and the skill copy offline; it does not run tests. Record a successful TAP log with `node tools/update-current-state.mjs --test-summary <log>` and validate it with `node tools/doc-check.mjs --test-summary <log>`. The prepublish check runs the default suite once and reuses the summary, including isolated tarball installation and actual host-tool execution. Metadata checks require network and gh/npm; an unpublished newer local version or README is a notice, while unavailable sources remain unverified.
 
-Slow integrations need explicit `DSC_SLOW=1`. This candidate has no new live DSH/Chrome/Windows validation; Linux CI is configured but no remote run is claimed. Older88.3% recall and66/66 arrival figures belong to [historical inputs](docs/Plan.md), not current accuracy. Python parity utilities are a legacy regex reference, not AST ground truth.
+Slow integrations need explicit `DSC_SLOW=1`. Six real DSH/Chrome tests passed on 2026-10-15, covering healthy arrival, a missing client file, an import exception and runtime negative controls; see [Plan](docs/Plan.md) for the environment and commands. Windows remains untested and no remote Linux CI run is claimed. The historical88.3% recall and current66/66 arrival figures are not functional accuracy measurements. Python parity utilities are a legacy regex reference, not AST ground truth.
 
 [Development history and next steps](docs/Plan.md) · [Historical audit](docs/GPT审计及重构方案文档.md) · [Rules](rules/README.md) · [Skill delivery](skill/README.md). Listed in [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness).
 

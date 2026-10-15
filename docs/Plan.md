@@ -479,9 +479,7 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 - **`loader` 的 entry id 是 `include:<entryName>`，不是包名**；`fiber.state`
   0=PENDING 1=LOADING 2=ACTIVE 3=FAILED 4=DISPOSED 5=UNLOADING。
   **`NO_FIBER`（≈`disabled:true`）不是缺陷。**
-- `--probe-boot` 的实现路径：复制 profile 到 `$DSH_HOME/profiles/dsc-probe-boot-<pid>-<ts>`，
-  加 `dsh-plugin-compat-check-probe: file:<REPO>/probe`，`dsh plugin --profile <tmp> install`，
-  起 `dsh --profile <tmp> -- --port 0 --no-open`，轮询 `probe-report.json`，kill，`finally` 里清理
+- `--probe-boot` 当前实现：创建私有工作目录及其内的DSH_HOME，复制目标profile（排除node_modules），将相对file/link依赖按原目录转为绝对路径，再安装依赖与暂存探针；启动自己的宿主、轮询报告，finally只清理拥有的进程组与目录。此路径已在§8.6真实验证；不再往正式DSH_HOME中创建探针profile。
 - 官方已有 `pluginInventory` 服务 + 设置页的 plugin-inventory 分类 ——
   **不要重造插件清单 UI，只加判定层**
 - **`ctx.settings.register` 在 0.2.0-rc.2 不存在**（实际提供 `configure/describe/mutate/replace/schema`）
@@ -506,7 +504,7 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 | 当前版本 | `0.1.1` 本地候选；npm 公开版本仍为历史 `0.1.0` |
 | 基线 | schema 2；profile/path/mode 分离；锁内比较与原子写入 |
 | 探针 | 显式私有目录；描述符形状；采样身份与时间；旧格式标为未绑定 |
-| 浏览器 | 显式开发工具；CDP pipe；未在本轮执行真实界面集成 |
+| 浏览器 | 显式开发工具；CDP pipe；已完成§8.6所列真实Chrome正负向测试及界面操作 |
 | 回归版本 | 第三方三个基准版本不变；本仓库探针有意同步至 0.1.1 |
 
 **结构树见三份 README 的「目录结构」一节** —— 本文件不再抄一份。抄一份就是多一处会腐烂的地方
@@ -530,7 +528,7 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 - 默认静态检查不执行目标源码；宿主使用有时限/内存上限的worker，默认写自己的schema2基线。分析不完整不推进基线，锁内比较、原子替换；异常退出可能留下锁，确认没有写进程后再清理。
 - 显式probe启动和安装检查会安装并执行目标插件，临时profile不是OS沙箱。描述符采样不调用getter，诊断只写显式私有目录，运行器只清理自己拥有的进程和目录。
 - API源码发现通常有file:line，loader/声明发现可能没有源码位置。动态属性、工厂/代理、跨函数与模块数据流仍有限；provide是提供方线索，不能遮住完整方法观测。客户端到货工具独立于面板，不能认证业务功能。
-- 真实DSH/Chrome/Windows集成仍未在本轮验证，Linux CI配置不等于远端已通过；历史Codex Security扫描为部分覆盖，本轮修复及复核不等于重新取得全量安全认证。
+- 真实DSH/Chrome已在§8.6的精确环境验收；Windows未测，Linux CI配置不等于远端已通过。历史Codex Security扫描为部分覆盖，本轮修复及复核不等于重新取得全量安全认证。
 
 ### 8.4 0.1.1施工摘要（已完成）
 
@@ -563,16 +561,54 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 
 本次合并后docs仅保留Plan、GPT审计、extraction-findings及current-state.json。Node26.11默认343项测试通过，发布前闸门通过，离线链接/版本/skill核验覆盖11份维护文档；实际文件数由current-state.json记录。
 
+### 8.6 真实集成验收（2026-10-15）
+
+本轮执行§9的两项P0，未启动P1、推送或发布。使用实际tgz、独立DSH_HOME和受控测试插件；正式用户profile未改。环境：macOS arm64，DSH **0.2.0-rc.2**，其Electron宿主Node **24.18.1**，测试运行器Node **26.11.1**，Google Chrome **155.0.8059.41**。以下结论只覆盖该环境。
+
+| 验收项 | 实测结果 |
+|---|---|
+| 安装与启动 | 从本地0.1.1 tgz安装、真实宿主激活；工具、skill及HTTP报告成功注册，包内内核可用 |
+| compat_check | 直接调用真实scoped tools服务中的工具execute；当前profile使用运行时面，其它profile退回静态证据，错误profile明确“无法判定”；未发送模型对话 |
+| 受控运行时反例 | FAILED和PENDING得到实测loader发现；缺失方法标certain，但影响仍标inferred。当前受控集合：可用2、部分可用1、不兼容2（其中包含测试观察插件），不是生态总体统计 |
+| skill目录 | 实际skills.list/get可见本skill；provider正确；正文6548字符，SHA-256为d824226d8ad8704a07d4c964d261918eb1b4a4aaf383efee0b1245081ce4b0eb，与真源一致 |
+| Computer Use界面 | 真实Chrome操作确认设置兼容性面板、插件详情与角标、重新检查、FAILED/PENDING及影响依据；添加反例时显示新增4，再次检查显示“与上次相比没有任何变化” |
+| 浏览器到货 | 正常例计划66、到货66、3/3批次、异常0，且报告内核确实可用；缺失client文件阻止宿主启动，存在但import抛错由真实Chrome异常/错误屏检出并退出1。到货不等于全部业务功能认证 |
+| 安装检查退出码 | 正常0、缺失方法1、PENDING致命2、官方peer版本闸门2、无效安装来源3；均实测并清理各自临时profile |
+| 回归与收尾 | 新增两条安全回归，默认套件345项；另行6项真实集成通过。自动测试断言拥有的profile、Chrome目录及打包目录被移除；手工环境按拥有PID收尾，截图及脱敏证据留本机临时目录，不添加公开报告文件 |
+
+本轮发现并修复四处实际问题：
+
+1. 安装检查提前创建目标profile，而DSH要求目标目录不存在。改为仅创建私有DSH_HOME及profiles父目录，由DSH初始化目标；受控回归先失败后通过，真实tgz安装检查由3恢复为0。
+2. 旧到货工具安装裸file:plugin，缺少prepack内核；即使66/66到货也会漏掉“找不到判定内核”。改装实际tgz，并要求后端报告ok；新版正向测试同时验证条目到货与报告可用。
+3. probe迁往私有DSH_HOME后，相对file/link依赖会指错位置。仅在复制的package.json内按原profile目录重定位dependencies/devDependencies/optionalDependencies，不改源文件；受控回归先红后绿，真实probe测试包含相对file依赖。
+4. npm pack的stage/unstage会改共享源码目录，可能与并行测试争用kernel。到货工具现在复制lib/rules/plugin/skill/LICENSE至自己的私有目录后打包；回归确认实际pack输入和所有暂存材料均在拥有的目录内。
+
+同时替换过时的probe慢测试：不再依赖用户parityfix、旧notes措辞或“有runtime就全部certain”的错误契约；采用独立profile和逐条证据断言。新增客户端import抛错对照，缺文件测试也只接受对应受控错误，避免把任意启动失败当作测试成功。统计生成器保留已记录的独立真实验收，不再每次重置为未验证；默认测试计数与真实集成记录分开。
+
+复现本轮集成（需要已安装DSH、pnpm和Chrome；DSC_CHROME可指定Chrome可执行文件）：
+
+```bash
+DSC_SLOW=1 node --test --test-reporter=tap test/probe-boot.test.mjs test/client-arrival.test.mjs
+npm test -- --test-reporter=tap
+npm run format:check
+node tools/doc-check.mjs --test-summary <成功的默认套件TAP文件>
+node plugin/scripts/prepublish-check.mjs
+```
+
+若运行环境限制默认npm缓存写入，设置npm_config_cache到可写的私有临时目录。慢测试自行创建和清理profile；默认npm test不会运行这6项集成。手工界面操作、真实tool/skill调用及0/1/2/3矩阵是本轮另行验收，不能把它们当作默认套件自动覆盖。
+
+最终独立复核的两项Important（相对依赖、共享打包）均按反例先红后绿修复。两项Minor延后：到货工具文本模式在非预期启动失败时仍可能称“预期失败”；文本摘要未展开compatibility.error。JSON和退出码正确，排错时使用--json；后续统一文本提示。
+
 ---
 
 ## 9. 下一动作
 
-下表统一记录尚未开发或验收的工作，不表示已经完成；不再另维护roadmap。
+下表统一记录后续工作与已完成的发版前门槛，不再另维护roadmap；已完成项的精确环境和证据见§8.6。
 
 | 优先级 | 工作 | 完成条件 |
 |---|---|---|
-| P0 发版前 | 真实DSH安装、启动和宿主功能验收 | 在自己创建的私有DSH_HOME与临时profile，从实际tgz安装；记录DSH/Node/OS版本；验证compat_check、当前与其它profile、FAILED/PENDING、错误无法判定、skills.list/get、第二次基线差分；验证0/1/2/3及清理无残留 |
-| P0 发版前 | 真实Chrome到货与界面验收 | 用当前CDP pipe路径运行开发工具；正常和故意破坏客户端两例都生效；人工确认面板、插件详情角标及错误状态；网络到货与业务交互分别记录 |
+| P0 已完成 | 真实DSH安装、启动和宿主功能验收 | 2026-10-15在§8.6环境从实际tgz安装；compat_check、profile隔离、FAILED/PENDING、错误、skills.list/get、基线及0/1/2/3均通过；发布或环境变化时重跑 |
+| P0 已完成 | 真实Chrome到货与界面验收 | CDP pipe正向、缺文件及import抛错反例通过；Computer Use确认面板、详情角标、受控错误和重新检查；限于§8.6环境和已操作交互 |
 | P1 度量可信度 | 适配旧辅助度量工具并隔离真值 | tools/labels.mjs仍固定DSH0.2.0-rc.2，且将LOADING归为未运行，和当前verdict语义不同；使用同一probe.entries参与判定又作为标签会发生循环验证。需要将独立loader标签和预测输入分离，统一状态/版本，并添加受控反例。Python parity只留历史比较，不能要求AST与旧正则结果相等 |
 | P1 规则质量 | 复核severity.needsReview与刷新历史inventory | 在明确DSH版本、profile、probe身份下逐条核对sessions.open/getSnapshot/refresh、settings.get、attachments.readImage等；区分源码归属与服务实际方法；只以证据更新规则、影响文案、夹具及回归，不把历史coverage数字当现状 |
 | P1 契约稳定 | 固化报告结构与消费者一致性 | 为observation/coverage/finding/baseline建立可校验schema或类型契约，覆盖CLI JSON、HTTP、model tool和面板；旧格式兼容策略和错误码有文档及回归，避免字段增加后某个通道丢证据 |
@@ -580,7 +616,7 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 | P2 工程验证 | 补齐平台和资源验证 | 真跑Linux CI并记录结果；Windows仅在获得实际环境后验收进程清理/路径/安装器，验证前不宣称已兼容。增加大包、超时、内存压力及并发基线的性能基准，保持宿主响应 |
 | 发布阶段 | 同步公开源码与npm候选 | 完成上述发版验收后，经授权推送/合并并发布；移除候选README中的未发布措辞，核验registry版本、README、依赖、tarball、简介与标签，再更新本文件的公开状态记录 |
 
-建议顺序：先完成两项P0；然后处理辅助度量和规则复核，再扩展语法覆盖或新UI。当前主要缺口是实际安装后的证据链与可信度量，继续大规模拆文件的收益较低。
+下一步建议先做P1辅助度量真值隔离，再做规则复核与报告结构契约。两项P0已完成本机验收；跨平台、跨DSH版本及全业务功能仍不在已验证范围内，继续大规模拆文件的收益较低。
 
 
 日常修改后运行 `npm test`、`node tools/doc-check.mjs` 与 `node plugin/scripts/prepublish-check.mjs`。改动 skill 后先运行 `node plugin/scripts/stage-skill.mjs`。更新公开说明时再运行 `node tools/meta-check.mjs`；网络不可用必须记录为未核验，本地版本高于 npm 已发布版本是 notice。
@@ -592,7 +628,7 @@ ctx.slots.inject("settings.plugins.tab", () => ctx.slots.register(
 1. 核对 `lib/version.mjs`、`plugin/package.json`、`probe/package.json`、`tools/slot-probe/package.json` 与说明文档。
 2. 先审查行为和基准版本变化，再有意更新快照；不以重建快照代替修复失败。
 3. 用成功 TAP 摘要运行 `node tools/update-current-state.mjs --test-summary <log>`，再运行 `node tools/doc-check.mjs --test-summary <log>`。
-4. 运行 `node plugin/scripts/prepublish-check.mjs`，并完成本节两项P0发版前集成验收。
+4. 运行 `node plugin/scripts/prepublish-check.mjs`，按§8.6重跑两项P0发版前集成验收（当前已有本机通过记录）。
 5. 取得发布授权后，在 `plugin/` 执行 `npm publish`，按 npm 实际提示完成认证；`prepack` 暂存 kernel 与 skill，`postpack` 清理 kernel。
 6. 重新核验 registry 版本、tarball、README 与依赖，并更新公开状态记录。发布0.1.1时将 npm README 中“本地候选”文字改为相应发布状态；不能提前声称已发布。
 
