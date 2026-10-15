@@ -48,6 +48,53 @@ const strings = (v) =>
 const verdicts = ["ok", "partial", "broken", "unknown"];
 const severities = ["fatal", "feature-dead", "degraded"];
 const certainties = ["certain", "suspected"];
+const dispositions = [
+  "finding",
+  "client-side",
+  "self-provided",
+  "runtime-facility",
+  "filtered",
+  "abstained",
+  "guarded",
+  "no-calls",
+  "unknown",
+];
+function coherentVerdict(p) {
+  if (!Array.isArray(p.findings)) return false;
+  return (
+    p.verdict === "unknown" ||
+    p.verdict ===
+      (p.findings.some((f) => f?.severity === "fatal")
+        ? "broken"
+        : p.findings.length
+          ? "partial"
+          : "ok")
+  );
+}
+function snapshotFinding(f) {
+  return (
+    record(f) &&
+    text(f.key) &&
+    text(f.category) &&
+    severities.includes(f.severity) &&
+    certainties.includes(f.certainty) &&
+    nullableText(f.location)
+  );
+}
+function checkedEntry(v) {
+  return record(v) && text(v.service) && dispositions.includes(v.disposition);
+}
+// Producers resolve relative observation paths before serialization. Lexical
+// normalization here is platform independent and needs no browser Node shim.
+function pathIdentity(v) {
+  const normalized = v.replace(/\\/g, "/");
+  const parts = [];
+  for (const part of normalized.split("/")) {
+    if (part === "..") parts.pop();
+    else if (part && part !== ".") parts.push(part);
+  }
+  return (normalized.startsWith("/") ? "/" : "") + parts.join("/");
+}
 function need(errors, condition, path) {
   if (!condition) errors.push(path);
 }
@@ -148,6 +195,7 @@ function validateBaseline(value) {
       "baseline.plugin:" + name,
     );
     need(e, Array.isArray(p.findings), "baseline.findings:" + name);
+    need(e, coherentVerdict(p), "baseline.verdict/findings:" + name);
     if (p.vacuous !== undefined)
       need(e, typeof p.vacuous === "boolean", "baseline.vacuous:" + name);
     for (const f of Array.isArray(p.findings) ? p.findings : []) {
@@ -155,15 +203,7 @@ function validateBaseline(value) {
         e.push("baseline.finding:" + name);
         continue;
       }
-      need(
-        e,
-        text(f.key) &&
-          text(f.category) &&
-          severities.includes(f.severity) &&
-          certainties.includes(f.certainty) &&
-          nullableText(f.location),
-        "baseline.finding:" + name,
-      );
+      need(e, snapshotFinding(f), "baseline.finding:" + name);
     }
   }
   return e;
@@ -178,15 +218,81 @@ function validateBaselineResult(b) {
   }
   need(e, typeof b.wrote === "boolean", "baseline.wrote");
   need(e, record(b.badge), "baseline.badge");
+  if (record(b.badge)) {
+    need(
+      e,
+      typeof b.badge.show === "boolean" &&
+        nullableText(b.badge.text) &&
+        nullableText(b.badge.detail) &&
+        [null, "worse", "better", "mixed", "neutral"].includes(
+          b.badge.direction,
+        ),
+      "baseline.badge.fields",
+    );
+  }
   if (b.diff !== null) {
     need(
       e,
       record(b.diff) && typeof b.diff.comparable === "boolean",
       "baseline.diff",
     );
-    if (record(b.diff))
-      for (const key of ["added", "removed", "worsened", "improved", "updated"])
+    if (record(b.diff)) {
+      for (const key of [
+        "added",
+        "removed",
+        "worsened",
+        "improved",
+        "updated",
+      ]) {
         need(e, Array.isArray(b.diff[key]), "baseline.diff." + key);
+        for (const entry of Array.isArray(b.diff[key]) ? b.diff[key] : []) {
+          const at = "baseline.diff." + key;
+          if (!record(entry)) {
+            e.push(at + ".entry");
+            continue;
+          }
+          need(e, text(entry.name), at + ".name");
+          if (key === "added" || key === "removed") {
+            need(e, nullableText(entry.version), at + ".version");
+            continue;
+          }
+          need(
+            e,
+            nullableText(entry.versionFrom) &&
+              nullableText(entry.versionTo) &&
+              typeof entry.versionChanged === "boolean" &&
+              verdicts.includes(entry.verdictFrom) &&
+              verdicts.includes(entry.verdictTo) &&
+              text(entry.reason),
+            at + ".fields",
+          );
+          for (const field of ["newFindings", "goneFindings"]) {
+            need(
+              e,
+              Array.isArray(entry[field]) &&
+                entry[field].every(snapshotFinding),
+              at + "." + field,
+            );
+          }
+          need(
+            e,
+            Array.isArray(entry.changedFindings) &&
+              entry.changedFindings.every(
+                (c) =>
+                  record(c) && snapshotFinding(c.from) && snapshotFinding(c.to),
+              ),
+            at + ".changedFindings",
+          );
+        }
+      }
+      for (const key of ["dshVersionFrom", "dshVersionTo", "reason"])
+        need(e, nullableText(b.diff[key]), "baseline.diff." + key);
+      need(
+        e,
+        typeof b.diff.dshVersionChanged === "boolean",
+        "baseline.diff.dshVersionChanged",
+      );
+    }
   }
   return e;
 }
@@ -208,6 +314,25 @@ function validateReportBody(body) {
   need(e, body.error === null, "report.error");
   need(e, nullableText(body.dshVersion), "report.dshVersion");
   e.push(...validateObservation(body.observation));
+  if (
+    record(body.observation) &&
+    body.observation.bound &&
+    body.observation.usable
+  ) {
+    const o = body.observation;
+    if (text(body.dshVersion) && text(o.dshVersion))
+      need(
+        e,
+        o.dshVersion === body.dshVersion,
+        "observation/report.dshVersion",
+      );
+    if (text(body.inputs?.nodeModules) && text(o.profileId))
+      need(
+        e,
+        pathIdentity(o.profileId) === pathIdentity(body.inputs.nodeModules),
+        "observation/report.profileId",
+      );
+  }
   e.push(...validateBaselineResult(body.baseline));
   const summary = body.summary,
     plugins = body.plugins;
@@ -260,14 +385,13 @@ function validateReportBody(body) {
     if (Array.isArray(p.findings))
       for (const f of p.findings)
         e.push(...validateFinding(f).map((x) => name + ":" + x));
-    if (Array.isArray(p.findings) && p.verdict !== "unknown") {
-      const expected = p.findings.some((f) => f?.severity === "fatal")
-        ? "broken"
-        : p.findings.length
-          ? "partial"
-          : "ok";
-      need(e, p.verdict === expected, "plugin.verdict/findings:" + name);
-    }
+    need(e, coherentVerdict(p), "plugin.verdict/findings:" + name);
+    if (record(c) && integer(c.verifiedCalls))
+      need(
+        e,
+        p.vacuous === (p.verdict === "ok" && c.verifiedCalls === 0),
+        "plugin.vacuous/coverage:" + name,
+      );
     if (record(c) && strings(c.limitations) && Array.isArray(p.clientSide))
       need(
         e,
@@ -278,6 +402,25 @@ function validateReportBody(body) {
         "plugin.coverage/status:" + name,
       );
     need(e, record(p.resolved), "plugin.resolved:" + name);
+    if (record(p.resolved))
+      for (const [service, value] of Object.entries(p.resolved))
+        need(
+          e,
+          checkedEntry(value) && value.service === service,
+          "plugin.resolved.entry:" + name + "." + service,
+        );
+    for (const [key, valid] of [
+      ["checked", checkedEntry],
+      ["clientSide", (v) => record(v) && text(v.service) && text(v.note)],
+      [
+        "filtered",
+        (v) => record(v) && text(v.service) && text(v.method) && text(v.reason),
+      ],
+      ["abstained", (v) => record(v) && text(v.service) && text(v.basis)],
+      ["runtimeFacilities", (v) => record(v) && text(v.name) && text(v.reason)],
+    ])
+      if (Array.isArray(p[key]))
+        need(e, p[key].every(valid), "plugin." + key + ".entry:" + name);
   }
   for (const key of Object.keys(counts))
     need(e, counts[key] === summary[key], "summary.count:" + key);

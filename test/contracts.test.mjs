@@ -8,7 +8,157 @@ import { spawnSync } from "node:child_process";
 import { packageFixture } from "./fixture-utils.mjs";
 import { run } from "../bin/compat-check.mjs";
 import { toJSON } from "../lib/report.mjs";
-import { snapshotForBaseline, diffAgainstBaseline } from "../lib/baseline.mjs";
+import {
+  snapshotForBaseline,
+  diffAgainstBaseline,
+  badgeFor,
+} from "../lib/baseline.mjs";
+import { validateReportBody, validateBaseline } from "../lib/contracts.mjs";
+function clientAccept() {
+  let registered;
+  const sandbox = {
+    window: { __ModuleLoader__: { load: (m) => (registered = m) } },
+    console: { log() {}, warn() {} },
+  };
+  vm.runInNewContext(fs.readFileSync("plugin/lib/client.js", "utf8"), sandbox);
+  const factory = registered.factory
+    .toString()
+    .replace(
+      "return module.exports;",
+      "exports.__accept=acceptPayload;return module.exports;",
+    );
+  return vm.runInNewContext("(" + factory + ")", sandbox)(() => ({})).__accept;
+}
+function envelope(report) {
+  return {
+    schemaVersion: 1,
+    kind: "plugin-compat-check/report",
+    ok: report.ok,
+    error: report.error,
+    exitCode: report.exitCode,
+    toolVersion: report.toolVersion,
+    baseline: report.baseline,
+    report,
+  };
+}
+test("actual client rejects corrupt nested ledgers and baseline changes before rendering", () =>
+  resultCase((_f, result) => {
+    const body = toJSON(result),
+      next = snapshotForBaseline(result.verdict, null),
+      prev = structuredClone(next);
+    prev.plugins.sample.verdict = "ok";
+    prev.plugins.sample.findings = [];
+    const diff = diffAgainstBaseline(prev, next);
+    body.baseline = { wrote: false, diff, badge: badgeFor(diff) };
+    const accept = clientAccept();
+    assert.doesNotThrow(() => accept(envelope(body)));
+    for (const mutate of [
+      (d) => (d.plugins.sample.resolved.settings = null),
+      (d) => (d.plugins.sample.resolved.settings.disposition = 42),
+      (d) => d.plugins.sample.checked.push(null),
+      (d) => d.plugins.sample.clientSide.push(null),
+      (d) => d.plugins.sample.clientSide.push({ service: 42, note: "bad" }),
+      (d) => d.plugins.sample.filtered.push(null),
+      (d) => d.plugins.sample.abstained.push(null),
+      (d) => d.plugins.sample.runtimeFacilities.push(null),
+      (d) => (d.baseline.badge.show = "true"),
+      (d) => (d.baseline.badge.text = {}),
+      (d) => (d.baseline.diff.worsened[0] = null),
+      (d) => (d.baseline.diff.worsened[0].newFindings[0] = null),
+      (d) =>
+        d.baseline.diff.worsened[0].changedFindings.push({
+          from: null,
+          to: null,
+        }),
+      (d) => d.baseline.diff.added.push(null),
+    ]) {
+      const bad = structuredClone(body);
+      mutate(bad);
+      assert.throws(() => accept(envelope(bad)), /报告|契约/);
+    }
+  }));
+test("contradictory schema2 verdicts cannot manufacture baseline improvements", () =>
+  resultCase((_f, result) => {
+    const clean = snapshotForBaseline(result.verdict, null);
+    clean.plugins.sample.verdict = "ok";
+    clean.plugins.sample.findings = [];
+    for (const verdict of ["broken", "partial"]) {
+      const bad = structuredClone(clean);
+      bad.plugins.sample.verdict = verdict;
+      assert.ok(validateBaseline(bad).length > 0);
+      assert.equal(diffAgainstBaseline(bad, clean).comparable, false);
+    }
+    const bad = snapshotForBaseline(result.verdict, null);
+    bad.plugins.sample.verdict = "ok";
+    assert.ok(validateBaseline(bad).length > 0);
+  }));
+test("bound observation identity and vacuous coverage agree with the report", () => {
+  const f = packageFixture(
+    "export function apply(ctx){ctx.settings.describe()}",
+  );
+  try {
+    const result = run({
+      nm: f.nm,
+      baseline: false,
+      dshVersion: "0.2.0-rc.2",
+      _ignoreAutoProbe: true,
+      _hostSurface: {
+        observationVersion: 1,
+        profileId: f.nm,
+        dshVersion: "0.2.0-rc.2",
+        probedAt: new Date().toISOString(),
+        root: {
+          settings: { present: true, methods: { describe: "function" } },
+        },
+      },
+    });
+    const body = toJSON(result);
+    assert.equal(body.plugins.sample.coverage.status, "complete");
+    assert.deepEqual(validateReportBody(body), []);
+    for (const mutate of [
+      (d) => (d.observation.dshVersion = "9.9.9"),
+      (d) => (d.observation.profileId = "/foreign/node_modules"),
+      (d) => (d.observation.profileId = body.inputs.nodeModules.slice(1)),
+      (d) => {
+        d.plugins.sample.coverage.verifiedCalls = 0;
+        d.plugins.sample.checked = [];
+      },
+    ]) {
+      const bad = structuredClone(body);
+      mutate(bad);
+      assert.ok(validateReportBody(bad).length > 0);
+    }
+    const unknown = structuredClone(body);
+    unknown.observation.profileId = null;
+    unknown.observation.dshVersion = null;
+    assert.deepEqual(validateReportBody(unknown), []);
+    const legacy = structuredClone(body);
+    legacy.observation.bound = false;
+    legacy.observation.profileId = "/legacy/unknown";
+    assert.deepEqual(validateReportBody(legacy), []);
+    const equivalent = structuredClone(body);
+    equivalent.observation.profileId += "/../node_modules";
+    assert.deepEqual(validateReportBody(equivalent), []);
+    const relative = run({
+      nm: f.nm,
+      baseline: false,
+      dshVersion: body.dshVersion,
+      _ignoreAutoProbe: true,
+      _hostSurface: {
+        observationVersion: 1,
+        profileId: path.relative(process.cwd(), f.nm),
+        dshVersion: body.dshVersion,
+        probedAt: body.observation.probedAt,
+        root: {
+          settings: { present: true, methods: { describe: "function" } },
+        },
+      },
+    });
+    assert.equal(toJSON(relative).observation.profileId, f.nm);
+  } finally {
+    f.cleanup();
+  }
+});
 function resultCase(check) {
   const f = packageFixture("export function apply(ctx){ctx.settings.absent()}");
   try {
