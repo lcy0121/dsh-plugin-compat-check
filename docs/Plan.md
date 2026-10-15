@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-更新于2026-10-15，适用于`dsh-plugin-compat-check`的0.1.1候选版。P0真实集成验收和三项P1已完成，源码在`codex/compat-evidence-refactor`工作分支维护，尚未发布npm；后续工作见[§6](#6-后续工作与发布)。
+更新于2026-10-16，适用于`dsh-plugin-compat-check`的0.1.1候选版。P0真实集成验收和三项P1已完成，源码在`codex/compat-evidence-refactor`工作分支维护，尚未发布npm；后续工作见[§6](#6-后续工作与发布)。
 
 本文只维护现行约束、关键决策、验证边界和下一步。用法与目录见[README](../README.md)，测试及环境事实以[docs/current-state.json](current-state.json)为准；原始问题见[历史审计](GPT审计及重构方案文档.md)，旧提取器反例见[extraction-findings](extraction-findings.md)。详细施工过程从Git历史查阅，不再逐轮累加报告。
 
@@ -115,15 +115,16 @@ desktop库存为21插件的**部分静态样本**：50服务、125分端方法�
 
 ### 5.1 已验证范围
 
-2026-10-15现场环境：macOS arm64，DSH0.2.0-rc.2，宿主Node24.18.1，运行器Node26.11.1，Chrome155.0.8059.41。以下均在私有环境进行，正式profile未改；未发送模型对话。
+2026-10-15现场环境：macOS arm64，DSH0.2.0-rc.2，宿主Node24.18.1，运行器Node26.11.1，Chrome155.0.8059.41。现场测试均使用私有环境，正式profile未改，未发送模型对话；后续Linux CI另列。
 
 | 证据 | 覆盖范围与限制 |
 |---|---|
 | 实际tgz、真实宿主 | 插件激活、内核、`compat_check`当前/其它/错误profile、skills.list/get；skill正文与源码一致。安装检查实测0/1/2/3，包含peer闸门与无效安装来源 |
 | Computer Use | 面板、详情角标、重新检查、FAILED/PENDING、基线变化与稳定刷新；P1另确认受控settings.get报告、HTTP/tool核心字段及正常/错误profile结构 |
 | Chrome到货 | 正常例66/66且后端报告可用；缺文件阻止启动、import抛错由浏览器检出。到货与这些交互不代表全部业务功能正确 |
-| 最新回归批次 | 默认套件及针对性结果见current-state；最终联合31项通过，其中24项离线、7项真实DSH/Chrome。格式、文档与发布前检查通过；手工及自动现场均按所有权清理 |
-| 其它环境 | 重构阶段曾通过Node22.19/24.21/26.11批次；不能当作每次最新修改均已重跑。Windows未测，Linux CI尚无本轮远端成功记录，其它DSH版本未验收 |
+| 本机回归 | 默认套件最新结果见current-state；2026-10-15联合31项通过，其中24项离线、7项真实DSH/Chrome。格式、文档与发布前检查通过；手工及自动现场均按所有权清理 |
+| Linux CI（2026-10-16） | [GitHub Actions](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38787562650)在Ubuntu通过Node22.19.0/24的依赖安装、格式和发布前闸门；对应修复6a919cb。修复打包测试强制离线依赖历史缓存的问题，并补全失败日志。未启动真实DSH/Chrome |
+| 其它环境 | 本轮本机Node22.19.0/26.11.1默认套件均通过；重构阶段Node24.21批次属于历史记录。Windows、Linux真实DSH及其它DSH版本未验收 |
 
 辅助度量的四个受控病例：broken-service=PENDING且预测fatal（TP）；healthy/real-service=ACTIVE且无fatal（TN×2）；failed-apply=FAILED但无fatal预测（FN）。TP1/FP0/FN1/TN2，精确率1、召回率0.5，退出1；最后一例故意在激活时抛错，暴露任意插件逻辑故障的预测盲区，**不是生态准确率**。
 
@@ -173,7 +174,7 @@ node tools/labels.mjs --nm web --synthetic --json
 | 小项 | coverage写入版本语法 | 拒绝非支持版本格式；保留实测版本核实责任。当前库存使用实测0.2.0-rc.2，未被该输入问题污染 |
 | 小项 | 到货工具文本提示 | 非预期启动失败不再称“预期失败”，摘要展示compatibility.error；现有JSON及退出码正确，排错暂用`--json` |
 | P2分析能力 | 动态属性、工厂/代理、跨模块别名与调用 | 建立有界误报/漏报反例队列；先复现再修复，量化归属和覆盖变化，不以疑似比例下降代替正确性 |
-| P2工程验证 | 平台与资源边界 | 实跑Linux CI；有Windows环境后验证路径、进程清理和安装器。增加大包、超时、内存压力及并发基线基准，确认宿主响应 |
+| P2工程验证 | 平台与资源边界 | 维护Linux CI，并补Linux真实DSH验收；有Windows环境后验证路径、进程清理和安装器。增加大包、超时、内存压力及并发基线基准，确认宿主响应 |
 | 发布 | 同步GitHub与npm候选 | 获得授权后推送/合并/发布，并核验registry产物和公开文档；发布前不声称0.1.1已可公开安装 |
 
 发布顺序：

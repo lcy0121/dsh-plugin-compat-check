@@ -139,7 +139,7 @@ node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 
 `doc-check` 离线检查文档链接、版本、入口与 skill 副本；**不会自己运行测试**。记录新结果时先保存 TAP 摘要，再执行 `node tools/update-current-state.mjs --test-summary <log>` 和 `node tools/doc-check.mjs --test-summary <log>`。发布前检查只运行一次完整默认套件并复用摘要，含独立 tarball 安装后的实际宿主工具调用；该打包回归使用私有空npm缓存，需要访问npm registry，不依赖本机历史缓存。GitHub/npm 元数据检查为联网步骤；未发布候选的版本和 README 差异是 notice，取数失败不能称“全部一致”。
 
-默认套件不启用 `DSC_SLOW=1` 集成。2026-10-15另行通过6项真实DSH/Chrome集成测试，包含正常到货、缺失客户端文件、导入抛错及运行时负向对照；环境与复现命令见 [Plan](docs/Plan.md#5-验证记录与复现)。Windows未测，Linux CI尚无本轮远端执行证明。历史88.3%召回和本次66/66到货均不是0.1.1功能准确率。Python parity 工具也是旧正则参考，不能把它当作 AST 实现的真值。
+默认套件不启用 `DSC_SLOW=1` 集成。2026-10-15另行通过6项真实DSH/Chrome集成测试，包含正常到货、缺失客户端文件、导入抛错及运行时负向对照；环境与复现命令见 [Plan](docs/Plan.md#5-验证记录与复现)。Windows未测；2026-10-16已通过Ubuntu的Node22.19.0/24 CI，尚未验证Linux上的真实DSH运行。历史88.3%召回和本次66/66到货均不是0.1.1功能准确率。Python parity 工具也是旧正则参考，不能把它当作 AST 实现的真值。
 
 辅助度量使用 [Plan辅助度量记录](docs/Plan.md#51-已验证范围) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
 

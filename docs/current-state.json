@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-15T18:36:36.001Z",
+  "recordedAt": "2026-10-15T18:42:22.037Z",
   "testFiles": 27,
   "tests": 371,
   "repositoryFiles": {
@@ -19,6 +19,7 @@
     "realChrome": true,
     "windows": false,
     "nodeVersions": [
+      "22.19.0",
       "26.11.1"
     ],
     "independentReview": {
@@ -159,6 +160,28 @@
         "defaultSuiteTestsAfterFix": 370,
         "realIntegrationRerunAfterFix": true
       }
+    },
+    "ci": {
+      "verifiedAt": "2026-10-16",
+      "provider": "GitHub Actions",
+      "runner": "ubuntu-latest",
+      "platform": "linux",
+      "headSha": "6a919cb934508ba0636f6e5c604f1dc7426624e7",
+      "runUrl": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38787562650",
+      "conclusion": "success",
+      "nodeMatrix": [
+        "22.19.0",
+        "24"
+      ],
+      "checks": [
+        "npm ci",
+        "format:check",
+        "prepublish-check"
+      ],
+      "coldCacheArtifactInstall": true,
+      "liveDshStartup": false,
+      "liveChrome": false,
+      "scope": "Default CI suite and package execution only; no formal profiles, actual DSH runtime or browser integration."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."
