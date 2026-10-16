@@ -227,9 +227,11 @@ test("P2 synchronous forwarding preserves the controlling guard and invalidates 
   const unsafe = measureCase({
     source: `function wipe(service){service.absent=undefined}export function apply(ctx){if(typeof ctx.settings.absent==='function'){wipe(ctx.settings);ctx.settings.absent()}}`,
   });
-  assert.equal(
-    unsafe.p.callSites.find((s) => s.method === "absent")?.guarded,
-    false,
+  // The overwritten local property is no longer a proved host method.
+  assert.deepEqual(unsafe.pairs, []);
+  assert.equal(unsafe.verdict.coverage.status, "limited");
+  assert.ok(
+    unsafe.p.diagnostics.some((d) => d.kind === "flow-service-mutation"),
   );
 });
 
@@ -545,4 +547,195 @@ test("P2 captured-function relevance graphs have a diagnosed traversal budget", 
   ).join("");
   const { p } = measureCase({ source: fns + `export function apply(){f0()}` });
   assert.ok(p.diagnostics.some((d) => d.kind === "flow-capture-budget"));
+});
+
+// Final review: precise proof must survive evaluation order and mutable aliases.
+const reviewCases = [
+  {
+    name: "arguments apply assignment effects left to right",
+    source: `function call(a,s){s.absent()}export function apply(ctx){let s=ctx.settings;call(s=ctx.tools,s)}`,
+    want: ["tools.absent"],
+  },
+  {
+    name: "assignment expression returns its argument value",
+    source: `function call(s){s.absent()}export function apply(ctx){let s=ctx.settings;call(s=ctx.tools)}`,
+    want: ["tools.absent"],
+  },
+  {
+    name: "switch paths do not select the final writer",
+    source: `export function apply(ctx){let s=ctx.settings;switch(flag){case 1:s=ctx.tools;break;default:break}s.absent()}`,
+    want: [],
+    limited: true,
+  },
+  {
+    name: "try paths include exceptions before assignment",
+    source: `export function apply(ctx){let s=ctx.settings;try{mayThrow();s=ctx.tools}catch(e){}s.absent()}`,
+    want: [],
+    limited: true,
+  },
+  {
+    name: "catch binding shadows the forwarded service",
+    source: `function call(s){try{mayThrow()}catch(s){s.absent()}}export function apply(ctx){call(ctx.settings)}`,
+    want: [],
+  },
+  {
+    name: "distinct structurally equal objects do not merge identities",
+    source: `export function apply(ctx){const a={s:ctx.settings},b={s:ctx.settings};const c=flag?a:b;c.s=ctx.tools;a.s.absent()}`,
+    want: [],
+    limited: true,
+  },
+  {
+    name: "destructuring respects object spread opacity",
+    source: `export function apply(ctx){const {s}={s:ctx.settings,...external};s.absent()}`,
+    want: [],
+    limited: true,
+  },
+  {
+    name: "destructuring respects escaped object opacity",
+    source: `export function apply(ctx){const o={s:ctx.settings};configure(o);const {s}=o;s.absent()}`,
+    want: [],
+    limited: true,
+  },
+  {
+    name: "delete removes a mutable field",
+    source: `export function apply(ctx){const o={s:ctx.settings};delete o.s;o.s.absent()}`,
+    want: [],
+  },
+  {
+    name: "unknown key writes invalidate existing fields",
+    source: `export function apply(ctx){const o={s:ctx.settings};o[externalKey]={absent(){}};o.s.absent()}`,
+    want: [],
+    limited: true,
+  },
+  {
+    name: "escape invalidates reachable nested aliases",
+    source: `export function apply(ctx){const child={s:ctx.settings};configure({child});child.s.absent()}`,
+    want: [],
+    limited: true,
+  },
+  {
+    name: "helper Context replacement does not retain host ownership",
+    source: `function replace(ctx){ctx.settings={absent(){}}}export function apply(ctx){replace(ctx);ctx.settings.absent()}`,
+    want: [],
+    limited: true,
+  },
+  {
+    name: "Proxy handler mutation invalidates transparency",
+    source: `export function apply(ctx){const h={};const p=new Proxy(ctx,h);h.get=()=>({absent(){}});p.settings.absent()}`,
+    want: [],
+    limited: true,
+  },
+  {
+    name: "Proxy handler escape invalidates transparency",
+    source: `export function apply(ctx){const h={};const p=new Proxy(ctx,h);configure(h);p.settings.absent()}`,
+    want: [],
+    limited: true,
+  },
+  {
+    name: "compound keys are not replaced by the RHS",
+    source: `export function apply(ctx){let key='set';key+='tings';ctx[key].absent()}`,
+    want: ["settings.absent"],
+  },
+  {
+    name: "updated keys cannot retain their old string",
+    source: `export function apply(ctx){let key='settings';key++;ctx[key].absent()}`,
+    want: [],
+    limited: true,
+  },
+  {
+    name: "compound member keys use the prior field value",
+    source: `export function apply(ctx){const o={key:'set'};o.key+='tings';ctx[o.key].absent()}`,
+    want: ["settings.absent"],
+  },
+  {
+    name: "async assignment is not a synchronous caller fact",
+    source: `export function apply(ctx){let s=ctx.settings;async function swap(){await something();s=ctx.tools}swap();s.absent()}`,
+    want: [],
+    limited: true,
+  },
+  {
+    name: "async object assignment is not a synchronous caller fact",
+    source: `export function apply(ctx){const o={s:ctx.settings};async function swap(){await something();o.s=ctx.tools}swap();o.s.absent()}`,
+    want: [],
+    limited: true,
+  },
+  {
+    name: "async factory awaited service remains explicitly limited",
+    source: `async function select(ctx){return ctx.settings}export async function apply(ctx){ctx.tools.register();const s=await select(ctx);s.absent()}`,
+    want: ["tools.register"],
+    limited: true,
+  },
+  {
+    name: "nested branch method mutation removes continuing guard",
+    source: `function mutate(s){s.absent=null}function call(s){s.absent()}export function apply(ctx){if(typeof ctx.settings.absent==='function'){if(flag)mutate(ctx.settings);call(ctx.settings)}}`,
+    limited: true,
+    noGuard: true,
+  },
+  {
+    name: "helper service replacement removes continuing guard",
+    source: `function mutate(ctx){ctx.settings={}}function call(s){s.absent()}export function apply(ctx){if(typeof ctx.settings.absent==='function'){mutate(ctx);call(ctx.settings)}}`,
+    want: [],
+    limited: true,
+    noGuard: true,
+  },
+  {
+    name: "unsupported default flow cannot claim complete coverage",
+    source: `export function apply(ctx){ctx.tools.register();function run(s=ctx.settings){s.absent()}run()}`,
+    want: ["tools.register"],
+    limited: true,
+  },
+  {
+    name: "unsupported rest flow cannot claim complete coverage",
+    source: `function run(...services){services[0].absent()}export function apply(ctx){ctx.tools.register();run(ctx.settings)}`,
+    want: ["tools.register"],
+    limited: true,
+  },
+];
+for (const c of reviewCases)
+  test("P2 review: " + c.name, () => {
+    const { p, pairs, verdict } = measureCase(c);
+    if (c.want) assert.deepEqual(pairs, c.want);
+    if (c.noGuard) assert.ok(p.callSites.every((s) => !s.guarded));
+    if (c.limited) {
+      assert.ok(
+        p.diagnostics.length > 0,
+        "unsupported flow needs a diagnostic",
+      );
+      assert.equal(verdict.coverage.status, "limited");
+    }
+  });
+
+test("P2 review: branch joins preserve alternative mutable alias identities", () => {
+  const { pairs, verdict } = measureCase({
+    source: `export function apply(ctx){const a={s:ctx.settings},b={s:ctx.settings};let c;if(flag)c=a;else c=b;c.s=ctx.tools;a.s.absent()}`,
+  });
+  assert.deepEqual(pairs, []);
+  assert.equal(verdict.coverage.status, "limited");
+});
+
+test("P2 review: suspension invalidates a prior capability guarantee", () => {
+  const { p } = measureCase({
+    source: `export async function apply(ctx){if(typeof ctx.settings.absent==='function'){await pause();ctx.settings.absent()}}`,
+  });
+  assert.equal(p.callSites.find((s) => s.method === "absent")?.guarded, false);
+});
+test("P2 review: reachable escape graphs have an explicit bound", () => {
+  const objects = Array.from(
+    { length: 140 },
+    (_, i) => `const o${i}={child:${i ? `o${i - 1}` : "ctx.settings"}};`,
+  ).join("");
+  const { p, pairs, verdict } = measureCase({
+    source: `export function apply(ctx){${objects}configure(o139);ctx.settings.absent()}`,
+  });
+  assert.deepEqual(pairs, []);
+  assert.ok(p.diagnostics.some((d) => d.kind === "flow-escape-budget"));
+  assert.equal(verdict.coverage.status, "limited");
+});
+
+test("P2 review: switch case expression effects cannot leave stale bindings", () => {
+  const { pairs, verdict } = measureCase({
+    source: `export function apply(ctx){let s=ctx.settings;switch(flag){case (s=ctx.tools):break} s.absent()}`,
+  });
+  assert.deepEqual(pairs, []);
+  assert.equal(verdict.coverage.status, "limited");
 });

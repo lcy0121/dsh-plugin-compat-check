@@ -1,8 +1,8 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-15T19:39:21.864Z",
+  "recordedAt": "2026-10-16T05:53:29.037Z",
   "testFiles": 28,
-  "tests": 432,
+  "tests": 460,
   "repositoryFiles": {
     "total": 213,
     "fixtures": 90,
@@ -158,7 +158,11 @@
         "newRegressionTests": 3,
         "singleRepairPass": true,
         "defaultSuiteTestsAfterFix": 370,
-        "realIntegrationRerunAfterFix": true
+        "realIntegrationRerunAfterFix": true,
+        "deferredMinorResolution": {
+          "verifiedAt": "2026-10-16",
+          "item": "Inventory semver syntax validation implemented and tested in P2 small items."
+        }
       }
     },
     "ci": {
@@ -186,8 +190,8 @@
     "p2Analysis": {
       "verifiedAt": "2026-10-16",
       "baseCommit": "1905662",
-      "defaultSuiteTests": 432,
-      "p2RegressionTests": 58,
+      "defaultSuiteTests": 460,
+      "p2RegressionTests": 86,
       "smallItemRegressionTests": 17,
       "nodeVersions": [
         "22.19.0",
@@ -212,13 +216,33 @@
       "desktopObservation": {
         "plugins": 21,
         "scanComplete": false,
-        "callSites": 603,
-        "sideSpecificPairs": 136,
-        "workerMilliseconds": 4947,
+        "callSites": 475,
+        "sideSpecificPairs": 121,
+        "workerMilliseconds": 3645,
         "workerBudgetMilliseconds": 10000,
         "scope": "Single local readonly observation; not a benchmark. Does not replace the separately dated rules inventory."
       },
-      "linuxFeatureCiVerified": false
+      "linuxFeatureCiVerified": false,
+      "dshVersion": "0.2.0-rc.2",
+      "hostNodeVersion": "24.18.1",
+      "runnerNodeVersion": "26.11.1",
+      "chromeVersion": "155.0.8059.41",
+      "privateProfilesOnly": true,
+      "independentReview": {
+        "reviewedCommit": "18f5681",
+        "importantFindings": 10,
+        "fixedImportantFindings": 10,
+        "minorFindings": 0,
+        "newRegressionTests": 28,
+        "singleRepairPass": true,
+        "scope": "Evaluation order, Switch/Try/catch, mutable identities, opaque destructuring, mutation/escape, Proxy handlers, compound/update keys, async effects, guards, default/rest limitations. Additional alias/await/escape/switch variants included."
+      },
+      "scope": "Bounded static analysis only; unknown patterns retain diagnostics. Conservative abstention can reduce call counts. No arbitrary JavaScript completeness or ecosystem accuracy claim.",
+      "combinedTests": 127,
+      "combinedFailures": 0,
+      "realIntegrationTests": 7,
+      "cleanupVerified": true,
+      "prepublishCheck": true
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

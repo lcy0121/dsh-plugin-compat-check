@@ -88,16 +88,16 @@ test('capability guards do not silently cross a deferred function boundary',()=>
  scan('export function apply(ctx){if(typeof ctx.settings.absent === "function"){setTimeout(()=>ctx.settings.absent(),100);}}',{},p=>assert.equal(p.callSites.find(s=>s.method==='absent').guarded,false));
 });
 test('a method reassignment invalidates a previous capability guard',()=>{
- scan('export function apply(ctx){if(typeof ctx.settings.absent === "function"){ctx.settings.absent=undefined;ctx.settings.absent();}}',{},p=>assert.equal(p.callSites.find(s=>s.method==='absent').guarded,false));
+ scan('export function apply(ctx){if(typeof ctx.settings.absent === "function"){ctx.settings.absent=undefined;ctx.settings.absent();}}',{},p=>{assert.equal(p.callSites.some(s=>s.method==='absent'),false);assert.ok(p.diagnostics.some(d=>d.kind==='flow-service-mutation'));});
 });
 test('var declarations bind the enclosing function rather than the block',()=>{
  scan('export function apply(ctx){if(true){var ctx={settings:{absent(){}}};}ctx.settings.absent();}',{},p=>assert.ok(!p.callSites.some(s=>s.service==='settings'&&!s.inferredReceiver)));
 });
 test('delete invalidates a controlling method capability check',()=>{
- scan('export function apply(ctx){if(typeof ctx.settings.absent === "function"){delete ctx.settings.absent;ctx.settings.absent();}}',{},p=>assert.equal(p.callSites.find(s=>s.method==='absent').guarded,false));
+ scan('export function apply(ctx){if(typeof ctx.settings.absent === "function"){delete ctx.settings.absent;ctx.settings.absent();}}',{},p=>{assert.equal(p.callSites.some(s=>s.method==='absent'),false);assert.ok(p.diagnostics.some(d=>d.kind==='flow-service-mutation'));});
 });
 test('receiver replacement invalidates a controlling method capability check',()=>{
- scan('export function apply(ctx){if(typeof ctx.settings.absent === "function"){ctx.settings={};ctx.settings.absent();}}',{},p=>assert.equal(p.callSites.find(s=>s.method==='absent').guarded,false));
+ scan('export function apply(ctx){if(typeof ctx.settings.absent === "function"){ctx.settings={};ctx.settings.absent();}}',{},p=>{assert.equal(p.callSites.some(s=>s.method==='absent'),false);assert.ok(p.diagnostics.some(d=>d.kind==='flow-service-mutation'));});
 });
 test('an uncalled nested function cannot change the caller service binding',()=>{
  scan('export function apply(ctx){let svc=ctx.settings;function unused(){svc=ctx.tools;}svc.absent();}',{},p=>{
