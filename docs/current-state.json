@@ -473,14 +473,45 @@
         "workflow": ".github/workflows/test.yml",
         "resourceChecksAdded": true,
         "pinnedRealLinuxDshJobAdded": true,
-        "newJobsRemoteRunVerified": false,
-        "scope": "Local Linux validation is recorded separately; inspect GitHub Actions for the corresponding pushed commit. npm publication is outside this task."
+        "newJobsRemoteRunVerified": true,
+        "scope": "Local arm64 VM and remote x64 CI evidence are separate; inspect the recorded commit/run rather than treating it as certification of later commits. npm publication is outside this task.",
+        "remoteRun": {
+          "verifiedAt": "2026-10-16",
+          "headSha": "38fa4a07ffece6bea4715ab67d9cd892846cfe84",
+          "runUrl": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38892527900",
+          "conclusion": "success",
+          "runner": "ubuntu-latest",
+          "platform": "linux",
+          "arch": "x64",
+          "nodeVersions": [
+            "22.19.0",
+            "24.21.0"
+          ],
+          "checks": [
+            "test (22.19.0)",
+            "test (24)",
+            "linux-live"
+          ],
+          "resourceScenariosPerNode": 6,
+          "liveTests": 18,
+          "liveFailures": 0,
+          "liveSkipped": 0,
+          "dshVersion": "0.2.0-rc.2",
+          "artifactVersion": "0.1.1",
+          "http": {
+            "samples": 36,
+            "refreshingSamples": 35,
+            "maxMilliseconds": 43.784670999999435
+          },
+          "privateProfileCleanupVerified": true,
+          "scope": "Exact recorded commit only. Node22/24 default/prepublish/resource jobs and Node24 real DSH/tgz/pnpm job passed; no Chrome or Windows run in this CI."
+        }
       },
       "windows": {
         "verified": false,
         "status": "deferred by explicit user choice until an actual environment is available"
       },
-      "scope": "Owned synthetic/local platform samples only. V8 worker heap caps do not cap external buffers or whole-process RSS. No production latency, arbitrary process sandbox, Linux x64 live DSH or other DSH-version certification.",
+      "scope": "Owned synthetic/local platform samples only. V8 worker heap caps do not cap external buffers or whole-process RSS. No production latency, arbitrary process sandbox, other Linux-distribution or DSH-version certification; Linux x64 CI is recorded separately.",
       "independentReview": {
         "reviewedCommit": "3637bbd",
         "importantFindings": 1,

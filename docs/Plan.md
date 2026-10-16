@@ -128,7 +128,7 @@ desktop库存为21插件的**部分静态样本**：50服务、125分端方法�
 | 本机回归 | 默认套件最新结果见current-state；2026-10-15联合31项通过，其中24项离线、7项真实DSH/Chrome。格式、文档与发布前检查通过；手工及自动现场均按所有权清理 |
 | Linux CI（2026-10-16） | [GitHub Actions](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38787562650)在Ubuntu通过Node22.19.0/24的依赖安装、格式和发布前闸门；对应修复6a919cb。修复打包测试强制离线依赖历史缓存的问题，并补全失败日志。未启动真实DSH/Chrome；该次CI不覆盖本轮P2新增代码 |
 | P2工程（2026-10-16） | 本地Ubuntu24.04.5 arm64虚拟机已通过真实DSH0.2.0-rc.2及资源验收，详见§5.3。与上行历史GitHub CI分开记录 |
-| 其它环境 | 本机Node22.19.0/26.11.1默认套件通过；Linux另实跑Node24.21.0。Windows按用户选择待验收；Linux x64真实DSH及其它DSH版本未验收 |
+| 其它环境 | 本机Node22.19.0/26.11.1默认套件通过；Linux另实跑Node24.21.0。Windows按用户选择待验收；Linux x64仅有下述CI验收，其它DSH版本未验收 |
 
 P2分析阶段（2026-10-16）的460项在Node22.19.0/26.11.1通过；联合127项通过，其中120项离线、7项真实DSH/Chrome，私有环境按所有权清理。最终复核的10类重要问题均通过失败反例修复，P2有86项有界回归（含28项复核反例/变体）。
 
@@ -188,7 +188,7 @@ DSC_SLOW=1 node --test --test-reporter=tap test/engineering-live.test.mjs test/p
 
 独立复核发现1项进程生命周期问题，已用3项回归修复：管道先关闭、宿主已被信号终止、组长先于忽略TERM的同组后代退出；修复后各平台套件及真实集成重新通过，临时VM与密钥已删除。保留1项低优先级改进：为超时度量增加任务已启动断言及宽松的耗时上限。
 
-GitHub工作流已加入同一工程脚本及固定官方DSH/pnpm的Linux真实验收，并保留失败TAP/指标产物；**远程结果须核对对应提交的GitHub Actions，不能用本地验证或历史CI替代**。Windows按用户选择保留待验收；Linux本轮是arm64本地VM，尚不代表x64现场或其它DSH版本。
+GitHub工作流运行同一工程脚本及固定官方DSH/pnpm的Linux真实验收，并保留TAP/指标产物。2026-10-16，提交`38fa4a0`的[GitHub Actions](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38892527900)在Ubuntu x64通过Node22/24默认、发布前及资源检查，Node24真实DSH集成18/18通过。**后续提交须核对各自CI，不能套用此结果**。本地VM为arm64、远程CI为x64；Windows按用户选择待验收，其它Linux发行版或DSH版本未认证。
 
 ## 6. 后续工作与发布
 
