@@ -33,6 +33,7 @@ test('probe clone preserves relative local dependency destinations',()=>{
  if(a.includes('--version')){console.log('0.2.0');return;}
  if(a.includes('plugin')){
   if(a.includes('install')){const pkg=JSON.parse(fs.readFileSync(path.join(profile,'package.json')));for(const field of ['dependencies','devDependencies','optionalDependencies'])for(const spec of Object.values(pkg[field]||{})){const target=path.resolve(profile,spec.replace(/^(file:|link:)/,''));if(!fs.existsSync(path.join(target,'package.json')))throw new Error('local dependency destination lost: '+target);}}
+  if(a.includes('install') && fs.existsSync(path.join(profile,'pnpm-lock.yaml'))){const lock=fs.readFileSync(path.join(profile,'pnpm-lock.yaml'),'utf8');if(lock.includes('directory: ../neighbor'))throw new Error('local lock directory was not relocated');if(!lock.includes('remote@1.2.3'))throw new Error('remote pin lost');}
   return;
  }
  global.setTimeout=fn=>{queueMicrotask(fn);return {unref(){}}};
@@ -45,11 +46,14 @@ test('probe clone preserves relative local dependency destinations',()=>{
   fs.writeFileSync(path.join(neighbor,'package.json'),'{}');
   const original={dependencies:{sample:'file:../neighbor'},devDependencies:{dev:'link:../neighbor'},optionalDependencies:{optional:'file:../neighbor'},dsh:{profile:{bundles:[]}}};
   fs.writeFileSync(path.join(source,'package.json'),JSON.stringify(original));
+  const lock=`lockfileVersion: '9.0'\nimporters:\n  .:\n    dependencies:\n      sample:\n        specifier: file:../neighbor\n        version: file:../neighbor\npackages:\n  sample@file:../neighbor:\n    resolution: {directory: ../neighbor, type: directory}\n  remote@1.2.3:\n    resolution: {integrity: pinned-remote}\nsnapshots:\n  sample@file:../neighbor: {}\n  remote@1.2.3: {}\n`;
+  fs.writeFileSync(path.join(source,'pnpm-lock.yaml'),lock);
   const code=`import {probeProfile} from ${JSON.stringify(new URL('../lib/probe-runner.mjs',import.meta.url).href)};console.log(JSON.stringify(await probeProfile(${JSON.stringify(path.join(source,'node_modules'))},{timeoutSec:5,services:['tools']})));`;
   const r=spawnSync(process.execPath,['--input-type=module','-e',code],{env,encoding:'utf8',timeout:15000});
   assert.equal(r.status,0,r.stderr);const out=JSON.parse(r.stdout);
   assert.equal(out.error,null,JSON.stringify(out));assert.ok(out.surface);
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(source,'package.json'))),original);
+  assert.equal(fs.readFileSync(path.join(source,'pnpm-lock.yaml'),'utf8'),lock);
  });
 });
 test('arrival packs an owned source copy with all staging inputs',()=>{
@@ -138,5 +142,120 @@ test('owned runners reject failed, empty or invalid version queries without inhe
    else{assert.equal(out.status,'tool-error');assert.equal(out.exitCode,3);assert.equal(out.cleanup.tempProfileRemoved,true);}
    assert.equal(JSON.parse(fs.readFileSync(trace)).inherited,false);
   }
+ });
+});
+
+test("cancelling an owned command waits for that process to stop", async () => {
+  const { command } = await import("../lib/probe-runner.mjs");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-command-abort-")),
+    marker = path.join(root, "pid");
+  const controller = new AbortController();
+  try {
+    const pending = command(
+      process.execPath,
+      [
+        "-e",
+        `require('node:fs').writeFileSync(process.argv[1],String(process.pid));setInterval(()=>{},1000)`,
+        marker,
+      ],
+      { signal: controller.signal, timeoutMs: 1000 },
+    );
+    const deadline = Date.now() + 900;
+    while (!fs.existsSync(marker) && Date.now() < deadline)
+      await new Promise((r) => setTimeout(r, 5));
+    assert.ok(fs.existsSync(marker));
+    const pid = Number(fs.readFileSync(marker));
+    controller.abort();
+    const result = await pending;
+    assert.match(result.error, /abort/i);
+    assert.equal(result.code, null);
+    assert.throws(
+      () => process.kill(pid, 0),
+      (e) => e.code === "ESRCH",
+    );
+  } finally {
+    controller.abort();
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+test("an already aborted command cannot start its executable", async () => {
+  const { command } = await import("../lib/probe-runner.mjs");
+  const controller = new AbortController();
+  controller.abort();
+  const out = await command(
+    process.execPath,
+    ["-e", 'console.log("should not start")'],
+    { signal: controller.signal },
+  );
+  assert.equal(out.code, null);
+  assert.match(out.error, /abort/i);
+  assert.equal(out.output, "");
+});
+
+test(
+  "a detached descendant retaining pipes cannot hang command cancellation",
+  { skip: process.platform === "win32" },
+  async () => {
+    const { command } = await import("../lib/probe-runner.mjs");
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-pipe-abort-")),
+      file = path.join(dir, "pids");
+    const script = `const fs=require('node:fs'),{spawn}=require('node:child_process');const child=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{detached:true,stdio:['ignore',process.stdout,process.stderr]});fs.writeFileSync(process.argv[1],JSON.stringify({parent:process.pid,descendant:child.pid}));setInterval(()=>{},1000)`;
+    const controller = new AbortController();
+    let pending, pids, settled;
+    try {
+      pending = command(process.execPath, ["-e", script, file], {
+        signal: controller.signal,
+        timeoutMs: 5000,
+      });
+      const end = Date.now() + 2000;
+      while (!fs.existsSync(file) && Date.now() < end)
+        await new Promise((r) => setTimeout(r, 5));
+      assert.ok(fs.existsSync(file));
+      pids = JSON.parse(fs.readFileSync(file));
+      controller.abort();
+      settled = await Promise.race([
+        pending.then(() => true),
+        new Promise((r) => setTimeout(() => r(false), 400)),
+      ]);
+    } finally {
+      controller.abort();
+      if (pids)
+        try {
+          process.kill(-pids.descendant, "SIGKILL");
+        } catch {}
+      if (pending) await pending;
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+    assert.equal(
+      settled,
+      true,
+      "inherited descriptors must not extend the owned-command deadline",
+    );
+    assert.throws(
+      () => process.kill(pids.parent, 0),
+      (e) => e.code === "ESRCH",
+    );
+  },
+);
+
+test('command output pressure remains bounded during process shutdown',async()=>{
+ const {command}=await import('../lib/probe-runner.mjs');
+ const out=await command(process.execPath,['-e',`require('node:fs').writeSync(1,Buffer.alloc(8*1024*1024,97));setInterval(()=>{},1000)`],{timeoutMs:2000});
+ assert.match(out.error,/output.*limit/i);assert.ok(Buffer.byteLength(out.output)<=1024*1024,'shutdown must stop collecting overflowing output');
+});
+test('command output preserves UTF8 split across pipe chunks',async()=>{
+ const {command}=await import('../lib/probe-runner.mjs');const out=await command(process.execPath,['-e',`process.stdout.write('你'.repeat(100000),()=>process.exit(0))`]);
+ assert.equal(out.code,0);assert.equal(out.output,'你'.repeat(100000));
+});
+
+test('probe cloning cannot rewrite symlinked source manifests or profile roots',()=>{
+ for(const kind of ['manifest','profile','metadata'])withFakeDsh(`const fs=require('node:fs'),path=require('node:path'),a=process.argv.slice(2),p=path.join(process.env.DSH_HOME,'profiles',a[a.indexOf('--profile')+1]);if(fs.existsSync(path.join(p,'.plugin-manager','control')))fs.writeFileSync(path.join(p,'.plugin-manager','control'),'changed');process.exit(1)`,({home,env})=>{
+  const source=path.join(home,'profiles','linked'),original=path.join(home,'shared-manifest.json');
+  const data=JSON.stringify({dependencies:{local:'file:../neighbor'},dsh:{profile:{bundles:[]}}});
+  if(kind==='manifest'){fs.mkdirSync(path.join(source,'node_modules'),{recursive:true});fs.writeFileSync(original,data);fs.symlinkSync(original,path.join(source,'package.json'));}
+  else if(kind==='metadata'){fs.mkdirSync(path.join(source,'node_modules'),{recursive:true});fs.writeFileSync(path.join(source,'package.json'),data);const meta=path.join(home,'meta');fs.mkdirSync(meta);fs.writeFileSync(path.join(meta,'control'),data);fs.symlinkSync(path.join(meta,'control'),original);fs.symlinkSync(meta,path.join(source,'.plugin-manager'),'dir');}
+  else{const real=path.join(home,'real');fs.mkdirSync(path.join(real,'node_modules'),{recursive:true});fs.writeFileSync(path.join(real,'package.json'),data);fs.symlinkSync(path.join(real,'package.json'),original);fs.symlinkSync(real,source,'dir');}
+  const code=`import {probeProfile} from ${JSON.stringify(new URL('../lib/probe-runner.mjs',import.meta.url).href)};console.log(JSON.stringify(await probeProfile(${JSON.stringify(path.join(source,'node_modules'))})));`;
+  const run=spawnSync(process.execPath,['--input-type=module','-e',code],{env,encoding:'utf8',timeout:10000});assert.equal(run.status,0,run.stderr);const out=JSON.parse(run.stdout);assert.ok(out.error);assert.equal(out.tempProfileRemoved,true);assert.equal(fs.readFileSync(original,'utf8'),data);
  });
 });

@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-16T05:53:29.037Z",
-  "testFiles": 28,
-  "tests": 460,
+  "recordedAt": "2026-10-16T07:09:38.096Z",
+  "testFiles": 32,
+  "tests": 478,
   "repositoryFiles": {
-    "total": 213,
+    "total": 222,
     "fixtures": 90,
-    "other": 123
+    "other": 132
   },
   "verification": {
     "platform": "darwin",
@@ -243,6 +243,174 @@
       "realIntegrationTests": 7,
       "cleanupVerified": true,
       "prepublishCheck": true
+    },
+    "engineering": {
+      "verifiedAt": "2026-10-16",
+      "baseCommit": "47efe7c",
+      "defaultSuite": {
+        "node22Tests": 478,
+        "node26Tests": 478,
+        "failures": 0,
+        "skipped": 0
+      },
+      "macLive": {
+        "tests": 22,
+        "failures": 0,
+        "realDshChromeOrPnpmTests": 9,
+        "http": {
+          "schemaVersion": 1,
+          "kind": "plugin-compat-check/engineering-live",
+          "ok": true,
+          "platform": "darwin",
+          "arch": "arm64",
+          "nodeVersion": "26.11.1",
+          "dshVersion": "0.2.0-rc.2",
+          "artifactVersion": "0.1.1",
+          "pressureFunctions": 4000,
+          "reportAvailable": true,
+          "reportMilliseconds": 179.65037500000017,
+          "http": {
+            "samples": 12,
+            "refreshingSamples": 12,
+            "maxMilliseconds": 4.945541000000048
+          },
+          "scope": "Owned web profile, actual tgz and synthetic uncalled functions; HTTP responsiveness only, not business behavior or a production performance guarantee.",
+          "cleanup": {
+            "hostStopped": true,
+            "privateRootRemoved": true
+          }
+        },
+        "resources": [
+          {
+            "name": "baseline-contention",
+            "processes": 8,
+            "attempts": 192,
+            "writes": 24,
+            "busy": 168,
+            "atomicReads": 35,
+            "milliseconds": 98.37725,
+            "orphanLocks": 0
+          },
+          {
+            "name": "timeout",
+            "milliseconds": 282.063417,
+            "parentTicks": 20,
+            "workerStopped": true,
+            "recovery": true
+          },
+          {
+            "name": "heap",
+            "oldGenerationLimitMb": 32,
+            "milliseconds": 93.56958400000002,
+            "parentTicks": 8,
+            "recovery": true
+          },
+          {
+            "name": "extractor-heap",
+            "oldGenerationLimitMb": 512,
+            "sourceFiles": 9,
+            "sourcePayloadBytes": 8231120,
+            "parentTicks": 206,
+            "milliseconds": 2254.039917,
+            "recovery": true
+          },
+          {
+            "name": "large-package",
+            "files": 2402,
+            "sourceBytes": 50196963,
+            "oversizedBytes": 2097152,
+            "milliseconds": 291.86974999999984,
+            "scanComplete": false,
+            "sourceExecuted": false
+          },
+          {
+            "name": "report-contention",
+            "requests": 64,
+            "computesBeforeRefresh": 1,
+            "milliseconds": 107.75345799999968,
+            "failedRefreshRetainedReport": true
+          }
+        ]
+      },
+      "linux": {
+        "environment": "local owned QEMU VM",
+        "os": "Ubuntu24.04.5",
+        "kernel": "6.8.0-142-generic",
+        "arch": "arm64",
+        "vcpus": 2,
+        "memoryMiB": 3072,
+        "nodeVersion": "22.19.0",
+        "dshPackage": "@deepseek-ai/dsh@0.2.0-rc.2",
+        "pnpmVersion": "11.25.0",
+        "imageUrl": "https://cloud-images.ubuntu.com/noble/20260926/noble-server-cloudimg-arm64.img",
+        "imageSha256": "1d6bffe64b848468ac97f821d369a4846d983de1800ccf6b5ec8853e85cefc55",
+        "defaultTests": 404,
+        "defaultPass": 403,
+        "defaultFailures": 0,
+        "defaultSkipped": 1,
+        "skipReason": "Optional parityfix profile is not installed in this VM.",
+        "liveTests": 18,
+        "liveFailures": 0,
+        "realDshTests": 4,
+        "realFrozenPnpmInstallTests": 1,
+        "http": {
+          "refreshRequests": 3,
+          "samples": 23,
+          "samplesDuringRefresh": 22,
+          "maxMilliseconds": 22.560129,
+          "refreshMilliseconds": 483.479403
+        },
+        "resources": {
+          "processes": 8,
+          "baselineAttempts": 192,
+          "writes": 26,
+          "busy": 166,
+          "atomicReads": 20,
+          "orphanLocks": 0,
+          "baselineMilliseconds": 68.922171,
+          "timeoutParentTicks": 19,
+          "controlledHeapMiB": 32,
+          "extractorHeapMiB": 512,
+          "extractorHeapParentTicks": 294,
+          "extractorHeapMilliseconds": 3176.376013,
+          "heapRecovery": true,
+          "largeFiles": 2402,
+          "sourceBytes": 50196963,
+          "largeScanComplete": false,
+          "largeMilliseconds": 321.609641,
+          "reportRequests": 64,
+          "singleFlightComputes": 1,
+          "failedRefreshRetainedReport": true
+        },
+        "privateProfileCleanupVerified": true,
+        "vmCleanupVerified": false
+      },
+      "workerDefaults": {
+        "timeoutMs": 10000,
+        "maxOldGenerationSizeMb": 512,
+        "maxYoungGenerationSizeMb": 64,
+        "settlesAfterTermination": true,
+        "invalidBudgetsRejected": true
+      },
+      "profileClone": {
+        "lockSchema": "pnpm9 single importer",
+        "remotePinsPreserved": true,
+        "originalFilesUnchanged": true,
+        "nonNodeModulesSymlinksRejected": true,
+        "parser": "yaml@2.8.1 (private workspace dependency only)"
+      },
+      "ci": {
+        "workflow": ".github/workflows/test.yml",
+        "resourceChecksAdded": true,
+        "pinnedRealLinuxDshJobAdded": true,
+        "newJobsRemoteRunVerified": false,
+        "scope": "Local Linux commands passed; no push or new GitHub Actions execution in this task."
+      },
+      "windows": {
+        "verified": false,
+        "status": "deferred by explicit user choice until an actual environment is available"
+      },
+      "scope": "Owned synthetic/local platform samples only. V8 worker heap caps do not cap external buffers or whole-process RSS. No production latency, arbitrary process sandbox, Linux x64 live DSH or other DSH-version certification."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."
