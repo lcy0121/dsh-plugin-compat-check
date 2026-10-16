@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-16T10:56:58.410Z",
+  "recordedAt": "2026-10-16T14:37:38.360Z",
   "testFiles": 33,
   "tests": 481,
   "repositoryFiles": {
@@ -20,7 +20,7 @@
     "windows": false,
     "nodeVersions": [
       "22.19.0",
-      "26.11.1"
+      "26.12.0"
     ],
     "independentReview": {
       "originalImportantFindings": 6,
@@ -522,8 +522,79 @@
         "deferredMinors": [
           "Timeout metric lacks a counter-start assertion and a generous elapsed ceiling; current test asserts parent scheduling, stopped worker and later recovery."
         ],
-        "scope": "Owned process lifecycle: early pipe EOF, already-signalled host, leader exiting before TERM-ignoring same-group descendant. Shared idempotent cleanup tested on macOS and Linux; Windows deferred."
+        "scope": "Owned process lifecycle: early pipe EOF, already-signalled host, leader exiting before TERM-ignoring same-group descendant. Shared idempotent cleanup tested on macOS and Linux; Windows deferred.",
+        "deferredMinorResolution": {
+          "verifiedAt": "2026-10-16",
+          "item": "Counter progress and generous total elapsed ceiling implemented; isolated counter/late-timeout negative checks verify rejection. Evidence: verification.timeoutMeasurement."
+        }
       }
+    },
+    "timeoutMeasurement": {
+      "verifiedAt": "2026-10-16",
+      "baseCommit": "cbfbf96",
+      "platform": "darwin",
+      "arch": "arm64",
+      "existingTestStrengthened": true,
+      "productionWorkerChanged": false,
+      "controlledTimeoutMs": 1000,
+      "totalElapsedLimitMs": 5000,
+      "totalIncludes": "timeout rejection after worker termination, stopped-counter interval and successful later extraction",
+      "runs": [
+        {
+          "nodeVersion": "22.19.0",
+          "defaultTests": 481,
+          "defaultFailures": 0,
+          "defaultSkipped": 0,
+          "engineeringScenarios": 6,
+          "timeout": {
+            "name": "timeout",
+            "milliseconds": 1063.5825829999999,
+            "timeoutMilliseconds": 1002.4819170000001,
+            "timeoutBudgetMs": 1000,
+            "totalElapsedLimitMs": 5000,
+            "counterAtTimeout": 260022323,
+            "workerStarted": true,
+            "parentTicks": 91,
+            "workerStopped": true,
+            "recovery": true
+          }
+        },
+        {
+          "nodeVersion": "26.12.0",
+          "defaultTests": 481,
+          "defaultFailures": 0,
+          "defaultSkipped": 0,
+          "engineeringScenarios": 6,
+          "timeout": {
+            "name": "timeout",
+            "milliseconds": 1043.850417,
+            "timeoutMilliseconds": 1002.505625,
+            "timeoutBudgetMs": 1000,
+            "totalElapsedLimitMs": 5000,
+            "counterAtTimeout": 228281488,
+            "workerStarted": true,
+            "parentTicks": 91,
+            "workerStopped": true,
+            "recovery": true
+          }
+        }
+      ],
+      "repeatedNode26TimeoutRuns": 3,
+      "repeatedTotalMillisecondsRange": [
+        1042.0486250000001,
+        1043.3424579999999
+      ],
+      "negativeChecks": {
+        "nodeVersion": "26.12.0",
+        "isolatedSourceCopiesOnly": true,
+        "cases": [
+          "CPU counter never increments",
+          "Supervisor timeout delayed to 6000ms"
+        ],
+        "oldAssertionsAcceptedBoth": true,
+        "strengthenedAssertionsRejectedBoth": true
+      },
+      "scope": "Test and metric assertions only; production 10000ms/512MiB/64MiB defaults unchanged. This follow-up was not rerun on Linux/Windows or pushed to GitHub CI; earlier CI records cover their exact commits."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."
