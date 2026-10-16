@@ -474,7 +474,7 @@
         "resourceChecksAdded": true,
         "pinnedRealLinuxDshJobAdded": true,
         "newJobsRemoteRunVerified": false,
-        "scope": "Local Linux commands passed; no push or new GitHub Actions execution in this task."
+        "scope": "Local Linux validation is recorded separately; inspect GitHub Actions for the corresponding pushed commit. npm publication is outside this task."
       },
       "windows": {
         "verified": false,

@@ -136,7 +136,7 @@ node tools/meta-check.mjs --json
 
 `doc-check`는 링크·버전·문서 진입점·skill 복사본을 오프라인 검사하며 테스트를 실행하지 않습니다. 성공한 TAP 로그로 `node tools/update-current-state.mjs --test-summary <log>` 후 `node tools/doc-check.mjs --test-summary <log>`를 실행하세요. 배포 전 검사는 기본 전체 테스트를 한 번 실행하고 요약을 재사용하며 독립 tarball 설치 후 실제 호스트 도구를 호출합니다. 이 패키지 검증은 비공개 빈 npm 캐시와 npm registry 접속을 사용하며 기존 로컬 캐시에 의존하지 않습니다. 메타데이터 검사는 네트워크와 gh/npm이 필요합니다. 미배포 로컬 버전·README 차이는 notice이고 조회 실패는 미검증입니다.
 
-느린 통합 검사는 명시적 `DSC_SLOW=1`이 필요합니다. 2026-10-15에 정상 도착, 클라이언트 파일 누락, import 예외 및 런타임 음성 대조를 포함한 실제 DSH·Chrome 테스트6개가 통과했습니다. 환경과 명령은 [Plan](docs/Plan.md)을 참고하세요. 2026-10-16에 Ubuntu24.04.5 arm64 VM에서 실제 DSH0.2.0-rc.2, tgz/HTTP 응답 및 자원 시나리오를 검증했습니다. Windows는 합의에 따라 보류합니다. 새 Linux CI 작업은 push 후 실행 예정이며 과거 CI 증거와 구분합니다. [Plan 엔지니어링 검증](docs/Plan.md#53-p2工程验收)을 참고하세요. 과거88.3% 재현율과 이번66/66 도착 수치는 기능 정확도가 아닙니다. Python parity는 구형 정규식 참고 구현이며 AST의 정답이 아닙니다.
+느린 통합 검사는 명시적 `DSC_SLOW=1`이 필요합니다. 2026-10-15에 정상 도착, 클라이언트 파일 누락, import 예외 및 런타임 음성 대조를 포함한 실제 DSH·Chrome 테스트6개가 통과했습니다. 환경과 명령은 [Plan](docs/Plan.md)을 참고하세요. 2026-10-16에 Ubuntu24.04.5 arm64 VM에서 실제 DSH0.2.0-rc.2, tgz/HTTP 응답 및 자원 시나리오를 검증했습니다. Windows는 합의에 따라 보류합니다. 새 Linux CI 결과는 해당 커밋의 GitHub Actions에서 확인하며 과거 CI 증거와 구분합니다. [Plan 엔지니어링 검증](docs/Plan.md#53-p2工程验收)을 참고하세요. 과거88.3% 재현율과 이번66/66 도착 수치는 기능 정확도가 아닙니다. Python parity는 구형 정규식 참고 구현이며 AST의 정답이 아닙니다.
 
 보조 측정은 독립 loader 원시 라벨과 서비스 관측만 받는 예측기를 분리합니다. [Plan 보조 측정 기록](docs/Plan.md#51-已验证范围)을 참고하세요. `node tools/labels.mjs --nm web --synthetic --json`은 비공개 환경을 만들고 실제 누락을 보고하면 exit1을 반환합니다. 기존 대상은 `--probe-boot`, 파일 입력은 `--probe`와 `--labels`를 함께 사용합니다. 이 수치는 첫 계층의 해당 표본에만 적용되며 생태계 정확도가 아닙니다.
 
