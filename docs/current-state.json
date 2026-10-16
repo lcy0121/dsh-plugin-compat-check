@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-16T07:09:38.096Z",
-  "testFiles": 32,
-  "tests": 478,
+  "recordedAt": "2026-10-16T10:56:58.410Z",
+  "testFiles": 33,
+  "tests": 481,
   "repositoryFiles": {
-    "total": 222,
+    "total": 223,
     "fixtures": 90,
-    "other": 132
+    "other": 133
   },
   "verification": {
     "platform": "darwin",
@@ -248,8 +248,8 @@
       "verifiedAt": "2026-10-16",
       "baseCommit": "47efe7c",
       "defaultSuite": {
-        "node22Tests": 478,
-        "node26Tests": 478,
+        "node22Tests": 481,
+        "node26Tests": 481,
         "failures": 0,
         "skipped": 0
       },
@@ -268,11 +268,11 @@
           "artifactVersion": "0.1.1",
           "pressureFunctions": 4000,
           "reportAvailable": true,
-          "reportMilliseconds": 179.65037500000017,
+          "reportMilliseconds": 318.78241700000035,
           "http": {
-            "samples": 12,
-            "refreshingSamples": 12,
-            "maxMilliseconds": 4.945541000000048
+            "samples": 15,
+            "refreshingSamples": 14,
+            "maxMilliseconds": 24.46966600000087
           },
           "scope": "Owned web profile, actual tgz and synthetic uncalled functions; HTTP responsiveness only, not business behavior or a production performance guarantee.",
           "cleanup": {
@@ -285,24 +285,24 @@
             "name": "baseline-contention",
             "processes": 8,
             "attempts": 192,
-            "writes": 24,
-            "busy": 168,
-            "atomicReads": 35,
-            "milliseconds": 98.37725,
+            "writes": 48,
+            "busy": 144,
+            "atomicReads": 40,
+            "milliseconds": 210.641083,
             "orphanLocks": 0
           },
           {
             "name": "timeout",
-            "milliseconds": 282.063417,
-            "parentTicks": 20,
+            "milliseconds": 282.914208,
+            "parentTicks": 16,
             "workerStopped": true,
             "recovery": true
           },
           {
             "name": "heap",
             "oldGenerationLimitMb": 32,
-            "milliseconds": 93.56958400000002,
-            "parentTicks": 8,
+            "milliseconds": 83.59125,
+            "parentTicks": 6,
             "recovery": true
           },
           {
@@ -310,8 +310,8 @@
             "oldGenerationLimitMb": 512,
             "sourceFiles": 9,
             "sourcePayloadBytes": 8231120,
-            "parentTicks": 206,
-            "milliseconds": 2254.039917,
+            "parentTicks": 344,
+            "milliseconds": 4111.779625,
             "recovery": true
           },
           {
@@ -319,7 +319,7 @@
             "files": 2402,
             "sourceBytes": 50196963,
             "oversizedBytes": 2097152,
-            "milliseconds": 291.86974999999984,
+            "milliseconds": 563.2914999999994,
             "scanComplete": false,
             "sourceExecuted": false
           },
@@ -327,7 +327,7 @@
             "name": "report-contention",
             "requests": 64,
             "computesBeforeRefresh": 1,
-            "milliseconds": 107.75345799999968,
+            "milliseconds": 113.38233300000047,
             "failedRefreshRetainedReport": true
           }
         ]
@@ -344,8 +344,8 @@
         "pnpmVersion": "11.25.0",
         "imageUrl": "https://cloud-images.ubuntu.com/noble/20260926/noble-server-cloudimg-arm64.img",
         "imageSha256": "1d6bffe64b848468ac97f821d369a4846d983de1800ccf6b5ec8853e85cefc55",
-        "defaultTests": 404,
-        "defaultPass": 403,
+        "defaultTests": 407,
+        "defaultPass": 406,
         "defaultFailures": 0,
         "defaultSkipped": 1,
         "skipReason": "Optional parityfix profile is not installed in this VM.",
@@ -355,35 +355,105 @@
         "realFrozenPnpmInstallTests": 1,
         "http": {
           "refreshRequests": 3,
-          "samples": 23,
-          "samplesDuringRefresh": 22,
-          "maxMilliseconds": 22.560129,
-          "refreshMilliseconds": 483.479403
+          "samples": 28,
+          "samplesDuringRefresh": 27,
+          "maxMilliseconds": 23.77884300000005,
+          "refreshMilliseconds": 536.514553
         },
         "resources": {
           "processes": 8,
           "baselineAttempts": 192,
-          "writes": 26,
-          "busy": 166,
-          "atomicReads": 20,
+          "writes": 24,
+          "busy": 168,
+          "atomicReads": 37,
           "orphanLocks": 0,
-          "baselineMilliseconds": 68.922171,
-          "timeoutParentTicks": 19,
+          "baselineMilliseconds": 166.567652,
+          "timeoutParentTicks": 18,
           "controlledHeapMiB": 32,
           "extractorHeapMiB": 512,
-          "extractorHeapParentTicks": 294,
-          "extractorHeapMilliseconds": 3176.376013,
+          "extractorHeapParentTicks": 468,
+          "extractorHeapMilliseconds": 5252.766012,
           "heapRecovery": true,
           "largeFiles": 2402,
           "sourceBytes": 50196963,
           "largeScanComplete": false,
-          "largeMilliseconds": 321.609641,
+          "largeMilliseconds": 349.02932899999996,
           "reportRequests": 64,
           "singleFlightComputes": 1,
           "failedRefreshRetainedReport": true
         },
         "privateProfileCleanupVerified": true,
-        "vmCleanupVerified": false
+        "vmCleanupVerified": true,
+        "nodeVersions": [
+          "22.19.0",
+          "24.21.0"
+        ],
+        "node24Verification": {
+          "nodeVersion": "24.21.0",
+          "defaultTests": 407,
+          "defaultPass": 406,
+          "defaultSkipped": 1,
+          "failures": 0,
+          "liveTests": 18,
+          "liveFailures": 0,
+          "http": {
+            "samples": 15,
+            "refreshingSamples": 15,
+            "maxMilliseconds": 18.39337999999998
+          },
+          "resources": [
+            {
+              "name": "baseline-contention",
+              "processes": 8,
+              "attempts": 192,
+              "writes": 31,
+              "busy": 161,
+              "atomicReads": 25,
+              "milliseconds": 109.96518699999999,
+              "orphanLocks": 0
+            },
+            {
+              "name": "timeout",
+              "milliseconds": 265.216544,
+              "parentTicks": 17,
+              "workerStopped": true,
+              "recovery": true
+            },
+            {
+              "name": "heap",
+              "oldGenerationLimitMb": 32,
+              "milliseconds": 78.51860299999998,
+              "parentTicks": 6,
+              "recovery": true
+            },
+            {
+              "name": "extractor-heap",
+              "oldGenerationLimitMb": 512,
+              "sourceFiles": 9,
+              "sourcePayloadBytes": 8231120,
+              "parentTicks": 258,
+              "milliseconds": 2741.724073,
+              "recovery": true
+            },
+            {
+              "name": "large-package",
+              "files": 2402,
+              "sourceBytes": 50196963,
+              "oversizedBytes": 2097152,
+              "milliseconds": 238.12137800000028,
+              "scanComplete": false,
+              "sourceExecuted": false
+            },
+            {
+              "name": "report-contention",
+              "requests": 64,
+              "computesBeforeRefresh": 1,
+              "milliseconds": 116.49945700000035,
+              "failedRefreshRetainedReport": true
+            }
+          ],
+          "privateProfileCleanupVerified": true
+        }
       },
       "workerDefaults": {
         "timeoutMs": 10000,
@@ -410,7 +480,19 @@
         "verified": false,
         "status": "deferred by explicit user choice until an actual environment is available"
       },
-      "scope": "Owned synthetic/local platform samples only. V8 worker heap caps do not cap external buffers or whole-process RSS. No production latency, arbitrary process sandbox, Linux x64 live DSH or other DSH-version certification."
+      "scope": "Owned synthetic/local platform samples only. V8 worker heap caps do not cap external buffers or whole-process RSS. No production latency, arbitrary process sandbox, Linux x64 live DSH or other DSH-version certification.",
+      "independentReview": {
+        "reviewedCommit": "3637bbd",
+        "importantFindings": 1,
+        "fixedImportantFindings": 1,
+        "newRegressionTests": 3,
+        "singleRepairPass": true,
+        "minorFindings": 1,
+        "deferredMinors": [
+          "Timeout metric lacks a counter-start assertion and a generous elapsed ceiling; current test asserts parent scheduling, stopped worker and later recovery."
+        ],
+        "scope": "Owned process lifecycle: early pipe EOF, already-signalled host, leader exiting before TERM-ignoring same-group descendant. Shared idempotent cleanup tested on macOS and Linux; Windows deferred."
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

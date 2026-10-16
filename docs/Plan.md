@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-更新于2026-10-16，适用于`dsh-plugin-compat-check`的0.1.1候选版。P0真实集成验收、三项P1及§6两小项与有界P2分析已完成，源码在`codex/compat-evidence-refactor`工作分支维护，尚未发布npm；后续工作见[§6](#6-后续工作与发布)。
+更新于2026-10-16，适用于`dsh-plugin-compat-check`的0.1.1候选版。P0真实集成验收、三项P1及§6两小项、有界P2分析及Linux/资源工程验证已完成，源码在`codex/compat-evidence-refactor`工作分支维护，尚未发布npm；后续工作见[§6](#6-后续工作与发布)。
 
 本文只维护现行约束、关键决策、验证边界和下一步。用法与目录见[README](../README.md)，测试及环境事实以[docs/current-state.json](current-state.json)为准；原始问题见[历史审计](GPT审计及重构方案文档.md)，旧提取器反例见[extraction-findings](extraction-findings.md)。详细施工过程从Git历史查阅，不再逐轮累加报告。
 
@@ -128,7 +128,7 @@ desktop库存为21插件的**部分静态样本**：50服务、125分端方法�
 | 本机回归 | 默认套件最新结果见current-state；2026-10-15联合31项通过，其中24项离线、7项真实DSH/Chrome。格式、文档与发布前检查通过；手工及自动现场均按所有权清理 |
 | Linux CI（2026-10-16） | [GitHub Actions](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38787562650)在Ubuntu通过Node22.19.0/24的依赖安装、格式和发布前闸门；对应修复6a919cb。修复打包测试强制离线依赖历史缓存的问题，并补全失败日志。未启动真实DSH/Chrome；该次CI不覆盖本轮P2新增代码 |
 | P2工程（2026-10-16） | 本地Ubuntu24.04.5 arm64虚拟机已通过真实DSH0.2.0-rc.2及资源验收，详见§5.3。与上行历史GitHub CI分开记录 |
-| 其它环境 | 本机Node22.19.0/26.11.1默认套件通过；重构阶段Node24.21属于历史记录。Windows按用户选择待验收；Linux x64真实DSH及其它DSH版本未验收 |
+| 其它环境 | 本机Node22.19.0/26.11.1默认套件通过；Linux另实跑Node24.21.0。Windows按用户选择待验收；Linux x64真实DSH及其它DSH版本未验收 |
 
 P2分析阶段（2026-10-16）的460项在Node22.19.0/26.11.1通过；联合127项通过，其中120项离线、7项真实DSH/Chrome，私有环境按所有权清理。最终复核的10类重要问题均通过失败反例修复，P2有86项有界回归（含28项复核反例/变体）。
 
@@ -177,14 +177,16 @@ node tools/labels.mjs --nm web --synthetic --json
 
 ### 5.3 P2工程验收
 
-2026-10-16在macOS arm64及临时Ubuntu24.04.5 arm64（QEMU、Linux6.8.0-142、Node22.19.0、DSH0.2.0-rc.2、pnpm11.25.0）实跑。使用私有目录、实际tgz及受控输入，不发送模型对话；本机Node22/26默认各478项、真实集成22项通过；Linux默认403项通过、1项因缺少外部parityfix跳过，真实集成18项通过。具体耗时和版本见current-state的`engineering`。Linux实测发现并修复了复制pnpm锁文件后本地路径失效的问题；结构化迁移由仓库专用yaml2.8.1完成，不增加发布插件依赖。
+2026-10-16在macOS arm64及临时Ubuntu24.04.5 arm64（QEMU、Linux6.8.0-142、Node22.19.0/24.21.0、DSH0.2.0-rc.2、pnpm11.25.0）实跑。使用私有目录、实际tgz及受控输入，不发送模型对话；本机Node22/26默认各481项、真实集成22项通过；Linux两版默认各406项通过、1项因缺少外部parityfix跳过，真实集成18项通过。具体耗时和版本见current-state的`engineering`。Linux实测发现并修复了复制pnpm锁文件后本地路径失效的问题；结构化迁移由仓库专用yaml2.8.1完成，不增加发布插件依赖。
 
-工程脚本覆盖2402文件/约50MB源码的预算弃权、220ms超时、32MiB受控堆与默认512MiB实际提取器堆耗尽/恢复、64请求single-flight、8进程192次基线争用及原子读取。真实宿主另验证4000函数输入下，3个并发刷新期间仍可读取有效缓存报告；成功响应必须发生在刷新尚未结束时。取消命令会等待自有子进程退出并回收管道；这不构成任意派生进程的OS隔离。V8堆限制也不是全进程RSS或外部Buffer上限，单次合成耗时不是生产性能认证。
+工程脚本覆盖2402文件/约50MB源码的预算弃权、220ms超时、32MiB受控堆与默认512MiB实际提取器堆耗尽/恢复、64请求single-flight、8进程192次基线争用及原子读取。真实宿主另验证4000函数输入下，3个并发刷新期间仍可读取有效缓存报告；成功响应必须发生在刷新尚未结束时。取消命令会等待自有子进程退出并回收管道，组长退出后仍完成同组进程的升级终止；这不构成任意派生进程的OS隔离。V8堆限制也不是全进程RSS或外部Buffer上限，单次合成耗时不是生产性能认证。
 
 ```bash
 node tools/engineering-check.mjs       # JSON指标；私有输入，无需DSH
 DSC_SLOW=1 node --test --test-reporter=tap test/engineering-live.test.mjs test/profile-lock.test.mjs
 ```
+
+独立复核发现1项进程生命周期问题，已用3项回归修复：管道先关闭、宿主已被信号终止、组长先于忽略TERM的同组后代退出；修复后各平台套件及真实集成重新通过，临时VM与密钥已删除。保留1项低优先级改进：为超时度量增加任务已启动断言及宽松的耗时上限。
 
 GitHub工作流已加入同一工程脚本及固定官方DSH/pnpm的Linux真实验收，并保留失败TAP/指标产物；**新任务尚未推送触发，不能冒充远程CI已通过**。Windows按用户选择保留待验收；Linux本轮是arm64本地VM，尚不代表x64现场或其它DSH版本。
 

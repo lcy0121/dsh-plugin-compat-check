@@ -6,7 +6,7 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { performance } from "node:perf_hooks";
-import { command } from "../lib/probe-runner.mjs";
+import { command, stopOwnedChild } from "../lib/probe-runner.mjs";
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-live-engineering-"));
 const home = path.join(root, "home"),
@@ -50,24 +50,8 @@ const run = async (executable, args, overrides = {}) => {
   return r.output;
 };
 async function stop() {
-  if (!host?.pid || host.exitCode !== null) return;
-  hostStopped = false;
-  await new Promise((resolve) => {
-    let timer;
-    host.once("exit", () => {
-      clearTimeout(timer);
-      hostStopped = true;
-      resolve();
-    });
-    const signal = (s) => {
-      try {
-        if (process.platform === "win32") host.kill(s);
-        else process.kill(-host.pid, s);
-      } catch {}
-    };
-    signal("SIGTERM");
-    timer = setTimeout(() => signal("SIGKILL"), 1500);
-  });
+  await stopOwnedChild(host);
+  hostStopped = true;
 }
 for (const signal of ["SIGTERM", "SIGINT"])
   process.once(signal, async () => {
