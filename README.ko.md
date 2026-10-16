@@ -6,7 +6,7 @@
 
 ## 버전과 배포
 
-로컬 소스는 **미배포0.1.1 후보 버전**입니다. 2026-10-15에 확인한 npm `latest`는 **0.1.0**이며 미배포 수정 사항을 포함하지 않습니다. [공개 메타데이터 검토](docs/Plan.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
+로컬 소스는 **미배포0.1.1 후보 버전**입니다. 2026-10-16에 확인한 npm `latest`는 **0.1.0**이며 미배포 수정 사항을 포함하지 않습니다. [공개 메타데이터 검토](docs/Plan.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
 
 | 진입점 | 역할 |
 |---|---|
@@ -21,10 +21,11 @@
 
 ### 저장소 CLI
 
-아래 명령은 이미 확보한0.1.1 후보 소스에 적용됩니다. 현재 공개main에는 새 루트 워크스페이스가 없으며 후보 버전의 공개ref는 아직 push되지 않았습니다.
+GitHub main에는 0.1.1 후보 핵심 소스와 루트 개발 워크스페이스가 포함되어 있습니다. 이후 로컬 변경과 공개 커밋은 Plan에 구분하여 기록하며, 기존 npm 패키지에는 후보 수정이 포함되지 않습니다. 저장소를 받은 뒤 루트에서 의존성을 설치하세요:
 
 ```bash
-cd /path/to/dsh-plugin-compat-check
+git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
+cd dsh-plugin-compat-check
 npm ci --ignore-scripts
 
 node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
@@ -50,7 +51,7 @@ node bin/compat-check.mjs --help
 ### 플러그인과 skill
 
 ```bash
-# npm 배포 버전 설치 (현재0.1.0)
+# npm 배포 버전 설치 (2026-10-16 확인: 0.1.0)
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # CLI 사용자의 독립 skill
@@ -68,7 +69,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 node bin/check-install.mjs <spec> --json
 ```
 
-Node, DSH, pnpm이 필요하며 npm 조회와 설치는 네트워크를 사용할 수 있습니다. spec은 DSH의 npm/GitHub/git/file 형식을 따릅니다. 실행마다 고유한 임시 profile과 비공개 디렉터리를 사용하고 자신이 시작한 프로세스만 정리합니다. **임시 profile은 운영체제 샌드박스가 아닙니다.**
+Node, DSH, pnpm이 필요하며 의존성 해결과 설치는 네트워크를 사용할 수 있습니다. spec은 DSH의 npm/GitHub/git/file 형식을 따릅니다. 실행마다 고유한 임시 profile과 비공개 디렉터리를 사용하고 자신이 시작한 프로세스만 정리합니다. **임시 profile은 운영체제 샌드박스가 아닙니다.**
 
 | 옵션 | 기능 |
 |---|---|
@@ -83,7 +84,7 @@ CLI 및 Node 설치 검사 결과 코드:
 | 코드 | 의미 |
 |---|---|
 | `0` | 보고된 문제 없음; coverage·vacuous·관측 제한 확인 필요 |
-| `1` | 부분 사용 가능한 플러그인 존재 |
+| `1` | 부분 사용 가능하거나 판정이 미확정인 플러그인 존재 |
 | `2` | 호환되지 않는 플러그인 또는 명확한 설치 peer 차단 |
 | `3` | 입력·설치·네트워크·준비·시작 오류, 판정 불가 |
 
@@ -134,9 +135,9 @@ node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-`doc-check`는 링크·버전·문서 진입점·skill 복사본을 오프라인 검사하며 테스트를 실행하지 않습니다. 성공한 TAP 로그로 `node tools/update-current-state.mjs --test-summary <log>` 후 `node tools/doc-check.mjs --test-summary <log>`를 실행하세요. 배포 전 검사는 기본 전체 테스트를 한 번 실행하고 요약을 재사용하며 독립 tarball 설치 후 실제 호스트 도구를 호출합니다. 이 패키지 검증은 비공개 빈 npm 캐시와 npm registry 접속을 사용하며 기존 로컬 캐시에 의존하지 않습니다. 메타데이터 검사는 네트워크와 gh/npm이 필요합니다. 미배포 로컬 버전·README 차이는 notice이고 조회 실패는 미검증입니다.
+`doc-check`는 링크·버전·문서 진입점·skill 복사본을 오프라인 검사하며 테스트를 실행하지 않습니다. 성공한 TAP 로그로 `node tools/update-current-state.mjs --test-summary <log>` 후 `node tools/doc-check.mjs --test-summary <log>`를 실행하세요. 배포 전 검사는 기본 전체 테스트를 한 번 실행하고 요약을 재사용하며 독립 tarball 설치 후 제어된 호스트 컨텍스트에서 등록된 도구를 호출합니다. 실제 DSH를 시작하는 검사는 아닙니다. 이 패키지 검증은 비공개 빈 npm 캐시와 npm registry 접속을 사용하며 기존 로컬 캐시에 의존하지 않습니다. 메타데이터 검사는 네트워크와 gh/npm이 필요합니다. 미배포 로컬 버전·README 차이는 notice이고 조회 실패는 미검증입니다.
 
-느린 통합 검사는 명시적 `DSC_SLOW=1`이 필요합니다. 2026-10-15에 정상 도착, 클라이언트 파일 누락, import 예외 및 런타임 음성 대조를 포함한 실제 DSH·Chrome 테스트6개가 통과했습니다. 환경과 명령은 [Plan](docs/Plan.md)을 참고하세요. 2026-10-16에 Ubuntu24.04.5 arm64 VM에서 실제 DSH0.2.0-rc.2, tgz/HTTP 응답 및 자원 시나리오를 검증했습니다. Windows는 합의에 따라 보류합니다. 새 Linux CI 결과는 해당 커밋의 GitHub Actions에서 확인하며 과거 CI 증거와 구분합니다. [Plan 엔지니어링 검증](docs/Plan.md#53-p2工程验收)을 참고하세요. 과거88.3% 재현율과 이번66/66 도착 수치는 기능 정확도가 아닙니다. Python parity는 구형 정규식 참고 구현이며 AST의 정답이 아닙니다.
+느린 통합 검사는 명시적 `DSC_SLOW=1`이 필요합니다. macOS DSH/Chrome, Ubuntu arm64 VM 및 Linux x64 CI 기록은 실제 tgz, 도구·skill, UI 대조와 자원 시나리오를 포함합니다. 정확한 커밋과 범위는 [Plan](docs/Plan.md#5-验证记录与复现)을 참고하세요. 과거 CI가 이후 로컬 단언·문서 변경을 인증하지는 않으며 Windows는 보류합니다. [엔지니어링 재현](docs/Plan.md#53-p2工程验收)을 참고하세요. 과거 88.3% 재현율, 66/66 도착 및 loader 라벨은 업무 기능 정확도가 아닙니다. Python parity도 구형 정규식 참고이며 AST의 정답이 아닙니다.
 
 보조 측정은 독립 loader 원시 라벨과 서비스 관측만 받는 예측기를 분리합니다. [Plan 보조 측정 기록](docs/Plan.md#51-已验证范围)을 참고하세요. `node tools/labels.mjs --nm web --synthetic --json`은 비공개 환경을 만들고 실제 누락을 보고하면 exit1을 반환합니다. 기존 대상은 `--probe-boot`, 파일 입력은 `--probe`와 `--labels`를 함께 사용합니다. 이 수치는 첫 계층의 해당 표본에만 적용되며 생태계 정확도가 아닙니다.
 

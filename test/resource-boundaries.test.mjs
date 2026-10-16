@@ -43,20 +43,25 @@ test("worker success is returned only after its CPU job has stopped", async () =
 });
 test("worker timeout leaves the parent responsive and a later extraction works", async () => {
   const run = supervisor(),
-    counter = new SharedArrayBuffer(4);
+    counter = new SharedArrayBuffer(4),
+    // Allow cold worker startup under concurrent CI load; production stays at 10s.
+    timeoutMs = 1000,
+    totalElapsedLimitMs = 5000;
   let ticks = 0;
   const timer = setInterval(() => ticks++, 10),
     start = performance.now();
   try {
     await assert.rejects(
-      run(job, { action: "cpu", counter }, { timeoutMs: 220 }),
+      run(job, { action: "cpu", counter }, { timeoutMs }),
       (e) => e.code === "DSC_WORKER_TIMEOUT",
     );
   } finally {
     clearInterval(timer);
   }
+  const timeoutMilliseconds = performance.now() - start,
+    stopped = Atomics.load(new Int32Array(counter), 0);
+  assert.ok(stopped > 0, "CPU job must have started before its timeout");
   assert.ok(ticks >= 3, "worker computation must not block parent timers");
-  const stopped = Atomics.load(new Int32Array(counter), 0);
   await new Promise((r) => setTimeout(r, 20));
   assert.equal(Atomics.load(new Int32Array(counter), 0), stopped);
   const f = packageFixture("export function apply(ctx){ctx.settings.known()}");
@@ -66,8 +71,18 @@ test("worker timeout leaves the parent responsive and a later extraction works",
   } finally {
     f.cleanup();
   }
+  const milliseconds = performance.now() - start;
+  assert.ok(
+    milliseconds < totalElapsedLimitMs,
+    `timeout and recovery must settle within ${totalElapsedLimitMs}ms (got ${milliseconds}ms)`,
+  );
   record("timeout", {
-    milliseconds: performance.now() - start,
+    milliseconds,
+    timeoutMilliseconds,
+    timeoutBudgetMs: timeoutMs,
+    totalElapsedLimitMs,
+    counterAtTimeout: stopped,
+    workerStarted: true,
     parentTicks: ticks,
     workerStopped: true,
     recovery: true,
