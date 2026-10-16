@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "_note": "由 `node test/snapshot.test.mjs --update` 生成。哈希只在这里出现一次，因为「变了没有」由它回答；「变错了没有」由 __expectations__/ 里人写的判据回答。",
   "extract": {
-    "hash": "38ff7f37fb9700813bcf42de37aa7977329903a681f1c5a4076cd6dec68d1dda",
+    "hash": "ee06710a156b9e9a28f9d28d47662c47088414eab0bac7ad62ab94e42f1a0bb4",
     "manifests": [
       {
         "name": "@omdsh-dev/dsh-plugin-check",
@@ -51,7 +51,7 @@
       },
       {
         "name": "dsh-plugin-compat-check-probe",
-        "version": "0.1.0",
+        "version": "0.1.1",
         "dshBundle": true,
         "clientPlatform": null,
         "clientInject": null,
@@ -66,10 +66,10 @@
       "connection",
       "credentials",
       "deepseekAccount",
-      "get",
       "jobs",
       "llm",
       "locale",
+      "logger",
       "remote",
       "remote.commands",
       "settings",
@@ -80,7 +80,7 @@
     ],
     "fallbackPackages": [],
     "providedServices": [],
-    "siteTotal": 32,
+    "siteTotal": 42,
     "buckets": {
       "@omdsh-dev/dsh-plugin-check": {
         "host-entry": 10,
@@ -152,16 +152,7 @@
         "unresolvedBindings": [],
         "ambiguousAliases": [],
         "subContexts": [
-          "lib/build-check.js:ctx",
-          "lib/ecosystem.js:ctx",
-          "lib/form.js:ctx",
-          "lib/hub.js:ctx",
-          "lib/index.js:ctx",
-          "lib/manifest.js:ctx",
-          "lib/patch.js:ctx",
-          "lib/paths.js:ctx",
-          "lib/registry.js:ctx",
-          "lib/report.js:ctx"
+          "lib/index.js:ctx"
         ]
       },
       "dsh-keep-awake": {
@@ -181,6 +172,7 @@
           "agents",
           "jobs",
           "locale",
+          "logger",
           "settings",
           "slots",
           "timer",
@@ -190,6 +182,7 @@
           "agents",
           "jobs",
           "locale",
+          "logger",
           "settings",
           "slots",
           "timer",
@@ -208,6 +201,9 @@
             "register",
             "subscribe"
           ],
+          "logger": [
+            "warn"
+          ],
           "settings": [
             "register"
           ],
@@ -220,27 +216,30 @@
           ]
         },
         "via": {
-          "alias": 13
+          "alias": 13,
+          "ctx-member": 2
         },
         "siteCounts": {
           "agents": 1,
           "jobs": 3,
           "locale": 4,
+          "logger": 2,
           "settings": 1,
           "slots": 2,
           "webServer": 2
         },
         "localBindings": [
-          "agents->agents/ctx-get",
           "jobs->jobs/ctx-get",
-          "locale->locale/ctx-get",
+          "agents->agents/ctx-get",
           "settings->settings/ctx-get",
+          "webServer->webServer/ctx-get",
           "slots->slots/ctx-get",
-          "webServer->webServer/ctx-get"
+          "locale->locale/ctx-get"
         ],
         "providedServices": [],
         "guardedPairs": [
-          "jobs.onJobsChanged"
+          "jobs.onJobsChanged",
+          "logger.warn"
         ],
         "shadowedBare": [],
         "unresolvedBindings": [],
@@ -270,9 +269,9 @@
           "connection",
           "credentials",
           "deepseekAccount",
-          "get",
           "llm",
           "locale",
+          "logger",
           "remote",
           "remote.commands",
           "slots",
@@ -287,6 +286,7 @@
           "deepseekAccount",
           "llm",
           "locale",
+          "logger",
           "remote",
           "remote.commands",
           "slots",
@@ -295,6 +295,9 @@
         "calls": {
           "agentDefaultModel": [
             "currentSelection"
+          ],
+          "commandUi": [
+            "decorate"
           ],
           "commands": [
             "register"
@@ -307,6 +310,7 @@
           ],
           "llm": [
             "listConfigurableProviders",
+            "listModels",
             "listProviders",
             "resolveModelInfo",
             "stream"
@@ -314,6 +318,10 @@
           "locale": [
             "bind",
             "register"
+          ],
+          "logger": [
+            "info",
+            "warn"
           ],
           "slots": [
             "inject",
@@ -324,34 +332,44 @@
           ]
         },
         "via": {
-          "alias": 6,
-          "ctx-member": 12
+          "alias": 8,
+          "ctx-member": 18
         },
         "siteCounts": {
-          "agentDefaultModel": 1,
+          "agentDefaultModel": 2,
+          "commandUi": 1,
           "commands": 3,
           "credentials": 1,
           "deepseekAccount": 1,
-          "llm": 5,
+          "llm": 6,
           "locale": 2,
+          "logger": 5,
           "slots": 4,
           "webServer": 1
         },
         "localBindings": [
-          "account->deepseekAccount/ctx-get-soft",
-          "commandUi->get/ctx-member",
-          "llm->llm/ctx-member"
+          "llm->llm/ctx-member",
+          "llm->llm/ctx-member",
+          "llm->llm/ctx-member",
+          "llm->llm/ctx-member",
+          "llm->llm/ctx-member",
+          "llm->llm/ctx-member",
+          "account->deepseekAccount/ctx-get",
+          "commandUi->commandUi/ctx-get",
+          "commandUi->commandUi/ctx-get"
         ],
         "providedServices": [],
         "guardedPairs": [
+          "commandUi.decorate",
           "llm.listConfigurableProviders",
+          "llm.listModels",
           "llm.listProviders",
-          "llm.resolveModelInfo"
+          "llm.resolveModelInfo",
+          "logger.info",
+          "logger.warn"
         ],
         "shadowedBare": [],
-        "unresolvedBindings": [
-          "lib/client.js:commandUi->get"
-        ],
+        "unresolvedBindings": [],
         "ambiguousAliases": [],
         "subContexts": [
           "lib/index.js:ctx",
@@ -359,7 +377,7 @@
         ]
       },
       "dsh-plugin-compat-check-probe": {
-        "version": "0.1.0",
+        "version": "0.1.1",
         "files": {
           "host-entry": [
             "index.mjs"
@@ -381,18 +399,19 @@
         "unresolvedBindings": [],
         "ambiguousAliases": [],
         "subContexts": [
-          "index.mjs:ctx"
+          "index.mjs:ctx,sctx"
         ]
       }
     }
   },
   "verdict": {
-    "hash": "fc7c55674539fab670ebf56f0328f922fd7afeb411a6fc31d9149f7efdae2702",
+    "hash": "ebe201ffe063f016aee070139cbc97bd0b7f326af73f92e348773f852aca28fc",
     "summary": {
       "ok": 3,
       "partial": 1,
       "broken": 0,
       "unknown": 0,
+      "limited": 4,
       "vacuousOk": 1
     },
     "plugins": {
@@ -424,27 +443,30 @@
           "jobs.onJobsChanged"
         ],
         "abstained": [],
-        "runtimeFacilities": []
+        "runtimeFacilities": [
+          "logger"
+        ]
       },
       "dsh-pet": {
         "verdict": "ok",
         "findings": [],
         "clientSide": [
           "commandUi",
+          "connection",
           "locale",
           "remote",
           "remote.commands",
           "slots"
         ],
         "filtered": [
-          "llm.listConfigurableProviders",
-          "llm.listProviders"
+          "llm.listProviders",
+          "llm.listConfigurableProviders"
         ],
         "abstained": [
           "deepseekAccount"
         ],
         "runtimeFacilities": [
-          "get"
+          "logger"
         ]
       },
       "dsh-plugin-compat-check-probe": {

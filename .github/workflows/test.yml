@@ -1,0 +1,60 @@
+name: Tests
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['22.19.0', '24']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run format:check
+      - run: node plugin/scripts/prepublish-check.mjs
+        env:
+          DSC_QUIET_SKIP_NOTICE: '1'
+      - run: node tools/engineering-check.mjs > engineering.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: engineering-node-${{ matrix.node }}
+          path: engineering.json
+  linux-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Install pinned official DSH and pnpm in a private runner prefix
+        shell: bash
+        run: |
+          npm install --prefix "$RUNNER_TEMP/dsh-runtime" --no-audit --no-fund @deepseek-ai/dsh@0.2.0-rc.2 pnpm@11.25.0
+          echo "$RUNNER_TEMP/dsh-runtime/node_modules/.bin" >> "$GITHUB_PATH"
+      - name: Real private Linux DSH, loader labels and artifact responsiveness
+        shell: bash
+        env:
+          DSC_SLOW: '1'
+          DSC_ENGINEERING_LIVE_LOG: linux-engineering.json
+        run: |
+          test_status=0
+          node --test --test-reporter=tap test/probe-boot.test.mjs test/labels.test.mjs test/engineering-live.test.mjs test/profile-lock.test.mjs > linux-live.tap 2>&1 || test_status=$?
+          cat linux-live.tap
+          exit "$test_status"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-live-evidence
+          path: |
+            linux-live.tap
+            linux-engineering.json

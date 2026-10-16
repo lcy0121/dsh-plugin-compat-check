@@ -43,6 +43,8 @@ import { REPO } from './helpers.mjs'
 // （fs / os / path / url / module），这样替身的行为与真身完全一致。
 const nodeRequire = createRequire(import.meta.url)
 
+import * as hostResources from '../plugin/lib/host-resources.js'
+import * as reportContract from '../plugin/lib/report-contract.js'
 const HOST = path.join(REPO, 'plugin', 'index.js')
 const SRC = fs.readFileSync(HOST, 'utf8')
 
@@ -66,7 +68,8 @@ function loadHost(env = {}) {
   sandbox.globalThis = sandbox
   vm.createContext(sandbox)
   // 把 ESM 的 import 换成受控替身；导出换成赋值
-  const cjs = SRC
+  const cjs = SRC.replace(/^import.*from '\.\/lib\/host-resources\.js';?$/gm, 'const {privateDiagnostic,loaderObservations}=__hostResources;')
+    .replace(/^import.*from '\.\/lib\/report-contract\.js';?$/gm, 'const {assertEnvelope,failureEnvelope}=__reportContract;')
     .replace(/^import\s+\{([^}]+)\}\s+from\s+'node:([^']+)';?$/gm, (m, names, mod) => {
       const pairs = names.split(',').map((s) => s.trim()).filter(Boolean)
       return pairs.map((p) => {
@@ -88,6 +91,8 @@ function loadHost(env = {}) {
     .replace(/\bexport\s+const\s+/g, 'const ')
     .replace(/\bexport\s+function\s+/g, 'function ')
     .replace(/\bexport\s+default\s+/g, 'const __default = ')
+  sandbox.__hostResources=hostResources
+  sandbox.__reportContract=reportContract
   sandbox.__importMetaUrl = pathToFileURL(HOST).href
   sandbox.__node = (mod, name) => {
     const m = name === 'default' ? nodeRequire(`node:${mod}`) : nodeRequire(`node:${mod}`)[name]
@@ -184,7 +189,7 @@ describe('宿主半边：DSH 版本（F1 的闭合）', () => {
   })
 
   test('解析用的路径**不写死 macOS**（要跨平台）', () => {
-    // §2 第 6 题：Windows 是一等目标。反推 dsh 根的正则必须同时接受 / 与 \。
+    // Plan §5.1：Windows未现场验证；路径解析仍须同时接受 / 与 \。
     //
     // 断言方式刻意避开"在测试里再写一层反斜杠" —— 那本身就是个错误来源。
     // 改为检查源码里那个正则的**字面形态**：字符类里必须同时出现这两种分隔符。

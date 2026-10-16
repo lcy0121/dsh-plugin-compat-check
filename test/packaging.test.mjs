@@ -23,13 +23,32 @@
 
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
+import {execFileSync, spawnSync}  from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
 const REPO = path.resolve(new URL('.', import.meta.url).pathname, '..')
 const PLUGIN = path.join(REPO, 'plugin')
+
+test('发布闸门保留TAP失败详情和文档校验错误', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-release-errors-'));
+  try {
+    for (const sub of ['lib', 'plugin/scripts', 'tools']) fs.mkdirSync(path.join(dir, sub), {recursive:true});
+    fs.copyFileSync(path.join(PLUGIN,'scripts/prepublish-check.mjs'), path.join(dir,'plugin/scripts/prepublish-check.mjs'));
+    fs.writeFileSync(path.join(dir,'lib/version.mjs'), 'export const TOOL_VERSION="0.1.1";');
+    fs.writeFileSync(path.join(dir,'plugin/package.json'), JSON.stringify({version:'0.1.1'}));
+    for (const mode of ['test', 'docs']) {
+      fs.writeFileSync(path.join(dir,'tools/run-tests.mjs'), mode === 'test'
+        ? 'console.log("TAP version 13\\nnot ok 1 - controlled failing case\\n  error: controlled assertion\\n# tests 1\\n# fail 1");process.exitCode=1;'
+        : 'console.log("TAP version 13\\nok 1 - sample\\n# tests 1\\n# fail 0");');
+      fs.writeFileSync(path.join(dir,'tools/doc-check.mjs'), 'console.error("controlled document mismatch");process.exitCode=1;');
+      const out = spawnSync(process.execPath,[path.join(dir,'plugin/scripts/prepublish-check.mjs')],{encoding:'utf8'});
+      assert.equal(out.status,1);
+      assert.match(out.stderr, mode === 'test' ? /controlled failing case[\s\S]*controlled assertion/ : /controlled document mismatch/);
+    }
+  } finally { fs.rmSync(dir,{recursive:true,force:true}); }
+});
 
 describe('打包自足性：npm pack 出来的包必须自己能算结论', () => {
   test('prepack 暂存器本身是可用的、且自证会失败', () => {
@@ -42,7 +61,7 @@ describe('打包自足性：npm pack 出来的包必须自己能算结论', () =
     assert.match(src, /dsh-api-catalog\.json/, '暂存器没有复查 rules/ 里的目录文件')
   })
 
-  test('npm pack 的产物里有内核，且暂存目录用完即清', () => {
+  test('npm pack 产物从空缓存安装后可执行，且暂存目录用完即清', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-pack-'))
     try {
       const out = execFileSync('npm', ['pack', '--pack-destination', tmp], {
@@ -59,9 +78,36 @@ describe('打包自足性：npm pack 出来的包必须自己能算结论', () =
       const list = execFileSync('tar', ['-tzf', tgz], { encoding: 'utf8' })
       for (const need of ['kernel/lib/extract.mjs', 'kernel/lib/verdict.mjs',
         'kernel/lib/baseline.mjs', 'kernel/rules/dsh-api-catalog.json',
-        'kernel/rules/severity.json', 'lib/client.js', 'index.js']) {
+        'kernel/rules/severity.json','kernel/lib/source-analysis.mjs','kernel/lib/extract-worker.mjs','kernel/lib/state-store.mjs','LICENSE', 'lib/client.js', 'index.js']) {
         assert.ok(list.includes(need), `tarball 里缺少 ${need} —— 装上去就是"找不到判定内核"`)
       }
+      const install=path.join(tmp,'installed');fs.mkdirSync(install);
+      // npm ci caches tarballs, but need not cache registry metadata. Resolve
+      // dependencies normally in an owned empty cache, as a fresh user would.
+      execFileSync('npm',['install','--ignore-scripts','--no-audit','--no-fund',tgz],{cwd:install,stdio:'pipe',timeout:120000,env:{...process.env,npm_config_cache:path.join(tmp,'npm-cache')}});
+      const artifact=path.join(install,'node_modules','dsh-plugin-compat-check');
+      const home=path.join(tmp,'home'),profile=path.join(home,'profiles','test');fs.mkdirSync(profile,{recursive:true});
+      fs.cpSync(path.join(REPO,'test/fixtures/micro/node_modules'),path.join(profile,'node_modules'),{recursive:true});
+      const entry=path.join(tmp,'run.mjs');
+      fs.writeFileSync(entry,`
+        import {pathToFileURL} from 'node:url';
+        const plugin=await import(pathToFileURL(${JSON.stringify(artifact+'/index.js')}).href);
+        let tool;
+        const loader={entries:()=>[]};
+        const ctx={get:k=>k==='loader'?loader:undefined,effect:()=>{},inject:(deps,fn)=>{
+          const sub={get:ctx.get};if(deps.includes('tools'))sub.tools={register:t=>tool=t};fn(sub);
+        }};
+        plugin.apply(ctx);
+        const out=await tool.execute({profile:'test'});
+        if(out.summary==='无法判定')throw new Error(JSON.stringify(out));
+        const report=await globalThis.__DSH_COMPAT_CHECK__.compatReport();
+        if(report.toolVersion!==${JSON.stringify(JSON.parse(fs.readFileSync(path.join(PLUGIN,'package.json'),'utf8')).version)})throw new Error('Artifact lost its kernel version');
+        if(!report.ok||report.report.manifests.length!==27)throw new Error('Artifact did not analyze the fixture');
+        console.log('packaged host computed 27 plugins');
+      `);
+      const executed=execFileSync(process.execPath,[entry],{cwd:install,encoding:'utf8',timeout:20000,env:{...process.env,DSH_HOME:home,DSC_AUTORUN_MS:'0',DSC_PROFILE:'test'}});
+      assert.match(executed,/packaged host computed 27 plugins/);
+
     } finally {
       fs.rmSync(tmp, { recursive: true, force: true })
     }

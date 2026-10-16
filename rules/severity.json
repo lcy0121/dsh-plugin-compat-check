@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "description": "服务/方法 → 严重度 + 影响面。判定由这张表驱动，不由 LLM 决定；表未覆盖的 API 落到 defaults。",
   "_coverageBasis": {
-    "usedServices": "rules/usage-inventory.json（快照）与 `node lib/extract.mjs ~/.dsh/profiles/desktop/node_modules <out>` 的真实输出（实测 58 个服务）",
+    "usedServices": "rules/usage-inventory.json：有版本、目标身份、AST来源及扫描完整性的新快照；旧数值仅在rules/README.md历史段保留",
     "serviceSemantics": "DSH 桌面端 app.asar 内官方生成的 API 目录（宿主 dsh-tool-cordis/lib/types/api-catalog.js、客户端 dsh-cordis-client-runner/lib/client.js）。每条 summary 与每个方法含义都取自它，不自行发明。",
     "coverageReport": "覆盖率的前后对比、\"有官方目录依据\"与\"从调用点推断\"的分列、以及**故意没填**的清单见 rules/README.md"
   },
@@ -11,7 +11,7 @@
     "summary": "这个服务是干什么的（人话，来自官方目录的 summary/description）",
     "severity": "只能是 fatal / feature-dead / degraded 三档之一，语义见 severityLevels",
     "impact": "一句人话：什么东西坏了，或者怎么个降级法。禁止\"可能有问题\"这类空话",
-    "basis": "该条判定的证据等级：catalog = 官方 API 目录的 summary/description 直接支持；catalog-description = 目录没声明方法，但官方 description 里明确写了这个方法；callsite = 目录里没有，依据是真实插件在该调用点上的代码（会在 evidence 里给出文件:行）",
+    "basis": "该条判定的证据等级：catalog = 官方 API 目录的 summary/description 直接支持；catalog-description = 目录没声明方法，但官方 description 里明确写了这个方法；callsite = 目录里没有，依据是真实插件在该调用点上的代码（会在 evidence 里给出文件:行）；official-source-runtime = 指定DSH版本官方实现与私有profile描述符观测互证",
     "evidence": "basis=callsite 时必须给出具体文件:行",
     "knownGoneIn": "已知在某个 DSH 版本起不再提供（沿用既有条目的写法）",
     "note": "补充说明；不影响判定"
@@ -120,7 +120,10 @@
       "methods": {
         "readImage": {
           "severity": "feature-dead",
-          "impact": "无法读取图片附件，视觉相关功能失效"
+          "impact": "使用readImage读取图片附件的操作无法完成",
+          "basis": "official-source-runtime",
+          "evidence": "@deepseek-ai/dsh-attachment-local/lib/index.js:1035 (DSH0.2.0-rc.2); private official-web descriptor probe",
+          "note": "官方目录未列出但运行时确实存在；缺失判断以当次完整方法观测为准"
         }
       }
     },
@@ -483,15 +486,13 @@
           "impact": "会话列表为空",
           "layer": "host"
         },
-        "map": {
-          "severity": "feature-dead",
-          "impact": "同上",
-          "layer": "host"
-        },
         "open": {
           "severity": "feature-dead",
-          "impact": "点击后无法跳转到会话",
-          "layer": "client"
+          "impact": "插件选择旧sessions.open回退路径时，会话跳转无法完成",
+          "layer": "client",
+          "basis": "callsite",
+          "evidence": "@michengai/dsh-archive-manager@1.0.19/lib/client.js:306",
+          "note": "仅客户端旧回退语义；主路径为uiWorkspace.openSession，不可用于宿主同名方法判定"
         },
         "fork": {
           "severity": "feature-dead",
@@ -501,11 +502,6 @@
         "binding": {
           "severity": "feature-dead",
           "impact": "会话绑定关系读不到",
-          "layer": "client"
-        },
-        "getSnapshot": {
-          "severity": "degraded",
-          "impact": "拿不到会话快照，相关 UI 显示不全",
           "layer": "client"
         },
         "liveEntryFor": {
@@ -545,22 +541,26 @@
         "announce": {
           "severity": "degraded",
           "impact": "宿主不再广播会话变化，插件的会话列表不会自动刷新",
-          "basis": "catalog"
+          "basis": "catalog",
+          "layer": "host"
         },
         "create": {
           "severity": "feature-dead",
           "impact": "建不了会话，插件无法开启新会话",
-          "basis": "catalog"
+          "basis": "catalog",
+          "layer": "host"
         },
         "enter": {
           "severity": "feature-dead",
           "impact": "进不去会话，插件的跳转/激活失效",
-          "basis": "catalog"
+          "basis": "catalog",
+          "layer": "host"
         },
         "flush": {
           "severity": "feature-dead",
           "impact": "会话变更写不下去，重启后这部分内容丢失",
-          "basis": "catalog"
+          "basis": "catalog",
+          "layer": "host"
         },
         "openSubagent": {
           "severity": "degraded",
@@ -592,10 +592,6 @@
         "update": {
           "severity": "feature-dead",
           "impact": "设置改不动"
-        },
-        "get": {
-          "severity": "feature-dead",
-          "impact": "读不到设置值，插件按默认值运行"
         },
         "installSection": {
           "severity": "feature-dead",
@@ -1029,28 +1025,158 @@
     ]
   },
   "needsReview": {
-    "_note": "既有条目里**看起来可疑、但本轮没有改**的项。改它们会改变输出，按 Plan.md §4 第 3 条应先摊开差异再由人决定，所以这里只登记证据。",
-    "items": [
+    "_note": "2026-10-15复核已完成；未验证的客户端运行时保持未知，不再列作未处理任务。",
+    "items": [],
+    "reviewed": [
       {
-        "entry": "sessions.open / sessions.getSnapshot",
-        "problem": "宿主与客户端两个官方目录里都没有这两个方法。客户端侧真正的跳转入口是 uiWorkspace.openSession，archive-manager 也是把它当回退用的。",
-        "evidence": "@michengai/dsh-archive-manager/lib/client.js（typeof openSession === 'function' ? openSession : N.sessions.open）"
+        "entry": "sessions.open",
+        "decision": "retain-client-legacy",
+        "reason": "客户端源码仅在uiWorkspace.openSession不可用时调用旧回退；宿主观测无open，客户端运行时未测，不能宣称已移除客户端API"
+      },
+      {
+        "entry": "sessions.getSnapshot",
+        "decision": "remove-unsupported-impact",
+        "reason": "宿主描述符无此方法，当前调用来自observable store等对象；无证据把store快照解释为sessions服务方法"
       },
       {
         "entry": "sessions.refresh",
-        "problem": "两个官方目录都没有它（客户端目录里有的是 refreshProjections）。无法判断是旧版 API 还是误报，故不补规则。",
-        "evidence": "@michengai/dsh-archive-manager/lib/client.js（typeof 守卫后调用）"
+        "decision": "no-rule",
+        "reason": "客户端源码使用typeof/可选调用守卫；宿主无此方法，不能为可选旧seam发明失效影响"
       },
       {
         "entry": "settings.get",
-        "problem": "0.2.0-rc.2 的宿主目录里 settings 没有 get（只有 configure/describe/mutate/prepareDocument/replace/update）。它可能和 settingsGet/externalDisable 一样来自插件自有的设置面。",
-        "evidence": "rules/dsh-api-catalog.json 的 host.settings.methods"
+        "decision": "remove-local-object-impact",
+        "reason": "宿主无get；better-sidebar buildApi中的getSettings返回局部settingsFace，非ctx.settings；没有证据支持插件必然按默认值运行"
       },
       {
         "entry": "attachments.readImage",
-        "problem": "宿主目录里是 readImageRequest，没有 readImage。条目本身写得通顺（“无法读取图片附件”），但方法名对不上，需要一次运行时探针来确认到底哪个是真的。",
-        "evidence": "rules/dsh-api-catalog.json 的 host.attachments.methods"
+        "decision": "retain-runtime-confirmed",
+        "reason": "官方目录省略此方法；运行时完整描述符与官方实现均确认存在，仅约束该读取路径影响"
+      },
+      {
+        "entry": "sessions.map",
+        "decision": "remove-historical-artifact-rule",
+        "reason": "旧集合误报留下的“同上”没有服务语义依据；真实Context上的同名调用不应被黑名单删去，也不应套用伪造影响"
       }
-    ]
+    ],
+    "evidence": {
+      "dshVersion": "0.2.0-rc.2",
+      "probedAt": "2026-10-15T12:50:23.833Z",
+      "profile": "private official web template (removed after sampling)",
+      "profileIdDigest": "09a867e8c1a29a9f5ebe23b5d30efe92ae1218429f297c2bed92ba1bffae9c5a",
+      "sampleId": "a45631f6-4603-4a57-b663-0b8fece40f8f",
+      "runtimeMethods": {
+        "attachments": {
+          "status": "present",
+          "namesComplete": true,
+          "methods": [
+            "__defineGetter__",
+            "__defineSetter__",
+            "__lookupGetter__",
+            "__lookupSetter__",
+            "admitEncodedFile",
+            "admitPromptContent",
+            "constructor",
+            "fileHostPath",
+            "hasOwnProperty",
+            "imageHostPath",
+            "isAttachmentError",
+            "isPrototypeOf",
+            "propertyIsEnumerable",
+            "readFileStream",
+            "readImage",
+            "readImageRequest",
+            "requestVersion",
+            "saveFile",
+            "saveFileStream",
+            "saveImage",
+            "saveImages",
+            "toLocaleString",
+            "toString",
+            "validateImage",
+            "validateImageBatch",
+            "valueOf"
+          ]
+        },
+        "sessions": {
+          "status": "present",
+          "namesComplete": true,
+          "methods": [
+            "__defineGetter__",
+            "__defineSetter__",
+            "__lookupGetter__",
+            "__lookupSetter__",
+            "_forkBoundary",
+            "_resolveForkSource",
+            "announce",
+            "constructor",
+            "create",
+            "detachEntered",
+            "emitDisposed",
+            "enter",
+            "flush",
+            "fork",
+            "get",
+            "hasOwnProperty",
+            "isPrototypeOf",
+            "list",
+            "liveEntryFor",
+            "prepare",
+            "propertyIsEnumerable",
+            "registerMessageProjection",
+            "toLocaleString",
+            "toString",
+            "valueOf"
+          ]
+        },
+        "settings": {
+          "status": "present",
+          "namesComplete": true,
+          "methods": [
+            "__defineGetter__",
+            "__defineSetter__",
+            "__lookupGetter__",
+            "__lookupSetter__",
+            "configure",
+            "constructor",
+            "describe",
+            "hasOwnProperty",
+            "importLegacyDocument",
+            "invalidate",
+            "isPrototypeOf",
+            "mutate",
+            "prepareDocument",
+            "propertyIsEnumerable",
+            "replace",
+            "schema",
+            "toLocaleString",
+            "toString",
+            "update",
+            "valueOf",
+            "write"
+          ]
+        }
+      },
+      "sources": [
+        {
+          "package": "@michengai/dsh-archive-manager",
+          "version": "1.0.19",
+          "file": "lib/client.js",
+          "sha256": "e427fb55c15c3e7b09404d17a35b6a81369434b5eacd9107388b87517bbcf5d5"
+        },
+        {
+          "package": "dsh-better-sidebar",
+          "version": "0.26.0",
+          "file": "lib/index.js",
+          "sha256": "9b2855f2e3d5b8c94432af6c7e353b4266211e9cb87fd6419e37d69b8e93389e"
+        },
+        {
+          "package": "@deepseek-ai/dsh-attachment-local",
+          "dshVersion": "0.2.0-rc.2",
+          "file": "lib/index.js",
+          "sha256": "dfe6e517a8aef173a0eb00753344dc91f2abf49d3bf7614dcc0198e426a1e94e"
+        }
+      ]
+    }
   }
 }

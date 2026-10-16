@@ -1,25 +1,9 @@
 #!/usr/bin/env node
 /**
- * `prepack` 钩子：把仓库内核（`../lib` + `../rules`）暂存进 `plugin/kernel/`，
- * 好让 `npm pack` / `npm publish` 产出的包**自足**。
- *
- * ## 为什么需要暂存，而不是直接把 kernel/ 提交进仓库
- *
- * 内核只有一份真源（仓库根的 `lib/` 与 `rules/`）。如果在 `plugin/kernel/` 里
- * **再放一份**并提交，那就是两份实现 —— 而"两份实现迟早漂移"正是这个项目
- * 从第一天起就在避免的事（见 Plan.md §2 第 6 题：否决双实现）。
- *
- * 所以内核**从不出现在 git 里**，只在 `npm pack` 的那几秒存在。
- * `plugin/kernel/` 已进 `.gitignore`，`postpack` 负责清掉。
- *
- * ## 为什么 `lib/` 只取三个文件
- *
- * 插件半边 import `extract` / `verdict` / `baseline` / `version`（见 index.js 的 `resolveKernelDir` 调用点）。
- * `version.mjs` 必须带上 —— 少了它，装好的包**报不出自己的版本**，
- * 而"结论可追溯"恰恰依赖它（Plan.md §2 第 9 题的「单版本」）。
- * `report.mjs` 是 CLI 的渲染层，插件半边不用它 —— 少打一个文件就少一处漂移面。
- * 但它**不影响正确性**（多打一个也无害），所以这里是"按实际 import 收窄"，
- * 而不是"少打能省空间"。
+ * Stage the single-source lib/rules tree into the npm plugin. Include transitive
+ * AST, observation, state and worker modules; only opt-in process/browser runners
+ * are excluded. Root LICENSE is copied at pack time. Kernel copies are ignored
+ * and postpack removes them; independent artifact execution tests completeness.
  */
 
 import fs from 'node:fs';
@@ -32,12 +16,14 @@ const REPO = path.resolve(PLUGIN, '..');
 const DEST = path.join(PLUGIN, 'kernel');
 
 // 插件半边真正 import 的内核模块（改 index.js 的 import 时要同步这里）
-const KERNEL_LIBS = ['extract.mjs', 'verdict.mjs', 'baseline.mjs', 'version.mjs'];
+const KERNEL_LIBS = fs.readdirSync(path.join(REPO,'lib')).filter(f=>f.endsWith('.mjs')&&!['probe-runner.mjs','debugger.mjs'].includes(f)).sort();
 
 function bail(message) {
   process.stderr.write(`[stage-kernel] ${message}\n`);
   process.exit(1);
 }
+
+if(!KERNEL_LIBS.includes('version.mjs'))bail('缺少必需的 lib/version.mjs');
 
 if (!fs.existsSync(path.join(REPO, 'lib', 'extract.mjs'))) {
   bail(`在 ${REPO}/lib 下找不到内核 —— prepack 必须在仓库检出里跑`);
@@ -46,6 +32,8 @@ if (!fs.existsSync(path.join(REPO, 'lib', 'extract.mjs'))) {
 fs.rmSync(DEST, { recursive: true, force: true });
 fs.mkdirSync(path.join(DEST, 'lib'), { recursive: true });
 fs.mkdirSync(path.join(DEST, 'rules'), { recursive: true });
+
+fs.copyFileSync(path.join(REPO,'LICENSE'),path.join(PLUGIN,'LICENSE'));
 
 for (const f of KERNEL_LIBS) {
   const src = path.join(REPO, 'lib', f);

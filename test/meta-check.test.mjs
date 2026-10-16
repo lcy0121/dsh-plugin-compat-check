@@ -84,7 +84,7 @@ describe('GitHub 规则逐条', () => {
 describe('npm 规则逐条 —— 重点是**两个方向严重度不同**', () => {
   const goodNpm = {
     version: pkg.version,
-    description: goodGh.description,
+    description: pkg.description,
     keywords: pkg.keywords,
     repository: pkg.repository,
   }
@@ -93,11 +93,18 @@ describe('npm 规则逐条 —— 重点是**两个方向严重度不同**', () 
     assert.deepEqual(runRules(NPM_RULES, goodNpm, local, {}), [])
   })
 
-  test('版本不一致 → error', () => {
-    const p = runRules(NPM_RULES, { ...goodNpm, version: '0.0.1' }, local, {})
+  test('npm 版本高于本地检出 → error', () => {
+    const p = runRules(NPM_RULES, { ...goodNpm, version: '99.0.0' }, local, {})
     const hit = p.find((x) => x.id === 'npm.version-matches')
     assert.ok(hit, '该报版本不一致')
     assert.equal(hit.severity, 'error')
+  })
+
+  test('本地候选版本高于 npm 已发布版本 → notice，不要求为消除漂移而发布', () => {
+    const p = runRules(NPM_RULES, { ...goodNpm, version: '0.1.0' }, { ...local, version: '0.1.1' }, {})
+    assert.equal(p.find(x => x.id === 'npm.version-matches')?.severity, 'notice')
+    const ahead = runRules(NPM_RULES, { ...goodNpm, version: '0.2.0' }, { ...local, version: '0.1.1' }, {})
+    assert.equal(ahead.find(x => x.id === 'npm.version-matches')?.severity, 'error')
   })
 
   test('⚠️ 本地多出来的 keywords = **notice**（npm 的 tarball 不可变，这是预期的）', () => {

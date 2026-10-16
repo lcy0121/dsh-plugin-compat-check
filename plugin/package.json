@@ -1,7 +1,7 @@
 {
   "name": "dsh-plugin-compat-check",
-  "version": "0.1.0",
-  "description": "Reports which installed DSH plugins are compatible with the current DSH version, with file:line and reason. The judgement kernel is staged into kernel/ at pack time, so the published tarball is self-contained.",
+  "version": "0.1.1",
+  "description": "Checks installed DSH plugins against the current DSH version, with source locations, runtime evidence and coverage limits. Includes a compatibility panel and agent tool.",
   "license": "MIT",
   "type": "module",
   "main": "index.js",
@@ -28,13 +28,14 @@
     "lib/",
     "cordis.patch.yml",
     "kernel/",
-    "scripts/"
+    "scripts/",
+    "LICENSE"
   ],
   "engines": {
     "node": "^22.19.0 || >=24"
   },
   "scripts": {
-    "prepack": "node scripts/stage-skill.mjs && node scripts/stage-kernel.mjs",
+    "prepack": "node scripts/stage-skill.mjs && node scripts/stage-contract.mjs && node scripts/stage-kernel.mjs",
     "postpack": "node scripts/unstage-kernel.mjs",
     "prepublishOnly": "node scripts/prepublish-check.mjs",
     "stage-skill": "node scripts/stage-skill.mjs"
@@ -48,8 +49,7 @@
     "compatibility",
     "health-check",
     "cordis",
-    "agent-skills",
-    "cli"
+    "agent-skills"
   ],
   "repository": {
     "type": "git",
@@ -58,5 +58,9 @@
   "homepage": "https://github.com/lcy0121/dsh-plugin-compat-check#readme",
   "bugs": {
     "url": "https://github.com/lcy0121/dsh-plugin-compat-check/issues"
+  },
+  "dependencies": {
+    "@babel/parser": "7.29.9",
+    "semver": "7.7.3"
   }
 }

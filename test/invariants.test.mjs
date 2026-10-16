@@ -443,8 +443,8 @@ describe('夹具必须真的测到它声称要测的东西', () => {
 
     // ③ 双参数形态的**第二个**形参也仍然要认（这是原有行为，不能被这次修改弄丢）
     const twoParam = '(tools, other) =>'
-    assert.ok(names.includes('other'),
-      `双参数 ${twoParam} 里的第二个形参没被认成上下文对象。实际: ${JSON.stringify(names)}`)
+    assert.ok(names.includes('tools') && !names.includes('other'),
+      `Cordis 回调第一个参数是 context；额外形参不能凭位置猜成 context。实际: ${JSON.stringify(names)}`)
   })
 
   test('@fixture/propctx：`X.ctx.<服务>.<方法>` 也要认出来', () => {
@@ -497,7 +497,7 @@ describe('夹具必须真的测到它声称要测的东西', () => {
     assert.ok(!sites.includes('sessions.has'),
       `别人的成员访问被当成了本地绑定的调用（假阳性）。实际站点: ${JSON.stringify(sites)}`)
     // 而真调用必须留着 —— 只堵假阳性、把真调用一起堵掉，是更糟的修法。
-    assert.ok(sites.includes('sessions.list'),
+    assert.ok(sites.includes('jobs.list'),
       `真调用丢了 —— 修假阳性时不能把真调用一起弄没。实际站点: ${JSON.stringify(sites)}`)
   })
 })

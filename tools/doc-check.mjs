@@ -1,79 +1,90 @@
 #!/usr/bin/env node
-/**
- * 「文档信息」的**全量**校验器 —— 包含测试层做不到的那一项。
- *
- * ## 为什么不能放在测试里
- *
- * 要验「文档写的断言条数 = 实测」，就得跑一遍测试套件。而**在测试文件里跑套件会自己调自己**：
- * 子进程会把 `test/docs.test.mjs` 也再跑一遍 → 无限递归。实测踩到过（一跑就挂）。
- *
- * 所以拆成两半：
- *
- * | 在哪 | 验什么 |
- * |---|---|
- * | `test/docs.test.mjs` | **便宜且不递归**的：文件数、编号连续性、交叉引用、跨文档一致性、旗标清单 |
- * | 本脚本（独立进程） | 需要**跑一次套件**才能拿到的：断言条数 |
- *
- * ## 用法
- *
- *     node tools/doc-check.mjs          # 校验，不一致就 exit 1
- *     node tools/doc-check.mjs --quiet  # 只报结论
- */
-
-import { execFileSync } from 'node:child_process';
+/** Offline document contracts and local links. Tests are never run recursively. */
 import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { TOOL_VERSION } from '../lib/version.mjs';
 
-const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const quiet = process.argv.includes('--quiet');
-const read = (rel) => fs.readFileSync(path.join(REPO, rel), 'utf8');
-
-/** 用户定义的「文档信息」 */
-const COUNT_DOCS = ['README.md', 'README.en.md', 'README.ko.md', 'Plan.md'];
-
-function realAssertionCount() {
-  const out = execFileSync(process.execPath, ['--test', 'test/'], {
-    cwd: REPO, encoding: 'utf8', timeout: 600000,
-  });
-  // ⚠️ 别用 `^ℹ tests (\d+)$` 配 `\b`：韩语/符号边界的坑见 doc 里那次教训。
-  // 这里直接找 `tests N` 这个形态。
-  const m = /ℹ tests (\d+)/.exec(out);
-  if (m === null) throw new Error('拿不到测试条数 —— `node --test` 的输出格式变了？');
-  return Number(m[1]);
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT_READMES = ['README.md', 'README.en.md', 'README.ko.md'];
+export function maintainedDocuments(root) {
+  return [...ROOT_READMES, 'plugin/README.md', 'plugin/skill/SKILL.md',
+    'skill/README.md', 'skill/SKILL.md', 'rules/README.md',
+    ...fs.readdirSync(path.join(root, 'docs')).filter(f => f.endsWith('.md')).map(f => `docs/${f}`)];
 }
 
-function main() {
-  const assertions = realAssertionCount();
+/** Resolve Markdown file links relative to the document, not the repository root. */
+export function checkDocumentLinks(root, documents) {
   const problems = [];
-
-  for (const rel of COUNT_DOCS) {
-    const s = read(rel);
-    // 抓所有「N 条断言 / N assertions / N개 단언」形态
-    const nums = [...s.matchAll(/(\d+)\s*(?:条断言|assertions|개 단언)/g)].map((m) => Number(m[1]));
-    const wrong = [...new Set(nums.filter((n) => n !== assertions))];
-    if (wrong.length) {
-      problems.push(`${rel}: 写了 ${wrong.join(' / ')}，实测 ${assertions}`);
+  for (const rel of documents) {
+    const file = path.join(root, rel);
+    if (!fs.existsSync(file)) { problems.push(`${rel}: missing document`); continue; }
+    let fenced = false;
+    for (const [index, line] of fs.readFileSync(file, 'utf8').split('\n').entries()) {
+      if (/^\s*(```|~~~)/.test(line)) { fenced = !fenced; continue; }
+      if (fenced) continue;
+      for (const match of line.matchAll(/\]\((<[^>]+>|[^\s)]+)(?:\s+"[^"]*")?\)/g)) {
+        const url = match[1].replace(/^<|>$/g, '');
+        // Historical local audit attachments are outside the repository contract.
+        if (/^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(url)) continue;
+        let target;
+        try { target = decodeURIComponent(url.split(/[?#]/)[0]); }
+        catch { problems.push(`${rel}:${index + 1}: invalid link ${url}`); continue; }
+        if (!target) continue;
+        const resolved = path.resolve(path.dirname(file), target);
+        const relative = path.relative(root, resolved);
+        if (relative.startsWith(`..${path.sep}`) || relative === '..' || !fs.existsSync(resolved))
+          problems.push(`${rel}:${index + 1}: broken local link ${url}`);
+      }
     }
   }
-
-  if (!quiet) {
-    process.stdout.write(`实测断言条数: ${assertions}\n`);
-    process.stdout.write(`校验文档: ${COUNT_DOCS.join(', ')}\n`);
-  }
-
-  if (problems.length) {
-    process.stderr.write(`\n❌ 文档里的断言条数与实测不符：\n`);
-    for (const p of problems) process.stderr.write(`   ${p}\n`);
-    process.stderr.write(
-      `\n文档里的数字**不会自己更新**。实测就是这么烂的：同一次改动只改了其中一处，`
-      + `于是同一份 README 里 250 行写 230、297 行写 221。\n`
-      + `修法：把这 4 份里的数字统一改成 ${assertions}。\n`,
-    );
-    process.exit(1);
-  }
-
-  process.stdout.write(`✅ 四份文档的断言条数一致（${assertions}）\n`);
+  return problems;
 }
 
-main();
+function main(argv) {
+  const problems = [];
+  try { execFileSync(process.execPath,[path.join(ROOT,'plugin/scripts/stage-contract.mjs'),'--check'],{stdio:'pipe'}); } catch { problems.push('Generated report contracts differ from lib/contracts.mjs; run stage-contract.mjs'); }
+  const read = rel => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+  const current = JSON.parse(read('docs/current-state.json'));
+  const count = fs.readdirSync(path.join(ROOT, 'test')).filter(f => f.endsWith('.test.mjs')).length;
+  if (current.testFiles !== count) problems.push(`testFiles: ${current.testFiles} != ${count}`);
+  if (current.toolVersion !== TOOL_VERSION) problems.push('toolVersion differs from kernel');
+  for (const rel of ['plugin/package.json', 'probe/package.json', 'tools/slot-probe/package.json'])
+    if (JSON.parse(read(rel)).version !== TOOL_VERSION) problems.push(`${rel}: version differs from kernel`);
+  for (const rel of ROOT_READMES) {
+    if (!read(rel).includes('docs/current-state.json')) problems.push(`${rel}: missing current-state link`);
+    if (!read(rel).includes('docs/Plan.md')) problems.push(`${rel}: missing migrated plan link`);
+    if (!read(rel).includes(TOOL_VERSION)) problems.push(`${rel}: missing current version`);
+  }
+  for (const name of ['Plan.md', 'GPT审计及重构方案文档.md']) {
+    if (fs.existsSync(path.join(ROOT, name))) problems.push(`${name}: obsolete root copy`);
+    if (!fs.existsSync(path.join(ROOT, 'docs', name))) problems.push(`docs/${name}: missing migrated document`);
+  }
+  if (read('skill/SKILL.md') !== read('plugin/skill/SKILL.md')) problems.push('packaged skill differs from source');
+  const documents = maintainedDocuments(ROOT);
+  problems.push(...checkDocumentLinks(ROOT, documents));
+  let summaryTests;
+  if (argv.length) {
+    if (argv.length !== 2 || argv[0] !== '--test-summary') throw new Error('Usage: node tools/doc-check.mjs [--test-summary <successful TAP log>]');
+    const log = fs.readFileSync(argv[1], 'utf8');
+    const tests = Number(/^(?:#|ℹ) tests (\d+)/m.exec(log)?.[1]);
+    const failed = Number(/^(?:#|ℹ) fail (\d+)/m.exec(log)?.[1]);
+    if (!Number.isFinite(tests) || failed !== 0) problems.push('Missing or failing test summary');
+    else {
+      summaryTests = tests;
+      const profiles = current.verification?.optionalProfiles || {};
+      const sameInputs = Object.entries(profiles).every(([name, present]) =>
+        fs.existsSync(path.join(os.homedir(), '.dsh/profiles', name, 'node_modules')) === present);
+      if (sameInputs && tests !== current.tests) problems.push(`tests: ${current.tests} != ${tests}`);
+      console.log(`Verified successful test summary: ${tests} tests${sameInputs ? '' : ' (different optional profile inputs)'}`);
+    }
+  }
+  if (problems.length) { console.error(problems.join('\n')); process.exitCode = 1; }
+  else console.log(`Documentation facts checked: ${TOOL_VERSION}, ${count} test files, ${documents.length} documents${summaryTests === undefined ? '' : `, ${summaryTests} tests`}`);
+}
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try { main(process.argv.slice(2)); }
+  catch (error) { console.error(error.message); process.exitCode = 1; }
+}

@@ -9,7 +9,7 @@
  * ① **版本号与内核不一致**。版本的真源是 `lib/version.mjs`，但 `package.json`
  *    只能写字面量（npm 只认字面量）。改了一处忘了另一处，发布出去的就是
  *    「包的版本是 A、它自己 `--version` 报 B」—— 而这恰恰是这次发布的**主题**
- *    （见 Plan.md §5.2.8：「单版本」）。
+ *    （见 docs/Plan.md §1、§6：「单版本」）。
  *
  * ② **测试没过就发**。`npm publish` 默认**不跑测试**。测试没过的包发出去，
  *    用户拿到的是我们已知有问题的版本，而他还以为那是"刚发布的最新版"。
@@ -24,8 +24,9 @@
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const PLUGIN = path.resolve(HERE, '..');
@@ -46,7 +47,7 @@ if (!fs.existsSync(path.join(REPO, 'lib', 'version.mjs'))) {
 }
 
 // ── ② 版本一致 ──
-const kernel = await import(new URL(`file://${path.join(REPO, 'lib', 'version.mjs')}`).href);
+const kernel = await import(pathToFileURL(path.join(REPO,'lib','version.mjs')).href);
 const pkg = JSON.parse(fs.readFileSync(path.join(PLUGIN, 'package.json'), 'utf8'));
 if (pkg.version !== kernel.TOOL_VERSION) {
   fail([
@@ -63,22 +64,26 @@ if (pkg.version !== kernel.TOOL_VERSION) {
 if (pkg.private === true) {
   fail([
     'plugin/package.json 里还写着 `"private": true`，npm 会拒绝发布。',
-    '  要去掉它 —— 但**先确认版本号已经定下来**（见 Plan.md §5.2.8）。',
+    '  要去掉它 —— 但**先确认版本号已经定下来**（见 docs/Plan.md §1、§6）。',
   ]);
 }
 
 // ── ④ 测试必须全过 ──
+const summaryDir=fs.mkdtempSync(path.join(os.tmpdir(),'dsc-release-'));
 try {
-  execFileSync(process.execPath, ['--test', 'test/'], {
-    cwd: REPO, stdio: ['ignore', 'pipe', 'pipe'], timeout: 600000,
+  const summary=execFileSync(process.execPath, ['tools/run-tests.mjs','--test-reporter=tap'], {
+    cwd: REPO, stdio: ['ignore', 'pipe', 'pipe'], timeout: 600000, maxBuffer:16*1024*1024,env:{...process.env,DSH_HOME:path.join(summaryDir,'state')},
   });
+  const file=path.join(summaryDir,'tests.tap');fs.writeFileSync(file,summary);
+  execFileSync(process.execPath,['tools/doc-check.mjs','--test-summary',file],{cwd:REPO,stdio:'pipe'});
 } catch (error) {
   const out = `${error.stdout ?? ''}${error.stderr ?? ''}`;
-  const failed = out.split('\n').filter((l) => /^✖|^ℹ fail/.test(l)).slice(-12).join('\n');
-  fail(['仓库的测试套件没有全过：', '', failed || '(拿不到失败摘要)', '',
-    '  跑 `node --test test/` 看全部输出。']);
+  fs.rmSync(summaryDir,{recursive:true,force:true});
+  fail(['仓库的测试或文档检查没有全过：', '', out.trim() || error.message || String(error), '',
+    '  跑 `npm test` 看全部输出。']);
 }
 
+fs.rmSync(summaryDir,{recursive:true,force:true});
 process.stdout.write(
   `✓ 发布前检查通过：version=${pkg.version}，测试全过\n`,
 );
