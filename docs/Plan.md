@@ -12,7 +12,7 @@
 | 仓库CLI / 安装检查 | 默认静态检查不执行目标源码；显式probe/安装检查会装依赖、启动宿主并执行目标插件，临时profile不是OS沙箱 |
 | skill | 指导agent调用同一工具或CLI，不另实现判定逻辑 |
 
-2026-10-16联网核验：GitHub main=`cbfbf96`，已合并候选主体；本地超时断言补强`d9269d7`及本轮文档修订尚未推送。npm latest仍为**0.1.0**，本地**0.1.1未发布**。GitHub简介/标签/主页和npm仓库指向核验无error；版本、描述、依赖、keywords、README的五项notice属于候选与发布版差异。公开查询详情见current-state的`verification.documentationAudit`，不能用本地修改背书旧npm包。
+2026-10-16：候选主体、超时断言补强及文档修订的源码交付见[PR #2](https://github.com/lcy0121/dsh-plugin-compat-check/pull/2)；新CI覆盖Node22/24、资源检查和真实Linux DSH。npm latest仍为**0.1.0**，**0.1.1未发布**。GitHub简介/标签/主页和npm仓库指向核验无error；版本、描述、依赖、keywords、README的五项notice属于候选与发布版差异。查询快照见current-state的`verification.documentationAudit`，本次交付证据见`verification.delivery`；旧快照保留原日期，不冒充最新main状态。
 
 版本真源为`lib/version.mjs`。根目录是private开发工作区；npm只打包`plugin/`，没有CLI bin、安装shell或probe入口。`prepack`同步skill/契约并暂存内核与LICENSE，`postpack`清理暂存内核；应安装完整tgz，不能假定裸`plugin/`已带kernel。
 
@@ -65,6 +65,8 @@
 
 保留的维护教训：不能只扫声明客户端入口而漏懒加载chunk，不能用方法黑名单代替接收者绑定，不能把未知provide当已激活服务，也不能把干净日志/成功到货当功能正常。
 
+交付跟踪：[本仓库PR #2](https://github.com/lcy0121/dsh-plugin-compat-check/pull/2)包含本地补强与文档；[Awesome PR #717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)已同步提交中英文收录简介，包含已装插件面板、详情角标、tool/skill及仓库CLI，lint通过，仍待上游维护者审核合并。提交PR不等于上游页面已更新。
+
 ## 5. 验证记录与复现
 
 ### 5.1 已验证范围
@@ -73,7 +75,7 @@
 |---|---|
 | macOS真实DSH/Chrome | 私有tgz、tool/skill、面板/详情/角标/基线及正负向到货；后续联合22项中9项为真实DSH/Chrome/pnpm、13项离线。DSH0.2.0-rc.2，未发送模型对话；旧skill实测正文6548与当时源码一致，不能冒充本轮修订后的正文 |
 | Linux arm64 VM | Ubuntu24.04.5、Node22.19/24.21，默认各406通过/1项外部parityfix缺失跳过，联合各18通过（4项真实DSH、1项冻结pnpm安装、13项离线）；自有QEMU磁盘、profile和SSH密钥已清理 |
-| Linux x64远程CI | [main cbfbf96的Actions](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38893199861)三个任务通过：Node22/24默认/发布前/资源、Node24真实DSH集成；只覆盖该提交，不覆盖本地d9269d7及本轮文档 |
+| Linux x64远程CI | [PR #2源码7cae84c的Actions](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38922904395)三个任务通过：Node22/24默认/发布前/资源、Node24联合18项（4项真实DSH、1项冻结pnpm安装、13项离线）；两版超时总流程约1.13/1.09秒，worker运行、停止及恢复均达标；后续纯交付记录提交另看PR最新CI |
 | 本地超时断言补强 | Node22.19/26.12默认各481/481，六个工程场景通过；计数须增长、1秒受控超时、含停止检查及恢复提取的总流程<5秒，两种隔离负例均被拒绝；生产10秒/512+64MiB预算未改 |
 | 当前文档与skill | 本轮核验记录见current-state的verification.documentationAudit；旧现场记录按原提交保留，Windows和其它DSH版本仍未认证 |
 
@@ -111,8 +113,6 @@ DSC_SLOW=1 node --test --test-reporter=tap test/engineering-live.test.mjs test/p
 
 按以下顺序推进，不重复已完成任务：
 
-1. **交付本地补强与文档。** 经授权推送当前分支并合并；按新head核对Node22/24、资源和真实Linux DSH CI。维护Actions/runner依赖时单独验证，不套用旧成功结果。
-2. **发布0.1.1候选。** 先核对版本、契约/skill副本、完整测试、实际tgz和公开元数据；获npm发布授权后发布，并核验registry版本、README、依赖和tarball，更新候选措辞。GitHub合并不等于npm已更新。
-3. **下一项功能开发：独立业务真值用例。** 从真实插件挑选有限业务路径，明确预期动作和成功/失败信号，优先补客户端交互及已知动态分析盲区。功能标签须独立于预测与loader标签；同时保留正反例，不用到货数或更多调用点冒充准确率。
-4. **Windows取得真实环境后验收。** 路径、安装器、进程回收和打包实跑；按用户选择暂缓，不用POSIX或路径模拟充数。
-5. **可选：更新Awesome收录简介。** 当前上游条目仍主要介绍临时profile安装检查；经授权向上游提供包含已装插件面板/tool/skill的说明，不把第三方页面当已同步。
+1. **发布0.1.1候选。** 先核对版本、契约/skill副本、完整测试、实际tgz和公开元数据；获npm发布授权后发布，并核验registry版本、README、依赖和tarball，更新候选措辞。GitHub合并不等于npm已更新。
+2. **下一项功能开发：独立业务真值用例。** 从真实插件挑选有限业务路径，明确预期动作和成功/失败信号，优先补客户端交互及已知动态分析盲区。功能标签须独立于预测与loader标签；同时保留正反例，不用到货数或更多调用点冒充准确率。
+3. **Windows取得真实环境后验收。** 路径、安装器、进程回收和打包实跑；按用户选择暂缓，不用POSIX或路径模拟充数。

@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-16T15:06:07.353Z",
+  "recordedAt": "2026-10-16T15:21:40.536657+00:00",
   "testFiles": 33,
   "tests": 481,
   "repositoryFiles": {
@@ -737,6 +737,105 @@
         },
         "scope": "Combined-run counts include offline cases; they are not counts of independent live DSH runs."
       }
+    },
+    "delivery": {
+      "verifiedAt": "2026-10-16T15:21:40.536657+00:00",
+      "projectPullRequest": "https://github.com/lcy0121/dsh-plugin-compat-check/pull/2",
+      "targetBranch": "main",
+      "sourceCommits": [
+        "d9269d7",
+        "7cae84c"
+      ],
+      "ci": {
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38922904395",
+        "headSha": "7cae84c54862db42e41a92a125fd59585b94aacc",
+        "event": "pull_request",
+        "conclusion": "success",
+        "jobs": [
+          {
+            "name": "test (24)",
+            "conclusion": "success"
+          },
+          {
+            "name": "test (22.19.0)",
+            "conclusion": "success"
+          },
+          {
+            "name": "linux-live",
+            "conclusion": "success"
+          }
+        ],
+        "engineering": [
+          {
+            "nodeVersion": "22.19.0",
+            "platform": "linux",
+            "arch": "x64",
+            "ok": true,
+            "scenarios": 6,
+            "timeout": {
+              "name": "timeout",
+              "milliseconds": 1131.1137919999999,
+              "timeoutMilliseconds": 1003.5611170000001,
+              "timeoutBudgetMs": 1000,
+              "totalElapsedLimitMs": 5000,
+              "counterAtTimeout": 95637654,
+              "workerStarted": true,
+              "parentTicks": 99,
+              "workerStopped": true,
+              "recovery": true
+            }
+          },
+          {
+            "nodeVersion": "24.21.0",
+            "platform": "linux",
+            "arch": "x64",
+            "ok": true,
+            "scenarios": 6,
+            "timeout": {
+              "name": "timeout",
+              "milliseconds": 1090.133492,
+              "timeoutMilliseconds": 1002.7685990000001,
+              "timeoutBudgetMs": 1000,
+              "totalElapsedLimitMs": 5000,
+              "counterAtTimeout": 92714390,
+              "workerStarted": true,
+              "parentTicks": 98,
+              "workerStopped": true,
+              "recovery": true
+            }
+          }
+        ],
+        "linuxCombinedTests": 18,
+        "linuxCombinedFailures": 0,
+        "linuxCombinedScope": {
+          "realDsh": 4,
+          "frozenPnpmInstall": 1,
+          "offline": 13
+        }
+      },
+      "local": {
+        "platform": "darwin",
+        "arch": "arm64",
+        "nodeVersion": "26.12.0",
+        "prepublishCheck": true,
+        "defaultSuiteTests": 481,
+        "formatCheck": true,
+        "engineeringScenarios": 6
+      },
+      "awesome": {
+        "pullRequest": "https://github.com/0xsline/awesome-deepseek-harness/pull/717",
+        "headSha": "abba71ea5d029dc1323a43d69ff4ec0db19e2e6b",
+        "stateAtVerification": "OPEN",
+        "languages": [
+          "English",
+          "Simplified Chinese"
+        ],
+        "lintConclusion": "success",
+        "upstreamMergedAtVerification": false,
+        "scope": "Both curated README entries updated in the PR. Awaiting the upstream maintainer; default-branch pages are not claimed updated."
+      },
+      "npmPublished": false,
+      "scope": "Source delivery and upstream description submission only. The recorded CI head is exact; subsequent delivery-record-only commits must pass their own PR checks. Historical audit snapshots remain unchanged. No npm release or Windows certification."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."
