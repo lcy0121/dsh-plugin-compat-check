@@ -8,9 +8,9 @@
 |---|---|
 | severity.json | 方法严重度/影响文案；引擎读取services下的方法规则，并与代码内默认档合用 |
 | dsh-api-catalog.json | 指定DSH版本生成的宿主/客户端契约目录；不证明当次运行时提供某方法 |
-| usage-inventory.json | 指定版本/profile的当前AST调用库存，含完整性、分端方法对与来源摘要；由coverage显式刷新 |
+| usage-inventory.json | 带日期/版本/profile及完整性标记的AST库存快照；由coverage显式刷新，不保证与后续提取器重扫同数 |
 
-严重度由 `lib/verdict.mjs` 的确定性逻辑、缺失证据、方法规则及默认档共同决定，不由LLM决定。JSON中的layer/summary/basis/evidence/knownGoneIn/needsReview等主要用于解释与维护；knownExtractionArtifacts是历史反例登记，不是自动过滤黑名单。
+严重度由 `lib/verdict.mjs` 的确定性逻辑、缺失证据、方法规则及默认档共同决定，不由LLM决定。方法规则的severity/impact参与判定与输出，layer控制端别：方法自身优先、服务layer回退。summary/basis/evidence/knownGoneIn/needsReview等用于解释与维护；knownExtractionArtifacts是历史反例登记，不是自动过滤黑名单。
 
 ## 当前证据与严重度
 
@@ -39,11 +39,13 @@ node tools/coverage.mjs --nm <node_modules目录> --probe <同目标的现代pro
 node tools/coverage.mjs --nm <node_modules目录> --dsh-version <已核验版本> --write --allow-partial --json
 ```
 
-当前库存是2026-10-15的desktop21插件样本，DSH0.2.0-rc.2，静态catalogue模式，不借用规则复核的私有web探针。扫描受默认字节预算和缺失CSS入口限制，明确为partial：50个有调用服务、125个分端方法对，其中88个有对应规则（host69/79、client19/46）。这些是本次读到的部分集合，不是完整覆盖率或准确率；同名方法不同端分别计数，不能直接和下面旧口径61%比较。sourceDigest记录规范化AST分析摘要，不承诺所有包字节的完整性。历史Python参考不是AST真值。
+仓库保存的库存是2026-10-15的desktop21插件样本，DSH0.2.0-rc.2，静态catalogue模式，不借用规则复核的私有web探针。扫描受默认字节预算和缺失CSS入口限制，明确为partial：50个有调用服务、125个分端方法对，其中88个有对应规则（host69/79、client19/46）。这些是本次读到的部分集合，不是完整覆盖率或准确率；同名方法不同端分别计数，不能直接和下面旧口径61%比较。sourceDigest记录规范化AST分析摘要，不承诺所有包字节的完整性。历史Python参考不是AST真值。
 
-本次复核：attachments.readImage由官方实现和真实描述符互证，保留仅该读取路径的影响；sessions.open保留明确的客户端旧回退语义；删除sessions.getSnapshot、settings.get及sessions.map的无依据影响条目；sessions.refresh有守卫且无足够语义证据，不新增规则。客户端运行时未采样，不宣称对应API已被删除。
+2026-10-15规则复核：attachments.readImage由官方实现和真实描述符互证，保留仅该读取路径的影响；sessions.open保留明确的客户端旧回退语义；删除sessions.getSnapshot、settings.get及sessions.map的无依据影响条目；sessions.refresh有守卫且无足够语义证据，不新增规则。客户端运行时未采样，不宣称对应API已被删除。
 
 ## 历史依据：覆盖率、方法与反例（2026-10-11，旧提取器）
+
+> 以下表格、旧命令、完整性判断和“故意没填”均是2026-10-11旧阶段记录，不是现行操作规程；当前证据与更新命令以上方为准。
 
 > ⚠️ **这张表由 `node tools/coverage.mjs` 生成，是一台机器的一个 profile 的快照，不是生态普查。**
 > 它以前是**手工算的**，于是必然过期。**一张会过期却没人知道的覆盖率表比没有表更糟：它看起来像证据。**
@@ -97,7 +99,7 @@ node tools/coverage.mjs --probe <报告> --write             # 顺带刷新 rule
 **所以规则表在"DSH API"这个范围内是完整的**：凡是真实存在、且被真实调用的宿主 API，
 要么有规则，要么已确证是提取产物。**剩下没规则的，都不是 DSH 的 API。**
 
-## 新增条目的证据分列
+## 历史补充：新增条目的证据分列
 
 ### 一、有官方 API 目录直接依据（27 条）
 
@@ -140,7 +142,7 @@ node tools/coverage.mjs --probe <报告> --write             # 顺带刷新 rule
 | `sessions.using` | `@michengai/dsh-archive-manager/lib/client.js`（`using` 不可用即退回 `binding`） |
 | `timer.timeout` | `dsh-recall-plugin/lib/client.js:1430`（不可用即用原生 `setTimeout`） |
 
-## 故意没填的服务与原因
+## 历史补充：故意没填的服务与原因
 
 未进入本表的 18 个实际被用到的服务。**这一节和填了的那些一样重要**——乱填一个影响面，等于毁掉本工具唯一的资产。
 
@@ -181,7 +183,7 @@ node tools/coverage.mjs --probe <报告> --write             # 顺带刷新 rule
 
 `betterSidebar` —— 它是插件自己 `ctx.provide()` 出来的服务，**提取器已正确记入 `providedServices`**（同类的还有 dshmarket 的 `market`），因此不会产生假缺口。`pet` / `agentTeams` / `companionQq` / `betterLocale` 这些**没有**被 `ctx.provide()` 捕获的（见 `docs/Plan.md` §2.1 的提供方证据约束），就落进了上面 A 组。
 
-## 已知提取误报：不要为它们补规则
+## 历史补充：已知提取误报
 
 `severity.json` 里有一个 `knownExtractionArtifacts` 段，逐条登记了"看起来是 API 缺口、其实是正则产物"的 `服务.方法`，并给出证据。**这一节存在的意义是防止后来者（包括未来的我）出于好心把假阳性升格成"有影响面的确定结论"。**
 
@@ -201,16 +203,16 @@ node tools/coverage.mjs --probe <报告> --write             # 顺带刷新 rule
 - `settings.get`：0.2.0-rc.2 的宿主目录里 `settings` 没有 `get`，可能和 `settingsGet` 一样来自插件自有的设置面。
 - `attachments.readImage`：目录里是 `readImageRequest`，方法名对不上，需要一次运行时探针定音。
 
-## 已知的提取缺陷（会影响本表的解读）
+## 当前提取边界
 
 旧inventory来源于正则提取器；当前JSON已由有版本和完整性标记的AST样本替换，旧数值只保留在本页历史表。knownExtractionArtifacts也保留历史反例用途，并非当前引擎的黑名单。新的规则刷新必须记录DSH版本、目标profile、probe身份与时间，并逐条复核源码归属。
 
-真解析器已经落地；“疑似比例明显下降”不作为验收指标，因为该比例还受运行时采样覆盖影响。当前实现仍不做完整跨函数/模块分析，边界见 [现行契约](../docs/Plan.md)。
+真解析器已经落地；“疑似比例明显下降”不作为验收指标，因为该比例还受运行时采样覆盖影响。当前已支持有界跨函数/包内模块值流，未知动态行为仍有诊断；不声称完整分析，边界见 [现行契约](../docs/Plan.md)。
 
-## 怎么改
+## 当前维护原则
 
 直接改 `severity.json` 并说明依据。特别注意三类容易判错的：
 
 - **同名不同义**：`settings.register` 在客户端设置页和宿主设置文档里不是一回事；`sessions`/`jobs`/`timer` 两侧同名但 API 不同。别混。
-- **降级 ≠ 无害**：`logger` 缺失判 `degraded` 是因为功能不受影响；但 `jobs.onJobsChanged` 判 `degraded` 是因为它**有明确的轮询回退**，而不是因为它不重要。
-- **判不准就不要填**：落到默认档 + 明确的"影响面未知"，比编一个看起来合理的影响面好得多。犹豫的写进上一节"故意没填"，那是有价值的产出，不是欠账。
+- **降级 ≠ 无害**：`logger`相关规则按日志/诊断影响描述，不外推全部业务功能均不受影响；但 `jobs.onJobsChanged` 判 `degraded` 是因为它**有明确的轮询回退**，而不是因为它不重要。
+- **判不准就不要填**：落到默认档 + 明确的"影响面未知"，比编一个看起来合理的影响面好得多。新疑问写入needsReview并保留来源和待核验范围，不把历史“故意没填”当永久结论。

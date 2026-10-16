@@ -6,7 +6,7 @@
 
 ## 当前版本与交付
 
-本地源码为 **0.1.1 未发布候选版**；2026-10-15联网核验，npm `latest` 为 **0.1.0**。`npm install` 或 `dsh plugin add` 不会取得本地尚未发布的修复。公开状态和差异见 [Plan中的核验记录](docs/Plan.md#1-项目定位与交付状态)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
+本地源码为 **0.1.1 未发布候选版**；2026-10-16联网核验，npm `latest` 为 **0.1.0**。`npm install` 或 `dsh plugin add` 不会取得本地尚未发布的修复。公开状态和差异见 [Plan中的核验记录](docs/Plan.md#1-项目定位与交付状态)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
 
 插件、CLI、skill三种形态共享判定内核；安装检查脚本是CLI编排入口。只有**相同输入与采样证据**才应得出相同结果。
 
@@ -23,10 +23,11 @@ npm 包**没有 CLI `bin`**，不支持 `npx dsh-plugin-compat-check`。默认�
 
 ### 仓库 CLI
 
-以下命令针对已经取得的0.1.1候选源码检出。普通克隆公开main当前仍得到旧版源码，不含新的根工作区；本地候选尚无已推送的公开ref。
+GitHub main已包含0.1.1候选主体和根开发工作区；本地后续补强与公开提交分别记录于Plan，不能把npm旧包当作候选源码。取得仓库后在根目录安装依赖：
 
 ```bash
-cd /path/to/dsh-plugin-compat-check
+git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
+cd dsh-plugin-compat-check
 npm ci --ignore-scripts
 
 node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
@@ -52,7 +53,7 @@ node bin/compat-check.mjs --help
 ### 安装插件与 skill
 
 ```bash
-# 安装 npm 已发布版（当前为0.1.0）
+# 安装 npm 已发布版（2026-10-16核验为0.1.0）
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # 只使用 CLI 时，安装独立 skill
@@ -71,7 +72,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 node bin/check-install.mjs <spec> --json
 ```
 
-需要 Node、DSH、pnpm；npm 身份查询和安装可能联网。`spec` 接受 npm、GitHub、git、file 等 DSH 支持的安装规格。流程使用唯一临时 profile 和私有现场，只清理自己启动的进程；**临时 profile 不是操作系统沙箱**。
+需要 Node、DSH、pnpm；依赖解析和安装可能联网。`spec` 接受 npm、GitHub、git、file 等 DSH 支持的安装规格。流程使用唯一临时 profile 和私有现场，只清理自己启动的进程；**临时 profile 不是操作系统沙箱**。
 
 | 选项 | 作用 |
 |---|---|
@@ -86,7 +87,7 @@ CLI 和 Node 安装检查的结果码：
 | 码 | 含义 |
 |---|---|
 | `0` | 没有报告问题；仍须检查 coverage、vacuous 和采样限制 |
-| `1` | 至少一个插件部分可用 |
+| `1` | 至少一个插件部分可用或未知 |
 | `2` | 至少一个插件不兼容，或安装阶段明确 peer 闸门拒绝 |
 | `3` | 输入、安装、网络、准备或启动出错，本次无法判定 |
 
@@ -137,9 +138,9 @@ node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 ```
 
-`doc-check` 离线检查文档链接、版本、入口与 skill 副本；**不会自己运行测试**。记录新结果时先保存 TAP 摘要，再执行 `node tools/update-current-state.mjs --test-summary <log>` 和 `node tools/doc-check.mjs --test-summary <log>`。发布前检查只运行一次完整默认套件并复用摘要，含独立 tarball 安装后的实际宿主工具调用；该打包回归使用私有空npm缓存，需要访问npm registry，不依赖本机历史缓存。GitHub/npm 元数据检查为联网步骤；未发布候选的版本和 README 差异是 notice，取数失败不能称“全部一致”。
+`doc-check` 离线检查文档链接、版本、入口与 skill 副本；**不会自己运行测试**。记录新结果时先保存 TAP 摘要，再执行 `node tools/update-current-state.mjs --test-summary <log>` 和 `node tools/doc-check.mjs --test-summary <log>`。发布前检查只运行一次完整默认套件并复用摘要，含独立tarball安装后在受控宿主上下文中调用注册工具；这不等于启动真实DSH；该打包回归使用私有空npm缓存，需要访问npm registry，不依赖本机历史缓存。GitHub/npm 元数据检查为联网步骤；未发布候选的版本和 README 差异是 notice，取数失败不能称“全部一致”。
 
-默认套件不启用 `DSC_SLOW=1` 集成。2026-10-15另行通过6项真实DSH/Chrome集成测试，包含正常到货、缺失客户端文件、导入抛错及运行时负向对照；环境与复现命令见 [Plan](docs/Plan.md#5-验证记录与复现)。2026-10-16已在Ubuntu24.04.5 arm64虚拟机实跑DSH0.2.0-rc.2、tgz/HTTP响应与工程资源场景；Windows按约定待验收。新增Linux CI的远程结果须核对对应提交的GitHub Actions，旧CI结果单独保留。工程复现见[Plan](docs/Plan.md#53-p2工程验收)。历史88.3%召回和本次66/66到货均不是0.1.1功能准确率。Python parity 工具也是旧正则参考，不能把它当作 AST 实现的真值。
+默认套件不启用 `DSC_SLOW=1` 集成。已有macOS真实DSH/Chrome、Ubuntu arm64 VM及Linux x64 CI证据，覆盖实际tgz、tool/skill、界面正负例与工程资源场景；各自提交和范围见[Plan](docs/Plan.md#5-验证记录与复现)。本地新补强与文档修订不能套用旧CI，Windows按约定待验收。工程复现见[Plan](docs/Plan.md#53-p2工程验收)。历史88.3%召回、66/66到货及loader标签都不等于业务准确率；Python parity也是旧正则参考，不是AST真值。
 
 辅助度量使用 [Plan辅助度量记录](docs/Plan.md#51-已验证范围) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
 

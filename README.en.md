@@ -6,7 +6,7 @@ Check the compatibility of **installed DSH plugins** with a target DSH version, 
 
 ## Version and delivery
 
-Local source is the **unpublished 0.1.1 candidate**. The npm `latest` version verified on 2026-10-15 is **0.1.0**; installing it does not include unpublished fixes. See [publication and verification records in Plan](docs/Plan.md) and [generated verification facts](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
+Local source is the **unpublished 0.1.1 candidate**. The npm `latest` version verified on 2026-10-16 is **0.1.0**; installing it does not include unpublished fixes. See [publication and verification records in Plan](docs/Plan.md) and [generated verification facts](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
 
 | Entry | Purpose |
 |---|---|
@@ -21,10 +21,11 @@ The entries share one verdict kernel. Only identical inputs and observation evid
 
 ### Repository CLI
 
-These commands assume an existing checkout of the0.1.1 candidate. Public main still contains older source without the new root workspace; the candidate has no pushed public ref yet.
+GitHub main includes the 0.1.1 candidate core and root development workspace. Plan records subsequent local changes separately from public commits; the old npm package does not include those changes. Obtain the repository and install dependencies at its root:
 
 ```bash
-cd /path/to/dsh-plugin-compat-check
+git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
+cd dsh-plugin-compat-check
 npm ci --ignore-scripts
 
 node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
@@ -50,7 +51,7 @@ Select the actual profile; do not assume desktop. `--nm` accepts a profile or no
 ### Plugin and skill
 
 ```bash
-# Published npm version (currently0.1.0)
+# Published npm version (0.1.0 verified on 2026-10-16)
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # Standalone skill for CLI users
@@ -68,7 +69,7 @@ The repository root is a **private development workspace**, not the installable 
 node bin/check-install.mjs <spec> --json
 ```
 
-Requires Node, DSH and pnpm; npm identity checks and installation may use the network. Specs follow DSH's npm/GitHub/git/file conventions. Each run owns a unique profile, private working directory and its spawned processes. **A temporary profile is not an OS sandbox.**
+Requires Node, DSH and pnpm; dependency resolution and installation may use the network. Specs follow DSH's npm/GitHub/git/file conventions. Each run owns a unique profile, private working directory and its spawned processes. **A temporary profile is not an OS sandbox.**
 
 | Option | Effect |
 |---|---|
@@ -83,7 +84,7 @@ CLI and Node installation-runner result codes:
 | Code | Meaning |
 |---|---|
 | `0` | No issue reported; still inspect coverage, vacuous results and observation limits |
-| `1` | At least one partially usable plugin |
+| `1` | At least one partially usable or unknown plugin |
 | `2` | An incompatible plugin or an explicit installation peer-gate rejection |
 | `3` | Input, installation, network, preparation or startup failed; no reliable verdict |
 
@@ -134,9 +135,9 @@ node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-`doc-check` checks links, versions, document entry points and the skill copy offline; it does not run tests. Record a successful TAP log with `node tools/update-current-state.mjs --test-summary <log>` and validate it with `node tools/doc-check.mjs --test-summary <log>`. The prepublish check runs the default suite once and reuses the summary, including isolated tarball installation and actual host-tool execution. That artifact test uses a private empty npm cache and requires npm registry access rather than a prewarmed machine cache. Metadata checks require network and gh/npm; an unpublished newer local version or README is a notice, while unavailable sources remain unverified.
+`doc-check` checks links, versions, document entry points and the skill copy offline; it does not run tests. Record a successful TAP log with `node tools/update-current-state.mjs --test-summary <log>` and validate it with `node tools/doc-check.mjs --test-summary <log>`. The prepublish check runs the default suite once and reuses the summary, including isolated tarball installation and registered-tool execution in a controlled host context; it does not start real DSH. That artifact test uses a private empty npm cache and requires npm registry access rather than a prewarmed machine cache. Metadata checks require network and gh/npm; an unpublished newer local version or README is a notice, while unavailable sources remain unverified.
 
-Slow integrations need explicit `DSC_SLOW=1`. Six real DSH/Chrome tests passed on 2026-10-15, covering healthy arrival, a missing client file, an import exception and runtime negative controls; see [Plan](docs/Plan.md) for the environment and commands. On 2026-10-16, an Ubuntu24.04.5 arm64 VM ran real DSH0.2.0-rc.2, artifact/HTTP checks and resource scenarios. Windows is deferred by agreement. Check the corresponding commit in GitHub Actions for the new Linux CI results; historical CI evidence remains separate. See [engineering checks in Plan](docs/Plan.md#53-p2工程验收). The historical88.3% recall and current66/66 arrival figures are not functional accuracy measurements. Python parity utilities are a legacy regex reference, not AST ground truth.
+Slow integrations require explicit `DSC_SLOW=1`. Existing macOS DSH/Chrome, Ubuntu arm64 VM and Linux x64 CI evidence covers actual tarballs, tool/skill registration, UI controls and engineering scenarios; see [Plan](docs/Plan.md#5-验证记录与复现) for exact commits and scopes. Earlier CI does not certify later local assertion or documentation changes. Windows remains deferred. See [engineering checks](docs/Plan.md#53-p2工程验收). Historical 88.3% recall, 66/66 arrival and loader labels are not business-function accuracy; Python parity is a legacy regex reference, not AST ground truth.
 
 Auxiliary measurement uses independent raw loader labels; the predictor receives service observations only. See [auxiliary measurement records in Plan](docs/Plan.md#51-已验证范围). `node tools/labels.mjs --nm web --synthetic --json` creates a private environment and can correctly report a false negative (exit1). Use `--probe-boot` for an existing target, or paired `--probe` and `--labels` files. These sample metrics cover the first layer only, not ecosystem accuracy.
 

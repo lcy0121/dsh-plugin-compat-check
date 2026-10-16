@@ -1,11 +1,11 @@
 ---
 name: dsh-plugin-compat-check
-description: 体检「已经装进某个 profile 的 DSH 插件」与当前 DSH 版本是否兼容，并给出每条不兼容的 file:line 与原因。当用户说「更新 DSH 之后插件不工作了」「这个插件在我这版上还行吗」「设置页/标签页/面板不见了」「工具点了没反应」「启动日志里有 did not activate」「装上了也没报错但功能是死的」，或者想核对插件声明的 peerDependencies、engines.dsh 兼容范围是否属实时，使用本 skill。Check whether the DSH plugins already installed in a profile work on the current DSH version, with file:line and reason; use when a plugin stopped working after a DSH update, when a settings page or feature silently disappeared, or when a plugin activates without error but its functionality is dead.
+description: 当用户询问已安装DSH插件是否适配当前版本，或排查更新后插件不工作、设置页/面板消失、工具无响应、did not activate和兼容声明时使用。Use when checking installed DeepSeek Harness plugin compatibility, investigating post-update failures or missing features, or verifying peerDependencies and engines.dsh declarations.
 ---
 
 # dsh-plugin-compat-check
 
-回答一个问题：**我这一版 DSH 上，我已经装了的插件到底能不能用**；不能用的，给位置（`file:line`）和原因。
+回答一个问题：**我这一版 DSH 上，我已经装了的插件有哪些兼容性证据与限制**。API源码发现有真实位置才给`file:line`；loader或声明事实用实际包身份、状态和依据说明，不编造源码行。
 
 判定内核只有一处实现（`lib/verdict.mjs`，经 `bin/compat-check.mjs` 暴露），插件 / 脚本 / 本 skill 三个入口共用它。只有相同目标、版本、规则与采样证据才应得到相同结果。默认 CLI 用静态证据，当前宿主插件使用进程内观测，两者结论和基线模式可以不同；先核对证据，不把差异直接当缺陷。
 
@@ -41,7 +41,7 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 | `--probe <json>` | 宿主运行时观测；身份、时间、完整性和调用点归属满足要求时，才可支持 certain 方法结论 |
 | `--probe-boot` | **自己起一次宿主拿运行时面**（不必先有报告）。默认不开，会安装并执行目标插件；只在用户授权启动检查时使用，不保证每条结论都是 certain |
 | `--probe-timeout <秒>` / `--probe-keep-dir <dir>` | `--probe-boot` 的等待上限（默认 40）/ 留一份探针报告到该目录（排查用） |
-| `--dsh-version <v>` | 当前 DSH 版本，用于「声明与实测不符」那类结论 |
+| `--dsh-version <v>` | 目标DSH版本，用于声明/peer范围判断；显式值优先 |
 | `--json` / `--quiet` | 机器可读 / 只输出结论行 |
 | `--no-baseline` | 不读写本机基线。**一次性检查用这个**，见下面的「副作用」 |
 | `--rules` / `--catalog` | 覆盖规则表与官方 API 目录（默认在 `rules/`） |
@@ -102,18 +102,17 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
     **转述时必须保留这个限定**，不要说成"确定会消失"。
     实测有过一条 certain 级假阳性：工具说「设置页会消失」，而作者把能力检测写在了
     一个辅助函数里、早就兜住了，还 log 了降级行为。
-  - 没标的 —— 有独立机器信号确认（仅明确记录 loader FAILED / PENDING 的观测，
-    宿主自己报 `fiber.state`，`tools/labels.mjs` 用合成正负例量过它）。
+  - 只有显式`impactBasis=measured`且有对应观测，才按实测转述，例如明确记录的loader FAILED/PENDING。缺少字段或没有标注“推断”均不能当成实测；损坏报告应报工具错误。
 - **转述结论时带上 `--version` 报出的工具版本**（`--json` 里是 `toolVersion`）。
   同一个插件在「规则表还没覆盖这个方法」和「已经覆盖」的两个版本下，
-  结论会从「影响面未知」变成「设置页会消失」—— 不带版本，用户无法判断该不该信。
+  结论可能从「影响面未知」变成「推断：可能影响设置页」—— 不带版本，用户无法判断该不该信。
 
 ## 退出码
 
 | 码 | 含义 |
 |---|---|
 | `0` | 可用（未发现问题，仍需检查 coverage / vacuous） |
-| `1` | 部分可用（有 API 缺失，相关功能降级或失效） |
+| `1` | 部分可用或未知；保留具体发现与证据限制 |
 | `2` | 不兼容（有插件连基本依赖都不满足） |
 | `3` | **无法判定**——工具/输入出了问题，**这不是插件的结论** |
 
@@ -133,7 +132,7 @@ CI 里可以直接用：`0` 过，`1`/`2` 按你的策略处理，`3` 是**工�
 - `插件数: 0` + 退出码 `0` 是**最危险**的输出：它意味着一个插件都没检到，不是"全都好"。看到这个先回头确认 `--nm` 指对了没有。
 
 **3. 「激活成功」不等于「功能可用」。**
-这个生态的插件普遍用 `try/catch`、`typeof` 守卫做降级：API 没了它照样激活成功，只是相应功能是**死的**。所以「启动没报错」「日志干净」都不能当结论；同理，插件的 `peerDependencies` / `engines.dsh` 声明也不等于事实——DSH 自带的版本闸门按 semver 比对官方 peerDependencies，不验证 API 是否存在。
+插件可能通过`try/catch`或能力守卫处理缺失API，因此激活成功、日志干净既不能证明功能完备，也不能证明相应功能一定失效。具体业务行为须另行验收；`peerDependencies`/`engines.dsh`声明也不是功能证明，DSH官方peer版本闸门只检查semver范围，不验证每个API。
 
 ## 边界（不要越界承诺）
 
@@ -143,7 +142,7 @@ CI 里可以直接用：`0` 过，`1`/`2` 按你的策略处理，`3` 是**工�
   （`$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`），好让下次对比出「相比上次变了什么」。
   一次性检查（CI、替别人看一眼）加 `--no-baseline`；`--dry-run` 是只算差分不写。除此之外它不装包、
   不改用户的 profile、不联网（显式 `--probe-boot` 和安装检查会安装并执行目标插件）。不要用它去"顺便修一下"。
-- 报结论时**带上位置和依据**。只说「不兼容」而不给 `file:line`，等于让用户无法验证我们凭什么判——那正是这个工具存在的理由。
+- 报结论时**给出可核对的依据**。API源码发现引用真实`file:line`；没有源码位置的loader/声明事实说明包身份及观测或声明来源，不补造行号。
 
 
 0.1.1：`root` 缺项是未采样，不能称为不存在；`coverage.status=limited` 与 `vacuous` 必须转述。现代探针绑定 profile/DSH/采样时间；旧报告明确标为未绑定。解析、读取、资源上限等诊断会限制覆盖，完整性不足不更新基线。当前统计见仓库 `docs/current-state.json`；npm 包是插件，CLI 从仓库使用并先运行 `npm ci --ignore-scripts`。显式安装检查会执行目标插件，临时 profile 不是不可信代码隔离沙箱。

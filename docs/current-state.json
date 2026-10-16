@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-16T14:37:38.360Z",
+  "recordedAt": "2026-10-16T15:06:07.353Z",
   "testFiles": 33,
   "tests": 481,
   "repositoryFiles": {
@@ -595,6 +595,148 @@
         "strengthenedAssertionsRejectedBoth": true
       },
       "scope": "Test and metric assertions only; production 10000ms/512MiB/64MiB defaults unchanged. This follow-up was not rerun on Linux/Windows or pushed to GitHub CI; earlier CI records cover their exact commits."
+    },
+    "documentationAudit": {
+      "verifiedAt": "2026-10-16T15:01:55.337Z",
+      "baseCommit": "d9269d7",
+      "platform": "darwin",
+      "nodeVersion": "26.12.0",
+      "maintainedDocuments": 11,
+      "additionalFixtureReadmes": 1,
+      "localSectionAnchorsChecked": 20,
+      "defaultSuiteTests": 481,
+      "defaultFailures": 0,
+      "targetedDocumentationSkillMetadataTests": 55,
+      "publicState": {
+        "main": "cbfbf967b72862b640835a7da52d6ed561a25d99",
+        "mainCi": {
+          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38893199861",
+          "conclusion": "success",
+          "headSha": "cbfbf967b72862b640835a7da52d6ed561a25d99",
+          "jobs": [
+            {
+              "name": "test (24)",
+              "conclusion": "success"
+            },
+            {
+              "name": "test (22.19.0)",
+              "conclusion": "success"
+            },
+            {
+              "name": "linux-live",
+              "conclusion": "success"
+            }
+          ]
+        },
+        "npm": {
+          "version": "0.1.0",
+          "description": "Reports which installed DSH plugins are compatible with the current DSH version, with file:line and reason. The judgement kernel is staged into kernel/ at pack time, so the published tarball is self-contained.",
+          "keywords": [
+            "dsh",
+            "deepseek-harness",
+            "plugin",
+            "compatibility",
+            "health-check"
+          ],
+          "repository": {
+            "url": "git+https://github.com/lcy0121/dsh-plugin-compat-check.git",
+            "type": "git"
+          },
+          "engines": {
+            "node": "^22.19.0 || >=24"
+          },
+          "dependencies": {},
+          "main": "index.js",
+          "bin": null,
+          "license": "MIT",
+          "homepage": "https://github.com/lcy0121/dsh-plugin-compat-check#readme"
+        },
+        "github": {
+          "description": "体检你已装的 DSH 插件与当前 DSH 版本是否兼容，给出 file:line 与原因（CLI 形态也可预检尚未安装的插件）/ Check whether your installed DeepSeek Harness plugins work on your current DSH version — with file:line and reason. The CLI can also pre-check plugins you have not installed yet.",
+          "topics": [
+            "compatibility",
+            "deepseek-harness",
+            "developer-tools",
+            "dsh",
+            "deepseek",
+            "dsh-plugin",
+            "agent-skills",
+            "cordis",
+            "health-check"
+          ],
+          "homepage": "https://www.npmjs.com/package/dsh-plugin-compat-check",
+          "license": "MIT License"
+        },
+        "metadataErrors": 0,
+        "metadataNotices": [
+          {
+            "id": "npm.version-matches",
+            "side": "npm",
+            "severity": "notice"
+          },
+          {
+            "id": "npm.description-matches",
+            "side": "npm",
+            "severity": "notice"
+          },
+          {
+            "id": "npm.runtime-metadata-matches",
+            "side": "npm",
+            "severity": "notice"
+          },
+          {
+            "id": "npm.keywords-synced",
+            "side": "npm",
+            "severity": "notice"
+          },
+          {
+            "id": "npm.readme-is-current",
+            "side": "npm",
+            "severity": "notice"
+          }
+        ],
+        "metadataSkipped": [],
+        "npmReadmeFetched": true,
+        "awesome": {
+          "listed": true,
+          "entryFocus": "Temporary-profile installation checks; does not yet summarize the installed-plugin panel/tool/skill. Upstream update is a separate optional follow-up."
+        }
+      },
+      "planCompression": {
+        "previousLines": 213,
+        "currentLines": 118,
+        "previousUtf16Length": 12776,
+        "currentUtf16Length": 6998
+      },
+      "skill": {
+        "bodyUtf16Length": 6551,
+        "bodySha256": "36433c4133264c8df3a3ce0e60d38d2610ecba60ba44bd5bb7e8e69818d29153",
+        "packagedCopyEqual": true,
+        "referenceApplicationCases": 6,
+        "baselineModelFailures": 0,
+        "scope": "Read-only reference application confirmed location/tool-error/inference boundaries. Baseline models already complied; contradictory prose was corrected without claiming a behavioral regression. Current body is validated in controlled registration/artifact tests, not a new real DSH or browser session; historical live contentLength=6548 is preserved."
+      },
+      "fixtureDocumentation": {
+        "graph": "index -> b -> a -> a (self-import)",
+        "explicitOwnedOutputDirectory": true,
+        "parityExitCode": 0,
+        "comparedPackages": 1
+      },
+      "scope": "Documentation, skill reference text and shell comments/help only. Runtime logic unchanged; no push/merge/npm publication, real DSH/browser restart or Windows/Linux rerun in this task. Old CI and history retain their original commit/date/input scope.",
+      "integrationCountInterpretation": {
+        "macCombined": {
+          "total": 22,
+          "realDshChromeOrPnpm": 9,
+          "offline": 13
+        },
+        "linuxCombined": {
+          "total": 18,
+          "realDsh": 4,
+          "realFrozenPnpmInstall": 1,
+          "offline": 13
+        },
+        "scope": "Combined-run counts include offline cases; they are not counts of independent live DSH runs."
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

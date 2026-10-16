@@ -2,17 +2,12 @@
 # =============================================================================
 # dsh-plugin-compat-check —— 回答「这个 DSH 插件在我这版上到底能不能用」
 #
-# 为什么需要：插件声明（peerDependencies / dsh.client.inject）不等于宿主实际提供的
-# API。这个生态里同一大版本内 API 被移除是常态（实测：0.2.0 移除了
-# ctx.settings.register），所以必须真实启动 + 实际比对 API 面。
-#
-# 做四件事：
-#   ① 身份核对   —— npm 包到底属于哪个仓库（防撞名，本机真踩过：aegis / dsh-effort-slider）
-#   ② 隔离安装   —— 装进一次性 profile，捕获 DSH 自带的版本兼容闸门拒绝
-#   ③ 真实启动   —— 看有无「did not activate」；顺带 dump 宿主真实 API 面
-#   ④ API 比对   —— 插件源码里实际调用的服务/方法 vs 宿主提供的，逐条判定
-#
-# 全程不碰你的正式 profile；结束会杀掉测试服务及其子进程（包括插件拉起的辅助进程）。
+# 仓库安装检查的shell入口：调用同一Node内核，不另实现判定。
+#   ① 在本次私有DSH_HOME中初始化profile并安装目标规格
+#   ② 安装probe，真实启动宿主，校验报告身份/就绪状态及loader观测
+#   ③ 在清理前计算兼容性报告，传播工具/安装错误与兼容性退出码
+# 不自动核对npm包的预期仓库身份，也不把干净日志当功能正常。
+# 只回收本次自有进程组/目录；临时profile不是OS沙箱，独立脱离的会话不在回收保证内。
 # =============================================================================
 set -uo pipefail
 
@@ -230,10 +225,10 @@ if [ ! -f "$KERNEL_DIR/lib/extract.mjs" ] || [ ! -f "$KERNEL_DIR/lib/verdict.mjs
 ✗ 找不到判定内核（$KERNEL_DIR/lib/{extract,verdict}.mjs）
 
   这个脚本不自带判定实现 —— 判定只有一处实现（lib/verdict.mjs），
-  而它需要 Node 环境（DSH 自带 Node ≥22）。
+  而它需要支持的 Node 环境（^22.19.0 或 >=24）及根工作区依赖。
 
   两条路：
-    1) 在仓库里跑（推荐）：git clone 后直接执行本脚本（内核就在旁边）
+    1) 在仓库里跑（推荐）：git clone 后在根目录 npm ci --ignore-scripts，再执行本脚本
     2) 只拷了脚本：用 DSC_KERNEL 指向内核目录，例如
          DSC_KERNEL=/path/to/dsh-plugin-compat-check ./dsh-plugin-compat-check.sh <spec>
 
