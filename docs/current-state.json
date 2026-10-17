@@ -1,6 +1,6 @@
 {
-  "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-17T07:40:51.238317+00:00",
+  "toolVersion": "0.1.2",
+  "recordedAt": "2026-10-17T08:01:31.782851+00:00",
   "testFiles": 33,
   "tests": 481,
   "repositoryFiles": {
@@ -950,6 +950,237 @@
       },
       "scope": "Published the tested tarball, then independently downloaded the registry artifact and verified its bytes and installed tool/skill behavior in a controlled host context. This is not a new real DSH/browser/Windows certification. Local documentation changes after f280302 are not in the published artifact and have not been pushed or merged.",
       "publishedAt": "2026-10-17T07:34:40.423Z"
+    },
+    "documentationDelivery012": {
+      "verifiedAt": "2026-10-17T08:01:31.782851+00:00",
+      "patchVersion": "0.1.2",
+      "baseCommit": "bc0aff1",
+      "publicNpmAtStart": "0.1.1",
+      "npmPublished": false,
+      "githubMerged": false,
+      "maintainedDocuments": 11,
+      "defaultSuiteTests": 481,
+      "defaultFailures": 0,
+      "skill": {
+        "bodyUtf16Length": 6669,
+        "bodySha256": "0c6dc74cb52cf33869593df5f3db4aa6ece6f863e0ef372cbad9ae0685c36cca",
+        "packagedCopyEqual": true,
+        "referenceApplication": "Clarifies new-host declaration limits and keeps tool version separate from the frozen historical probe sample; no model behavior regression claim."
+      },
+      "runtimeChanges": "Only the tool/package version marker; verdict/analysis/observation/worker/runner implementation and rule data unchanged. Engineering live test now reads TOOL_VERSION instead of a fixed literal.",
+      "auditCorrections": [
+        "Remove stale pre-release wording from the new package while preserving dated historical evidence.",
+        "Qualify engines.dsh advisory behavior as the current legacy implementation; document new-host false positives and missed conflicts.",
+        "Align the real CLI example with tool 0.1.2 while retaining the installed probe 0.1.1 frozen baseline.",
+        "Correct the catalogue extractor help default output path."
+      ],
+      "scope": "In-progress authorized documentation delivery and source assessment; publication, final registry checks and merged CI are recorded when actually complete."
+    },
+    "dshUpgradeAssessment": {
+      "verifiedAt": "2026-10-17T08:01:31.782851+00:00",
+      "officialRelease": "https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.1",
+      "desktopVersion": "0.2.1-rc.1",
+      "cliVersion": "0.2.1-rc.1",
+      "bundledNodeVersion": "24.21.0",
+      "bundledPnpmVersion": "11.28.5",
+      "assessmentRunnerNode": "26.12.0",
+      "officialPackageSourceSha256": {
+        "dsh-app-boot": "5135179ac810e4f626f32ec3bdc3293dc7d2028e8aa92e5e0c006f1a33b78e76",
+        "dsh-client-ui-plugin-manager": "421deeb3f647bbbb0e5778e97fef508b226cb31dd67a3631b3aa9dbcdb498a2d",
+        "dsh-client-ui-settings-plugins": "2d8ab934d186d295d3496ad084cd02fb52a39fa5be7aca775e47f63b82d2d2a4",
+        "cordis-plugin-loader": "638b9ad360e01236120772323f80a65570c4f3f42f4cfc6243330241025b6d72",
+        "dsh-skill": "4b88621be4e7ff09b05c175fc6dcb67e77a22e5c5570e3aa603338b2937ea791",
+        "dsh-tools": "1e53932e7c4213ea24a7d87f06960b7a7702cb21f8a5741c97242b4a470a442a"
+      },
+      "existingInterfacesObserved": [
+        "settings.plugins.tab",
+        "plugins.detail.section",
+        "plugins.detail.badge",
+        "loader.entries",
+        "skills.registerProvider",
+        "tools.register"
+      ],
+      "declarationCases": {
+        "runtime": "0.2.1-rc.1",
+        "source": "Actual official installed dsh-app-boot exported evaluatePluginCompatibility called with explicit target runtime",
+        "scope": "Source-function evaluation plus current real extractor/verdict; not a full host activation test for these two manifests",
+        "cases": [
+          {
+            "name": "engine-accept-peer-reject",
+            "manifest": {
+              "name": "engine-accept-peer-reject",
+              "version": "1.0.0",
+              "engines": {
+                "dsh": ">=0.2.1-rc.1 <0.3.0"
+              },
+              "peerDependencies": {
+                "@deepseek-ai/dsh": "<0.2.1-rc.1"
+              }
+            },
+            "official": {
+              "accepted": true
+            },
+            "currentVerdict": "partial",
+            "currentCategories": [
+              "declared-incompatible"
+            ]
+          },
+          {
+            "name": "engine-reject-peer-accept",
+            "manifest": {
+              "name": "engine-reject-peer-accept",
+              "version": "1.0.0",
+              "engines": {
+                "dsh": "<0.2.1-rc.1"
+              },
+              "peerDependencies": {
+                "@deepseek-ai/dsh": ">=0.2.1-rc.1 <0.3.0"
+              }
+            },
+            "official": {
+              "name": "engine-reject-peer-accept",
+              "version": "1.0.0",
+              "runtimeVersion": "0.2.1-rc.1",
+              "requirements": {
+                "engines.dsh": "<0.2.1-rc.1"
+              },
+              "exempted": false
+            },
+            "currentVerdict": "ok",
+            "currentCategories": []
+          }
+        ]
+      },
+      "generatedCatalogueDiff": {
+        "host": {
+          "oldServices": 91,
+          "newServices": 98,
+          "addedServices": [
+            "claudeCodeMods",
+            "cotTranslation",
+            "pluginMarket",
+            "remoteAccess",
+            "translator",
+            "webApp",
+            "workingDirectory",
+            "worktrees"
+          ],
+          "removedServices": [
+            "invariants"
+          ],
+          "changedMethods": {
+            "agentPresets": {
+              "added": [
+                "inspectCompositions"
+              ],
+              "removed": []
+            },
+            "connection": {
+              "added": [
+                "admitConnection",
+                "createPeer"
+              ],
+              "removed": []
+            },
+            "hmr": {
+              "added": [
+                "reconcileProfile"
+              ],
+              "removed": []
+            },
+            "llm": {
+              "added": [
+                "imageRequestTarget"
+              ],
+              "removed": []
+            },
+            "ptcRuntime": {
+              "added": [
+                "release"
+              ],
+              "removed": []
+            },
+            "subagents": {
+              "added": [
+                "drainChildren",
+                "drainDescendants",
+                "startActivation",
+                "waitForChildren"
+              ],
+              "removed": [
+                "drainContinuableChildren",
+                "drainContinuableDescendants",
+                "start",
+                "startContinuable"
+              ]
+            },
+            "systemPrompt": {
+              "added": [
+                "refreshContext"
+              ],
+              "removed": []
+            },
+            "webServer": {
+              "added": [
+                "getOrigin"
+              ],
+              "removed": []
+            }
+          }
+        },
+        "client": {
+          "oldServices": 8,
+          "newServices": 8,
+          "addedServices": [],
+          "removedServices": [],
+          "changedMethods": {}
+        }
+      },
+      "initialCurrentArtifactProbeHttp": {
+        "toolVersion": "0.1.1",
+        "tests": 3,
+        "failures": 0
+      },
+      "initialClientAttempt": {
+        "tests": 4,
+        "passed": 3,
+        "failed": 1,
+        "reason": "The tool packaged 0.1.1 before the source version marker changed to 0.1.2, while the assertion later read the new source marker. A complete fixed-version rerun follows; this is not classified as a DSH runtime regression."
+      },
+      "patchArtifactLive": {
+        "toolVersion": "0.1.2",
+        "tests": 7,
+        "failures": 0,
+        "skipped": 0,
+        "probeTests": 2,
+        "httpTests": 1,
+        "chromeArrivalTests": 4,
+        "engineering": {
+          "schemaVersion": 1,
+          "kind": "plugin-compat-check/engineering-live",
+          "ok": true,
+          "platform": "darwin",
+          "arch": "arm64",
+          "nodeVersion": "26.12.0",
+          "dshVersion": "0.2.1-rc.1",
+          "artifactVersion": "0.1.2",
+          "pressureFunctions": 4000,
+          "reportAvailable": true,
+          "reportMilliseconds": 173.89441699999998,
+          "http": {
+            "samples": 12,
+            "refreshingSamples": 11,
+            "maxMilliseconds": 4.095499999999902
+          },
+          "scope": "Owned web profile, actual tgz and synthetic uncalled functions; HTTP responsiveness only, not business behavior or a production performance guarantee.",
+          "cleanup": {
+            "hostStopped": true,
+            "privateRootRemoved": true
+          }
+        },
+        "scope": "Private web profiles and actual tgz with real DSH plus independent Chrome. Covers probe binding/loader controls, HTTP responsiveness and client arrival/error controls; not new full manual panel interaction, model dialogue, business truth or Windows certification."
+      },
+      "conclusion": "No evidence that AST, workers or panel architecture need wholesale replacement. Version-aware declaration adaptation is required: current legacy logic yields a false positive and a missed engines rejection. Host API catalogue/rule changes, subpath metadata and hot-reload lifecycles require separate adaptation and regression coverage. 0.1.2 documents these limits and does not implement that adaptation."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

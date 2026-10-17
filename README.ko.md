@@ -6,7 +6,7 @@
 
 ## 버전과 배포
 
-현재 배포 버전은 **0.1.1**입니다. 2026-10-17에 npm `latest`, 다운로드 무결성과 설치된 패키지를 검증했습니다. 배포 후 로컬 문서 수정과 npm 패키지에 남은 이전 문구는 Plan에 구분하여 기록하며, 미배포 문서 수정이 공개 패키지에 반영되었다고 주장하지 않습니다. [공개 메타데이터 검토](docs/Plan.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
+현재 소스는 **0.1.2 문서 패치**이며 판정 알고리즘은 0.1.1과 같습니다. 배포 상태와 npm 패키지 문구 차이는 Plan의 최신 기록을 따릅니다. 2026-10-17 확인한 npm latest는 0.1.1입니다. [공개 메타데이터 검토](docs/Plan.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
 
 | 진입점 | 역할 |
 |---|---|
@@ -21,7 +21,7 @@
 
 ### 저장소 CLI
 
-저장소는 0.1.1 공통 판정 소스와 루트 개발 워크스페이스를 제공하며 npm에는 plugin 패키지만 포함됩니다. 이후 로컬 문서 수정은 Plan에 따로 기록합니다. 저장소를 받은 뒤 루트에서 의존성을 설치하세요:
+저장소는 공통 판정 소스와 루트 개발 워크스페이스를 제공하며 npm에는 plugin 패키지만 포함됩니다. 저장소를 받은 뒤 루트에서 의존성을 설치하세요:
 
 ```bash
 git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
@@ -94,7 +94,7 @@ shell은 Node 진입 전 기존 사용법·커널 오류 코드를 유지합니�
 
 서비스는 present, absent, unobserved, unreadable로 구분합니다. 누락된 키는 미관측입니다. 현대 관측은 profile·DSH 버전이 일치해야 하고 기본24시간 후 만료됩니다. 구형 보고서는 명시된 키만 사용하며 unbound 경고를 표시합니다.
 
-`certainty`는 certain 또는 suspected이며 filtered/abstained는 별도 처리 분류입니다. 선언은 의존 관계를 증명할 수 있지만 메서드 부재를 증명하지 못합니다. `impactBasis=inferred`의 기능 영향은 추론임을 유지하세요. 신뢰할 수 있게 매핑된 loader FAILED/PENDING은 실제 미활성 증거입니다. 공식 peer 충돌은 declared-incompatible 및 추론 영향·degraded로 표시하고 미관측 예외를 고려해 fatal로 단정하지 않습니다. `engines.dsh`는 권고 선언입니다.
+`certainty`는 certain 또는 suspected이며 filtered/abstained는 별도 처리 분류입니다. 선언은 의존 관계를 증명할 수 있지만 메서드 부재를 증명하지 못합니다. `impactBasis=inferred`의 기능 영향은 추론임을 유지하세요. 신뢰할 수 있게 매핑된 loader FAILED/PENDING은 실제 미활성 증거입니다. 공식 peer 충돌은 declared-incompatible 및 추론 영향·degraded로 표시하고 미관측 예외를 고려해 fatal로 단정하지 않습니다. 현재 구현은 0.2.0-rc.2 규칙에 따라 `engines.dsh`를 권고로 처리합니다. 0.2.1-rc.1 호스트는 이 필드를 우선하므로 선언 오탐·누락 가능성이 있으며 실제 호스트 결과를 확인해야 합니다.
 
 `coverage.status=limited`, vacuous, 파싱·읽기·예산 진단, 매핑 불가능한 loader 제한을 항상 함께 전달하세요. 문제 없음이 기능 인증은 아닙니다. 호스트·클라이언트·공유 호출을 구분합니다. provide 선언은 제공자 단서일 뿐 활성화 증거가 아니며 존재하는 서비스의 완전한 메서드 관측은 계속 사용합니다.
 
@@ -141,7 +141,7 @@ node tools/meta-check.mjs --json
 
 보조 측정은 독립 loader 원시 라벨과 서비스 관측만 받는 예측기를 분리합니다. [Plan 보조 측정 기록](docs/Plan.md#51-已验证范围)을 참고하세요. `node tools/labels.mjs --nm web --synthetic --json`은 비공개 환경을 만들고 실제 누락을 보고하면 exit1을 반환합니다. 기존 대상은 `--probe-boot`, 파일 입력은 `--probe`와 `--labels`를 함께 사용합니다. 이 수치는 첫 계층의 해당 표본에만 적용되며 생태계 정확도가 아닙니다.
 
-[lib/contracts.mjs](lib/contracts.mjs)가 보고서 계약의 단일 원본이며 CLI JSON·HTTP·도구·패널에서 증거를 유지합니다. 추가 필드는 보존하고 필수 필드 누락이나 미지원 버전은 도구 오류로 처리합니다. 규칙은 공식0.2.0-rc.2 소스·런타임으로 검토했으며 AST 목록은 부분 스캔임을 명시합니다. [Plan 규칙 및 계약 기록](docs/Plan.md#2-现行判定与集成契约)을 참고하세요.
+[lib/contracts.mjs](lib/contracts.mjs)가 보고서 계약의 단일 원본이며 CLI JSON·HTTP·도구·패널에서 증거를 유지합니다. 추가 필드는 보존하고 필수 필드 누락이나 미지원 버전은 도구 오류로 처리합니다. 규칙·API 카탈로그는 0.2.0-rc.2 기준입니다. 0.2.1-rc.1의 제한된 접속 검증은 통과했지만 선언 판정 적용과 카탈로그 검토는 아직 필요합니다. AST 목록은 부분 스캔임을 명시합니다. [Plan 규칙 및 계약 기록](docs/Plan.md#2-现行判定与集成契约)을 참고하세요.
 
 [개발 기록 및 후속 계획](docs/Plan.md) · [역사 감사](docs/GPT审计及重构方案文档.md) · [규칙](rules/README.md) · [skill 배포](skill/README.md). [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)에 수록되어 있습니다.
 

@@ -6,7 +6,7 @@
 
 ## 当前版本与交付
 
-当前发布版为 **0.1.1**；2026-10-17已核验 npm `latest`、下载完整性和安装产物。源码中的发布后文档修订与npm随包旧文案差异见Plan，不把未发布文档修订说成已在公开包生效。公开状态和差异见 [Plan中的核验记录](docs/Plan.md#1-项目定位与交付状态)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
+当前源码为 **0.1.2 文档补丁**，判定算法与0.1.1一致。发布状态、npm随包文案与源码差异以Plan中的最新记录为准；2026-10-17核验npm latest为0.1.1。公开状态和差异见 [Plan中的核验记录](docs/Plan.md#1-项目定位与交付状态)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
 
 插件、CLI、skill三种形态共享判定内核；安装检查脚本是CLI编排入口。只有**相同输入与采样证据**才应得出相同结果。
 
@@ -23,7 +23,7 @@ npm 包**没有 CLI `bin`**，不支持 `npx dsh-plugin-compat-check`。默认�
 
 ### 仓库 CLI
 
-仓库提供0.1.1共享判定源码和根开发工作区；npm只包含plugin子包，后续本地文档修订单独记录于Plan。取得仓库后在根目录安装依赖：
+仓库提供共享判定源码和根开发工作区，npm只包含plugin子包。取得仓库后在根目录安装依赖：
 
 ```bash
 git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
@@ -97,7 +97,7 @@ shell 在进入 Node 前保留旧的用法/内核缺失错误码；调用自动�
 
 - 服务区分 `present`、`absent`、`unobserved`、`unreadable`；省略键是未采集，不能判成不存在。现代探针需匹配 profile、DSH版本，默认超过24小时失效；旧报告只使用明确记录的键并提示未绑定。
 - `certainty` 是 `certain` 或 `suspected`，与“过滤/弃权”这种去处不同。声明能确定依赖关系，不能单独确定方法缺失。`impactBasis=inferred` 的用户影响要保留“推断，非实测”；可靠映射的 loader FAILED/PENDING 可提供实际未激活证据。
-- 官方 peer 范围冲突单列 `declared-incompatible`，影响为推断；`engines.dsh` 是建议声明，不冒充宿主安装闸门。未采集精确版本豁免时不据此写 fatal。
+- 官方 peer 范围冲突单列 `declared-incompatible`，影响为推断；当前实现沿用0.2.0-rc.2的声明规则，将`engines.dsh`作建议处理；0.2.1-rc.1已优先按该字段判断，相关声明有误报/漏报风险，须核对宿主实际结果。未采集精确版本豁免时不据此写 fatal。
 - `coverage.status=limited`、`vacuous`、解析/读取/预算诊断、无法映射的 loader 状态都必须转述。“可用”不等于完整功能验收通过。
 - 宿主、客户端、共享调用点分开处理。声明 provide 只是提供方线索，不能证明服务已激活；已确认存在服务的完整方法观测仍参与判断。
 
@@ -144,7 +144,7 @@ node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 
 辅助度量使用 [Plan辅助度量记录](docs/Plan.md#51-已验证范围) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
 
-报告契约以 [lib/contracts.mjs](lib/contracts.mjs) 为单一真源，CLI JSON、HTTP、工具与面板保留完整证据；新字段可扩展，缺少必需字段或不支持的版本明确报工具错误。规则已按0.2.0-rc.2官方实现/运行时复核，库存为明确标记不完整的AST样本，详见 [Plan规则与契约记录](docs/Plan.md#2-现行判定与集成契约)。
+报告契约以 [lib/contracts.mjs](lib/contracts.mjs) 为单一真源，CLI JSON、HTTP、工具与面板保留完整证据；新字段可扩展，缺少必需字段或不支持的版本明确报工具错误。规则/API目录基于0.2.0-rc.2；已对0.2.1-rc.1完成有限接入验证，声明判定适配和目录复核尚待完成。库存为明确标记不完整的AST样本，详见 [Plan规则与契约记录](docs/Plan.md#2-现行判定与集成契约)。
 
 [施工记录与后续计划](docs/Plan.md) · [历史审计](docs/GPT审计及重构方案文档.md) · [规则说明](rules/README.md) · [skill交付](skill/README.md)。项目已收录于 [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)。
 

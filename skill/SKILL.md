@@ -63,7 +63,7 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 插件数: 4    有运行时面: 是
 
 采样说明: 旧格式探针未绑定 profile/DSH 版本；仅使用显式记录的服务，不推断缺项
-工具版本: 0.1.1    证据覆盖有限: 4 个插件
+工具版本: 0.1.2    证据覆盖有限: 4 个插件
 结论: 可用 3    部分可用 1    不兼容 0    （其中 1 个「可用」是空洞的：它没有任何可检查的依赖）
 
 部分可用  dsh-keep-awake@0.2.0
@@ -147,4 +147,4 @@ CI 里可以直接用：`0` 过，`1`/`2` 按你的策略处理，`3` 是**工�
 
 0.1.1：`root` 缺项是未采样，不能称为不存在；`coverage.status=limited` 与 `vacuous` 必须转述。现代探针绑定 profile/DSH/采样时间；旧报告明确标为未绑定。解析、读取、资源上限等诊断会限制覆盖，完整性不足不更新基线。当前统计见仓库 `docs/current-state.json`；npm 包是插件，CLI 从仓库使用并先运行 `npm ci --ignore-scripts`。显式安装检查会执行目标插件，临时 profile 不是不可信代码隔离沙箱。
 
-官方 peer 范围冲突是 declared-incompatible：影响为推断，不能凭声明写成实际加载失败；engines.dsh 只作建议声明。当前契约、施工记录和后续计划统一见仓库 docs/Plan.md，原始审计位于 docs/GPT审计及重构方案文档.md。本地版本以仓库文件为准；发布受理不等于公开可安装，公开版本以npm registry实时结果为准；本地修订不能视为已在公开包生效。
+官方 peer 范围冲突是 declared-incompatible：影响为推断，不能凭声明写成实际加载失败；当前实现沿用DSH0.2.0-rc.2的声明规则，将engines.dsh作建议处理；0.2.1-rc.1宿主已优先按engines.dsh判断，存在声明误报/漏报风险，须说明该限制并核对宿主实际结果，不能称新版已全面适配。当前契约、施工记录和后续计划统一见仓库 docs/Plan.md，原始审计位于 docs/GPT审计及重构方案文档.md。本地版本以仓库文件为准；发布受理不等于公开可安装，公开版本以npm registry实时结果为准；本地修订不能视为已在公开包生效。

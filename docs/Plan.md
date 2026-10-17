@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-更新于2026-10-17，适用于0.1.1及发布后的本地文档修订。本文维护现行契约、验证边界与待办；用法见[README](../README.md)，统计和分阶段证据见[docs/current-state.json](current-state.json)，详细施工过程查Git历史。[原始审计](GPT审计及重构方案文档.md)与[旧提取器反例](extraction-findings.md)保留历史身份，不作为当前缺陷清单。
+更新于2026-10-17，适用于0.1.2文档补丁；运行判定仍沿用0.1.1。本文维护现行契约、验证边界与待办；用法见[README](../README.md)，统计和分阶段证据见[docs/current-state.json](current-state.json)，详细施工过程查Git历史。[原始审计](GPT审计及重构方案文档.md)与[旧提取器反例](extraction-findings.md)保留历史身份，不作为当前缺陷清单。
 
 ## 1. 项目定位与交付状态
 
@@ -12,7 +12,7 @@
 | 仓库CLI / 安装检查 | 默认静态检查不执行目标源码；显式probe/安装检查会装依赖、启动宿主并执行目标插件，临时profile不是OS沙箱 |
 | skill | 指导agent调用同一工具或CLI，不另实现判定逻辑 |
 
-2026-10-17：**npm latest=0.1.1，已发布并回下载验收**。运行时代码基于main `49403d7`，随包README对应本地提交`f280302`；版本、描述、依赖、keywords和README核验均一致。发布后文案修订尚未push/合并，也未发新npm版本；0.1.1随包skill仍含“本地0.1.1未发布”的旧提示，包内规则README仍称本地候选，不能原位覆盖，后续补丁须另行授权。发布证据见current-state的`verification.npmRelease`；此前查询和交付快照保留原日期。
+2026-10-17：npm latest已核验为**0.1.1**；本轮获授权交付**0.1.2文档补丁**，修正skill/规则说明的旧发布状态文案、统一版本与新版DSH限制，判定算法不变。GitHub合并、补丁发布与回下载结果分别记录于current-state的`verification.documentationDelivery012`；0.1.1发布证据保留在`verification.npmRelease`，旧包不可原位覆盖，不能把待交付修订冒充已公开。
 
 版本真源为`lib/version.mjs`。根目录是private开发工作区；npm只打包`plugin/`，没有CLI bin、安装shell或probe入口。`prepack`同步skill/契约并暂存内核与LICENSE，`postpack`清理暂存内核；应安装完整tgz，不能假定裸`plugin/`已带kernel。
 
@@ -28,7 +28,7 @@
 ### 2.2 结论、影响与基线
 
 - `certain / suspected`表达证据确定性，过滤/守卫/弃权另列；`impactBasis=measured / inferred`表达实测或推断。不得从缺少“推断”标记反推实测。API源码发现通常有`file:line`；loader/声明发现可能没有，不编造位置。
-- 可可靠映射且启用的loader FAILED/PENDING可形成fatal实测发现；disabled、LOADING、group及无法映射项不冒充同一事实。官方peer冲突是`declared-incompatible`及推断影响，`engines.dsh`仅建议；声明不等于实测加载失败。
+- 可可靠映射且启用的loader FAILED/PENDING可形成fatal实测发现；disabled、LOADING、group及无法映射项不冒充同一事实。官方peer冲突是`declared-incompatible`及推断影响，当前实现把`engines.dsh`作建议处理，这是旧0.2.0-rc.2口径；0.2.1-rc.1已优先使用该字段，本版尚有声明误报/漏报，见后续适配任务。声明不等于实测加载失败。
 - 规则按方法layer优先、服务layer回退，不能跨端套用。provide声明只是提供方线索；未知方法影响用默认“影响面未知”。`try/catch`不是能力守卫；`coverage.status=limited`、vacuous及客户端未验证须转述，ok不是功能认证。
 - schema2基线按canonical profile/路径/模式及工具、规则、目录身份隔离，锁内比较、原子写入；不完整扫描不推进。升级/身份变化记中性，严重度/确定性/位置变化参与差分；schema1或损坏条目不比较。角标表示变化及方向，“没变化”不等于兼容。
 
@@ -42,11 +42,13 @@
 
 ### 2.4 DSH接入要点
 
-以下限定于已核验的0.2.0-rc.2，升级后重新验证：
+历史基准为0.2.0-rc.2；0.2.1-rc.1的新版宿主/客户端源码仍保留下列主要接入口，实测范围和声明差异另列，不能把接入可用当作判定全面适配：
 
 - UI使用`settings.plugins.tab`、`plugins.detail.section`和`.badge`；`plugins.item`缺可靠插件身份。客户端为web，导出预构建的`window.__ModuleLoader__.load({id,factory})`，inject声明其它插件包名；宿主不代构建。
 - loader entries是可迭代对象，entry id须映射包身份；0–5依次为PENDING/LOADING/ACTIVE/FAILED/DISPOSED/UNLOADING。import失败可能没有fiber，不能靠`fiber.await()`取得PENDING原因，也不读要求inject的fiber.store假装全知。
 - 本插件空inject避免体检自身因缺服务挂起；使用有效scoped Context。工具required为顶层数组，skill须运行时注册provider，包内文件不会自动发现；profile按实际启动参数解析，不依赖过期环境变量。`ctx.settings.register`不存在不能外推其它方法。
+
+0.2.1-rc.1升级评估：已直接调用官方导出的声明检查函数，复现“engines放行/peer拒绝”的误报及反向组合的漏报；API目录对照为host91→98（新增8、移除invariants），client仍8且方法集合未变，subagents等方法有变化。无需据此重写AST/worker/面板架构；应按目标DSH版本适配声明优先级、更新并复核目录/规则、扩展回归；子路径元数据及热重载生命周期另验收。官方依据：[新版发布说明](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.1)。
 
 ## 3. 开发与文档维护约定
 
@@ -77,7 +79,8 @@
 | Linux arm64 VM | Ubuntu24.04.5、Node22.19/24.21，默认各406通过/1项外部parityfix缺失跳过，联合各18通过（4项真实DSH、1项冻结pnpm安装、13项离线）；自有QEMU磁盘、profile和SSH密钥已清理 |
 | Linux x64远程CI | [PR #2源码7cae84c的Actions](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38922904395)三个任务通过：Node22/24默认/发布前/资源、Node24联合18项（4项真实DSH、1项冻结pnpm安装、13项离线）；两版超时总流程约1.13/1.09秒，worker运行、停止及恢复均达标；后续纯交付记录提交另看PR最新CI |
 | 本地超时断言补强 | Node22.19/26.12默认各481/481，六个工程场景通过；计数须增长、1秒受控超时、含停止检查及恢复提取的总流程<5秒，两种隔离负例均被拒绝；生产10秒/512+64MiB预算未改 |
-| 当前文档与skill | 本轮核验记录见current-state的verification.documentationAudit；旧现场记录按原提交保留，Windows和其它DSH版本仍未认证 |
+| 新版DSH有限验证 | 0.2.1-rc.1/macOS arm64、工具0.1.2实际tgz共7/7：探针2、HTTP1、Chrome到货及错误对照4；不是全面业务或新一轮手动面板验收。声明两组差异及目录对照见current-state的verification.dshUpgradeAssessment |
+| 当前文档与skill | 本轮交付见current-state的verification.documentationDelivery012；旧documentationAudit按原日期保留，Windows与未列明版本未认证 |
 
 辅助度量只用独立原始loader标签计分；预测只读服务观测，不读标签。四病例TP1/FP0/FN1/TN2（精确率1、召回率0.5、退出1）说明固定样本中存在真实漏报，不是生态准确率。标签须绑定身份、时间、版本并配对报告；无有效分母/输入不可信退出3，指标分母为空为null。度量退出0/1不等同兼容性CLI的0/1。
 
@@ -113,7 +116,7 @@ DSC_SLOW=1 node --test --test-reporter=tap test/engineering-live.test.mjs test/p
 
 按以下顺序推进，不重复已完成任务：
 
-1. **交付发布后文档修订。** 经push/合并授权后同步本地发布记录；另获补丁发布授权后去除npm随包skill/规则说明中的旧发布状态文案。不要覆盖或重用0.1.1，也不要把本地修订冒充已在npm生效。
+1. **0.2.1-rc.1定向适配。** 按目标版本区分engines.dsh优先与旧peer规则，覆盖缺失、非法范围、预发布和精确豁免；审查host API目录及受影响规则，不靠重建快照消红。保留旧版回归，并把当前官方函数对照升级为真实宿主正反例及持续集成；完成前不声称全面支持新版。
 2. **下一项功能开发：独立业务真值用例。** 从真实插件挑选有限业务路径，明确预期动作和成功/失败信号，优先补客户端交互及已知动态分析盲区。功能标签须独立于预测与loader标签；同时保留正反例，不用到货数或更多调用点冒充准确率。
 3. **Windows取得真实环境后验收。** 路径、安装器、进程回收和打包实跑；按用户选择暂缓，不用POSIX或路径模拟充数。
 4. **可选profile回归快照隔离。** 目录发现后被其它任务删除，或源码在提取与行号回读间变化，会使本机回归竞态失败；本轮保留失败证据并在输入稳定后原样通过，后续补不可变输入，不能删断言或把重试当长期修复。

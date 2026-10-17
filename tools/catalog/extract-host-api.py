@@ -9,7 +9,7 @@
 用法:
   tools/catalog/extract-host-api.py [app.asar 路径] [输出 json 路径]
 默认读 /Applications/DeepSeek Harness.app/Contents/Resources/app.asar，
-默认写到 rules/host-api-catalog.json。
+默认写到 rules/dsh-api-catalog.json。
 """
 import json, re, struct, sys, os, pathlib
 

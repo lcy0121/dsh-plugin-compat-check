@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-compat-check",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Checks installed DSH plugins against the current DSH version, with source locations, runtime evidence and coverage limits. Includes a compatibility panel and agent tool.",
   "license": "MIT",
   "type": "module",
