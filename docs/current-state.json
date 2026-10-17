@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.1.2",
-  "recordedAt": "2026-10-17T08:01:31.782851+00:00",
+  "recordedAt": "2026-10-17T08:12:35.411226+00:00",
   "testFiles": 33,
   "tests": 481,
   "repositoryFiles": {
@@ -949,15 +949,15 @@
         "modelBehaviorRegressionClaimed": false
       },
       "scope": "Published the tested tarball, then independently downloaded the registry artifact and verified its bytes and installed tool/skill behavior in a controlled host context. This is not a new real DSH/browser/Windows certification. Local documentation changes after f280302 are not in the published artifact and have not been pushed or merged.",
-      "publishedAt": "2026-10-17T07:34:40.423Z"
+      "publishedAt": "2026-10-17T07:34:40.423Z",
+      "recordType": "Historical 0.1.1 publication checkpoint. Its latest, local-fix and delivery flags are as observed at verifiedAt; current release and delivery are recorded in documentationDelivery012."
     },
     "documentationDelivery012": {
-      "verifiedAt": "2026-10-17T08:01:31.782851+00:00",
+      "verifiedAt": "2026-10-17T08:12:35.411226+00:00",
       "patchVersion": "0.1.2",
       "baseCommit": "bc0aff1",
       "publicNpmAtStart": "0.1.1",
-      "npmPublished": false,
-      "githubMerged": false,
+      "npmPublished": true,
       "maintainedDocuments": 11,
       "defaultSuiteTests": 481,
       "defaultFailures": 0,
@@ -974,7 +974,84 @@
         "Align the real CLI example with tool 0.1.2 while retaining the installed probe 0.1.1 frozen baseline.",
         "Correct the catalogue extractor help default output path."
       ],
-      "scope": "In-progress authorized documentation delivery and source assessment; publication, final registry checks and merged CI are recorded when actually complete."
+      "scope": "Published 0.1.2 and verified the public tarball bytes, ordinary empty-cache installation, controlled tool/skill execution and live GitHub/npm metadata. CI is tied to the exact artifact source commit; final record-only commits have their own checks. New DSH real integration is separately scoped in dshUpgradeAssessment; no Windows or full business compatibility claim.",
+      "publication": {
+        "version": "0.1.2",
+        "latest": "0.1.2",
+        "publishedAt": "2026-10-17T08:08:40.762Z",
+        "registry": "https://registry.npmjs.org",
+        "explicitUserAuthorization": true,
+        "artifactSourceCommit": "5af2550cf03a3975ae583935518bb8be41560fad",
+        "artifact": {
+          "name": "dsh-plugin-compat-check",
+          "version": "0.1.2",
+          "filename": "dsh-plugin-compat-check-0.1.2.tgz",
+          "shasum": "e3c9070b93bc8fd9499d5b34e354e92eb9ee38c2",
+          "integrity": "sha512-MjGe8WNpt3FObjBhqgabS2Q69Rgbh0uYfhKKQ0j/Iy/FzGvNFG0gd5graxGIl7MjZc/FjYQdu7TKzzLESfmYOA==",
+          "size": 128118,
+          "unpackedSize": 415700,
+          "entryCount": 34
+        },
+        "registryBytesEqual": true,
+        "sha1Matches": true,
+        "sha512Matches": true,
+        "readmeMatchesSource": true,
+        "dependencies": {
+          "@babel/parser": "7.29.9",
+          "semver": "7.7.3"
+        },
+        "ordinaryRegistryEmptyCacheInstall": true,
+        "unmodifiedRegistryUrlAndIntegrityVerified": true,
+        "installedToolAndSkill": {
+          "ok": true,
+          "plugins": 27,
+          "exitCode": 2,
+          "skillBodyUtf16Length": 6669,
+          "skillBodySha256": "0c6dc74cb52cf33869593df5f3db4aa6ece6f863e0ef372cbad9ae0685c36cca",
+          "kernelRulesReadmeMatchSource": true,
+          "oldPublicationStatusRemoved": true,
+          "scope": "Controlled registered tool/skill invocation; no real DSH or browser certification from this smoke test."
+        }
+      },
+      "metadata": {
+        "observedAt": "2026-10-17T08:12:00.856Z",
+        "errors": 0,
+        "notices": 0,
+        "skipped": [],
+        "npmReadmeFetched": true
+      },
+      "githubDelivery": {
+        "pullRequest": "https://github.com/lcy0121/dsh-plugin-compat-check/pull/3",
+        "targetBranch": "main",
+        "artifactSourceCi": {
+          "headSha": "5af2550cf03a3975ae583935518bb8be41560fad",
+          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39015874460",
+          "conclusion": "success",
+          "jobs": [
+            {
+              "name": "test (22.19.0)",
+              "conclusion": "success"
+            },
+            {
+              "name": "test (24)",
+              "conclusion": "success"
+            },
+            {
+              "name": "linux-live",
+              "conclusion": "success"
+            }
+          ]
+        },
+        "recordCommitChecks": "The final publication-record commit is checked separately on the PR; use the linked PR for current merge status and subsequent main CI."
+      },
+      "prepublishCheck": true,
+      "formatCheck": true,
+      "finalDocumentationRegression": {
+        "tests": 67,
+        "failures": 0,
+        "skipped": 0,
+        "scope": "Maintained documentation, skill, metadata rules, versions and actual tarball empty-cache installation. Sandbox cache/network restrictions required a rerun with a private npm cache and network access; no assertions were changed."
+      }
     },
     "dshUpgradeAssessment": {
       "verifiedAt": "2026-10-17T08:01:31.782851+00:00",

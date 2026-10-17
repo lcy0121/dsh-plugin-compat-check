@@ -12,7 +12,7 @@
 | 仓库CLI / 安装检查 | 默认静态检查不执行目标源码；显式probe/安装检查会装依赖、启动宿主并执行目标插件，临时profile不是OS沙箱 |
 | skill | 指导agent调用同一工具或CLI，不另实现判定逻辑 |
 
-2026-10-17：npm latest已核验为**0.1.1**；本轮获授权交付**0.1.2文档补丁**，修正skill/规则说明的旧发布状态文案、统一版本与新版DSH限制，判定算法不变。GitHub合并、补丁发布与回下载结果分别记录于current-state的`verification.documentationDelivery012`；0.1.1发布证据保留在`verification.npmRelease`，旧包不可原位覆盖，不能把待交付修订冒充已公开。
+2026-10-17：**npm latest=0.1.2，文档补丁已发布并回下载验收**；旧发布状态文案已在新包去除，判定算法及规则数据与0.1.1一致。GitHub交付见[PR #3](https://github.com/lcy0121/dsh-plugin-compat-check/pull/3)，源码5af2550及最终记录提交各按对应CI核验；发布哈希、README/依赖/skill比对见current-state的`verification.documentationDelivery012`。0.1.1与旧现场记录保留原日期，不追写为新认证。
 
 版本真源为`lib/version.mjs`。根目录是private开发工作区；npm只打包`plugin/`，没有CLI bin、安装shell或probe入口。`prepack`同步skill/契约并暂存内核与LICENSE，`postpack`清理暂存内核；应安装完整tgz，不能假定裸`plugin/`已带kernel。
 

@@ -6,7 +6,7 @@ Check the compatibility of **installed DSH plugins** with a target DSH version, 
 
 ## Version and delivery
 
-The current source is the **0.1.2 documentation patch**, with the same verdict algorithm as 0.1.1. Plan records publication status and differences from immutable npm artifacts; npm latest was verified as 0.1.1 on 2026-10-17. See [publication and verification records in Plan](docs/Plan.md) and [generated verification facts](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
+The current release is **0.1.2**. npm latest, the downloaded tarball and installed artifact were verified on 2026-10-17. This patch corrects documentation and version markers; the verdict algorithm is unchanged from 0.1.1. See [publication and verification records in Plan](docs/Plan.md) and [generated verification facts](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
 
 | Entry | Purpose |
 |---|---|
@@ -51,7 +51,7 @@ Select the actual profile; do not assume desktop. `--nm` accepts a profile or no
 ### Plugin and skill
 
 ```bash
-# Published npm version (0.1.1 verified on 2026-10-17)
+# Published npm version (0.1.2 verified on 2026-10-17)
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # Standalone skill for CLI users

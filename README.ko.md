@@ -6,7 +6,7 @@
 
 ## 버전과 배포
 
-현재 소스는 **0.1.2 문서 패치**이며 판정 알고리즘은 0.1.1과 같습니다. 배포 상태와 npm 패키지 문구 차이는 Plan의 최신 기록을 따릅니다. 2026-10-17 확인한 npm latest는 0.1.1입니다. [공개 메타데이터 검토](docs/Plan.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
+현재 배포 버전은 **0.1.2**입니다. 2026-10-17에 npm latest, 다운로드 tarball과 설치된 패키지를 검증했습니다. 문구와 버전 표기를 수정한 패치이며 판정 알고리즘은 0.1.1과 같습니다. [공개 메타데이터 검토](docs/Plan.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
 
 | 진입점 | 역할 |
 |---|---|
@@ -51,7 +51,7 @@ node bin/compat-check.mjs --help
 ### 플러그인과 skill
 
 ```bash
-# npm 배포 버전 설치 (2026-10-17 확인: 0.1.1)
+# npm 배포 버전 설치 (2026-10-17 확인: 0.1.2)
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # CLI 사용자의 독립 skill
