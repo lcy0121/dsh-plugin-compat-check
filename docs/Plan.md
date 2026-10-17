@@ -44,7 +44,7 @@
 
 历史基准为0.2.0-rc.2；0.2.1-rc.1的新版宿主/客户端源码仍保留下列主要接入口，实测范围和声明差异另列，不能把接入可用当作判定全面适配：
 
-- UI使用`settings.plugins.tab`、`plugins.detail.section`和`.badge`；`plugins.item`缺可靠插件身份。客户端为web，导出预构建的`window.__ModuleLoader__.load({id,factory})`，inject声明其它插件包名；宿主不代构建。
+- UI使用`settings.plugins.tab`、`plugins.detail.section`和`.badge`；`plugins.item`缺可靠插件身份。客户端为web，导出预构建的`window.__ModuleLoader__.load({id,factory})`，inject声明其它插件包名；宿主不代构建。2026-10-17在0.2.1-rc.2实测：`plugins.detail.section`、`plugins.detail.badge`与tool/skill正常，`settings.plugins.tab`（标签名“兼容性”）**未渲染**——插件设置页DOM中无该标签，而`window.__COMPAT_CHECK__`仍自报已注册；注册成功不等于界面出现。该结论只覆盖一次手动检查，不推翻0.2.0-rc.2的面板记录。
 - loader entries是可迭代对象，entry id须映射包身份；0–5依次为PENDING/LOADING/ACTIVE/FAILED/DISPOSED/UNLOADING。import失败可能没有fiber，不能靠`fiber.await()`取得PENDING原因，也不读要求inject的fiber.store假装全知。
 - 本插件空inject避免体检自身因缺服务挂起；使用有效scoped Context。工具required为顶层数组，skill须运行时注册provider，包内文件不会自动发现；profile按实际启动参数解析，不依赖过期环境变量。`ctx.settings.register`不存在不能外推其它方法。
 
@@ -121,3 +121,46 @@ DSC_SLOW=1 node --test --test-reporter=tap test/engineering-live.test.mjs test/p
 1. **0.2.1-rc.1定向适配。** 按目标版本区分engines.dsh优先与旧peer规则，覆盖缺失、非法范围、预发布和精确豁免；审查host API目录及受影响规则，不靠重建快照消红。保留旧版回归，并把当前官方函数对照升级为真实宿主正反例及持续集成；完成前不声称全面支持新版。
 2. **下一项功能开发：独立业务真值用例。** 从真实插件挑选有限业务路径，明确预期动作和成功/失败信号，优先补客户端交互及已知动态分析盲区。功能标签须独立于预测与loader标签；同时保留正反例，不用到货数或更多调用点冒充准确率。
 3. **Windows取得真实环境后验收。** 路径、安装器、进程回收和打包实跑；按用户选择暂缓，不用POSIX或路径模拟充数。
+
+## 7. 宣传与分发提案（2026-10-17，待评估）
+
+本节是**待评估的渠道判断**，不是已承诺的施工项：做不做、先后顺序由人决定。写入目的是把结论和前置条件摊开，避免每条渠道都要重新论证一遍。
+
+事实底数（2026-10-17实测）：npm近30天下载243、GitHub star 0；`awesome-dsh-plugin.com/plugins.json`（5,704条，对应仓库19,110★）里**没有**本仓库，而dshmarket只读这一份表，所以当前无法在该市场搜到或安装；已被0xsline（1,196★）、Dominic789654、dshbase与dsh-xray收录或建页（后两者页面返回200），另有若干目录以自动方式收录（调研口径，未逐个复核）。
+
+### 7.1 判断
+
+兼容性工具只在**故障发生时**被需要：某个插件在新版DSH上坏了，作者或用户正在查为什么。榜单解决“被搜到”，不解决“被想到”，而后者才是这个产品的入口。因此优先级按“能否出现在那一刻”排，而不是按渠道体量排。
+
+### 7.2 候选渠道
+
+| 渠道 | 机制 | 前置条件 | 需要的产品改动 | 可观测信号 |
+|---|---|---|---|---|
+| A 故障现场 | 把一次体检结论变成可直接粘进issue的markdown块（宿主版本、插件名与版本、结论、每条`file:line`、`certainty`、`impactBasis`、静态推断免责、复现命令），在真实报错贴里回复 | 报告字段已齐备（`lib/contracts.mjs`），缺面向第三方的措辞与固定格式 | CLI增加`--issue-report`；不改判定 | 被引用/被致谢次数；**不能自发增长** |
+| B 兼容性普查 | 取一个明确样本（如下载量前50）做静态扫描，公布“声称支持0.2.x但存在悬空调用”的计数与清单 | 样本口径与抓取方式可复现；结论须标静态推断、非实测、非安全审查 | 批量扫描编排与结果聚合（`--json`已可支撑单仓） | 数字被外部引用 |
+| C 徽章 + Action | 作者仓库加一个workflow跑CLI，把徽章JSON推到自己仓库分支，README用shields endpoint引用 | 稳定的机器可读契约（已有`schemaVersion`） | 徽章JSON schema、可复用的Action | 安装该Action的仓库数、徽章在第三方README出现次数；**唯一不依赖持续人工的渠道** |
+| D 发布节奏钩子 | DSH每发一个rc，24小时内出一次普查增量 | 依赖B的批量脚本 | 版本差异对比（基线差分已有雏形） | 发版后24小时的引用量 |
+| E 市场详情页 | 与dsh-market协商在详情页展示第三方结论 | 需要一个只读、可缓存的结论端点；主动权在对方 | 只读结论端点 | 上线与否 |
+
+A与B的红线：只在结论确实回答该帖问题时出现，须声明作者身份与工具来源，一次回复不夹带第二个仓库；普查只写“待作者核对”，不写某插件“坏了”，也不把静态推断写成实测。
+
+### 7.3 明确不做
+
+- **YELEBAI市场**（调研口径约1.1万下载/月，未独立复核）：其扫描只读仓库根`package.json`。根是private开发工作区，要过闸就得给根加`dsh.bundle`指向`plugin/cordis.patch.yml`，这会让“从根安装”变成一句假话——用不实声明换渠道位，不做。
+- **bruc3van自荐位**：要求star>10，当前0。已就“只是个bash CLI”这条过时排除理由提issue（#138），等人工复核，不自行改`curated.json`/`approved.json`。
+- **dshhub.co**：口令/付费分发市场；**cordis.run**：需登录并人工审核。二者不作为主线。
+- **通用社交平台贴链接**：产品价值需要30秒演示才看得懂，纯链接转化接近零。
+- **求star**：下载量与被引用次数是可用指标，star是结果不是手段。
+
+### 7.4 本轮已提交的对外动作
+
+| 对象 | 动作 | 状态 |
+|---|---|---|
+| awesome-dsh-plugin（dsh-market登记表） | [PR #7736](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/7736)，`plugin/`子目录形态、`category: dev` | CI通过，待维护者合并 |
+| deepseek1024（1024 Store） | [PR #628](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/628) | 已自动合并 |
+| dshworks/awesome-dsh-plugins | [PR #167](https://github.com/dshworks/awesome-dsh-plugins/pull/167)，修正`path`（`probe`→`plugin`）、过时的“安装前”描述、缺失的npm名 | CI通过，待合并 |
+| 0xsline/awesome-deepseek-harness | [PR #717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)，描述改为现行能力 | CI通过，待合并 |
+| bruc3van/awesome-dsh-plugin | [issue #138](https://github.com/bruc3van/awesome-dsh-plugin/issues/138)，排除理由已过时 | 待人工复核 |
+
+以上对外描述统一只写0.2.1-rc.2实测到的界面：插件详情页角标、逐项发现、`compat_check`工具、skill provider；**不承诺**`settings.plugins.tab`面板，原因见§2.4。提交PR不等于上游页面已更新。
+
