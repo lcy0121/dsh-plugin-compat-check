@@ -69,7 +69,7 @@ npm latest=0.1.2，2026-10-17已回下载验收，发布事实见`verification.d
 | 对象 | 已有动作与状态 |
 |---|---|
 | awesome-dsh-plugin / dsh-market登记表 | [PR #7736](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/7736)，plugin子目录、dev分类；CI通过，OPEN，当前登记表未见本仓库 |
-| 1024 Store目录 | [PR #628](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/628)已MERGED；公开搜索/详情可见。详情仍仅提供unknown的GitHub子目录规格，无npm方法，按当前商店源码为仅浏览；安装入口待上游采集刷新 |
+| 1024 Store目录 | [PR #628](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/628)已MERGED；公开搜索/详情可见。详情仍仅提供unknown的GitHub子目录规格，无npm方法，按当前商店源码为仅浏览；用户已提交[issue #22](https://github.com/imsai-sh/dsh-1024store/issues/22)（OPEN），反馈npm映射缺失及GitHub子目录安装缺内核；后者为issue作者复现，本轮未重复该源码安装实验 |
 | dshworks目录 | [PR #167](https://github.com/dshworks/awesome-dsh-plugins/pull/167)修正子目录、简介和npm名；CI通过，OPEN |
 | 0xsline Awesome | 已有收录；[简介修订PR #717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)仍OPEN，提交不等于页面已更新 |
 | bruc3van目录 | [issue #138](https://github.com/bruc3van/awesome-dsh-plugin/issues/138)请求复核过时排除理由，OPEN；两处0.1.2发布日期已更正为10月17日并回读确认；排除理由复核仍待维护者处理 |
@@ -119,6 +119,6 @@ DSC_SLOW=1 node --test --test-reporter=tap test/engineering-live.test.mjs test/p
 
 1. **0.2.1-rc.2定向适配。** 先复现标签未显示，核对settings入口、slot注册/加载时序并加真实UI回归；按目标版本适配engines优先、旧peer规则、非法/空范围、预发布、workspace及精确豁免，补真实宿主正反例/CI。修复目录读取器ASAR数据偏移多8字节的问题，先做文件首尾/JSON/字节校验，再审查新目录与规则；保留旧版回归，另验子路径元数据及HMR生命周期。不以改版本号、换目录或重建快照代替验收，现有证据不要求整体重写架构。
 2. **独立业务真值用例。** 从真实插件选择有限业务路径，定义预期动作及成功/失败信号，优先客户端交互和动态分析盲区；功能标签独立于预测与loader标签，同时保留正反例。
-3. **分发的上游待办。** 本地补全与日期更正已完成；三个OPEN收录修订及issue #138仍待维护者处理，主登记表刷新后再验市场可见性/完整制品安装。1024已可搜索，但尚无npm安装方法，待上游采集刷新后实跑商店入口。rc.2适配稳定后另经授权发布源码文档/skill更新，当前npm0.1.2不含这些修订；不提前发布、不把本地制品验收当作市场安装成功。
+3. **分发的上游待办。** 本地补全与日期更正已完成；三个OPEN收录修订及issue #138仍待维护者处理，主登记表刷新后再验市场可见性/完整制品安装。1024已可搜索，但尚无npm安装方法；跟进上述issue #22，待上游采集刷新后实跑商店入口。rc.2适配稳定后另经授权发布源码文档/skill更新，当前npm0.1.2不含这些修订；不提前发布、不把本地制品验收当作市场安装成功。
 4. **有限样本与自动化（后置）。** 先以少量明确版本/制品哈希的样本验证批量静态JSON聚合，公开口径、限制和“待作者复核”，不称插件坏了或已作安全审查。再评估低权限Action、workflow摘要/徽章及逐版增量；覆盖不足与工具错误单列，不把绿色等同兼容、不默认写第三方仓库、不承诺24小时SLA。引用/实际接入与复现反馈作为信号，不把下载当用户。第三方详情页集成和公共结论端点暂缓，先确认合作、隐私、缓存失效及维护成本。
 5. **Windows取得真实环境后验收。** 路径、安装器、进程回收和打包实跑；按用户选择暂缓，不用POSIX或路径模拟充数。
