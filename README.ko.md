@@ -6,7 +6,7 @@
 
 ## 버전과 배포
 
-로컬 소스는 **미배포0.1.1 후보 버전**입니다. 2026-10-16에 확인한 npm `latest`는 **0.1.0**이며 미배포 수정 사항을 포함하지 않습니다. [공개 메타데이터 검토](docs/Plan.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
+현재 배포 버전은 **0.1.1**입니다. 2026-10-17에 npm `latest`, 다운로드 무결성과 설치된 패키지를 검증했습니다. 배포 후 로컬 문서 수정과 npm 패키지에 남은 이전 문구는 Plan에 구분하여 기록하며, 미배포 문서 수정이 공개 패키지에 반영되었다고 주장하지 않습니다. [공개 메타데이터 검토](docs/Plan.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
 
 | 진입점 | 역할 |
 |---|---|
@@ -21,7 +21,7 @@
 
 ### 저장소 CLI
 
-GitHub main에는 0.1.1 후보 핵심 소스와 루트 개발 워크스페이스가 포함되어 있습니다. 이후 로컬 변경과 공개 커밋은 Plan에 구분하여 기록하며, 기존 npm 패키지에는 후보 수정이 포함되지 않습니다. 저장소를 받은 뒤 루트에서 의존성을 설치하세요:
+저장소는 0.1.1 공통 판정 소스와 루트 개발 워크스페이스를 제공하며 npm에는 plugin 패키지만 포함됩니다. 이후 로컬 문서 수정은 Plan에 따로 기록합니다. 저장소를 받은 뒤 루트에서 의존성을 설치하세요:
 
 ```bash
 git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
@@ -51,7 +51,7 @@ node bin/compat-check.mjs --help
 ### 플러그인과 skill
 
 ```bash
-# npm 배포 버전 설치 (2026-10-16 확인: 0.1.0)
+# npm 배포 버전 설치 (2026-10-17 확인: 0.1.1)
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # CLI 사용자의 독립 skill
@@ -60,7 +60,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 플러그인은 호환성 패널, 상세 배지, `compat_check`, skill provider를 등록합니다. 2026-10-15에 실제 tarball을 macOS arm64의 DSH0.2.0-rc.2에 설치하고 도구·skill 호출 및 실제 Chrome의 패널·배지·기준선 변화를 검증했습니다. 독립 skill은 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`에 설치되며 기존 파일 덮어쓰기는 `--force`가 필요합니다.
 
-저장소 루트는 **비공개 개발 워크스페이스**이며 설치 가능한 DSH bundle이 아닙니다. 루트 GitHub spec은 `plugin/` 설치와 같지 않습니다. 후보 버전 검사 시 루트에서 `npm ci --ignore-scripts`를 실행하고 `plugin/`에서 `npm pack --pack-destination <이미있는절대출력경로>`를 실행한 뒤 생성된 `.tgz`를 DSH로 설치하세요. pack이 커널과 LICENSE를 준비합니다. 준비되지 않은 `plugin/` 복사본에는 커널이 없습니다. [플러그인 배포 설명](plugin/README.md)을 참고하세요.
+저장소 루트는 **비공개 개발 워크스페이스**이며 설치 가능한 DSH bundle이 아닙니다. 루트 GitHub spec은 `plugin/` 설치와 같지 않습니다. 소스 검사 시 루트에서 `npm ci --ignore-scripts`를 실행하고 `plugin/`에서 `npm pack --pack-destination <이미있는절대출력경로>`를 실행한 뒤 생성된 `.tgz`를 DSH로 설치하세요. pack이 커널과 LICENSE를 준비합니다. 준비되지 않은 `plugin/` 복사본에는 커널이 없습니다. [플러그인 배포 설명](plugin/README.md)을 참고하세요.
 
 ### 설치 검사
 

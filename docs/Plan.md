@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-更新于2026-10-16，适用于0.1.1候选源码。本文维护现行契约、验证边界与待办；用法见[README](../README.md)，统计和分阶段证据见[docs/current-state.json](current-state.json)，详细施工过程查Git历史。[原始审计](GPT审计及重构方案文档.md)与[旧提取器反例](extraction-findings.md)保留历史身份，不作为当前缺陷清单。
+更新于2026-10-17，适用于0.1.1及发布后的本地文档修订。本文维护现行契约、验证边界与待办；用法见[README](../README.md)，统计和分阶段证据见[docs/current-state.json](current-state.json)，详细施工过程查Git历史。[原始审计](GPT审计及重构方案文档.md)与[旧提取器反例](extraction-findings.md)保留历史身份，不作为当前缺陷清单。
 
 ## 1. 项目定位与交付状态
 
@@ -12,7 +12,7 @@
 | 仓库CLI / 安装检查 | 默认静态检查不执行目标源码；显式probe/安装检查会装依赖、启动宿主并执行目标插件，临时profile不是OS沙箱 |
 | skill | 指导agent调用同一工具或CLI，不另实现判定逻辑 |
 
-2026-10-16：候选主体、超时断言补强及文档修订的源码交付见[PR #2](https://github.com/lcy0121/dsh-plugin-compat-check/pull/2)；新CI覆盖Node22/24、资源检查和真实Linux DSH。npm latest仍为**0.1.0**，**0.1.1未发布**。GitHub简介/标签/主页和npm仓库指向核验无error；版本、描述、依赖、keywords、README的五项notice属于候选与发布版差异。查询快照见current-state的`verification.documentationAudit`，本次交付证据见`verification.delivery`；旧快照保留原日期，不冒充最新main状态。
+2026-10-17：**npm latest=0.1.1，已发布并回下载验收**。运行时代码基于main `49403d7`，随包README对应本地提交`f280302`；版本、描述、依赖、keywords和README核验均一致。发布后文案修订尚未push/合并，也未发新npm版本；0.1.1随包skill仍含“本地0.1.1未发布”的旧提示，包内规则README仍称本地候选，不能原位覆盖，后续补丁须另行授权。发布证据见current-state的`verification.npmRelease`；此前查询和交付快照保留原日期。
 
 版本真源为`lib/version.mjs`。根目录是private开发工作区；npm只打包`plugin/`，没有CLI bin、安装shell或probe入口。`prepack`同步skill/契约并暂存内核与LICENSE，`postpack`清理暂存内核；应安装完整tgz，不能假定裸`plugin/`已带kernel。
 
@@ -113,6 +113,7 @@ DSC_SLOW=1 node --test --test-reporter=tap test/engineering-live.test.mjs test/p
 
 按以下顺序推进，不重复已完成任务：
 
-1. **发布0.1.1候选。** 先核对版本、契约/skill副本、完整测试、实际tgz和公开元数据；获npm发布授权后发布，并核验registry版本、README、依赖和tarball，更新候选措辞。GitHub合并不等于npm已更新。
+1. **交付发布后文档修订。** 经push/合并授权后同步本地发布记录；另获补丁发布授权后去除npm随包skill/规则说明中的旧发布状态文案。不要覆盖或重用0.1.1，也不要把本地修订冒充已在npm生效。
 2. **下一项功能开发：独立业务真值用例。** 从真实插件挑选有限业务路径，明确预期动作和成功/失败信号，优先补客户端交互及已知动态分析盲区。功能标签须独立于预测与loader标签；同时保留正反例，不用到货数或更多调用点冒充准确率。
 3. **Windows取得真实环境后验收。** 路径、安装器、进程回收和打包实跑；按用户选择暂缓，不用POSIX或路径模拟充数。
+4. **可选profile回归快照隔离。** 目录发现后被其它任务删除，或源码在提取与行号回读间变化，会使本机回归竞态失败；本轮保留失败证据并在输入稳定后原样通过，后续补不可变输入，不能删断言或把重试当长期修复。

@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-16T15:21:40.536657+00:00",
+  "recordedAt": "2026-10-17T07:40:51.238317+00:00",
   "testFiles": 33,
   "tests": 481,
   "repositoryFiles": {
@@ -836,6 +836,120 @@
       },
       "npmPublished": false,
       "scope": "Source delivery and upstream description submission only. The recorded CI head is exact; subsequent delivery-record-only commits must pass their own PR checks. Historical audit snapshots remain unchanged. No npm release or Windows certification."
+    },
+    "npmRelease": {
+      "verifiedAt": "2026-10-17T07:40:51.238317+00:00",
+      "version": "0.1.1",
+      "registry": "https://registry.npmjs.org",
+      "latest": "0.1.1",
+      "publisher": "lcy0121",
+      "runtimeBaseCommit": "49403d78ca3800ee6094a54b2e2fa777b0a0ac32",
+      "artifactSourceCommit": "f2803027f01d745fc0b5e3ada09872263f3e6071",
+      "sourceMainCi": {
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38923778251",
+        "conclusion": "success"
+      },
+      "prepublishCheck": {
+        "ok": true,
+        "platform": "darwin",
+        "arch": "arm64",
+        "nodeVersion": "26.12.0",
+        "tests": 481,
+        "failures": 0,
+        "scope": "Full original gate passed before publication. Earlier optional-profile races are recorded below; tests were not skipped or weakened."
+      },
+      "artifact": {
+        "name": "dsh-plugin-compat-check",
+        "version": "0.1.1",
+        "filename": "dsh-plugin-compat-check-0.1.1.tgz",
+        "shasum": "29f64fea7b9efb7133f833a05758c1e66520c59a",
+        "integrity": "sha512-kiVK80RGXyJLNIUFY+77sYmSL0tgTGdtcgWLjIxDjB+8NVGKvmpZHBEdFVn4/x92N++sS1wjQjETVbTluBJDCg==",
+        "size": 127779,
+        "unpackedSize": 414797,
+        "files": 34,
+        "registryTarball": "https://registry.npmjs.org/dsh-plugin-compat-check/-/dsh-plugin-compat-check-0.1.1.tgz",
+        "registryBytesEqual": true,
+        "sha1Matches": true,
+        "sha512Matches": true,
+        "readmeMatches": true,
+        "dependencies": {
+          "@babel/parser": "7.29.9",
+          "semver": "7.7.3"
+        },
+        "emptyCacheInstall": true,
+        "controlledExecution": {
+          "ok": true,
+          "version": "0.1.1",
+          "plugins": 27,
+          "exitCode": 2,
+          "tool": "compat_check",
+          "skillBodyLength": 6551,
+          "skillBodySha256": "36433c4133264c8df3a3ce0e60d38d2610ecba60ba44bd5bb7e8e69818d29153",
+          "kernelAndReadmeMatch": true,
+          "scope": "Controlled host context; does not start real DSH or a browser."
+        },
+        "standardInstallLockIntegrityMatches": true,
+        "standardInstallUsesUnmodifiedRegistryUrl": true,
+        "standardInstallControlledExecution": {
+          "ok": true,
+          "version": "0.1.1",
+          "plugins": 27,
+          "exitCode": 2,
+          "tool": "compat_check",
+          "skillBodyLength": 6551,
+          "skillBodySha256": "36433c4133264c8df3a3ce0e60d38d2610ecba60ba44bd5bb7e8e69818d29153",
+          "kernelAndReadmeMatch": true,
+          "scope": "Controlled host context; does not start real DSH or a browser."
+        }
+      },
+      "metadata": {
+        "errors": 0,
+        "notices": 0,
+        "skipped": [],
+        "npmReadmeFetched": true,
+        "observedAt": "2026-10-17T07:40:20.203Z"
+      },
+      "publicationDelay": {
+        "publishAcceptedBeforePublicAvailability": true,
+        "metadataInitially404": true,
+        "tarballInitially404": true,
+        "stale404CacheMaxAgeSeconds": 300,
+        "cacheBypassedDownloadVerified": true,
+        "ordinaryPackageSpecInstallVerified": true
+      },
+      "knownDocumentationDifference": {
+        "publishedSkillBodyUtf16Length": 6551,
+        "publishedSkillBodySha256": "36433c4133264c8df3a3ce0e60d38d2610ecba60ba44bd5bb7e8e69818d29153",
+        "publishedSkillRetainsPreReleaseStatusSentence": true,
+        "publishedRulesReadmeCallsSourceCandidate": true,
+        "localSkill": {
+          "bodyUtf16Length": 6576,
+          "bodySha256": "befbd17fefaff4109b80e6901009c9221a06dd3c24ca82d5a5b038cc7219282b"
+        },
+        "localCopiesEqual": true,
+        "localDocumentationFixPublished": false,
+        "localDocumentationFixPushed": false,
+        "nextAction": "A separately authorized patch release is needed to ship the version-neutral skill/rules wording; npm 0.1.1 is immutable. Current local documentation fixes do not alter its tarball."
+      },
+      "optionalProfileRace": {
+        "initialGateFailures": [
+          "A discovered qa021/qa021b profile disappeared before extraction.",
+          "111/475 source locations did not match a mutable desktop plugin file; subsequent unchanged-code invariant assertions and the original full gate passed."
+        ],
+        "diagnosticSuiteOnlySetupFailure": "A discovered qa021 profile disappeared; all 73 executed assertions passed, but process exited 1.",
+        "finalOriginalGatePassed": true,
+        "permanentFixImplemented": false,
+        "followUp": "Snapshot or isolate optional profile inputs; keep original assertions."
+      },
+      "postReleaseDocumentationTests": {
+        "tests": 55,
+        "failures": 0,
+        "localSkillReferenceApplication": "Before: stale status sentence conflicts with newer publication evidence. After: distinguishes acceptance, public availability and unpublished local fixes; no model behavior regression claim.",
+        "referenceApplicationsCompleted": 2,
+        "modelBehaviorRegressionClaimed": false
+      },
+      "scope": "Published the tested tarball, then independently downloaded the registry artifact and verified its bytes and installed tool/skill behavior in a controlled host context. This is not a new real DSH/browser/Windows certification. Local documentation changes after f280302 are not in the published artifact and have not been pushed or merged.",
+      "publishedAt": "2026-10-17T07:34:40.423Z"
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

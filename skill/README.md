@@ -1,6 +1,6 @@
 # skill 交付与注册
 
-当前说明适用于0.1.1本地候选；源码、版本和验证索引见 [Plan](../docs/Plan.md) 与 [自动统计](../docs/current-state.json)。
+当前说明适用于0.1.1及发布后的本地文档修订；源码、版本和验证索引见 [Plan](../docs/Plan.md) 与 [自动统计](../docs/current-state.json)。
 
 ## 真源与安装
 
@@ -21,13 +21,15 @@ node --test test/skill.test.mjs test/docs.test.mjs
 
 provider name与skill name均为dsh-plugin-compat-check，source=bundled、rank=600；提供list/get、description、invocation和正文。frontmatter保持单行name/description，name为kebab-case。不支持的旧键可能使文件系统发现失效；不要添加disableModelInvocation等旧字段。
 
-当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为 **6551 字符**，由docs测试核对。不要把历史探针的contentLength手工替换成新正文长度：那会篡改历史实测。
+当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为 **6576 字符**，由docs测试核对。不要把历史探针的contentLength手工替换成新正文长度：那会篡改历史实测。
 
 ## 历史证据与当前验收
 
-DSH0.2.0-rc.2/macOS的历史机制实验确认：静态inject或子fiber inject均能注册provider；包内未注册文件不被自动发现；扁平markdown和name/SKILL.md两种扫描形态可被发现。旧实验不是当前候选的真实启动验收。
+DSH0.2.0-rc.2/macOS的历史机制实验确认：静态inject或子fiber inject均能注册provider；包内未注册文件不被自动发现；扁平markdown和name/SKILL.md两种扫描形态可被发现。旧实验不是本次发布后文案修订的真实启动验收。
 
 默认测试在受控上下文中检查apply、注册、正文、隔离安装及独立tarball工具执行，不启动真实DSH。2026-10-15另从实际tgz在私有profile启动真实DSH0.2.0-rc.2（macOS arm64，宿主Node24.18.1）：skills.list包含本skill，skills.get返回provider=dsh-plugin-compat-check，当时contentLength=6548且SHA-256与当时源码一致。实际调用compat_check亦成功；这验证宿主目录和工具，不表示已经发送模型对话或覆盖其它DSH版本。环境、清理与后续见 [Plan](../docs/Plan.md#51-已验证范围)。
+
+npm0.1.1随包正文contentLength=6551，末段仍含发布前的“本地0.1.1未发布”；本地正文已改为版本中立的事实源说明，尚未发布到npm。发布包不可原位覆盖，不能把本地修订冒充随包正文。
 
 本轮正文的引用位置与实测限定已修订，当前使用语义以[SKILL.md](SKILL.md)为准；本轮仓库/打包核验与旧DSH现场正文分开记录于current-state。
 

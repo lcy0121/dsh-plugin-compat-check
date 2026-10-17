@@ -6,7 +6,7 @@ Check the compatibility of **installed DSH plugins** with a target DSH version, 
 
 ## Version and delivery
 
-Local source is the **unpublished 0.1.1 candidate**. The npm `latest` version verified on 2026-10-16 is **0.1.0**; installing it does not include unpublished fixes. See [publication and verification records in Plan](docs/Plan.md) and [generated verification facts](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
+The current release is **0.1.1**. npm `latest`, download integrity and the installed artifact were verified on 2026-10-17. Plan records subsequent local documentation fixes and stale text in the immutable npm artifact; unpublished documentation fixes are not claimed shipped. See [publication and verification records in Plan](docs/Plan.md) and [generated verification facts](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
 
 | Entry | Purpose |
 |---|---|
@@ -21,7 +21,7 @@ The entries share one verdict kernel. Only identical inputs and observation evid
 
 ### Repository CLI
 
-GitHub main includes the 0.1.1 candidate core and root development workspace. Plan records subsequent local changes separately from public commits; the old npm package does not include those changes. Obtain the repository and install dependencies at its root:
+The repository provides the shared 0.1.1 kernel and root development workspace; npm ships only the plugin package. Plan records subsequent local documentation fixes separately. Obtain the repository and install dependencies at its root:
 
 ```bash
 git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
@@ -51,7 +51,7 @@ Select the actual profile; do not assume desktop. `--nm` accepts a profile or no
 ### Plugin and skill
 
 ```bash
-# Published npm version (0.1.0 verified on 2026-10-16)
+# Published npm version (0.1.1 verified on 2026-10-17)
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # Standalone skill for CLI users
@@ -60,7 +60,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 The plugin registers a compatibility panel, detail badges, `compat_check` and a skill provider. On 2026-10-15, the actual tarball was installed into DSH0.2.0-rc.2 on macOS arm64; tool and skill calls, the panel, badges and baseline changes were verified with a real Chrome session. Standalone skill destination: `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`; existing files require `--force` to overwrite.
 
-The repository root is a **private development workspace**, not the installable DSH bundle. A root GitHub spec is not equivalent to installing `plugin/`. To test the candidate, run `npm ci --ignore-scripts` at the root, then `npm pack --pack-destination <existing-absolute-output-dir>` inside `plugin/`, and install the resulting `.tgz` through DSH. Packing stages the kernel and LICENSE. Copying a bare `plugin/` directory does not stage the kernel; see [plugin delivery](plugin/README.md).
+The repository root is a **private development workspace**, not the installable DSH bundle. A root GitHub spec is not equivalent to installing `plugin/`. To test the source, run `npm ci --ignore-scripts` at the root, then `npm pack --pack-destination <existing-absolute-output-dir>` inside `plugin/`, and install the resulting `.tgz` through DSH. Packing stages the kernel and LICENSE. Copying a bare `plugin/` directory does not stage the kernel; see [plugin delivery](plugin/README.md).
 
 ### Installation checks
 

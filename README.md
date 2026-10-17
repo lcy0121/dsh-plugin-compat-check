@@ -6,7 +6,7 @@
 
 ## 当前版本与交付
 
-本地源码为 **0.1.1 未发布候选版**；2026-10-16联网核验，npm `latest` 为 **0.1.0**。`npm install` 或 `dsh plugin add` 不会取得本地尚未发布的修复。公开状态和差异见 [Plan中的核验记录](docs/Plan.md#1-项目定位与交付状态)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
+当前发布版为 **0.1.1**；2026-10-17已核验 npm `latest`、下载完整性和安装产物。源码中的发布后文档修订与npm随包旧文案差异见Plan，不把未发布文档修订说成已在公开包生效。公开状态和差异见 [Plan中的核验记录](docs/Plan.md#1-项目定位与交付状态)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
 
 插件、CLI、skill三种形态共享判定内核；安装检查脚本是CLI编排入口。只有**相同输入与采样证据**才应得出相同结果。
 
@@ -23,7 +23,7 @@ npm 包**没有 CLI `bin`**，不支持 `npx dsh-plugin-compat-check`。默认�
 
 ### 仓库 CLI
 
-GitHub main已包含0.1.1候选主体和根开发工作区；本地后续补强与公开提交分别记录于Plan，不能把npm旧包当作候选源码。取得仓库后在根目录安装依赖：
+仓库提供0.1.1共享判定源码和根开发工作区；npm只包含plugin子包，后续本地文档修订单独记录于Plan。取得仓库后在根目录安装依赖：
 
 ```bash
 git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
@@ -53,7 +53,7 @@ node bin/compat-check.mjs --help
 ### 安装插件与 skill
 
 ```bash
-# 安装 npm 已发布版（2026-10-16核验为0.1.0）
+# 安装 npm 已发布版（2026-10-17核验为0.1.1）
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # 只使用 CLI 时，安装独立 skill
@@ -62,7 +62,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 插件注册兼容性面板、插件详情角标、`compat_check` 与 skill provider；2026-10-15已从实际tgz安装，在DSH0.2.0-rc.2/macOS arm64中验证工具和skill，并通过真实Chrome操作确认面板、角标及基线差分。独立 skill 安装至 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`，已有文件需 `--force` 才覆盖。
 
-源码仓库根是私有开发工作区，**不是可直接激活的 DSH 插件包**。根目录 GitHub spec 不等同于安装 `plugin/`。测试本地候选时，在仓库根运行 `npm ci --ignore-scripts`，再在 `plugin/` 中执行 `npm pack --pack-destination <已存在的绝对输出目录>`，最后让 DSH 安装生成的 `.tgz`。打包会暂存内核和 LICENSE；不要直接复制裸 `plugin/` 并假定内核已在包内。细节见 [插件说明](plugin/README.md)。
+源码仓库根是私有开发工作区，**不是可直接激活的 DSH 插件包**。根目录 GitHub spec 不等同于安装 `plugin/`。测试本地源码时，在仓库根运行 `npm ci --ignore-scripts`，再在 `plugin/` 中执行 `npm pack --pack-destination <已存在的绝对输出目录>`，最后让 DSH 安装生成的 `.tgz`。打包会暂存内核和 LICENSE；不要直接复制裸 `plugin/` 并假定内核已在包内。细节见 [插件说明](plugin/README.md)。
 
 ### 安装检查
 
