@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.2",
-  "recordedAt": "2026-10-17T08:17:35.411Z",
-  "testFiles": 33,
-  "tests": 482,
+  "recordedAt": "2026-10-17T09:02:32.932Z",
+  "testFiles": 34,
+  "tests": 491,
   "repositoryFiles": {
-    "total": 223,
+    "total": 225,
     "fixtures": 90,
-    "other": 133
+    "other": 135
   },
   "verification": {
     "platform": "darwin",
@@ -939,7 +939,8 @@
         "diagnosticSuiteOnlySetupFailure": "A discovered qa021 profile disappeared; all 73 executed assertions passed, but process exited 1.",
         "finalOriginalGatePassed": true,
         "permanentFixImplemented": false,
-        "followUp": "Snapshot or isolate optional profile inputs; keep original assertions."
+        "followUp": "Snapshot or isolate optional profile inputs; keep original assertions.",
+        "followUpResolution": "Implemented locally in verification.optionalProfileSnapshots; the original release checkpoint and failed runs remain historical evidence."
       },
       "postReleaseDocumentationTests": {
         "tests": 55,
@@ -1277,6 +1278,97 @@
         "scope": "Private web profiles and actual tgz with real DSH plus independent Chrome. Covers probe binding/loader controls, HTTP responsiveness and client arrival/error controls; not new full manual panel interaction, model dialogue, business truth or Windows certification."
       },
       "conclusion": "No evidence that AST, workers or panel architecture need wholesale replacement. Version-aware declaration adaptation is required: current legacy logic yields a false positive and a missed engines rejection. Host API catalogue/rule changes, subpath metadata and hot-reload lifecycles require separate adaptation and regression coverage. 0.1.2 documents these limits and does not implement that adaptation."
+    },
+    "optionalProfileSnapshots": {
+      "verifiedAt": "2026-10-17T09:02:32.932Z",
+      "baseCommit": "453477b6fbeb026a0d7b15e9f009d8e340eac4de",
+      "implementationScope": "Test inputs only: the default runner captures once for all test processes; standalone consumers capture their own inputs. Production scan, worker, verdict, installer and npm package contents are unchanged.",
+      "consumers": [
+        "invariants",
+        "feature snapshots",
+        "CLI parityfix regression",
+        "skill example",
+        "documentation extraction command"
+      ],
+      "capture": {
+        "communityPackageTrees": true,
+        "otherInventoryMetadataRetained": true,
+        "canonicalPnpmRootMaterialized": true,
+        "internalLinksRelocated": true,
+        "externalSourceLinksReplacedWithOwnedMarkers": true,
+        "sourceCodeExecuted": false,
+        "readOnlyCopies": true,
+        "matchingObservations": 2,
+        "compared": [
+          "profile and package inventory",
+          "file bytes and identity",
+          "directory and link identity"
+        ],
+        "operatingSystemAtomicSnapshot": false,
+        "changesDuringCapture": "PROFILE_SNAPSHOT_UNSTABLE; no retry or partial input",
+        "budgetExceeded": "PROFILE_SNAPSHOT_BUDGET; no partial input",
+        "absentOptionalProfile": "Explicitly skipped; documentation command instead uses the in-repository fixture.",
+        "limits": {
+          "bytesPerObservation": 268435456,
+          "filesPerObservation": 50000,
+          "directoriesPerObservation": 20000,
+          "totalTimeMs": 30000
+        },
+        "cleanup": "Owned incomplete copies on capture failure; normal runner/file exit releases completed copies. Borrowing child processes do not remove the runner copy."
+      },
+      "regression": {
+        "tests": 9,
+        "failures": 0,
+        "cases": [
+          "delete original profile before extraction/source reread",
+          "rewrite original after extraction and compare a second extraction",
+          "delete profile during capture and verify failed-copy cleanup",
+          "rewrite source/add package during capture",
+          "canonical pnpm roots, internal absolute links, external and broken links",
+          "explicit absent profile and idempotent cleanup",
+          "capture byte budget rejection",
+          "multiple borrowing child processes and missing-snapshot failure",
+          "scoped/invalid/official inventory metadata and readonly files"
+        ],
+        "beforeFix": "Two controlled tests reproduced ENOENT after deletion and changed extraction after a source rewrite using the former live-directory adapter.",
+        "afterFix": "All nine passed without modifying expectations or version baselines."
+      },
+      "localDefaultSuite": {
+        "platform": "darwin",
+        "arch": "arm64",
+        "nodeVersion": "26.12.0",
+        "tests": 491,
+        "failures": 0,
+        "skipped": 0,
+        "capturedProfiles": [
+          "desktop",
+          "kawake-headless",
+          "kawake-test",
+          "parityfix"
+        ]
+      },
+      "formatCheck": true,
+      "documentationCheck": true,
+      "baselineVersionsOrExpectedSnapshotsChanged": false,
+      "initialConsumerRun": "203/204 passed; the sole failure was the current-state test-file count (33 vs the newly added 34th file). The facts record was refreshed before the complete 491/491 run.",
+      "scope": "Local static regression input isolation only. No new DSH/business/Windows certification or remote CI run; past release/CI evidence keeps its original date and commit.",
+      "minimumNodeVerification": {
+        "nodeVersion": "22.19.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "tests": 491,
+        "failures": 0,
+        "skipped": 0,
+        "command": "npm test -- --test-reporter=tap (temporary official Node 22.19.0 first on PATH)",
+        "runtimeSha256": "c59006db713c770d6ec63ae16cb3edc11f49ee093b5c415d667bb4f436c6526d",
+        "officialChecksumMatched": true,
+        "systemInstallationModified": false
+      },
+      "cleanupVerification": {
+        "standaloneSuccessExit": true,
+        "standaloneFailureExit": true,
+        "remainingOwnedSnapshotDirectories": 0
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

@@ -29,27 +29,19 @@ import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
-import os from 'node:os'
+import { optionalProfiles } from './support/profile-snapshot.mjs'
 
 import { extractWithProvenance } from '../lib/extract.mjs'
 import { buildVerdicts } from '../lib/verdict.mjs'
 
 const REPO = path.resolve(new URL('.', import.meta.url).pathname, '..')
-const PROFILES = path.join(os.homedir(), '.dsh', 'profiles')
 
 const load = (p) => JSON.parse(fs.readFileSync(path.join(REPO, p), 'utf8'))
 const rules = load('rules/severity.json')
 const catalog = load('rules/dsh-api-catalog.json')
 
-/** 找出本机真实存在的 profile（每个都被跑一遍；机器上没有就跳过） */
-function availableProfiles() {
-  try {
-    return fs.readdirSync(PROFILES).map((p) => ({ name: p, nm: path.join(PROFILES, p, 'node_modules') }))
-      .filter((p) => fs.existsSync(p.nm))
-  } catch { return [] }
-}
-
-const profiles = availableProfiles()
+// Every extraction and source reread uses the same captured bytes.
+const profiles = optionalProfiles()
 
 describe('不变式：提取结果必须自恰', { skip: profiles.length ? false : '本机没有可用的 ~/.dsh/profiles/*/node_modules' }, () => {
   for (const prof of profiles) {

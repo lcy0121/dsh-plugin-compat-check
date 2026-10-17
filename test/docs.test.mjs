@@ -35,6 +35,8 @@
  * 那种断言会变成第二个会腐烂的东西。
  */
 
+import { optionalProfiles } from './support/profile-snapshot.mjs'
+
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync, spawnSync } from 'node:child_process'
@@ -194,12 +196,7 @@ describe('文档信息：可复算的数字必须与仓库一致', () => {
       assert.equal(sh.status, 0, `dsh-plugin-compat-check.sh --help 没能 exit 0（exit=${sh.status}）`)
 
       // ② `lib/extract.mjs` 必须自己建输出目录 —— 文档就是这么教的
-      const PROFILES = path.join(os.homedir(), '.dsh', 'profiles')
-      const nm = fs.existsSync(PROFILES)
-        ? fs.readdirSync(PROFILES).map((p) => path.join(PROFILES, p, 'node_modules'))
-          .find((p) => fs.existsSync(p))
-        : null
-      if (nm === null) return   // 本机没有可用 profile：跳过（与别的测试一致，不静默假装通过）
+      const nm = optionalProfiles()[0]?.nm ?? path.join(REPO, 'test/fixtures/micro/node_modules')
       const out = path.join(tmp, 'a', 'b', 'c')   // **多层且不存在**
       const r = spawnSync(process.execPath, ['lib/extract.mjs', nm, out], { cwd: REPO, encoding: 'utf8' })
       assert.equal(r.status, 0, `node lib/extract.mjs 失败了（exit=${r.status}）\n${r.stderr.slice(0, 400)}`)

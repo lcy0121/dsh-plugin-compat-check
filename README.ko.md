@@ -135,6 +135,8 @@ node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
+기본 테스트는 선택적 로컬 profile의 비공개 읽기 전용 복사본을 한 번 만들어 추출·소스 재확인·자식 프로세스가 공유합니다. 단일 테스트 파일은 자체 입력을 캡처합니다. 캡처 중 변경이나 예산 초과는 명시적 오류로, 미설치 profile은 명시적 건너뛰기로 처리합니다. 종료 후 복사본을 정리하며 제품의 스캔·설치 검사 동작은 바뀌지 않습니다.
+
 `doc-check`는 링크·버전·문서 진입점·skill 복사본을 오프라인 검사하며 테스트를 실행하지 않습니다. 성공한 TAP 로그로 `node tools/update-current-state.mjs --test-summary <log>` 후 `node tools/doc-check.mjs --test-summary <log>`를 실행하세요. 배포 전 검사는 기본 전체 테스트를 한 번 실행하고 요약을 재사용하며 독립 tarball 설치 후 제어된 호스트 컨텍스트에서 등록된 도구를 호출합니다. 실제 DSH를 시작하는 검사는 아닙니다. 이 패키지 검증은 비공개 빈 npm 캐시와 npm registry 접속을 사용하며 기존 로컬 캐시에 의존하지 않습니다. 메타데이터 검사는 네트워크와 gh/npm이 필요합니다. 미배포 로컬 버전·README 차이는 notice이고 조회 실패는 미검증입니다.
 
 느린 통합 검사는 명시적 `DSC_SLOW=1`이 필요합니다. macOS DSH/Chrome, Ubuntu arm64 VM 및 Linux x64 CI 기록은 실제 tgz, 도구·skill, UI 대조와 자원 시나리오를 포함합니다. 정확한 커밋과 범위는 [Plan](docs/Plan.md#5-验证记录与复现)을 참고하세요. 과거 CI가 이후 로컬 단언·문서 변경을 인증하지는 않으며 Windows는 보류합니다. [엔지니어링 재현](docs/Plan.md#53-p2工程验收)을 참고하세요. 과거 88.3% 재현율, 66/66 도착 및 loader 라벨은 업무 기능 정확도가 아닙니다. Python parity도 구형 정규식 참고이며 AST의 정답이 아닙니다.

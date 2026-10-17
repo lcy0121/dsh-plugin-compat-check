@@ -44,6 +44,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
 
+import { optionalProfiles } from './support/profile-snapshot.mjs'
+
 import { extractWithProvenance } from '../lib/extract.mjs'
 import { buildVerdicts } from '../lib/verdict.mjs'
 import {
@@ -69,6 +71,7 @@ const PINNED = readJSON('test/__baseline-versions.json')
  *     懒加载 chunk、几千行的单文件。合成 fixture 永远造不出这些东西的复杂度。
  *     本机没有就跳过，并**明确说明跳过了什么**（静默跳过与静默通过一样危险）。
  */
+const parityfix = optionalProfiles().find(p => p.name === 'parityfix')
 const targets = [
   {
     name: 'micro',
@@ -78,7 +81,7 @@ const targets = [
   },
   {
     name: 'parityfix',
-    nm: path.join(os.homedir(), '.dsh/profiles/parityfix/node_modules'),
+    nm: parityfix?.nm ?? null,
     surface: path.join(REPO, 'tools/parity/fixtures/host-surface-parityfix.json'),
     why: '真实插件 + 真实运行时面：三个回归基准的现场',
     optional: true,
@@ -86,7 +89,8 @@ const targets = [
 ]
 
 function runTarget(t) {
-  if (!fs.existsSync(t.nm)) return null
+  if (!t.nm) return null
+  assert.ok(fs.existsSync(t.nm), `Captured input disappeared: ${t.nm}`)
   const extract = extractWithProvenance(t.nm, { catalog })
   const hostSurface = t.surface && fs.existsSync(t.surface) ? readJSON(t.surface) : null
   const verdict = buildVerdicts({ report: extract.report, hostSurface, rules, catalog, dshVersion: '0.2.0-rc.2' })
@@ -103,7 +107,7 @@ describe('特征快照', () => {
   for (const t of targets) {
     const r = results.get(t.name)
     if (!r) {
-      test(`${t.name}（跳过：${t.nm} 不存在）`, { skip: `本机没有 ${t.nm}` }, () => {})
+      test(`${t.name}（跳过：可选 profile 不存在）`, { skip: `本机没有 ${t.name} profile` }, () => {})
       continue
     }
     const { snapshot } = snapshotPaths(t.name)
