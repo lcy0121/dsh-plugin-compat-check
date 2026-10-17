@@ -15,7 +15,7 @@ description: 当用户询问已安装DSH插件是否适配当前版本，或排�
 
 ## 怎么跑
 
-CLI 只随仓库提供，npm 插件包没有 CLI bin。定位仓库检出，先在其根目录执行 `npm ci --ignore-scripts`；仓库必须同时有 `bin/compat-check.mjs`、`lib/`、`rules/`。先定位它，再跑：
+CLI 只随仓库提供，npm 插件包没有 CLI bin。定位仓库检出，根依赖尚未就绪时需在授权范围内执行 `npm ci --ignore-scripts`；仓库必须同时有 `bin/compat-check.mjs`、`lib/`、`rules/`。先定位它，再跑：
 
 ```bash
 # 1) 找到内核（仓库检出，不是已安装的 npm 插件目录）
@@ -43,6 +43,7 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 | `--probe-timeout <秒>` / `--probe-keep-dir <dir>` | `--probe-boot` 的等待上限（默认 40）/ 留一份探针报告到该目录（排查用） |
 | `--dsh-version <v>` | 目标DSH版本，用于声明/peer范围判断；显式值优先 |
 | `--json` / `--quiet` | 机器可读 / 只输出结论行 |
+| `--issue-report` | 默认脱敏Markdown；不读写基线，与json/quiet互斥；输出后由用户预览分享 |
 | `--no-baseline` | 不读写本机基线。**一次性检查用这个**，见下面的「副作用」 |
 | `--rules` / `--catalog` | 覆盖规则表与官方 API 目录（默认在 `rules/`） |
 | `--version` | 工具版本。**报结论时要带上它** —— 同一个插件在不同版本的规则表/提取器下结论会变，不带版本无法追溯 |
@@ -56,6 +57,15 @@ node <repo>/bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 3. 没有探针则按目录提供疑似线索；省略的服务是未采样，不能推断为不存在。CLI 也会尝试读取目标 node_modules 旁的 probe-report.json，转述前检查输出中的采样来源。
 
 安装检查脚本 `--keep` 会返回本次唯一私有目录；CLI `--probe-keep-dir` 需显式给私有目录。报告与 boot.log 不再使用固定共享临时路径。`static.json` 来自 `node lib/extract.mjs <nm> <输出目录>`，不是每次安装检查都会自动产生的文件。
+
+分享故障（仓库源码功能，npm无CLI）：
+
+```bash
+node <repo>/bin/compat-check.mjs --nm <目标目录> --issue-report > issue-report.md
+report_status=$?
+```
+
+保留退出码0/1/2/3，后续命令不可覆盖原结论。报告省略绝对路径、原始日志/探针、源码片段与基线；含路径、链接、常见凭据或控制字符的说明整项隐藏。仍保留插件名和包内相对位置，任意业务文本不保证无敏感信息，须预览；缺位置如实说明，保留coverage/vacuous和certainty/impactBasis。复现命令须替换占位符。默认仍可能读取旁置探针，不能保证纯静态证据。只生成报告不授权上传/发帖；不为生成文本额外启动宿主。
 
 ## 输出怎么读
 
@@ -145,7 +155,7 @@ CI 里可以直接用：`0` 过，`1`/`2` 按你的策略处理，`3` 是**工�
 - 报结论时**给出可核对的依据**。API源码发现引用真实`file:line`；没有源码位置的loader/声明事实说明包身份及观测或声明来源，不补造行号。
 
 
-0.1.1：`root` 缺项是未采样，不能称为不存在；`coverage.status=limited` 与 `vacuous` 必须转述。现代探针绑定 profile/DSH/采样时间；旧报告明确标为未绑定。解析、读取、资源上限等诊断会限制覆盖，完整性不足不更新基线。当前统计见仓库 `docs/current-state.json`；npm 包是插件，CLI 从仓库使用并先运行 `npm ci --ignore-scripts`。显式安装检查会执行目标插件，临时 profile 不是不可信代码隔离沙箱。
+0.1.1：`root` 缺项是未采样，不能称为不存在；`coverage.status=limited` 与 `vacuous` 必须转述。现代探针绑定 profile/DSH/采样时间；旧报告明确标为未绑定。解析、读取、资源上限等诊断会限制覆盖，完整性不足不更新基线。当前统计见仓库 `docs/current-state.json`；npm 包是插件，CLI 从仓库使用，根依赖尚未就绪时在授权范围内运行 `npm ci --ignore-scripts`。显式安装检查会执行目标插件，临时 profile 不是不可信代码隔离沙箱。
 
 官方 peer 范围冲突是 declared-incompatible：影响为推断，不能凭声明写成实际加载失败；当前实现沿用DSH0.2.0-rc.2的声明规则，将engines.dsh作建议处理；0.2.1-rc.1及rc.2宿主已优先按engines.dsh判断，存在声明误报/漏报风险，须说明该限制并核对宿主实际结果，不能称新版已全面适配。当前契约、施工记录和后续计划统一见仓库 docs/Plan.md，原始审计位于 docs/GPT审计及重构方案文档.md。本地版本以仓库文件为准；发布受理不等于公开可安装，公开版本以npm registry实时结果为准；本地修订不能视为已在公开包生效。
 

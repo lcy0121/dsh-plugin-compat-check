@@ -54,7 +54,10 @@ node bin/compat-check.mjs --help
 | `--no-baseline` | 기준선 읽기·쓰기 비활성화 |
 | `--baseline-file <path>` / `--dry-run` | 기준선 지정; 쓰지 않고 비교 |
 | `--json` / `--quiet` | JSON 문서 하나; 또는 요약만 출력 |
+| `--issue-report` | 기본 비식별 Markdown 보고서; 기준선 읽기/쓰기 없음; `--json`/`--quiet`와 상호 배타적 |
 | `--version` / `--help` | 버전·도움말, 대상 불필요 |
+
+공유 보고서는 `node bin/compat-check.mjs --nm <대상> --issue-report > issue-report.md`로 생성합니다. 버전, 관측 모드, 발견, 가능한 패키지 상대 위치, certainty/impactBasis, 범위와 자리표시자 재현 명령을 보존합니다. 원시 로그/프로브, 절대 경로와 기준선은 제외하며 경로·링크·일반 자격 증명·제어 문자가 있는 설명은 전체를 숨깁니다. 패키지 이름과 상대 파일명은 남고 임의의 업무 텍스트에는 민감 정보가 있을 수 있으므로 공유 전에 미리 확인하세요. 종료 코드는 0/1/2/3이며 필요하면 바로 다음 명령에서 `report_status=$?`로 저장하세요. 이 옵션은 현재 저장소 소스에만 있으며 npm 플러그인에는 CLI가 없습니다.
 
 ### 플러그인과 skill
 

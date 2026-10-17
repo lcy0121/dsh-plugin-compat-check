@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.2",
-  "recordedAt": "2026-10-17T13:25:08.608Z",
+  "recordedAt": "2026-10-17T13:47:24.542Z",
   "testFiles": 34,
-  "tests": 491,
+  "tests": 498,
   "repositoryFiles": {
-    "total": 228,
+    "total": 229,
     "fixtures": 90,
-    "other": 138
+    "other": 139
   },
   "verification": {
     "platform": "darwin",
@@ -1616,6 +1616,144 @@
         "generatedContractsChecked": true,
         "formatCheck": true,
         "skillSlotIdentifierChecked": "settings.plugins.tab"
+      }
+    },
+    "issueReportAndDistribution": {
+      "recordedAt": "2026-10-17T13:44:53.767Z",
+      "sourceStatus": "Local repository implementation/documentation; not pushed, merged or npm-published by this task.",
+      "issueReport": {
+        "entry": "node bin/compat-check.mjs --nm <target> --issue-report",
+        "format": "Markdown stdout",
+        "baseline": "No reads or writes, including with --baseline-file",
+        "exitCodes": "0/1/2/3 preserved; JSON and quiet are mutually exclusive",
+        "included": [
+          "tool/target/observed DSH and plugin versions",
+          "evidence mode, binding and usability",
+          "summary and scan completeness/diagnostic count",
+          "findings, available package-relative locations, certainty and impactBasis",
+          "coverage/limitations/vacuous",
+          "placeholder reproduction command and declaration caveats"
+        ],
+        "omitted": [
+          "absolute paths and original argv",
+          "raw errors, logs, probe/evidence, source snippets and baseline",
+          "unknown additive summary fields"
+        ],
+        "privacy": "Whole explanation fields containing paths, URLs, common credentials or control characters are hidden. HTML/Markdown/mentions are escaped. Names and safe package-relative filenames remain; arbitrary business text requires human preview. No automatic posting.",
+        "tests": {
+          "newBehaviorTests": 7,
+          "cliTests": 37
+        },
+        "referenceTest": {
+          "before": "Skill did not document Markdown export, privacy or immediate exit-code preservation.",
+          "after": "Reference agent retrieved and executed --issue-report on micro fixture; saved exit 2, previewed output and cleaned temporary report; correctly retained catalogue/limited/vacuous and human review limits.",
+          "scope": "One reference retrieval/application case, not generic agent reliability or model conversation certification."
+        },
+        "entryGuardFix": "Import from Node stdin no longer resolves the virtual argv[1] dash as a filesystem path."
+      },
+      "distribution": {
+        "issue138": {
+          "url": "https://github.com/bruc3van/awesome-dsh-plugin/issues/138",
+          "state": "OPEN",
+          "changedFields": "Two publication-date literals only: 2026-10-13 -> 2026-10-17",
+          "updatedAt": "2026-10-17T13:37:12Z",
+          "bodySha256Before": "5ecb9b51e25c266381a7b3b3e861624b62633bd9dd56662e858a27d3f2cb2cfc",
+          "bodySha256After": "cbe69b1353bd1ab852ff28ccdfe1b4a40b2a3fd996220fe507a388d56a41c4d2",
+          "readBackMatches": true
+        },
+        "pullRequests": [
+          {
+            "url": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/7736",
+            "state": "OPEN",
+            "checks": "check and Submission gate SUCCESS"
+          },
+          {
+            "url": "https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/628",
+            "state": "MERGED",
+            "mergedAt": "2026-10-17T12:58:36Z"
+          },
+          {
+            "url": "https://github.com/dshworks/awesome-dsh-plugins/pull/167",
+            "state": "OPEN",
+            "checks": "check SUCCESS"
+          },
+          {
+            "url": "https://github.com/0xsline/awesome-deepseek-harness/pull/717",
+            "state": "OPEN",
+            "checks": "awesome-lint SUCCESS"
+          }
+        ],
+        "primaryRegistry": {
+          "url": "https://awesome-dsh-plugin.com/plugins.json",
+          "updated": "2026-10-17",
+          "count": 5704,
+          "repositoryPresent": false,
+          "sha256": "b8f15642a7359c086a15f3a8611a0681c737a7899c53e686f1b569a676f01ef3"
+        },
+        "store1024": {
+          "catalogEntry": "https://github.com/imsai-sh/awesome-deepseek-harness-plugins/blob/main/catalog/plugins/lcy0121--dsh-plugin-compat-check--plugin.json",
+          "searchUrl": "https://api.deepseek1024.com/v1/plugins/search?q=dsh-plugin-compat-check",
+          "detailUrl": "https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin",
+          "searchTotal": 1,
+          "id": "lcy0121/dsh-plugin-compat-check/plugin",
+          "installMethods": [
+            {
+              "kind": "github",
+              "spec": "github:lcy0121/dsh-plugin-compat-check#path:plugin",
+              "command": "dsh plugin --profile web add github:lcy0121/dsh-plugin-compat-check#path:plugin",
+              "verification": "unknown",
+              "code": "not_checked",
+              "requiresBuildAllowance": false,
+              "buildPackage": null,
+              "revision": null,
+              "checkedAt": null
+            }
+          ],
+          "status": "Search/detail visible; npm method absent; GitHub method unknown/not_checked. Current offeredInstallCommand source returns null for GitHub-only entries: browse-only, not an installation success.",
+          "schema": "Catalog plugin schema has additionalProperties=false and no npm override field; do not add unsupported metadata.",
+          "pending": "Upstream crawl/npm mapping refresh; verify actual market installation after npm method is offered."
+        },
+        "otherChannels": {
+          "dshMarket": "Documented repo-verified npm -> author prebuilt GitHub Release tarball -> source fallback; discovery still depends on primary registry inclusion.",
+          "yeleBai": "Current scanner validates repository root manifest before later npm overrides. No verified subdirectory exception for this private workspace root."
+        },
+        "publishedArtifactRuntime": {
+          "recordedAt": "2026-10-17T13:43:50.156Z",
+          "ok": true,
+          "dshVersion": "0.2.1-rc.2",
+          "artifactVersion": "0.1.2",
+          "artifactSha1": "e3c9070b93bc8fd9499d5b34e354e92eb9ee38c2",
+          "artifactIntegrity": "sha512-MjGe8WNpt3FObjBhqgabS2Q69Rgbh0uYfhKKQ0j/Iy/FzGvNFG0gd5graxGIl7MjZc/FjYQdu7TKzzLESfmYOA==",
+          "installedFilesEqual": 34,
+          "privateProfile": true,
+          "httpStatus": 200,
+          "reportOk": true,
+          "pluginNames": [
+            "dsh-plugin-compat-check"
+          ],
+          "scope": "Published npm package installed by real DSH CLI and exact bytes checked; authenticated HTTP report on actual rc.2. No client UI, model conversation or business behavior certification."
+        },
+        "preliminaryAttempt": "A plain private DSH profile registered tool/skill but had no Web service, so waiting for its Web URL timed out. Reinitialized a separate profile from the official web template; completed authenticated HTTP verification. All owned hosts stopped.",
+        "release": "No new npm release. rc.2 adaptation remains pending; source README/skill changes require separately authorized release afterward."
+      },
+      "skill": {
+        "bodyLength": 7296,
+        "bodySha256": "3caa98ac3e013fc319b5f1ed515d937d745e7b38a90677b42e116d7dc4fc6196",
+        "packagedCopyEqual": true,
+        "published012BodyLength": 6669,
+        "sourceBodyNotPublished": true
+      },
+      "validation": {
+        "defaultTests": 498,
+        "failures": 0,
+        "skipped": 0,
+        "nodeVersion": "26.12.0",
+        "documentAndSkillTests": 35,
+        "formatCheck": true,
+        "metadataErrors": 0,
+        "metadataNotices": 1,
+        "metadataSkipped": [],
+        "scope": "Default suite includes independent empty-cache tgz installation in controlled host context; separate published-artifact real rc.2 HTTP test above. No full UI/business/Windows certification."
       }
     }
   },

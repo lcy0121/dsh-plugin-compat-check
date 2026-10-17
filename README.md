@@ -56,7 +56,10 @@ node bin/compat-check.mjs --help
 | `--no-baseline` | 不读写基线，适合一次性检查 |
 | `--baseline-file <path>` / `--dry-run` | 指定基线；只比较、不写入 |
 | `--json` / `--quiet` | 一份机器可读 JSON；或仅总结行 |
+| `--issue-report` | 默认脱敏的 Markdown 故障报告；不读写基线，与 `--json`/`--quiet` 互斥 |
 | `--version` / `--help` | 版本或完整帮助，不需要目标目录 |
+
+分享故障时，可运行 `node bin/compat-check.mjs --nm <目标目录> --issue-report > issue-report.md`。报告保留版本、证据模式、发现、可用包内位置、certainty/impactBasis、覆盖和占位符复现命令；不导出原始日志/探针、绝对路径或基线，含路径、链接、常见凭据或控制字符的说明整项隐藏。仍保留插件名和相对文件名，不能保证任意业务文字均无敏感信息，务必预览后自行分享。退出码仍为0/1/2/3；需要保存时在下一条命令用 `report_status=$?`，避免后续命令覆盖。此旗标目前只在仓库源码中提供，npm插件没有CLI。
 
 ### 安装插件与 skill
 

@@ -54,7 +54,10 @@ Select the actual profile; do not assume desktop. `--nm` accepts a profile or no
 | `--no-baseline` | Disable baseline reads and writes |
 | `--baseline-file <path>` / `--dry-run` | Explicit baseline; compare without writing |
 | `--json` / `--quiet` | One JSON document; or summary only |
+| `--issue-report` | Redacted Markdown report; no baseline reads/writes; exclusive with `--json`/`--quiet` |
 | `--version` / `--help` | Version or full usage, no target required |
+
+To prepare a report, run `node bin/compat-check.mjs --nm <target> --issue-report > issue-report.md`. It retains versions, observation mode, findings, available package-relative positions, certainty/impactBasis, coverage and a reproduction command with placeholders. Raw logs/probes, absolute paths and baselines are omitted; explanation fields containing paths, links, common credentials or control characters are hidden in full. Package names and relative filenames remain, and arbitrary business text may still be sensitive: preview before sharing. Exit codes remain 0/1/2/3; capture immediately with `report_status=$?` if needed. This flag is currently a repository-source feature; the npm plugin has no CLI.
 
 ### Plugin and skill
 

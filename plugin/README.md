@@ -22,7 +22,7 @@ dsh plugin --profile <临时profile> add file:<生成的tgz绝对路径>
 
 prepack复制权威skill、同步单源报告契约的宿主/客户端产物，并暂存共享kernel和MIT LICENSE，postpack清理kernel。固定运行时依赖为 `@babel/parser@7.29.9` 与 `semver@7.7.3`，支持 Node `^22.19.0 || >=24`。源码裸复制或file安装不保证prepack运行，应使用完整仓库开发布局或预打包tarball。
 
-npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检查从仓库使用；本插件不能做安装前检查。仓库使用说明：[README](https://github.com/lcy0121/dsh-plugin-compat-check#readme)。版本说明与发布状态请查看[开发计划与验收记录](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，本地路径为docs/Plan.md。
+npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检查从仓库使用；仓库源码现提供`--issue-report`默认脱敏Markdown导出，不读写基线、保留原退出码，须预览后自行分享，该功能不在npm包内。本插件不能做安装前检查。仓库使用说明：[README](https://github.com/lcy0121/dsh-plugin-compat-check#readme)。版本说明与发布状态请查看[开发计划与验收记录](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，本地路径为docs/Plan.md。
 
 0.1.2修正发布状态文案并统一版本标记；判定算法与0.1.1一致。规则/API目录仍基于0.2.0-rc.2，不把新版接入测试当作全面适配。
 
