@@ -6,7 +6,7 @@
 
 ## 버전과 배포
 
-로컬 소스는 **미배포0.1.1 후보 버전**입니다. 2026-10-16에 확인한 npm `latest`는 **0.1.0**이며 미배포 수정 사항을 포함하지 않습니다. [공개 메타데이터 검토](docs/Plan.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
+현재 배포 버전은 **0.1.2**입니다. 2026-10-17에 npm latest, 다운로드 tarball과 설치된 패키지를 검증했습니다. 문구와 버전 표기를 수정한 패치이며 판정 알고리즘은 0.1.1과 같습니다. [공개 메타데이터 검토](docs/Plan.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
 
 | 진입점 | 역할 |
 |---|---|
@@ -21,7 +21,7 @@
 
 ### 저장소 CLI
 
-GitHub main에는 0.1.1 후보 핵심 소스와 루트 개발 워크스페이스가 포함되어 있습니다. 이후 로컬 변경과 공개 커밋은 Plan에 구분하여 기록하며, 기존 npm 패키지에는 후보 수정이 포함되지 않습니다. 저장소를 받은 뒤 루트에서 의존성을 설치하세요:
+저장소는 공통 판정 소스와 루트 개발 워크스페이스를 제공하며 npm에는 plugin 패키지만 포함됩니다. 저장소를 받은 뒤 루트에서 의존성을 설치하세요:
 
 ```bash
 git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
@@ -51,7 +51,7 @@ node bin/compat-check.mjs --help
 ### 플러그인과 skill
 
 ```bash
-# npm 배포 버전 설치 (2026-10-16 확인: 0.1.0)
+# npm 배포 버전 설치 (2026-10-17 확인: 0.1.2)
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # CLI 사용자의 독립 skill
@@ -60,7 +60,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 플러그인은 호환성 패널, 상세 배지, `compat_check`, skill provider를 등록합니다. 2026-10-15에 실제 tarball을 macOS arm64의 DSH0.2.0-rc.2에 설치하고 도구·skill 호출 및 실제 Chrome의 패널·배지·기준선 변화를 검증했습니다. 독립 skill은 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`에 설치되며 기존 파일 덮어쓰기는 `--force`가 필요합니다.
 
-저장소 루트는 **비공개 개발 워크스페이스**이며 설치 가능한 DSH bundle이 아닙니다. 루트 GitHub spec은 `plugin/` 설치와 같지 않습니다. 후보 버전 검사 시 루트에서 `npm ci --ignore-scripts`를 실행하고 `plugin/`에서 `npm pack --pack-destination <이미있는절대출력경로>`를 실행한 뒤 생성된 `.tgz`를 DSH로 설치하세요. pack이 커널과 LICENSE를 준비합니다. 준비되지 않은 `plugin/` 복사본에는 커널이 없습니다. [플러그인 배포 설명](plugin/README.md)을 참고하세요.
+저장소 루트는 **비공개 개발 워크스페이스**이며 설치 가능한 DSH bundle이 아닙니다. 루트 GitHub spec은 `plugin/` 설치와 같지 않습니다. 소스 검사 시 루트에서 `npm ci --ignore-scripts`를 실행하고 `plugin/`에서 `npm pack --pack-destination <이미있는절대출력경로>`를 실행한 뒤 생성된 `.tgz`를 DSH로 설치하세요. pack이 커널과 LICENSE를 준비합니다. 준비되지 않은 `plugin/` 복사본에는 커널이 없습니다. [플러그인 배포 설명](plugin/README.md)을 참고하세요.
 
 ### 설치 검사
 
@@ -94,7 +94,7 @@ shell은 Node 진입 전 기존 사용법·커널 오류 코드를 유지합니�
 
 서비스는 present, absent, unobserved, unreadable로 구분합니다. 누락된 키는 미관측입니다. 현대 관측은 profile·DSH 버전이 일치해야 하고 기본24시간 후 만료됩니다. 구형 보고서는 명시된 키만 사용하며 unbound 경고를 표시합니다.
 
-`certainty`는 certain 또는 suspected이며 filtered/abstained는 별도 처리 분류입니다. 선언은 의존 관계를 증명할 수 있지만 메서드 부재를 증명하지 못합니다. `impactBasis=inferred`의 기능 영향은 추론임을 유지하세요. 신뢰할 수 있게 매핑된 loader FAILED/PENDING은 실제 미활성 증거입니다. 공식 peer 충돌은 declared-incompatible 및 추론 영향·degraded로 표시하고 미관측 예외를 고려해 fatal로 단정하지 않습니다. `engines.dsh`는 권고 선언입니다.
+`certainty`는 certain 또는 suspected이며 filtered/abstained는 별도 처리 분류입니다. 선언은 의존 관계를 증명할 수 있지만 메서드 부재를 증명하지 못합니다. `impactBasis=inferred`의 기능 영향은 추론임을 유지하세요. 신뢰할 수 있게 매핑된 loader FAILED/PENDING은 실제 미활성 증거입니다. 공식 peer 충돌은 declared-incompatible 및 추론 영향·degraded로 표시하고 미관측 예외를 고려해 fatal로 단정하지 않습니다. 현재 구현은 0.2.0-rc.2 규칙에 따라 `engines.dsh`를 권고로 처리합니다. 0.2.1-rc.1 호스트는 이 필드를 우선하므로 선언 오탐·누락 가능성이 있으며 실제 호스트 결과를 확인해야 합니다.
 
 `coverage.status=limited`, vacuous, 파싱·읽기·예산 진단, 매핑 불가능한 loader 제한을 항상 함께 전달하세요. 문제 없음이 기능 인증은 아닙니다. 호스트·클라이언트·공유 호출을 구분합니다. provide 선언은 제공자 단서일 뿐 활성화 증거가 아니며 존재하는 서비스의 완전한 메서드 관측은 계속 사용합니다.
 
@@ -141,7 +141,7 @@ node tools/meta-check.mjs --json
 
 보조 측정은 독립 loader 원시 라벨과 서비스 관측만 받는 예측기를 분리합니다. [Plan 보조 측정 기록](docs/Plan.md#51-已验证范围)을 참고하세요. `node tools/labels.mjs --nm web --synthetic --json`은 비공개 환경을 만들고 실제 누락을 보고하면 exit1을 반환합니다. 기존 대상은 `--probe-boot`, 파일 입력은 `--probe`와 `--labels`를 함께 사용합니다. 이 수치는 첫 계층의 해당 표본에만 적용되며 생태계 정확도가 아닙니다.
 
-[lib/contracts.mjs](lib/contracts.mjs)가 보고서 계약의 단일 원본이며 CLI JSON·HTTP·도구·패널에서 증거를 유지합니다. 추가 필드는 보존하고 필수 필드 누락이나 미지원 버전은 도구 오류로 처리합니다. 규칙은 공식0.2.0-rc.2 소스·런타임으로 검토했으며 AST 목록은 부분 스캔임을 명시합니다. [Plan 규칙 및 계약 기록](docs/Plan.md#2-现行判定与集成契约)을 참고하세요.
+[lib/contracts.mjs](lib/contracts.mjs)가 보고서 계약의 단일 원본이며 CLI JSON·HTTP·도구·패널에서 증거를 유지합니다. 추가 필드는 보존하고 필수 필드 누락이나 미지원 버전은 도구 오류로 처리합니다. 규칙·API 카탈로그는 0.2.0-rc.2 기준입니다. 0.2.1-rc.1의 제한된 접속 검증은 통과했지만 선언 판정 적용과 카탈로그 검토는 아직 필요합니다. AST 목록은 부분 스캔임을 명시합니다. [Plan 규칙 및 계약 기록](docs/Plan.md#2-现行判定与集成契约)을 참고하세요.
 
 [개발 기록 및 후속 계획](docs/Plan.md) · [역사 감사](docs/GPT审计及重构方案文档.md) · [규칙](rules/README.md) · [skill 배포](skill/README.md). [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)에 수록되어 있습니다.
 

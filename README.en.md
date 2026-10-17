@@ -6,7 +6,7 @@ Check the compatibility of **installed DSH plugins** with a target DSH version, 
 
 ## Version and delivery
 
-Local source is the **unpublished 0.1.1 candidate**. The npm `latest` version verified on 2026-10-16 is **0.1.0**; installing it does not include unpublished fixes. See [publication and verification records in Plan](docs/Plan.md) and [generated verification facts](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
+The current release is **0.1.2**. npm latest, the downloaded tarball and installed artifact were verified on 2026-10-17. This patch corrects documentation and version markers; the verdict algorithm is unchanged from 0.1.1. See [publication and verification records in Plan](docs/Plan.md) and [generated verification facts](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
 
 | Entry | Purpose |
 |---|---|
@@ -21,7 +21,7 @@ The entries share one verdict kernel. Only identical inputs and observation evid
 
 ### Repository CLI
 
-GitHub main includes the 0.1.1 candidate core and root development workspace. Plan records subsequent local changes separately from public commits; the old npm package does not include those changes. Obtain the repository and install dependencies at its root:
+The repository provides the shared kernel and root development workspace; npm ships only the plugin package. Obtain the repository and install dependencies at its root:
 
 ```bash
 git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
@@ -51,7 +51,7 @@ Select the actual profile; do not assume desktop. `--nm` accepts a profile or no
 ### Plugin and skill
 
 ```bash
-# Published npm version (0.1.0 verified on 2026-10-16)
+# Published npm version (0.1.2 verified on 2026-10-17)
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # Standalone skill for CLI users
@@ -60,7 +60,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 The plugin registers a compatibility panel, detail badges, `compat_check` and a skill provider. On 2026-10-15, the actual tarball was installed into DSH0.2.0-rc.2 on macOS arm64; tool and skill calls, the panel, badges and baseline changes were verified with a real Chrome session. Standalone skill destination: `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`; existing files require `--force` to overwrite.
 
-The repository root is a **private development workspace**, not the installable DSH bundle. A root GitHub spec is not equivalent to installing `plugin/`. To test the candidate, run `npm ci --ignore-scripts` at the root, then `npm pack --pack-destination <existing-absolute-output-dir>` inside `plugin/`, and install the resulting `.tgz` through DSH. Packing stages the kernel and LICENSE. Copying a bare `plugin/` directory does not stage the kernel; see [plugin delivery](plugin/README.md).
+The repository root is a **private development workspace**, not the installable DSH bundle. A root GitHub spec is not equivalent to installing `plugin/`. To test the source, run `npm ci --ignore-scripts` at the root, then `npm pack --pack-destination <existing-absolute-output-dir>` inside `plugin/`, and install the resulting `.tgz` through DSH. Packing stages the kernel and LICENSE. Copying a bare `plugin/` directory does not stage the kernel; see [plugin delivery](plugin/README.md).
 
 ### Installation checks
 
@@ -94,7 +94,7 @@ The shell retains legacy usage/kernel-error codes before entering Node. For auto
 
 Services have distinct present, absent, unobserved and unreadable states. Omitted keys are unobserved. Modern observations must match profile and DSH version and expire after24h by default. Legacy reports use explicit keys only and carry an unbound warning.
 
-`certainty` is certain or suspected; filtered/abstained are dispositions, not certainty levels. Declarations establish dependency relationships, not method absence. Preserve `impactBasis=inferred` when quoting feature impact; reliably mapped loader FAILED/PENDING supplies measured activation evidence. Official peer conflicts use `declared-incompatible` with inferred impact and degraded severity, not fatal without observed host exemptions. `engines.dsh` is advisory.
+`certainty` is certain or suspected; filtered/abstained are dispositions, not certainty levels. Declarations establish dependency relationships, not method absence. Preserve `impactBasis=inferred` when quoting feature impact; reliably mapped loader FAILED/PENDING supplies measured activation evidence. Official peer conflicts use `declared-incompatible` with inferred impact and degraded severity, not fatal without observed host exemptions. The current implementation retains the 0.2.0-rc.2 declaration rules and treats `engines.dsh` as advisory. The 0.2.1-rc.1 host prioritizes that field; declaration findings can be incorrect or missed, so check actual host results.
 
 Always retain `coverage.status=limited`, vacuous results, parse/read/budget diagnostics and unmapped-loader limits. No finding is not a feature certificate. Host, client and shared sites are kept separate. Provider declarations are hints, not evidence of activation; complete method observations of present services still apply.
 
@@ -141,7 +141,7 @@ Slow integrations require explicit `DSC_SLOW=1`. Existing macOS DSH/Chrome, Ubun
 
 Auxiliary measurement uses independent raw loader labels; the predictor receives service observations only. See [auxiliary measurement records in Plan](docs/Plan.md#51-已验证范围). `node tools/labels.mjs --nm web --synthetic --json` creates a private environment and can correctly report a false negative (exit1). Use `--probe-boot` for an existing target, or paired `--probe` and `--labels` files. These sample metrics cover the first layer only, not ecosystem accuracy.
 
-[lib/contracts.mjs](lib/contracts.mjs) is the single report contract source; CLI JSON, HTTP, tools and the panel preserve full evidence. Additive fields are retained; missing required fields and unsupported versions fail as tool errors. Rules were checked against official0.2.0-rc.2 sources/runtime; the refreshed AST inventory explicitly records partial coverage. See [rule and contract records in Plan](docs/Plan.md#2-现行判定与集成契约).
+[lib/contracts.mjs](lib/contracts.mjs) is the single report contract source; CLI JSON, HTTP, tools and the panel preserve full evidence. Additive fields are retained; missing required fields and unsupported versions fail as tool errors. Rules and the API catalogue are based on 0.2.0-rc.2. Limited integration checks passed on 0.2.1-rc.1; declaration-rule adaptation and catalogue review remain pending. The AST inventory explicitly records partial coverage. See [rule and contract records in Plan](docs/Plan.md#2-现行判定与集成契约).
 
 [Development history and next steps](docs/Plan.md) · [Historical audit](docs/GPT审计及重构方案文档.md) · [Rules](rules/README.md) · [Skill delivery](skill/README.md). Listed in [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness).
 

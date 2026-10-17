@@ -6,7 +6,7 @@
 
 ## 当前版本与交付
 
-本地源码为 **0.1.1 未发布候选版**；2026-10-16联网核验，npm `latest` 为 **0.1.0**。`npm install` 或 `dsh plugin add` 不会取得本地尚未发布的修复。公开状态和差异见 [Plan中的核验记录](docs/Plan.md#1-项目定位与交付状态)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
+当前发布版为 **0.1.2**；2026-10-17已核验npm latest、实际下载与安装产物。此补丁修正文案并统一版本标记，判定算法与0.1.1一致。公开状态和差异见 [Plan中的核验记录](docs/Plan.md#1-项目定位与交付状态)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
 
 插件、CLI、skill三种形态共享判定内核；安装检查脚本是CLI编排入口。只有**相同输入与采样证据**才应得出相同结果。
 
@@ -23,7 +23,7 @@ npm 包**没有 CLI `bin`**，不支持 `npx dsh-plugin-compat-check`。默认�
 
 ### 仓库 CLI
 
-GitHub main已包含0.1.1候选主体和根开发工作区；本地后续补强与公开提交分别记录于Plan，不能把npm旧包当作候选源码。取得仓库后在根目录安装依赖：
+仓库提供共享判定源码和根开发工作区，npm只包含plugin子包。取得仓库后在根目录安装依赖：
 
 ```bash
 git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
@@ -53,7 +53,7 @@ node bin/compat-check.mjs --help
 ### 安装插件与 skill
 
 ```bash
-# 安装 npm 已发布版（2026-10-16核验为0.1.0）
+# 安装 npm 已发布版（2026-10-17核验为0.1.2）
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # 只使用 CLI 时，安装独立 skill
@@ -62,7 +62,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 插件注册兼容性面板、插件详情角标、`compat_check` 与 skill provider；2026-10-15已从实际tgz安装，在DSH0.2.0-rc.2/macOS arm64中验证工具和skill，并通过真实Chrome操作确认面板、角标及基线差分。独立 skill 安装至 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`，已有文件需 `--force` 才覆盖。
 
-源码仓库根是私有开发工作区，**不是可直接激活的 DSH 插件包**。根目录 GitHub spec 不等同于安装 `plugin/`。测试本地候选时，在仓库根运行 `npm ci --ignore-scripts`，再在 `plugin/` 中执行 `npm pack --pack-destination <已存在的绝对输出目录>`，最后让 DSH 安装生成的 `.tgz`。打包会暂存内核和 LICENSE；不要直接复制裸 `plugin/` 并假定内核已在包内。细节见 [插件说明](plugin/README.md)。
+源码仓库根是私有开发工作区，**不是可直接激活的 DSH 插件包**。根目录 GitHub spec 不等同于安装 `plugin/`。测试本地源码时，在仓库根运行 `npm ci --ignore-scripts`，再在 `plugin/` 中执行 `npm pack --pack-destination <已存在的绝对输出目录>`，最后让 DSH 安装生成的 `.tgz`。打包会暂存内核和 LICENSE；不要直接复制裸 `plugin/` 并假定内核已在包内。细节见 [插件说明](plugin/README.md)。
 
 ### 安装检查
 
@@ -97,7 +97,7 @@ shell 在进入 Node 前保留旧的用法/内核缺失错误码；调用自动�
 
 - 服务区分 `present`、`absent`、`unobserved`、`unreadable`；省略键是未采集，不能判成不存在。现代探针需匹配 profile、DSH版本，默认超过24小时失效；旧报告只使用明确记录的键并提示未绑定。
 - `certainty` 是 `certain` 或 `suspected`，与“过滤/弃权”这种去处不同。声明能确定依赖关系，不能单独确定方法缺失。`impactBasis=inferred` 的用户影响要保留“推断，非实测”；可靠映射的 loader FAILED/PENDING 可提供实际未激活证据。
-- 官方 peer 范围冲突单列 `declared-incompatible`，影响为推断；`engines.dsh` 是建议声明，不冒充宿主安装闸门。未采集精确版本豁免时不据此写 fatal。
+- 官方 peer 范围冲突单列 `declared-incompatible`，影响为推断；当前实现沿用0.2.0-rc.2的声明规则，将`engines.dsh`作建议处理；0.2.1-rc.1已优先按该字段判断，相关声明有误报/漏报风险，须核对宿主实际结果。未采集精确版本豁免时不据此写 fatal。
 - `coverage.status=limited`、`vacuous`、解析/读取/预算诊断、无法映射的 loader 状态都必须转述。“可用”不等于完整功能验收通过。
 - 宿主、客户端、共享调用点分开处理。声明 provide 只是提供方线索，不能证明服务已激活；已确认存在服务的完整方法观测仍参与判断。
 
@@ -144,7 +144,7 @@ node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 
 辅助度量使用 [Plan辅助度量记录](docs/Plan.md#51-已验证范围) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
 
-报告契约以 [lib/contracts.mjs](lib/contracts.mjs) 为单一真源，CLI JSON、HTTP、工具与面板保留完整证据；新字段可扩展，缺少必需字段或不支持的版本明确报工具错误。规则已按0.2.0-rc.2官方实现/运行时复核，库存为明确标记不完整的AST样本，详见 [Plan规则与契约记录](docs/Plan.md#2-现行判定与集成契约)。
+报告契约以 [lib/contracts.mjs](lib/contracts.mjs) 为单一真源，CLI JSON、HTTP、工具与面板保留完整证据；新字段可扩展，缺少必需字段或不支持的版本明确报工具错误。规则/API目录基于0.2.0-rc.2；已对0.2.1-rc.1完成有限接入验证，声明判定适配和目录复核尚待完成。库存为明确标记不完整的AST样本，详见 [Plan规则与契约记录](docs/Plan.md#2-现行判定与集成契约)。
 
 [施工记录与后续计划](docs/Plan.md) · [历史审计](docs/GPT审计及重构方案文档.md) · [规则说明](rules/README.md) · [skill交付](skill/README.md)。项目已收录于 [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)。
 

@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fork } from "node:child_process";
-import { once } from "node:events";
+import { EventEmitter, once } from "node:events";
 import { performance } from "node:perf_hooks";
 import { baselineIdentity, baselineTransaction } from "../lib/state-store.mjs";
 import { snapshotForBaseline } from "../lib/baseline.mjs";
@@ -32,7 +32,7 @@ const nextMessage = (child) =>
       const cleanup = () => {
         child.off("message", message);
         child.off("error", error);
-        child.off("exit", exit);
+        child.off("close", close);
       };
       const message = (value) => {
         cleanup();
@@ -42,13 +42,32 @@ const nextMessage = (child) =>
         cleanup();
         reject(value);
       };
-      const exit = (code) =>
-        error(new Error("Writer exited before its response: " + code));
+      const close = (code) =>
+        error(new Error("Writer closed before its response: " + code));
       child.once("message", message);
       child.once("error", error);
-      child.once("exit", exit);
+      child.once("close", close);
     }),
   );
+test("writer responses drain after exit and missing responses reject on close", async () => {
+  // A process may exit before its IPC channel finishes delivering messages.
+  // Drive that ordering explicitly; the contention test below uses real forks.
+  const child = new EventEmitter();
+  const response = nextMessage(child);
+  child.emit("exit", 0);
+  child.emit("message", { outcomes: [{ wrote: true }] });
+  child.emit("close", 0);
+  assert.deepEqual(await response, { outcomes: [{ wrote: true }] });
+  for (const event of ["message", "error", "exit", "close"])
+    assert.equal(child.listenerCount(event), 0);
+
+  const missing = new EventEmitter();
+  const rejected = assert.rejects(nextMessage(missing), /before its response/);
+  missing.emit("exit", 0);
+  missing.emit("close", 0);
+  await rejected;
+});
+
 const record = (name, metrics) => {
   if (process.env.DSC_ENGINEERING_LOG)
     fs.appendFileSync(

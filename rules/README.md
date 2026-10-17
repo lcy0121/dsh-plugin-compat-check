@@ -1,6 +1,6 @@
 # 严重度规则表与维护
 
-适用于0.1.1本地候选。当前契约见 [Plan现行契约](../docs/Plan.md)，验证见 [自动统计](../docs/current-state.json)。本页后半保留2026-10-11旧提取器的规则依据；其中表格不是当前覆盖率，也不是当前运行时真值。
+适用于0.1.2，判定算法与0.1.1一致。当前契约见 [Plan现行契约](../docs/Plan.md)，验证见 [自动统计](../docs/current-state.json)。本页后半保留2026-10-11旧提取器的规则依据；其中表格不是当前覆盖率，也不是当前运行时真值。
 
 ## 文件与运行时消费者
 
@@ -12,6 +12,8 @@
 
 严重度由 `lib/verdict.mjs` 的确定性逻辑、缺失证据、方法规则及默认档共同决定，不由LLM决定。方法规则的severity/impact参与判定与输出，layer控制端别：方法自身优先、服务layer回退。summary/basis/evidence/knownGoneIn/needsReview等用于解释与维护；knownExtractionArtifacts是历史反例登记，不是自动过滤黑名单。
 
+0.2.1-rc.1宿主改为优先按engines.dsh判断；本版尚未同步该逻辑，已复现声明误报与漏报，规则/API目录也未更新为新版。新版接入验证不代表这些判定已适配，实施顺序见Plan后续。
+
 ## 当前证据与严重度
 
 | 情形 | 处理 |
@@ -19,7 +21,7 @@
 | 可映射loader条目FAILED/PENDING | fatal，影响依据measured；禁用、LOADING、无法映射不冒充同一事实 |
 | 宿主硬依赖且明确absent | 可判fatal；仅catalog缺项不冒充运行时缺失 |
 | 非硬依赖服务明确absent，或有足够方法证据 | 按规则/默认档给feature-dead或degraded；用户影响通常是inferred |
-| 官方peer范围冲突 | declared-incompatible，degraded及推断影响；不是实测加载失败，engines.dsh仅建议 |
+| 官方peer范围冲突 | declared-incompatible，degraded及推断影响；不是实测加载失败；当前内核沿用0.2.0-rc.2，将engines.dsh作建议处理 |
 | 未采样、读取失败、访问器未知、源码不完整 | 保留覆盖限制；不以省略键认定不存在 |
 
 方法规则中的degraded应有具体降级/回退依据；peer声明冲突的degraded是引擎针对声明风险的独立默认，不代表观察到回退。方法缺失但没有语义规则时会明确“影响面未知”。声明provide只是候选提供方，不证明已激活，不能遮住完整的present方法观测。

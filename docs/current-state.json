@@ -1,8 +1,8 @@
 {
-  "toolVersion": "0.1.1",
-  "recordedAt": "2026-10-16T15:21:40.536657+00:00",
+  "toolVersion": "0.1.2",
+  "recordedAt": "2026-10-17T08:17:35.411Z",
   "testFiles": 33,
-  "tests": 481,
+  "tests": 482,
   "repositoryFiles": {
     "total": 223,
     "fixtures": 90,
@@ -836,6 +836,447 @@
       },
       "npmPublished": false,
       "scope": "Source delivery and upstream description submission only. The recorded CI head is exact; subsequent delivery-record-only commits must pass their own PR checks. Historical audit snapshots remain unchanged. No npm release or Windows certification."
+    },
+    "npmRelease": {
+      "verifiedAt": "2026-10-17T07:40:51.238317+00:00",
+      "version": "0.1.1",
+      "registry": "https://registry.npmjs.org",
+      "latest": "0.1.1",
+      "publisher": "lcy0121",
+      "runtimeBaseCommit": "49403d78ca3800ee6094a54b2e2fa777b0a0ac32",
+      "artifactSourceCommit": "f2803027f01d745fc0b5e3ada09872263f3e6071",
+      "sourceMainCi": {
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38923778251",
+        "conclusion": "success"
+      },
+      "prepublishCheck": {
+        "ok": true,
+        "platform": "darwin",
+        "arch": "arm64",
+        "nodeVersion": "26.12.0",
+        "tests": 481,
+        "failures": 0,
+        "scope": "Full original gate passed before publication. Earlier optional-profile races are recorded below; tests were not skipped or weakened."
+      },
+      "artifact": {
+        "name": "dsh-plugin-compat-check",
+        "version": "0.1.1",
+        "filename": "dsh-plugin-compat-check-0.1.1.tgz",
+        "shasum": "29f64fea7b9efb7133f833a05758c1e66520c59a",
+        "integrity": "sha512-kiVK80RGXyJLNIUFY+77sYmSL0tgTGdtcgWLjIxDjB+8NVGKvmpZHBEdFVn4/x92N++sS1wjQjETVbTluBJDCg==",
+        "size": 127779,
+        "unpackedSize": 414797,
+        "files": 34,
+        "registryTarball": "https://registry.npmjs.org/dsh-plugin-compat-check/-/dsh-plugin-compat-check-0.1.1.tgz",
+        "registryBytesEqual": true,
+        "sha1Matches": true,
+        "sha512Matches": true,
+        "readmeMatches": true,
+        "dependencies": {
+          "@babel/parser": "7.29.9",
+          "semver": "7.7.3"
+        },
+        "emptyCacheInstall": true,
+        "controlledExecution": {
+          "ok": true,
+          "version": "0.1.1",
+          "plugins": 27,
+          "exitCode": 2,
+          "tool": "compat_check",
+          "skillBodyLength": 6551,
+          "skillBodySha256": "36433c4133264c8df3a3ce0e60d38d2610ecba60ba44bd5bb7e8e69818d29153",
+          "kernelAndReadmeMatch": true,
+          "scope": "Controlled host context; does not start real DSH or a browser."
+        },
+        "standardInstallLockIntegrityMatches": true,
+        "standardInstallUsesUnmodifiedRegistryUrl": true,
+        "standardInstallControlledExecution": {
+          "ok": true,
+          "version": "0.1.1",
+          "plugins": 27,
+          "exitCode": 2,
+          "tool": "compat_check",
+          "skillBodyLength": 6551,
+          "skillBodySha256": "36433c4133264c8df3a3ce0e60d38d2610ecba60ba44bd5bb7e8e69818d29153",
+          "kernelAndReadmeMatch": true,
+          "scope": "Controlled host context; does not start real DSH or a browser."
+        }
+      },
+      "metadata": {
+        "errors": 0,
+        "notices": 0,
+        "skipped": [],
+        "npmReadmeFetched": true,
+        "observedAt": "2026-10-17T07:40:20.203Z"
+      },
+      "publicationDelay": {
+        "publishAcceptedBeforePublicAvailability": true,
+        "metadataInitially404": true,
+        "tarballInitially404": true,
+        "stale404CacheMaxAgeSeconds": 300,
+        "cacheBypassedDownloadVerified": true,
+        "ordinaryPackageSpecInstallVerified": true
+      },
+      "knownDocumentationDifference": {
+        "publishedSkillBodyUtf16Length": 6551,
+        "publishedSkillBodySha256": "36433c4133264c8df3a3ce0e60d38d2610ecba60ba44bd5bb7e8e69818d29153",
+        "publishedSkillRetainsPreReleaseStatusSentence": true,
+        "publishedRulesReadmeCallsSourceCandidate": true,
+        "localSkill": {
+          "bodyUtf16Length": 6576,
+          "bodySha256": "befbd17fefaff4109b80e6901009c9221a06dd3c24ca82d5a5b038cc7219282b"
+        },
+        "localCopiesEqual": true,
+        "localDocumentationFixPublished": false,
+        "localDocumentationFixPushed": false,
+        "nextAction": "A separately authorized patch release is needed to ship the version-neutral skill/rules wording; npm 0.1.1 is immutable. Current local documentation fixes do not alter its tarball."
+      },
+      "optionalProfileRace": {
+        "initialGateFailures": [
+          "A discovered qa021/qa021b profile disappeared before extraction.",
+          "111/475 source locations did not match a mutable desktop plugin file; subsequent unchanged-code invariant assertions and the original full gate passed."
+        ],
+        "diagnosticSuiteOnlySetupFailure": "A discovered qa021 profile disappeared; all 73 executed assertions passed, but process exited 1.",
+        "finalOriginalGatePassed": true,
+        "permanentFixImplemented": false,
+        "followUp": "Snapshot or isolate optional profile inputs; keep original assertions."
+      },
+      "postReleaseDocumentationTests": {
+        "tests": 55,
+        "failures": 0,
+        "localSkillReferenceApplication": "Before: stale status sentence conflicts with newer publication evidence. After: distinguishes acceptance, public availability and unpublished local fixes; no model behavior regression claim.",
+        "referenceApplicationsCompleted": 2,
+        "modelBehaviorRegressionClaimed": false
+      },
+      "scope": "Published the tested tarball, then independently downloaded the registry artifact and verified its bytes and installed tool/skill behavior in a controlled host context. This is not a new real DSH/browser/Windows certification. Local documentation changes after f280302 are not in the published artifact and have not been pushed or merged.",
+      "publishedAt": "2026-10-17T07:34:40.423Z",
+      "recordType": "Historical 0.1.1 publication checkpoint. Its latest, local-fix and delivery flags are as observed at verifiedAt; current release and delivery are recorded in documentationDelivery012."
+    },
+    "documentationDelivery012": {
+      "verifiedAt": "2026-10-17T08:12:35.411226+00:00",
+      "patchVersion": "0.1.2",
+      "baseCommit": "bc0aff1",
+      "publicNpmAtStart": "0.1.1",
+      "npmPublished": true,
+      "maintainedDocuments": 11,
+      "defaultSuiteTests": 481,
+      "defaultFailures": 0,
+      "skill": {
+        "bodyUtf16Length": 6669,
+        "bodySha256": "0c6dc74cb52cf33869593df5f3db4aa6ece6f863e0ef372cbad9ae0685c36cca",
+        "packagedCopyEqual": true,
+        "referenceApplication": "Clarifies new-host declaration limits and keeps tool version separate from the frozen historical probe sample; no model behavior regression claim."
+      },
+      "runtimeChanges": "Only the tool/package version marker; verdict/analysis/observation/worker/runner implementation and rule data unchanged. Engineering live test now reads TOOL_VERSION instead of a fixed literal.",
+      "auditCorrections": [
+        "Remove stale pre-release wording from the new package while preserving dated historical evidence.",
+        "Qualify engines.dsh advisory behavior as the current legacy implementation; document new-host false positives and missed conflicts.",
+        "Align the real CLI example with tool 0.1.2 while retaining the installed probe 0.1.1 frozen baseline.",
+        "Correct the catalogue extractor help default output path."
+      ],
+      "scope": "Published 0.1.2 and verified the public tarball bytes, ordinary empty-cache installation, controlled tool/skill execution and live GitHub/npm metadata. CI is tied to the exact artifact source commit; final record-only commits have their own checks. New DSH real integration is separately scoped in dshUpgradeAssessment; no Windows or full business compatibility claim.",
+      "publication": {
+        "version": "0.1.2",
+        "latest": "0.1.2",
+        "publishedAt": "2026-10-17T08:08:40.762Z",
+        "registry": "https://registry.npmjs.org",
+        "explicitUserAuthorization": true,
+        "artifactSourceCommit": "5af2550cf03a3975ae583935518bb8be41560fad",
+        "artifact": {
+          "name": "dsh-plugin-compat-check",
+          "version": "0.1.2",
+          "filename": "dsh-plugin-compat-check-0.1.2.tgz",
+          "shasum": "e3c9070b93bc8fd9499d5b34e354e92eb9ee38c2",
+          "integrity": "sha512-MjGe8WNpt3FObjBhqgabS2Q69Rgbh0uYfhKKQ0j/Iy/FzGvNFG0gd5graxGIl7MjZc/FjYQdu7TKzzLESfmYOA==",
+          "size": 128118,
+          "unpackedSize": 415700,
+          "entryCount": 34
+        },
+        "registryBytesEqual": true,
+        "sha1Matches": true,
+        "sha512Matches": true,
+        "readmeMatchesSource": true,
+        "dependencies": {
+          "@babel/parser": "7.29.9",
+          "semver": "7.7.3"
+        },
+        "ordinaryRegistryEmptyCacheInstall": true,
+        "unmodifiedRegistryUrlAndIntegrityVerified": true,
+        "installedToolAndSkill": {
+          "ok": true,
+          "plugins": 27,
+          "exitCode": 2,
+          "skillBodyUtf16Length": 6669,
+          "skillBodySha256": "0c6dc74cb52cf33869593df5f3db4aa6ece6f863e0ef372cbad9ae0685c36cca",
+          "kernelRulesReadmeMatchSource": true,
+          "oldPublicationStatusRemoved": true,
+          "scope": "Controlled registered tool/skill invocation; no real DSH or browser certification from this smoke test."
+        }
+      },
+      "metadata": {
+        "observedAt": "2026-10-17T08:12:00.856Z",
+        "errors": 0,
+        "notices": 0,
+        "skipped": [],
+        "npmReadmeFetched": true
+      },
+      "githubDelivery": {
+        "pullRequest": "https://github.com/lcy0121/dsh-plugin-compat-check/pull/3",
+        "targetBranch": "main",
+        "artifactSourceCi": {
+          "headSha": "5af2550cf03a3975ae583935518bb8be41560fad",
+          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39015874460",
+          "conclusion": "success",
+          "jobs": [
+            {
+              "name": "test (22.19.0)",
+              "conclusion": "success"
+            },
+            {
+              "name": "test (24)",
+              "conclusion": "success"
+            },
+            {
+              "name": "linux-live",
+              "conclusion": "success"
+            }
+          ]
+        },
+        "recordCommitChecks": "The final publication-record commit is checked separately on the PR; use the linked PR for current merge status and subsequent main CI."
+      },
+      "prepublishCheck": true,
+      "formatCheck": true,
+      "finalDocumentationRegression": {
+        "tests": 67,
+        "failures": 0,
+        "skipped": 0,
+        "scope": "Maintained documentation, skill, metadata rules, versions and actual tarball empty-cache installation. Sandbox cache/network restrictions required a rerun with a private npm cache and network access; no assertions were changed."
+      },
+      "finalRepositoryRegression": {
+        "tests": 482,
+        "failures": 0,
+        "skipped": 0,
+        "nodeVersion": "26.12.0",
+        "engineeringScenarios": 6,
+        "formatCheck": true
+      },
+      "ciHarnessCorrection": {
+        "failedHead": "2e450fbdd0848664245ce4120404cefbcb6d123a",
+        "failedRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39016620627",
+        "nodeVersion": "22.19.0",
+        "failure": "Writer exited before its response: 0",
+        "cause": "The test rejected on child exit while the IPC channel could still deliver its response.",
+        "fix": "Wait for close before rejecting a missing response; production code and the published artifact are unchanged.",
+        "regression": "Controlled exit-message-close ordering failed before the fix and passed afterward; close without a response still rejects. Real eight-process contention assertions are retained.",
+        "localDefaultTestsAfterFix": 482,
+        "scope": "Test harness only; subsequent PR/main CI must pass. Original failed run is preserved rather than hidden by retrying it."
+      }
+    },
+    "dshUpgradeAssessment": {
+      "verifiedAt": "2026-10-17T08:01:31.782851+00:00",
+      "officialRelease": "https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.1",
+      "desktopVersion": "0.2.1-rc.1",
+      "cliVersion": "0.2.1-rc.1",
+      "bundledNodeVersion": "24.21.0",
+      "bundledPnpmVersion": "11.28.5",
+      "assessmentRunnerNode": "26.12.0",
+      "officialPackageSourceSha256": {
+        "dsh-app-boot": "5135179ac810e4f626f32ec3bdc3293dc7d2028e8aa92e5e0c006f1a33b78e76",
+        "dsh-client-ui-plugin-manager": "421deeb3f647bbbb0e5778e97fef508b226cb31dd67a3631b3aa9dbcdb498a2d",
+        "dsh-client-ui-settings-plugins": "2d8ab934d186d295d3496ad084cd02fb52a39fa5be7aca775e47f63b82d2d2a4",
+        "cordis-plugin-loader": "638b9ad360e01236120772323f80a65570c4f3f42f4cfc6243330241025b6d72",
+        "dsh-skill": "4b88621be4e7ff09b05c175fc6dcb67e77a22e5c5570e3aa603338b2937ea791",
+        "dsh-tools": "1e53932e7c4213ea24a7d87f06960b7a7702cb21f8a5741c97242b4a470a442a"
+      },
+      "existingInterfacesObserved": [
+        "settings.plugins.tab",
+        "plugins.detail.section",
+        "plugins.detail.badge",
+        "loader.entries",
+        "skills.registerProvider",
+        "tools.register"
+      ],
+      "declarationCases": {
+        "runtime": "0.2.1-rc.1",
+        "source": "Actual official installed dsh-app-boot exported evaluatePluginCompatibility called with explicit target runtime",
+        "scope": "Source-function evaluation plus current real extractor/verdict; not a full host activation test for these two manifests",
+        "cases": [
+          {
+            "name": "engine-accept-peer-reject",
+            "manifest": {
+              "name": "engine-accept-peer-reject",
+              "version": "1.0.0",
+              "engines": {
+                "dsh": ">=0.2.1-rc.1 <0.3.0"
+              },
+              "peerDependencies": {
+                "@deepseek-ai/dsh": "<0.2.1-rc.1"
+              }
+            },
+            "official": {
+              "accepted": true
+            },
+            "currentVerdict": "partial",
+            "currentCategories": [
+              "declared-incompatible"
+            ]
+          },
+          {
+            "name": "engine-reject-peer-accept",
+            "manifest": {
+              "name": "engine-reject-peer-accept",
+              "version": "1.0.0",
+              "engines": {
+                "dsh": "<0.2.1-rc.1"
+              },
+              "peerDependencies": {
+                "@deepseek-ai/dsh": ">=0.2.1-rc.1 <0.3.0"
+              }
+            },
+            "official": {
+              "name": "engine-reject-peer-accept",
+              "version": "1.0.0",
+              "runtimeVersion": "0.2.1-rc.1",
+              "requirements": {
+                "engines.dsh": "<0.2.1-rc.1"
+              },
+              "exempted": false
+            },
+            "currentVerdict": "ok",
+            "currentCategories": []
+          }
+        ]
+      },
+      "generatedCatalogueDiff": {
+        "host": {
+          "oldServices": 91,
+          "newServices": 98,
+          "addedServices": [
+            "claudeCodeMods",
+            "cotTranslation",
+            "pluginMarket",
+            "remoteAccess",
+            "translator",
+            "webApp",
+            "workingDirectory",
+            "worktrees"
+          ],
+          "removedServices": [
+            "invariants"
+          ],
+          "changedMethods": {
+            "agentPresets": {
+              "added": [
+                "inspectCompositions"
+              ],
+              "removed": []
+            },
+            "connection": {
+              "added": [
+                "admitConnection",
+                "createPeer"
+              ],
+              "removed": []
+            },
+            "hmr": {
+              "added": [
+                "reconcileProfile"
+              ],
+              "removed": []
+            },
+            "llm": {
+              "added": [
+                "imageRequestTarget"
+              ],
+              "removed": []
+            },
+            "ptcRuntime": {
+              "added": [
+                "release"
+              ],
+              "removed": []
+            },
+            "subagents": {
+              "added": [
+                "drainChildren",
+                "drainDescendants",
+                "startActivation",
+                "waitForChildren"
+              ],
+              "removed": [
+                "drainContinuableChildren",
+                "drainContinuableDescendants",
+                "start",
+                "startContinuable"
+              ]
+            },
+            "systemPrompt": {
+              "added": [
+                "refreshContext"
+              ],
+              "removed": []
+            },
+            "webServer": {
+              "added": [
+                "getOrigin"
+              ],
+              "removed": []
+            }
+          }
+        },
+        "client": {
+          "oldServices": 8,
+          "newServices": 8,
+          "addedServices": [],
+          "removedServices": [],
+          "changedMethods": {}
+        }
+      },
+      "initialCurrentArtifactProbeHttp": {
+        "toolVersion": "0.1.1",
+        "tests": 3,
+        "failures": 0
+      },
+      "initialClientAttempt": {
+        "tests": 4,
+        "passed": 3,
+        "failed": 1,
+        "reason": "The tool packaged 0.1.1 before the source version marker changed to 0.1.2, while the assertion later read the new source marker. A complete fixed-version rerun follows; this is not classified as a DSH runtime regression."
+      },
+      "patchArtifactLive": {
+        "toolVersion": "0.1.2",
+        "tests": 7,
+        "failures": 0,
+        "skipped": 0,
+        "probeTests": 2,
+        "httpTests": 1,
+        "chromeArrivalTests": 4,
+        "engineering": {
+          "schemaVersion": 1,
+          "kind": "plugin-compat-check/engineering-live",
+          "ok": true,
+          "platform": "darwin",
+          "arch": "arm64",
+          "nodeVersion": "26.12.0",
+          "dshVersion": "0.2.1-rc.1",
+          "artifactVersion": "0.1.2",
+          "pressureFunctions": 4000,
+          "reportAvailable": true,
+          "reportMilliseconds": 173.89441699999998,
+          "http": {
+            "samples": 12,
+            "refreshingSamples": 11,
+            "maxMilliseconds": 4.095499999999902
+          },
+          "scope": "Owned web profile, actual tgz and synthetic uncalled functions; HTTP responsiveness only, not business behavior or a production performance guarantee.",
+          "cleanup": {
+            "hostStopped": true,
+            "privateRootRemoved": true
+          }
+        },
+        "scope": "Private web profiles and actual tgz with real DSH plus independent Chrome. Covers probe binding/loader controls, HTTP responsiveness and client arrival/error controls; not new full manual panel interaction, model dialogue, business truth or Windows certification."
+      },
+      "conclusion": "No evidence that AST, workers or panel architecture need wholesale replacement. Version-aware declaration adaptation is required: current legacy logic yields a false positive and a missed engines rejection. Host API catalogue/rule changes, subpath metadata and hot-reload lifecycles require separate adaptation and regression coverage. 0.1.2 documents these limits and does not implement that adaptation."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { TOOL_VERSION } from "../lib/version.mjs";
 describe(
   "owned real DSH engineering",
   { skip: process.env.DSC_SLOW !== "1" },
@@ -34,7 +35,7 @@ describe(
         assert.equal(result.ok, true);
         assert.ok(result.http.samples >= 1);
         assert.ok(result.http.maxMilliseconds < 1500);
-        assert.equal(result.artifactVersion, "0.1.1");
+        assert.equal(result.artifactVersion, TOOL_VERSION);
         assert.equal(result.reportAvailable, true);
         if (process.env.DSC_ENGINEERING_LIVE_LOG)
           fs.writeFileSync(
