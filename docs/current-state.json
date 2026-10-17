@@ -1,8 +1,8 @@
 {
   "toolVersion": "0.1.2",
-  "recordedAt": "2026-10-17T08:12:35.411226+00:00",
+  "recordedAt": "2026-10-17T08:17:35.411Z",
   "testFiles": 33,
-  "tests": 481,
+  "tests": 482,
   "repositoryFiles": {
     "total": 223,
     "fixtures": 90,
@@ -1051,6 +1051,25 @@
         "failures": 0,
         "skipped": 0,
         "scope": "Maintained documentation, skill, metadata rules, versions and actual tarball empty-cache installation. Sandbox cache/network restrictions required a rerun with a private npm cache and network access; no assertions were changed."
+      },
+      "finalRepositoryRegression": {
+        "tests": 482,
+        "failures": 0,
+        "skipped": 0,
+        "nodeVersion": "26.12.0",
+        "engineeringScenarios": 6,
+        "formatCheck": true
+      },
+      "ciHarnessCorrection": {
+        "failedHead": "2e450fbdd0848664245ce4120404cefbcb6d123a",
+        "failedRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39016620627",
+        "nodeVersion": "22.19.0",
+        "failure": "Writer exited before its response: 0",
+        "cause": "The test rejected on child exit while the IPC channel could still deliver its response.",
+        "fix": "Wait for close before rejecting a missing response; production code and the published artifact are unchanged.",
+        "regression": "Controlled exit-message-close ordering failed before the fix and passed afterward; close without a response still rejects. Real eight-process contention assertions are retained.",
+        "localDefaultTestsAfterFix": 482,
+        "scope": "Test harness only; subsequent PR/main CI must pass. Original failed run is preserved rather than hidden by retrying it."
       }
     },
     "dshUpgradeAssessment": {

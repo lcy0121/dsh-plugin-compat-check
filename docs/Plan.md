@@ -80,7 +80,7 @@
 | Linux x64远程CI | [PR #2源码7cae84c的Actions](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38922904395)三个任务通过：Node22/24默认/发布前/资源、Node24联合18项（4项真实DSH、1项冻结pnpm安装、13项离线）；两版超时总流程约1.13/1.09秒，worker运行、停止及恢复均达标；后续纯交付记录提交另看PR最新CI |
 | 本地超时断言补强 | Node22.19/26.12默认各481/481，六个工程场景通过；计数须增长、1秒受控超时、含停止检查及恢复提取的总流程<5秒，两种隔离负例均被拒绝；生产10秒/512+64MiB预算未改 |
 | 新版DSH有限验证 | 0.2.1-rc.1/macOS arm64、工具0.1.2实际tgz共7/7：探针2、HTTP1、Chrome到货及错误对照4；不是全面业务或新一轮手动面板验收。声明两组差异及目录对照见current-state的verification.dshUpgradeAssessment |
-| 当前文档与skill | 本轮交付见current-state的verification.documentationDelivery012；旧documentationAudit按原日期保留，Windows与未列明版本未认证 |
+| 当前文档与skill | 0.1.2发布前默认481/481，发布后文档/打包回归67/67；CI暴露的测试IPC退出时序竞态已补回归，现默认482/482，生产内核未变。交付证据见current-state的verification.documentationDelivery012；旧documentationAudit按原日期保留，Windows与未列明版本未认证 |
 
 辅助度量只用独立原始loader标签计分；预测只读服务观测，不读标签。四病例TP1/FP0/FN1/TN2（精确率1、召回率0.5、退出1）说明固定样本中存在真实漏报，不是生态准确率。标签须绑定身份、时间、版本并配对报告；无有效分母/输入不可信退出3，指标分母为空为null。度量退出0/1不等同兼容性CLI的0/1。
 
