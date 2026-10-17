@@ -2,6 +2,8 @@
 
 检查**已经安装的 DSH 插件**与当前 DSH 版本的兼容性，提供源码位置、运行时证据与覆盖限制。包含兼容性面板、插件详情角标、`compat_check` 对话工具和 skill provider。
 
+![插件详情页：部分可用，含 file:line、影响与依据](https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/main/plugin/assets/compat-detail-partial.png)
+
 本文件适用于 **0.1.2**。安装指定版本：
 
 ```bash

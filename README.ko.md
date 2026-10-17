@@ -17,6 +17,14 @@
 
 하나의 판정 커널을 공유합니다. **입력과 관측 증거가 같을 때만** 동일한 결과를 기대할 수 있습니다. npm 패키지에는 CLI `bin`이 없어 `npx dsh-plugin-compat-check`를 사용할 수 없습니다. 클라이언트 도착 검사는 별도 개발 도구이며 패널 기능이나 전체 UI 검증이 아닙니다.
 
+## 어떻게 보이는가
+
+설치 후 각 플러그인의 상세 페이지에 현재 호스트 기준 판정이 표시되며, 모든 발견 항목은 위치·영향·근거를 함께 보여 줍니다.
+
+![플러그인 상세 페이지: 부분 사용 가능, file:line·영향·근거 포함](plugin/assets/compat-detail-partial.png)
+
+![플러그인 상세 페이지: 공식 peer 선언이 현재 호스트를 지원하지 않음](plugin/assets/compat-detail-declared.png)
+
 ## 사용법
 
 ### 저장소 CLI

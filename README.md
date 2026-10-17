@@ -19,6 +19,14 @@
 
 npm 包**没有 CLI `bin`**，不支持 `npx dsh-plugin-compat-check`。默认报告列出客户端待验证项；客户端到货开发工具没有接入兼容性面板，且不认证业务功能。
 
+## 长什么样
+
+装好之后，插件详情页会给出该插件对当前宿主的结论，每条发现都带位置、影响和依据。
+
+![插件详情页：部分可用，含 file:line、影响与依据](plugin/assets/compat-detail-partial.png)
+
+![插件详情页：官方 peer 声明不支持当前宿主](plugin/assets/compat-detail-declared.png)
+
 ## 使用
 
 ### 仓库 CLI

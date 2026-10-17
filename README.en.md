@@ -17,6 +17,14 @@ The current release is **0.1.2**. npm latest, the downloaded tarball and install
 
 The entries share one verdict kernel. Only identical inputs and observation evidence should produce identical results. The npm package has **no CLI `bin`**; `npx dsh-plugin-compat-check` is unavailable. Client arrival diagnostics are a separate development tool, not a panel feature or a full UI test.
 
+## What it looks like
+
+Once installed, each plugin's detail page carries a verdict for the current host, and every finding shows its location, impact and basis.
+
+![Plugin detail page: partially working, with file:line, impact and basis](plugin/assets/compat-detail-partial.png)
+
+![Plugin detail page: the official peer declaration does not support the current host](plugin/assets/compat-detail-declared.png)
+
 ## Usage
 
 ### Repository CLI
