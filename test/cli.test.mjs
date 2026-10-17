@@ -19,13 +19,15 @@ import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
 
+import { optionalProfiles } from './support/profile-snapshot.mjs'
+
 import { REPO } from './helpers.mjs'
 
 const CLI = path.join(REPO, 'bin', 'compat-check.mjs')
 const MICRO = path.join(REPO, 'test/fixtures/micro/node_modules')
 const MICRO_SURFACE = path.join(REPO, 'test/fixtures/micro/host-surface.json')
 const BASELINE_SURFACE = path.join(REPO, 'tools/parity/fixtures/host-surface-parityfix.json')
-const PARITYFIX = path.join(os.homedir(), '.dsh/profiles/parityfix/node_modules')
+const PARITYFIX = optionalProfiles().find(p => p.name === 'parityfix')?.nm
 
 /**
  * 跑一次 CLI —— **把 `DSH_HOME` 钉进临时目录**。
@@ -174,7 +176,7 @@ describe('CLI：--json 真的产出 JSON（不是被静默忽略）', () => {
   })
 })
 
-describe('CLI：真实插件（三个回归基准）', { skip: fs.existsSync(PARITYFIX) ? false : '本机没有 parityfix profile' }, () => {
+describe('CLI：真实插件（三个回归基准）', { skip: PARITYFIX ? false : '本机没有 parityfix profile' }, () => {
   test('三个回归基准的结论与 docs/Plan.md §3 的基准维护约定一致', () => {
     const r = runCLI(['--nm', PARITYFIX, '--probe', BASELINE_SURFACE, '--dsh-version', '0.2.0-rc.2', '--json', '--no-baseline'])
     const data = JSON.parse(r.out)

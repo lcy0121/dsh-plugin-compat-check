@@ -53,7 +53,7 @@
 ## 3. 开发与文档维护约定
 
 1. **先复现再修改。** 判据验证目标行为，不能以测试自洽代替事实；动态/未知形态先留诊断，不编造归属、影响或实测。
-2. **审查差异。** 不用重建快照消除失败；基准版本漂移需有意更新`test/__baseline-versions.json`并单独审查。
+2. **审查差异。** 不用重建快照消除失败；基准版本漂移需有意更新`test/__baseline-versions.json`并单独审查。默认套件先捕获一份测试专用profile副本供各进程共享，单文件测试自行捕获；提取与源码回读只用该副本。清单、字节和链接身份两次观测不一致报`PROFILE_SNAPSHOT_UNSTABLE`，超预算报`PROFILE_SNAPSHOT_BUDGET`，不重试或静默丢弃；未安装的可选profile明确跳过。两次核验不是OS原子快照。
 3. **保护宿主与所有权。** 昂贵分析在有预算的worker中；只清理自有目录/PID组，不按进程名杀用户服务，不保留认证URL。profile克隆排除node_modules、重定位manifest和pnpm9单importer本地锁路径，保留远程pins；拒绝不支持格式及不安全链接，不改原profile。
 4. **从产物验收。** 在私有源码副本打tgz、安装并实际调用；文件存在或前端到货不代表内核/业务成功。Python parity是旧参考，不能作为AST真值。
 5. **控制提交与发布。** push/合并/npm发布分别取得授权；本地可提交，只stage本项路径，不用`git add -A`。身份为`Chenyu Liu <233006721+lcy0121@users.noreply.github.com>`。
@@ -64,6 +64,8 @@
 0.1.1已实施原审计B01–B14/S01–S03整改、P0真实集成、P1辅助度量真值隔离/规则质量/契约稳定、semver库存写入与到货文本两小项，以及有界P2分析和资源验证。修复与独立复核详节在Git/current-state；历史安全审阅为partial，不是全量安全认证。
 
 规则复核保留`attachments.readImage`实际读取路径及`sessions.open`客户端旧回退语义，删除`getSnapshot`、`settings.get`、`sessions.map`无依据影响；`sessions.refresh`不补无依据规则。证据见`rules/severity.json`的needsReview.reviewed/evidence；库存仍是明确partial的desktop样本，不能用历史61%或调用数增减说明准确率。
+
+2026-10-17已完成可选profile回归输入隔离：覆盖不变式、特征快照、CLI、skill示例和文档命令；私有只读副本保留pnpm包根/包内链接语义，外部链接仅映射自有标记，不读其源码。新增9项删除/改写/链接/跨进程/预算回归通过，本机Node22.19.0/26.12.0完整默认各491/491；版本基准、预期快照和生产内核未改。证据见current-state的`verification.optionalProfileSnapshots`。
 
 保留的维护教训：不能只扫声明客户端入口而漏懒加载chunk，不能用方法黑名单代替接收者绑定，不能把未知provide当已激活服务，也不能把干净日志/成功到货当功能正常。
 
@@ -80,7 +82,7 @@
 | Linux x64远程CI | [PR #2源码7cae84c的Actions](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/38922904395)三个任务通过：Node22/24默认/发布前/资源、Node24联合18项（4项真实DSH、1项冻结pnpm安装、13项离线）；两版超时总流程约1.13/1.09秒，worker运行、停止及恢复均达标；后续纯交付记录提交另看PR最新CI |
 | 本地超时断言补强 | Node22.19/26.12默认各481/481，六个工程场景通过；计数须增长、1秒受控超时、含停止检查及恢复提取的总流程<5秒，两种隔离负例均被拒绝；生产10秒/512+64MiB预算未改 |
 | 新版DSH有限验证 | 0.2.1-rc.1/macOS arm64、工具0.1.2实际tgz共7/7：探针2、HTTP1、Chrome到货及错误对照4；不是全面业务或新一轮手动面板验收。声明两组差异及目录对照见current-state的verification.dshUpgradeAssessment |
-| 当前文档与skill | 0.1.2发布前默认481/481，发布后文档/打包回归67/67；CI暴露的测试IPC退出时序竞态已补回归，现默认482/482，生产内核未变。交付证据见current-state的verification.documentationDelivery012；旧documentationAudit按原日期保留，Windows与未列明版本未认证 |
+| 当前文档与skill | 0.1.2发布前默认481/481，发布后文档/打包回归67/67；CI暴露的测试IPC退出时序竞态已补回归，当时默认482/482，生产内核未变；后续profile隔离回归见第4节。交付证据见current-state的verification.documentationDelivery012；旧documentationAudit按原日期保留，Windows与未列明版本未认证 |
 
 辅助度量只用独立原始loader标签计分；预测只读服务观测，不读标签。四病例TP1/FP0/FN1/TN2（精确率1、召回率0.5、退出1）说明固定样本中存在真实漏报，不是生态准确率。标签须绑定身份、时间、版本并配对报告；无有效分母/输入不可信退出3，指标分母为空为null。度量退出0/1不等同兼容性CLI的0/1。
 
@@ -119,4 +121,3 @@ DSC_SLOW=1 node --test --test-reporter=tap test/engineering-live.test.mjs test/p
 1. **0.2.1-rc.1定向适配。** 按目标版本区分engines.dsh优先与旧peer规则，覆盖缺失、非法范围、预发布和精确豁免；审查host API目录及受影响规则，不靠重建快照消红。保留旧版回归，并把当前官方函数对照升级为真实宿主正反例及持续集成；完成前不声称全面支持新版。
 2. **下一项功能开发：独立业务真值用例。** 从真实插件挑选有限业务路径，明确预期动作和成功/失败信号，优先补客户端交互及已知动态分析盲区。功能标签须独立于预测与loader标签；同时保留正反例，不用到货数或更多调用点冒充准确率。
 3. **Windows取得真实环境后验收。** 路径、安装器、进程回收和打包实跑；按用户选择暂缓，不用POSIX或路径模拟充数。
-4. **可选profile回归快照隔离。** 目录发现后被其它任务删除，或源码在提取与行号回读间变化，会使本机回归竞态失败；本轮保留失败证据并在输入稳定后原样通过，后续补不可变输入，不能删断言或把重试当长期修复。

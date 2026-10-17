@@ -138,6 +138,8 @@ node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 ```
 
+默认套件在启动时捕获本机可选profile的测试专用只读副本，供提取、源码回读及子进程共享；单文件测试自行捕获。捕获期间输入变化或超预算会明确报错，未安装的profile明确跳过，不以重试消除失败。副本在结束后清理；这不改变生产扫描或安装检查行为。
+
 `doc-check` 离线检查文档链接、版本、入口与 skill 副本；**不会自己运行测试**。记录新结果时先保存 TAP 摘要，再执行 `node tools/update-current-state.mjs --test-summary <log>` 和 `node tools/doc-check.mjs --test-summary <log>`。发布前检查只运行一次完整默认套件并复用摘要，含独立tarball安装后在受控宿主上下文中调用注册工具；这不等于启动真实DSH；该打包回归使用私有空npm缓存，需要访问npm registry，不依赖本机历史缓存。GitHub/npm 元数据检查为联网步骤；未发布候选的版本和 README 差异是 notice，取数失败不能称“全部一致”。
 
 默认套件不启用 `DSC_SLOW=1` 集成。已有macOS真实DSH/Chrome、Ubuntu arm64 VM及Linux x64 CI证据，覆盖实际tgz、tool/skill、界面正负例与工程资源场景；各自提交和范围见[Plan](docs/Plan.md#5-验证记录与复现)。本地新补强与文档修订不能套用旧CI，Windows按约定待验收。工程复现见[Plan](docs/Plan.md#53-p2工程验收)。历史88.3%召回、66/66到货及loader标签都不等于业务准确率；Python parity也是旧正则参考，不是AST真值。

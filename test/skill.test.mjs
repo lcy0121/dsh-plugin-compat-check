@@ -14,6 +14,8 @@
  *     而那是**静默**失效：文件在那里，skill 却不存在）。
  */
 
+import { optionalProfiles } from './support/profile-snapshot.mjs'
+
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
@@ -383,15 +385,15 @@ describe('脚本：不需要内核的那些入口', () => {
  * 所以比对时按前缀匹配，而不是要求全文相等。
  */
 describe('skill 的示例输出必须与真实输出一致', () => {
-  test('示例块 = 真实运行的前缀（逐行）', () => {
+  test('示例块 = 真实运行的前缀（逐行）', (t) => {
     const body = frontmatter(readSkill()).body
     const m = /```\n(插件数: \d[\s\S]*?)\n```/.exec(body)
     assert.ok(m, '找不到示例输出块 —— 它被删了还是改了开头？这条测试要跟着改')
 
-    const PARITYFIX = path.join(os.homedir(), '.dsh', 'profiles', 'parityfix')
-    if (!fs.existsSync(PARITYFIX)) {
+    const PARITYFIX = optionalProfiles().find(p => p.name === 'parityfix')?.nm
+    if (!PARITYFIX) {
       // 与别的 skill 测试一致：本机没有这个 profile 就跳过并说明，不静默通过
-      assert.ok(true, '本机没有 parityfix profile，跳过')
+      t.skip('本机没有 parityfix profile')
       return
     }
     const r = runCLI(['--nm', PARITYFIX,
