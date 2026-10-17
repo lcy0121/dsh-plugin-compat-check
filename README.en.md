@@ -6,11 +6,11 @@ Check the compatibility of **installed DSH plugins** with a target DSH version, 
 
 ## Version and delivery
 
-The current release is **0.1.2**. npm latest, the downloaded tarball and installed artifact were verified on 2026-10-17. This patch corrects documentation and version markers; the verdict algorithm is unchanged from 0.1.1. See [publication and verification records in Plan](docs/Plan.md) and [generated verification facts](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
+The current release is **0.1.2**; npm latest, download and installation were verified on 2026-10-17. The verdict algorithm is unchanged from 0.1.1. Repository screenshots, rc.2 limitations and this skill revision are post-release source documentation, absent from the published tarball. See [publication and verification records in Plan](docs/Plan.md) and [generated verification facts](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
 
 | Entry | Purpose |
 |---|---|
-| npm plugin | In-process host sampling, compatibility panel, `compat_check` and a skill provider; no pre-install checks |
+| npm plugin | In-process sampling, per-plugin findings/badge, `compat_check` and skill provider; a declared compatibility tab has an rc.2 visibility report; no pre-install checks |
 | Repository CLI | Static checks of installed packages; optional file observations or explicit temporary-host probing |
 | Repository installation runner | Install a spec into a temporary profile and check installation, startup and compatibility |
 | Skill | Teaches an agent to use the registered tool or repository CLI |
@@ -19,11 +19,11 @@ The entries share one verdict kernel. Only identical inputs and observation evid
 
 ## What it looks like
 
-Once installed, each plugin's detail page carries a verdict for the current host, and every finding shows its location, impact and basis.
+These recorded detail-page screenshots are not complete compatibility certification. API findings can carry real source locations; declaration or loader facts may have no source location and must retain their basis.
 
 ![Plugin detail page: partially working, with file:line, impact and basis](plugin/assets/compat-detail-partial.png)
 
-![Plugin detail page: the official peer declaration does not support the current host](plugin/assets/compat-detail-declared.png)
+![Declaration-conflict example: interpret tool inference separately from the host warning](plugin/assets/compat-detail-declared.png)
 
 ## Usage
 
@@ -68,6 +68,8 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 The plugin registers a compatibility panel, detail badges, `compat_check` and a skill provider. On 2026-10-15, the actual tarball was installed into DSH0.2.0-rc.2 on macOS arm64; tool and skill calls, the panel, badges and baseline changes were verified with a real Chrome session. Standalone skill destination: `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`; existing files require `--force` to overwrite.
 
+rc.2 note: one manual check recorded in this repository on 2026-10-17 found detail findings/badges and tool/skill working, while the compatibility tab was absent. The slot remains in the new host source; registration markers do not establish rendering. This documentation audit reviewed the record and source, without repeating that UI check.
+
 The repository root is a **private development workspace**, not the installable DSH bundle. A root GitHub spec is not equivalent to installing `plugin/`. To test the source, run `npm ci --ignore-scripts` at the root, then `npm pack --pack-destination <existing-absolute-output-dir>` inside `plugin/`, and install the resulting `.tgz` through DSH. Packing stages the kernel and LICENSE. Copying a bare `plugin/` directory does not stage the kernel; see [plugin delivery](plugin/README.md).
 
 ### Installation checks
@@ -102,7 +104,7 @@ The shell retains legacy usage/kernel-error codes before entering Node. For auto
 
 Services have distinct present, absent, unobserved and unreadable states. Omitted keys are unobserved. Modern observations must match profile and DSH version and expire after24h by default. Legacy reports use explicit keys only and carry an unbound warning.
 
-`certainty` is certain or suspected; filtered/abstained are dispositions, not certainty levels. Declarations establish dependency relationships, not method absence. Preserve `impactBasis=inferred` when quoting feature impact; reliably mapped loader FAILED/PENDING supplies measured activation evidence. Official peer conflicts use `declared-incompatible` with inferred impact and degraded severity, not fatal without observed host exemptions. The current implementation retains the 0.2.0-rc.2 declaration rules and treats `engines.dsh` as advisory. The 0.2.1-rc.1 host prioritizes that field; declaration findings can be incorrect or missed, so check actual host results.
+`certainty` is certain or suspected; filtered/abstained are dispositions, not certainty levels. Declarations establish dependency relationships, not method absence. Preserve `impactBasis=inferred` when quoting feature impact; reliably mapped loader FAILED/PENDING supplies measured activation evidence. Official peer conflicts use `declared-incompatible` with inferred impact and degraded severity, not fatal without observed host exemptions. The current implementation retains the 0.2.0-rc.2 declaration rules and treats `engines.dsh` as advisory. The 0.2.1-rc.1 and rc.2 hosts prioritize that field; declaration findings can be incorrect or missed, so check actual host results.
 
 Always retain `coverage.status=limited`, vacuous results, parse/read/budget diagnostics and unmapped-loader limits. No finding is not a feature certificate. Host, client and shared sites are kept separate. Provider declarations are hints, not evidence of activation; complete method observations of present services still apply.
 
@@ -151,7 +153,7 @@ Slow integrations require explicit `DSC_SLOW=1`. Existing macOS DSH/Chrome, Ubun
 
 Auxiliary measurement uses independent raw loader labels; the predictor receives service observations only. See [auxiliary measurement records in Plan](docs/Plan.md#51-已验证范围). `node tools/labels.mjs --nm web --synthetic --json` creates a private environment and can correctly report a false negative (exit1). Use `--probe-boot` for an existing target, or paired `--probe` and `--labels` files. These sample metrics cover the first layer only, not ecosystem accuracy.
 
-[lib/contracts.mjs](lib/contracts.mjs) is the single report contract source; CLI JSON, HTTP, tools and the panel preserve full evidence. Additive fields are retained; missing required fields and unsupported versions fail as tool errors. Rules and the API catalogue are based on 0.2.0-rc.2. Limited integration checks passed on 0.2.1-rc.1; declaration-rule adaptation and catalogue review remain pending. The AST inventory explicitly records partial coverage. See [rule and contract records in Plan](docs/Plan.md#2-现行判定与集成契约).
+[lib/contracts.mjs](lib/contracts.mjs) is the single report contract source; CLI JSON, HTTP, tools and the panel preserve full evidence. Additive fields are retained; missing required fields and unsupported versions fail as tool errors. Rules and the API catalogue are based on 0.2.0-rc.2. Limited integration checks passed on 0.2.1-rc.1. rc.2 has separately scoped manual records and official-function/source checks; UI reproduction, declaration adaptation and catalogue review remain pending. The AST inventory explicitly records partial coverage. See [rule and contract records in Plan](docs/Plan.md#2-现行判定与集成契约).
 
 [Development history and next steps](docs/Plan.md) · [Historical audit](docs/GPT审计及重构方案文档.md) · [Rules](rules/README.md) · [Skill delivery](skill/README.md). Listed in [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness).
 

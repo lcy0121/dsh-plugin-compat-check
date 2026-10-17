@@ -21,7 +21,7 @@ node --test test/skill.test.mjs test/docs.test.mjs
 
 provider name与skill name均为dsh-plugin-compat-check，source=bundled、rank=600；提供list/get、description、invocation和正文。frontmatter保持单行name/description，name为kebab-case。不支持的旧键可能使文件系统发现失效；不要添加disableModelInvocation等旧字段。
 
-当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为 **6669 字符**，由docs测试核对。不要把历史探针的contentLength手工替换成新正文长度：那会篡改历史实测。
+当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为 **6858 字符**，由docs测试核对。不要把历史探针的contentLength手工替换成新正文长度：那会篡改历史实测。
 
 ## 历史证据与当前验收
 
@@ -30,6 +30,8 @@ DSH0.2.0-rc.2/macOS的历史机制实验确认：静态inject或子fiber inject�
 默认测试在受控上下文中检查apply、注册、正文、隔离安装及独立tarball工具执行，不启动真实DSH。2026-10-15另从实际tgz在私有profile启动真实DSH0.2.0-rc.2（macOS arm64，宿主Node24.18.1）：skills.list包含本skill，skills.get返回provider=dsh-plugin-compat-check，当时contentLength=6548且SHA-256与当时源码一致。实际调用compat_check亦成功；这验证宿主目录和工具，不表示已经发送模型对话或覆盖其它DSH版本。环境、清理与后续见 [Plan](../docs/Plan.md#51-已验证范围)。
 
 历史npm0.1.1正文contentLength=6551，末段误留发布前的“本地0.1.1未发布”。0.1.2改为版本中立的事实源说明，并补充新版DSH声明规则未适配的限制；是否已公开安装以Plan和registry的最新记录为准，不追改旧包或旧实测。
+
+npm0.1.2发布时正文contentLength=6669；本轮补充rc.2声明与UI记录边界后的正文尚未进入公开包。源码文档、两份SKILL副本与已发布tarball分别核验，不能混为同一正文验收。
 
 本轮正文的引用位置与实测限定已修订，当前使用语义以[SKILL.md](SKILL.md)为准；本轮仓库/打包核验与旧DSH现场正文分开记录于current-state。
 

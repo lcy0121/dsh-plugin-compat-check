@@ -6,13 +6,13 @@
 
 ## 当前版本与交付
 
-当前发布版为 **0.1.2**；2026-10-17已核验npm latest、实际下载与安装产物。此补丁修正文案并统一版本标记，判定算法与0.1.1一致。公开状态和差异见 [Plan中的核验记录](docs/Plan.md#1-项目定位与交付状态)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
+当前发布版为 **0.1.2**；2026-10-17已核验npm latest、下载与安装产物，判定算法与0.1.1一致。仓库中的截图、rc.2限制和本轮skill修订属于发布后源码文档，尚未进入已发布tarball。公开状态和差异见 [Plan中的核验记录](docs/Plan.md#1-项目定位与交付状态)，测试与文件统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
 
 插件、CLI、skill三种形态共享判定内核；安装检查脚本是CLI编排入口。只有**相同输入与采样证据**才应得出相同结果。
 
 | 入口 | 提供什么 |
 |---|---|
-| npm 插件 | 当前宿主采样、兼容性面板、`compat_check` 对话工具、skill provider；不能做安装前检查 |
+| npm 插件 | 当前宿主采样、插件详情发现/角标、`compat_check`、skill provider；另声明兼容性标签，rc.2有未显示记录；不能做安装前检查 |
 | 仓库 CLI | 静态体检已装插件，可读已有探针；显式 `--probe-boot` 才启动临时宿主 |
 | 仓库安装检查脚本 | 将安装规格装进临时 profile，检查安装、启动和兼容性 |
 | skill | 教 agent 调用工具或仓库 CLI，不是另一套判定实现 |
@@ -21,11 +21,11 @@ npm 包**没有 CLI `bin`**，不支持 `npx dsh-plugin-compat-check`。默认�
 
 ## 长什么样
 
-装好之后，插件详情页会给出该插件对当前宿主的结论，每条发现都带位置、影响和依据。
+以下是仓库记录的详情页截图，不是全面兼容认证。API发现可给出真实file:line；声明或loader事实可能没有源码位置，需说明依据。
 
 ![插件详情页：部分可用，含 file:line、影响与依据](plugin/assets/compat-detail-partial.png)
 
-![插件详情页：官方 peer 声明不支持当前宿主](plugin/assets/compat-detail-declared.png)
+![声明冲突示例：工具推断与宿主提示分别解读](plugin/assets/compat-detail-declared.png)
 
 ## 使用
 
@@ -70,6 +70,8 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 插件注册兼容性面板、插件详情角标、`compat_check` 与 skill provider；2026-10-15已从实际tgz安装，在DSH0.2.0-rc.2/macOS arm64中验证工具和skill，并通过真实Chrome操作确认面板、角标及基线差分。独立 skill 安装至 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`，已有文件需 `--force` 才覆盖。
 
+rc.2注意：仓库2026-10-17的一次手动检查记录详情发现/角标及tool/skill正常，但“兼容性”标签未显示。该槽位仍在新版源码中，自报注册不等于渲染；本轮仅核对记录和源码，未重跑该UI验收。
+
 源码仓库根是私有开发工作区，**不是可直接激活的 DSH 插件包**。根目录 GitHub spec 不等同于安装 `plugin/`。测试本地源码时，在仓库根运行 `npm ci --ignore-scripts`，再在 `plugin/` 中执行 `npm pack --pack-destination <已存在的绝对输出目录>`，最后让 DSH 安装生成的 `.tgz`。打包会暂存内核和 LICENSE；不要直接复制裸 `plugin/` 并假定内核已在包内。细节见 [插件说明](plugin/README.md)。
 
 ### 安装检查
@@ -105,7 +107,7 @@ shell 在进入 Node 前保留旧的用法/内核缺失错误码；调用自动�
 
 - 服务区分 `present`、`absent`、`unobserved`、`unreadable`；省略键是未采集，不能判成不存在。现代探针需匹配 profile、DSH版本，默认超过24小时失效；旧报告只使用明确记录的键并提示未绑定。
 - `certainty` 是 `certain` 或 `suspected`，与“过滤/弃权”这种去处不同。声明能确定依赖关系，不能单独确定方法缺失。`impactBasis=inferred` 的用户影响要保留“推断，非实测”；可靠映射的 loader FAILED/PENDING 可提供实际未激活证据。
-- 官方 peer 范围冲突单列 `declared-incompatible`，影响为推断；当前实现沿用0.2.0-rc.2的声明规则，将`engines.dsh`作建议处理；0.2.1-rc.1已优先按该字段判断，相关声明有误报/漏报风险，须核对宿主实际结果。未采集精确版本豁免时不据此写 fatal。
+- 官方 peer 范围冲突单列 `declared-incompatible`，影响为推断；当前实现沿用0.2.0-rc.2的声明规则，将`engines.dsh`作建议处理；0.2.1-rc.1/rc.2已优先按该字段判断，相关声明有误报/漏报风险，须核对宿主实际结果。未采集精确版本豁免时不据此写 fatal。
 - `coverage.status=limited`、`vacuous`、解析/读取/预算诊断、无法映射的 loader 状态都必须转述。“可用”不等于完整功能验收通过。
 - 宿主、客户端、共享调用点分开处理。声明 provide 只是提供方线索，不能证明服务已激活；已确认存在服务的完整方法观测仍参与判断。
 
@@ -154,7 +156,7 @@ node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 
 辅助度量使用 [Plan辅助度量记录](docs/Plan.md#51-已验证范围) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
 
-报告契约以 [lib/contracts.mjs](lib/contracts.mjs) 为单一真源，CLI JSON、HTTP、工具与面板保留完整证据；新字段可扩展，缺少必需字段或不支持的版本明确报工具错误。规则/API目录基于0.2.0-rc.2；已对0.2.1-rc.1完成有限接入验证，声明判定适配和目录复核尚待完成。库存为明确标记不完整的AST样本，详见 [Plan规则与契约记录](docs/Plan.md#2-现行判定与集成契约)。
+报告契约以 [lib/contracts.mjs](lib/contracts.mjs) 为单一真源，CLI JSON、HTTP、工具与面板保留完整证据；新字段可扩展，缺少必需字段或不支持的版本明确报工具错误。规则/API目录基于0.2.0-rc.2；已对0.2.1-rc.1完成有限接入验证；rc.2仅有另列的手动记录、官方函数及源码核验，尚待UI复现、声明适配和目录复核。库存为明确标记不完整的AST样本，详见 [Plan规则与契约记录](docs/Plan.md#2-现行判定与集成契约)。
 
 [施工记录与后续计划](docs/Plan.md) · [历史审计](docs/GPT审计及重构方案文档.md) · [规则说明](rules/README.md) · [skill交付](skill/README.md)。项目已收录于 [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)。
 

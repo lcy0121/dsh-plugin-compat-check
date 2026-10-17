@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.2",
-  "recordedAt": "2026-10-17T09:02:32.932Z",
+  "recordedAt": "2026-10-17T13:25:08.608Z",
   "testFiles": 34,
   "tests": 491,
   "repositoryFiles": {
-    "total": 225,
+    "total": 228,
     "fixtures": 90,
-    "other": 135
+    "other": 138
   },
   "verification": {
     "platform": "darwin",
@@ -1368,6 +1368,254 @@
         "standaloneSuccessExit": true,
         "standaloneFailureExit": true,
         "remainingOwnedSnapshotDirectories": 0
+      }
+    },
+    "dshRc2DocumentationAudit": {
+      "verifiedAt": "2026-10-17T13:25:08.741484+00:00",
+      "baseCommit": "59714e7f96e2c8be32166e39a48ee29e4b6cfe89",
+      "scope": "Documentation audit and planning only. No production logic/rules/catalogue changes, new npm release, external issue/PR edits or new full UI/DSH activation/business certification.",
+      "environment": {
+        "desktopVersion": "0.2.1-rc.2",
+        "cliVersion": "0.2.1-rc.2",
+        "runnerNodeVersion": "26.12.0",
+        "platform": "darwin",
+        "arch": "arm64"
+      },
+      "officialRelease": "https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.2",
+      "officialReleaseScope": "Release notes list model and DeepSeek Search/Fetch support; they alone do not establish API or UI compatibility.",
+      "officialSourceHashes": {
+        "dsh-app-boot": {
+          "file": "lib/index.js",
+          "sha256": "5135179ac810e4f626f32ec3bdc3293dc7d2028e8aa92e5e0c006f1a33b78e76"
+        },
+        "dsh-client-ui-settings-plugins": {
+          "file": "lib/client.js",
+          "sha256": "6c57ee5fdef9de70a7d78054927db2e7eb282a09fc5e755d0cc2da0c6f64ffaf"
+        },
+        "dsh-client-ui-plugin-manager": {
+          "file": "lib/client.js",
+          "sha256": "3381dd14d1b5573f8e98b48bf895e90c6ee0fccdeeb7a8ae815fda9cca661a81"
+        }
+      },
+      "declarations": {
+        "source": "Actual installed app-boot exported evaluatePluginCompatibility called with explicit rc.2 runtime; compared with current real extractor/verdict. No host boot or target-plugin activation.",
+        "cases": [
+          {
+            "manifest": {
+              "name": "engine-accept-peer-reject",
+              "version": "1.0.0",
+              "engines": {
+                "dsh": ">=0.2.1-rc.2 <0.3.0"
+              },
+              "peerDependencies": {
+                "@deepseek-ai/dsh": "<0.2.1-rc.2"
+              }
+            },
+            "official": {
+              "accepted": true
+            },
+            "current": {
+              "verdict": "partial",
+              "categories": [
+                "declared-incompatible"
+              ]
+            }
+          },
+          {
+            "manifest": {
+              "name": "engine-reject-peer-accept",
+              "version": "1.0.0",
+              "engines": {
+                "dsh": "<0.2.1-rc.2"
+              },
+              "peerDependencies": {
+                "@deepseek-ai/dsh": ">=0.2.1-rc.2 <0.3.0"
+              }
+            },
+            "official": {
+              "name": "engine-reject-peer-accept",
+              "version": "1.0.0",
+              "runtimeVersion": "0.2.1-rc.2",
+              "requirements": {
+                "engines.dsh": "<0.2.1-rc.2"
+              },
+              "exempted": false
+            },
+            "current": {
+              "verdict": "ok",
+              "categories": []
+            }
+          }
+        ]
+      },
+      "catalogue": {
+        "oldBaseline": "0.2.0-rc.2",
+        "hostServices": 98,
+        "hostMethods": 291,
+        "clientServices": 8,
+        "clientMethods": 43,
+        "addedHostServices": [
+          "claudeCodeMods",
+          "cotTranslation",
+          "pluginMarket",
+          "remoteAccess",
+          "translator",
+          "webApp",
+          "workingDirectory",
+          "worktrees"
+        ],
+        "removedHostServices": [
+          "invariants"
+        ],
+        "changedSurvivingHostServices": [
+          "agentPresets",
+          "connection",
+          "hmr",
+          "llm",
+          "ptcRuntime",
+          "subagents",
+          "systemPrompt",
+          "webServer"
+        ],
+        "clientServiceAndMethodSetsEqualToOldBaseline": true,
+        "oldBaselineDeltaMatchesPriorRc1Record": true,
+        "scope": "Comparison to committed old catalogue and the previously recorded delta. Not a complete byte comparison with an archived rc.1 catalogue. Committed catalogue/rules unchanged."
+      },
+      "asarReaderFinding": {
+        "file": "tools/catalog/extract-host-api.py",
+        "currentExpression": "store_offset = 16 + header_size",
+        "validatedDataStart": "8 + header_size",
+        "offsetBytes": 8,
+        "badPrefix": " createRequire, isBuiltin }",
+        "correctPrefix": "import { createRequire, isBuiltin }",
+        "sourceHashMethod": "Hashes above use the corrected data start and exact entry size; package JSON parses and JS boundaries were checked.",
+        "catalogueSetsEqualWithAndWithoutCorrection": true,
+        "scope": "Existing generated-catalogue parsing still yields identical service/method sets on this rc.2 image. This does not make the reader byte-correct or safe for other layouts. Repository implementation unchanged; fix and byte regressions planned."
+      },
+      "ui": {
+        "recordedByCommit": "59714e7",
+        "recordedDate": "2026-10-17",
+        "reportedWorking": [
+          "plugins.detail.section",
+          "plugins.detail.badge",
+          "compat_check",
+          "skill provider"
+        ],
+        "reportedMissing": "Compatibility settings tab despite self-registration marker",
+        "independentlyRepeatedInThisAudit": false,
+        "rc2SourceStillRegistersAndConsumesSettingsPluginsTab": true,
+        "sourcePaths": [
+          "dsh-client-ui-settings-plugins/lib/client.js",
+          "dsh-client-ui-plugin-manager/lib/client.js"
+        ],
+        "conclusion": "Reproduce navigation, dependency loading and scoped registration/render timing before attributing removal or deciding a rewrite."
+      },
+      "promotionAudit": {
+        "actions": [
+          {
+            "url": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/7736",
+            "state": "OPEN",
+            "checks": "success"
+          },
+          {
+            "url": "https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/628",
+            "state": "MERGED",
+            "mergedAt": "2026-10-17T12:58:36Z"
+          },
+          {
+            "url": "https://github.com/dshworks/awesome-dsh-plugins/pull/167",
+            "state": "OPEN",
+            "checks": "success"
+          },
+          {
+            "url": "https://github.com/0xsline/awesome-deepseek-harness/pull/717",
+            "state": "OPEN",
+            "existingMainListingVerified": true
+          },
+          {
+            "url": "https://github.com/bruc3van/awesome-dsh-plugin/issues/138",
+            "state": "OPEN",
+            "incorrectPublicationDate": "2026-10-13",
+            "correctPublicationDate": "2026-10-17",
+            "npmPublishedAt": "2026-10-17T08:08:40.762Z",
+            "externalCorrectionSent": false
+          }
+        ],
+        "marketIndex": {
+          "url": "https://awesome-dsh-plugin.com/plugins.json",
+          "updated": "2026-10-17",
+          "count": 5704,
+          "repositoryPresent": false,
+          "scope": "Registry inclusion only, not an assertion that the independently published npm package cannot be installed."
+        },
+        "channelSources": [
+          "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/contributing.md",
+          "https://github.com/bruc3van/awesome-dsh-plugin/blob/main/CONTRIBUTING.md",
+          "https://github.com/dsh-market/dsh-market/blob/main/README.md",
+          "https://github.com/YELEBAI/dsh-plugin-marketplace/blob/main/scripts/registry-scan.mjs"
+        ],
+        "channelConclusions": "Primary registry supports monorepo subpackages; bruc3van showcase requires >10 stars and is distinct from maintainer review. YELEBAI scanner validates root metadata before later npm handling, so its npm override alone is not established to bypass this workspace mismatch. Do not fabricate a root bundle; seek a supported subdirectory/artifact path before claiming feasibility or impossibility.",
+        "nonCurrentDownloadResponse": {
+          "requested": "last-month",
+          "returned": {
+            "downloads": 243,
+            "start": "2026-09-13",
+            "end": "2026-10-12",
+            "package": "dsh-plugin-compat-check"
+          },
+          "treatedAsCurrentTrailing30Days": false
+        },
+        "removedUnsupportedClaims": [
+          "Only badge/Action can grow without manual work",
+          "Near-zero generic social-link conversion",
+          "Guaranteed survey within 24 hours of each rc",
+          "HTTP 200 or automatic indexing means curated approval",
+          "Root scan implies every lawful distribution route is impossible"
+        ],
+        "prioritizedCandidates": [
+          "user-previewed redacted issue report",
+          "complete existing distribution corrections and verify real install",
+          "bounded pinned static sample before automation",
+          "least-privilege Action/status badge and version deltas after adaptation"
+        ],
+        "deferred": "Public conclusion endpoint/market integration until cooperation, privacy, cache invalidation and maintenance are defined; no unsolicited external messages."
+      },
+      "sourceVsNpm": {
+        "npmLatest": "0.1.2",
+        "publishedAt": "2026-10-17T08:08:40.762Z",
+        "publicTarballSha1": "e3c9070b93bc8fd9499d5b34e354e92eb9ee38c2",
+        "matchesOriginalPublishedArtifact": true,
+        "publishedReadmeMatchesArtifactSourceCommit": "5af2550",
+        "publishedSkillBodyUtf16Length": 6669,
+        "publishedSkillBodySha256": "0c6dc74cb52cf33869593df5f3db4aa6ece6f863e0ef372cbad9ae0685c36cca",
+        "localSkillBodyUtf16Length": 6858,
+        "localSkillBodySha256": "2b0a68517e19d62ca5759f56f30e97285e5088a7e886d9b2b50040d5bb649a9e",
+        "localSkillCopiesEqual": true,
+        "kernelRuntimeAndRuleJsonBytesEqual": true,
+        "kernelDocumentationDifferences": [
+          "rules/README.md"
+        ],
+        "screenshotsAndManifestInPublishedTarball": false,
+        "sourceDocumentChangesNeedSeparateRelease": true
+      },
+      "validation": {
+        "defaultTests": 491,
+        "failures": 0,
+        "skipped": 0,
+        "referenceRetrievalBefore": "Existing skill disclosed rc.1 legacy declaration limitations but lacked rc.2-specific declaration/UI records.",
+        "referenceRetrievalAfter": "Updated reference separates rc.2 declaration limits, historical UI evidence, registration/rendering and unpublished local changes; no generic model-behavior reliability claim.",
+        "metadataErrors": 0,
+        "metadataNotices": 1,
+        "metadataSkipped": [],
+        "npmReadmeFetched": true,
+        "documentRegressionTests": 64,
+        "documentRegressionFailures": 0,
+        "maintainedDocumentsChecked": 11,
+        "additionalHistoricalFixtureReadmeReviewed": true,
+        "localSectionAnchorsChecked": 20,
+        "generatedContractsChecked": true,
+        "formatCheck": true,
+        "skillSlotIdentifierChecked": "settings.plugins.tab"
       }
     }
   },

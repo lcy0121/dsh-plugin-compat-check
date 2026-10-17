@@ -1,10 +1,10 @@
 # dsh-plugin-compat-check
 
-检查**已经安装的 DSH 插件**与当前 DSH 版本的兼容性，提供源码位置、运行时证据与覆盖限制。包含兼容性面板、插件详情角标、`compat_check` 对话工具和 skill provider。
+检查**已经安装的 DSH 插件**与当前 DSH 版本的兼容性，提供源码位置、运行时证据与覆盖限制。包含插件详情发现/角标、`compat_check` 对话工具和skill provider；另声明兼容性标签，rc.2有未显示记录，详见下方限制。
 
 ![插件详情页：部分可用，含 file:line、影响与依据](https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/main/plugin/assets/compat-detail-partial.png)
 
-本文件适用于 **0.1.2**。安装指定版本：
+本源码文档面向 **0.1.2**；截图与rc.2说明等为发布后修订，尚未进入已发布tarball。安装公开版本：
 
 ```bash
 dsh plugin --profile <profile> add dsh-plugin-compat-check@0.1.2
@@ -28,9 +28,11 @@ npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检�
 
 ## 判定与边界
 
+仓库提交59714e7记录2026-10-17的一次rc.2手动检查：详情发现/角标及tool/skill正常，兼容性标签未显示而自报标记显示已注册；本轮未重复该UI检查。新版源码仍有settings.plugins.tab，不能据此认定槽位已删除。rc.1的既有有限集成不等于rc.2全面验收。
+
 当前profile在宿主进程内采样服务描述符，不执行getter；未知访问器保留未知，并纳入能可靠映射的loader FAILED/PENDING。查询其它profile只用静态证据，不借用当前宿主服务。Babel AST扫描不执行目标源码，分析运行在有时间和内存上限的worker中；动态调用和跨函数数据流仍有限。
 
-`certainty`为certain或suspected；过滤、守卫、弃权是独立去处。省略的probe键表示未采样，不表示服务缺失。现代观测匹配profile/DSH版本且默认24小时过期；旧报告标记未绑定。声明不能代替API实测，官方peer冲突以推断影响呈现，当前实现仍按0.2.0-rc.2把engines.dsh作建议处理。0.2.1-rc.1宿主已优先按该字段判断，声明有误报/漏报风险，应核对实际宿主结果；本补丁未改判定算法。
+`certainty`为certain或suspected；过滤、守卫、弃权是独立去处。省略的probe键表示未采样，不表示服务缺失。现代观测匹配profile/DSH版本且默认24小时过期；旧报告标记未绑定。声明不能代替API实测，官方peer冲突以推断影响呈现，当前实现仍按0.2.0-rc.2把engines.dsh作建议处理。0.2.1-rc.1/rc.2宿主已优先按该字段判断，声明有误报/漏报风险，应核对实际宿主结果；本补丁未改判定算法。
 
 转述时保留 `impactBasis=inferred`（影响为推断，非实测）、coverage限制和vacuous结果。API发现通常有file:line，loader/元数据发现可能没有源码位置。客户端服务列为待界面核验项；独立浏览器开发工具不属于本面板，且不验证业务交互。
 

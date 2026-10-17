@@ -12,7 +12,7 @@
 
 严重度由 `lib/verdict.mjs` 的确定性逻辑、缺失证据、方法规则及默认档共同决定，不由LLM决定。方法规则的severity/impact参与判定与输出，layer控制端别：方法自身优先、服务layer回退。summary/basis/evidence/knownGoneIn/needsReview等用于解释与维护；knownExtractionArtifacts是历史反例登记，不是自动过滤黑名单。
 
-0.2.1-rc.1宿主改为优先按engines.dsh判断；本版尚未同步该逻辑，已复现声明误报与漏报，规则/API目录也未更新为新版。新版接入验证不代表这些判定已适配，实施顺序见Plan后续。
+0.2.1-rc.1/rc.2宿主优先按engines.dsh判断；本版尚未同步该逻辑，已复现声明误报与漏报，规则/API目录也未更新为新版。新版接入验证不代表这些判定已适配，实施顺序见Plan后续。
 
 ## 当前证据与严重度
 
@@ -29,6 +29,8 @@
 宿主、客户端及shared调用点必须分开。客户端方法不能拿宿主probe判缺失；同名服务也不保证同一语义。对源码归属不确定的Context/别名保留suspected。certainty与impactBasis分别表达证据强度和影响是否实测。
 
 ## 如何更新
+
+rc.2文档审计用正确ASAR数据偏移交叉得到host98/client8服务，未替换提交目录或规则。现有extract-host-api.py的数据起点多8字节，会截掉文件前缀并读入下一文件字节；本次服务/方法集合未受影响，但正式刷新前须先修复并做首尾/JSON/字节校验，不能把该读取结果当作原文件摘要。任务见Plan第6节。
 
 先读调用点和目标版本的真实描述符/官方源码，再修改规则，添加行为回归并审查快照差异。原needsReview已在2026-10-15逐条复核，决定与证据保留于severity.json的needsReview.reviewed/evidence及 [Plan](../docs/Plan.md)。
 
