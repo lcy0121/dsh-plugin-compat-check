@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-更新于2026-10-17。当前发布版0.1.2，判定算法与0.1.1一致；规则/API目录仍以DSH0.2.0-rc.2为基准。本文只维护现行契约、交付边界与待办；用法见[README](../README.md)，逐次证据见[docs/current-state.json](current-state.json)。[原始审计](GPT审计及重构方案文档.md)与[旧提取器反例](extraction-findings.md)保留历史身份，施工过程查Git历史。
+更新于2026-10-18（本次复查分发上游状态）。当前发布版0.1.2，判定算法与0.1.1一致；规则/API目录仍以DSH0.2.0-rc.2为基准。本文只维护现行契约、交付边界与待办；用法见[README](../README.md)，逐次证据见[docs/current-state.json](current-state.json)。[原始审计](GPT审计及重构方案文档.md)与[旧提取器反例](extraction-findings.md)保留历史身份，施工过程查Git历史。
 
 ## 1. 项目定位与交付状态
 
@@ -64,17 +64,17 @@ npm latest=0.1.2，2026-10-17已回下载验收，发布事实见`verification.d
 
 可选profile输入隔离已由[PR #4](https://github.com/lcy0121/dsh-plugin-compat-check/pull/4)交付；9项隔离回归、本机Node22.19/26.12默认各491/491，合并提交ec6f06a的[CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39033059918)通过Node22/24及Linux真实DSH。只适用于各自输入/日期，不认证后续源码或其它宿主版本。
 
-**分发状态（2026-10-17核验）：**
+**分发状态（2026-10-18核验，北京时间）：**
 
 | 对象 | 已有动作与状态 |
 |---|---|
-| awesome-dsh-plugin / dsh-market登记表 | [PR #7736](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/7736)，plugin子目录、dev分类；CI通过，OPEN，当前登记表未见本仓库 |
-| 1024 Store目录 | [PR #628](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/628)已MERGED；公开搜索/详情可见。详情仍仅提供unknown的GitHub子目录规格，无npm方法，按当前商店源码为仅浏览；用户已提交[issue #22](https://github.com/imsai-sh/dsh-1024store/issues/22)（OPEN），反馈npm映射缺失及GitHub子目录安装缺内核；后者为issue作者复现，本轮未重复该源码安装实验 |
-| dshworks目录 | [PR #167](https://github.com/dshworks/awesome-dsh-plugins/pull/167)修正子目录、简介和npm名；CI通过，OPEN |
-| 0xsline Awesome | 已有收录；[简介修订PR #717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)仍OPEN，提交不等于页面已更新 |
-| bruc3van目录 | [issue #138](https://github.com/bruc3van/awesome-dsh-plugin/issues/138)请求复核过时排除理由，OPEN；两处0.1.2发布日期已更正为10月17日并回读确认；排除理由复核仍待维护者处理 |
+| awesome-dsh-plugin / dsh-market登记表 | [PR #7736](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/7736)已于10月18日04:34合并；默认分支YAML、[公开索引](https://awesome-dsh-plugin.com/plugins.json)及[详情页](https://awesome-dsh-plugin.com/p/lcy0121/dsh-plugin-compat-check--plugin/)均已出现本插件。索引含两个截图链接，但npm/version仍为null，安装命令仍为GitHub子目录规格；主市场实际安装未验收 |
+| 1024 Store目录 | [PR #628](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/628)已MERGED；公开搜索/详情仍可见，但installMethods仅有unknown/not_checked的GitHub方法，无npm方法，按当前商店源码仍仅浏览。[issue #22](https://github.com/imsai-sh/dsh-1024store/issues/22)仍OPEN且无评论；其GitHub子目录安装缺内核为作者复现，本轮未重跑 |
+| dshworks目录 | [PR #167](https://github.com/dshworks/awesome-dsh-plugins/pull/167)已CLOSED，维护者将内容并入10月18日11:33合并的[PR #169](https://github.com/dshworks/awesome-dsh-plugins/pull/169)；默认分支data/plugins.json及[分类列表](https://github.com/dshworks/awesome-dsh-plugins/blob/main/lists/interop-migration.md)已包含plugin子目录、修订简介与npm链接，无须再等待#167 |
+| 0xsline Awesome | [简介修订PR #717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)仍OPEN且无评论；默认README仍为旧的安装前CLI简介，尚未采纳修订 |
+| bruc3van目录 | [issue #138](https://github.com/bruc3van/awesome-dsh-plugin/issues/138)仍OPEN且无评论；curated.json仍保留“standalone bash CLI”排除理由。发布日期已更正，排除理由复核仍待处理 |
 
-分发补验：真实DSH CLI已将npm0.1.2安装到私有profile，逐文件对照公开tgz并验证完整内核，再启动rc.2调用认证HTTP报告。该结果不证明市场入口可安装或客户端/业务正确。主登记表仍未见本仓库；三个OPEN PR的现有CI通过。1024目录schema不接受手写npm字段，须等待采集/维护者处理；dsh-market支持经核验npm、作者预构建Release tgz及源码回退，YELEBAI渠道仍先校验根manifest，尚无本仓库适用的子目录绕过证据。证据见`verification.issueReportAndDistribution`。
+10月17日的分发补验已确认：npm0.1.2由真实DSH CLI安装到私有profile，34个文件与公开tgz一致，rc.2认证HTTP报告成功；该结果不证明市场入口或客户端/业务正确。本次只读复查未重新安装、启动宿主或发送对外消息，npm latest仍为0.1.2。主目录已收录，后续重点改为npm映射/完整制品入口和市场安装验收；不能直接推荐仍指向源码子目录的安装命令。dshworks的上游verified标记依据manifest声明，不是本项目新增的rc.2业务认证。dsh-market仍支持经核验npm、作者预构建Release tgz及源码回退；其它渠道准入结论沿用各自日期证据。旧验收见`verification.issueReportAndDistribution`，本次状态见`verification.distributionUpstream20261018`。
 
 宣传仅保留可核验事实：HTTP 200不等于收录，下载不等于用户，star不代表兼容性；“故障时被想到”是待验证的定位假设。删除“唯一自动增长渠道”“纯链接转化近零”“每个rc后24小时普查”等未经验证或尚无资源保证的断言。其它市场按其npm/子目录/制品规则评估，不给private根包添加虚假bundle声明，也不从根扫描限制推出所有合规入口都不可能。
 
@@ -119,6 +119,6 @@ DSC_SLOW=1 node --test --test-reporter=tap test/engineering-live.test.mjs test/p
 
 1. **0.2.1-rc.2定向适配。** 先复现标签未显示，核对settings入口、slot注册/加载时序并加真实UI回归；按目标版本适配engines优先、旧peer规则、非法/空范围、预发布、workspace及精确豁免，补真实宿主正反例/CI。修复目录读取器ASAR数据偏移多8字节的问题，先做文件首尾/JSON/字节校验，再审查新目录与规则；保留旧版回归，另验子路径元数据及HMR生命周期。不以改版本号、换目录或重建快照代替验收，现有证据不要求整体重写架构。
 2. **独立业务真值用例。** 从真实插件选择有限业务路径，定义预期动作及成功/失败信号，优先客户端交互和动态分析盲区；功能标签独立于预测与loader标签，同时保留正反例。
-3. **分发的上游待办。** 本地补全与日期更正已完成；三个OPEN收录修订及issue #138仍待维护者处理，主登记表刷新后再验市场可见性/完整制品安装。1024已可搜索，但尚无npm安装方法；跟进上述issue #22，待上游采集刷新后实跑商店入口。rc.2适配稳定后另经授权发布源码文档/skill更新，当前npm0.1.2不含这些修订；不提前发布、不把本地制品验收当作市场安装成功。
+3. **分发的上游待办。** 主目录与dshworks收录已落地，不再等待#7736/#167。先核对主索引为何npm/version仍为空，解决npm映射或完整制品入口后验收真实市场安装；不能把GitHub子目录源码包当成完整tgz。1024继续跟进#22，待npm方法出现后验收商店入口；另等0xsline #717简介修订、bruc3van #138排除理由复核。rc.2适配稳定后另经授权发布源码文档/skill更新，npm0.1.2仍不含这些修订；索引可见、本地npm验收与市场安装分别记录。
 4. **有限样本与自动化（后置）。** 先以少量明确版本/制品哈希的样本验证批量静态JSON聚合，公开口径、限制和“待作者复核”，不称插件坏了或已作安全审查。再评估低权限Action、workflow摘要/徽章及逐版增量；覆盖不足与工具错误单列，不把绿色等同兼容、不默认写第三方仓库、不承诺24小时SLA。引用/实际接入与复现反馈作为信号，不把下载当用户。第三方详情页集成和公共结论端点暂缓，先确认合作、隐私、缓存失效及维护成本。
 5. **Windows取得真实环境后验收。** 路径、安装器、进程回收和打包实跑；按用户选择暂缓，不用POSIX或路径模拟充数。

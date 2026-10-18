@@ -1755,6 +1755,169 @@
         "metadataSkipped": [],
         "scope": "Default suite includes independent empty-cache tgz installation in controlled host context; separate published-artifact real rc.2 HTTP test above. No full UI/business/Windows certification."
       }
+    },
+    "distributionUpstream20261018": {
+      "recordedAt": "2026-10-18T03:58:03.213Z",
+      "localDate": "2026-10-18",
+      "timezone": "Asia/Shanghai",
+      "scope": "Read-only upstream/API/default-branch/source inspection. No installation, host startup, browser UI test, external posting, push, merge or npm release. Prior runtime verification retains its original date and scope.",
+      "primary": {
+        "pullRequest": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/7736",
+        "state": "MERGED",
+        "mergedAt": "2026-10-17T20:34:41Z",
+        "mergedAtLocal": "2026-10-18 04:34:41 +08:00",
+        "defaultBranchCommit": "53b303576470bc9547e6cb4e4b922904d32edfbf",
+        "sourceYamlPresent": true,
+        "registryUrl": "https://awesome-dsh-plugin.com/plugins.json",
+        "registryUpdated": "2026-10-17",
+        "registryCount": 5786,
+        "registrySha256": "7812c61aa8033e593ce6728915cb0af853940ab14ba5da374aaf4a37c0545793",
+        "entry": {
+          "name": "dsh-plugin-compat-check#plugin",
+          "owner": "lcy0121",
+          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/tree/main/plugin",
+          "page": "https://awesome-dsh-plugin.com/p/lcy0121/dsh-plugin-compat-check--plugin/",
+          "category": "dev",
+          "description": {
+            "en": "Compatibility verdicts for installed DSH plugins on the plugin detail page: samples the current host's service descriptors in-process, extracts each plugin's calls into host services from source with a pinned Babel AST, and reports missing services or methods with file:line, a certainty of certain/suspected, and an impact basis, alongside coverage limits and observation age. Adds an agent tool, a skill provider and plugin-detail badges; the repository also ships a CLI.",
+            "zh": "在插件详情页给出已装 DSH 插件的兼容性结论：在宿主进程内采样服务描述符，用固定版本 Babel AST 从源码提取每个插件对宿主服务的调用，逐条报出缺失的服务或方法及 file:line、确定度（certain/suspected）与影响依据，并给出覆盖限制与观测时效。另加 agent 工具、skill provider 与插件详情角标；仓库还提供 CLI。"
+          },
+          "npm": null,
+          "version": null,
+          "stars": null,
+          "downloads": null,
+          "downloadsStart": null,
+          "downloadsEnd": null,
+          "downloadsCheckedAt": null,
+          "capabilities": [
+            "shell",
+            "fs-write",
+            "fs-read",
+            "network",
+            "env"
+          ],
+          "capabilityRedLines": [],
+          "capabilityCheckedAt": "2026-10-17T23:22:20.818Z",
+          "install": "dsh plugin --profile web add github:lcy0121/dsh-plugin-compat-check#path:/plugin",
+          "added": "2026-10-17",
+          "screenshots": [
+            "https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/HEAD/plugin/assets/compat-detail-partial.png",
+            "https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/HEAD/plugin/assets/compat-detail-declared.png"
+          ]
+        },
+        "detailPage": {
+          "url": "https://awesome-dsh-plugin.com/p/lcy0121/dsh-plugin-compat-check--plugin/",
+          "sha256": "947f8679eb6f26f312cf9e87a44853d6f0b42b9670c496b6e2aeaa5e53400084",
+          "containsRepositoryAndInstallCommand": true,
+          "scope": "Content checked, not HTTP status alone; no rendered browser or market installation certification."
+        },
+        "downloadNote": "First uncompressed download timed out with incomplete JSON; discarded as evidence. Compressed retry completed and full JSON parsed.",
+        "pending": "npm and version remain null; resolve npm mapping or a complete artifact route and then verify actual marketplace installation. Source-subdirectory spec is not a verified complete-kernel install."
+      },
+      "dshworks": {
+        "originalPullRequest": "https://github.com/dshworks/awesome-dsh-plugins/pull/167",
+        "state": "CLOSED",
+        "mergedAt": null,
+        "maintainerComment": "https://github.com/dshworks/awesome-dsh-plugins/pull/167#issuecomment-6245233421",
+        "adoptedVia": "https://github.com/dshworks/awesome-dsh-plugins/pull/169",
+        "adoptedViaState": "MERGED",
+        "adoptedAt": "2026-10-18T03:33:17Z",
+        "adoptedAtLocal": "2026-10-18 11:33:17 +08:00",
+        "defaultBranchCommit": "7773d618fc4918283c5e1df7abd1f3112c203206",
+        "defaultBranchDataUrl": "https://github.com/dshworks/awesome-dsh-plugins/blob/main/data/plugins.json",
+        "dataSha256": "754e3b654a9dd961fe747fd899a0519d1145255344f2e1f3c26de8c7bbdbfb1a",
+        "entry": {
+          "name": "dsh-plugin-compat-check",
+          "repo": "lcy0121/dsh-plugin-compat-check",
+          "path": "plugin",
+          "description": "检查已装 DSH 插件的宿主兼容性，按 file:line 报出缺失的服务或方法、确定度与影响依据 / Checks installed DSH plugins against the host: missing services or methods with file:line, certainty and impact basis.",
+          "category": "plugin",
+          "official": false,
+          "added": "2026-10-07",
+          "lastVerified": "2026-10-17",
+          "verifiedAgainst": "0.2.1-rc.2",
+          "status": "verified",
+          "evidence": "plugin/package.json#dsh.bundle",
+          "stars": 0,
+          "starsUpdated": "2026-10-17",
+          "tags": [
+            "interop"
+          ],
+          "pushedAt": "2026-10-17",
+          "npm": "dsh-plugin-compat-check"
+        },
+        "publicList": "https://github.com/dshworks/awesome-dsh-plugins/blob/main/lists/interop-migration.md",
+        "publicRowChecked": true,
+        "scope": "Correct plugin subdirectory, description and npm link adopted. Upstream verified/verifiedAgainst metadata cites manifest declaration, not newly performed business-runtime acceptance."
+      },
+      "store1024": {
+        "issue": "https://github.com/imsai-sh/dsh-1024store/issues/22",
+        "state": "OPEN",
+        "comments": 0,
+        "updatedAt": "2026-10-17T13:31:31Z",
+        "searchUrl": "https://api.deepseek1024.com/v1/plugins/search?q=dsh-plugin-compat-check",
+        "searchTotal": 1,
+        "detailUrl": "https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin",
+        "detailSha256": "44d6bd916b877ca7a0cce0e061a4fb611d8460dcd3f9685e8754811bbf30c94f",
+        "id": "lcy0121/dsh-plugin-compat-check/plugin",
+        "installMethods": [
+          {
+            "kind": "github",
+            "spec": "github:lcy0121/dsh-plugin-compat-check#path:plugin",
+            "command": "dsh plugin --profile web add github:lcy0121/dsh-plugin-compat-check#path:plugin",
+            "verification": "unknown",
+            "code": "not_checked",
+            "requiresBuildAllowance": false,
+            "buildPackage": null,
+            "revision": null,
+            "checkedAt": null
+          }
+        ],
+        "install": "dsh plugin --profile web add github:lcy0121/dsh-plugin-compat-check#path:plugin",
+        "sourceRuleRechecked": "web/worker/lib/install-methods.ts offeredInstallCommand still offers npm only; GitHub-only entry is browse-only.",
+        "pending": "npm method absent; await upstream enrichment/mapping resolution then verify market install. Source install failure described in issue #22 was not independently rerun."
+      },
+      "oxsline": {
+        "pullRequest": "https://github.com/0xsline/awesome-deepseek-harness/pull/717",
+        "state": "OPEN",
+        "comments": 0,
+        "updatedAt": "2026-10-17T12:54:55Z",
+        "checks": "awesome-lint SUCCESS",
+        "defaultReadme": "https://github.com/0xsline/awesome-deepseek-harness/blob/main/README.md",
+        "currentDescriptionStillPreInstallCliOnly": true
+      },
+      "bruc3van": {
+        "issue": "https://github.com/bruc3van/awesome-dsh-plugin/issues/138",
+        "state": "OPEN",
+        "comments": 0,
+        "updatedAt": "2026-10-17T13:37:12Z",
+        "curatedUrl": "https://github.com/bruc3van/awesome-dsh-plugin/blob/main/data/curated.json",
+        "exclusionStillPresent": "Not a DSH plugin — a standalone bash compatibility-checker CLI for DSH plugins.",
+        "dateCorrectionPreserved": true
+      },
+      "npm": {
+        "name": "dsh-plugin-compat-check",
+        "latest": "0.1.2",
+        "bundlePatch": "./cordis.patch.yml",
+        "repository": {
+          "url": "git+https://github.com/lcy0121/dsh-plugin-compat-check.git",
+          "type": "git"
+        },
+        "scope": "Live manifest check only; no new publish or repeated runtime acceptance."
+      },
+      "remaining": [
+        "Primary registry npm/artifact mapping and real market install",
+        "1024 Store issue #22 and offered npm method",
+        "0xsline PR #717 description adoption",
+        "bruc3van issue #138 stale exclusion review",
+        "Separately authorized post-adaptation documentation/skill release"
+      ],
+      "validation": {
+        "docCheck": true,
+        "gitDiffCheck": true,
+        "productionCodeChanged": false,
+        "defaultSuiteNotRerun": "Documentation/evidence-only update; 498-test previous run remains dated historical verification."
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."
