@@ -4,10 +4,10 @@
 
 ![插件详情页：部分可用，含 file:line、影响与依据](https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/main/plugin/assets/compat-detail-partial.png)
 
-本源码文档面向 **0.1.3候选（未发布）**；npm latest仍为0.1.2，不含本轮rc.2适配与文档。安装已发布版本：
+本文描述 **0.1.3** 的实现；是否已发布及 npm latest 以[发布记录](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)与registry为准。安装公开版本（发布前不能用源码测试代替公开包验收）：
 
 ```bash
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.1.2
+dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
 ## 从源码构建安装
@@ -24,7 +24,7 @@ prepack复制权威skill、同步单源报告契约的宿主/客户端产物，�
 
 npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检查从仓库使用；仓库源码现提供`--issue-report`默认脱敏Markdown导出，不读写基线、保留原退出码，须预览后自行分享，该功能不在npm包内。本插件不能做安装前检查。仓库使用说明：[README](https://github.com/lcy0121/dsh-plugin-compat-check#readme)。版本说明与发布状态请查看[开发计划与验收记录](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，本地路径为docs/Plan.md。
 
-0.1.3候选增加目标版本声明适配、rc.2目录与卸载清理；0.1.2公开包只修正文案和版本，算法仍与0.1.1一致。候选源码验证不能代替公开包验收。
+0.1.3增加目标版本声明适配、rc.2目录与卸载清理；历史0.1.2只修正文案和版本，算法与0.1.1一致；0.1.3改变了新版DSH声明判定。
 
 ## 判定与边界
 
@@ -32,9 +32,9 @@ npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检�
 
 当前profile在宿主进程内采样服务描述符，不执行getter；未知访问器保留未知，并纳入能可靠映射的loader FAILED/PENDING。查询其它profile只用静态证据，不借用当前宿主服务。Babel AST扫描不执行目标源码，分析运行在有时间和内存上限的worker中；动态调用和跨函数数据流仍有限。
 
-`certainty`为certain或suspected；过滤、守卫、弃权另列。省略probe键为未采样，现代观测绑定profile/DSH版本且默认24小时过期，旧报告标记未绑定。0.1.3候选对DSH≥0.2.1-rc.1优先自有engines.dsh，缺失时回退官方peer；旧目标保持旧规则。声明冲突/非法字段的影响为推断，不冒充实测加载失败。只读profile独立compatibility.json，按插件名、插件精确版本及DSH精确版本匹配；无效记录整条忽略并限制覆盖，不可读/超64KiB则豁免未观测，不自动写入豁免。
+`certainty`为certain或suspected；过滤、守卫、弃权另列。省略probe键为未采样，现代观测绑定profile/DSH版本且默认24小时过期，旧报告标记未绑定。0.1.3对DSH≥0.2.1-rc.1优先自有engines.dsh，缺失时回退官方peer；旧目标保持旧规则。声明冲突/非法字段的影响为推断，不冒充实测加载失败。只读profile独立compatibility.json，按插件名、插件精确版本及DSH精确版本匹配；无效记录整条忽略并限制覆盖，不可读/超64KiB则豁免未观测，不自动写入豁免。
 
-按已知目标选目录：DSH≥0.2.1-rc.2用rc.2快照（host98/client8），其余/未知用原0.2.0-rc.2快照（host91/client8）；未来版本未经认证。转述保留 `impactBasis=inferred`、coverage限制和vacuous。API发现通常有file:line，loader/声明事实可能无位置；声明获准不证明API或业务成功。客户端待界面核验；到货工具与新增的独立业务队列均不属于本面板。仓库业务队列只测固定dshmarket的备注/收藏及POST503对照，业务标签不进入兼容性判定，结果不认证其它路径或原插件有缺陷。
+按已知目标选目录：DSH≥0.2.1-rc.2用rc.2快照（host98/client8），其余/未知用原0.2.0-rc.2快照（host91/client8）；未来版本未经认证。转述保留 `impactBasis=inferred`、coverage限制和vacuous。API发现通常有file:line，loader/声明事实可能无位置；声明获准不证明API或业务成功。客户端待界面核验；到货工具与新增的独立业务队列均不属于本面板。仓库业务队列覆盖固定dshmarket的备注/收藏，以及dsh-better-sidebar的保存/预览HTTP路径、编码/换行保留及失败后恢复；对照仅在浏览器注入POST503，业务标签不进入兼容性判定，结果不认证其它路径或原插件有缺陷。
 
 插件体检不安装包、不调用外部命令或联网；会启动分析worker，并默认写自己的schema2基线：`$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`。模式分离、锁内比较、原子替换；源码扫描不完整不推进基线。默认不输出共享loader诊断；诊断需显式私有DSC_OUT_DIR。若需完全禁止基线读写，请使用仓库CLI的 `--no-baseline`。
 

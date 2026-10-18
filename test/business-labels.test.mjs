@@ -397,3 +397,101 @@ test(
     }
   },
 );
+
+test("sidebar byte oracle catches BOM/CRLF loss even when decoded text is unchanged", async () => {
+  const m = await import("../tools/business-sidebar.mjs").catch(() => ({}));
+  assert.equal(typeof m.savedDocumentBytes, "function");
+  assert.equal(
+    m.savedDocumentBytes("A\nB\n", "utf8-bom").toString("hex"),
+    "efbbbf410d0a420d0a",
+  );
+  assert.equal(
+    m.savedDocumentBytes("A\nB\n", "utf16le").toString("hex"),
+    "fffe41000d000a0042000d000a00",
+  );
+  assert.throws(() => m.savedDocumentBytes("A", "unknown"), /encoding/i);
+});
+
+test("live suite selection rejects unknown names before creating evidence", () => {
+  const r = spawnSync(
+    process.execPath,
+    ["tools/business-labels.mjs", "--live", "--suite", "missing", "--json"],
+    { encoding: "utf8" },
+  );
+  assert.equal(r.status, 3);
+  assert.match(JSON.parse(r.stdout).error, /Unknown business suite/);
+});
+
+describe(
+  "second real plugin: byte-preserving save and recovery",
+  { skip: process.env.DSC_SLOW !== "1" },
+  () => {
+    test("sidebar editor HTTP path preserves both encodings, detects blocked saves and recovers", (t) => {
+      const r = spawnSync(
+        process.execPath,
+        [
+          "tools/business-labels.mjs",
+          "--live",
+          "--suite",
+          "sidebar",
+          "--json",
+          ...(process.env.DSC_SIDEBAR_LIVE_DIR
+            ? ["--out-dir", process.env.DSC_SIDEBAR_LIVE_DIR]
+            : []),
+        ],
+        { encoding: "utf8", timeout: 240000 },
+      );
+      assert.ok(r.status === 0 || r.status === 1, r.stdout + r.stderr);
+      const v = JSON.parse(r.stdout);
+      if (v.applicable === false) {
+        t.skip(v.reason);
+        return;
+      }
+      assert.equal(v.artifacts.package, "dsh-better-sidebar");
+      assert.equal(v.artifacts.version, "0.28.0");
+      assert.deepEqual(
+        v.rows.map((r) => r.outcome),
+        ["passed", "failed", "passed", "passed", "failed", "passed"],
+      );
+      assert.equal(v.metrics.baseline.scored, 4);
+      assert.equal(v.metrics.baseline.trueNegative, 4);
+      assert.equal(v.metrics.faultInjected.falseNegative, 2);
+      assert.equal(r.status, 1);
+      if (process.env.DSC_SIDEBAR_LIVE_DIR) {
+        const fs = process.getBuiltinModule("node:fs");
+        const labels = JSON.parse(
+          fs.readFileSync(process.env.DSC_SIDEBAR_LIVE_DIR + "/labels.json"),
+        );
+        assert.deepEqual(
+          labels.rows.map((r) => r.byteEvidence.previousBytesPreserved),
+          [false, true, false, false, true, false],
+        );
+      }
+      assert.equal(v.metrics.faultInjected.scored, 2);
+      assert.equal(v.cleanup.privateRootRemoved, true);
+      assert.equal(v.cleanup.hostStopped, true);
+      assert.equal(v.prediction.businessLabelsUsed, false);
+    });
+  },
+);
+
+test("navigation completion belongs to the requested new document, never the previous loaded page", async () => {
+  const m = await import("../tools/business-live.mjs");
+  assert.equal(typeof m.loadedNavigation, "function");
+  const event = (id, name) => ({
+    method: "Page.lifecycleEvent",
+    params: { loaderId: id, name },
+  });
+  assert.equal(
+    m.loadedNavigation(
+      [event("old", "load"), event("new", "DOMContentLoaded")],
+      "new",
+    ),
+    false,
+  );
+  assert.equal(
+    m.loadedNavigation([event("old", "load"), event("new", "load")], "new"),
+    true,
+  );
+  assert.equal(m.loadedNavigation([event("old", "load")], undefined), false);
+});

@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.3",
-  "recordedAt": "2026-10-18T09:24:53.857Z",
+  "recordedAt": "2026-10-18T13:34:29.793Z",
   "testFiles": 37,
-  "tests": 526,
+  "tests": 529,
   "repositoryFiles": {
-    "total": 239,
+    "total": 240,
     "fixtures": 90,
-    "other": 149
+    "other": 150
   },
   "verification": {
     "platform": "darwin",
@@ -2791,6 +2791,465 @@
         "npmRelease": false,
         "externalPost": false
       }
+    },
+    "businessSampleExpansion": {
+      "recordedAt": "2026-10-18T13:37:56.930Z",
+      "platform": "darwin",
+      "arch": "arm64",
+      "dshVersion": "0.2.1-rc.2",
+      "toolVersion": "0.1.3",
+      "package": "dsh-better-sidebar",
+      "packageVersion": "0.28.0",
+      "artifact": {
+        "packageFingerprint": {
+          "files": 471,
+          "digest": "2c3b5619b4a8ee9ab87ea179b0163a1230dbbb63e8cdbea3de8b08f9147d6892"
+        },
+        "publishedTarballSha256": "40b7ce32a6d90bff069b3bb4d0e5dd692281e0ac0598163196b816ac12335b6f",
+        "publishedIntegrity": "sha512-x7+/YmH/HrSlXWOBZkhL7qQqcDgZEnDcWrhR5GlizzUZjz+w84FbQ6jo8trJC9tyaQxMaNvXVnXwDxn4I330Ew==",
+        "combinedArtifactDigest": "0180c12fedee338606cfb588722579a2bde01d8c1d2ff1ba46b63437a752aa15",
+        "sourceHashes": {
+          "package.json": "e557306a7af1f8ea020caffae62c36df4591ced90cf4626db464df5dce8fcc36",
+          "lib/index.js": "00080091516184efe0005d8521cb890ae89032b9abcd514b752c4ef7642fa129",
+          "src/index.ts": "7658d35cb8a0d9c8c9ea816413817c338b56a18fe6f21d62f55ec3e849682f42",
+          "src/fs-operations.ts": "1a0d84d4872f0fa42170dc1797bb3bd4d3a66b2186c94847b6e4ce2608de5511",
+          "src/html-route.ts": "73974a8649ac8332258dae896f0129da2b16541ad9ea1ab5cb1c40576ec6885e"
+        },
+        "harnessSources": {
+          "tools/business-live.mjs": "f8e5378bffc4c34a608e9b5306b6c471cf33c7ea282c5289f3aeb9d7f5713b6d",
+          "tools/business-sidebar.mjs": "dfd5b0f3b945c953260ac248b5e5fc0665ba6393a84a76e55e9abfd6cacb4672"
+        }
+      },
+      "prediction": {
+        "mode": "feature-scoped-static-api-risk",
+        "businessLabelsUsed": false,
+        "loaderLabelsUsed": false,
+        "autoProbeDiscovery": false,
+        "sealedBeforeActions": true,
+        "sha256": "48b5372deba1b240a565871f5c2129030b7c0dcc5346463059b862865e25daf5",
+        "predictedAt": "2026-10-18T13:31:11.744Z",
+        "casePlan": [
+          {
+            "caseId": "sidebar.save.utf8-bom.healthy",
+            "featureId": "sidebar.save.utf8-bom",
+            "control": "none"
+          },
+          {
+            "caseId": "sidebar.save.utf8-bom.blocked",
+            "featureId": "sidebar.save.utf8-bom",
+            "control": "http-503"
+          },
+          {
+            "caseId": "sidebar.save.utf8-bom.recovered",
+            "featureId": "sidebar.save.utf8-bom",
+            "control": "none"
+          },
+          {
+            "caseId": "sidebar.save.utf16le.healthy",
+            "featureId": "sidebar.save.utf16le",
+            "control": "none"
+          },
+          {
+            "caseId": "sidebar.save.utf16le.blocked",
+            "featureId": "sidebar.save.utf16le",
+            "control": "http-503"
+          },
+          {
+            "caseId": "sidebar.save.utf16le.recovered",
+            "featureId": "sidebar.save.utf16le",
+            "control": "none"
+          }
+        ],
+        "scope": "Manually scoped save/preview/cwd/admission API risk only; no business or loader labels enter predictor"
+      },
+      "businessTruth": {
+        "source": "browser-action+profile-state",
+        "collectedAt": "2026-10-18T13:31:15.063Z",
+        "rows": [
+          {
+            "caseId": "sidebar.save.utf8-bom.healthy",
+            "featureId": "sidebar.save.utf8-bom",
+            "control": "none",
+            "action": "Browser POST to real editor-save route, then fresh plugin HTML preview",
+            "expected": "Requested content, original BOM/encoding and CRLF bytes must survive; preview text must match",
+            "observed": {
+              "requestStatus": 200,
+              "persisted": true,
+              "uiAfterReload": true
+            },
+            "outcome": "passed",
+            "byteEvidence": {
+              "encoding": "utf8-bom",
+              "exactRequestedBytes": true,
+              "previousBytesPreserved": false
+            }
+          },
+          {
+            "caseId": "sidebar.save.utf8-bom.blocked",
+            "featureId": "sidebar.save.utf8-bom",
+            "control": "http-503",
+            "action": "Browser POST to real editor-save route, then fresh plugin HTML preview",
+            "expected": "Requested content, original BOM/encoding and CRLF bytes must survive; preview text must match",
+            "observed": {
+              "requestStatus": 503,
+              "persisted": false,
+              "uiAfterReload": false
+            },
+            "outcome": "failed",
+            "byteEvidence": {
+              "encoding": "utf8-bom",
+              "exactRequestedBytes": false,
+              "previousBytesPreserved": true
+            }
+          },
+          {
+            "caseId": "sidebar.save.utf8-bom.recovered",
+            "featureId": "sidebar.save.utf8-bom",
+            "control": "none",
+            "action": "Browser POST to real editor-save route, then fresh plugin HTML preview",
+            "expected": "Requested content, original BOM/encoding and CRLF bytes must survive; preview text must match",
+            "observed": {
+              "requestStatus": 200,
+              "persisted": true,
+              "uiAfterReload": true
+            },
+            "outcome": "passed",
+            "byteEvidence": {
+              "encoding": "utf8-bom",
+              "exactRequestedBytes": true,
+              "previousBytesPreserved": false
+            }
+          },
+          {
+            "caseId": "sidebar.save.utf16le.healthy",
+            "featureId": "sidebar.save.utf16le",
+            "control": "none",
+            "action": "Browser POST to real editor-save route, then fresh plugin HTML preview",
+            "expected": "Requested content, original BOM/encoding and CRLF bytes must survive; preview text must match",
+            "observed": {
+              "requestStatus": 200,
+              "persisted": true,
+              "uiAfterReload": true
+            },
+            "outcome": "passed",
+            "byteEvidence": {
+              "encoding": "utf16le",
+              "exactRequestedBytes": true,
+              "previousBytesPreserved": false
+            }
+          },
+          {
+            "caseId": "sidebar.save.utf16le.blocked",
+            "featureId": "sidebar.save.utf16le",
+            "control": "http-503",
+            "action": "Browser POST to real editor-save route, then fresh plugin HTML preview",
+            "expected": "Requested content, original BOM/encoding and CRLF bytes must survive; preview text must match",
+            "observed": {
+              "requestStatus": 503,
+              "persisted": false,
+              "uiAfterReload": false
+            },
+            "outcome": "failed",
+            "byteEvidence": {
+              "encoding": "utf16le",
+              "exactRequestedBytes": false,
+              "previousBytesPreserved": true
+            }
+          },
+          {
+            "caseId": "sidebar.save.utf16le.recovered",
+            "featureId": "sidebar.save.utf16le",
+            "control": "none",
+            "action": "Browser POST to real editor-save route, then fresh plugin HTML preview",
+            "expected": "Requested content, original BOM/encoding and CRLF bytes must survive; preview text must match",
+            "observed": {
+              "requestStatus": 200,
+              "persisted": true,
+              "uiAfterReload": true
+            },
+            "outcome": "passed",
+            "byteEvidence": {
+              "encoding": "utf16le",
+              "exactRequestedBytes": true,
+              "previousBytesPreserved": false
+            }
+          }
+        ]
+      },
+      "metrics": {
+        "baseline": {
+          "scored": 4,
+          "unscored": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "trueNegative": 4,
+          "precision": null,
+          "recall": null
+        },
+        "faultInjected": {
+          "scored": 2,
+          "unscored": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 2,
+          "trueNegative": 0,
+          "precision": null,
+          "recall": 0
+        }
+      },
+      "rawCliExitCode": 1,
+      "validation": {
+        "defaultSuite": {
+          "nodeVersion": "26.12.0",
+          "tests": 529,
+          "passed": 529,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "26bca0822d8667e888b2bbfac20adb6b15ee5254bd471fef6960daa8f4a9f13f"
+        },
+        "additionalSupportedNode": {
+          "nodeVersion": "24.19.0",
+          "tests": 529,
+          "passed": 529,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "d339bbd230ab1b06de2eab5f31578d451de9ce400408c8683c6cb287dfd14cf9"
+        },
+        "jointRealBusiness": {
+          "nodeVersion": "26.12.0",
+          "tests": 16,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "df7d6db8636847d0771a1168871c6b5996aa58b023206030b87d11b6c89d95d5"
+        },
+        "replay": [
+          {
+            "suite": "market",
+            "replayExit": 1,
+            "incompleteCaseExit": 3,
+            "metrics": {
+              "baseline": {
+                "scored": 2,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 2,
+                "precision": null,
+                "recall": null
+              },
+              "faultInjected": {
+                "scored": 2,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 2,
+                "trueNegative": 0,
+                "precision": null,
+                "recall": 0
+              }
+            },
+            "cleanup": {
+              "privateRootRemoved": true,
+              "hostStopped": true
+            }
+          },
+          {
+            "suite": "sidebar",
+            "replayExit": 1,
+            "incompleteCaseExit": 3,
+            "metrics": {
+              "baseline": {
+                "scored": 4,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 4,
+                "precision": null,
+                "recall": null
+              },
+              "faultInjected": {
+                "scored": 2,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 2,
+                "trueNegative": 0,
+                "precision": null,
+                "recall": 0
+              }
+            },
+            "cleanup": {
+              "privateRootRemoved": true,
+              "hostStopped": true
+            }
+          }
+        ],
+        "artifactHashes": {
+          "predictions.json": "2a479fb415020cd0c4ef1a0bc6e28b0922f8140b998211d8738b77ffc3c61920",
+          "labels.json": "457e272499381c7c04fabff05e127bcc4084e9636bb67679c22b44672d0761d1",
+          "measurement.json": "49b63887fb8a0be2b95b3041602a03efc7dcc783e7e3e6312d27b8375a96baca"
+        },
+        "screenshots": {
+          "sidebar.save.utf8-bom.healthy": "c17cff2ee8c62a366832d7e47174bba3fdaada5500fb049f3bbaf0f0a8a038a6",
+          "sidebar.save.utf8-bom.blocked": "c17cff2ee8c62a366832d7e47174bba3fdaada5500fb049f3bbaf0f0a8a038a6",
+          "sidebar.save.utf8-bom.recovered": "52c96be4a5a5ef177dd9c9182122966f14e41da9cd016005c547cb65167a732b",
+          "sidebar.save.utf16le.healthy": "c17cff2ee8c62a366832d7e47174bba3fdaada5500fb049f3bbaf0f0a8a038a6",
+          "sidebar.save.utf16le.blocked": "c17cff2ee8c62a366832d7e47174bba3fdaada5500fb049f3bbaf0f0a8a038a6",
+          "sidebar.save.utf16le.recovered": "52c96be4a5a5ef177dd9c9182122966f14e41da9cd016005c547cb65167a732b"
+        },
+        "driverCorrections": [
+          "Page.navigate loaderId must match Page.lifecycleEvent load before DOM actions; old document cannot satisfy readiness",
+          "Fresh Chrome welcome dialog mounts asynchronously after shell: wait for Continue and its dismissal before settings navigation"
+        ],
+        "independentReview": {
+          "importantFound": 1,
+          "importantFixed": 1,
+          "minorSourceSpansFixed": true,
+          "scope": "Read-only code and documentation consistency plus targeted offline checks; final default/live outcomes are primary-runner evidence"
+        },
+        "skillReference": {
+          "baseline": "Candidate-unpublished wording contradicts an assumed confirmed0.1.3 registry publication",
+          "after": "Version-neutral0.1.3 behavior, registry/Plan as status sources; declaration priority, exact grant and business boundaries preserved",
+          "bodyLength": 7787,
+          "sourceSha256": "e0b3f7b1269a3af547f421de92bb1ef91f9eefca396ba4d9f3858ef8c1d6f10d",
+          "packagedCopyEqual": true
+        }
+      },
+      "controls": {
+        "catalogue": "No market catalog; published sidebar + owned empty official session and two disposable workspace files",
+        "faults": "Browser intercepts only POST /sidebar/write with HTTP503; installed plugin bytes unchanged",
+        "scope": "Save/preview HTTP path for UTF8 BOM/UTF16LE + CRLF: healthy, blocked and recovery. Not editor widget UI, natural version regression, or original-plugin defect certification."
+      },
+      "cleanup": {
+        "privateRootRemoved": true,
+        "hostStopped": true
+      },
+      "limitations": [
+        "Two encoded file-save/HTML-preview HTTP paths, not a complete editor-widget interaction test",
+        "HTTP503 browser controls; no natural version regression or original-plugin defect established",
+        "No model call, Windows business acceptance or ecosystem-accuracy claim",
+        "Separate market and sidebar cohorts; file replay does not rerun current business behavior"
+      ]
+    },
+    "release013": {
+      "status": "candidate-verified-awaiting-CI-and-publication",
+      "recordedAt": "2026-10-18T13:37:56.934Z",
+      "version": "0.1.3",
+      "authorization": "User explicitly requested completing0.1.3 candidate delivery and publication after business expansion and full documentation audit",
+      "validation": {
+        "defaultSuite": {
+          "nodeVersion": "26.12.0",
+          "tests": 529,
+          "passed": 529,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "26bca0822d8667e888b2bbfac20adb6b15ee5254bd471fef6960daa8f4a9f13f"
+        },
+        "additionalSupportedNode": {
+          "nodeVersion": "24.19.0",
+          "tests": 529,
+          "passed": 529,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "d339bbd230ab1b06de2eab5f31578d451de9ce400408c8683c6cb287dfd14cf9"
+        },
+        "realRc2Joint": {
+          "nodeVersion": "26.12.0",
+          "tests": 19,
+          "passed": 19,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "9ce6ca48ffdd9c20c5748a1dc3cf7c03b63290ddafd217cc06d0a2f64ace62c0"
+        },
+        "realLegacyJoint": {
+          "nodeVersion": "26.12.0",
+          "tests": 35,
+          "passed": 33,
+          "failed": 0,
+          "skipped": 2,
+          "tapSha256": "800002f7ae7c2e3c6ceda8618cebb81c3b119609674e3eac7f33532c34f4662c",
+          "dshVersion": "0.2.0-rc.2",
+          "businessSkipped": 2,
+          "rc2Specific": "applicable=false; other legacy live checks executed"
+        },
+        "realBusiness": {
+          "nodeVersion": "26.12.0",
+          "tests": 16,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "df7d6db8636847d0771a1168871c6b5996aa58b023206030b87d11b6c89d95d5"
+        },
+        "prepublishGate": true,
+        "formatCheck": true,
+        "generatedContractCheck": true
+      },
+      "artifact": {
+        "version": "0.1.3",
+        "files": 37,
+        "sha256": "7b4ae580beb80b91f71c23d7534b5014b30039029e0a150a58a6f73e5f98d038",
+        "integrity": "sha512-+/uvRKoz1Av/awahbJedswbnWKH1P5UFAlcNrFYfxaK4qMCFPX9eShsAmD4A0Cf1CKNlDJwRmX+/HQK/ONkACg==",
+        "contentDigest": "d0f9bf3faebc2f79e72862e305840c261674ba8fe2429237175f080ff3fda925",
+        "skillSha256": "e0b3f7b1269a3af547f421de92bb1ef91f9eefca396ba4d9f3858ef8c1d6f10d",
+        "readmeSha256": "25659d999c8fb25214ba5b457c2395e0c537d26e82e7f53aac59f876e57193be"
+      },
+      "exactTarballInstallation": {
+        "status": "checked",
+        "exitCode": 0,
+        "toolVersion": "0.1.3",
+        "dshVersion": "0.2.1-rc.2",
+        "ownVerdict": "ok",
+        "coverage": "limited",
+        "tempProfileRemoved": true,
+        "scope": "Exact release tgz in a temporary actual DSH profile; limited API/report evidence, not all plugin business certification"
+      },
+      "documentationAudit": {
+        "documents": [
+          "README.md",
+          "README.en.md",
+          "README.ko.md",
+          "plugin/README.md",
+          "skill/README.md",
+          "skill/SKILL.md",
+          "plugin/skill/SKILL.md",
+          "rules/README.md",
+          "docs/Plan.md",
+          "docs/GPT审计及重构方案文档.md",
+          "docs/extraction-findings.md",
+          "docs/current-state.json"
+        ],
+        "historicalEvidencePreserved": true,
+        "versionNeutralPackagedReadmeAndSkill": true,
+        "metadataBefore": {
+          "observedAt": "2026-10-18T13:34:58.782Z",
+          "githubDescription": "检查已安装DSH插件的版本声明、API风险与覆盖限制；提供兼容性面板、agent工具及可用源码位置。Check installed DSH plugins for declaration/API risks, with a compatibility panel, agent tool, source locations when available and coverage limits.",
+          "npmLatest": "0.1.2",
+          "errors": 0,
+          "notices": [
+            "npm.version-matches",
+            "npm.readme-is-current"
+          ],
+          "sourcesAvailable": true
+        },
+        "upstreamStatus": "2026-10-18 release audit:1024#22,0xsline#717,bruc3van#138 still open without comments; dshworks#169 merged; no external message sent"
+      },
+      "ci": {
+        "status": "Not run for final source until authorized push"
+      },
+      "publication": {
+        "npm": false,
+        "merge": false,
+        "githubRelease": false
+      },
+      "limitations": [
+        "Windows remains deferred by user",
+        "Historical marketplace install accepted published0.1.2; this candidate has separate exact-tgz and integration evidence",
+        "Coverage remains limited; transport fault FN values are preserved, not fixed by changing truth labels"
+      ]
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

@@ -30,7 +30,7 @@ const sourceHashes = {
 };
 const span = (file, start, end) => ({ file, start, end });
 // Hand-audited published 1.66.37 call paths, not a whole-plugin verdict proxy.
-const features = [
+const marketFeatures = [
   {
     id: "market.note",
     plugin: "dshmarket",
@@ -84,7 +84,35 @@ export function completedResponse(rows, finished, failed, route, start) {
     throw Error("Business request transport did not finish");
   return match && finished.has(match.requestId) ? match : null;
 }
-export async function runBusiness({ outDir } = {}) {
+export function loadedNavigation(events, loaderId) {
+  return (
+    typeof loaderId === "string" &&
+    Boolean(loaderId) &&
+    events.some(
+      (e) =>
+        e.method === "Page.lifecycleEvent" &&
+        e.params.loaderId === loaderId &&
+        e.params.name === "load",
+    )
+  );
+}
+export async function runBusiness({ outDir, suite = "market" } = {}) {
+  if (!["market", "sidebar"].includes(suite))
+    throw Error("Unknown business suite: " + suite);
+  const sidebar =
+    suite === "sidebar" ? await import("./business-sidebar.mjs") : null;
+  const features = sidebar ? sidebar.sidebarFeatures : marketFeatures;
+  const pin = sidebar?.sidebarPin || {
+    package: "dshmarket",
+    version: "1.66.37",
+    files: 182,
+    digest: "a26339e13c9adcff506c1d0c00842d0e6cf104226c5a1954a5e091c40dd6f583",
+    sourceHashes,
+    publishedTarballSha256:
+      "8b29d156e3ea45330623b4cd66736992456f5ef4c92c8fb00243ccc3b101f188",
+    publishedIntegrity:
+      "sha512-6sr+x6W6PppAtygJra/khU1ehK8bmjmfVnFgmPyHixx3GzIXGX/iW04CoeqlExFpsyTWXnM2W/X7JLU78dHJLA==",
+  };
   if (outDir) {
     outDir = path.resolve(outDir);
     fs.mkdirSync(outDir, { recursive: true });
@@ -202,33 +230,37 @@ export async function runBusiness({ outDir } = {}) {
       "--profile",
       "business",
       "add",
-      "dshmarket@1.66.37",
-      "dsh-plugin-compat-check@0.1.2",
+      pin.package + "@" + pin.version,
+      ...(sidebar ? [] : ["dsh-plugin-compat-check@0.1.2"]),
     ]);
-    const pkg = path.join(nm, "dshmarket");
-    for (const [file, digest] of Object.entries(sourceHashes))
+    const workspace = path.join(profile, "business-workspace");
+    const fixtureSource = sidebar
+      ? sidebar.installSidebarFixture(profile, workspace)
+      : null;
+    const pkg = path.join(nm, pin.package);
+    for (const [file, digest] of Object.entries(pin.sourceHashes))
       if (hash(fs.readFileSync(path.join(pkg, file))) !== digest)
         throw Error("Pinned business source bytes changed: " + file);
     const fingerprint = packageFingerprint(pkg);
-    if (
-      fingerprint.files !== 182 ||
-      fingerprint.digest !==
-        "a26339e13c9adcff506c1d0c00842d0e6cf104226c5a1954a5e091c40dd6f583"
-    )
+    if (fingerprint.files !== pin.files || fingerprint.digest !== pin.digest)
       throw Error("Full pinned business artifact bytes changed");
     const artifact = {
-      package: "dshmarket",
-      version: "1.66.37",
-      sourceHashes,
+      package: pin.package,
+      version: pin.version,
+      sourceHashes: pin.sourceHashes,
       packageFingerprint: fingerprint,
-      publishedTarballSha256:
-        "8b29d156e3ea45330623b4cd66736992456f5ef4c92c8fb00243ccc3b101f188",
-      publishedIntegrity:
-        "sha512-6sr+x6W6PppAtygJra/khU1ehK8bmjmfVnFgmPyHixx3GzIXGX/iW04CoeqlExFpsyTWXnM2W/X7JLU78dHJLA==",
-      seedPackage: "dsh-plugin-compat-check@0.1.2",
-      seedManifestHash: hash(
-        fs.readFileSync(path.join(nm, "dsh-plugin-compat-check/package.json")),
-      ),
+      publishedTarballSha256: pin.publishedTarballSha256,
+      publishedIntegrity: pin.publishedIntegrity,
+      ...(sidebar
+        ? { fixtureSourceHash: hash(fixtureSource) }
+        : {
+            seedPackage: "dsh-plugin-compat-check@0.1.2",
+            seedManifestHash: hash(
+              fs.readFileSync(
+                path.join(nm, "dsh-plugin-compat-check/package.json"),
+              ),
+            ),
+          }),
       predictorSources: Object.fromEntries(
         [
           ...fs
@@ -238,6 +270,12 @@ export async function runBusiness({ outDir } = {}) {
             .map((f) => "lib/" + f),
           "bin/compat-check.mjs",
           "tools/business-metrics.mjs",
+        ].map((f) => [f, hash(fs.readFileSync(path.join(REPO, f)))]),
+      ),
+      harnessSources: Object.fromEntries(
+        [
+          "tools/business-live.mjs",
+          ...(sidebar ? ["tools/business-sidebar.mjs"] : []),
         ].map((f) => [f, hash(fs.readFileSync(path.join(REPO, f)))]),
       ),
       rulesHash: hash(fs.readFileSync(path.join(REPO, "rules/severity.json"))),
@@ -258,7 +296,7 @@ export async function runBusiness({ outDir } = {}) {
     const canonical = toJSON(predicted),
       identity = {
         sampleId: crypto.randomUUID(),
-        suiteId: "dshmarket-1.66.37-actions-v1",
+        suiteId: pin.package + "-" + pin.version + "-actions-v1",
         artifactDigest: hash(JSON.stringify(artifact)),
         dshVersion: version,
         toolVersion: canonical.toolVersion,
@@ -267,6 +305,9 @@ export async function runBusiness({ outDir } = {}) {
     predictions.casePlan = features.flatMap((f) => [
       { caseId: f.id + ".healthy", featureId: f.id, control: "none" },
       { caseId: f.id + ".blocked", featureId: f.id, control: "http-503" },
+      ...(sidebar
+        ? [{ caseId: f.id + ".recovered", featureId: f.id, control: "none" }]
+        : []),
     ]);
     const sealed = JSON.stringify(predictions);
     fs.writeFileSync(path.join(root, "predictions.json"), sealed);
@@ -285,24 +326,26 @@ export async function runBusiness({ outDir } = {}) {
       added: "2026-10-17",
       install: "dsh plugin --profile web add dsh-plugin-compat-check",
     };
-    server = http.createServer((req, res) => {
-      if (req.url !== "/plugins.json") {
-        res.writeHead(404).end();
-        return;
-      }
-      res.writeHead(200, { "content-type": "application/json" });
-      res.end(
-        JSON.stringify({
-          updated: "2026-10-18",
-          count: 1,
-          categories: { dev: { zh: "开发与运行时", en: "Development" } },
-          plugins: [entry],
-        }),
-      );
-    });
-    await new Promise((r) => server.listen(0, "127.0.0.1", r));
-    env.DSHM_REGISTRY_URL =
-      "http://127.0.0.1:" + server.address().port + "/plugins.json";
+    if (!sidebar) {
+      server = http.createServer((req, res) => {
+        if (req.url !== "/plugins.json") {
+          res.writeHead(404).end();
+          return;
+        }
+        res.writeHead(200, { "content-type": "application/json" });
+        res.end(
+          JSON.stringify({
+            updated: "2026-10-18",
+            count: 1,
+            categories: { dev: { zh: "开发与运行时", en: "Development" } },
+            plugins: [entry],
+          }),
+        );
+      });
+      await new Promise((r) => server.listen(0, "127.0.0.1", r));
+      env.DSHM_REGISTRY_URL =
+        "http://127.0.0.1:" + server.address().port + "/plugins.json";
+    }
     host = spawn(
       "dsh",
       ["--profile", "business", "--", "--port", "0", "--no-open"],
@@ -362,6 +405,7 @@ export async function runBusiness({ outDir } = {}) {
     });
     await chrome.send("Runtime.enable");
     await chrome.send("Page.enable");
+    await chrome.send("Page.setLifecycleEventsEnabled", { enabled: true });
     await chrome.send("Network.enable");
     const evalx = async (expression) => {
       const r = await chrome.send("Runtime.evaluate", {
@@ -369,7 +413,16 @@ export async function runBusiness({ outDir } = {}) {
         returnByValue: true,
         awaitPromise: true,
       });
-      if (r.exceptionDetails) throw Error("Business browser script failed");
+      if (r.exceptionDetails)
+        throw Error(
+          "Business browser script failed: " +
+            String(
+              r.exceptionDetails.exception?.description ||
+                r.exceptionDetails.text,
+            )
+              .split("\n")[0]
+              .replaceAll(root, "<private>"),
+        );
       return r.result?.value;
     };
     async function poll(fn, message, budget = 15000) {
@@ -381,6 +434,14 @@ export async function runBusiness({ outDir } = {}) {
       } while (Date.now() < end);
       throw Error(message);
     }
+    async function navigate(url) {
+      const navigation = await chrome.send("Page.navigate", { url });
+      if (navigation.errorText) throw Error("Business page navigation failed");
+      await poll(
+        () => loadedNavigation(chrome.events, navigation.loaderId),
+        "New business document did not finish loading",
+      );
+    }
     const textButton = (t) =>
       `[...document.querySelectorAll('button')].find(b=>b.innerText.trim()===${JSON.stringify(t)})`;
     async function click(t) {
@@ -390,8 +451,9 @@ export async function runBusiness({ outDir } = {}) {
       );
       await evalx(`${textButton(t)}.click()`);
     }
+    let onboardingHandled = false;
     async function openMarket(tab) {
-      await chrome.send("Page.navigate", { url });
+      await navigate(url);
       await poll(
         () =>
           evalx(
@@ -399,9 +461,17 @@ export async function runBusiness({ outDir } = {}) {
           ),
         "Business shell unavailable",
       );
-      await evalx(
-        `${textButton("继续")}?.click();${textButton("关闭")}?.click()`,
-      );
+      if (!onboardingHandled) {
+        // Fresh private browser: the welcome dialog mounts after the shell.
+        // Optional immediate clicks can miss it and later dialog work steals settings focus.
+        await click("继续");
+        await poll(
+          () => evalx(`!${textButton("继续")}`),
+          "Welcome dialog did not close",
+        );
+        onboardingHandled = true;
+      }
+      await evalx(`${textButton("关闭")}?.click()`);
       await evalx(
         "document.querySelector('button[aria-label=\"账号菜单\"]').click()",
       );
@@ -520,99 +590,147 @@ export async function runBusiness({ outDir } = {}) {
       source: "browser-action+profile-state",
       rows: [],
     };
-    for (const feature of features) {
-      for (const control of ["none", "http-503"]) {
-        const note = feature.id === "market.note",
-          caseId =
-            feature.id + "." + (control === "none" ? "healthy" : "blocked");
-        await openMarket(note ? "installed" : "discover");
-        const desired = note
-          ? "business-note-" + (control === "none" ? "one" : "two")
-          : control === "none";
-        const route = note ? "/dsh-market/note" : "/dsh-market/favorite";
-        faultRoute = control === "http-503" ? route : null;
-        if (faultRoute)
-          await chrome.send("Fetch.enable", {
-            patterns: [{ urlPattern: "*" + route, requestStage: "Request" }],
-          });
-        const before = responses.length;
-        if (note) {
-          await evalx(
-            `(${textButton("添加备注")}||${textButton("编辑备注")}).click()`,
-          );
-          await poll(
-            () =>
-              evalx(
-                "Boolean(document.querySelector('input[placeholder=\"用你自己的话描述这个插件，将代替作者简介显示\"]'))",
-              ),
-            "Note editor missing",
-          );
-          await evalx(
-            `(()=>{const i=document.querySelector('input[placeholder="用你自己的话描述这个插件，将代替作者简介显示"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,${JSON.stringify(desired)});i.dispatchEvent(new Event('input',{bubbles:true}));})()`,
-          );
-          await click("保存");
-        } else {
-          const label = control === "none" ? "加入收藏" : "取消收藏";
-          await evalx(
-            `document.querySelector('button[aria-label="${label}"]').click()`,
-          );
-        }
-        const response = await poll(() => {
-          if (pumpError) throw pumpError;
-          return completedResponse(
-            responses,
-            finishedRequests,
-            failedRequests,
-            route,
-            before,
-          );
-        }, "Business action did not complete its request");
-        if (faultRoute) {
-          await chrome.send("Fetch.disable");
-          faultRoute = null;
-        }
-        await openMarket(note ? "installed" : "discover");
-        const state = disk();
-        const persisted = note
-          ? state.notes?.["dsh-plugin-compat-check"] === desired
-          : (state.favorites || []).includes(entry.url) === desired;
-        const uiAfterReload = note
-          ? await evalx(
-              `document.body.innerText.includes(${JSON.stringify(desired)})`,
-            )
-          : await evalx(
-              `document.querySelector('button[aria-label="${desired ? "取消收藏" : "加入收藏"}"]')!==null`,
+    const screenshot = async (caseId) => {
+      if (!outDir) return;
+      const shot = await chrome.send("Page.captureScreenshot", {
+        format: "png",
+      });
+      fs.writeFileSync(
+        path.join(outDir, caseId + ".png"),
+        Buffer.from(shot.data, "base64"),
+        { flag: "wx" },
+      );
+    };
+    if (sidebar)
+      labels.rows = await sidebar.sidebarCases({
+        workspace,
+        url,
+        evalx,
+        poll,
+        screenshot,
+        navigate,
+        armFault: async (route) => {
+          faultRoute = route;
+          if (route)
+            await chrome.send("Fetch.enable", {
+              patterns: [
+                { urlPattern: "*" + route + "*", requestStage: "Request" },
+              ],
+            });
+          return responses.length;
+        },
+        finishRequest: async (route, start) => {
+          const receipt = await poll(() => {
+            if (pumpError) throw pumpError;
+            return completedResponse(
+              responses,
+              finishedRequests,
+              failedRequests,
+              route,
+              start,
             );
-        const observed = {
-          requestStatus: response.status,
-          persisted,
-          uiAfterReload,
-        };
-        const label = {
-          caseId,
-          featureId: feature.id,
-          control,
-          action: note
-            ? "Save a new note, then reload"
-            : "Toggle catalog favorite, then reload",
-          expected:
-            "Requested value must persist on disk and remain visible after reload",
-          observed,
-          outcome: businessOutcome(observed),
-        };
-        labels.rows.push(label);
-        if (outDir) {
-          const screenshot = await chrome.send("Page.captureScreenshot", {
-            format: "png",
-          });
-          fs.writeFileSync(
-            path.join(outDir, caseId + ".png"),
-            Buffer.from(screenshot.data, "base64"),
-            { flag: "wx" },
-          );
+          }, "Sidebar save did not complete its request");
+          if (faultRoute) {
+            await chrome.send("Fetch.disable");
+            faultRoute = null;
+          }
+          return receipt;
+        },
+      });
+    else
+      for (const feature of features) {
+        for (const control of ["none", "http-503"]) {
+          const note = feature.id === "market.note",
+            caseId =
+              feature.id + "." + (control === "none" ? "healthy" : "blocked");
+          await openMarket(note ? "installed" : "discover");
+          const desired = note
+            ? "business-note-" + (control === "none" ? "one" : "two")
+            : control === "none";
+          const route = note ? "/dsh-market/note" : "/dsh-market/favorite";
+          faultRoute = control === "http-503" ? route : null;
+          if (faultRoute)
+            await chrome.send("Fetch.enable", {
+              patterns: [{ urlPattern: "*" + route, requestStage: "Request" }],
+            });
+          const before = responses.length;
+          if (note) {
+            await evalx(
+              `(${textButton("添加备注")}||${textButton("编辑备注")}).click()`,
+            );
+            await poll(
+              () =>
+                evalx(
+                  "Boolean(document.querySelector('input[placeholder=\"用你自己的话描述这个插件，将代替作者简介显示\"]'))",
+                ),
+              "Note editor missing",
+            );
+            await evalx(
+              `(()=>{const i=document.querySelector('input[placeholder="用你自己的话描述这个插件，将代替作者简介显示"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,${JSON.stringify(desired)});i.dispatchEvent(new Event('input',{bubbles:true}));})()`,
+            );
+            await click("保存");
+          } else {
+            const label = control === "none" ? "加入收藏" : "取消收藏";
+            await evalx(
+              `document.querySelector('button[aria-label="${label}"]').click()`,
+            );
+          }
+          const response = await poll(() => {
+            if (pumpError) throw pumpError;
+            return completedResponse(
+              responses,
+              finishedRequests,
+              failedRequests,
+              route,
+              before,
+            );
+          }, "Business action did not complete its request");
+          if (faultRoute) {
+            await chrome.send("Fetch.disable");
+            faultRoute = null;
+          }
+          await openMarket(note ? "installed" : "discover");
+          const state = disk();
+          const persisted = note
+            ? state.notes?.["dsh-plugin-compat-check"] === desired
+            : (state.favorites || []).includes(entry.url) === desired;
+          const uiAfterReload = note
+            ? await evalx(
+                `document.body.innerText.includes(${JSON.stringify(desired)})`,
+              )
+            : await evalx(
+                `document.querySelector('button[aria-label="${desired ? "取消收藏" : "加入收藏"}"]')!==null`,
+              );
+          const observed = {
+            requestStatus: response.status,
+            persisted,
+            uiAfterReload,
+          };
+          const label = {
+            caseId,
+            featureId: feature.id,
+            control,
+            action: note
+              ? "Save a new note, then reload"
+              : "Toggle catalog favorite, then reload",
+            expected:
+              "Requested value must persist on disk and remain visible after reload",
+            observed,
+            outcome: businessOutcome(observed),
+          };
+          labels.rows.push(label);
+          if (outDir) {
+            const screenshot = await chrome.send("Page.captureScreenshot", {
+              format: "png",
+            });
+            fs.writeFileSync(
+              path.join(outDir, caseId + ".png"),
+              Buffer.from(screenshot.data, "base64"),
+              { flag: "wx" },
+            );
+          }
         }
       }
-    }
     labels.collectedAt = new Date().toISOString();
     if (
       JSON.stringify(predictions) !== sealed ||
@@ -632,14 +750,23 @@ export async function runBusiness({ outDir } = {}) {
         sealedBeforeActions: true,
         sha256: hash(sealed),
       },
-      controls: {
-        catalogue:
-          "Single real public entry as a controlled local catalog; not a public-market installation test",
-        faults:
-          "Browser intercepts only the selected feature POST with HTTP503; installed plugin bytes unchanged",
-        scope:
-          "Normal note save and favorite toggle plus failure controls; transport failures expose blind spots, not original plugin defects.",
-      },
+      controls: sidebar
+        ? {
+            catalogue:
+              "No market catalog; published sidebar + owned empty official session and two disposable workspace files",
+            faults:
+              "Browser intercepts only POST /sidebar/write with HTTP503; installed plugin bytes unchanged",
+            scope:
+              "Save/preview HTTP path for UTF8 BOM/UTF16LE + CRLF: healthy, blocked and recovery. Not editor widget UI, natural version regression, or original-plugin defect certification.",
+          }
+        : {
+            catalogue:
+              "Single real public entry as a controlled local catalog; not a public-market installation test",
+            faults:
+              "Browser intercepts only the selected feature POST with HTTP503; installed plugin bytes unchanged",
+            scope:
+              "Normal note save and favorite toggle plus failure controls; transport failures expose blind spots, not original plugin defects.",
+          },
     };
   } catch (error) {
     if (outDir && chrome) {

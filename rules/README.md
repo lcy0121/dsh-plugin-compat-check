@@ -1,6 +1,6 @@
 # 严重度规则表与维护
 
-适用于0.1.3候选（未发布；npm latest仍为0.1.2）。当前契约见 [Plan](../docs/Plan.md)，验证见 [自动统计](../docs/current-state.json)。后半保留2026-10-11旧提取器的依据，历史表不是当前覆盖率或运行时真值。
+适用于0.1.3；公开版本以registry和Plan发布记录为准。当前契约见 [Plan](../docs/Plan.md)，验证见 [自动统计](../docs/current-state.json)。后半保留2026-10-11旧提取器的依据，历史表不是当前覆盖率或运行时真值。
 
 ## 文件与运行时消费者
 
@@ -12,7 +12,7 @@
 
 严重度由 `lib/verdict.mjs` 的确定性逻辑、缺失证据、方法规则及默认档共同决定，不由LLM决定。方法规则的severity/impact参与判定与输出，layer控制端别：方法自身优先、服务layer回退。summary/basis/evidence/knownGoneIn/needsReview等用于解释与维护；knownExtractionArtifacts是历史反例登记，不是自动过滤黑名单。
 
-0.1.3候选按DSH目标分流声明：从0.2.1-rc.1起自有engines.dsh优先，缺失才回退全部官方peer；旧目标保留旧行为。非法/空范围、预发布和peer workspace别名均有回归；engines中的workspace不获放行。独立compatibility.json仅按插件/运行时精确版本豁免，非法字段不能靠豁免绕过；无效记录忽略并保留覆盖限制。
+0.1.3按DSH目标分流声明：从0.2.1-rc.1起自有engines.dsh优先，缺失才回退全部官方peer；旧目标保留旧行为。非法/空范围、预发布和peer workspace别名均有回归；engines中的workspace不获放行。独立compatibility.json仅按插件/运行时精确版本豁免，非法字段不能靠豁免绕过；无效记录忽略并保留覆盖限制。
 
 ## 当前证据与严重度
 
@@ -28,7 +28,7 @@
 
 宿主、客户端及shared调用点必须分开。客户端方法不能拿宿主probe判缺失；同名服务也不保证同一语义。对源码归属不确定的Context/别名保留suspected。certainty与impactBasis分别表达证据强度和影响是否实测。
 
-仓库独立业务队列将手审的功能调用区间内API风险与真实备注/收藏结果对照，保持业务、loader标签及预测隔离；不把整个插件的其它发现挪给本功能。正常/HTTP503故障组分别计分，限定样本不能改变生产报告中的certainty或impactBasis，也不是新增严重度规则的充分证据。复现见[Plan](../docs/Plan.md#52-日常检查与真实集成)。
+仓库独立业务队列将手审的功能调用区间内API风险与真实备注/收藏及侧栏保存/预览结果对照，保持业务、loader标签及预测隔离；不把整个插件的其它发现挪给本功能。正常/HTTP503故障组分别计分，限定样本不能改变生产报告中的certainty或impactBasis，也不是新增严重度规则的充分证据。复现见[Plan](../docs/Plan.md#52-日常检查与真实集成)。
 
 ## 如何更新
 
