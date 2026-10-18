@@ -1906,7 +1906,7 @@
         "scope": "Live manifest check only; no new publish or repeated runtime acceptance."
       },
       "remaining": [
-        "Primary registry npm/artifact mapping and real market install",
+        "Primary index propagation/inconsistency recheck after the successful nightly; detail page now offers npm; real market install still pending",
         "1024 Store issue #22 and offered npm method",
         "0xsline PR #717 description adoption",
         "bruc3van issue #138 stale exclusion review",
@@ -1917,6 +1917,41 @@
         "gitDiffCheck": true,
         "productionCodeChanged": false,
         "defaultSuiteNotRerun": "Documentation/evidence-only update; 498-test previous run remains dated historical verification."
+      },
+      "postNightlyFollowUp": {
+        "recordedAt": "2026-10-18T04:04:05.191871+00:00",
+        "scheduledRun": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/actions/runs/39090736719",
+        "runConclusion": "success",
+        "runCompletedAt": "2026-10-18T03:58:41Z",
+        "workflowRule": "Push builds normally reuse probe cache; scheduled builds use PROBE_ALL=1 and probe npm before building the site.",
+        "detailPage": {
+          "lastModified": "Sun, 18 Oct 2026 03:58:12 GMT",
+          "npmPackageLinkPresent": true,
+          "commands": [
+            "dsh plugin --profile web add dsh-plugin-compat-check",
+            "dsh plugin --profile web add github:lcy0121/dsh-plugin-compat-check#path:/plugin"
+          ]
+        },
+        "indexResponse": {
+          "url": "https://awesome-dsh-plugin.com/plugins.json?check=20261018-post-nightly",
+          "lastModified": "Sat, 17 Oct 2026 23:46:23 GMT",
+          "cacheControl": "max-age=600",
+          "xOriginCache": "HIT",
+          "xProxyCache": "HIT",
+          "date": "Sun, 18 Oct 2026 04:03:21 GMT",
+          "age": "195",
+          "npm": null,
+          "version": null,
+          "sha256": "7812c61aa8033e593ce6728915cb0af853940ab14ba5da374aaf4a37c0545793"
+        },
+        "interpretation": "Detail-page npm mapping now works; the public index response is an older build. Cache/propagation delay is a plausible inference, not a confirmed root cause.",
+        "recommendation": "Defer a new issue, recheck after approximately 10–20 minutes. If index remains old, report detail-page versus plugins.json inconsistency with headers and the successful build, rather than claiming npm detection failure.",
+        "relatedHistory": [
+          "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/issues/487",
+          "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/issues/3222"
+        ],
+        "externalIssuePosted": false,
+        "actualMarketInstallVerified": false
       }
     }
   },
