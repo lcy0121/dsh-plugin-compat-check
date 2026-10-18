@@ -1,10 +1,10 @@
 # dsh-plugin-compat-check
 
-检查**已经安装的 DSH 插件**与当前 DSH 版本的兼容性，提供源码位置、运行时证据与覆盖限制。包含插件详情发现/角标、`compat_check` 对话工具和skill provider；另声明兼容性标签，rc.2有未显示记录，详见下方限制。
+检查**已经安装的 DSH 插件**与当前 DSH 版本的兼容性，提供源码位置、运行时证据与覆盖限制。包含兼容性标签、插件详情发现/角标、`compat_check` 对话工具和skill provider。
 
 ![插件详情页：部分可用，含 file:line、影响与依据](https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/main/plugin/assets/compat-detail-partial.png)
 
-本源码文档面向 **0.1.2**；截图与rc.2说明等为发布后修订，尚未进入已发布tarball。安装公开版本：
+本源码文档面向 **0.1.3候选（未发布）**；npm latest仍为0.1.2，不含本轮rc.2适配与文档。安装已发布版本：
 
 ```bash
 dsh plugin --profile <profile> add dsh-plugin-compat-check@0.1.2
@@ -24,17 +24,17 @@ prepack复制权威skill、同步单源报告契约的宿主/客户端产物，�
 
 npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检查从仓库使用；仓库源码现提供`--issue-report`默认脱敏Markdown导出，不读写基线、保留原退出码，须预览后自行分享，该功能不在npm包内。本插件不能做安装前检查。仓库使用说明：[README](https://github.com/lcy0121/dsh-plugin-compat-check#readme)。版本说明与发布状态请查看[开发计划与验收记录](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，本地路径为docs/Plan.md。
 
-0.1.2修正发布状态文案并统一版本标记；判定算法与0.1.1一致。规则/API目录仍基于0.2.0-rc.2，不把新版接入测试当作全面适配。
+0.1.3候选增加目标版本声明适配、rc.2目录与卸载清理；0.1.2公开包只修正文案和版本，算法仍与0.1.1一致。候选源码验证不能代替公开包验收。
 
 ## 判定与边界
 
-仓库提交59714e7记录2026-10-17的一次rc.2手动检查：详情发现/角标及tool/skill正常，兼容性标签未显示而自报标记显示已注册；本轮未重复该UI检查。新版源码仍有settings.plugins.tab，不能据此认定槽位已删除。rc.1的既有有限集成不等于rc.2全面验收。
+2026-10-18从候选完整tgz在私有rc.2宿主和真实Chrome验证：“更多 → 设置 → 内置插件 → 兼容性”可见标签和报告；禁用后报告路由消失，启用后恢复且标签唯一。59714e7中10月17日标签未显示的历史记录本次未复现，原因未定；不把这次局部UI验收当作所有业务功能认证。
 
 当前profile在宿主进程内采样服务描述符，不执行getter；未知访问器保留未知，并纳入能可靠映射的loader FAILED/PENDING。查询其它profile只用静态证据，不借用当前宿主服务。Babel AST扫描不执行目标源码，分析运行在有时间和内存上限的worker中；动态调用和跨函数数据流仍有限。
 
-`certainty`为certain或suspected；过滤、守卫、弃权是独立去处。省略的probe键表示未采样，不表示服务缺失。现代观测匹配profile/DSH版本且默认24小时过期；旧报告标记未绑定。声明不能代替API实测，官方peer冲突以推断影响呈现，当前实现仍按0.2.0-rc.2把engines.dsh作建议处理。0.2.1-rc.1/rc.2宿主已优先按该字段判断，声明有误报/漏报风险，应核对实际宿主结果；本补丁未改判定算法。
+`certainty`为certain或suspected；过滤、守卫、弃权另列。省略probe键为未采样，现代观测绑定profile/DSH版本且默认24小时过期，旧报告标记未绑定。0.1.3候选对DSH≥0.2.1-rc.1优先自有engines.dsh，缺失时回退官方peer；旧目标保持旧规则。声明冲突/非法字段的影响为推断，不冒充实测加载失败。只读profile独立compatibility.json，按插件名、插件精确版本及DSH精确版本匹配；无效记录整条忽略并限制覆盖，不可读/超64KiB则豁免未观测，不自动写入豁免。
 
-转述时保留 `impactBasis=inferred`（影响为推断，非实测）、coverage限制和vacuous结果。API发现通常有file:line，loader/元数据发现可能没有源码位置。客户端服务列为待界面核验项；独立浏览器开发工具不属于本面板，且不验证业务交互。
+按已知目标选目录：DSH≥0.2.1-rc.2用rc.2快照（host98/client8），其余/未知用原0.2.0-rc.2快照（host91/client8）；未来版本未经认证。转述保留 `impactBasis=inferred`、coverage限制和vacuous。API发现通常有file:line，loader/声明事实可能无位置；声明获准不证明API或业务成功。客户端待界面核验，独立浏览器工具不属于本面板。
 
 插件体检不安装包、不调用外部命令或联网；会启动分析worker，并默认写自己的schema2基线：`$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`。模式分离、锁内比较、原子替换；源码扫描不完整不推进基线。默认不输出共享loader诊断；诊断需显式私有DSC_OUT_DIR。若需完全禁止基线读写，请使用仓库CLI的 `--no-baseline`。
 

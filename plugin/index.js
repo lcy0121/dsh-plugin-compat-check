@@ -21,7 +21,7 @@
 //   ${DSC_OUT_DIR}/loader-introspect.json (explicit owned private directory only)
 // plus structured console lines prefixed with [dsh-plugin-compat-check].
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, realpathSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import path, { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -462,6 +462,7 @@ function toEntryArray(value) {
 }
 
 async function scan(ctx, state, pass) {
+  if(state.disposed)return;
   const report = {
     schemaVersion: SCHEMA_VERSION,
     plugin: name,
@@ -550,6 +551,7 @@ async function scan(ctx, state, pass) {
     return true;
   });
 
+  if(state.disposed)return report;
   const written = writeReport(report);
   log(
     `scan#${pass}/${SCAN_DELAYS.length} loader-via=${via} entries=${report.entryCount} states=${safeJson(report.stateHistogram)} problems=${report.problems.length} report=${OUT_JSON}${written ? '' : ' (WRITE FAILED)'}`,
@@ -700,6 +702,18 @@ function resolveDshVersion() {
     }
   } catch { /* 继续 */ }
 
+  // npm prefixes need not end in /dsh/. Read only an official runtime's own
+  // manifest above the real entry; package.json need not be an exported subpath.
+  try {
+    let dir=path.dirname(path.resolve(realpathSync(process.argv[1])));
+    for(let depth=0;depth<32;depth++){
+      try{
+        const meta=JSON.parse(readFileSync(join(dir,'package.json'),'utf8'));
+        if(['@deepseek-ai/dsh','@deepseek-ai/dsh-desktop-host','@deepseek-ai/dsh-app-boot'].includes(meta.name)&&typeof meta.version==='string'&&meta.version)return meta.version;
+      }catch{}
+      const parent=path.dirname(dir);if(parent===dir)break;dir=parent;
+    }
+  }catch{}
   // ③ 都没有 → **null，不猜**（判定层会据此不产出声明不符的结论）
   return null;
 }
@@ -790,6 +804,7 @@ function resolveNodeModules(requestedProfile = null) {
  * 同时到达也只会算一次 —— 否则它们会各自算一遍，白烧 1.5 秒 × 10。
  */
 async function serveReport(state, ctx, force, options = {}) {
+  if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
   if(!state.reportService){
     const kernel=resolveKernelDir();
     if(!kernel)return failureEnvelope('找不到判定内核');
@@ -797,7 +812,7 @@ async function serveReport(state, ctx, force, options = {}) {
     if(!state.reportService)state.reportService=new ReportService(async options=>{const out=await computeReport(state,ctx,options);return out.ok?assertEnvelope(out):failureEnvelope(out.error,out);},{ttlMs:state.cacheTtlMs});
   }
   const key=options.profile?`profile:${options.profile}`:'current';
-  const out=await state.reportService.get(key,options,force);return out?.ok?assertEnvelope(out):failureEnvelope(out?.error,out||{});
+  const out=await state.reportService.get(key,options,force);if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');return out?.ok?assertEnvelope(out):failureEnvelope(out?.error,out||{});
 }
 
 /**
@@ -817,13 +832,14 @@ function baselineFileFor(nmDir) {
 }
 
 /**
- * 跑一次体检。**同步、纯计算、不抛**。
+ * 跑一次有界体检；异步分析、可写自身基线，错误由报告返回。
  *
  * 为什么宿主半边要算而不是把原始数据丢给客户端：
  *   - 客户端跑在浏览器里，读不了文件系统；
  *   - 结论（五元组 + 确定性）是内核的产物，算出唯一一份才不会两边漂移。
  */
 async function computeReport(state, ctx, options = {}) {
+  if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
   const started = Date.now();
   const out = {
     schemaVersion: 1,
@@ -872,7 +888,8 @@ async function computeReport(state, ctx, options = {}) {
     const { extractInWorker } = await import(pathToFileURL(join(kernel, 'lib', 'worker-analysis.mjs')).href);
     const { buildVerdicts } = await import(pathToFileURL(join(kernel, 'lib', 'verdict.mjs')).href);
 
-    const catalogPath = join(kernel, 'rules', 'dsh-api-catalog.json');
+    const {catalogPathFor}=await import(pathToFileURL(join(kernel,'lib','catalog.mjs')).href);
+    const catalogPath = catalogPathFor(kernel,resolveDshVersion());
     const rulesPath = join(kernel, 'rules', 'severity.json');
     const catalog = JSON.parse(readFileSync(catalogPath, 'utf8'));
     const rules = JSON.parse(readFileSync(rulesPath, 'utf8'));
@@ -893,6 +910,7 @@ async function computeReport(state, ctx, options = {}) {
     out.surfaceWhy = surfaceWhy;
 
     const extracted = await extractInWorker(nm.dir, { catalog });
+    if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
     const { sampleServices } = await import(pathToFileURL(join(kernel,'lib','observation.mjs')).href);
     const currentTarget=resolveNodeModules();
     const sameHost=currentTarget.dir&&path.resolve(currentTarget.dir)===path.resolve(nm.dir);
@@ -905,6 +923,8 @@ async function computeReport(state, ctx, options = {}) {
     out.loaderCoverage=loaderState;
 
     out.surfaceWhy=surfaceWhy;
+    const {readProfileCompatibility}=await import(pathToFileURL(join(kernel,'lib','profile-compatibility.mjs')).href);
+    const compatibility=readProfileCompatibility(nm.dir);
     const verdict = buildVerdicts({
       report: extracted.report,
       hostSurface,
@@ -913,6 +933,8 @@ async function computeReport(state, ctx, options = {}) {
       dshVersion: resolveDshVersion(),
       entryStates: loaderState.rows,
       observationTarget: {profileId:nm.dir,maxAgeMs:24*60*60*1000},
+      compatibilityExemptions: compatibility.exemptions,
+      compatibilityNotes: compatibility.notes,
     });
 
     // ── C4：基线差分 ──
@@ -926,6 +948,7 @@ async function computeReport(state, ctx, options = {}) {
       const identity=store.baselineIdentity(nm.dir,verdict.observation.mode,rules,catalog);
       const snap = snapshotForBaseline(verdict, resolveDshVersion(),identity);
       const bfile = store.baselinePath(nm.dir,verdict.observation.mode);
+      if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
       baseline=store.baselineTransaction(bfile,snap,{advance:extracted.report.scanComplete});
     } catch (error) {
       baseline = { error: errText(error), note: '基线差分没算成（不影响本次结论）' };
@@ -957,6 +980,7 @@ async function computeReport(state, ctx, options = {}) {
     }
 
     const {toJSON}=await import(pathToFileURL(join(kernel,'lib','report.mjs')).href);
+    if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
     const canonical=toJSON({error:null,extract:extracted,verdict,baseline,inputs:{nodeModules:nm.dir,hasRuntimeSurface:verdict.observation.usable,catalog:catalogPath,rules:rulesPath}});
     out.baseline = canonical.baseline;
     out.dshVersion = canonical.dshVersion;
@@ -1076,7 +1100,7 @@ function registerTool(ctx, state) {
         log('D1 tool skipped: scoped ctx has no tools.register');
         return;
       }
-      scope.tools.register({
+      const dispose = scope.tools.register({
         name: 'compat_check',
         description:
           'Check whether the DSH plugins installed in this profile are actually compatible with the '
@@ -1150,6 +1174,7 @@ function registerTool(ctx, state) {
         },
       });
       log('D1 tool registered: compat_check');
+      return dispose;
     } catch (error) {
       log(`WARN D1 tool registration failed: ${errText(error)}`);
     }
@@ -1260,7 +1285,7 @@ function registerSkill(ctx) {
           path: skill.file,
           resourceBase: { kind: 'directory', path: path.dirname(skill.file) },
         };
-        skillCtx.skills.registerProvider(() => ({
+        const dispose = skillCtx.skills.registerProvider(() => ({
           name: SKILL_PROVIDER,
           list: () => Promise.resolve([summary]),
           get: () => Promise.resolve({
@@ -1274,6 +1299,7 @@ function registerSkill(ctx) {
           }),
         }));
         log(`SKILL registered: ${SKILL_NAME} <- ${skill.file}`);
+        return dispose;
       } catch (error) {
         log(`SKILL registration failed: ${errText(error)}`);
       }
@@ -1289,6 +1315,8 @@ export function apply(ctx) {
     log(`HOST-HALF-ACTIVATED pid=${process.pid} node=${process.version}`);
 
     const state = {
+      disposed: false,
+      scanTimers: new Set(),
       applyAt: new Date().toISOString(),
       loader: undefined,
       loaderVia: null,
@@ -1342,7 +1370,7 @@ export function apply(ctx) {
       if (typeof ctx.inject === 'function') {
         ctx.inject(['webServer'], (scope) => {
           try {
-            scope.webServer.register({
+            const dispose = scope.webServer.register({
               name: 'dsh-plugin-compat-check',
               kind: 'exact',
               path: '/plugin-compat-check/report',
@@ -1371,6 +1399,7 @@ export function apply(ctx) {
               },
             });
             log('C2 route registered: GET /plugin-compat-check/report');
+            return dispose;
           } catch (error) {
             log(`WARN C2 route registration failed: ${errText(error)}`);
           }
@@ -1431,14 +1460,18 @@ export function apply(ctx) {
     // one can safely wait for it and the report file is never written twice
     // concurrently.
     const schedulePass = (index) => {
+      if(state.disposed)return;
       const previous = index === 0 ? 0 : SCAN_DELAYS[index - 1];
       const delay = Math.max(0, SCAN_DELAYS[index] - previous);
       const timer = setTimeout(() => {
+        state.scanTimers.delete(timer);
+        if(state.disposed)return;
         const pass = index + 1;
         try {
           scan(ctx, state, pass)
             .catch((error) => log(`ERROR scan#${pass} failed: ${errText(error)}`))
             .finally(() => {
+              if(state.disposed)return;
               if (pass < SCAN_DELAYS.length) schedulePass(index + 1);
               else finish();
             });
@@ -1448,6 +1481,7 @@ export function apply(ctx) {
       }, delay);
       // unref: a scan timer must never keep the host process alive.
       if (timer && typeof timer.unref === 'function') timer.unref();
+      state.scanTimers.add(timer);
     };
     schedulePass(0);
 
@@ -1465,6 +1499,7 @@ export function apply(ctx) {
     //      的清理顺手取消掉了 —— 启动自检从未运行、且**没有任何报错**。
     //      一个"看起来做了其实没做"的定时器，比没有更糟。
     state.runAutoCheck = () => {
+      if(state.disposed)return;
       if (state.autoCheckStarted) return;   // 幂等：只跑一次
       state.autoCheckStarted = true;
       try {
@@ -1503,12 +1538,21 @@ export function apply(ctx) {
 
     // Manual re-scan handle for tooling/experiments (no host service needed).
     try {
-      globalThis.__DSH_COMPAT_CHECK__ = {
+      const handle = {
         rescan: () => scan(ctx, state, 0),
         reportPath: OUT_JSON,
         // 面板用的那份结论（同一个函数，所以界面与工具不可能给出不同答案）
         compatReport: (c) => computeReport(state, c || ctx),
       };
+      globalThis.__DSH_COMPAT_CHECK__ = handle;
+      if(typeof ctx.effect==='function')ctx.effect(()=>()=>{
+        state.disposed=true;
+        for(const timer of state.scanTimers)clearTimeout(timer);
+        state.scanTimers.clear();
+        clearTimeout(state.fallbackTimer);
+        state.disposeInjectProbe?.();state.disposeInjectProbe=null;
+        if(globalThis.__DSH_COMPAT_CHECK__===handle)delete globalThis.__DSH_COMPAT_CHECK__;
+      },'compat-check: generation cleanup');
     } catch {
       /* 忽略 */
     }

@@ -33,6 +33,8 @@ import { extractWithProvenance } from '../lib/extract.mjs';
 import { buildVerdicts } from '../lib/verdict.mjs';
 import { render, toJSON } from '../lib/report.mjs';
 import { renderIssueReport } from './issue-report.mjs';
+import { readProfileCompatibility } from '../lib/profile-compatibility.mjs';
+import { catalogPathFor } from '../lib/catalog.mjs';
 import { snapshotForBaseline, diffAgainstBaseline, badgeFor, BASELINE_SCHEMA } from '../lib/baseline.mjs';
 import {baselinePath,baselineIdentity,baselineTransaction,readBaseline as readStoredBaseline,writeBaseline as writeStoredBaseline} from '../lib/state-store.mjs';
 import {probeProfile} from '../lib/probe-runner.mjs';
@@ -56,9 +58,9 @@ ${versionLine()}
                    给了它就不必再给 --probe（两者同时给时以 --probe 为准）。
   --probe-timeout <秒>  --probe-boot 的启动等待上限（默认 40）
   --probe-keep-dir <dir>  把探针报告与 services.json 留一份到该目录（排查用）
-  --dsh-version <v> 目标 DSH 版本（用于声明/peer范围判断；显式值优先）。
+  --dsh-version <v> 目标 DSH 版本（用于声明判断及目录选择；显式值优先）。
   --rules <json>   覆盖 severity 规则表（默认 rules/severity.json）
-  --catalog <json> 覆盖官方 API 目录（默认 rules/dsh-api-catalog.json）
+  --catalog <json> 覆盖官方 API 目录（默认按目标版本选择 rules/ 下的已知目录）
   --no-baseline    不读写本机基线（CI / 一次性检查用）
   --baseline-file <path>  指定基线文件（默认按 profile 分文件放在 $DSH_HOME 下）
   --dry-run        算出差分但不写基线
@@ -197,7 +199,7 @@ export function run(options = {}) {
     const nm = resolveNodeModules(options.nm);
     result.inputs.nodeModules = nm;
 
-    const catalogPath = options.catalog || path.join(REPO, 'rules', 'dsh-api-catalog.json');
+    const catalogPath = catalogPathFor(REPO, options.dshVersion, options.catalog);
     const rulesPath = options.rules || path.join(REPO, 'rules', 'severity.json');
     const catalog = readJSON(catalogPath, '官方 API 目录');
     const rules = readJSON(rulesPath, 'severity 规则表');
@@ -215,6 +217,7 @@ export function run(options = {}) {
     if(probePath && !hostSurface){hostSurface=readJSON(probePath,'探针报告');result.inputs.probe=probePath;}
     if(options._probeBootInfo){result.inputs.probeBoot=options._probeBootInfo;result.inputs.probe='(--probe-boot 实时采集)';}
     result.inputs.hasRuntimeSurface = Boolean(hostSurface);
+    const compatibility=readProfileCompatibility(nm);
 
     result.verdict = buildVerdicts({
       report: extracted.report,
@@ -223,6 +226,8 @@ export function run(options = {}) {
       catalog,
       dshVersion: options.dshVersion || null,
       observationTarget:{profileId:nm,maxAgeMs:24*60*60*1000},
+      compatibilityExemptions: compatibility.exemptions,
+      compatibilityNotes: compatibility.notes,
     });
 
     result.inputs.hasRuntimeSurface=result.verdict.observation.usable;

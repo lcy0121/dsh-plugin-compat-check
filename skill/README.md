@@ -1,6 +1,6 @@
 # skill 交付与注册
 
-当前说明涵盖0.1.2及其后仓库源码修订；源码、版本和验证索引见 [Plan](../docs/Plan.md) 与 [自动统计](../docs/current-state.json)。
+当前说明面向0.1.3候选（未发布）；npm latest仍为0.1.2。源码、版本与验证索引见 [Plan](../docs/Plan.md) 与 [自动统计](../docs/current-state.json)。
 
 ## 真源与安装
 
@@ -21,7 +21,7 @@ node --test test/skill.test.mjs test/docs.test.mjs
 
 provider name与skill name均为dsh-plugin-compat-check，source=bundled、rank=600；提供list/get、description、invocation和正文。frontmatter保持单行name/description，name为kebab-case。不支持的旧键可能使文件系统发现失效；不要添加disableModelInvocation等旧字段。
 
-当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为 **7296 字符**，由docs测试核对。不要把历史探针的contentLength手工替换成新正文长度：那会篡改历史实测。
+当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为 **7764 字符**，由docs测试核对。不要把历史探针的contentLength手工替换成新正文长度：那会篡改历史实测。
 
 ## 历史证据与当前验收
 
@@ -31,8 +31,8 @@ DSH0.2.0-rc.2/macOS的历史机制实验确认：静态inject或子fiber inject�
 
 历史npm0.1.1正文contentLength=6551，末段误留发布前的“本地0.1.1未发布”。0.1.2改为版本中立的事实源说明，并补充新版DSH声明规则未适配的限制；是否已公开安装以Plan和registry的最新记录为准，不追改旧包或旧实测。
 
-npm0.1.2发布时正文contentLength=6669；本轮补充rc.2声明/UI记录边界及Markdown故障报告用法后的正文尚未进入公开包。源码文档、两份SKILL副本与已发布tarball分别核验，不能混为同一正文验收。
+npm0.1.2发布时正文contentLength=6669；本轮候选正文已补齐版本声明规则、精确豁免、目录选择与rc.2 UI/HMR边界，尚未进入公开包。源码副本、已发布tarball与各次现场正文分别核验。
 
-本轮正文的引用位置与实测限定已修订，当前使用语义以[SKILL.md](SKILL.md)为准；本轮仓库/打包核验与旧DSH现场正文分开记录于current-state。
+本轮先用旧正文做只读场景前测，暴露上述缺口；修订后的同场景与受控CLI应用结果记录于current-state，不代替模型对话或业务准确率评估。当前操作以[SKILL.md](SKILL.md)为准。
 
 compat_check现除summary/text等原有字段外，还返回经校验的完整report与baseline、工具版本和exitCode；agent需要结构化证据时应读取report，不靠文本反向解析。正文已明确源码位置和实测证据须实际存在，不能从字段缺失推断；跨通道契约与旧格式策略见 [Plan](../docs/Plan.md#23-报告结构与兼容策略)。

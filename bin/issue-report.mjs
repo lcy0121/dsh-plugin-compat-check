@@ -149,7 +149,7 @@ export function renderIssueReport(body, options = {}) {
     "",
     "certain/suspected 表示确定性；impactBasis=measured/inferred 区分实测与推断。catalogue 不是运行时观测，limited/vacuous 或客户端未验证均不能省略。声明放行、激活或没有发现不证明业务成功。",
     "",
-    "当前规则/API 目录基于 DSH 0.2.0-rc.2；声明仍按旧 peer 规则，engines.dsh 为建议。DSH 0.2.1-rc.1/rc.2 官方优先 engines.dsh，现有判定可能误报/漏报；请以实际宿主复核。",
+    "本工具0.1.3按目标版本选择已知目录：0.2.1-rc.2及以后用rc.2目录，其余/未知用旧目录；显式--catalog优先，未来版本未经认证。声明从0.2.1-rc.1起优先engines.dsh，否则回退官方peer；旧目标保留旧规则。精确豁免只表示声明获准，不证明业务成功；请以实际宿主复核。",
     "",
     "本报告只生成文本，不自动上传、创建 issue 或回复他人。",
   );

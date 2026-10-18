@@ -1,12 +1,12 @@
 {
-  "toolVersion": "0.1.2",
-  "recordedAt": "2026-10-17T13:47:24.542Z",
-  "testFiles": 34,
-  "tests": 498,
+  "toolVersion": "0.1.3",
+  "recordedAt": "2026-10-18T04:48:49.410Z",
+  "testFiles": 36,
+  "tests": 515,
   "repositoryFiles": {
-    "total": 229,
+    "total": 235,
     "fixtures": 90,
-    "other": 139
+    "other": 145
   },
   "verification": {
     "platform": "darwin",
@@ -1952,6 +1952,350 @@
         ],
         "externalIssuePosted": false,
         "actualMarketInstallVerified": false
+      },
+      "timedRecheck": {
+        "recordedAt": "2026-10-18T04:20:40Z",
+        "localTime": "2026-10-18 12:20:40 +08:00",
+        "registrySha256": "ea53264aca77f3e0a395c1dfe232cd95cc6baf1e9f15b6ee4f2ff9b130722e47",
+        "entry": {
+          "name": "dsh-plugin-compat-check#plugin",
+          "npm": "dsh-plugin-compat-check",
+          "version": "0.1.2",
+          "install": "dsh plugin --profile web add dsh-plugin-compat-check"
+        },
+        "headers": {
+          "lastModified": "Sun, 18 Oct 2026 03:58:12 GMT",
+          "cacheControl": "max-age=600",
+          "date": "Sun, 18 Oct 2026 04:20:40 GMT",
+          "age": 346
+        },
+        "outcome": "Synced. Earlier null entry is retained above as a dated snapshot, superseded by this recheck. No upstream issue needed or posted; primary market install still pending.",
+        "automation": {
+          "name": "主目录索引同步复查",
+          "id": "automation",
+          "status": "PAUSED",
+          "reason": "Monitoring completed after sync confirmation; no duplicate issue."
+        }
+      }
+    },
+    "rc2TargetedAdaptation": {
+      "recordedAt": "2026-10-18T04:50:13.260Z",
+      "sourceState": "0.1.3 local unpublished candidate; main and npm unchanged; remote CI not run for these changes",
+      "platform": "darwin",
+      "arch": "arm64",
+      "dshVersion": "0.2.1-rc.2",
+      "defaultSuite": {
+        "nodeVersion": "26.12.0",
+        "tests": 515,
+        "passed": 515,
+        "failed": 0,
+        "skipped": 0,
+        "tapSha256": "ee10715236273087ada0adbc5ad75a706480d896ceca871ececa1b9c28e94237",
+        "additionalSupportedNode": {
+          "nodeVersion": "24.19.0",
+          "tests": 515,
+          "passed": 515,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "843bb06e73d71e834c2dbcc725eea53040dcacdc21c6032d72d54061e296739c"
+        }
+      },
+      "realRc2Joint": {
+        "tests": 19,
+        "passed": 19,
+        "failed": 0,
+        "skipped": 0,
+        "tapSha256": "91f58dbb73c390fa185e866a16227105603f81eff1b2604db23f95c8b3b49242",
+        "scope": "Private actual DSH, probe identity/loader labels, exact candidate tgz and HTTP responsiveness, frozen pnpm clone, plus rc.2 declaration/metadata/browser lifecycle. Not business certification."
+      },
+      "rc2Live": {
+        "ok": true,
+        "applicable": true,
+        "dshVersion": "0.2.1-rc.2",
+        "artifactVersion": "0.1.3",
+        "declarationCases": [
+          {
+            "id": "engines-allow",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "engines-reject",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "exact-exemption",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "wrong-exemption",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "peer-fallback",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          }
+        ],
+        "ui": {
+          "available": true,
+          "navigation": "More > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+        },
+        "scope": "Controlled declaration gates and unprivileged local browser UI only; no model call, real plugin business-function or Windows certification.",
+        "subpathMetadata": true,
+        "artifactSha256": "9da5f82a41c68b3a61d356390a0660a391f49d022b85d908037b8a408b962fb0",
+        "httpReport": true,
+        "disabledDiagnostic": {
+          "status": 404,
+          "type": null
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        }
+      },
+      "engineeringRc2": {
+        "schemaVersion": 1,
+        "kind": "plugin-compat-check/engineering-live",
+        "ok": true,
+        "platform": "darwin",
+        "arch": "arm64",
+        "nodeVersion": "26.12.0",
+        "dshVersion": "0.2.1-rc.2",
+        "artifactVersion": "0.1.3",
+        "pressureFunctions": 4000,
+        "reportAvailable": true,
+        "reportMilliseconds": 177.42029200000025,
+        "http": {
+          "samples": 11,
+          "refreshingSamples": 11,
+          "maxMilliseconds": 5.581749999999829
+        },
+        "scope": "Owned web profile, actual tgz and synthetic uncalled functions; HTTP responsiveness only, not business behavior or a production performance guarantee.",
+        "cleanup": {
+          "hostStopped": true,
+          "privateRootRemoved": true
+        }
+      },
+      "declarationPolicy": {
+        "modernFrom": "0.2.1-rc.1",
+        "enginesFirst": true,
+        "officialPeersFallback": true,
+        "includesPrerelease": true,
+        "workspaceAliases": "peer only: workspace:^/~/* resolve to exact runtime; engines do not",
+        "independentGrants": "Read-only profile/compatibility.json; exact package name/version and exact runtime, invalid row ignored as a whole, valid rows retained, invalid fields never exemptable.",
+        "budget": "64KiB ordinary-file read; nonblocking open avoids FIFO hangs; unreadable/malformed/oversize is unobserved plus coverage notes.",
+        "legacyPolicyPreserved": true
+      },
+      "catalogue": {
+        "newFile": "rules/dsh-api-catalog-0.2.1-rc.2.json",
+        "legacyFile": "rules/dsh-api-catalog.json",
+        "legacySha256": "1331bf3220c1e06cfe087237077118d002dc04c32d027ce01da74c6a0d1dc9ad",
+        "legacyBytesUnchanged": true,
+        "selection": "Target >=0.2.1-rc.2 selects rc.2; older/unknown selects legacy; explicit CLI override wins. Future runtime versions are unverified.",
+        "asarDataOffset": "8 + headerSize; bounded header, file bounds, complete read, strict UTF8/JSON and recorded archive SHA256 verified",
+        "electronCrossCheck": {
+          "exactBytesAndPrefixSuffix": true,
+          "hostApiSha256": "ec9d470867ab2b08c50c189fe10bb00201839b67e0f3866ad081daff1284c6a0",
+          "clientRunnerSha256": "ad3488b2cdbe6b5077962aa05dbeff9499f5b782838f1b658c6c902aa538bcd0",
+          "appBootBytes": 203572,
+          "appBootSha256": "5135179ac810e4f626f32ec3bdc3293dc7d2028e8aa92e5e0c006f1a33b78e76"
+        },
+        "differences": {
+          "host": {
+            "services": 98,
+            "methods": 291,
+            "added": [
+              "claudeCodeMods",
+              "cotTranslation",
+              "pluginMarket",
+              "remoteAccess",
+              "translator",
+              "webApp",
+              "workingDirectory",
+              "worktrees"
+            ],
+            "removed": [
+              "invariants"
+            ],
+            "changedMethods": {
+              "agentPresets": {
+                "added": [
+                  "inspectCompositions"
+                ],
+                "removed": []
+              },
+              "connection": {
+                "added": [
+                  "admitConnection",
+                  "createPeer"
+                ],
+                "removed": []
+              },
+              "hmr": {
+                "added": [
+                  "reconcileProfile"
+                ],
+                "removed": []
+              },
+              "llm": {
+                "added": [
+                  "imageRequestTarget"
+                ],
+                "removed": []
+              },
+              "ptcRuntime": {
+                "added": [
+                  "release"
+                ],
+                "removed": []
+              },
+              "subagents": {
+                "added": [
+                  "drainChildren",
+                  "drainDescendants",
+                  "startActivation",
+                  "waitForChildren"
+                ],
+                "removed": [
+                  "drainContinuableChildren",
+                  "drainContinuableDescendants",
+                  "start",
+                  "startContinuable"
+                ]
+              },
+              "systemPrompt": {
+                "added": [
+                  "refreshContext"
+                ],
+                "removed": []
+              },
+              "webServer": {
+                "added": [
+                  "getOrigin"
+                ],
+                "removed": []
+              }
+            }
+          },
+          "client": {
+            "services": 8,
+            "methods": 43,
+            "added": [],
+            "removed": [],
+            "changedMethods": {}
+          }
+        },
+        "rulesReview": "Existing semantic rules retained for their original call sites. New methods not assumed equivalent renames; no unsupported new severity rule. Unknown impact retains fallback."
+      },
+      "lifecycle": {
+        "registrationDisposersReturned": true,
+        "ownedTimersAndHandleDisposed": true,
+        "oldCleanupPreservesNewHandle": true,
+        "inflightDisposalRegression": "Pause first actual pluginManager.list, dispose generation, then release: failure envelope, no baseline created. Also guard before baseline transaction and after final async import/at serve boundary.",
+        "cancellationRegression": "Owned fake dsh startup then SIGTERM: detached host and private root removed. All command calls (including official metadata), pending browser startup and host groups now tracked.",
+        "workerLimit": "In-flight worker remains governed by original timeout/memory budget, not immediate cancellation."
+      },
+      "independentReview": {
+        "importantFindings": 2,
+        "fixed": 2,
+        "additionalCancellationCallSiteFixed": true,
+        "scope": "Read-only diff, source and targeted behavior review; reviewer did not independently rerun all live/default tests.",
+        "finalConclusion": "Both P2 findings and the additional metadata command cancellation call-site fixed; final read-only review has no unresolved important issue."
+      },
+      "skillReference": {
+        "baseline": "Old skill left modern declarations/grants/catalogue/current navigation and HMR unknown.",
+        "after": "Updated reference read; three actual controlled static CLI cases passed with original exit codes 0/0/1, modern catalogue and no baseline. Fixture setup supplied as test apparatus; no host/network/install/post.",
+        "bodyLength": 7764,
+        "sourceSha256": "2ec999a96d86bb62cdcc689ea69e8de2ae5564f097720ba5b99bb456856a956f",
+        "scope": "One reference/application scenario, not model reliability or business certification."
+      },
+      "ciConfiguration": {
+        "node": [
+          "22.19.0",
+          "24"
+        ],
+        "linuxDsh": [
+          "0.2.0-rc.2",
+          "0.2.1-rc.2"
+        ],
+        "rc2BrowserRequired": true,
+        "artifacts": [
+          "linux-live.tap",
+          "linux-engineering.json",
+          "linux-rc2.json"
+        ],
+        "status": "Configured, not remotely run for this unpushed change."
+      },
+      "metadata": {
+        "observedAt": "2026-10-18T04:45:44.865Z",
+        "npmLatest": "0.1.2",
+        "errors": 0,
+        "notices": [
+          "Local unpublished candidate version ahead of npm",
+          "npm README is the published 0.1.2 text, not local candidate"
+        ],
+        "sourcesAvailable": true
+      },
+      "limitations": [
+        "No model invocation or complete third-party business-function certification",
+        "No Windows real environment; remains deferred by user",
+        "Historical missing-tab root cause not established by current successful navigation",
+        "Older CI and dated runtime records do not certify current changes"
+      ],
+      "realLegacyJoint": {
+        "dshVersion": "0.2.0-rc.2",
+        "tests": 19,
+        "passed": 19,
+        "failed": 0,
+        "skipped": 0,
+        "rc2SpecificAcceptance": "applicable=false; its wrapper passed without running rc.2 declarations/UI; the other 18 checks exercised legacy and offline behavior",
+        "tapSha256": "da558e8198b4fca04e2a02fd1ff54ef94ddcc5dfda4fa61311c4622ef4efa094",
+        "engineering": {
+          "schemaVersion": 1,
+          "kind": "plugin-compat-check/engineering-live",
+          "ok": true,
+          "platform": "darwin",
+          "arch": "arm64",
+          "nodeVersion": "26.12.0",
+          "dshVersion": "0.2.0-rc.2",
+          "artifactVersion": "0.1.3",
+          "pressureFunctions": 4000,
+          "reportAvailable": true,
+          "reportMilliseconds": 190.15487500000017,
+          "http": {
+            "samples": 13,
+            "refreshingSamples": 12,
+            "maxMilliseconds": 4.18079200000011
+          },
+          "scope": "Owned web profile, actual tgz and synthetic uncalled functions; HTTP responsiveness only, not business behavior or a production performance guarantee.",
+          "cleanup": {
+            "hostStopped": true,
+            "privateRootRemoved": true
+          }
+        },
+        "runtime": "Official pinned npm DSH in an owned temporary prefix, no global runtime change"
       }
     }
   },

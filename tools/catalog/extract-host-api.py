@@ -9,12 +9,12 @@
 用法:
   tools/catalog/extract-host-api.py [app.asar 路径] [输出 json 路径]
 默认读 /Applications/DeepSeek Harness.app/Contents/Resources/app.asar，
-默认写到 rules/dsh-api-catalog.json。
+默认按归档内版本写到 rules/dsh-api-catalog-<version>.json；旧0.2.0-rc.2仍写旧文件，避免新版覆盖旧基准。
 """
-import json, re, struct, sys, os, pathlib
+import json, re, struct, sys, os, pathlib, hashlib
 
 ASAR = sys.argv[1] if len(sys.argv) > 1 else "/Applications/DeepSeek Harness.app/Contents/Resources/app.asar"
-OUT = sys.argv[2] if len(sys.argv) > 2 else "rules/dsh-api-catalog.json"
+OUT = sys.argv[2] if len(sys.argv) > 2 else None
 HOST_TARGET = "dsh/node_modules/@deepseek-ai/dsh-tool-cordis/lib/types/api-catalog.js"
 CLIENT_TARGET = "dsh/node_modules/@deepseek-ai/dsh-cordis-client-runner/lib/client.js"
 
@@ -23,22 +23,38 @@ def read_asar_entry(asar, logical_path):
     """asar 归档：8 字节 pickle 头 + JSON 目录 + 数据区。按逻辑路径取一个文件。"""
     with open(asar, "rb") as f:
         head = f.read(16)
+        if len(head) != 16:
+            raise ValueError("Truncated ASAR header")
         # 实测布局（Electron asar）：
         #   [0:4]  = 4（pickle 头长度）
         #   [4:8]  = headerSize（4 字节对齐后的长度）
-        #   [8:12] = headerSize（未对齐）
+        #   [8:12] = header pickle payload 长度（headerSize - 4）
         #   [12:16]= JSON 实际长度
         #   [16:]  = JSON，其后是数据区
         json_size = struct.unpack("<I", head[12:16])[0]
         header_size = struct.unpack("<I", head[4:8])[0]
+        if (struct.unpack("<I", head[:4])[0] != 4 or header_size < 8
+                or header_size > 64 * 1024 * 1024 or json_size > header_size - 8):
+            raise ValueError("Invalid ASAR header lengths")
         f.seek(16)
         header = json.loads(f.read(json_size).decode("utf-8"))
-        store_offset = 16 + header_size
+        store_offset = 8 + header_size
         node = header
         for part in logical_path.split("/"):
             node = node["files"][part]
-        f.seek(store_offset + int(node["offset"]))
-        return f.read(int(node["size"]))
+        if node.get("unpacked") or "link" in node:
+            raise ValueError("Only packed regular ASAR entries are supported")
+        offset, size = int(node["offset"]), int(node["size"])
+        if offset < 0 or size < 0 or store_offset + offset + size > os.fstat(f.fileno()).st_size:
+            raise ValueError("ASAR entry outside archive bounds")
+        f.seek(store_offset + offset)
+        data = f.read(size)
+        if len(data) != size:
+            raise ValueError("Truncated ASAR entry")
+        integrity = node.get("integrity", {})
+        if integrity.get("algorithm") == "SHA256" and hashlib.sha256(data).hexdigest() != integrity.get("hash"):
+            raise ValueError("ASAR entry SHA256 mismatch")
+        return data
 
 
 def method_names(seg):
@@ -79,12 +95,14 @@ def bracket_slice(text, start):
 
 
 def main():
-    host_src = read_asar_entry(ASAR, HOST_TARGET).decode("utf-8", errors="ignore")
+    host_bytes = read_asar_entry(ASAR, HOST_TARGET)
+    host_src = host_bytes.decode("utf-8")
     i = host_src.index("export const SERVICE_API")
     host = method_names(host_src[i:host_src.index("export const EVENT_API")])
 
     # 客户端目录形状不同（const SERVICE_API = [ ... ]），用括号配平取整段
-    client_src = read_asar_entry(ASAR, CLIENT_TARGET).decode("utf-8", errors="ignore")
+    client_bytes = read_asar_entry(ASAR, CLIENT_TARGET)
+    client_src = client_bytes.decode("utf-8")
     m = re.search(r"SERVICE_API\s*[:=]\s*\[", client_src)
     client = method_names(bracket_slice(client_src, m.end() - 1)) if m else {}
 
@@ -93,6 +111,13 @@ def main():
               file=sys.stderr)
         sys.exit(1)
 
+    try:
+        version = json.loads(read_asar_entry(ASAR, "dsh/node_modules/@deepseek-ai/dsh-app-boot/package.json"))["version"]
+    except KeyError:
+        version = None
+    if OUT is None and (not isinstance(version, str) or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:[-+][A-Za-z0-9.-]+)?", version)):
+        raise ValueError("Unknown DSH version: provide an explicit output path")
+    target = OUT or ("rules/dsh-api-catalog.json" if version == "0.2.0-rc.2" else f"rules/dsh-api-catalog-{version}.json")
     out = {
         "_note": "从 DSH 桌面端 app.asar 内**官方生成**的 API 目录解析出的服务与方法清单。"
                  "host = Node 宿主侧；client = 浏览器客户端侧。它随 DSH 版本变化 —— 换版本后必须重新生成。"
@@ -100,12 +125,14 @@ def main():
                  "但运行时实现有方法；方法级判定必须优先用运行时面（探针），拿目录当运行时面会海量误报。",
         "_source": {"host": HOST_TARGET, "client": CLIENT_TARGET},
         "_asar": ASAR,
+        "_dshVersion": version,
+        "_sourceSha256": {"host": hashlib.sha256(host_bytes).hexdigest(), "client": hashlib.sha256(client_bytes).hexdigest()},
         "host": {k: {"methods": v} for k, v in sorted(host.items())},
         "client": {k: {"methods": v} for k, v in sorted(client.items())},
     }
-    pathlib.Path(OUT).write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    pathlib.Path(target).write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"✓ 宿主 {len(host)} 个服务 / {sum(len(v) for v in host.values())} 个方法；"
-          f"客户端 {len(client)} 个服务 / {sum(len(v) for v in client.values())} 个方法 → {OUT}")
+          f"客户端 {len(client)} 个服务 / {sum(len(v) for v in client.values())} 个方法 → {target}")
 
 
 main()

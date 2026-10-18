@@ -29,6 +29,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: test
+    strategy:
+      matrix:
+        dsh: ['0.2.0-rc.2', '0.2.1-rc.2']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -39,22 +42,25 @@ jobs:
       - name: Install pinned official DSH and pnpm in a private runner prefix
         shell: bash
         run: |
-          npm install --prefix "$RUNNER_TEMP/dsh-runtime" --no-audit --no-fund @deepseek-ai/dsh@0.2.0-rc.2 pnpm@11.25.0
+          npm install --prefix "$RUNNER_TEMP/dsh-runtime" --no-audit --no-fund @deepseek-ai/dsh@${{ matrix.dsh }} pnpm@11.25.0
           echo "$RUNNER_TEMP/dsh-runtime/node_modules/.bin" >> "$GITHUB_PATH"
       - name: Real private Linux DSH, loader labels and artifact responsiveness
         shell: bash
         env:
           DSC_SLOW: '1'
+          DSC_REQUIRE_RC2_UI: '1'
+          DSC_RC2_LIVE_LOG: linux-rc2.json
           DSC_ENGINEERING_LIVE_LOG: linux-engineering.json
         run: |
           test_status=0
-          node --test --test-reporter=tap test/probe-boot.test.mjs test/labels.test.mjs test/engineering-live.test.mjs test/profile-lock.test.mjs > linux-live.tap 2>&1 || test_status=$?
+          node --test --test-reporter=tap test/probe-boot.test.mjs test/labels.test.mjs test/engineering-live.test.mjs test/profile-lock.test.mjs test/rc2-live.test.mjs > linux-live.tap 2>&1 || test_status=$?
           cat linux-live.tap
           exit "$test_status"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: linux-live-evidence
+          name: linux-live-evidence-${{ matrix.dsh }}
           path: |
             linux-live.tap
             linux-engineering.json
+            linux-rc2.json
