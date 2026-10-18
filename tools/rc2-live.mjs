@@ -9,6 +9,11 @@ import { createRequire } from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { command, stopOwnedChild } from "../lib/probe-runner.mjs";
 import { launchChromePipe } from "../lib/debugger.mjs";
+import {
+  configureChineseBrowser,
+  disableCredentialOnboarding,
+  loadedNavigation,
+} from "./browser-session.mjs";
 import { run as check } from "../bin/compat-check.mjs";
 import { TOOL_VERSION } from "../lib/version.mjs";
 
@@ -68,6 +73,7 @@ const init = async (name) => {
     "web",
     "--dump-config",
   ]);
+  disableCredentialOnboarding(profilePath(name));
   return profilePath(name);
 };
 async function boot(name) {
@@ -392,9 +398,22 @@ try {
         userDataDir: path.join(root, "chrome"),
       });
       chrome = await chromeStarting;
+      await configureChineseBrowser(chrome);
+      await chrome.send("Emulation.setDeviceMetricsOverride", {
+        width: 1280,
+        height: 900,
+        deviceScaleFactor: 1,
+        mobile: false,
+      });
       await chrome.send("Runtime.enable");
       await chrome.send("Page.enable");
-      await chrome.send("Page.navigate", { url: host.url });
+      await chrome.send("Page.setLifecycleEventsEnabled", { enabled: true });
+      const navigation = await chrome.send("Page.navigate", { url: host.url });
+      requireTrue(!navigation.errorText, "Browser navigation failed");
+      await poll(
+        () => loadedNavigation(chrome.events, navigation.loaderId),
+        "Browser new document did not load",
+      );
       const evalx = async (expression) =>
         (
           await chrome.send("Runtime.evaluate", {
@@ -410,10 +429,13 @@ try {
           ),
         "Browser shell did not load",
       );
-      await evalx(
-        `[...document.querySelectorAll('button')].find(b=>b.innerText==='继续')?.click()`,
+      const welcome = `[...document.querySelectorAll('button')].find(b=>b.innerText==='继续')`;
+      await poll(
+        () => evalx(`Boolean(${welcome})`),
+        "Welcome dialog did not mount",
       );
-      await wait(200);
+      await evalx(`${welcome}.click()`);
+      await poll(() => evalx(`!${welcome}`), "Welcome dialog did not close");
       const settings = async () => {
         await evalx(
           `document.querySelector('button[aria-label="账号菜单"]').click()`,

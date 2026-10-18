@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.3",
-  "recordedAt": "2026-10-18T13:34:29.793Z",
+  "recordedAt": "2026-10-18T13:57:37.293Z",
   "testFiles": 37,
   "tests": 529,
   "repositoryFiles": {
-    "total": 240,
+    "total": 241,
     "fixtures": 90,
-    "other": 150
+    "other": 151
   },
   "verification": {
     "platform": "darwin",
@@ -2807,7 +2807,7 @@
         },
         "publishedTarballSha256": "40b7ce32a6d90bff069b3bb4d0e5dd692281e0ac0598163196b816ac12335b6f",
         "publishedIntegrity": "sha512-x7+/YmH/HrSlXWOBZkhL7qQqcDgZEnDcWrhR5GlizzUZjz+w84FbQ6jo8trJC9tyaQxMaNvXVnXwDxn4I330Ew==",
-        "combinedArtifactDigest": "0180c12fedee338606cfb588722579a2bde01d8c1d2ff1ba46b63437a752aa15",
+        "combinedArtifactDigest": "8ef87df8375fde82caae6c13c850f6c6425dd8e444ba00199ea1456193d878fd",
         "sourceHashes": {
           "package.json": "e557306a7af1f8ea020caffae62c36df4591ced90cf4626db464df5dce8fcc36",
           "lib/index.js": "00080091516184efe0005d8521cb890ae89032b9abcd514b752c4ef7642fa129",
@@ -2816,8 +2816,9 @@
           "src/html-route.ts": "73974a8649ac8332258dae896f0129da2b16541ad9ea1ab5cb1c40576ec6885e"
         },
         "harnessSources": {
-          "tools/business-live.mjs": "f8e5378bffc4c34a608e9b5306b6c471cf33c7ea282c5289f3aeb9d7f5713b6d",
-          "tools/business-sidebar.mjs": "dfd5b0f3b945c953260ac248b5e5fc0665ba6393a84a76e55e9abfd6cacb4672"
+          "tools/business-live.mjs": "f4812fd6f818b0a936766a6427d06737abc8fa06172d285f6707e604fd3df9f7",
+          "tools/browser-session.mjs": "cac570102145b75391ea264286f89d9bdf4cbfbbae517c583b323e9026371719",
+          "tools/business-sidebar.mjs": "dd57ff5ea02d30fb55039d6f1c30f149e382b4f71e3802ed08c0622f6c9c824e"
         }
       },
       "prediction": {
@@ -2826,8 +2827,8 @@
         "loaderLabelsUsed": false,
         "autoProbeDiscovery": false,
         "sealedBeforeActions": true,
-        "sha256": "48b5372deba1b240a565871f5c2129030b7c0dcc5346463059b862865e25daf5",
-        "predictedAt": "2026-10-18T13:31:11.744Z",
+        "sha256": "20655752bfb38ce3feb1fa222b1abb39da71e55f7ea4ab6ee186e2674a761f11",
+        "predictedAt": "2026-10-18T13:56:00.754Z",
         "casePlan": [
           {
             "caseId": "sidebar.save.utf8-bom.healthy",
@@ -2864,7 +2865,7 @@
       },
       "businessTruth": {
         "source": "browser-action+profile-state",
-        "collectedAt": "2026-10-18T13:31:15.063Z",
+        "collectedAt": "2026-10-18T13:56:04.519Z",
         "rows": [
           {
             "caseId": "sidebar.save.utf8-bom.healthy",
@@ -3089,9 +3090,9 @@
           }
         ],
         "artifactHashes": {
-          "predictions.json": "2a479fb415020cd0c4ef1a0bc6e28b0922f8140b998211d8738b77ffc3c61920",
-          "labels.json": "457e272499381c7c04fabff05e127bcc4084e9636bb67679c22b44672d0761d1",
-          "measurement.json": "49b63887fb8a0be2b95b3041602a03efc7dcc783e7e3e6312d27b8375a96baca"
+          "predictions.json": "484e669bbeee2e99fee69e8b48640663ee740619bf8f3d1a3c6f723e874ef186",
+          "labels.json": "0bb09b6ddc26f4bb53bbdd82f4b8ccbcdbf3ad61af9e6540f4de091b1ab571a3",
+          "measurement.json": "b15a50499c931ba043cf1f9cd6599ea13b351638fb8a117d5a419b699273f496"
         },
         "screenshots": {
           "sidebar.save.utf8-bom.healthy": "c17cff2ee8c62a366832d7e47174bba3fdaada5500fb049f3bbaf0f0a8a038a6",
@@ -3103,11 +3104,14 @@
         },
         "driverCorrections": [
           "Page.navigate loaderId must match Page.lifecycleEvent load before DOM actions; old document cannot satisfy readiness",
-          "Fresh Chrome welcome dialog mounts asynchronously after shell: wait for Continue and its dismissal before settings navigation"
+          "Fresh Chrome welcome dialog mounts asynchronously after shell: wait for Continue and its dismissal before settings navigation",
+          "Explicit CDP Chinese locale and official private credentialOnboarding=false config; do not claim model readiness",
+          "Market navigation follows current visible DOM as async onboarding can close settings; navigation only, never retries business POST",
+          "Loaded preview lacking expected h1 is business failure; document navigation/CDP failure remains harness error"
         ],
         "independentReview": {
-          "importantFound": 1,
-          "importantFixed": 1,
+          "importantFound": 2,
+          "importantFixed": 2,
           "minorSourceSpansFixed": true,
           "scope": "Read-only code and documentation consistency plus targeted offline checks; final default/live outcomes are primary-runner evidence"
         },
@@ -3117,9 +3121,39 @@
           "bodyLength": 7787,
           "sourceSha256": "e0b3f7b1269a3af547f421de92bb1ef91f9eefca396ba4d9f3858ef8c1d6f10d",
           "packagedCopyEqual": true
+        },
+        "finalRealBusiness": {
+          "tests": 17,
+          "passed": 17,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "475cb490de559797819d862bf5d039799a4b2ee4d3302d3ab1d26e9df4aedd27",
+          "scope": "14 offline +2 actual plugin cohorts +1 real Chrome driver boundary; edge classification status/disk observations constructed"
+        },
+        "browserBoundary": {
+          "tests": 1,
+          "actualChrome": true,
+          "scope": "Chrome forced from en-US to zh-CN; missing DOM heading and scorer classification checked. Status200/disk-success in this edge check are constructed observations, not a corrupted-server-response end-to-end test."
+        },
+        "finalJointAcceptance": {
+          "tests": 36,
+          "passed": 36,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "9116d8f9248ec6147f851180f3ed0b87c5710807a96fa20747487735516352d4",
+          "scope": "Sequential local rc.2 joint run: existing19 checks plus business17; includes offline and actual host/browser checks"
+        },
+        "finalDefaultSuite": {
+          "tests": 529,
+          "passed": 529,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "8a5c7ed45732d5e5538bef4bb82f64fc0a68a7fc43b9337b3ecf4396da3f5d55",
+          "nodeVersion": "26.12.0"
         }
       },
       "controls": {
+        "credentialOnboarding": "Disabled through official private-profile config; no model readiness or credential claim",
         "catalogue": "No market catalog; published sidebar + owned empty official session and two disposable workspace files",
         "faults": "Browser intercepts only POST /sidebar/write with HTTP503; installed plugin bytes unchanged",
         "scope": "Save/preview HTTP path for UTF8 BOM/UTF16LE + CRLF: healthy, blocked and recovery. Not editor widget UI, natural version regression, or original-plugin defect certification."
@@ -3186,7 +3220,30 @@
         },
         "prepublishGate": true,
         "formatCheck": true,
-        "generatedContractCheck": true
+        "generatedContractCheck": true,
+        "finalRealBusiness": {
+          "tests": 17,
+          "passed": 17,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "475cb490de559797819d862bf5d039799a4b2ee4d3302d3ab1d26e9df4aedd27"
+        },
+        "finalJointAcceptance": {
+          "tests": 36,
+          "passed": 36,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "9116d8f9248ec6147f851180f3ed0b87c5710807a96fa20747487735516352d4",
+          "scope": "Sequential local rc.2 joint run: existing19 checks plus business17; includes offline and actual host/browser checks"
+        },
+        "finalDefaultSuite": {
+          "tests": 529,
+          "passed": 529,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "8a5c7ed45732d5e5538bef4bb82f64fc0a68a7fc43b9337b3ecf4396da3f5d55",
+          "nodeVersion": "26.12.0"
+        }
       },
       "artifact": {
         "version": "0.1.3",
@@ -3220,7 +3277,8 @@
           "docs/Plan.md",
           "docs/GPT审计及重构方案文档.md",
           "docs/extraction-findings.md",
-          "docs/current-state.json"
+          "docs/current-state.json",
+          "tools/parity/fixtures/hang-cycle/README.md"
         ],
         "historicalEvidencePreserved": true,
         "versionNeutralPackagedReadmeAndSkill": true,
@@ -3238,7 +3296,11 @@
         "upstreamStatus": "2026-10-18 release audit:1024#22,0xsline#717,bruc3van#138 still open without comments; dshworks#169 merged; no external message sent"
       },
       "ci": {
-        "status": "Not run for final source until authorized push"
+        "status": "First run failed due English-locale selectors in market/rc2 browser drivers; fix pending new CI",
+        "failedRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39132486152",
+        "sourceCommit": "3da84ed68f381f26b00f12456f249e994c32ee91",
+        "failureScope": "Node22/24 and legacy Linux passed; rc2 market navigation and settings navigation were driver errors, not plugin verdicts",
+        "packageArtifactUnchanged": true
       },
       "publication": {
         "npm": false,

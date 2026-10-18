@@ -495,3 +495,62 @@ test("navigation completion belongs to the requested new document, never the pre
   );
   assert.equal(m.loadedNavigation([event("old", "load")], undefined), false);
 });
+
+describe(
+  "real browser driver boundaries",
+  { skip: process.env.DSC_SLOW !== "1" },
+  () => {
+    test("browser locale is explicit and a loaded preview without its heading is a business failure", async () => {
+      const helpers = await import("../tools/browser-session.mjs").catch(
+        () => ({}),
+      );
+      assert.equal(typeof helpers.configureChineseBrowser, "function");
+      const { launchChromePipe } = await import("../lib/debugger.mjs");
+      const fs = await import("node:fs");
+      const exe =
+        process.env.DSC_CHROME ||
+        [
+          "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+          "/usr/bin/google-chrome",
+          "/usr/bin/chromium",
+        ].find((p) => fs.existsSync(p));
+      assert.ok(exe, "Real Chrome required");
+      const browser = await launchChromePipe(exe);
+      try {
+        const evaluate = async (expression) =>
+          (
+            await browser.send("Runtime.evaluate", {
+              expression,
+              returnByValue: true,
+              awaitPromise: true,
+            })
+          ).result?.value;
+        const { userAgent } = await browser.send("Browser.getVersion");
+        await browser.send("Network.setUserAgentOverride", {
+          userAgent,
+          acceptLanguage: "en-US,en",
+        });
+        assert.equal(await evaluate("navigator.language"), "en-US");
+        await helpers.configureChineseBrowser(browser);
+        assert.equal(await evaluate("navigator.language"), "zh-CN");
+        await evaluate(
+          'document.body.innerHTML="<p>loaded response without expected business content</p>"',
+        );
+        const uiAfterReload = await helpers.observeHeading(evaluate, "saved");
+        assert.equal(uiAfterReload, false);
+        assert.equal(
+          api.businessOutcome({
+            requestStatus: 200,
+            persisted: true,
+            uiAfterReload,
+          }),
+          "failed",
+        );
+        await evaluate('document.body.innerHTML="<h1>saved</h1>"');
+        assert.equal(await helpers.observeHeading(evaluate, "saved"), true);
+      } finally {
+        await browser.close();
+      }
+    });
+  },
+);

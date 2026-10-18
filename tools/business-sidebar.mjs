@@ -3,6 +3,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { observeHeading } from "./browser-session.mjs";
 import { businessOutcome } from "./business-metrics.mjs";
 export const sidebarPin = {
   package: "dsh-better-sidebar",
@@ -155,15 +156,10 @@ export async function sidebarCases(driver) {
       ).href;
       await navigate(preview);
       await poll(
-        () =>
-          evalx(
-            'document.readyState === "complete" && Boolean(document.querySelector("h1"))',
-          ),
+        () => evalx('document.readyState === "complete"'),
         "Sidebar HTML preview unavailable",
       );
-      const uiAfterReload = await evalx(
-        `document.querySelector('h1').textContent===${JSON.stringify(desired)}`,
-      );
+      const uiAfterReload = await observeHeading(evalx, desired);
       const observed = {
         requestStatus: response.status,
         persisted,

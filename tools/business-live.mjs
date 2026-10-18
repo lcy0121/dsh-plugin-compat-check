@@ -6,6 +6,11 @@ import path from "node:path";
 import os from "node:os";
 import crypto from "node:crypto";
 import http from "node:http";
+import {
+  configureChineseBrowser,
+  disableCredentialOnboarding,
+  loadedNavigation,
+} from "./browser-session.mjs";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { command, stopOwnedChild } from "../lib/probe-runner.mjs";
@@ -84,18 +89,7 @@ export function completedResponse(rows, finished, failed, route, start) {
     throw Error("Business request transport did not finish");
   return match && finished.has(match.requestId) ? match : null;
 }
-export function loadedNavigation(events, loaderId) {
-  return (
-    typeof loaderId === "string" &&
-    Boolean(loaderId) &&
-    events.some(
-      (e) =>
-        e.method === "Page.lifecycleEvent" &&
-        e.params.loaderId === loaderId &&
-        e.params.name === "load",
-    )
-  );
-}
+export { loadedNavigation } from "./browser-session.mjs";
 export async function runBusiness({ outDir, suite = "market" } = {}) {
   if (!["market", "sidebar"].includes(suite))
     throw Error("Unknown business suite: " + suite);
@@ -225,6 +219,7 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
       "web",
       "--dump-config",
     ]);
+    disableCredentialOnboarding(profile);
     await exec("dsh", [
       "plugin",
       "--profile",
@@ -275,6 +270,7 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
       harnessSources: Object.fromEntries(
         [
           "tools/business-live.mjs",
+          "tools/browser-session.mjs",
           ...(sidebar ? ["tools/business-sidebar.mjs"] : []),
         ].map((f) => [f, hash(fs.readFileSync(path.join(REPO, f)))]),
       ),
@@ -403,6 +399,7 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
       deviceScaleFactor: 1,
       mobile: false,
     });
+    await configureChineseBrowser(chrome);
     await chrome.send("Runtime.enable");
     await chrome.send("Page.enable");
     await chrome.send("Page.setLifecycleEventsEnabled", { enabled: true });
@@ -421,7 +418,9 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
                 r.exceptionDetails.text,
             )
               .split("\n")[0]
-              .replaceAll(root, "<private>"),
+              .replaceAll(root, "<private>") +
+            " at " +
+            expression.slice(0, 200).replaceAll(root, "<private>"),
         );
       return r.result?.value;
     };
@@ -444,73 +443,49 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
     }
     const textButton = (t) =>
       `[...document.querySelectorAll('button')].find(b=>b.innerText.trim()===${JSON.stringify(t)})`;
-    async function click(t) {
+    async function clickElement(selector, message) {
       await poll(
-        () => evalx(`Boolean(${textButton(t)})`),
-        "Missing business control: " + t,
+        () =>
+          evalx(
+            `(()=>{const b=${selector};if(!b||!b.isConnected||b.disabled||!b.getClientRects().length)return false;b.click();return true;})()`,
+          ),
+        message,
       );
-      await evalx(`${textButton(t)}.click()`);
     }
-    let onboardingHandled = false;
+    const click = (t) =>
+      clickElement(textButton(t), "Missing business control: " + t);
     async function openMarket(tab) {
       await navigate(url);
+      // The official shell may close settings when its async onboarding step appears.
+      // Navigate idempotently from the current visible DOM until the target card is ready.
+      // Only navigation is repeated: no business POST is issued by this state machine.
       await poll(
         () =>
-          evalx(
-            "Boolean(document.querySelector('button[aria-label=\"账号菜单\"]'))",
-          ),
-        "Business shell unavailable",
+          evalx(`(()=>{
+        const visible=e=>e&&e.isConnected&&e.getClientRects().length&&!e.closest('[inert]')&&!e.disabled;
+        const button=t=>[...document.querySelectorAll('button')].find(b=>visible(b)&&b.innerText.trim()===t);
+        const cont=button('继续');if(cont){cont.click();return false;}
+        const discover=button('发现');
+        if(discover){
+          if(${JSON.stringify(tab)}==='installed'){
+            if(button('添加备注')||button('编辑备注'))return true;
+            const installed=[...document.querySelectorAll('button')].find(b=>visible(b)&&b.innerText.startsWith('已安装'));
+            if(installed)installed.click();
+          }else{
+            if([...document.querySelectorAll('button[aria-label="加入收藏"],button[aria-label="取消收藏"]')].some(visible))return true;
+            discover.click();
+          }
+          return false;
+        }
+        const market=button('插件市场');if(market){market.click();return false;}
+        const settings=[...document.querySelectorAll('[role="menuitem"]')].find(b=>visible(b)&&b.innerText.startsWith('设置'));
+        if(settings){settings.click();return false;}
+        const account=document.querySelector('button[aria-label="账号菜单"]');
+        if(visible(account)&&account.getAttribute('aria-expanded')!=='true')account.click();
+        return false;
+      })()`),
+        "Market target card did not become ready",
       );
-      if (!onboardingHandled) {
-        // Fresh private browser: the welcome dialog mounts after the shell.
-        // Optional immediate clicks can miss it and later dialog work steals settings focus.
-        await click("继续");
-        await poll(
-          () => evalx(`!${textButton("继续")}`),
-          "Welcome dialog did not close",
-        );
-        onboardingHandled = true;
-      }
-      await evalx(`${textButton("关闭")}?.click()`);
-      await evalx(
-        "document.querySelector('button[aria-label=\"账号菜单\"]').click()",
-      );
-      await poll(
-        () =>
-          evalx(
-            `Boolean([...document.querySelectorAll('[role="menuitem"]')].find(b=>b.innerText.startsWith('设置')))`,
-          ),
-        "Settings menu unavailable",
-      );
-      await evalx(
-        `[...document.querySelectorAll('[role="menuitem"]')].find(b=>b.innerText.startsWith('设置')).click()`,
-      );
-      await click("插件市场");
-      await poll(
-        () => evalx(`Boolean(${textButton("发现")})`),
-        "Market did not mount",
-      );
-      if (tab === "installed") {
-        await evalx(
-          `[...document.querySelectorAll('button')].find(b=>b.innerText.startsWith('已安装')).click()`,
-        );
-        await poll(
-          () =>
-            evalx(
-              `Boolean(${textButton("添加备注")}||${textButton("编辑备注")})`,
-            ),
-          "Installed business card unavailable",
-        );
-      } else {
-        await click("发现");
-        await poll(
-          () =>
-            evalx(
-              `Boolean(document.querySelector('button[aria-label="加入收藏"],button[aria-label="取消收藏"]'))`,
-            ),
-          "Pinned catalog business card unavailable",
-        );
-      }
     }
     async function drain() {
       for (; eventCursor < chrome.events.length; eventCursor++) {
@@ -655,8 +630,9 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
             });
           const before = responses.length;
           if (note) {
-            await evalx(
-              `(${textButton("添加备注")}||${textButton("编辑备注")}).click()`,
+            await clickElement(
+              `(${textButton("添加备注")}||${textButton("编辑备注")})`,
+              "Note control unavailable",
             );
             await poll(
               () =>
@@ -671,8 +647,9 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
             await click("保存");
           } else {
             const label = control === "none" ? "加入收藏" : "取消收藏";
-            await evalx(
-              `document.querySelector('button[aria-label="${label}"]').click()`,
+            await clickElement(
+              `document.querySelector('button[aria-label="${label}"]')`,
+              "Favorite control unavailable",
             );
           }
           const response = await poll(() => {
@@ -752,6 +729,8 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
       },
       controls: sidebar
         ? {
+            credentialOnboarding:
+              "Disabled through official private-profile config; no model readiness or credential claim",
             catalogue:
               "No market catalog; published sidebar + owned empty official session and two disposable workspace files",
             faults:
@@ -760,6 +739,8 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
               "Save/preview HTTP path for UTF8 BOM/UTF16LE + CRLF: healthy, blocked and recovery. Not editor widget UI, natural version regression, or original-plugin defect certification.",
           }
         : {
+            credentialOnboarding:
+              "Disabled through official private-profile config; no model readiness or credential claim",
             catalogue:
               "Single real public entry as a controlled local catalog; not a public-market installation test",
             faults:
