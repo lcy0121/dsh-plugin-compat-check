@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-更新于2026-10-18。仓库为0.1.3候选（未发布），已完成rc.2定向适配；npm latest仍为0.1.2（旧声明算法）。本文维护现行契约、交付边界与待办；用法见[README](../README.md)，逐次证据见[docs/current-state.json](current-state.json)。[原始审计](GPT审计及重构方案文档.md)与[旧提取器反例](extraction-findings.md)保留历史身份，施工过程查Git历史。
+更新于2026-10-18。仓库与npm latest均为0.1.3，已完成rc.2定向适配、业务样本扩展及发布后验收。本文维护现行契约、交付边界与待办；用法见[README](../README.md)，逐次证据见[docs/current-state.json](current-state.json)。[原始审计](GPT审计及重构方案文档.md)与[旧提取器反例](extraction-findings.md)保留历史身份，施工过程查Git历史。
 
 ## 1. 项目定位与交付状态
 
@@ -12,7 +12,7 @@
 | 仓库CLI / 安装检查 | 默认静态扫描不执行目标源码；显式probe/安装检查会装依赖、启动宿主并执行目标插件。临时profile不是OS沙箱 |
 | skill | 指导agent调用同一工具或CLI，不另实现判定 |
 
-npm0.1.2于2026-10-17回下载验收，见`verification.documentationDelivery012`；[PR #3](https://github.com/lcy0121/dsh-plugin-compat-check/pull/3)交付文档补丁，[PR #4](https://github.com/lcy0121/dsh-plugin-compat-check/pull/4)交付输入隔离。**0.1.3候选的rc.2适配、skill、截图及仓库CLI故障报告等修订均未进入公开tarball**，候选验证不等于npm包已更新。本轮用户已授权在业务扩展、文档核对及CI通过后交付0.1.3；发布事实在完成后更新，未完成前不称已上线。
+**0.1.3于2026-10-18发布到[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)，latest已更新；[GitHub Release](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.1.3)附同一tgz。** 发布源提交ada1d78，新旧DSH Linux及Node22/24的[CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39133915275)通过。公开tgz与验收制品37文件逐字节一致，公开npm规格实装/启动exit0，覆盖仍有限；见`verification.release013`。源码及发布后文档的main交付入口为[PR #5](https://github.com/lcy0121/dsh-plugin-compat-check/pull/5)，最终合并状态与记录提交CI以该PR为准。0.1.1/0.1.2和PR #3/#4保留在current-state的对应历史记录，不代表当前算法。
 
 版本真源为`lib/version.mjs`。仓库根是private开发工作区，npm仅打包`plugin/`，没有CLI bin、安装shell或probe入口；不支持`npx dsh-plugin-compat-check`。prepack同步skill/契约、暂存kernel与LICENSE，postpack清理kernel；安装完整tgz，不假定裸`plugin/`含内核。市场截图声明位于`plugin/screenshots.json`，图片在`plugin/assets/`；当前npm files未收录二者，README使用GitHub图片链接。
 
@@ -28,7 +28,7 @@ npm0.1.2于2026-10-17回下载验收，见`verification.documentationDelivery012
 ### 2.2 结论、影响与基线
 
 - `certain / suspected`表达确定性，过滤/守卫/弃权另列；`impactBasis=measured / inferred`区分实测与推断，缺少字段不能反推实测。API发现通常有`file:line`，声明/loader事实可无源码位置，不编造。
-- 可靠映射且启用的loader FAILED/PENDING可形成fatal实测发现，disabled、LOADING、group或无法映射不冒充该事实。0.1.3候选对DSH≥0.2.1-rc.1优先自有engines.dsh，缺失时回退官方peer；旧目标保留旧规则。非法字段、空/非法范围有诊断；peer workspace:^/~/*按当前精确版本处理，engines不接受该别名。声明冲突/非法字段为declared-incompatible及推断影响，不能等同实际加载失败（宿主可能跳过bundle后继续启动）。
+- 可靠映射且启用的loader FAILED/PENDING可形成fatal实测发现，disabled、LOADING、group或无法映射不冒充该事实。0.1.3对DSH≥0.2.1-rc.1优先自有engines.dsh，缺失时回退官方peer；旧目标保留旧规则。非法字段、空/非法范围有诊断；peer workspace:^/~/*按当前精确版本处理，engines不接受该别名。声明冲突/非法字段为declared-incompatible及推断影响，不能等同实际加载失败（宿主可能跳过bundle后继续启动）。
 - 只读目标profile独立compatibility.json，插件名/插件精确版本/DSH精确版本全匹配才豁免范围冲突。无效记录整条忽略，其它有效记录仍用；非法字段不可被豁免。不可读、非普通文件、JSON无效或超64KiB则豁免未观测并限制覆盖，不自动授予。获豁免不证明API或业务成功。
 - 方法layer优先、服务layer回退，不跨端套规则；provide仅为线索，未知方法影响写“影响面未知”。try/catch不是能力守卫；coverage.status=limited、vacuous及客户端未验证须转述，ok不等于功能认证。
 - schema2基线按canonical profile/路径/模式及工具、规则、目录身份隔离；锁内比较、原子写入，不完整扫描不推进。身份升级记中性，严重度/确定性/位置参与差分；schema1或损坏条目不比较。“无变化”不等于兼容。
@@ -92,9 +92,9 @@ npm0.1.2于2026-10-17回下载验收，见`verification.documentationDelivery012
 | DSH0.2.0-rc.2 / macOS | 实际tgz、tool/skill、面板/详情/角标/基线、Chrome正负例；联合22项含9项真实DSH/Chrome/pnpm，未发送模型对话 |
 | Linux | arm64 VM：Node22/24各406通过、1项外部profile缺失跳过，联合各18通过；x64 CI精确提交见current-state。联合18项含4项真实DSH、1项冻结pnpm安装、13项离线 |
 | DSH0.2.1-rc.1 | 工具0.1.2实际tgz有限集成7/7（探针2、HTTP1、Chrome到货/错误4）；不是全面业务、rc.2或新一轮手动面板认证 |
-| 0.1.3候选 / rc.2适配阶段 | Node24.19/26.12默认各515/515；rc.2联合19/19含5组真实声明病例、官方子路径元数据、tgz/HTTP、Chrome导航及禁用/启用；旧DSH0.2.0-rc.2联合19/19中rc.2专项明确不适用。两项复核P2已修，无模型/第三方业务/Windows认证；新远端CI未跑，证据见current-state |
-| 独立业务队列 / 首轮 | Node24.19/26.12默认各526/526；专项12/12含真实Chrome中备注/收藏四病例及取消回收。正常组TN2、503对照组FN2；离线回放保留exit1，缺病例exit3。两项重要审阅问题已修，新远端CI未跑；见`verification.independentBusinessTruth` |
-| 业务扩展 / 0.1.3发布前 | Node24.19/26.12默认各529/529；业务专项17/17（14离线、两组真实插件、1项真实Chrome边界）；最终rc.2联合36/36（含原19项）；旧DSH联合35项中33通过、2项rc.2业务明确不适用。确切0.1.3 tgz实际安装/启动exit0，覆盖仍有限。发布前闸门通过；见`verification.businessSampleExpansion`、`verification.release013` |
+| 0.1.3候选 / rc.2适配阶段 | Node24.19/26.12默认各515/515；rc.2联合19/19含5组真实声明病例、官方子路径元数据、tgz/HTTP、Chrome导航及禁用/启用；旧DSH0.2.0-rc.2联合19/19中rc.2专项明确不适用。两项复核P2已修，无模型/第三方业务/Windows认证；该阶段尚未跑新远端CI，最终发布CI另列；证据见current-state |
+| 独立业务队列 / 首轮 | Node24.19/26.12默认各526/526；专项12/12含真实Chrome中备注/收藏四病例及取消回收。正常组TN2、503对照组FN2；离线回放保留exit1，缺病例exit3。两项重要审阅问题已修，该阶段尚未跑新远端CI，最终发布CI另列；见`verification.independentBusinessTruth` |
+| 业务扩展 / 0.1.3发布前 | Node24.19/26.12默认各529/529；业务专项17/17（14离线、两组真实插件、1项真实Chrome边界）；最终rc.2联合36/36（含原19项）；本地旧DSH联合35项中33通过、2项rc.2业务明确不适用；最终Linux旧版矩阵新增浏览器边界项后为34通过、2跳过。确切0.1.3 tgz实际安装/启动exit0，覆盖仍有限。发布前闸门通过；见`verification.businessSampleExpansion`、`verification.release013` |
 
 辅助标签独立于预测；四个固定病例TP1/FP0/FN1/TN2（精确率1、召回率0.5）暴露漏报，不是生态准确率。P2的21例归属反例TP0/FN14→TP14/FN0、FP为0，另4例未知有诊断，只评价该队列。默认suite不代替真实集成，旧skill正文/旧CI不追写成新认证，所有阶段数字以对应记录为准。
 
@@ -129,7 +129,7 @@ node tools/business-labels.mjs --predictions <预测.json> --labels <业务标�
 DSC_SLOW=1 node --test test/business-labels.test.mjs
 ```
 
-度量退出码：0=已计分且无错配，1=有FP/FN或不计分项，3=输入/驱动错误或无可计分项。当前503对照有FN，原始CLI应为1；回归suite验证它如实暴露漏报，并不要求把度量改绿。正常/故障组分开报告；market使用单条真实公开记录的本地目录；sidebar使用自有空官方会话和工作区文件，不调用模型，两者不重复认证公共市场安装。`--out-dir`成功时写预测、标签、度量和截图，失败时可能写诊断，须为空；私有profile仍会清理。验收浏览器固定zh-CN，私有profile通过官方credentialOnboarding=false关闭无凭据引导，不认证默认引导或模型能力。该live队列只认证rc.2，旧DSH明确不适用，不用旧版测试通过代替业务认证。文件回放校验同批身份、制品/预测器摘要、病例完整集与时间先后，仅重放历史事实，不提供防协同篡改的签名。CI已配置上传产物，新远端运行须待授权push。
+度量退出码：0=已计分且无错配，1=有FP/FN或不计分项，3=输入/驱动错误或无可计分项。当前503对照有FN，原始CLI应为1；回归suite验证它如实暴露漏报，并不要求把度量改绿。正常/故障组分开报告；market使用单条真实公开记录的本地目录；sidebar使用自有空官方会话和工作区文件，不调用模型，两者不重复认证公共市场安装。`--out-dir`成功时写预测、标签、度量和截图，失败时可能写诊断，须为空；私有profile仍会清理。验收浏览器固定zh-CN，私有profile通过官方credentialOnboarding=false关闭无凭据引导，不认证默认引导或模型能力。该live队列只认证rc.2，旧DSH明确不适用，不用旧版测试通过代替业务认证。文件回放校验同批身份、制品/预测器摘要、病例完整集与时间先后，仅重放历史事实，不提供防协同篡改的签名。提交ada1d78的[CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39133915275)已通过Node22/24及新旧DSH Linux矩阵，rc.2联合36/36并上传产物；不外推后续提交。
 
 ### 5.3 P2工程验收
 
@@ -140,12 +140,12 @@ DSC_SLOW=1 node --test --test-reporter=tap test/engineering-live.test.mjs test/p
 
 覆盖2402文件/约50MB预算弃权、受控超时、32MiB与默认提取器堆耗尽/恢复、64请求single-flight、8进程192次基线争用/原子读取；旧宿主4000函数/3并发刷新期间仍可响应。超时分别检查等待/总流程、停止后计数不增长及恢复。只证明限定版本/输入的工程行为，不是全进程RSS、任意脱离进程组隔离或生产性能保证。
 
-## 6. 后续工作与发布
+## 6. 后续工作
 
-按依赖关系推进；宣传提案在此列为后续候选，不视为已实现或已授权对外发送：
+本轮业务样本扩展、0.1.3发布及文档核对已完成，证据见§1、§4–5。后续按资源与依赖推进；对外发帖须另有授权：
 
-1. **0.1.3候选交付与发布。** rc.2定向适配已完成，见§2.2、§2.4与本轮证据。先审查候选diff、默认套件/真实集成及新旧DSH矩阵；经授权push分支、审查CI，再决定main合并和npm发布。当前不把本地测试当作新CI通过，不把未发布候选描述为公开最新版。
-2. **业务样本扩展已完成本轮范围。** 第二个真实插件的关键保存/预览路径、独立字节验证和失败后恢复已补齐，见§4、§5.2。自然版本回归、完整编辑器交互及模型路径仍未认证；后续样本按明确版本/制品和资源另选，不扩大本轮结论。
-3. **分发的上游待办。** 主目录JSON/npm映射已同步、dshworks已收录；真实dsh-market安装npm0.1.2已完成，见§4。跟进市场“终端插件”的疑似误分类；源码子目录不能代替完整tgz。1024继续跟进#22，npm方法出现后验收；另等0xsline #717简介修订、bruc3van #138排除理由复核。本轮0.1.3发布已获授权；索引可见、本地npm验收和市场安装仍分别记录。
-4. **有限样本与自动化（后置）。** 先以少量明确版本/制品哈希的样本验证批量静态JSON聚合，公开口径、限制和“待作者复核”，不称插件坏了或已作安全审查。再评估低权限Action、workflow摘要/徽章及逐版增量；覆盖不足与工具错误单列，不把绿色等同兼容、不默认写第三方仓库、不承诺24小时SLA。引用/实际接入与复现反馈作为信号，不把下载当用户。第三方详情页集成和公共结论端点暂缓，先确认合作、隐私、缓存失效及维护成本。
+1. **补齐市场UI失败分类边界。** 当前已加载页面若缺少备注/收藏控件，导航等待可能归为驱动错误/未观测；需将导航就绪与业务后置条件分开，并加入真实浏览器反例。现有503用例未覆盖控件缺失，不宣称一般UI失败均能分类。
+2. **跟进0.1.3分发与上游待办。** §4真实市场安装只验收npm0.1.2；0.1.3已单独公开规格实装，但市场索引版本同步、市场升级安装还需新证据。复核疑似“终端插件”误分类；1024 #22出现npm方法后再验收；等待0xsline #717简介修订、bruc3van #138排除理由复核。源码子目录不等价于完整tgz。
+3. **继续独立业务样本。** 已有两插件10个固定病例，正常/恢复与受控故障分组，不是生态准确率。自然版本回归、完整编辑器控件交互及模型路径仍待明确制品和资源后另验收；保留预测/真值隔离与原始错配，不追求改绿。
+4. **有限批量与自动化（后置）。** 先验证明确版本/哈希样本的静态JSON聚合，公开口径、限制和“待作者复核”；再评估低权限Action、逐版增量、摘要/徽章。工具错误和覆盖不足单列，不默认写第三方仓库、不承诺24小时SLA，不把下载当用户。公共端点/第三方详情集成须先确认合作、隐私、缓存与维护成本。
 5. **Windows取得真实环境后验收。** 路径、安装器、进程回收和打包实跑；按用户选择暂缓，不用POSIX或路径模拟充数。

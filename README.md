@@ -6,7 +6,7 @@
 
 ## 当前版本与交付
 
-仓库当前为 **0.1.3候选（未发布）**，新增rc.2声明适配、版本目录和卸载清理修复；npm latest仍为 **0.1.2**（2026-10-17回下载验收，判定算法与0.1.1一致）。本轮源码、skill与文档修订不在公开tarball内。公开状态见 [Plan](docs/Plan.md#1-项目定位与交付状态)，验证范围及统计见 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
+仓库与npm当前版本均为 **0.1.3**，npm `latest`已更新（2026-10-18回下载逐字节核验及公开规格实装通过）。本版包含rc.2声明适配、版本目录、卸载清理修复及同步skill；仓库CLI与业务度量工具仍不随npm插件分发。发布与验证范围见 [Plan](docs/Plan.md#1-项目定位与交付状态) 和 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
 
 插件、CLI、skill三种形态共享判定内核；安装检查脚本是CLI编排入口。只有**相同输入与采样证据**才应得出相同结果。
 
@@ -64,7 +64,7 @@ node bin/compat-check.mjs --help
 ### 安装插件与 skill
 
 ```bash
-# 安装 npm 已发布版（2026-10-17核验为0.1.2）
+# 安装 npm 已发布版（2026-10-18核验为0.1.3）
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # 只使用 CLI 时，安装独立 skill

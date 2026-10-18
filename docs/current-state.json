@@ -2302,7 +2302,8 @@
           }
         },
         "runtime": "Official pinned npm DSH in an owned temporary prefix, no global runtime change"
-      }
+      },
+      "recordType": "Dated development checkpoint; local-only/unpublished/CI flags describe this checkpoint. Final0.1.3 publication and remote matrix are recorded in verification.release013."
     },
     "marketInstallation20261018": {
       "recordedAt": "2026-10-18T05:03:21.974Z",
@@ -2790,7 +2791,8 @@
         "merge": false,
         "npmRelease": false,
         "externalPost": false
-      }
+      },
+      "recordType": "Dated development checkpoint; local-only/unpublished/CI flags describe this checkpoint. Final0.1.3 publication and remote matrix are recorded in verification.release013."
     },
     "businessSampleExpansion": {
       "recordedAt": "2026-10-18T13:37:56.930Z",
@@ -3167,11 +3169,12 @@
         "HTTP503 browser controls; no natural version regression or original-plugin defect established",
         "No model call, Windows business acceptance or ecosystem-accuracy claim",
         "Separate market and sidebar cohorts; file replay does not rerun current business behavior"
-      ]
+      ],
+      "recordType": "Dated development checkpoint; local-only/unpublished/CI flags describe this checkpoint. Final0.1.3 publication and remote matrix are recorded in verification.release013."
     },
     "release013": {
-      "status": "candidate-verified-awaiting-CI-and-publication",
-      "recordedAt": "2026-10-18T13:37:56.934Z",
+      "status": "published-and-public-artifact-verified",
+      "recordedAt": "2026-10-18T14:06:17.830186+00:00",
       "version": "0.1.3",
       "authorization": "User explicitly requested completing0.1.3 candidate delivery and publication after business expansion and full documentation audit",
       "validation": {
@@ -3243,6 +3246,13 @@
           "skipped": 0,
           "tapSha256": "8a5c7ed45732d5e5538bef4bb82f64fc0a68a7fc43b9337b3ecf4396da3f5d55",
           "nodeVersion": "26.12.0"
+        },
+        "checkpointScope": "Initial default/live results and later final-prefixed reruns are separate stages; final source CI is recorded in ci.",
+        "postPublicationDocumentationGate": {
+          "passed": true,
+          "tests": 529,
+          "logSha256": "e5edc01dba5961cab23678de9bbf28353f1ff7fc68d8952588298fe2460934b3",
+          "sandboxFailure": "Initial sandbox run passed528/529; npm pack could not write default ~/.npm cache. Full gate then passed with private npm_config_cache and required registry network access; no code/assertion changes."
         }
       },
       "artifact": {
@@ -3293,25 +3303,113 @@
           ],
           "sourcesAvailable": true
         },
-        "upstreamStatus": "2026-10-18 release audit:1024#22,0xsline#717,bruc3van#138 still open without comments; dshworks#169 merged; no external message sent"
+        "upstreamStatus": "2026-10-18 release audit:1024#22,0xsline#717,bruc3van#138 still open without comments; dshworks#169 merged; no external message sent",
+        "metadataAfter": {
+          "observedAt": "2026-10-18T14:04:52.854Z",
+          "npmLatest": "0.1.3",
+          "problems": [],
+          "skipped": [],
+          "githubDescription": "检查已安装DSH插件的版本声明、API风险与覆盖限制；提供兼容性面板、agent工具及可用源码位置。Check installed DSH plugins for declaration/API risks, with a compatibility panel, agent tool, source locations when available and coverage limits.",
+          "topics": [
+            "compatibility",
+            "deepseek-harness",
+            "developer-tools",
+            "dsh",
+            "deepseek",
+            "dsh-plugin",
+            "agent-skills",
+            "cordis",
+            "health-check"
+          ]
+        }
       },
       "ci": {
-        "status": "First run failed due English-locale selectors in market/rc2 browser drivers; fix pending new CI",
-        "failedRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39132486152",
-        "sourceCommit": "3da84ed68f381f26b00f12456f249e994c32ee91",
-        "failureScope": "Node22/24 and legacy Linux passed; rc2 market navigation and settings navigation were driver errors, not plugin verdicts",
-        "packageArtifactUnchanged": true
+        "status": "success",
+        "sourceCommit": "ada1d7888754936fbd7aa5aa527faa46bcf1ea83",
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39133915275",
+        "matrix": [
+          "Node22.19.0",
+          "Node24",
+          "Linux DSH0.2.0-rc.2",
+          "Linux DSH0.2.1-rc.2"
+        ],
+        "rc2Joint": {
+          "tests": 36,
+          "passed": 36,
+          "failed": 0,
+          "skipped": 0
+        },
+        "initialFailure": {
+          "status": "Historical initial failure; repaired and verified by the successful run above",
+          "failedRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39132486152",
+          "sourceCommit": "3da84ed68f381f26b00f12456f249e994c32ee91",
+          "failureScope": "Node22/24 and legacy Linux passed; rc2 market navigation and settings navigation were driver errors, not plugin verdicts",
+          "packageArtifactUnchanged": true
+        },
+        "packageArtifactUnchanged": true,
+        "legacyJoint": {
+          "tests": 36,
+          "passed": 34,
+          "failed": 0,
+          "skipped": 2,
+          "scope": "Two rc.2-only business cohorts explicitly inapplicable; new locale boundary test included"
+        },
+        "businessCohorts": {
+          "market": {
+            "baselineTN": 2,
+            "faultInjectedFN": 2
+          },
+          "sidebar": {
+            "baselineTN": 4,
+            "faultInjectedFN": 2
+          },
+          "rawMeasurementExitCode": 1
+        }
       },
       "publication": {
-        "npm": false,
-        "merge": false,
-        "githubRelease": false
+        "npm": true,
+        "version": "0.1.3",
+        "latest": "0.1.3",
+        "publishedAt": "2026-10-18T14:04:27.781Z",
+        "registryTarball": "https://registry.npmjs.org/dsh-plugin-compat-check/-/dsh-plugin-compat-check-0.1.3.tgz",
+        "registryIntegrity": "sha512-+/uvRKoz1Av/awahbJedswbnWKH1P5UFAlcNrFYfxaK4qMCFPX9eShsAmD4A0Cf1CKNlDJwRmX+/HQK/ONkACg==",
+        "publicArtifactVerification": {
+          "byteIdentical": true,
+          "fileHashesIdentical": true,
+          "files": 37,
+          "sha256": "7b4ae580beb80b91f71c23d7534b5014b30039029e0a150a58a6f73e5f98d038"
+        },
+        "githubRelease": {
+          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.1.3",
+          "tag": "v0.1.3",
+          "targetCommit": "ada1d7888754936fbd7aa5aa527faa46bcf1ea83",
+          "attachment": "dsh-plugin-compat-check-0.1.3.tgz",
+          "publishedAt": "2026-10-18T14:05:23Z",
+          "assetSha256": "7b4ae580beb80b91f71c23d7534b5014b30039029e0a150a58a6f73e5f98d038"
+        },
+        "repositoryDelivery": {
+          "pullRequest": "https://github.com/lcy0121/dsh-plugin-compat-check/pull/5",
+          "scope": "Release tag identifies the CI-verified package-source commit; final publication-record commit and main integration are tracked by this PR."
+        }
       },
       "limitations": [
         "Windows remains deferred by user",
-        "Historical marketplace install accepted published0.1.2; this candidate has separate exact-tgz and integration evidence",
-        "Coverage remains limited; transport fault FN values are preserved, not fixed by changing truth labels"
-      ]
+        "Historical marketplace install accepted published0.1.2; published0.1.3 has separate exact-tgz/public-npm and integration evidence",
+        "Coverage remains limited; transport fault FN values are preserved, not fixed by changing truth labels",
+        "Market post-action navigation still requires note/favorite controls; a loaded page missing those controls can be classified as driver error/unobserved instead of business failure. No general UI-failure classification claim; follow-up tracked in Plan."
+      ],
+      "publicNpmInstallation": {
+        "spec": "dsh-plugin-compat-check@0.1.3",
+        "status": "checked",
+        "exitCode": 0,
+        "toolVersion": "0.1.3",
+        "dshVersion": "0.2.1-rc.2",
+        "ownVersion": "0.1.3",
+        "ownVerdict": "ok",
+        "coverage": "limited",
+        "tempProfileRemoved": true,
+        "scope": "Public npm specification in a private actual DSH host; report and boot evidence, not a repeat marketplace UI or comprehensive business certification"
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

@@ -6,7 +6,7 @@
 
 ## 버전과 배포
 
-저장소는 **0.1.3 후보(미배포)**이며 rc.2 선언 판정, 버전별 카탈로그, 비활성화 정리 수정을 포함합니다. npm latest는 **0.1.2**입니다(2026-10-17 다운로드·설치 검증, 알고리즘은 0.1.1과 동일). 현재 소스·skill·문서 수정은 공개 tarball에 없습니다. [Plan](docs/Plan.md)과 [검증 범위·통계](docs/current-state.json)를 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
+저장소와 npm의 현재 버전은 **0.1.3**이며 `latest`로 배포되었습니다(2026-10-18 공개 tarball 바이트 일치와 실제 설치 확인). rc.2 선언 판정, 버전별 카탈로그, 비활성화 정리 수정 및 최신 skill을 포함합니다. 저장소 CLI와 업무 측정 도구는 npm 플러그인에 포함되지 않습니다. [Plan](docs/Plan.md)과 [검증 범위·통계](docs/current-state.json)를 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
 
 | 진입점 | 역할 |
 |---|---|
@@ -62,7 +62,7 @@ node bin/compat-check.mjs --help
 ### 플러그인과 skill
 
 ```bash
-# npm 배포 버전 설치 (2026-10-17 확인: 0.1.2)
+# npm 배포 버전 설치 (2026-10-18 확인: 0.1.3)
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # CLI 사용자의 독립 skill

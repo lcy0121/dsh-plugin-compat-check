@@ -6,7 +6,7 @@ Check the compatibility of **installed DSH plugins** with a target DSH version, 
 
 ## Version and delivery
 
-The repository is **0.1.3 candidate (unpublished)**, adding rc.2 declarations, versioned catalogues and unload cleanup fixes. npm latest remains **0.1.2** (download/install verified on 2026-10-17; algorithm unchanged from 0.1.1). Current source, skill and documentation changes are absent from that published tarball. See [Plan](docs/Plan.md) and [verification facts and scope](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
+The repository and npm are at **0.1.3**, now tagged `latest` (public tarball bytes and installation verified on 2026-10-18). This release includes rc.2 declarations, versioned catalogues, unload cleanup fixes and the updated skill. Repository CLI and business measurement tools are not shipped in the npm plugin. See [Plan](docs/Plan.md) and [verification facts and scope](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
 
 | Entry | Purpose |
 |---|---|
@@ -62,7 +62,7 @@ To prepare a report, run `node bin/compat-check.mjs --nm <target> --issue-report
 ### Plugin and skill
 
 ```bash
-# Published npm version (0.1.2 verified on 2026-10-17)
+# Published npm version (0.1.3 verified on 2026-10-18)
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # Standalone skill for CLI users
