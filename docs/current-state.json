@@ -1976,6 +1976,12 @@
           "status": "PAUSED",
           "reason": "Monitoring completed after sync confirmation; no duplicate issue."
         }
+      },
+      "currentDisposition": {
+        "asOf": "2026-10-18T05:03:21.975Z",
+        "primaryRegistryNpmMapping": "Synced (timedRecheck)",
+        "primaryMarketInstall": "Passed for published0.1.2; see verification.marketInstallation20261018. Earlier pending statements are dated snapshots, superseded for this tested route only.",
+        "store1024": "Still pending, no new 1024 test in this run."
       }
     },
     "rc2TargetedAdaptation": {
@@ -2297,6 +2303,139 @@
         },
         "runtime": "Official pinned npm DSH in an owned temporary prefix, no global runtime change"
       }
+    },
+    "marketInstallation20261018": {
+      "recordedAt": "2026-10-18T05:03:21.974Z",
+      "platform": "darwin",
+      "arch": "arm64",
+      "profileKind": "Owned private web profile",
+      "marketVersion": "1.66.37",
+      "targetVersion": "0.1.2",
+      "setupTargetAbsent": true,
+      "dshVersion": "0.2.1-rc.2",
+      "verifiedAt": "2026-10-18T05:01:19.126Z",
+      "installedVersion": "0.1.2",
+      "sourceSpec": "0.1.2",
+      "bundle": {
+        "patch": "./cordis.patch.yml"
+      },
+      "artifact": {
+        "tarball": "https://registry.npmjs.org/dsh-plugin-compat-check/-/dsh-plugin-compat-check-0.1.2.tgz",
+        "integrity": "sha512-MjGe8WNpt3FObjBhqgabS2Q69Rgbh0uYfhKKQ0j/Iy/FzGvNFG0gd5graxGIl7MjZc/FjYQdu7TKzzLESfmYOA==",
+        "sha256": "1afd6aae5f1b1d3242f437c1cc5863147361d51bdc673b54246176eea91f3e59",
+        "files": 34,
+        "allInstalledFilesEqual": true,
+        "contentDigest": "2858a1148227476de4614ea96edff960138e5717759d7bd8142cfd87ed722f77"
+      },
+      "http": {
+        "status": 200,
+        "ok": true,
+        "toolVersion": "0.1.2",
+        "dshVersion": "0.2.1-rc.2",
+        "pluginCount": 2,
+        "ownVerdict": "ok"
+      },
+      "runtimeLog": {
+        "hostActivation": true,
+        "skillRegistered": true,
+        "kernelPresent": true
+      },
+      "scope": "Published npm0.1.2 installed by real market UI; not local0.1.3 candidate or comprehensive business-function certification",
+      "cleanup": {
+        "hostStopped": true,
+        "privateProfileRemoved": true
+      },
+      "localDate": "2026-10-18",
+      "timezone": "Asia/Shanghai",
+      "sourceCommit": "c586f7cabba44ad459c080b0e87ae9da2d711682",
+      "market": {
+        "package": "dshmarket",
+        "version": "1.66.37",
+        "repository": "https://github.com/dsh-market/dsh-market",
+        "sourceHeadObserved": "ba73a3988bb3eee82295a695d59be59563637350",
+        "sourceHeadScope": "Upstream main observed, not an assertion that this exact commit built the npm tarball.",
+        "tarball": "https://registry.npmjs.org/dshmarket/-/dshmarket-1.66.37.tgz",
+        "integrity": "sha512-6sr+x6W6PppAtygJra/khU1ehK8bmjmfVnFgmPyHixx3GzIXGX/iW04CoeqlExFpsyTWXnM2W/X7JLU78dHJLA=="
+      },
+      "setup": {
+        "template": "Official web template, private DSH_HOME and DSH_AGENTS_HOME",
+        "preinstalledPackages": [
+          "dshmarket@1.66.37"
+        ],
+        "targetInitiallyAbsent": true,
+        "registryAndGithubRouteOverrides": false,
+        "cliTargetInstall": false,
+        "sourceCandidateInjected": false
+      },
+      "ui": {
+        "driver": "Computer Use via cua_repl, actual Chrome tab",
+        "navigation": "More > Settings > Plugin Market > Discover search",
+        "search": "dsh-plugin-compat-check",
+        "selectedEntry": {
+          "name": "dsh-plugin-compat-check#plugin",
+          "owner": "lcy0121",
+          "version": "0.1.2",
+          "github": "https://github.com/lcy0121/dsh-plugin-compat-check/tree/main/plugin"
+        },
+        "confirmationCommand": "dsh plugin --profile market-acceptance add dsh-plugin-compat-check",
+        "confirmedInstall": true,
+        "installCompletedVisible": true,
+        "activation": "Market requested page refresh; clicked its refresh control; UI reported installed and active. No host restart or manual reinstallation needed.",
+        "installedTab": {
+          "name": "dsh-plugin-compat-check",
+          "version": "0.1.2",
+          "enabled": true,
+          "updateLabel": "已是最新"
+        },
+        "compatibilityPanel": {
+          "path": "More > Settings > Built-in plugins > Compatibility",
+          "visible": true,
+          "toolVersion": "0.1.2",
+          "ownPluginVersion": "0.1.2"
+        },
+        "screenshots": {
+          "installedSha256": "647c0e831c23e9efd80945b41cb41dad4cfc231f54bbe7df1d9089a1f2dfabf4",
+          "reportSha256": "5e163b7e86a3bd9c85d7ad3b14b9cbdaac637af40084f1bed2de7b1f76eb33ff",
+          "captureScope": "Actual visible browser; temporary local evidence shown to user, not new repository asset files."
+        },
+        "installedAXSha256": "2c49c3a555b5c8d415b4ca1505f77b8983436568ae02d3ace80f58fe779d633e"
+      },
+      "observations": [
+        {
+          "kind": "upstream-classification-warning",
+          "text": "Market install confirmation called this a terminal plugin and warned it might not suit the web host.",
+          "effect": "Did not block npm installation, activation, compatibility tab or HTTP report in this controlled web test.",
+          "interpretation": "Suspected classification issue; cause not determined and no upstream issue filed."
+        },
+        {
+          "kind": "verdict-scope",
+          "text": "Published0.1.2 report also contains inferred findings about dshmarket; successful installation does not validate or invalidate every reported feature path.",
+          "effect": "Preserved inferred/limited scope; no claim of complete business correctness."
+        }
+      ],
+      "validation": {
+        "productionCodeChanged": false,
+        "tests": "Documentation contracts and links rerun; full default suite not repeated for this evidence-only edit. Existing 515-test runs keep their original rc2TargetedAdaptation scope.",
+        "externalPost": false,
+        "push": false,
+        "merge": false,
+        "npmRelease": false,
+        "documentation": {
+          "tests": 9,
+          "passed": 9,
+          "failed": 0,
+          "docCheck": true,
+          "gitDiffCheck": true,
+          "tapSha256": "c446170868793c07df537eacc71343113ccaa9511eebea3c34a5c66256caa319"
+        }
+      },
+      "limitations": [
+        "One primary dsh-market version / DSH0.2.1-rc.2 / macOS arm64 web profile and real Chrome",
+        "Published0.1.2 only; local0.1.3 candidate remains unpublished and not marketplace-certified",
+        "No Windows, model invocation or complete plugin-business-function certification",
+        "1024 Store is a separate distribution path and remains pending issue22/npm mapping",
+        "Source-subdirectory and prebuilt GitHub routes were not used or certified"
+      ]
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."
