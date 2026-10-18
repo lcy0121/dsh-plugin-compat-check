@@ -4,7 +4,7 @@
  * ## 为什么 CLI 需要自己的测试
  *
  * 三个入口（插件 / CLI / skill）共用一份内核，而**只有 CLI 是独立进程**：
- * 它有参数解析、有退出码、有两条输出通道（表 / JSON），还要能当别人脚本里的一步。
+ * 它有参数解析、有退出码、有多种输出格式（表 / JSON / Markdown），还要能当别人脚本里的一步。
  * 这几样东西内核测试覆盖不到。而且本会话里已经踩过两次同类的坑：
  *   - `.sh` 的 `--json` 是个**死参数**（被解析、被写进用法、从没被用过）；
  *   - `node --test x.test.mjs --update` 的旗标**从未生效**而退出码正常。
@@ -22,6 +22,9 @@ import os from 'node:os'
 import { optionalProfiles } from './support/profile-snapshot.mjs'
 
 import { REPO } from './helpers.mjs'
+import { run } from '../bin/compat-check.mjs'
+import { toJSON } from '../lib/report.mjs'
+import { renderIssueReport } from '../bin/issue-report.mjs'
 
 const CLI = path.join(REPO, 'bin', 'compat-check.mjs')
 const MICRO = path.join(REPO, 'test/fixtures/micro/node_modules')
@@ -86,6 +89,102 @@ describe('CLI：参数解析', () => {
     const r = runCLI(['--nm'])
     assert.equal(r.code, 3)
     assert.match(r.err + r.out, /需要一个值/)
+  })
+})
+
+describe('CLI：可分享的 Markdown 报告', () => {
+  test('报告调用方可从 stdin import CLI 内核，不误执行入口或抛 ENOENT', () => {
+    const r = spawnSync(process.execPath, ['--input-type=module', '-'], {
+      input: `import {run} from ${JSON.stringify(CLI)}; console.log(typeof run);`,
+      encoding: 'utf8', timeout: 10000,
+      env: { ...process.env, DSH_HOME: TEST_HOME, HOME: TEST_HOME },
+    })
+    assert.equal(r.status, 0, r.stderr)
+    assert.equal(r.stdout.trim(), 'function')
+  })
+
+  test('自由文本中的带空格路径、凭据与多行日志整项隐藏，丢弃未选取的原始数据', () => {
+    const body = toJSON(run({ nm: MICRO, probe: MICRO_SURFACE, baseline: false }))
+    const f = body.plugins['@fixture/fatalmethod'].findings[0]
+    const originals = [
+      '读取 /Users/person/Secret Project/canaryposix.json 失败',
+      '读取 C:\\Users\\person\\Secret Project\\canarywin.json 失败',
+      '读取 \\\\server\\Secret Share\\canaryunc.json 失败',
+      'token=canarytoken-value', 'Authorization: Bearer canarybearer-value',
+      'https://host.test/private?key=canaryurl-value',
+      '日志首行\ncanarylog-value', 'sk-canaryapi-key-value',
+    ]
+    for (const text of originals) {
+      f.impact = text
+      const out = renderIssueReport(body)
+      assert.ok(!out.includes('canary'), text)
+      assert.ok(!out.includes('Secret Project'), text)
+      assert.ok(!out.includes('Secret Share'), text)
+    }
+    f.evidence = { log: 'canaryraw-evidence' }
+    body.inputs.privateConfig = 'canaryinput-config'
+    body.summary.privateConfig = 'canarysummary-config'
+    body.extraction.diagnostics.push({ log: 'canarydiagnostic-log' })
+    const out = renderIssueReport(body, { rules: '/canaryrules.json', catalog: '/canarycatalog.json' })
+    assert.ok(!out.includes('canary'))
+    assert.match(out, /--rules <rules.json> --catalog <catalog.json>/)
+  })
+
+  test('保留合法相对位置与可读说明，拒绝绝对/穿越位置并转义 Markdown', () => {
+    const body = toJSON(run({ nm: MICRO, probe: MICRO_SURFACE, baseline: false }))
+    const f = body.plugins['@fixture/fatalmethod'].findings[0]
+    f.impact = '不能打开设置'
+    body.observation.notes.push('旧格式探针未绑定 profile/DSH 版本；不推断缺项')
+    f.basis = '<script> [link](evil) `code` @everyone'
+    f.location = { file: 'lib/index.js', line: 42 }
+    const out = renderIssueReport(body)
+    assert.ok(out.includes('`lib/index.js:42`'))
+    assert.ok(out.includes('不能打开设置'))
+    assert.ok(out.includes('旧格式探针未绑定 profile/DSH 版本；不推断缺项'))
+    assert.ok(!out.includes('<script>'))
+    assert.ok(!out.includes('[link](evil)'))
+    assert.ok(!out.includes('@everyone'))
+    for (const file of ['/private/canarylocation', 'C:\\canarylocation', '../canarylocation', 'lib/../../canarylocation']) {
+      f.location = { file, line: 42 }
+      assert.ok(!renderIssueReport(body).includes('canarylocation'))
+    }
+  })
+
+  test('导出保留发现、证据、缺失位置和覆盖，不改变结论退出码', () => {
+    const r = runCLI(['--nm', MICRO, '--probe', MICRO_SURFACE, '--dsh-version', '0.2.0-rc.2', '--issue-report'])
+    assert.equal(r.code, 2)
+    assert.match(r.out, /^# DSH 插件兼容性故障报告/m)
+    for (const field of ['@fixture/fatalmethod', '1.0.0', 'settings.installSection', 'certainty=certain', 'impactBasis=inferred', 'coverage=limited', '源码位置未提供', 'engines.dsh', '--probe <probe-report.json>', '--no-baseline']) assert.ok(r.out.includes(field), field)
+    assert.ok(!r.out.includes(REPO), '不能泄露仓库绝对路径')
+    assert.equal(r.err, '')
+  })
+
+  test('报告模式不读取或推进基线，即使显式提供基线文件', () => {
+    const target = path.join(TEST_HOME, 'issue-baseline.json')
+    const r = runCLI(['--nm', BASELINE_NM, '--baseline-file', target, '--issue-report'])
+    assert.equal(r.code, 0, r.out + r.err)
+    assert.equal(fs.existsSync(target), false)
+    assert.match(r.out, /vacuous=true/)
+    assert.match(r.out, /证据模式: catalogue/)
+  })
+
+  test('文件输入失败返回可分享的工具错误，不回显敏感路径或日志', () => {
+    const r = runCLI(['--nm', '/Users/private-person/private-project', '--issue-report'])
+    assert.equal(r.code, 3)
+    assert.match(r.out, /工具无法判定/)
+    assert.ok(!r.out.includes('private-person'))
+    assert.ok(!r.out.includes('private-project'))
+    assert.equal(r.err, '')
+  })
+
+  test('用法错误也不回显原始参数；与 JSON 和 quiet 互斥', () => {
+    for (const args of [['--json'], ['--quiet'], ['--unknown=/Users/private-person/secret'], ['--nm']]) {
+      const r = runCLI(['--issue-report', ...args])
+      assert.equal(r.code, 3)
+      assert.match(r.out, /^# DSH 插件兼容性故障报告/m)
+      assert.ok(!r.out.includes('private-person'))
+      assert.equal(r.err, '')
+    }
   })
 })
 

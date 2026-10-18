@@ -1,12 +1,12 @@
 {
-  "toolVersion": "0.1.2",
-  "recordedAt": "2026-10-17T09:02:32.932Z",
-  "testFiles": 34,
-  "tests": 491,
+  "toolVersion": "0.1.3",
+  "recordedAt": "2026-10-18T13:57:37.293Z",
+  "testFiles": 37,
+  "tests": 529,
   "repositoryFiles": {
-    "total": 225,
+    "total": 241,
     "fixtures": 90,
-    "other": 135
+    "other": 151
   },
   "verification": {
     "platform": "darwin",
@@ -1368,6 +1368,2047 @@
         "standaloneSuccessExit": true,
         "standaloneFailureExit": true,
         "remainingOwnedSnapshotDirectories": 0
+      }
+    },
+    "dshRc2DocumentationAudit": {
+      "verifiedAt": "2026-10-17T13:25:08.741484+00:00",
+      "baseCommit": "59714e7f96e2c8be32166e39a48ee29e4b6cfe89",
+      "scope": "Documentation audit and planning only. No production logic/rules/catalogue changes, new npm release, external issue/PR edits or new full UI/DSH activation/business certification.",
+      "environment": {
+        "desktopVersion": "0.2.1-rc.2",
+        "cliVersion": "0.2.1-rc.2",
+        "runnerNodeVersion": "26.12.0",
+        "platform": "darwin",
+        "arch": "arm64"
+      },
+      "officialRelease": "https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.2",
+      "officialReleaseScope": "Release notes list model and DeepSeek Search/Fetch support; they alone do not establish API or UI compatibility.",
+      "officialSourceHashes": {
+        "dsh-app-boot": {
+          "file": "lib/index.js",
+          "sha256": "5135179ac810e4f626f32ec3bdc3293dc7d2028e8aa92e5e0c006f1a33b78e76"
+        },
+        "dsh-client-ui-settings-plugins": {
+          "file": "lib/client.js",
+          "sha256": "6c57ee5fdef9de70a7d78054927db2e7eb282a09fc5e755d0cc2da0c6f64ffaf"
+        },
+        "dsh-client-ui-plugin-manager": {
+          "file": "lib/client.js",
+          "sha256": "3381dd14d1b5573f8e98b48bf895e90c6ee0fccdeeb7a8ae815fda9cca661a81"
+        }
+      },
+      "declarations": {
+        "source": "Actual installed app-boot exported evaluatePluginCompatibility called with explicit rc.2 runtime; compared with current real extractor/verdict. No host boot or target-plugin activation.",
+        "cases": [
+          {
+            "manifest": {
+              "name": "engine-accept-peer-reject",
+              "version": "1.0.0",
+              "engines": {
+                "dsh": ">=0.2.1-rc.2 <0.3.0"
+              },
+              "peerDependencies": {
+                "@deepseek-ai/dsh": "<0.2.1-rc.2"
+              }
+            },
+            "official": {
+              "accepted": true
+            },
+            "current": {
+              "verdict": "partial",
+              "categories": [
+                "declared-incompatible"
+              ]
+            }
+          },
+          {
+            "manifest": {
+              "name": "engine-reject-peer-accept",
+              "version": "1.0.0",
+              "engines": {
+                "dsh": "<0.2.1-rc.2"
+              },
+              "peerDependencies": {
+                "@deepseek-ai/dsh": ">=0.2.1-rc.2 <0.3.0"
+              }
+            },
+            "official": {
+              "name": "engine-reject-peer-accept",
+              "version": "1.0.0",
+              "runtimeVersion": "0.2.1-rc.2",
+              "requirements": {
+                "engines.dsh": "<0.2.1-rc.2"
+              },
+              "exempted": false
+            },
+            "current": {
+              "verdict": "ok",
+              "categories": []
+            }
+          }
+        ]
+      },
+      "catalogue": {
+        "oldBaseline": "0.2.0-rc.2",
+        "hostServices": 98,
+        "hostMethods": 291,
+        "clientServices": 8,
+        "clientMethods": 43,
+        "addedHostServices": [
+          "claudeCodeMods",
+          "cotTranslation",
+          "pluginMarket",
+          "remoteAccess",
+          "translator",
+          "webApp",
+          "workingDirectory",
+          "worktrees"
+        ],
+        "removedHostServices": [
+          "invariants"
+        ],
+        "changedSurvivingHostServices": [
+          "agentPresets",
+          "connection",
+          "hmr",
+          "llm",
+          "ptcRuntime",
+          "subagents",
+          "systemPrompt",
+          "webServer"
+        ],
+        "clientServiceAndMethodSetsEqualToOldBaseline": true,
+        "oldBaselineDeltaMatchesPriorRc1Record": true,
+        "scope": "Comparison to committed old catalogue and the previously recorded delta. Not a complete byte comparison with an archived rc.1 catalogue. Committed catalogue/rules unchanged."
+      },
+      "asarReaderFinding": {
+        "file": "tools/catalog/extract-host-api.py",
+        "currentExpression": "store_offset = 16 + header_size",
+        "validatedDataStart": "8 + header_size",
+        "offsetBytes": 8,
+        "badPrefix": " createRequire, isBuiltin }",
+        "correctPrefix": "import { createRequire, isBuiltin }",
+        "sourceHashMethod": "Hashes above use the corrected data start and exact entry size; package JSON parses and JS boundaries were checked.",
+        "catalogueSetsEqualWithAndWithoutCorrection": true,
+        "scope": "Existing generated-catalogue parsing still yields identical service/method sets on this rc.2 image. This does not make the reader byte-correct or safe for other layouts. Repository implementation unchanged; fix and byte regressions planned."
+      },
+      "ui": {
+        "recordedByCommit": "59714e7",
+        "recordedDate": "2026-10-17",
+        "reportedWorking": [
+          "plugins.detail.section",
+          "plugins.detail.badge",
+          "compat_check",
+          "skill provider"
+        ],
+        "reportedMissing": "Compatibility settings tab despite self-registration marker",
+        "independentlyRepeatedInThisAudit": false,
+        "rc2SourceStillRegistersAndConsumesSettingsPluginsTab": true,
+        "sourcePaths": [
+          "dsh-client-ui-settings-plugins/lib/client.js",
+          "dsh-client-ui-plugin-manager/lib/client.js"
+        ],
+        "conclusion": "Reproduce navigation, dependency loading and scoped registration/render timing before attributing removal or deciding a rewrite."
+      },
+      "promotionAudit": {
+        "actions": [
+          {
+            "url": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/7736",
+            "state": "OPEN",
+            "checks": "success"
+          },
+          {
+            "url": "https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/628",
+            "state": "MERGED",
+            "mergedAt": "2026-10-17T12:58:36Z"
+          },
+          {
+            "url": "https://github.com/dshworks/awesome-dsh-plugins/pull/167",
+            "state": "OPEN",
+            "checks": "success"
+          },
+          {
+            "url": "https://github.com/0xsline/awesome-deepseek-harness/pull/717",
+            "state": "OPEN",
+            "existingMainListingVerified": true
+          },
+          {
+            "url": "https://github.com/bruc3van/awesome-dsh-plugin/issues/138",
+            "state": "OPEN",
+            "incorrectPublicationDate": "2026-10-13",
+            "correctPublicationDate": "2026-10-17",
+            "npmPublishedAt": "2026-10-17T08:08:40.762Z",
+            "externalCorrectionSent": false
+          }
+        ],
+        "marketIndex": {
+          "url": "https://awesome-dsh-plugin.com/plugins.json",
+          "updated": "2026-10-17",
+          "count": 5704,
+          "repositoryPresent": false,
+          "scope": "Registry inclusion only, not an assertion that the independently published npm package cannot be installed."
+        },
+        "channelSources": [
+          "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/contributing.md",
+          "https://github.com/bruc3van/awesome-dsh-plugin/blob/main/CONTRIBUTING.md",
+          "https://github.com/dsh-market/dsh-market/blob/main/README.md",
+          "https://github.com/YELEBAI/dsh-plugin-marketplace/blob/main/scripts/registry-scan.mjs"
+        ],
+        "channelConclusions": "Primary registry supports monorepo subpackages; bruc3van showcase requires >10 stars and is distinct from maintainer review. YELEBAI scanner validates root metadata before later npm handling, so its npm override alone is not established to bypass this workspace mismatch. Do not fabricate a root bundle; seek a supported subdirectory/artifact path before claiming feasibility or impossibility.",
+        "nonCurrentDownloadResponse": {
+          "requested": "last-month",
+          "returned": {
+            "downloads": 243,
+            "start": "2026-09-13",
+            "end": "2026-10-12",
+            "package": "dsh-plugin-compat-check"
+          },
+          "treatedAsCurrentTrailing30Days": false
+        },
+        "removedUnsupportedClaims": [
+          "Only badge/Action can grow without manual work",
+          "Near-zero generic social-link conversion",
+          "Guaranteed survey within 24 hours of each rc",
+          "HTTP 200 or automatic indexing means curated approval",
+          "Root scan implies every lawful distribution route is impossible"
+        ],
+        "prioritizedCandidates": [
+          "user-previewed redacted issue report",
+          "complete existing distribution corrections and verify real install",
+          "bounded pinned static sample before automation",
+          "least-privilege Action/status badge and version deltas after adaptation"
+        ],
+        "deferred": "Public conclusion endpoint/market integration until cooperation, privacy, cache invalidation and maintenance are defined; no unsolicited external messages."
+      },
+      "sourceVsNpm": {
+        "npmLatest": "0.1.2",
+        "publishedAt": "2026-10-17T08:08:40.762Z",
+        "publicTarballSha1": "e3c9070b93bc8fd9499d5b34e354e92eb9ee38c2",
+        "matchesOriginalPublishedArtifact": true,
+        "publishedReadmeMatchesArtifactSourceCommit": "5af2550",
+        "publishedSkillBodyUtf16Length": 6669,
+        "publishedSkillBodySha256": "0c6dc74cb52cf33869593df5f3db4aa6ece6f863e0ef372cbad9ae0685c36cca",
+        "localSkillBodyUtf16Length": 6858,
+        "localSkillBodySha256": "2b0a68517e19d62ca5759f56f30e97285e5088a7e886d9b2b50040d5bb649a9e",
+        "localSkillCopiesEqual": true,
+        "kernelRuntimeAndRuleJsonBytesEqual": true,
+        "kernelDocumentationDifferences": [
+          "rules/README.md"
+        ],
+        "screenshotsAndManifestInPublishedTarball": false,
+        "sourceDocumentChangesNeedSeparateRelease": true
+      },
+      "validation": {
+        "defaultTests": 491,
+        "failures": 0,
+        "skipped": 0,
+        "referenceRetrievalBefore": "Existing skill disclosed rc.1 legacy declaration limitations but lacked rc.2-specific declaration/UI records.",
+        "referenceRetrievalAfter": "Updated reference separates rc.2 declaration limits, historical UI evidence, registration/rendering and unpublished local changes; no generic model-behavior reliability claim.",
+        "metadataErrors": 0,
+        "metadataNotices": 1,
+        "metadataSkipped": [],
+        "npmReadmeFetched": true,
+        "documentRegressionTests": 64,
+        "documentRegressionFailures": 0,
+        "maintainedDocumentsChecked": 11,
+        "additionalHistoricalFixtureReadmeReviewed": true,
+        "localSectionAnchorsChecked": 20,
+        "generatedContractsChecked": true,
+        "formatCheck": true,
+        "skillSlotIdentifierChecked": "settings.plugins.tab"
+      }
+    },
+    "issueReportAndDistribution": {
+      "recordedAt": "2026-10-17T13:44:53.767Z",
+      "sourceStatus": "Local repository implementation/documentation; not pushed, merged or npm-published by this task.",
+      "issueReport": {
+        "entry": "node bin/compat-check.mjs --nm <target> --issue-report",
+        "format": "Markdown stdout",
+        "baseline": "No reads or writes, including with --baseline-file",
+        "exitCodes": "0/1/2/3 preserved; JSON and quiet are mutually exclusive",
+        "included": [
+          "tool/target/observed DSH and plugin versions",
+          "evidence mode, binding and usability",
+          "summary and scan completeness/diagnostic count",
+          "findings, available package-relative locations, certainty and impactBasis",
+          "coverage/limitations/vacuous",
+          "placeholder reproduction command and declaration caveats"
+        ],
+        "omitted": [
+          "absolute paths and original argv",
+          "raw errors, logs, probe/evidence, source snippets and baseline",
+          "unknown additive summary fields"
+        ],
+        "privacy": "Whole explanation fields containing paths, URLs, common credentials or control characters are hidden. HTML/Markdown/mentions are escaped. Names and safe package-relative filenames remain; arbitrary business text requires human preview. No automatic posting.",
+        "tests": {
+          "newBehaviorTests": 7,
+          "cliTests": 37
+        },
+        "referenceTest": {
+          "before": "Skill did not document Markdown export, privacy or immediate exit-code preservation.",
+          "after": "Reference agent retrieved and executed --issue-report on micro fixture; saved exit 2, previewed output and cleaned temporary report; correctly retained catalogue/limited/vacuous and human review limits.",
+          "scope": "One reference retrieval/application case, not generic agent reliability or model conversation certification."
+        },
+        "entryGuardFix": "Import from Node stdin no longer resolves the virtual argv[1] dash as a filesystem path."
+      },
+      "distribution": {
+        "issue138": {
+          "url": "https://github.com/bruc3van/awesome-dsh-plugin/issues/138",
+          "state": "OPEN",
+          "changedFields": "Two publication-date literals only: 2026-10-13 -> 2026-10-17",
+          "updatedAt": "2026-10-17T13:37:12Z",
+          "bodySha256Before": "5ecb9b51e25c266381a7b3b3e861624b62633bd9dd56662e858a27d3f2cb2cfc",
+          "bodySha256After": "cbe69b1353bd1ab852ff28ccdfe1b4a40b2a3fd996220fe507a388d56a41c4d2",
+          "readBackMatches": true
+        },
+        "pullRequests": [
+          {
+            "url": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/7736",
+            "state": "OPEN",
+            "checks": "check and Submission gate SUCCESS"
+          },
+          {
+            "url": "https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/628",
+            "state": "MERGED",
+            "mergedAt": "2026-10-17T12:58:36Z"
+          },
+          {
+            "url": "https://github.com/dshworks/awesome-dsh-plugins/pull/167",
+            "state": "OPEN",
+            "checks": "check SUCCESS"
+          },
+          {
+            "url": "https://github.com/0xsline/awesome-deepseek-harness/pull/717",
+            "state": "OPEN",
+            "checks": "awesome-lint SUCCESS"
+          }
+        ],
+        "primaryRegistry": {
+          "url": "https://awesome-dsh-plugin.com/plugins.json",
+          "updated": "2026-10-17",
+          "count": 5704,
+          "repositoryPresent": false,
+          "sha256": "b8f15642a7359c086a15f3a8611a0681c737a7899c53e686f1b569a676f01ef3"
+        },
+        "store1024": {
+          "catalogEntry": "https://github.com/imsai-sh/awesome-deepseek-harness-plugins/blob/main/catalog/plugins/lcy0121--dsh-plugin-compat-check--plugin.json",
+          "searchUrl": "https://api.deepseek1024.com/v1/plugins/search?q=dsh-plugin-compat-check",
+          "detailUrl": "https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin",
+          "searchTotal": 1,
+          "id": "lcy0121/dsh-plugin-compat-check/plugin",
+          "installMethods": [
+            {
+              "kind": "github",
+              "spec": "github:lcy0121/dsh-plugin-compat-check#path:plugin",
+              "command": "dsh plugin --profile web add github:lcy0121/dsh-plugin-compat-check#path:plugin",
+              "verification": "unknown",
+              "code": "not_checked",
+              "requiresBuildAllowance": false,
+              "buildPackage": null,
+              "revision": null,
+              "checkedAt": null
+            }
+          ],
+          "status": "Search/detail visible; npm method absent; GitHub method unknown/not_checked. Current offeredInstallCommand source returns null for GitHub-only entries: browse-only, not an installation success.",
+          "schema": "Catalog plugin schema has additionalProperties=false and no npm override field; do not add unsupported metadata.",
+          "pending": "Upstream crawl/npm mapping refresh; verify actual market installation after npm method is offered."
+        },
+        "otherChannels": {
+          "dshMarket": "Documented repo-verified npm -> author prebuilt GitHub Release tarball -> source fallback; discovery still depends on primary registry inclusion.",
+          "yeleBai": "Current scanner validates repository root manifest before later npm overrides. No verified subdirectory exception for this private workspace root."
+        },
+        "publishedArtifactRuntime": {
+          "recordedAt": "2026-10-17T13:43:50.156Z",
+          "ok": true,
+          "dshVersion": "0.2.1-rc.2",
+          "artifactVersion": "0.1.2",
+          "artifactSha1": "e3c9070b93bc8fd9499d5b34e354e92eb9ee38c2",
+          "artifactIntegrity": "sha512-MjGe8WNpt3FObjBhqgabS2Q69Rgbh0uYfhKKQ0j/Iy/FzGvNFG0gd5graxGIl7MjZc/FjYQdu7TKzzLESfmYOA==",
+          "installedFilesEqual": 34,
+          "privateProfile": true,
+          "httpStatus": 200,
+          "reportOk": true,
+          "pluginNames": [
+            "dsh-plugin-compat-check"
+          ],
+          "scope": "Published npm package installed by real DSH CLI and exact bytes checked; authenticated HTTP report on actual rc.2. No client UI, model conversation or business behavior certification."
+        },
+        "preliminaryAttempt": "A plain private DSH profile registered tool/skill but had no Web service, so waiting for its Web URL timed out. Reinitialized a separate profile from the official web template; completed authenticated HTTP verification. All owned hosts stopped.",
+        "release": "No new npm release. rc.2 adaptation remains pending; source README/skill changes require separately authorized release afterward."
+      },
+      "skill": {
+        "bodyLength": 7296,
+        "bodySha256": "3caa98ac3e013fc319b5f1ed515d937d745e7b38a90677b42e116d7dc4fc6196",
+        "packagedCopyEqual": true,
+        "published012BodyLength": 6669,
+        "sourceBodyNotPublished": true
+      },
+      "validation": {
+        "defaultTests": 498,
+        "failures": 0,
+        "skipped": 0,
+        "nodeVersion": "26.12.0",
+        "documentAndSkillTests": 35,
+        "formatCheck": true,
+        "metadataErrors": 0,
+        "metadataNotices": 1,
+        "metadataSkipped": [],
+        "scope": "Default suite includes independent empty-cache tgz installation in controlled host context; separate published-artifact real rc.2 HTTP test above. No full UI/business/Windows certification."
+      }
+    },
+    "distributionUpstream20261018": {
+      "recordedAt": "2026-10-18T03:58:03.213Z",
+      "localDate": "2026-10-18",
+      "timezone": "Asia/Shanghai",
+      "scope": "Read-only upstream/API/default-branch/source inspection. No installation, host startup, browser UI test, external posting, push, merge or npm release. Prior runtime verification retains its original date and scope.",
+      "primary": {
+        "pullRequest": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/7736",
+        "state": "MERGED",
+        "mergedAt": "2026-10-17T20:34:41Z",
+        "mergedAtLocal": "2026-10-18 04:34:41 +08:00",
+        "defaultBranchCommit": "53b303576470bc9547e6cb4e4b922904d32edfbf",
+        "sourceYamlPresent": true,
+        "registryUrl": "https://awesome-dsh-plugin.com/plugins.json",
+        "registryUpdated": "2026-10-17",
+        "registryCount": 5786,
+        "registrySha256": "7812c61aa8033e593ce6728915cb0af853940ab14ba5da374aaf4a37c0545793",
+        "entry": {
+          "name": "dsh-plugin-compat-check#plugin",
+          "owner": "lcy0121",
+          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/tree/main/plugin",
+          "page": "https://awesome-dsh-plugin.com/p/lcy0121/dsh-plugin-compat-check--plugin/",
+          "category": "dev",
+          "description": {
+            "en": "Compatibility verdicts for installed DSH plugins on the plugin detail page: samples the current host's service descriptors in-process, extracts each plugin's calls into host services from source with a pinned Babel AST, and reports missing services or methods with file:line, a certainty of certain/suspected, and an impact basis, alongside coverage limits and observation age. Adds an agent tool, a skill provider and plugin-detail badges; the repository also ships a CLI.",
+            "zh": "在插件详情页给出已装 DSH 插件的兼容性结论：在宿主进程内采样服务描述符，用固定版本 Babel AST 从源码提取每个插件对宿主服务的调用，逐条报出缺失的服务或方法及 file:line、确定度（certain/suspected）与影响依据，并给出覆盖限制与观测时效。另加 agent 工具、skill provider 与插件详情角标；仓库还提供 CLI。"
+          },
+          "npm": null,
+          "version": null,
+          "stars": null,
+          "downloads": null,
+          "downloadsStart": null,
+          "downloadsEnd": null,
+          "downloadsCheckedAt": null,
+          "capabilities": [
+            "shell",
+            "fs-write",
+            "fs-read",
+            "network",
+            "env"
+          ],
+          "capabilityRedLines": [],
+          "capabilityCheckedAt": "2026-10-17T23:22:20.818Z",
+          "install": "dsh plugin --profile web add github:lcy0121/dsh-plugin-compat-check#path:/plugin",
+          "added": "2026-10-17",
+          "screenshots": [
+            "https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/HEAD/plugin/assets/compat-detail-partial.png",
+            "https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/HEAD/plugin/assets/compat-detail-declared.png"
+          ]
+        },
+        "detailPage": {
+          "url": "https://awesome-dsh-plugin.com/p/lcy0121/dsh-plugin-compat-check--plugin/",
+          "sha256": "947f8679eb6f26f312cf9e87a44853d6f0b42b9670c496b6e2aeaa5e53400084",
+          "containsRepositoryAndInstallCommand": true,
+          "scope": "Content checked, not HTTP status alone; no rendered browser or market installation certification."
+        },
+        "downloadNote": "First uncompressed download timed out with incomplete JSON; discarded as evidence. Compressed retry completed and full JSON parsed.",
+        "pending": "npm and version remain null; resolve npm mapping or a complete artifact route and then verify actual marketplace installation. Source-subdirectory spec is not a verified complete-kernel install."
+      },
+      "dshworks": {
+        "originalPullRequest": "https://github.com/dshworks/awesome-dsh-plugins/pull/167",
+        "state": "CLOSED",
+        "mergedAt": null,
+        "maintainerComment": "https://github.com/dshworks/awesome-dsh-plugins/pull/167#issuecomment-6245233421",
+        "adoptedVia": "https://github.com/dshworks/awesome-dsh-plugins/pull/169",
+        "adoptedViaState": "MERGED",
+        "adoptedAt": "2026-10-18T03:33:17Z",
+        "adoptedAtLocal": "2026-10-18 11:33:17 +08:00",
+        "defaultBranchCommit": "7773d618fc4918283c5e1df7abd1f3112c203206",
+        "defaultBranchDataUrl": "https://github.com/dshworks/awesome-dsh-plugins/blob/main/data/plugins.json",
+        "dataSha256": "754e3b654a9dd961fe747fd899a0519d1145255344f2e1f3c26de8c7bbdbfb1a",
+        "entry": {
+          "name": "dsh-plugin-compat-check",
+          "repo": "lcy0121/dsh-plugin-compat-check",
+          "path": "plugin",
+          "description": "检查已装 DSH 插件的宿主兼容性，按 file:line 报出缺失的服务或方法、确定度与影响依据 / Checks installed DSH plugins against the host: missing services or methods with file:line, certainty and impact basis.",
+          "category": "plugin",
+          "official": false,
+          "added": "2026-10-07",
+          "lastVerified": "2026-10-17",
+          "verifiedAgainst": "0.2.1-rc.2",
+          "status": "verified",
+          "evidence": "plugin/package.json#dsh.bundle",
+          "stars": 0,
+          "starsUpdated": "2026-10-17",
+          "tags": [
+            "interop"
+          ],
+          "pushedAt": "2026-10-17",
+          "npm": "dsh-plugin-compat-check"
+        },
+        "publicList": "https://github.com/dshworks/awesome-dsh-plugins/blob/main/lists/interop-migration.md",
+        "publicRowChecked": true,
+        "scope": "Correct plugin subdirectory, description and npm link adopted. Upstream verified/verifiedAgainst metadata cites manifest declaration, not newly performed business-runtime acceptance."
+      },
+      "store1024": {
+        "issue": "https://github.com/imsai-sh/dsh-1024store/issues/22",
+        "state": "OPEN",
+        "comments": 0,
+        "updatedAt": "2026-10-17T13:31:31Z",
+        "searchUrl": "https://api.deepseek1024.com/v1/plugins/search?q=dsh-plugin-compat-check",
+        "searchTotal": 1,
+        "detailUrl": "https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin",
+        "detailSha256": "44d6bd916b877ca7a0cce0e061a4fb611d8460dcd3f9685e8754811bbf30c94f",
+        "id": "lcy0121/dsh-plugin-compat-check/plugin",
+        "installMethods": [
+          {
+            "kind": "github",
+            "spec": "github:lcy0121/dsh-plugin-compat-check#path:plugin",
+            "command": "dsh plugin --profile web add github:lcy0121/dsh-plugin-compat-check#path:plugin",
+            "verification": "unknown",
+            "code": "not_checked",
+            "requiresBuildAllowance": false,
+            "buildPackage": null,
+            "revision": null,
+            "checkedAt": null
+          }
+        ],
+        "install": "dsh plugin --profile web add github:lcy0121/dsh-plugin-compat-check#path:plugin",
+        "sourceRuleRechecked": "web/worker/lib/install-methods.ts offeredInstallCommand still offers npm only; GitHub-only entry is browse-only.",
+        "pending": "npm method absent; await upstream enrichment/mapping resolution then verify market install. Source install failure described in issue #22 was not independently rerun."
+      },
+      "oxsline": {
+        "pullRequest": "https://github.com/0xsline/awesome-deepseek-harness/pull/717",
+        "state": "OPEN",
+        "comments": 0,
+        "updatedAt": "2026-10-17T12:54:55Z",
+        "checks": "awesome-lint SUCCESS",
+        "defaultReadme": "https://github.com/0xsline/awesome-deepseek-harness/blob/main/README.md",
+        "currentDescriptionStillPreInstallCliOnly": true
+      },
+      "bruc3van": {
+        "issue": "https://github.com/bruc3van/awesome-dsh-plugin/issues/138",
+        "state": "OPEN",
+        "comments": 0,
+        "updatedAt": "2026-10-17T13:37:12Z",
+        "curatedUrl": "https://github.com/bruc3van/awesome-dsh-plugin/blob/main/data/curated.json",
+        "exclusionStillPresent": "Not a DSH plugin — a standalone bash compatibility-checker CLI for DSH plugins.",
+        "dateCorrectionPreserved": true
+      },
+      "npm": {
+        "name": "dsh-plugin-compat-check",
+        "latest": "0.1.2",
+        "bundlePatch": "./cordis.patch.yml",
+        "repository": {
+          "url": "git+https://github.com/lcy0121/dsh-plugin-compat-check.git",
+          "type": "git"
+        },
+        "scope": "Live manifest check only; no new publish or repeated runtime acceptance."
+      },
+      "remaining": [
+        "Primary index propagation/inconsistency recheck after the successful nightly; detail page now offers npm; real market install still pending",
+        "1024 Store issue #22 and offered npm method",
+        "0xsline PR #717 description adoption",
+        "bruc3van issue #138 stale exclusion review",
+        "Separately authorized post-adaptation documentation/skill release"
+      ],
+      "validation": {
+        "docCheck": true,
+        "gitDiffCheck": true,
+        "productionCodeChanged": false,
+        "defaultSuiteNotRerun": "Documentation/evidence-only update; 498-test previous run remains dated historical verification."
+      },
+      "postNightlyFollowUp": {
+        "recordedAt": "2026-10-18T04:04:05.191871+00:00",
+        "scheduledRun": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/actions/runs/39090736719",
+        "runConclusion": "success",
+        "runCompletedAt": "2026-10-18T03:58:41Z",
+        "workflowRule": "Push builds normally reuse probe cache; scheduled builds use PROBE_ALL=1 and probe npm before building the site.",
+        "detailPage": {
+          "lastModified": "Sun, 18 Oct 2026 03:58:12 GMT",
+          "npmPackageLinkPresent": true,
+          "commands": [
+            "dsh plugin --profile web add dsh-plugin-compat-check",
+            "dsh plugin --profile web add github:lcy0121/dsh-plugin-compat-check#path:/plugin"
+          ]
+        },
+        "indexResponse": {
+          "url": "https://awesome-dsh-plugin.com/plugins.json?check=20261018-post-nightly",
+          "lastModified": "Sat, 17 Oct 2026 23:46:23 GMT",
+          "cacheControl": "max-age=600",
+          "xOriginCache": "HIT",
+          "xProxyCache": "HIT",
+          "date": "Sun, 18 Oct 2026 04:03:21 GMT",
+          "age": "195",
+          "npm": null,
+          "version": null,
+          "sha256": "7812c61aa8033e593ce6728915cb0af853940ab14ba5da374aaf4a37c0545793"
+        },
+        "interpretation": "Detail-page npm mapping now works; the public index response is an older build. Cache/propagation delay is a plausible inference, not a confirmed root cause.",
+        "recommendation": "Defer a new issue, recheck after approximately 10–20 minutes. If index remains old, report detail-page versus plugins.json inconsistency with headers and the successful build, rather than claiming npm detection failure.",
+        "relatedHistory": [
+          "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/issues/487",
+          "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/issues/3222"
+        ],
+        "externalIssuePosted": false,
+        "actualMarketInstallVerified": false
+      },
+      "timedRecheck": {
+        "recordedAt": "2026-10-18T04:20:40Z",
+        "localTime": "2026-10-18 12:20:40 +08:00",
+        "registrySha256": "ea53264aca77f3e0a395c1dfe232cd95cc6baf1e9f15b6ee4f2ff9b130722e47",
+        "entry": {
+          "name": "dsh-plugin-compat-check#plugin",
+          "npm": "dsh-plugin-compat-check",
+          "version": "0.1.2",
+          "install": "dsh plugin --profile web add dsh-plugin-compat-check"
+        },
+        "headers": {
+          "lastModified": "Sun, 18 Oct 2026 03:58:12 GMT",
+          "cacheControl": "max-age=600",
+          "date": "Sun, 18 Oct 2026 04:20:40 GMT",
+          "age": 346
+        },
+        "outcome": "Synced. Earlier null entry is retained above as a dated snapshot, superseded by this recheck. No upstream issue needed or posted; primary market install still pending.",
+        "automation": {
+          "name": "主目录索引同步复查",
+          "id": "automation",
+          "status": "PAUSED",
+          "reason": "Monitoring completed after sync confirmation; no duplicate issue."
+        }
+      },
+      "currentDisposition": {
+        "asOf": "2026-10-18T05:03:21.975Z",
+        "primaryRegistryNpmMapping": "Synced (timedRecheck)",
+        "primaryMarketInstall": "Passed for published0.1.2; see verification.marketInstallation20261018. Earlier pending statements are dated snapshots, superseded for this tested route only.",
+        "store1024": "Still pending, no new 1024 test in this run."
+      }
+    },
+    "rc2TargetedAdaptation": {
+      "recordedAt": "2026-10-18T04:50:13.260Z",
+      "sourceState": "0.1.3 local unpublished candidate; main and npm unchanged; remote CI not run for these changes",
+      "platform": "darwin",
+      "arch": "arm64",
+      "dshVersion": "0.2.1-rc.2",
+      "defaultSuite": {
+        "nodeVersion": "26.12.0",
+        "tests": 515,
+        "passed": 515,
+        "failed": 0,
+        "skipped": 0,
+        "tapSha256": "ee10715236273087ada0adbc5ad75a706480d896ceca871ececa1b9c28e94237",
+        "additionalSupportedNode": {
+          "nodeVersion": "24.19.0",
+          "tests": 515,
+          "passed": 515,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "843bb06e73d71e834c2dbcc725eea53040dcacdc21c6032d72d54061e296739c"
+        }
+      },
+      "realRc2Joint": {
+        "tests": 19,
+        "passed": 19,
+        "failed": 0,
+        "skipped": 0,
+        "tapSha256": "91f58dbb73c390fa185e866a16227105603f81eff1b2604db23f95c8b3b49242",
+        "scope": "Private actual DSH, probe identity/loader labels, exact candidate tgz and HTTP responsiveness, frozen pnpm clone, plus rc.2 declaration/metadata/browser lifecycle. Not business certification."
+      },
+      "rc2Live": {
+        "ok": true,
+        "applicable": true,
+        "dshVersion": "0.2.1-rc.2",
+        "artifactVersion": "0.1.3",
+        "declarationCases": [
+          {
+            "id": "engines-allow",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "engines-reject",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "exact-exemption",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "wrong-exemption",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "peer-fallback",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          }
+        ],
+        "ui": {
+          "available": true,
+          "navigation": "More > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+        },
+        "scope": "Controlled declaration gates and unprivileged local browser UI only; no model call, real plugin business-function or Windows certification.",
+        "subpathMetadata": true,
+        "artifactSha256": "9da5f82a41c68b3a61d356390a0660a391f49d022b85d908037b8a408b962fb0",
+        "httpReport": true,
+        "disabledDiagnostic": {
+          "status": 404,
+          "type": null
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        }
+      },
+      "engineeringRc2": {
+        "schemaVersion": 1,
+        "kind": "plugin-compat-check/engineering-live",
+        "ok": true,
+        "platform": "darwin",
+        "arch": "arm64",
+        "nodeVersion": "26.12.0",
+        "dshVersion": "0.2.1-rc.2",
+        "artifactVersion": "0.1.3",
+        "pressureFunctions": 4000,
+        "reportAvailable": true,
+        "reportMilliseconds": 177.42029200000025,
+        "http": {
+          "samples": 11,
+          "refreshingSamples": 11,
+          "maxMilliseconds": 5.581749999999829
+        },
+        "scope": "Owned web profile, actual tgz and synthetic uncalled functions; HTTP responsiveness only, not business behavior or a production performance guarantee.",
+        "cleanup": {
+          "hostStopped": true,
+          "privateRootRemoved": true
+        }
+      },
+      "declarationPolicy": {
+        "modernFrom": "0.2.1-rc.1",
+        "enginesFirst": true,
+        "officialPeersFallback": true,
+        "includesPrerelease": true,
+        "workspaceAliases": "peer only: workspace:^/~/* resolve to exact runtime; engines do not",
+        "independentGrants": "Read-only profile/compatibility.json; exact package name/version and exact runtime, invalid row ignored as a whole, valid rows retained, invalid fields never exemptable.",
+        "budget": "64KiB ordinary-file read; nonblocking open avoids FIFO hangs; unreadable/malformed/oversize is unobserved plus coverage notes.",
+        "legacyPolicyPreserved": true
+      },
+      "catalogue": {
+        "newFile": "rules/dsh-api-catalog-0.2.1-rc.2.json",
+        "legacyFile": "rules/dsh-api-catalog.json",
+        "legacySha256": "1331bf3220c1e06cfe087237077118d002dc04c32d027ce01da74c6a0d1dc9ad",
+        "legacyBytesUnchanged": true,
+        "selection": "Target >=0.2.1-rc.2 selects rc.2; older/unknown selects legacy; explicit CLI override wins. Future runtime versions are unverified.",
+        "asarDataOffset": "8 + headerSize; bounded header, file bounds, complete read, strict UTF8/JSON and recorded archive SHA256 verified",
+        "electronCrossCheck": {
+          "exactBytesAndPrefixSuffix": true,
+          "hostApiSha256": "ec9d470867ab2b08c50c189fe10bb00201839b67e0f3866ad081daff1284c6a0",
+          "clientRunnerSha256": "ad3488b2cdbe6b5077962aa05dbeff9499f5b782838f1b658c6c902aa538bcd0",
+          "appBootBytes": 203572,
+          "appBootSha256": "5135179ac810e4f626f32ec3bdc3293dc7d2028e8aa92e5e0c006f1a33b78e76"
+        },
+        "differences": {
+          "host": {
+            "services": 98,
+            "methods": 291,
+            "added": [
+              "claudeCodeMods",
+              "cotTranslation",
+              "pluginMarket",
+              "remoteAccess",
+              "translator",
+              "webApp",
+              "workingDirectory",
+              "worktrees"
+            ],
+            "removed": [
+              "invariants"
+            ],
+            "changedMethods": {
+              "agentPresets": {
+                "added": [
+                  "inspectCompositions"
+                ],
+                "removed": []
+              },
+              "connection": {
+                "added": [
+                  "admitConnection",
+                  "createPeer"
+                ],
+                "removed": []
+              },
+              "hmr": {
+                "added": [
+                  "reconcileProfile"
+                ],
+                "removed": []
+              },
+              "llm": {
+                "added": [
+                  "imageRequestTarget"
+                ],
+                "removed": []
+              },
+              "ptcRuntime": {
+                "added": [
+                  "release"
+                ],
+                "removed": []
+              },
+              "subagents": {
+                "added": [
+                  "drainChildren",
+                  "drainDescendants",
+                  "startActivation",
+                  "waitForChildren"
+                ],
+                "removed": [
+                  "drainContinuableChildren",
+                  "drainContinuableDescendants",
+                  "start",
+                  "startContinuable"
+                ]
+              },
+              "systemPrompt": {
+                "added": [
+                  "refreshContext"
+                ],
+                "removed": []
+              },
+              "webServer": {
+                "added": [
+                  "getOrigin"
+                ],
+                "removed": []
+              }
+            }
+          },
+          "client": {
+            "services": 8,
+            "methods": 43,
+            "added": [],
+            "removed": [],
+            "changedMethods": {}
+          }
+        },
+        "rulesReview": "Existing semantic rules retained for their original call sites. New methods not assumed equivalent renames; no unsupported new severity rule. Unknown impact retains fallback."
+      },
+      "lifecycle": {
+        "registrationDisposersReturned": true,
+        "ownedTimersAndHandleDisposed": true,
+        "oldCleanupPreservesNewHandle": true,
+        "inflightDisposalRegression": "Pause first actual pluginManager.list, dispose generation, then release: failure envelope, no baseline created. Also guard before baseline transaction and after final async import/at serve boundary.",
+        "cancellationRegression": "Owned fake dsh startup then SIGTERM: detached host and private root removed. All command calls (including official metadata), pending browser startup and host groups now tracked.",
+        "workerLimit": "In-flight worker remains governed by original timeout/memory budget, not immediate cancellation."
+      },
+      "independentReview": {
+        "importantFindings": 2,
+        "fixed": 2,
+        "additionalCancellationCallSiteFixed": true,
+        "scope": "Read-only diff, source and targeted behavior review; reviewer did not independently rerun all live/default tests.",
+        "finalConclusion": "Both P2 findings and the additional metadata command cancellation call-site fixed; final read-only review has no unresolved important issue."
+      },
+      "skillReference": {
+        "baseline": "Old skill left modern declarations/grants/catalogue/current navigation and HMR unknown.",
+        "after": "Updated reference read; three actual controlled static CLI cases passed with original exit codes 0/0/1, modern catalogue and no baseline. Fixture setup supplied as test apparatus; no host/network/install/post.",
+        "bodyLength": 7764,
+        "sourceSha256": "2ec999a96d86bb62cdcc689ea69e8de2ae5564f097720ba5b99bb456856a956f",
+        "scope": "One reference/application scenario, not model reliability or business certification."
+      },
+      "ciConfiguration": {
+        "node": [
+          "22.19.0",
+          "24"
+        ],
+        "linuxDsh": [
+          "0.2.0-rc.2",
+          "0.2.1-rc.2"
+        ],
+        "rc2BrowserRequired": true,
+        "artifacts": [
+          "linux-live.tap",
+          "linux-engineering.json",
+          "linux-rc2.json"
+        ],
+        "status": "Configured, not remotely run for this unpushed change."
+      },
+      "metadata": {
+        "observedAt": "2026-10-18T04:45:44.865Z",
+        "npmLatest": "0.1.2",
+        "errors": 0,
+        "notices": [
+          "Local unpublished candidate version ahead of npm",
+          "npm README is the published 0.1.2 text, not local candidate"
+        ],
+        "sourcesAvailable": true
+      },
+      "limitations": [
+        "No model invocation or complete third-party business-function certification",
+        "No Windows real environment; remains deferred by user",
+        "Historical missing-tab root cause not established by current successful navigation",
+        "Older CI and dated runtime records do not certify current changes"
+      ],
+      "realLegacyJoint": {
+        "dshVersion": "0.2.0-rc.2",
+        "tests": 19,
+        "passed": 19,
+        "failed": 0,
+        "skipped": 0,
+        "rc2SpecificAcceptance": "applicable=false; its wrapper passed without running rc.2 declarations/UI; the other 18 checks exercised legacy and offline behavior",
+        "tapSha256": "da558e8198b4fca04e2a02fd1ff54ef94ddcc5dfda4fa61311c4622ef4efa094",
+        "engineering": {
+          "schemaVersion": 1,
+          "kind": "plugin-compat-check/engineering-live",
+          "ok": true,
+          "platform": "darwin",
+          "arch": "arm64",
+          "nodeVersion": "26.12.0",
+          "dshVersion": "0.2.0-rc.2",
+          "artifactVersion": "0.1.3",
+          "pressureFunctions": 4000,
+          "reportAvailable": true,
+          "reportMilliseconds": 190.15487500000017,
+          "http": {
+            "samples": 13,
+            "refreshingSamples": 12,
+            "maxMilliseconds": 4.18079200000011
+          },
+          "scope": "Owned web profile, actual tgz and synthetic uncalled functions; HTTP responsiveness only, not business behavior or a production performance guarantee.",
+          "cleanup": {
+            "hostStopped": true,
+            "privateRootRemoved": true
+          }
+        },
+        "runtime": "Official pinned npm DSH in an owned temporary prefix, no global runtime change"
+      },
+      "recordType": "Dated development checkpoint; local-only/unpublished/CI flags describe this checkpoint. Final0.1.3 publication and remote matrix are recorded in verification.release013."
+    },
+    "marketInstallation20261018": {
+      "recordedAt": "2026-10-18T05:03:21.974Z",
+      "platform": "darwin",
+      "arch": "arm64",
+      "profileKind": "Owned private web profile",
+      "marketVersion": "1.66.37",
+      "targetVersion": "0.1.2",
+      "setupTargetAbsent": true,
+      "dshVersion": "0.2.1-rc.2",
+      "verifiedAt": "2026-10-18T05:01:19.126Z",
+      "installedVersion": "0.1.2",
+      "sourceSpec": "0.1.2",
+      "bundle": {
+        "patch": "./cordis.patch.yml"
+      },
+      "artifact": {
+        "tarball": "https://registry.npmjs.org/dsh-plugin-compat-check/-/dsh-plugin-compat-check-0.1.2.tgz",
+        "integrity": "sha512-MjGe8WNpt3FObjBhqgabS2Q69Rgbh0uYfhKKQ0j/Iy/FzGvNFG0gd5graxGIl7MjZc/FjYQdu7TKzzLESfmYOA==",
+        "sha256": "1afd6aae5f1b1d3242f437c1cc5863147361d51bdc673b54246176eea91f3e59",
+        "files": 34,
+        "allInstalledFilesEqual": true,
+        "contentDigest": "2858a1148227476de4614ea96edff960138e5717759d7bd8142cfd87ed722f77"
+      },
+      "http": {
+        "status": 200,
+        "ok": true,
+        "toolVersion": "0.1.2",
+        "dshVersion": "0.2.1-rc.2",
+        "pluginCount": 2,
+        "ownVerdict": "ok"
+      },
+      "runtimeLog": {
+        "hostActivation": true,
+        "skillRegistered": true,
+        "kernelPresent": true
+      },
+      "scope": "Published npm0.1.2 installed by real market UI; not local0.1.3 candidate or comprehensive business-function certification",
+      "cleanup": {
+        "hostStopped": true,
+        "privateProfileRemoved": true
+      },
+      "localDate": "2026-10-18",
+      "timezone": "Asia/Shanghai",
+      "sourceCommit": "c586f7cabba44ad459c080b0e87ae9da2d711682",
+      "market": {
+        "package": "dshmarket",
+        "version": "1.66.37",
+        "repository": "https://github.com/dsh-market/dsh-market",
+        "sourceHeadObserved": "ba73a3988bb3eee82295a695d59be59563637350",
+        "sourceHeadScope": "Upstream main observed, not an assertion that this exact commit built the npm tarball.",
+        "tarball": "https://registry.npmjs.org/dshmarket/-/dshmarket-1.66.37.tgz",
+        "integrity": "sha512-6sr+x6W6PppAtygJra/khU1ehK8bmjmfVnFgmPyHixx3GzIXGX/iW04CoeqlExFpsyTWXnM2W/X7JLU78dHJLA=="
+      },
+      "setup": {
+        "template": "Official web template, private DSH_HOME and DSH_AGENTS_HOME",
+        "preinstalledPackages": [
+          "dshmarket@1.66.37"
+        ],
+        "targetInitiallyAbsent": true,
+        "registryAndGithubRouteOverrides": false,
+        "cliTargetInstall": false,
+        "sourceCandidateInjected": false
+      },
+      "ui": {
+        "driver": "Computer Use via cua_repl, actual Chrome tab",
+        "navigation": "More > Settings > Plugin Market > Discover search",
+        "search": "dsh-plugin-compat-check",
+        "selectedEntry": {
+          "name": "dsh-plugin-compat-check#plugin",
+          "owner": "lcy0121",
+          "version": "0.1.2",
+          "github": "https://github.com/lcy0121/dsh-plugin-compat-check/tree/main/plugin"
+        },
+        "confirmationCommand": "dsh plugin --profile market-acceptance add dsh-plugin-compat-check",
+        "confirmedInstall": true,
+        "installCompletedVisible": true,
+        "activation": "Market requested page refresh; clicked its refresh control; UI reported installed and active. No host restart or manual reinstallation needed.",
+        "installedTab": {
+          "name": "dsh-plugin-compat-check",
+          "version": "0.1.2",
+          "enabled": true,
+          "updateLabel": "已是最新"
+        },
+        "compatibilityPanel": {
+          "path": "More > Settings > Built-in plugins > Compatibility",
+          "visible": true,
+          "toolVersion": "0.1.2",
+          "ownPluginVersion": "0.1.2"
+        },
+        "screenshots": {
+          "installedSha256": "647c0e831c23e9efd80945b41cb41dad4cfc231f54bbe7df1d9089a1f2dfabf4",
+          "reportSha256": "5e163b7e86a3bd9c85d7ad3b14b9cbdaac637af40084f1bed2de7b1f76eb33ff",
+          "captureScope": "Actual visible browser; temporary local evidence shown to user, not new repository asset files."
+        },
+        "installedAXSha256": "2c49c3a555b5c8d415b4ca1505f77b8983436568ae02d3ace80f58fe779d633e"
+      },
+      "observations": [
+        {
+          "kind": "upstream-classification-warning",
+          "text": "Market install confirmation called this a terminal plugin and warned it might not suit the web host.",
+          "effect": "Did not block npm installation, activation, compatibility tab or HTTP report in this controlled web test.",
+          "interpretation": "Suspected classification issue; cause not determined and no upstream issue filed."
+        },
+        {
+          "kind": "verdict-scope",
+          "text": "Published0.1.2 report also contains inferred findings about dshmarket; successful installation does not validate or invalidate every reported feature path.",
+          "effect": "Preserved inferred/limited scope; no claim of complete business correctness."
+        }
+      ],
+      "validation": {
+        "productionCodeChanged": false,
+        "tests": "Documentation contracts and links rerun; full default suite not repeated for this evidence-only edit. Existing 515-test runs keep their original rc2TargetedAdaptation scope.",
+        "externalPost": false,
+        "push": false,
+        "merge": false,
+        "npmRelease": false,
+        "documentation": {
+          "tests": 9,
+          "passed": 9,
+          "failed": 0,
+          "docCheck": true,
+          "gitDiffCheck": true,
+          "tapSha256": "c446170868793c07df537eacc71343113ccaa9511eebea3c34a5c66256caa319"
+        }
+      },
+      "limitations": [
+        "One primary dsh-market version / DSH0.2.1-rc.2 / macOS arm64 web profile and real Chrome",
+        "Published0.1.2 only; local0.1.3 candidate remains unpublished and not marketplace-certified",
+        "No Windows, model invocation or complete plugin-business-function certification",
+        "1024 Store is a separate distribution path and remains pending issue22/npm mapping",
+        "Source-subdirectory and prebuilt GitHub routes were not used or certified"
+      ]
+    },
+    "independentBusinessTruth": {
+      "recordedAt": "2026-10-18T09:26:01.288Z",
+      "verifiedAt": "2026-10-18T09:24:31.982Z",
+      "sourceBaseCommit": "367b307cbc5bdeab7e4a15cee9ef857e57acc075",
+      "platform": "darwin",
+      "arch": "arm64",
+      "toolVersion": "0.1.3",
+      "dshVersion": "0.2.1-rc.2",
+      "runnerNodeVersion": "26.12.0",
+      "chromeVersion": "155.0.8059.84",
+      "artifacts": {
+        "package": "dshmarket",
+        "version": "1.66.37",
+        "sourceHashes": {
+          "package.json": "bdad145d54f257db7a814df0bb4b7feb3ce82fd3d18b9aa57a0402e9e88b9a47",
+          "lib/routes.js": "84bf6a9fd2acb24893a4cd81f577b413cf540ac166f2fc0572c408a2874ca48e",
+          "lib/hot.js": "e0a8d32d02b400e02a90c97ef31895b96a4d22f773d7b3bb78f7def13eca1b0f",
+          "client/client.js": "e40be7d4bbbc1b1380f5fb6d1817f2a2092ab59713bcc011b3e86d2f238d5bdf"
+        },
+        "packageFingerprint": {
+          "files": 182,
+          "digest": "a26339e13c9adcff506c1d0c00842d0e6cf104226c5a1954a5e091c40dd6f583"
+        },
+        "publishedTarballSha256": "8b29d156e3ea45330623b4cd66736992456f5ef4c92c8fb00243ccc3b101f188",
+        "publishedIntegrity": "sha512-6sr+x6W6PppAtygJra/khU1ehK8bmjmfVnFgmPyHixx3GzIXGX/iW04CoeqlExFpsyTWXnM2W/X7JLU78dHJLA==",
+        "seedPackage": "dsh-plugin-compat-check@0.1.2",
+        "seedManifestHash": "599e64b9c0a5fc1ecc1cc7eedd48ad0efa5ae2ca8cb60114c7a2d83ec849a05d",
+        "rulesHash": "8aa022ce423c25337b0c670c2b2a4c52d4af624cccee35d3da8c7532ef041593",
+        "catalogueHash": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+        "predictorSourcesSha256": "ffdad0820720ff516dd6fa67683a882c4702ec5594cccf921931f5bb3af76893",
+        "combinedArtifactDigest": "3fdee03d456106103463bf0a0deb21d32293e1f57ff567cfb7368119c8690725"
+      },
+      "features": [
+        {
+          "id": "market.note",
+          "plugin": "dshmarket",
+          "spans": [
+            {
+              "file": "client/client.js",
+              "start": 10398,
+              "end": 10416
+            },
+            {
+              "file": "lib/routes.js",
+              "start": 3113,
+              "end": 3153
+            },
+            {
+              "file": "lib/routes.js",
+              "start": 1871,
+              "end": 1884
+            },
+            {
+              "file": "lib/hot.js",
+              "start": 310,
+              "end": 445
+            }
+          ]
+        },
+        {
+          "id": "market.favorite",
+          "plugin": "dshmarket",
+          "spans": [
+            {
+              "file": "client/client.js",
+              "start": 10417,
+              "end": 10467
+            },
+            {
+              "file": "lib/routes.js",
+              "start": 3154,
+              "end": 3206
+            },
+            {
+              "file": "lib/routes.js",
+              "start": 1871,
+              "end": 1884
+            },
+            {
+              "file": "lib/hot.js",
+              "start": 310,
+              "end": 445
+            }
+          ]
+        }
+      ],
+      "prediction": {
+        "mode": "feature-scoped-static-api-risk",
+        "businessLabelsUsed": false,
+        "loaderLabelsUsed": false,
+        "autoProbeDiscovery": false,
+        "sealedBeforeActions": true,
+        "sha256": "9f75f4c3d5c0cd084d1829e677839514673873f785cb71155ab03c900c259e24",
+        "predictedAt": "2026-10-18T09:24:28.141Z",
+        "casePlan": [
+          {
+            "caseId": "market.note.healthy",
+            "featureId": "market.note",
+            "control": "none"
+          },
+          {
+            "caseId": "market.note.blocked",
+            "featureId": "market.note",
+            "control": "http-503"
+          },
+          {
+            "caseId": "market.favorite.healthy",
+            "featureId": "market.favorite",
+            "control": "none"
+          },
+          {
+            "caseId": "market.favorite.blocked",
+            "featureId": "market.favorite",
+            "control": "http-503"
+          }
+        ],
+        "rows": [
+          {
+            "featureId": "market.note",
+            "flagged": false,
+            "coverageLimited": true,
+            "clientVerified": false,
+            "findings": []
+          },
+          {
+            "featureId": "market.favorite",
+            "flagged": false,
+            "coverageLimited": true,
+            "clientVerified": false,
+            "findings": []
+          }
+        ],
+        "scope": "Feature-scoped source/static catalogue API risk only. No business or loader labels, no auto-probe. Exact case plan is sealed before browser actions; unrelated feature findings are excluded."
+      },
+      "businessTruth": {
+        "source": "browser-action+profile-state",
+        "collectedAt": "2026-10-18T09:24:31.982Z",
+        "rows": [
+          {
+            "caseId": "market.note.healthy",
+            "featureId": "market.note",
+            "control": "none",
+            "action": "Save a new note, then reload",
+            "expected": "Requested value must persist on disk and remain visible after reload",
+            "observed": {
+              "requestStatus": 200,
+              "persisted": true,
+              "uiAfterReload": true
+            },
+            "outcome": "passed"
+          },
+          {
+            "caseId": "market.note.blocked",
+            "featureId": "market.note",
+            "control": "http-503",
+            "action": "Save a new note, then reload",
+            "expected": "Requested value must persist on disk and remain visible after reload",
+            "observed": {
+              "requestStatus": 503,
+              "persisted": false,
+              "uiAfterReload": false
+            },
+            "outcome": "failed"
+          },
+          {
+            "caseId": "market.favorite.healthy",
+            "featureId": "market.favorite",
+            "control": "none",
+            "action": "Toggle catalog favorite, then reload",
+            "expected": "Requested value must persist on disk and remain visible after reload",
+            "observed": {
+              "requestStatus": 200,
+              "persisted": true,
+              "uiAfterReload": true
+            },
+            "outcome": "passed"
+          },
+          {
+            "caseId": "market.favorite.blocked",
+            "featureId": "market.favorite",
+            "control": "http-503",
+            "action": "Toggle catalog favorite, then reload",
+            "expected": "Requested value must persist on disk and remain visible after reload",
+            "observed": {
+              "requestStatus": 503,
+              "persisted": false,
+              "uiAfterReload": false
+            },
+            "outcome": "failed"
+          }
+        ],
+        "postconditions": "Completed Network.loadingFinished request plus requested value in independently read raw profile state and freshly navigated DOM. Headers alone or ACTIVE loader are insufficient. Driver/unfinished transport errors do not become business-failure labels."
+      },
+      "metrics": {
+        "baseline": {
+          "scored": 2,
+          "unscored": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "trueNegative": 2,
+          "precision": null,
+          "recall": null
+        },
+        "faultInjected": {
+          "scored": 2,
+          "unscored": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 2,
+          "trueNegative": 0,
+          "precision": null,
+          "recall": 0
+        }
+      },
+      "rawCliExitCode": 1,
+      "validation": {
+        "defaultSuite": {
+          "nodeVersion": "26.12.0",
+          "tests": 526,
+          "passed": 526,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "b56b3378794e59fcdc2823638571c2c07ba85f7ca5832a4bbe69f7fc25f2cc48"
+        },
+        "additionalSupportedNode": {
+          "nodeVersion": "24.19.0",
+          "tests": 526,
+          "passed": 526,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "fe8a61bf22f19df931a182f17519cc91003b643395775c4e0baf28baa618786d"
+        },
+        "targetedWithRealBusiness": {
+          "nodeVersion": "26.12.0",
+          "tests": 12,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "1691df3bd73b33540bf62d40168d039021827aafb87126aa8d8c0432e87d1e8b"
+        },
+        "replay": {
+          "replayExit": 1,
+          "metrics": {
+            "baseline": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 2,
+              "precision": null,
+              "recall": null
+            },
+            "faultInjected": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 2,
+              "trueNegative": 0,
+              "precision": null,
+              "recall": 0
+            }
+          },
+          "incompleteCaseExit": 3,
+          "incompleteCaseError": "Incomplete planned business cases"
+        },
+        "artifactHashes": {
+          "predictions.json": "83f57a5d64e09c2612119b13c056081cde78eb1113383b2565bd61f6544f3d3c",
+          "labels.json": "37f8c338f2b4a529e01455b1aa29e71117f421774af0da400560816d615e8ee1",
+          "measurement.json": "d2ad6ea6304869794c2710ad7719a05c8319ac05f24582be89e24600abefe8a4"
+        },
+        "screenshots": {
+          "market.note.healthy": "4e01ecee1d2ad0fdb2da5405b0669e8574de325fd5d2860e3a926437fe1a1e61",
+          "market.note.blocked": "4e01ecee1d2ad0fdb2da5405b0669e8574de325fd5d2860e3a926437fe1a1e61",
+          "market.favorite.healthy": "ee5db8d33e60461a5153fb7a27ea439cd65d7705c24730de024dc9ae2e0f8061",
+          "market.favorite.blocked": "4440cb2aa9610276f8d57bcaad6a0fd53b906b364b4fcfecee117af92a264530"
+        },
+        "regressions": [
+          "Missing planned case/whole feature cannot erase misses",
+          "Identity, source artifact digest and time order must match",
+          "Malformed or contradictory postconditions rejected; unobserved/harness errors unscored",
+          "Completed request required; loadingFailed rejected as transport error",
+          "Full published package fingerprint covers untraced source files",
+          "SIGTERM during setup reclaims owned command and private profile"
+        ],
+        "initialDriverRepair": "First UI run could not mount because the controlled catalog fixture lacked required categories/install fields. Fixed the fixture; no business labels inferred from that run and no original-plugin bug asserted.",
+        "independentReview": {
+          "importantFindings": 2,
+          "fixed": 2,
+          "remainingImportantFindings": 0,
+          "findings": [
+            "Partial case replay could hide failures",
+            "Response headers mistaken for completed request"
+          ],
+          "finalConclusion": "No remaining Critical/Important in reviewed tools/tests scope",
+          "scope": "Read-only source/diff and offline tests; reviewer did not independently rerun the complete default/live suite. One minor masked negative test also corrected.",
+          "finalConsistencyReview": {
+            "remainingCritical": 0,
+            "remainingImportant": 0,
+            "remainingMinor": 0,
+            "targetedRegressionTests": 2,
+            "passed": 2,
+            "scope": "Final documentation/CI consistency and corrected malformed-row/cancellation checks only; full/default/live results remain primary-runner evidence."
+          }
+        },
+        "documentation": {
+          "formatCheck": true,
+          "docCheck": {
+            "toolVersion": "0.1.3",
+            "testFiles": 37,
+            "documents": 11,
+            "tests": 526
+          },
+          "generatedContractCheck": true,
+          "gitDiffCheck": true
+        }
+      },
+      "controls": {
+        "catalogue": "Single real public entry as a controlled local catalog; not a public-market installation test",
+        "faults": "Browser intercepts only the selected feature POST with HTTP503; installed plugin bytes unchanged",
+        "scope": "Normal note save and favorite toggle plus failure controls; transport failures expose blind spots, not original plugin defects."
+      },
+      "cleanup": {
+        "privateRootRemoved": true,
+        "hostStopped": true,
+        "ownedBrowserClosed": true,
+        "cancellationRegressionPassed": true
+      },
+      "ciConfiguration": {
+        "workflow": ".github/workflows/test.yml",
+        "linuxDsh": [
+          "0.2.0-rc.2",
+          "0.2.1-rc.2"
+        ],
+        "artifactDirectory": "linux-business/",
+        "legacyBehavior": "Explicit business test skip: applicable=false; no legacy business certification",
+        "status": "Configured only; not remotely run for this unpushed change"
+      },
+      "limitations": [
+        "Two dshmarket1.66.37 paths on macOS arm64 / DSH0.2.1-rc.2 only; no model invocation or Windows certification",
+        "Controlled single-entry local catalog, not another public marketplace installation acceptance",
+        "Browser HTTP503 controls are not natural version regressions or proof of original-plugin defects",
+        "Baseline and fault-injected metrics remain separate; no ecosystem accuracy claim",
+        "Production compatibility panel, verdict severity and npm delivery unchanged; repository tool only",
+        "Historical paired files replay historical observations; matching hashes are not a cryptographic attestation against deliberate coordinated tampering"
+      ],
+      "delivery": {
+        "push": false,
+        "merge": false,
+        "npmRelease": false,
+        "externalPost": false
+      },
+      "recordType": "Dated development checkpoint; local-only/unpublished/CI flags describe this checkpoint. Final0.1.3 publication and remote matrix are recorded in verification.release013."
+    },
+    "businessSampleExpansion": {
+      "recordedAt": "2026-10-18T13:37:56.930Z",
+      "platform": "darwin",
+      "arch": "arm64",
+      "dshVersion": "0.2.1-rc.2",
+      "toolVersion": "0.1.3",
+      "package": "dsh-better-sidebar",
+      "packageVersion": "0.28.0",
+      "artifact": {
+        "packageFingerprint": {
+          "files": 471,
+          "digest": "2c3b5619b4a8ee9ab87ea179b0163a1230dbbb63e8cdbea3de8b08f9147d6892"
+        },
+        "publishedTarballSha256": "40b7ce32a6d90bff069b3bb4d0e5dd692281e0ac0598163196b816ac12335b6f",
+        "publishedIntegrity": "sha512-x7+/YmH/HrSlXWOBZkhL7qQqcDgZEnDcWrhR5GlizzUZjz+w84FbQ6jo8trJC9tyaQxMaNvXVnXwDxn4I330Ew==",
+        "combinedArtifactDigest": "8ef87df8375fde82caae6c13c850f6c6425dd8e444ba00199ea1456193d878fd",
+        "sourceHashes": {
+          "package.json": "e557306a7af1f8ea020caffae62c36df4591ced90cf4626db464df5dce8fcc36",
+          "lib/index.js": "00080091516184efe0005d8521cb890ae89032b9abcd514b752c4ef7642fa129",
+          "src/index.ts": "7658d35cb8a0d9c8c9ea816413817c338b56a18fe6f21d62f55ec3e849682f42",
+          "src/fs-operations.ts": "1a0d84d4872f0fa42170dc1797bb3bd4d3a66b2186c94847b6e4ce2608de5511",
+          "src/html-route.ts": "73974a8649ac8332258dae896f0129da2b16541ad9ea1ab5cb1c40576ec6885e"
+        },
+        "harnessSources": {
+          "tools/business-live.mjs": "f4812fd6f818b0a936766a6427d06737abc8fa06172d285f6707e604fd3df9f7",
+          "tools/browser-session.mjs": "cac570102145b75391ea264286f89d9bdf4cbfbbae517c583b323e9026371719",
+          "tools/business-sidebar.mjs": "dd57ff5ea02d30fb55039d6f1c30f149e382b4f71e3802ed08c0622f6c9c824e"
+        }
+      },
+      "prediction": {
+        "mode": "feature-scoped-static-api-risk",
+        "businessLabelsUsed": false,
+        "loaderLabelsUsed": false,
+        "autoProbeDiscovery": false,
+        "sealedBeforeActions": true,
+        "sha256": "20655752bfb38ce3feb1fa222b1abb39da71e55f7ea4ab6ee186e2674a761f11",
+        "predictedAt": "2026-10-18T13:56:00.754Z",
+        "casePlan": [
+          {
+            "caseId": "sidebar.save.utf8-bom.healthy",
+            "featureId": "sidebar.save.utf8-bom",
+            "control": "none"
+          },
+          {
+            "caseId": "sidebar.save.utf8-bom.blocked",
+            "featureId": "sidebar.save.utf8-bom",
+            "control": "http-503"
+          },
+          {
+            "caseId": "sidebar.save.utf8-bom.recovered",
+            "featureId": "sidebar.save.utf8-bom",
+            "control": "none"
+          },
+          {
+            "caseId": "sidebar.save.utf16le.healthy",
+            "featureId": "sidebar.save.utf16le",
+            "control": "none"
+          },
+          {
+            "caseId": "sidebar.save.utf16le.blocked",
+            "featureId": "sidebar.save.utf16le",
+            "control": "http-503"
+          },
+          {
+            "caseId": "sidebar.save.utf16le.recovered",
+            "featureId": "sidebar.save.utf16le",
+            "control": "none"
+          }
+        ],
+        "scope": "Manually scoped save/preview/cwd/admission API risk only; no business or loader labels enter predictor"
+      },
+      "businessTruth": {
+        "source": "browser-action+profile-state",
+        "collectedAt": "2026-10-18T13:56:04.519Z",
+        "rows": [
+          {
+            "caseId": "sidebar.save.utf8-bom.healthy",
+            "featureId": "sidebar.save.utf8-bom",
+            "control": "none",
+            "action": "Browser POST to real editor-save route, then fresh plugin HTML preview",
+            "expected": "Requested content, original BOM/encoding and CRLF bytes must survive; preview text must match",
+            "observed": {
+              "requestStatus": 200,
+              "persisted": true,
+              "uiAfterReload": true
+            },
+            "outcome": "passed",
+            "byteEvidence": {
+              "encoding": "utf8-bom",
+              "exactRequestedBytes": true,
+              "previousBytesPreserved": false
+            }
+          },
+          {
+            "caseId": "sidebar.save.utf8-bom.blocked",
+            "featureId": "sidebar.save.utf8-bom",
+            "control": "http-503",
+            "action": "Browser POST to real editor-save route, then fresh plugin HTML preview",
+            "expected": "Requested content, original BOM/encoding and CRLF bytes must survive; preview text must match",
+            "observed": {
+              "requestStatus": 503,
+              "persisted": false,
+              "uiAfterReload": false
+            },
+            "outcome": "failed",
+            "byteEvidence": {
+              "encoding": "utf8-bom",
+              "exactRequestedBytes": false,
+              "previousBytesPreserved": true
+            }
+          },
+          {
+            "caseId": "sidebar.save.utf8-bom.recovered",
+            "featureId": "sidebar.save.utf8-bom",
+            "control": "none",
+            "action": "Browser POST to real editor-save route, then fresh plugin HTML preview",
+            "expected": "Requested content, original BOM/encoding and CRLF bytes must survive; preview text must match",
+            "observed": {
+              "requestStatus": 200,
+              "persisted": true,
+              "uiAfterReload": true
+            },
+            "outcome": "passed",
+            "byteEvidence": {
+              "encoding": "utf8-bom",
+              "exactRequestedBytes": true,
+              "previousBytesPreserved": false
+            }
+          },
+          {
+            "caseId": "sidebar.save.utf16le.healthy",
+            "featureId": "sidebar.save.utf16le",
+            "control": "none",
+            "action": "Browser POST to real editor-save route, then fresh plugin HTML preview",
+            "expected": "Requested content, original BOM/encoding and CRLF bytes must survive; preview text must match",
+            "observed": {
+              "requestStatus": 200,
+              "persisted": true,
+              "uiAfterReload": true
+            },
+            "outcome": "passed",
+            "byteEvidence": {
+              "encoding": "utf16le",
+              "exactRequestedBytes": true,
+              "previousBytesPreserved": false
+            }
+          },
+          {
+            "caseId": "sidebar.save.utf16le.blocked",
+            "featureId": "sidebar.save.utf16le",
+            "control": "http-503",
+            "action": "Browser POST to real editor-save route, then fresh plugin HTML preview",
+            "expected": "Requested content, original BOM/encoding and CRLF bytes must survive; preview text must match",
+            "observed": {
+              "requestStatus": 503,
+              "persisted": false,
+              "uiAfterReload": false
+            },
+            "outcome": "failed",
+            "byteEvidence": {
+              "encoding": "utf16le",
+              "exactRequestedBytes": false,
+              "previousBytesPreserved": true
+            }
+          },
+          {
+            "caseId": "sidebar.save.utf16le.recovered",
+            "featureId": "sidebar.save.utf16le",
+            "control": "none",
+            "action": "Browser POST to real editor-save route, then fresh plugin HTML preview",
+            "expected": "Requested content, original BOM/encoding and CRLF bytes must survive; preview text must match",
+            "observed": {
+              "requestStatus": 200,
+              "persisted": true,
+              "uiAfterReload": true
+            },
+            "outcome": "passed",
+            "byteEvidence": {
+              "encoding": "utf16le",
+              "exactRequestedBytes": true,
+              "previousBytesPreserved": false
+            }
+          }
+        ]
+      },
+      "metrics": {
+        "baseline": {
+          "scored": 4,
+          "unscored": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "trueNegative": 4,
+          "precision": null,
+          "recall": null
+        },
+        "faultInjected": {
+          "scored": 2,
+          "unscored": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 2,
+          "trueNegative": 0,
+          "precision": null,
+          "recall": 0
+        }
+      },
+      "rawCliExitCode": 1,
+      "validation": {
+        "defaultSuite": {
+          "nodeVersion": "26.12.0",
+          "tests": 529,
+          "passed": 529,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "26bca0822d8667e888b2bbfac20adb6b15ee5254bd471fef6960daa8f4a9f13f"
+        },
+        "additionalSupportedNode": {
+          "nodeVersion": "24.19.0",
+          "tests": 529,
+          "passed": 529,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "d339bbd230ab1b06de2eab5f31578d451de9ce400408c8683c6cb287dfd14cf9"
+        },
+        "jointRealBusiness": {
+          "nodeVersion": "26.12.0",
+          "tests": 16,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "df7d6db8636847d0771a1168871c6b5996aa58b023206030b87d11b6c89d95d5"
+        },
+        "replay": [
+          {
+            "suite": "market",
+            "replayExit": 1,
+            "incompleteCaseExit": 3,
+            "metrics": {
+              "baseline": {
+                "scored": 2,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 2,
+                "precision": null,
+                "recall": null
+              },
+              "faultInjected": {
+                "scored": 2,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 2,
+                "trueNegative": 0,
+                "precision": null,
+                "recall": 0
+              }
+            },
+            "cleanup": {
+              "privateRootRemoved": true,
+              "hostStopped": true
+            }
+          },
+          {
+            "suite": "sidebar",
+            "replayExit": 1,
+            "incompleteCaseExit": 3,
+            "metrics": {
+              "baseline": {
+                "scored": 4,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 4,
+                "precision": null,
+                "recall": null
+              },
+              "faultInjected": {
+                "scored": 2,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 2,
+                "trueNegative": 0,
+                "precision": null,
+                "recall": 0
+              }
+            },
+            "cleanup": {
+              "privateRootRemoved": true,
+              "hostStopped": true
+            }
+          }
+        ],
+        "artifactHashes": {
+          "predictions.json": "484e669bbeee2e99fee69e8b48640663ee740619bf8f3d1a3c6f723e874ef186",
+          "labels.json": "0bb09b6ddc26f4bb53bbdd82f4b8ccbcdbf3ad61af9e6540f4de091b1ab571a3",
+          "measurement.json": "b15a50499c931ba043cf1f9cd6599ea13b351638fb8a117d5a419b699273f496"
+        },
+        "screenshots": {
+          "sidebar.save.utf8-bom.healthy": "c17cff2ee8c62a366832d7e47174bba3fdaada5500fb049f3bbaf0f0a8a038a6",
+          "sidebar.save.utf8-bom.blocked": "c17cff2ee8c62a366832d7e47174bba3fdaada5500fb049f3bbaf0f0a8a038a6",
+          "sidebar.save.utf8-bom.recovered": "52c96be4a5a5ef177dd9c9182122966f14e41da9cd016005c547cb65167a732b",
+          "sidebar.save.utf16le.healthy": "c17cff2ee8c62a366832d7e47174bba3fdaada5500fb049f3bbaf0f0a8a038a6",
+          "sidebar.save.utf16le.blocked": "c17cff2ee8c62a366832d7e47174bba3fdaada5500fb049f3bbaf0f0a8a038a6",
+          "sidebar.save.utf16le.recovered": "52c96be4a5a5ef177dd9c9182122966f14e41da9cd016005c547cb65167a732b"
+        },
+        "driverCorrections": [
+          "Page.navigate loaderId must match Page.lifecycleEvent load before DOM actions; old document cannot satisfy readiness",
+          "Fresh Chrome welcome dialog mounts asynchronously after shell: wait for Continue and its dismissal before settings navigation",
+          "Explicit CDP Chinese locale and official private credentialOnboarding=false config; do not claim model readiness",
+          "Market navigation follows current visible DOM as async onboarding can close settings; navigation only, never retries business POST",
+          "Loaded preview lacking expected h1 is business failure; document navigation/CDP failure remains harness error"
+        ],
+        "independentReview": {
+          "importantFound": 2,
+          "importantFixed": 2,
+          "minorSourceSpansFixed": true,
+          "scope": "Read-only code and documentation consistency plus targeted offline checks; final default/live outcomes are primary-runner evidence"
+        },
+        "skillReference": {
+          "baseline": "Candidate-unpublished wording contradicts an assumed confirmed0.1.3 registry publication",
+          "after": "Version-neutral0.1.3 behavior, registry/Plan as status sources; declaration priority, exact grant and business boundaries preserved",
+          "bodyLength": 7787,
+          "sourceSha256": "e0b3f7b1269a3af547f421de92bb1ef91f9eefca396ba4d9f3858ef8c1d6f10d",
+          "packagedCopyEqual": true
+        },
+        "finalRealBusiness": {
+          "tests": 17,
+          "passed": 17,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "475cb490de559797819d862bf5d039799a4b2ee4d3302d3ab1d26e9df4aedd27",
+          "scope": "14 offline +2 actual plugin cohorts +1 real Chrome driver boundary; edge classification status/disk observations constructed"
+        },
+        "browserBoundary": {
+          "tests": 1,
+          "actualChrome": true,
+          "scope": "Chrome forced from en-US to zh-CN; missing DOM heading and scorer classification checked. Status200/disk-success in this edge check are constructed observations, not a corrupted-server-response end-to-end test."
+        },
+        "finalJointAcceptance": {
+          "tests": 36,
+          "passed": 36,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "9116d8f9248ec6147f851180f3ed0b87c5710807a96fa20747487735516352d4",
+          "scope": "Sequential local rc.2 joint run: existing19 checks plus business17; includes offline and actual host/browser checks"
+        },
+        "finalDefaultSuite": {
+          "tests": 529,
+          "passed": 529,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "8a5c7ed45732d5e5538bef4bb82f64fc0a68a7fc43b9337b3ecf4396da3f5d55",
+          "nodeVersion": "26.12.0"
+        }
+      },
+      "controls": {
+        "credentialOnboarding": "Disabled through official private-profile config; no model readiness or credential claim",
+        "catalogue": "No market catalog; published sidebar + owned empty official session and two disposable workspace files",
+        "faults": "Browser intercepts only POST /sidebar/write with HTTP503; installed plugin bytes unchanged",
+        "scope": "Save/preview HTTP path for UTF8 BOM/UTF16LE + CRLF: healthy, blocked and recovery. Not editor widget UI, natural version regression, or original-plugin defect certification."
+      },
+      "cleanup": {
+        "privateRootRemoved": true,
+        "hostStopped": true
+      },
+      "limitations": [
+        "Two encoded file-save/HTML-preview HTTP paths, not a complete editor-widget interaction test",
+        "HTTP503 browser controls; no natural version regression or original-plugin defect established",
+        "No model call, Windows business acceptance or ecosystem-accuracy claim",
+        "Separate market and sidebar cohorts; file replay does not rerun current business behavior"
+      ],
+      "recordType": "Dated development checkpoint; local-only/unpublished/CI flags describe this checkpoint. Final0.1.3 publication and remote matrix are recorded in verification.release013."
+    },
+    "release013": {
+      "status": "published-and-public-artifact-verified",
+      "recordedAt": "2026-10-18T14:06:17.830186+00:00",
+      "version": "0.1.3",
+      "authorization": "User explicitly requested completing0.1.3 candidate delivery and publication after business expansion and full documentation audit",
+      "validation": {
+        "defaultSuite": {
+          "nodeVersion": "26.12.0",
+          "tests": 529,
+          "passed": 529,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "26bca0822d8667e888b2bbfac20adb6b15ee5254bd471fef6960daa8f4a9f13f"
+        },
+        "additionalSupportedNode": {
+          "nodeVersion": "24.19.0",
+          "tests": 529,
+          "passed": 529,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "d339bbd230ab1b06de2eab5f31578d451de9ce400408c8683c6cb287dfd14cf9"
+        },
+        "realRc2Joint": {
+          "nodeVersion": "26.12.0",
+          "tests": 19,
+          "passed": 19,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "9ce6ca48ffdd9c20c5748a1dc3cf7c03b63290ddafd217cc06d0a2f64ace62c0"
+        },
+        "realLegacyJoint": {
+          "nodeVersion": "26.12.0",
+          "tests": 35,
+          "passed": 33,
+          "failed": 0,
+          "skipped": 2,
+          "tapSha256": "800002f7ae7c2e3c6ceda8618cebb81c3b119609674e3eac7f33532c34f4662c",
+          "dshVersion": "0.2.0-rc.2",
+          "businessSkipped": 2,
+          "rc2Specific": "applicable=false; other legacy live checks executed"
+        },
+        "realBusiness": {
+          "nodeVersion": "26.12.0",
+          "tests": 16,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "df7d6db8636847d0771a1168871c6b5996aa58b023206030b87d11b6c89d95d5"
+        },
+        "prepublishGate": true,
+        "formatCheck": true,
+        "generatedContractCheck": true,
+        "finalRealBusiness": {
+          "tests": 17,
+          "passed": 17,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "475cb490de559797819d862bf5d039799a4b2ee4d3302d3ab1d26e9df4aedd27"
+        },
+        "finalJointAcceptance": {
+          "tests": 36,
+          "passed": 36,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "9116d8f9248ec6147f851180f3ed0b87c5710807a96fa20747487735516352d4",
+          "scope": "Sequential local rc.2 joint run: existing19 checks plus business17; includes offline and actual host/browser checks"
+        },
+        "finalDefaultSuite": {
+          "tests": 529,
+          "passed": 529,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "8a5c7ed45732d5e5538bef4bb82f64fc0a68a7fc43b9337b3ecf4396da3f5d55",
+          "nodeVersion": "26.12.0"
+        },
+        "checkpointScope": "Initial default/live results and later final-prefixed reruns are separate stages; final source CI is recorded in ci.",
+        "postPublicationDocumentationGate": {
+          "passed": true,
+          "tests": 529,
+          "logSha256": "e5edc01dba5961cab23678de9bbf28353f1ff7fc68d8952588298fe2460934b3",
+          "sandboxFailure": "Initial sandbox run passed528/529; npm pack could not write default ~/.npm cache. Full gate then passed with private npm_config_cache and required registry network access; no code/assertion changes."
+        }
+      },
+      "artifact": {
+        "version": "0.1.3",
+        "files": 37,
+        "sha256": "7b4ae580beb80b91f71c23d7534b5014b30039029e0a150a58a6f73e5f98d038",
+        "integrity": "sha512-+/uvRKoz1Av/awahbJedswbnWKH1P5UFAlcNrFYfxaK4qMCFPX9eShsAmD4A0Cf1CKNlDJwRmX+/HQK/ONkACg==",
+        "contentDigest": "d0f9bf3faebc2f79e72862e305840c261674ba8fe2429237175f080ff3fda925",
+        "skillSha256": "e0b3f7b1269a3af547f421de92bb1ef91f9eefca396ba4d9f3858ef8c1d6f10d",
+        "readmeSha256": "25659d999c8fb25214ba5b457c2395e0c537d26e82e7f53aac59f876e57193be"
+      },
+      "exactTarballInstallation": {
+        "status": "checked",
+        "exitCode": 0,
+        "toolVersion": "0.1.3",
+        "dshVersion": "0.2.1-rc.2",
+        "ownVerdict": "ok",
+        "coverage": "limited",
+        "tempProfileRemoved": true,
+        "scope": "Exact release tgz in a temporary actual DSH profile; limited API/report evidence, not all plugin business certification"
+      },
+      "documentationAudit": {
+        "documents": [
+          "README.md",
+          "README.en.md",
+          "README.ko.md",
+          "plugin/README.md",
+          "skill/README.md",
+          "skill/SKILL.md",
+          "plugin/skill/SKILL.md",
+          "rules/README.md",
+          "docs/Plan.md",
+          "docs/GPT审计及重构方案文档.md",
+          "docs/extraction-findings.md",
+          "docs/current-state.json",
+          "tools/parity/fixtures/hang-cycle/README.md"
+        ],
+        "historicalEvidencePreserved": true,
+        "versionNeutralPackagedReadmeAndSkill": true,
+        "metadataBefore": {
+          "observedAt": "2026-10-18T13:34:58.782Z",
+          "githubDescription": "检查已安装DSH插件的版本声明、API风险与覆盖限制；提供兼容性面板、agent工具及可用源码位置。Check installed DSH plugins for declaration/API risks, with a compatibility panel, agent tool, source locations when available and coverage limits.",
+          "npmLatest": "0.1.2",
+          "errors": 0,
+          "notices": [
+            "npm.version-matches",
+            "npm.readme-is-current"
+          ],
+          "sourcesAvailable": true
+        },
+        "upstreamStatus": "2026-10-18 release audit:1024#22,0xsline#717,bruc3van#138 still open without comments; dshworks#169 merged; no external message sent",
+        "metadataAfter": {
+          "observedAt": "2026-10-18T14:04:52.854Z",
+          "npmLatest": "0.1.3",
+          "problems": [],
+          "skipped": [],
+          "githubDescription": "检查已安装DSH插件的版本声明、API风险与覆盖限制；提供兼容性面板、agent工具及可用源码位置。Check installed DSH plugins for declaration/API risks, with a compatibility panel, agent tool, source locations when available and coverage limits.",
+          "topics": [
+            "compatibility",
+            "deepseek-harness",
+            "developer-tools",
+            "dsh",
+            "deepseek",
+            "dsh-plugin",
+            "agent-skills",
+            "cordis",
+            "health-check"
+          ]
+        }
+      },
+      "ci": {
+        "status": "success",
+        "sourceCommit": "ada1d7888754936fbd7aa5aa527faa46bcf1ea83",
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39133915275",
+        "matrix": [
+          "Node22.19.0",
+          "Node24",
+          "Linux DSH0.2.0-rc.2",
+          "Linux DSH0.2.1-rc.2"
+        ],
+        "rc2Joint": {
+          "tests": 36,
+          "passed": 36,
+          "failed": 0,
+          "skipped": 0
+        },
+        "initialFailure": {
+          "status": "Historical initial failure; repaired and verified by the successful run above",
+          "failedRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39132486152",
+          "sourceCommit": "3da84ed68f381f26b00f12456f249e994c32ee91",
+          "failureScope": "Node22/24 and legacy Linux passed; rc2 market navigation and settings navigation were driver errors, not plugin verdicts",
+          "packageArtifactUnchanged": true
+        },
+        "packageArtifactUnchanged": true,
+        "legacyJoint": {
+          "tests": 36,
+          "passed": 34,
+          "failed": 0,
+          "skipped": 2,
+          "scope": "Two rc.2-only business cohorts explicitly inapplicable; new locale boundary test included"
+        },
+        "businessCohorts": {
+          "market": {
+            "baselineTN": 2,
+            "faultInjectedFN": 2
+          },
+          "sidebar": {
+            "baselineTN": 4,
+            "faultInjectedFN": 2
+          },
+          "rawMeasurementExitCode": 1
+        }
+      },
+      "publication": {
+        "npm": true,
+        "version": "0.1.3",
+        "latest": "0.1.3",
+        "publishedAt": "2026-10-18T14:04:27.781Z",
+        "registryTarball": "https://registry.npmjs.org/dsh-plugin-compat-check/-/dsh-plugin-compat-check-0.1.3.tgz",
+        "registryIntegrity": "sha512-+/uvRKoz1Av/awahbJedswbnWKH1P5UFAlcNrFYfxaK4qMCFPX9eShsAmD4A0Cf1CKNlDJwRmX+/HQK/ONkACg==",
+        "publicArtifactVerification": {
+          "byteIdentical": true,
+          "fileHashesIdentical": true,
+          "files": 37,
+          "sha256": "7b4ae580beb80b91f71c23d7534b5014b30039029e0a150a58a6f73e5f98d038"
+        },
+        "githubRelease": {
+          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.1.3",
+          "tag": "v0.1.3",
+          "targetCommit": "ada1d7888754936fbd7aa5aa527faa46bcf1ea83",
+          "attachment": "dsh-plugin-compat-check-0.1.3.tgz",
+          "publishedAt": "2026-10-18T14:05:23Z",
+          "assetSha256": "7b4ae580beb80b91f71c23d7534b5014b30039029e0a150a58a6f73e5f98d038"
+        },
+        "repositoryDelivery": {
+          "pullRequest": "https://github.com/lcy0121/dsh-plugin-compat-check/pull/5",
+          "scope": "Release tag identifies the CI-verified package-source commit; final publication-record commit and main integration are tracked by this PR."
+        }
+      },
+      "limitations": [
+        "Windows remains deferred by user",
+        "Historical marketplace install accepted published0.1.2; published0.1.3 has separate exact-tgz/public-npm and integration evidence",
+        "Coverage remains limited; transport fault FN values are preserved, not fixed by changing truth labels",
+        "Market post-action navigation still requires note/favorite controls; a loaded page missing those controls can be classified as driver error/unobserved instead of business failure. No general UI-failure classification claim; follow-up tracked in Plan."
+      ],
+      "publicNpmInstallation": {
+        "spec": "dsh-plugin-compat-check@0.1.3",
+        "status": "checked",
+        "exitCode": 0,
+        "toolVersion": "0.1.3",
+        "dshVersion": "0.2.1-rc.2",
+        "ownVersion": "0.1.3",
+        "ownVerdict": "ok",
+        "coverage": "limited",
+        "tempProfileRemoved": true,
+        "scope": "Public npm specification in a private actual DSH host; report and boot evidence, not a repeat marketplace UI or comprehensive business certification"
       }
     }
   },

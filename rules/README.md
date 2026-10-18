@@ -1,18 +1,18 @@
 # 严重度规则表与维护
 
-适用于0.1.2，判定算法与0.1.1一致。当前契约见 [Plan现行契约](../docs/Plan.md)，验证见 [自动统计](../docs/current-state.json)。本页后半保留2026-10-11旧提取器的规则依据；其中表格不是当前覆盖率，也不是当前运行时真值。
+适用于0.1.3；公开版本以registry和Plan发布记录为准。当前契约见 [Plan](../docs/Plan.md)，验证见 [自动统计](../docs/current-state.json)。后半保留2026-10-11旧提取器的依据，历史表不是当前覆盖率或运行时真值。
 
 ## 文件与运行时消费者
 
 | 文件 | 用途 |
 |---|---|
 | severity.json | 方法严重度/影响文案；引擎读取services下的方法规则，并与代码内默认档合用 |
-| dsh-api-catalog.json | 指定DSH版本生成的宿主/客户端契约目录；不证明当次运行时提供某方法 |
+| dsh-api-catalog.json / dsh-api-catalog-0.2.1-rc.2.json | 原0.2.0-rc.2（host91/client8）与新rc.2（host98/client8）契约快照；DSH≥0.2.1-rc.2选新目录，其余/未知选旧目录，CLI显式覆盖优先；未来版本未认证 |
 | usage-inventory.json | 带日期/版本/profile及完整性标记的AST库存快照；由coverage显式刷新，不保证与后续提取器重扫同数 |
 
 严重度由 `lib/verdict.mjs` 的确定性逻辑、缺失证据、方法规则及默认档共同决定，不由LLM决定。方法规则的severity/impact参与判定与输出，layer控制端别：方法自身优先、服务layer回退。summary/basis/evidence/knownGoneIn/needsReview等用于解释与维护；knownExtractionArtifacts是历史反例登记，不是自动过滤黑名单。
 
-0.2.1-rc.1宿主改为优先按engines.dsh判断；本版尚未同步该逻辑，已复现声明误报与漏报，规则/API目录也未更新为新版。新版接入验证不代表这些判定已适配，实施顺序见Plan后续。
+0.1.3按DSH目标分流声明：从0.2.1-rc.1起自有engines.dsh优先，缺失才回退全部官方peer；旧目标保留旧行为。非法/空范围、预发布和peer workspace别名均有回归；engines中的workspace不获放行。独立compatibility.json仅按插件/运行时精确版本豁免，非法字段不能靠豁免绕过；无效记录忽略并保留覆盖限制。
 
 ## 当前证据与严重度
 
@@ -21,14 +21,18 @@
 | 可映射loader条目FAILED/PENDING | fatal，影响依据measured；禁用、LOADING、无法映射不冒充同一事实 |
 | 宿主硬依赖且明确absent | 可判fatal；仅catalog缺项不冒充运行时缺失 |
 | 非硬依赖服务明确absent，或有足够方法证据 | 按规则/默认档给feature-dead或degraded；用户影响通常是inferred |
-| 官方peer范围冲突 | declared-incompatible，degraded及推断影响；不是实测加载失败；当前内核沿用0.2.0-rc.2，将engines.dsh作建议处理 |
+| 官方声明冲突或非法字段 | declared-incompatible，degraded及推断影响；不冒充实测加载失败；有效精确豁免可消除范围冲突，但保留限制且不证明业务成功 |
 | 未采样、读取失败、访问器未知、源码不完整 | 保留覆盖限制；不以省略键认定不存在 |
 
 方法规则中的degraded应有具体降级/回退依据；peer声明冲突的degraded是引擎针对声明风险的独立默认，不代表观察到回退。方法缺失但没有语义规则时会明确“影响面未知”。声明provide只是候选提供方，不证明已激活，不能遮住完整的present方法观测。
 
 宿主、客户端及shared调用点必须分开。客户端方法不能拿宿主probe判缺失；同名服务也不保证同一语义。对源码归属不确定的Context/别名保留suspected。certainty与impactBasis分别表达证据强度和影响是否实测。
 
+仓库独立业务队列将手审的功能调用区间内API风险与真实备注/收藏及侧栏保存/预览结果对照，保持业务、loader标签及预测隔离；不把整个插件的其它发现挪给本功能。正常/HTTP503故障组分别计分，限定样本不能改变生产报告中的certainty或impactBasis，也不是新增严重度规则的充分证据。复现见[Plan](../docs/Plan.md#52-日常检查与真实集成)。
+
 ## 如何更新
+
+ASAR读取器已修正数据起点为8+headerSize，并校验头长、边界、完整读取、UTF-8/JSON及归档SHA256。2026-10-18与Electron原生ASAR读取逐字节及首尾交叉校验后生成独立rc.2目录，旧目录未改。新host增加8项、移除invariants；subagents移除start/startContinuable/drainContinuableChildren/drainContinuableDescendants，增加startActivation/drainChildren/drainDescendants/waitForChildren；其它方法差异和源摘要见current-state。client方法集合未变。旧方法规则保留其原调用语义；不把新方法当同义重命名，也不只凭目录变化新增严重度，未知影响继续回退。
 
 先读调用点和目标版本的真实描述符/官方源码，再修改规则，添加行为回归并审查快照差异。原needsReview已在2026-10-15逐条复核，决定与证据保留于severity.json的needsReview.reviewed/evidence及 [Plan](../docs/Plan.md)。
 

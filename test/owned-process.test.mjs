@@ -125,3 +125,52 @@ test(
     }
   },
 );
+
+test(
+  "rc.2 live cancellation removes its private host and directory",
+  { skip: process.platform === "win32", timeout: 10000 },
+  async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-rc2-cancel-"));
+    const marker = path.join(root, "owned.json");
+    let runner, owned;
+    try {
+      const fake = path.join(root, "dsh");
+      fs.writeFileSync(
+        fake,
+        `#!${process.execPath}\nconst fs=require('node:fs'),path=require('node:path');const a=process.argv.slice(2);if(a.includes('--version')){console.log('0.2.1-rc.2');}else if(a.includes('--dump-config')){const p=path.join(process.env.DSH_HOME,'profiles',a[a.indexOf('--profile')+1]);fs.mkdirSync(path.join(p,'node_modules'),{recursive:true});fs.writeFileSync(path.join(p,'package.json'),JSON.stringify({dsh:{profile:{bundles:[]}}}));}else{fs.writeFileSync(process.env.DSC_CANCEL_MARKER,JSON.stringify({pid:process.pid,root:path.dirname(process.env.DSH_HOME)}));setInterval(()=>{},1000);}`,
+        { mode: 0o700 },
+      );
+      runner = spawn(process.execPath, ["tools/rc2-live.mjs"], {
+        env: {
+          ...process.env,
+          PATH: root + path.delimiter + process.env.PATH,
+          DSC_CANCEL_MARKER: marker,
+        },
+        stdio: "ignore",
+      });
+      const exited = once(runner, "exit");
+      for (let i = 0; i < 150 && !fs.existsSync(marker); i++) await delay(20);
+      assert.ok(fs.existsSync(marker), "owned fake host must reach startup");
+      owned = JSON.parse(fs.readFileSync(marker));
+      runner.kill("SIGTERM");
+      await exited;
+      assert.ok(
+        !fs.existsSync(owned.root),
+        "cancellation must remove the private root",
+      );
+      assert.throws(
+        () => process.kill(owned.pid, 0),
+        (e) => e.code === "ESRCH",
+        "detached host must stop",
+      );
+    } finally {
+      if (runner?.exitCode === null && runner?.signalCode === null)
+        kill(runner.pid);
+      if (owned) {
+        kill(owned.pid, true);
+        fs.rmSync(owned.root, { recursive: true, force: true });
+      }
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  },
+);

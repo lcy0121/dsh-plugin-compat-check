@@ -6,11 +6,11 @@
 
 ## 버전과 배포
 
-현재 배포 버전은 **0.1.2**입니다. 2026-10-17에 npm latest, 다운로드 tarball과 설치된 패키지를 검증했습니다. 문구와 버전 표기를 수정한 패치이며 판정 알고리즘은 0.1.1과 같습니다. [공개 메타데이터 검토](docs/Plan.md)와 [자동 검증 기록](docs/current-state.json)을 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
+저장소와 npm의 현재 버전은 **0.1.3**이며 `latest`로 배포되었습니다(2026-10-18 공개 tarball 바이트 일치와 실제 설치 확인). rc.2 선언 판정, 버전별 카탈로그, 비활성화 정리 수정 및 최신 skill을 포함합니다. 저장소 CLI와 업무 측정 도구는 npm 플러그인에 포함되지 않습니다. [Plan](docs/Plan.md)과 [검증 범위·통계](docs/current-state.json)를 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
 
 | 진입점 | 역할 |
 |---|---|
-| npm 플러그인 | 현재 호스트 샘플링, 호환성 패널, `compat_check`, skill provider; 설치 전 검사는 불가 |
+| npm 플러그인 | 호스트 관측, 호환성 탭, 플러그인별 발견·배지, `compat_check`, skill provider; 설치 전 검사는 불가 |
 | 저장소 CLI | 설치된 패키지 정적 검사; 기존 관측 파일 또는 명시적 임시 호스트 검사 |
 | 저장소 설치 검사 | spec을 임시 profile에 설치해 설치·시작·호환성 확인 |
 | skill | 등록된 도구 또는 저장소 CLI 사용 방법 안내 |
@@ -19,11 +19,11 @@
 
 ## 어떻게 보이는가
 
-설치 후 각 플러그인의 상세 페이지에 현재 호스트 기준 판정이 표시되며, 모든 발견 항목은 위치·영향·근거를 함께 보여 줍니다.
+다음은 저장소에 기록된 상세 페이지 스크린샷이며 전체 호환성 인증이 아닙니다. API 발견에는 실제 소스 위치를 표시할 수 있지만 선언·loader 사실은 위치 없이 근거를 설명할 수 있습니다.
 
 ![플러그인 상세 페이지: 부분 사용 가능, file:line·영향·근거 포함](plugin/assets/compat-detail-partial.png)
 
-![플러그인 상세 페이지: 공식 peer 선언이 현재 호스트를 지원하지 않음](plugin/assets/compat-detail-declared.png)
+![선언 충돌 예시: 도구 추론과 호스트 경고를 구분](plugin/assets/compat-detail-declared.png)
 
 ## 사용법
 
@@ -49,17 +49,20 @@ node bin/compat-check.mjs --help
 | `--probe <json>` | 기존 관측 파일; `--probe-boot`보다 우선 |
 | `--probe-boot` | 명시적으로 profile 복사, probe 설치, 임시 호스트 시작; 대상 플러그인 실행 |
 | `--probe-timeout <초>` / `--probe-keep-dir <dir>` | 시작 제한 기본40초; 명시적 비공개 디렉터리에 현장 보존 |
-| `--dsh-version <v>` | 대상 버전; 명시 값은 시작 관측 버전보다 우선 |
+| `--dsh-version <v>` | 선언·카탈로그 선택 대상 버전; 명시 값은 시작 관측 버전보다 우선 |
 | `--rules <json>` / `--catalog <json>` | 규칙 및 API 카탈로그 지정 |
 | `--no-baseline` | 기준선 읽기·쓰기 비활성화 |
 | `--baseline-file <path>` / `--dry-run` | 기준선 지정; 쓰지 않고 비교 |
 | `--json` / `--quiet` | JSON 문서 하나; 또는 요약만 출력 |
+| `--issue-report` | 기본 비식별 Markdown 보고서; 기준선 읽기/쓰기 없음; `--json`/`--quiet`와 상호 배타적 |
 | `--version` / `--help` | 버전·도움말, 대상 불필요 |
+
+공유 보고서는 `node bin/compat-check.mjs --nm <대상> --issue-report > issue-report.md`로 생성합니다. 버전, 관측 모드, 발견, 가능한 패키지 상대 위치, certainty/impactBasis, 범위와 자리표시자 재현 명령을 보존합니다. 원시 로그/프로브, 절대 경로와 기준선은 제외하며 경로·링크·일반 자격 증명·제어 문자가 있는 설명은 전체를 숨깁니다. 패키지 이름과 상대 파일명은 남고 임의의 업무 텍스트에는 민감 정보가 있을 수 있으므로 공유 전에 미리 확인하세요. 종료 코드는 0/1/2/3이며 필요하면 바로 다음 명령에서 `report_status=$?`로 저장하세요. 이 옵션은 현재 저장소 소스에만 있으며 npm 플러그인에는 CLI가 없습니다.
 
 ### 플러그인과 skill
 
 ```bash
-# npm 배포 버전 설치 (2026-10-17 확인: 0.1.2)
+# npm 배포 버전 설치 (2026-10-18 확인: 0.1.3)
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 # CLI 사용자의 독립 skill
@@ -67,6 +70,8 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
 플러그인은 호환성 패널, 상세 배지, `compat_check`, skill provider를 등록합니다. 2026-10-15에 실제 tarball을 macOS arm64의 DSH0.2.0-rc.2에 설치하고 도구·skill 호출 및 실제 Chrome의 패널·배지·기준선 변화를 검증했습니다. 독립 skill은 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`에 설치되며 기존 파일 덮어쓰기는 `--force`가 필요합니다.
+
+rc.2 경로는 더 보기 → 설정 → 내장 플러그인 → 호환성입니다. 2026-10-18에 0.1.3 후보 tarball, 전용 rc.2 호스트와 실제 Chrome으로 탭·보고서, 비활성화/재활성화 시 경로 제거·복구 및 탭 하나 유지를 확인했습니다. 10월17일의 탭 미표시 기록은 이번에 재현되지 않았으며 당시 원인이나 전체 업무 기능을 인증하지는 않습니다.
 
 저장소 루트는 **비공개 개발 워크스페이스**이며 설치 가능한 DSH bundle이 아닙니다. 루트 GitHub spec은 `plugin/` 설치와 같지 않습니다. 소스 검사 시 루트에서 `npm ci --ignore-scripts`를 실행하고 `plugin/`에서 `npm pack --pack-destination <이미있는절대출력경로>`를 실행한 뒤 생성된 `.tgz`를 DSH로 설치하세요. pack이 커널과 LICENSE를 준비합니다. 준비되지 않은 `plugin/` 복사본에는 커널이 없습니다. [플러그인 배포 설명](plugin/README.md)을 참고하세요.
 
@@ -102,7 +107,7 @@ shell은 Node 진입 전 기존 사용법·커널 오류 코드를 유지합니�
 
 서비스는 present, absent, unobserved, unreadable로 구분합니다. 누락된 키는 미관측입니다. 현대 관측은 profile·DSH 버전이 일치해야 하고 기본24시간 후 만료됩니다. 구형 보고서는 명시된 키만 사용하며 unbound 경고를 표시합니다.
 
-`certainty`는 certain 또는 suspected이며 filtered/abstained는 별도 처리 분류입니다. 선언은 의존 관계를 증명할 수 있지만 메서드 부재를 증명하지 못합니다. `impactBasis=inferred`의 기능 영향은 추론임을 유지하세요. 신뢰할 수 있게 매핑된 loader FAILED/PENDING은 실제 미활성 증거입니다. 공식 peer 충돌은 declared-incompatible 및 추론 영향·degraded로 표시하고 미관측 예외를 고려해 fatal로 단정하지 않습니다. 현재 구현은 0.2.0-rc.2 규칙에 따라 `engines.dsh`를 권고로 처리합니다. 0.2.1-rc.1 호스트는 이 필드를 우선하므로 선언 오탐·누락 가능성이 있으며 실제 호스트 결과를 확인해야 합니다.
+`certainty`는 certain 또는 suspected이며 filtered/abstained는 별도 분류입니다. 선언은 의존 관계를 증명할 뿐 메서드 부재를 증명하지 않습니다. inferred 영향을 유지하세요. 신뢰할 수 있는 loader FAILED/PENDING은 실제 미활성 증거입니다. 0.1.3은 DSH≥0.2.1-rc.1에서 자체 `engines.dsh`를 우선하며 없을 때만 공식 peer를 검사합니다. 이전 대상은 engines 권고 규칙을 유지합니다. 충돌/잘못된 필드는 추론 `declared-incompatible`이며 실제 로드 실패가 아닙니다. profile의 독립 `compatibility.json`을 읽기만 하며 플러그인 이름·정확한 버전·정확한 DSH 버전으로 예외를 맞춥니다. 잘못된 행은 전체를 무시하고 범위를 제한하며, 읽기 실패/64KiB 초과 시 예외는 미관측입니다. 예외는 선언 허용이지 기능 인증이 아닙니다.
 
 `coverage.status=limited`, vacuous, 파싱·읽기·예산 진단, 매핑 불가능한 loader 제한을 항상 함께 전달하세요. 문제 없음이 기능 인증은 아닙니다. 호스트·클라이언트·공유 호출을 구분합니다. provide 선언은 제공자 단서일 뿐 활성화 증거가 아니며 존재하는 서비스의 완전한 메서드 관측은 계속 사용합니다.
 
@@ -151,7 +156,9 @@ node tools/meta-check.mjs --json
 
 보조 측정은 독립 loader 원시 라벨과 서비스 관측만 받는 예측기를 분리합니다. [Plan 보조 측정 기록](docs/Plan.md#51-已验证范围)을 참고하세요. `node tools/labels.mjs --nm web --synthetic --json`은 비공개 환경을 만들고 실제 누락을 보고하면 exit1을 반환합니다. 기존 대상은 `--probe-boot`, 파일 입력은 `--probe`와 `--labels`를 함께 사용합니다. 이 수치는 첫 계층의 해당 표본에만 적용되며 생태계 정확도가 아닙니다.
 
-[lib/contracts.mjs](lib/contracts.mjs)가 보고서 계약의 단일 원본이며 CLI JSON·HTTP·도구·패널에서 증거를 유지합니다. 추가 필드는 보존하고 필수 필드 누락이나 미지원 버전은 도구 오류로 처리합니다. 규칙·API 카탈로그는 0.2.0-rc.2 기준입니다. 0.2.1-rc.1의 제한된 접속 검증은 통과했지만 선언 판정 적용과 카탈로그 검토는 아직 필요합니다. AST 목록은 부분 스캔임을 명시합니다. [Plan 규칙 및 계약 기록](docs/Plan.md#2-现行判定与集成契约)을 참고하세요.
+저장소 업무 측정은 `node tools/business-labels.mjs --live --suite sidebar --out-dir <빈-증거-디렉터리> --json`으로 실행합니다(suite 하나 선택, 기본 market). 고정 dshmarket1.66.37은 메모·즐겨찾기, dsh-better-sidebar0.28.0은 저장·미리보기 HTTP 경로와 UTF-8 BOM/UTF-16LE·CRLF 보존 및 POST503 후 복구를 확인합니다. 전용 rc.2와 실제 Chrome에서 완료 요청, 새 문서 DOM, 독립 디스크 데이터를 검증하며 정적 API 위험 예측에는 업무/loader 정답을 넣지 않습니다. 두 집단은 각각 정상 TN2/TN4, 제어 장애 FN2/FN2와 exit1을 보고합니다. 사례 누락·신원 불일치는 거부하며 드라이버 오류를 업무 실패로 세지 않습니다. 전체 편집기 UI·자연 버전 회귀·원본 결함·생태계 정확도 인증은 아닙니다. [Plan](docs/Plan.md#52-日常检查与真实集成)을 참고하세요.
+
+[lib/contracts.mjs](lib/contracts.mjs)가 CLI JSON·HTTP·도구·패널의 보고서 계약 원본입니다. 추가 필드는 보존하고 필수 필드 누락이나 미지원 버전은 도구 오류로 처리합니다. 0.1.3은 DSH≥0.2.1-rc.2이면 rc.2 카탈로그(host98/client8), 나머지/미상은 기존 0.2.0-rc.2 카탈로그(host91/client8)를 선택합니다. 명시적 `--catalog`가 우선하며 미래 DSH 버전은 미검증입니다. 카탈로그는 런타임 관측이나 심각도 증거가 아닙니다. AST 목록은 날짜가 있는 부분 표본입니다. [Plan](docs/Plan.md#2-现行判定与集成契约)을 참고하세요.
 
 [개발 기록 및 후속 계획](docs/Plan.md) · [역사 감사](docs/GPT审计及重构方案文档.md) · [규칙](rules/README.md) · [skill 배포](skill/README.md). [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)에 수록되어 있습니다.
 

@@ -33,6 +33,8 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 import vm from 'node:vm'
+import os from 'node:os'
+import {spawnSync} from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 
 import { createRequire } from 'node:module'
@@ -102,6 +104,7 @@ function loadHost(env = {}) {
   sandbox.__out = {}
   const wrapped = `${cjs}\n__out.apply = (typeof apply === 'function') ? apply : null;\n`
   vm.runInContext(wrapped, sandbox, { timeout: 5000, filename: HOST })
+  vm.runInContext('__out.resolveDshVersion = resolveDshVersion', sandbox)
   return { apply: sandbox.__out.apply, logs, sandbox }
 }
 
@@ -201,3 +204,57 @@ describe('宿主半边：DSH 版本（F1 的闭合）', () => {
     assert.ok(sepClass, `resolveDshVersion 里没找到同时含 / 与 \\ 的字符类：${body.slice(0, 400)}`)
   })
 })
+
+test('disposed host generation removes its handle and cannot retire a newer generation', async () => {
+ const {apply,sandbox}=loadHost();
+ const cleanups=[];
+ const ctx={get:()=>undefined,inject:()=>()=>{},effect:fn=>{const dispose=fn();if(typeof dispose==='function')cleanups.push(dispose);}};
+ apply(ctx);const old=sandbox.__DSH_COMPAT_CHECK__;
+ assert.ok(old);assert.ok(cleanups.length>0,'host owns lifecycle cleanup');
+ const first=cleanups.splice(0);apply(ctx);const next=sandbox.__DSH_COMPAT_CHECK__;
+ assert.notEqual(old,next);
+ for(const fn of first)fn();assert.equal(sandbox.__DSH_COMPAT_CHECK__,next,'old disposal must preserve newer owner');
+ const retired=await old.compatReport();assert.equal(retired.ok,false);assert.match(retired.error,/disposed|已卸载/);
+ for(const fn of cleanups)fn();assert.equal(sandbox.__DSH_COMPAT_CHECK__,undefined);
+});
+
+test('host version is read from an npm runtime prefix even when package.json is not exported',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'dsc-runtime-meta-'));
+ try{
+ const pkg=path.join(root,'runtime-prefix/node_modules/@deepseek-ai/dsh'),entry=path.join(pkg,'lib/cli.js');fs.mkdirSync(path.dirname(entry),{recursive:true});
+ fs.writeFileSync(entry,'');fs.writeFileSync(path.join(pkg,'package.json'),JSON.stringify({name:'@deepseek-ai/dsh',version:'0.2.1-rc.2',exports:{'.':'./lib/cli.js'}}));
+ const {sandbox}=loadHost({DSH_VERSION:''});sandbox.process.argv=[process.execPath,entry];
+ assert.equal(sandbox.__out.resolveDshVersion(),'0.2.1-rc.2');
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('host subscriptions return route/tool/provider disposers to their owner',()=>{
+ const {apply}=loadHost();const cleanup=[];let active=0;
+ const register=()=>{active++;let live=true;return()=>{if(live){active--;live=false;}};};
+ const ctx={get:()=>undefined,effect:fn=>{const off=fn();if(typeof off==='function')cleanup.push(off);},inject:(_deps,cb)=>{
+  const off=cb({get:()=>undefined,webServer:{register},tools:{register},skills:{registerProvider:register}});
+  if(typeof off==='function')cleanup.push(off);return()=>{};
+ }};
+ apply(ctx);assert.equal(active,3);for(const off of cleanup)off();assert.equal(active,0,'no owned registrations may survive unload');
+});
+
+
+test('unloading an in-flight report before a pending manager read cannot write a baseline',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'dsc-disposal-flight-'));
+ try{
+  const nm=path.join(root,'home/profiles/disposal/node_modules/sample');fs.mkdirSync(nm,{recursive:true});
+  fs.writeFileSync(path.join(nm,'package.json'),JSON.stringify({name:'sample',version:'1.0.0',main:'index.js',dsh:{bundle:{patch:'cordis.patch.yml'}}}));
+  fs.writeFileSync(path.join(nm,'index.js'),'export function apply(){}');fs.writeFileSync(path.join(nm,'cordis.patch.yml'),'- name: ./index.js\n');
+  const script=`import {apply} from ${JSON.stringify(pathToFileURL(HOST).href)};
+   const off=[];let release,entered;const ready=new Promise(r=>entered=r);let calls=0;
+   const ctx={get:key=>key==='pluginManager'?{list:()=>{if(++calls>1)return [];entered();return new Promise(r=>release=r);}}:undefined,inject:()=>()=>{},effect:fn=>{const d=fn();if(typeof d==='function')off.push(d);}};
+   apply(ctx);const pending=globalThis.__DSH_COMPAT_CHECK__.compatReport();await ready;
+   for(const d of off)d();release([]);const result=await pending;
+   if(result.ok!==false)throw Error('retired report returned success');
+   if(!/disposed|已卸载/.test(result.error))throw Error('missing retirement diagnostic');
+   console.log('DISPOSED_INFLIGHT_OK');`;
+  const r=spawnSync(process.execPath,['--input-type=module','-e',script],{encoding:'utf8',timeout:10000,env:{...process.env,DSC_KERNEL:REPO,DSC_PROFILE:'disposal',DSH_HOME:path.join(root,'home'),DSC_OUT_DIR:path.join(root,'diagnostic'),DSC_AUTORUN_MS:'60000',DSH_VERSION:'0.2.1-rc.2'}});
+  assert.equal(r.status,0,r.stdout+r.stderr);assert.match(r.stdout,/DISPOSED_INFLIGHT_OK/);
+  assert.ok(!fs.existsSync(path.join(root,'home/dsh-plugin-compat-check')),'retired generation cannot create a baseline');
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});

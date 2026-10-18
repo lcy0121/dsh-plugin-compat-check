@@ -32,6 +32,9 @@ import { fileURLToPath } from 'node:url';
 import { extractWithProvenance } from '../lib/extract.mjs';
 import { buildVerdicts } from '../lib/verdict.mjs';
 import { render, toJSON } from '../lib/report.mjs';
+import { renderIssueReport } from './issue-report.mjs';
+import { readProfileCompatibility } from '../lib/profile-compatibility.mjs';
+import { catalogPathFor } from '../lib/catalog.mjs';
 import { snapshotForBaseline, diffAgainstBaseline, badgeFor, BASELINE_SCHEMA } from '../lib/baseline.mjs';
 import {baselinePath,baselineIdentity,baselineTransaction,readBaseline as readStoredBaseline,writeBaseline as writeStoredBaseline} from '../lib/state-store.mjs';
 import {probeProfile} from '../lib/probe-runner.mjs';
@@ -55,14 +58,15 @@ ${versionLine()}
                    给了它就不必再给 --probe（两者同时给时以 --probe 为准）。
   --probe-timeout <秒>  --probe-boot 的启动等待上限（默认 40）
   --probe-keep-dir <dir>  把探针报告与 services.json 留一份到该目录（排查用）
-  --dsh-version <v> 目标 DSH 版本（用于声明/peer范围判断；显式值优先）。
+  --dsh-version <v> 目标 DSH 版本（用于声明判断及目录选择；显式值优先）。
   --rules <json>   覆盖 severity 规则表（默认 rules/severity.json）
-  --catalog <json> 覆盖官方 API 目录（默认 rules/dsh-api-catalog.json）
+  --catalog <json> 覆盖官方 API 目录（默认按目标版本选择 rules/ 下的已知目录）
   --no-baseline    不读写本机基线（CI / 一次性检查用）
   --baseline-file <path>  指定基线文件（默认按 profile 分文件放在 $DSH_HOME 下）
   --dry-run        算出差分但不写基线
   --json           输出机器可读的完整结论，而不是给人看的表
   --quiet          只输出结论行，不输出逐条发现
+  --issue-report   输出默认脱敏的 Markdown 故障报告；不读写基线，与 --json/--quiet 互斥
   --version        显示工具版本（结论的可追溯性依赖它，见 lib/version.mjs）
   --help           显示这段文字
 
@@ -83,6 +87,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--json') { out.json = true; continue; }
+    if (a === '--issue-report') { out.issueReport = true; continue; }
     if (a === '--no-baseline') { out.baseline = false; continue; }
     if (a === '--dry-run') { out.dryRun = true; continue; }
     if (a === '--probe-boot') { out.probeBoot = true; continue; }
@@ -99,6 +104,8 @@ function parseArgs(argv) {
     // 「跑完了但没有 JSON 输出」，而用户会以为工具不支持 JSON。
     throw new Error(`无法识别的参数: ${a}`);
   }
+  if(out.issueReport && (out.json || out.quiet))throw new Error('--issue-report 与 --json/--quiet 互斥');
+  if(out.issueReport)out.baseline=false;
   return out;
 }
 
@@ -192,7 +199,7 @@ export function run(options = {}) {
     const nm = resolveNodeModules(options.nm);
     result.inputs.nodeModules = nm;
 
-    const catalogPath = options.catalog || path.join(REPO, 'rules', 'dsh-api-catalog.json');
+    const catalogPath = catalogPathFor(REPO, options.dshVersion, options.catalog);
     const rulesPath = options.rules || path.join(REPO, 'rules', 'severity.json');
     const catalog = readJSON(catalogPath, '官方 API 目录');
     const rules = readJSON(rulesPath, 'severity 规则表');
@@ -210,6 +217,7 @@ export function run(options = {}) {
     if(probePath && !hostSurface){hostSurface=readJSON(probePath,'探针报告');result.inputs.probe=probePath;}
     if(options._probeBootInfo){result.inputs.probeBoot=options._probeBootInfo;result.inputs.probe='(--probe-boot 实时采集)';}
     result.inputs.hasRuntimeSurface = Boolean(hostSurface);
+    const compatibility=readProfileCompatibility(nm);
 
     result.verdict = buildVerdicts({
       report: extracted.report,
@@ -218,6 +226,8 @@ export function run(options = {}) {
       catalog,
       dshVersion: options.dshVersion || null,
       observationTarget:{profileId:nm,maxAgeMs:24*60*60*1000},
+      compatibilityExemptions: compatibility.exemptions,
+      compatibilityNotes: compatibility.notes,
     });
 
     result.inputs.hasRuntimeSurface=result.verdict.observation.usable;
@@ -255,7 +265,8 @@ async function main() {
   try {
     opts = parseArgs(process.argv.slice(2));
   } catch (error) {
-    if(process.argv.includes('--json'))process.stdout.write(JSON.stringify(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');else process.stderr.write(`${error.message}\n\n${USAGE}`);
+    if(process.argv.includes('--issue-report'))process.stdout.write(renderIssueReport(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');
+    else if(process.argv.includes('--json'))process.stdout.write(JSON.stringify(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');else process.stderr.write(`${error.message}\n\n${USAGE}`);
     process.exit(3);
   }
   // `--version` 先于一切：它不该需要 --nm，也不该碰任何状态。
@@ -265,7 +276,8 @@ async function main() {
     process.exit(0);
   }
   if (opts.help || !opts.nm) {
-    if(!opts.help && opts.json)process.stdout.write(JSON.stringify(createFailure('需要 --nm',{toolVersion:TOOL_VERSION}))+'\n');else process.stdout.write(USAGE);
+    if(!opts.help && opts.issueReport)process.stdout.write(renderIssueReport(createFailure('需要 --nm',{toolVersion:TOOL_VERSION}),opts)+'\n');
+    else if(!opts.help && opts.json)process.stdout.write(JSON.stringify(createFailure('需要 --nm',{toolVersion:TOOL_VERSION}))+'\n');else process.stdout.write(USAGE);
     process.exit(opts.help ? 0 : 3);
   }
 
@@ -281,7 +293,9 @@ async function main() {
   //      工具自己出错不能被误读成"这个插件部分可用"。
   try {
     const result = await runAsync(opts);
-    if (opts.json) {
+    if (opts.issueReport) {
+      process.stdout.write(`${renderIssueReport(toJSON(result),opts)}\n`);
+    } else if (opts.json) {
       process.stdout.write(`${JSON.stringify(toJSON(result), null, 2)}\n`);
     } else {
       process.stdout.write(`${render(result, opts)}\n`);
@@ -292,12 +306,13 @@ async function main() {
     const s = result.verdict.summary;
     process.exit(exitCodeForSummary(s));
   } catch (error) {
-    if(opts.json)process.stdout.write(JSON.stringify(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');else process.stderr.write(`✗ 体检工具自身出错（不是插件的问题）：${error && error.stack ? error.stack : error}\n`);
+    if(opts.issueReport)process.stdout.write(renderIssueReport(createFailure(error.message,{toolVersion:TOOL_VERSION}),opts)+'\n');
+    else if(opts.json)process.stdout.write(JSON.stringify(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');else process.stderr.write(`✗ 体检工具自身出错（不是插件的问题）：${error && error.stack ? error.stack : error}\n`);
     process.exit(3);
   }
 }
 
 // 只有被当作主脚本时才跑 CLI；被 import 时什么都不做。
-if (process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url))) {
+if (process.argv[1] && fs.existsSync(process.argv[1]) && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url))) {
   main();
 }
