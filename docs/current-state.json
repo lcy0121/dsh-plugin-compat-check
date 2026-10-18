@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.3",
-  "recordedAt": "2026-10-18T04:48:49.410Z",
-  "testFiles": 36,
-  "tests": 515,
+  "recordedAt": "2026-10-18T09:24:53.857Z",
+  "testFiles": 37,
+  "tests": 526,
   "repositoryFiles": {
-    "total": 235,
+    "total": 239,
     "fixtures": 90,
-    "other": 145
+    "other": 149
   },
   "verification": {
     "platform": "darwin",
@@ -2436,6 +2436,361 @@
         "1024 Store is a separate distribution path and remains pending issue22/npm mapping",
         "Source-subdirectory and prebuilt GitHub routes were not used or certified"
       ]
+    },
+    "independentBusinessTruth": {
+      "recordedAt": "2026-10-18T09:26:01.288Z",
+      "verifiedAt": "2026-10-18T09:24:31.982Z",
+      "sourceBaseCommit": "367b307cbc5bdeab7e4a15cee9ef857e57acc075",
+      "platform": "darwin",
+      "arch": "arm64",
+      "toolVersion": "0.1.3",
+      "dshVersion": "0.2.1-rc.2",
+      "runnerNodeVersion": "26.12.0",
+      "chromeVersion": "155.0.8059.84",
+      "artifacts": {
+        "package": "dshmarket",
+        "version": "1.66.37",
+        "sourceHashes": {
+          "package.json": "bdad145d54f257db7a814df0bb4b7feb3ce82fd3d18b9aa57a0402e9e88b9a47",
+          "lib/routes.js": "84bf6a9fd2acb24893a4cd81f577b413cf540ac166f2fc0572c408a2874ca48e",
+          "lib/hot.js": "e0a8d32d02b400e02a90c97ef31895b96a4d22f773d7b3bb78f7def13eca1b0f",
+          "client/client.js": "e40be7d4bbbc1b1380f5fb6d1817f2a2092ab59713bcc011b3e86d2f238d5bdf"
+        },
+        "packageFingerprint": {
+          "files": 182,
+          "digest": "a26339e13c9adcff506c1d0c00842d0e6cf104226c5a1954a5e091c40dd6f583"
+        },
+        "publishedTarballSha256": "8b29d156e3ea45330623b4cd66736992456f5ef4c92c8fb00243ccc3b101f188",
+        "publishedIntegrity": "sha512-6sr+x6W6PppAtygJra/khU1ehK8bmjmfVnFgmPyHixx3GzIXGX/iW04CoeqlExFpsyTWXnM2W/X7JLU78dHJLA==",
+        "seedPackage": "dsh-plugin-compat-check@0.1.2",
+        "seedManifestHash": "599e64b9c0a5fc1ecc1cc7eedd48ad0efa5ae2ca8cb60114c7a2d83ec849a05d",
+        "rulesHash": "8aa022ce423c25337b0c670c2b2a4c52d4af624cccee35d3da8c7532ef041593",
+        "catalogueHash": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+        "predictorSourcesSha256": "ffdad0820720ff516dd6fa67683a882c4702ec5594cccf921931f5bb3af76893",
+        "combinedArtifactDigest": "3fdee03d456106103463bf0a0deb21d32293e1f57ff567cfb7368119c8690725"
+      },
+      "features": [
+        {
+          "id": "market.note",
+          "plugin": "dshmarket",
+          "spans": [
+            {
+              "file": "client/client.js",
+              "start": 10398,
+              "end": 10416
+            },
+            {
+              "file": "lib/routes.js",
+              "start": 3113,
+              "end": 3153
+            },
+            {
+              "file": "lib/routes.js",
+              "start": 1871,
+              "end": 1884
+            },
+            {
+              "file": "lib/hot.js",
+              "start": 310,
+              "end": 445
+            }
+          ]
+        },
+        {
+          "id": "market.favorite",
+          "plugin": "dshmarket",
+          "spans": [
+            {
+              "file": "client/client.js",
+              "start": 10417,
+              "end": 10467
+            },
+            {
+              "file": "lib/routes.js",
+              "start": 3154,
+              "end": 3206
+            },
+            {
+              "file": "lib/routes.js",
+              "start": 1871,
+              "end": 1884
+            },
+            {
+              "file": "lib/hot.js",
+              "start": 310,
+              "end": 445
+            }
+          ]
+        }
+      ],
+      "prediction": {
+        "mode": "feature-scoped-static-api-risk",
+        "businessLabelsUsed": false,
+        "loaderLabelsUsed": false,
+        "autoProbeDiscovery": false,
+        "sealedBeforeActions": true,
+        "sha256": "9f75f4c3d5c0cd084d1829e677839514673873f785cb71155ab03c900c259e24",
+        "predictedAt": "2026-10-18T09:24:28.141Z",
+        "casePlan": [
+          {
+            "caseId": "market.note.healthy",
+            "featureId": "market.note",
+            "control": "none"
+          },
+          {
+            "caseId": "market.note.blocked",
+            "featureId": "market.note",
+            "control": "http-503"
+          },
+          {
+            "caseId": "market.favorite.healthy",
+            "featureId": "market.favorite",
+            "control": "none"
+          },
+          {
+            "caseId": "market.favorite.blocked",
+            "featureId": "market.favorite",
+            "control": "http-503"
+          }
+        ],
+        "rows": [
+          {
+            "featureId": "market.note",
+            "flagged": false,
+            "coverageLimited": true,
+            "clientVerified": false,
+            "findings": []
+          },
+          {
+            "featureId": "market.favorite",
+            "flagged": false,
+            "coverageLimited": true,
+            "clientVerified": false,
+            "findings": []
+          }
+        ],
+        "scope": "Feature-scoped source/static catalogue API risk only. No business or loader labels, no auto-probe. Exact case plan is sealed before browser actions; unrelated feature findings are excluded."
+      },
+      "businessTruth": {
+        "source": "browser-action+profile-state",
+        "collectedAt": "2026-10-18T09:24:31.982Z",
+        "rows": [
+          {
+            "caseId": "market.note.healthy",
+            "featureId": "market.note",
+            "control": "none",
+            "action": "Save a new note, then reload",
+            "expected": "Requested value must persist on disk and remain visible after reload",
+            "observed": {
+              "requestStatus": 200,
+              "persisted": true,
+              "uiAfterReload": true
+            },
+            "outcome": "passed"
+          },
+          {
+            "caseId": "market.note.blocked",
+            "featureId": "market.note",
+            "control": "http-503",
+            "action": "Save a new note, then reload",
+            "expected": "Requested value must persist on disk and remain visible after reload",
+            "observed": {
+              "requestStatus": 503,
+              "persisted": false,
+              "uiAfterReload": false
+            },
+            "outcome": "failed"
+          },
+          {
+            "caseId": "market.favorite.healthy",
+            "featureId": "market.favorite",
+            "control": "none",
+            "action": "Toggle catalog favorite, then reload",
+            "expected": "Requested value must persist on disk and remain visible after reload",
+            "observed": {
+              "requestStatus": 200,
+              "persisted": true,
+              "uiAfterReload": true
+            },
+            "outcome": "passed"
+          },
+          {
+            "caseId": "market.favorite.blocked",
+            "featureId": "market.favorite",
+            "control": "http-503",
+            "action": "Toggle catalog favorite, then reload",
+            "expected": "Requested value must persist on disk and remain visible after reload",
+            "observed": {
+              "requestStatus": 503,
+              "persisted": false,
+              "uiAfterReload": false
+            },
+            "outcome": "failed"
+          }
+        ],
+        "postconditions": "Completed Network.loadingFinished request plus requested value in independently read raw profile state and freshly navigated DOM. Headers alone or ACTIVE loader are insufficient. Driver/unfinished transport errors do not become business-failure labels."
+      },
+      "metrics": {
+        "baseline": {
+          "scored": 2,
+          "unscored": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "trueNegative": 2,
+          "precision": null,
+          "recall": null
+        },
+        "faultInjected": {
+          "scored": 2,
+          "unscored": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 2,
+          "trueNegative": 0,
+          "precision": null,
+          "recall": 0
+        }
+      },
+      "rawCliExitCode": 1,
+      "validation": {
+        "defaultSuite": {
+          "nodeVersion": "26.12.0",
+          "tests": 526,
+          "passed": 526,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "b56b3378794e59fcdc2823638571c2c07ba85f7ca5832a4bbe69f7fc25f2cc48"
+        },
+        "additionalSupportedNode": {
+          "nodeVersion": "24.19.0",
+          "tests": 526,
+          "passed": 526,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "fe8a61bf22f19df931a182f17519cc91003b643395775c4e0baf28baa618786d"
+        },
+        "targetedWithRealBusiness": {
+          "nodeVersion": "26.12.0",
+          "tests": 12,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0,
+          "tapSha256": "1691df3bd73b33540bf62d40168d039021827aafb87126aa8d8c0432e87d1e8b"
+        },
+        "replay": {
+          "replayExit": 1,
+          "metrics": {
+            "baseline": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 2,
+              "precision": null,
+              "recall": null
+            },
+            "faultInjected": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 2,
+              "trueNegative": 0,
+              "precision": null,
+              "recall": 0
+            }
+          },
+          "incompleteCaseExit": 3,
+          "incompleteCaseError": "Incomplete planned business cases"
+        },
+        "artifactHashes": {
+          "predictions.json": "83f57a5d64e09c2612119b13c056081cde78eb1113383b2565bd61f6544f3d3c",
+          "labels.json": "37f8c338f2b4a529e01455b1aa29e71117f421774af0da400560816d615e8ee1",
+          "measurement.json": "d2ad6ea6304869794c2710ad7719a05c8319ac05f24582be89e24600abefe8a4"
+        },
+        "screenshots": {
+          "market.note.healthy": "4e01ecee1d2ad0fdb2da5405b0669e8574de325fd5d2860e3a926437fe1a1e61",
+          "market.note.blocked": "4e01ecee1d2ad0fdb2da5405b0669e8574de325fd5d2860e3a926437fe1a1e61",
+          "market.favorite.healthy": "ee5db8d33e60461a5153fb7a27ea439cd65d7705c24730de024dc9ae2e0f8061",
+          "market.favorite.blocked": "4440cb2aa9610276f8d57bcaad6a0fd53b906b364b4fcfecee117af92a264530"
+        },
+        "regressions": [
+          "Missing planned case/whole feature cannot erase misses",
+          "Identity, source artifact digest and time order must match",
+          "Malformed or contradictory postconditions rejected; unobserved/harness errors unscored",
+          "Completed request required; loadingFailed rejected as transport error",
+          "Full published package fingerprint covers untraced source files",
+          "SIGTERM during setup reclaims owned command and private profile"
+        ],
+        "initialDriverRepair": "First UI run could not mount because the controlled catalog fixture lacked required categories/install fields. Fixed the fixture; no business labels inferred from that run and no original-plugin bug asserted.",
+        "independentReview": {
+          "importantFindings": 2,
+          "fixed": 2,
+          "remainingImportantFindings": 0,
+          "findings": [
+            "Partial case replay could hide failures",
+            "Response headers mistaken for completed request"
+          ],
+          "finalConclusion": "No remaining Critical/Important in reviewed tools/tests scope",
+          "scope": "Read-only source/diff and offline tests; reviewer did not independently rerun the complete default/live suite. One minor masked negative test also corrected.",
+          "finalConsistencyReview": {
+            "remainingCritical": 0,
+            "remainingImportant": 0,
+            "remainingMinor": 0,
+            "targetedRegressionTests": 2,
+            "passed": 2,
+            "scope": "Final documentation/CI consistency and corrected malformed-row/cancellation checks only; full/default/live results remain primary-runner evidence."
+          }
+        },
+        "documentation": {
+          "formatCheck": true,
+          "docCheck": {
+            "toolVersion": "0.1.3",
+            "testFiles": 37,
+            "documents": 11,
+            "tests": 526
+          },
+          "generatedContractCheck": true,
+          "gitDiffCheck": true
+        }
+      },
+      "controls": {
+        "catalogue": "Single real public entry as a controlled local catalog; not a public-market installation test",
+        "faults": "Browser intercepts only the selected feature POST with HTTP503; installed plugin bytes unchanged",
+        "scope": "Normal note save and favorite toggle plus failure controls; transport failures expose blind spots, not original plugin defects."
+      },
+      "cleanup": {
+        "privateRootRemoved": true,
+        "hostStopped": true,
+        "ownedBrowserClosed": true,
+        "cancellationRegressionPassed": true
+      },
+      "ciConfiguration": {
+        "workflow": ".github/workflows/test.yml",
+        "linuxDsh": [
+          "0.2.0-rc.2",
+          "0.2.1-rc.2"
+        ],
+        "artifactDirectory": "linux-business/",
+        "legacyBehavior": "Explicit business test skip: applicable=false; no legacy business certification",
+        "status": "Configured only; not remotely run for this unpushed change"
+      },
+      "limitations": [
+        "Two dshmarket1.66.37 paths on macOS arm64 / DSH0.2.1-rc.2 only; no model invocation or Windows certification",
+        "Controlled single-entry local catalog, not another public marketplace installation acceptance",
+        "Browser HTTP503 controls are not natural version regressions or proof of original-plugin defects",
+        "Baseline and fault-injected metrics remain separate; no ecosystem accuracy claim",
+        "Production compatibility panel, verdict severity and npm delivery unchanged; repository tool only",
+        "Historical paired files replay historical observations; matching hashes are not a cryptographic attestation against deliberate coordinated tampering"
+      ],
+      "delivery": {
+        "push": false,
+        "merge": false,
+        "npmRelease": false,
+        "externalPost": false
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

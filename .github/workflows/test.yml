@@ -51,9 +51,10 @@ jobs:
           DSC_REQUIRE_RC2_UI: '1'
           DSC_RC2_LIVE_LOG: linux-rc2.json
           DSC_ENGINEERING_LIVE_LOG: linux-engineering.json
+          DSC_BUSINESS_LIVE_DIR: linux-business
         run: |
           test_status=0
-          node --test --test-reporter=tap test/probe-boot.test.mjs test/labels.test.mjs test/engineering-live.test.mjs test/profile-lock.test.mjs test/rc2-live.test.mjs > linux-live.tap 2>&1 || test_status=$?
+          node --test --test-reporter=tap test/probe-boot.test.mjs test/labels.test.mjs test/engineering-live.test.mjs test/profile-lock.test.mjs test/rc2-live.test.mjs test/business-labels.test.mjs > linux-live.tap 2>&1 || test_status=$?
           cat linux-live.tap
           exit "$test_status"
       - uses: actions/upload-artifact@v4
@@ -64,3 +65,4 @@ jobs:
             linux-live.tap
             linux-engineering.json
             linux-rc2.json
+            linux-business/

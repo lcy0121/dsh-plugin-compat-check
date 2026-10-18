@@ -156,6 +156,8 @@ node tools/meta-check.mjs --json
 
 보조 측정은 독립 loader 원시 라벨과 서비스 관측만 받는 예측기를 분리합니다. [Plan 보조 측정 기록](docs/Plan.md#51-已验证范围)을 참고하세요. `node tools/labels.mjs --nm web --synthetic --json`은 비공개 환경을 만들고 실제 누락을 보고하면 exit1을 반환합니다. 기존 대상은 `--probe-boot`, 파일 입력은 `--probe`와 `--labels`를 함께 사용합니다. 이 수치는 첫 계층의 해당 표본에만 적용되며 생태계 정확도가 아닙니다.
 
+별도 저장소 업무 측정은 `node tools/business-labels.mjs --live --out-dir <빈-증거-디렉터리> --json`으로 실행합니다. 전용 DSH0.2.1-rc.2와 실제 Chrome에서 고정 dshmarket1.66.37의 메모·즐겨찾기를 요청 완료, 새로고침 후 DOM, 독립 디스크 데이터로 확인합니다. 소스·정적 API 위험 예측은 동작 전에 봉인하며 업무/loader 정답은 예측기에 넣지 않습니다. 정상 TN2, 제어 POST503 FN2를 그대로 보고해 exit1입니다. 사례 누락이나 신원·제작물 불일치는 거부하며 드라이버 오류는 업무 실패가 아닙니다. 원본 플러그인 결함·생태계 정확도·전체 패널 업무 인증을 의미하지 않습니다. [Plan](docs/Plan.md#52-日常检查与真实集成)을 참고하세요.
+
 [lib/contracts.mjs](lib/contracts.mjs)가 CLI JSON·HTTP·도구·패널의 보고서 계약 원본입니다. 추가 필드는 보존하고 필수 필드 누락이나 미지원 버전은 도구 오류로 처리합니다. 0.1.3 후보는 DSH≥0.2.1-rc.2이면 rc.2 카탈로그(host98/client8), 나머지/미상은 기존 0.2.0-rc.2 카탈로그(host91/client8)를 선택합니다. 명시적 `--catalog`가 우선하며 미래 DSH 버전은 미검증입니다. 카탈로그는 런타임 관측이나 심각도 증거가 아닙니다. AST 목록은 날짜가 있는 부분 표본입니다. [Plan](docs/Plan.md#2-现行判定与集成契约)을 참고하세요.
 
 [개발 기록 및 후속 계획](docs/Plan.md) · [역사 감사](docs/GPT审计及重构方案文档.md) · [규칙](rules/README.md) · [skill 배포](skill/README.md). [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)에 수록되어 있습니다.

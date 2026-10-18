@@ -159,6 +159,8 @@ node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 
 辅助度量使用 [Plan辅助度量记录](docs/Plan.md#51-已验证范围) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
 
+仓库另有独立业务队列：`node tools/business-labels.mjs --live --out-dir <空证据目录> --json`，在私有DSH0.2.1-rc.2与真实Chrome测固定dshmarket1.66.37的备注/收藏，分别核验请求完成、刷新后界面和磁盘数据。源码/静态API风险预测在动作前封存，业务与loader标签不进入判定器；正常组TN2，受控POST503组FN2，CLI如实返回1。缺病例或身份/制品不符拒绝计分，驱动失败不算业务失败。它不是原插件缺陷证明、生态准确率或面板业务认证；用法与边界见[Plan](docs/Plan.md#52-日常检查与真实集成)。
+
 报告契约以 [lib/contracts.mjs](lib/contracts.mjs) 为单一真源，CLI JSON、HTTP、工具与面板保留完整证据；新字段可扩展，缺少必需字段或不支持的版本报工具错误。0.1.3候选按已知目标选择目录：DSH≥0.2.1-rc.2用新增rc.2目录（host98/client8），其余/未知用原0.2.0-rc.2目录（host91/client8），`--catalog`显式覆盖优先；未来DSH版本尚未认证。目录不等于运行时面，严重度不能只靠目录增删推定；库存仍是明确标记不完整的旧AST样本。见 [Plan](docs/Plan.md#2-现行判定与集成契约)。
 
 [施工记录与后续计划](docs/Plan.md) · [历史审计](docs/GPT审计及重构方案文档.md) · [规则说明](rules/README.md) · [skill交付](skill/README.md)。项目已收录于 [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)。
