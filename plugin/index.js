@@ -1000,8 +1000,12 @@ function isTrustedRequest(req) {
     const host = String((req.headers && (req.headers.host || req.headers.Host)) || '');
     const origin = String((req.headers && (req.headers.origin || req.headers.Origin)) || '');
     const hostOk = /^(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(host);
-    if (!origin) return hostOk;
-    return hostOk && /^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(origin);
+    if (!hostOk) return false;
+    const protocol = req.socket?.encrypted === true ? 'https:' : 'http:';
+    const expectedOrigin = new URL(`${protocol}//${host}`).origin;
+    if (!origin) return true;
+    if ( !/^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(origin)) return false;
+    return new URL(origin).origin === expectedOrigin;
   } catch {
     return false;
   }

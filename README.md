@@ -10,6 +10,8 @@
 
 插件、CLI、skill三种形态共享判定内核；安装检查脚本是CLI编排入口。只有**相同输入与采样证据**才应得出相同结果。
 
+本地工作树另含未发布的激活前提说明、HTTP Origin协议/主机/端口校验和npm子目录元数据修订；不能据版本号0.1.3认定这些修改已进入公开包。
+
 | 入口 | 提供什么 |
 |---|---|
 | npm 插件 | 当前宿主采样、兼容性标签、插件详情发现/角标、`compat_check`、skill provider；不能做安装前检查 |
@@ -160,6 +162,8 @@ node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 辅助度量使用 [Plan辅助度量记录](docs/Plan.md#51-已验证范围) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
 
 仓库独立业务工具用`node tools/business-labels.mjs --live --suite sidebar-ui --out-dir <空证据目录> --json`（默认market）。固定dshmarket1.66.37覆盖备注/收藏的正常、503、操作前/保存后控件缺失及恢复；dsh-better-sidebar0.28.0覆盖保存/预览HTTP路径、真实编辑器输入/保存/重载和UTF-8 BOM/UTF-16LE、CRLF字节保留。0.26.1另作无故障注入的版本对照：两例文件树HTTP405、无法编辑，保留功能风险漏报，不认定具体引入回归的版本。预测提前封存，业务与loader答案不进入预测；完成请求、目标卡片/编辑器DOM和独立磁盘数据共同核验。自然缺控件记业务失败；无法建立故障的对照逐例不计分，驱动错误不冒充业务失败。
+
+编辑器suite可加`--observe-services`：保留原静态队列，另封存动作前、同profile的根服务观测，输出独立`service-*`证据。0.26.1必需webRuntime缺失时该队列TP2，0.28.0为TN4且FP0；原静态FN2及503漏报仍保留。仅给诊断宿主提供旧版要求的服务后两例编辑恢复，说明激活前提缺失，不证明编辑方法或所有业务可由静态分析预测。详见[Plan](docs/Plan.md#4-已完成的关键工作)。
 
 显式`--suite sidebar-model --model-profile <已配置来源profile目录>`才会使用真实账户，当前仅支持deepseek-official；只复制所选凭据到自有临时home，最多两个提示/提供方首步、每步最多256输出token、无重试/自动标题，代码禁用工具。默认套件、`DSC_SLOW=1`和CI均不调用模型。正常/受控故障分组，固定样本不代表生态准确率或完整模型能力；用法和限定实测见[Plan](docs/Plan.md#52-日常检查与真实集成)。
 

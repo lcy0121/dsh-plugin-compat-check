@@ -95,6 +95,7 @@ export async function runBusiness({
   outDir,
   suite = "market",
   modelProfile,
+  observeServices = false,
 } = {}) {
   if (
     ![
@@ -108,6 +109,11 @@ export async function runBusiness({
     throw Error("Unknown business suite: " + suite);
   if (Boolean(modelProfile) !== (suite === "sidebar-model"))
     throw Error("--model-profile is required only for sidebar-model");
+  if (observeServices && !["sidebar-ui", "sidebar-ui-previous"].includes(suite))
+    throw Error("Service observation requires live editor suite");
+  const observer = observeServices
+    ? await import("./business-observation.mjs")
+    : null;
   const model =
     suite === "sidebar-model" ? await import("./business-model.mjs") : null;
   const sidebar = suite.startsWith("sidebar")
@@ -185,7 +191,12 @@ export async function runBusiness({
     tick,
     result,
     predictions,
-    labels;
+    labels,
+    servicePredictions,
+    serviceSurface,
+    serviceSealed,
+    serviceArtifact,
+    serviceIdentity;
   const finishedRequests = new Set(),
     failedRequests = new Set();
   let cleanupPromise;
@@ -329,6 +340,7 @@ export async function runBusiness({
                 "tools/business-sidebar.mjs",
                 ...(editor || model ? ["tools/business-sidebar-ui.mjs"] : []),
                 ...(model ? ["tools/business-model.mjs"] : []),
+                ...(observer ? ["tools/business-observation.mjs"] : []),
               ]
             : ["tools/business-market.mjs"]),
         ].map((f) => [f, hash(fs.readFileSync(path.join(REPO, f)))]),
@@ -348,6 +360,14 @@ export async function runBusiness({
     });
     if (predicted.error)
       throw Error("Business prediction failed: " + predicted.error);
+    const serviceObserver = observer
+      ? observer.installServiceObserver(
+          profile,
+          predicted.extract.report.perPlugin[pin.package].services,
+        )
+      : null;
+    if (serviceObserver)
+      artifact.serviceObserverSourceHash = hash(serviceObserver.source);
     const canonical = toJSON(predicted),
       identity = {
         sampleId: crypto.randomUUID(),
@@ -481,6 +501,53 @@ export async function runBusiness({
         if (!settled) reject(Error("Private host exited before ready"));
       });
     });
+    if (serviceObserver) {
+      const until = Date.now() + 15000;
+      while (!fs.existsSync(serviceObserver.output) && Date.now() < until)
+        await wait(50);
+      if (!fs.existsSync(serviceObserver.output))
+        throw Error("Owned service observer did not finish");
+      serviceSurface = observer.servicePredictionInput(
+        JSON.parse(fs.readFileSync(serviceObserver.output)),
+        { nm, dshVersion: version },
+      );
+      const servicesReport = run({
+        nm,
+        dshVersion: version,
+        baseline: false,
+        _ignoreAutoProbe: true,
+        _hostSurface: serviceSurface,
+      });
+      if (servicesReport.error) throw Error("Service-only prediction failed");
+      serviceArtifact = {
+        staticArtifactDigest: identity.artifactDigest,
+        rootServiceInputSha256: hash(JSON.stringify(serviceSurface)),
+      };
+      serviceIdentity = {
+        ...identity,
+        sampleId: identity.sampleId + "-services",
+        suiteId: identity.suiteId + "-service-observed-v1",
+        artifactDigest: hash(JSON.stringify(serviceArtifact)),
+      };
+      servicePredictions = {
+        predictionContext: {
+          mode: "feature-scoped-service-observed-api-risk",
+          rootOnly: true,
+          observationSha256: serviceArtifact.rootServiceInputSha256,
+        },
+        ...featurePredictions(
+          toJSON(servicesReport),
+          features,
+          serviceIdentity,
+        ),
+        casePlan: predictions.casePlan,
+      };
+      serviceSealed = JSON.stringify(servicePredictions);
+      fs.writeFileSync(
+        path.join(root, "service-predictions.json"),
+        serviceSealed,
+      );
+    }
     const chromePath =
       process.env.DSC_CHROME ||
       [
@@ -714,8 +781,31 @@ export async function runBusiness({
       fs.readFileSync(path.join(root, "predictions.json"), "utf8") !== sealed
     )
       throw Error("Sealed predictions changed after gold collection");
+    let serviceObserved;
+    if (servicePredictions) {
+      if (
+        JSON.stringify(servicePredictions) !== serviceSealed ||
+        fs.readFileSync(path.join(root, "service-predictions.json"), "utf8") !==
+          serviceSealed
+      )
+        throw Error("Sealed service predictions changed after gold collection");
+      serviceObserved = {
+        ...scoreBusiness(servicePredictions, { ...labels, ...serviceIdentity }),
+        artifacts: serviceArtifact,
+        prediction: {
+          mode: "feature-scoped-service-observed-api-risk",
+          loaderLabelsUsed: false,
+          businessLabelsUsed: false,
+          sealedBeforeActions: true,
+          rootOnly: true,
+          observationSha256: serviceArtifact.rootServiceInputSha256,
+          sha256: hash(serviceSealed),
+        },
+      };
+    }
     result = {
       ...scoreBusiness(predictions, labels),
+      ...(serviceObserved ? { serviceObserved } : {}),
       applicable: true,
       artifacts: artifact,
       features,
@@ -815,6 +905,13 @@ export async function runBusiness({
           "predictions.json": predictions,
           "labels.json": labels,
           "measurement.json": result,
+          ...(servicePredictions
+            ? {
+                "service-predictions.json": servicePredictions,
+                "service-labels.json": { ...labels, ...serviceIdentity },
+                "service-observation.json": serviceSurface,
+              }
+            : {}),
         }))
           fs.writeFileSync(
             path.join(outDir, file),

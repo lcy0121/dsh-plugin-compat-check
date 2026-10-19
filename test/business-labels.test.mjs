@@ -836,6 +836,27 @@ test("sidebar byte oracle catches BOM/CRLF loss even when decoded text is unchan
   assert.throws(() => m.savedDocumentBytes("A", "unknown"), /encoding/i);
 });
 
+test("service-only predictions are explicit and cannot silently change non-editor or replay modes", () => {
+  for (const args of [
+    ["--live", "--suite", "sidebar", "--observe-services"],
+    [
+      "--predictions",
+      "absent.json",
+      "--labels",
+      "absent.json",
+      "--observe-services",
+    ],
+  ]) {
+    const r = spawnSync(
+      process.execPath,
+      ["tools/business-labels.mjs", ...args, "--json"],
+      { encoding: "utf8" },
+    );
+    assert.equal(r.status, 3);
+    assert.match(JSON.parse(r.stdout).error, /editor|live/i);
+  }
+});
+
 test("live suite selection rejects unknown names before creating evidence", () => {
   const r = spawnSync(
     process.execPath,
@@ -915,6 +936,7 @@ describe(
               "--suite",
               suite,
               "--json",
+              "--observe-services",
               ...(process.env.DSC_EDITOR_LIVE_ROOT
                 ? ["--out-dir", process.env.DSC_EDITOR_LIVE_ROOT + "/" + suite]
                 : []),
@@ -937,6 +959,19 @@ describe(
               ? ["failed", "failed"]
               : ["passed", "failed", "passed", "passed", "failed", "passed"],
           );
+          assert.equal(v.serviceObserved.prediction.loaderLabelsUsed, false);
+          assert.equal(v.serviceObserved.prediction.sealedBeforeActions, true);
+          assert.equal(
+            v.serviceObserved.metrics.baseline.truePositive,
+            previous ? 2 : 0,
+          );
+          assert.equal(
+            v.serviceObserved.metrics.baseline.trueNegative,
+            previous ? 0 : 4,
+          );
+          assert.equal(v.serviceObserved.metrics.baseline.falseNegative, 0);
+          assert.equal(v.serviceObserved.metrics.baseline.falsePositive, 0);
+          assert.notEqual(v.serviceObserved.artifactDigest, v.artifactDigest);
           assert.equal(v.cleanup.privateRootRemoved, true);
           assert.equal(v.prediction.sealedBeforeActions, true);
         },

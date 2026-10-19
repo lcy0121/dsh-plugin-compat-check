@@ -18,6 +18,10 @@ describe(
       assert.equal(value.declarationCases.length, 5);
       assert.ok(value.declarationCases.every((x) => x.matched));
       assert.equal(value.subpathMetadata, true);
+      assert.deepEqual(value.originFence, {
+        sameOriginStatus: 200,
+        crossPortStatus: 403,
+      });
       assert.equal(value.cleanup.privateRootRemoved, true);
       if (value.ui.available) {
         assert.equal(value.ui.tabCount, 1);

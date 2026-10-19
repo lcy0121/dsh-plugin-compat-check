@@ -8,6 +8,8 @@ Check the compatibility of **installed DSH plugins** with a target DSH version, 
 
 The repository and npm are at **0.1.3**, now tagged `latest` (public tarball bytes and installation verified on 2026-10-18). This release includes rc.2 declarations, versioned catalogues, unload cleanup fixes and the updated skill. Repository CLI and business measurement tools are not shipped in the npm plugin. See [Plan](docs/Plan.md) and [verification facts and scope](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
 
+The local working tree additionally contains unpublished activation-prerequisite explanations, an HTTP Origin protocol/host/port fence and npm subdirectory metadata. The shared 0.1.3 version number does not mean these changes are in the public package.
+
 | Entry | Purpose |
 |---|---|
 | npm plugin | In-process sampling, compatibility tab, per-plugin findings/badge, `compat_check` and skill provider; no pre-install checks |
@@ -157,6 +159,8 @@ Slow integrations require explicit `DSC_SLOW=1`. Existing macOS DSH/Chrome, Ubun
 Auxiliary measurement uses independent raw loader labels; the predictor receives service observations only. See [auxiliary measurement records in Plan](docs/Plan.md#51-已验证范围). `node tools/labels.mjs --nm web --synthetic --json` creates a private environment and can correctly report a false negative (exit1). Use `--probe-boot` for an existing target, or paired `--probe` and `--labels` files. These sample metrics cover the first layer only, not ecosystem accuracy.
 
 Repository business tools run with `node tools/business-labels.mjs --live --suite sidebar-ui --out-dir <empty-evidence-directory> --json` (default: market). Pinned dshmarket1.66.37 covers notes/favorites, POST503, missing controls before/after saving, and recovery. dsh-better-sidebar0.28.0 covers save/preview HTTP paths, actual editor input/Save/reload and UTF-8 BOM/UTF-16LE/CRLF bytes. An uninjected 0.26.1 comparison records two file-tree HTTP405 failures and feature-risk misses; it does not identify a regression-introducing version. Predictions are sealed before actions, without business/loader answers. Completed requests, target-card/editor DOM and independent disk bytes establish outcomes. Naturally absent controls fail the business case; unestablished fault controls are individually unscored.
+
+Editor suites accept `--observe-services`: the original static cohort remains, while a separate same-profile root-service prediction is sealed before actions and written as `service-*` artifacts. Required webRuntime absence in0.26.1 yields TP2;0.28.0 yields TN4/FP0. Original static FN2 and503 misses remain. Providing the old prerequisite only in a diagnostic host restores both edits; this distinguishes activation prerequisites from editor-method failures, without certifying arbitrary business behavior. See [Plan](docs/Plan.md#4-已完成的关键工作).
 
 Only explicit `--suite sidebar-model --model-profile <configured-source-profile-directory>` uses a real account (currently deepseek-official only). It copies only the selected credential into an owned temporary home: at most two prompts/provider first steps,256 output tokens per step, no retries/automatic titles, and enforced tool denial. Default tests, `DSC_SLOW=1` and CI never call a model. Baseline/fault groups remain separate; fixed samples do not certify ecosystem accuracy or complete model capability. See [Plan](docs/Plan.md#52-日常检查与真实集成) for commands and scoped evidence.
 

@@ -385,6 +385,32 @@ try {
       "Actual candidate report lacks rc.2 identity",
     );
     result.httpReport = true;
+    const sameOrigin = await fetch(reportUrl, {
+      headers: { ...headers, Origin: reportUrl.origin },
+      signal: AbortSignal.timeout(15000),
+    });
+    requireTrue(
+      sameOrigin.status === 200,
+      "Same-origin report request rejected",
+    );
+    await sameOrigin.arrayBuffer();
+    const wrongPort = new URL(reportUrl);
+    wrongPort.port = String(
+      Number(reportUrl.port) === 65535 ? 65534 : Number(reportUrl.port) + 1,
+    );
+    const crossOrigin = await fetch(reportUrl, {
+      headers: { ...headers, Origin: wrongPort.origin },
+      signal: AbortSignal.timeout(15000),
+    });
+    const forbiddenBody = await crossOrigin.text();
+    requireTrue(
+      crossOrigin.status === 403 && !forbiddenBody.includes("nodeModules"),
+      "Cross-port origin can read the report",
+    );
+    result.originFence = {
+      sameOriginStatus: sameOrigin.status,
+      crossPortStatus: crossOrigin.status,
+    };
     const chromePath =
       process.env.DSC_CHROME ||
       [
