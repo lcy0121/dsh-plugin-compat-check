@@ -11,6 +11,7 @@ import {
   disableCredentialOnboarding,
   navigateOwnedDocument,
 } from "./browser-session.mjs";
+import { cleanupOwned, combineFailure } from "../lib/owned-process.mjs";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { command, stopOwnedChild } from "../lib/probe-runner.mjs";
@@ -199,7 +200,7 @@ export async function runBusiness({
     serviceIdentity;
   const finishedRequests = new Set(),
     failedRequests = new Set();
-  let cleanupPromise;
+  let cleanupPromise, primaryFailure, commandCleanupFailure;
   const pendingFaults = new Set(),
     requests = new Map(),
     responses = [];
@@ -216,11 +217,18 @@ export async function runBusiness({
     } finally {
       commands.delete(p);
     }
+    if (r.cleanup?.stopped === false)
+      commandCleanupFailure = Object.assign(new Error(r.error), {
+        diagnostics: r.diagnostics || [],
+      });
     if (r.code !== 0)
-      throw Error(
-        c +
-          " failed: " +
-          (r.error || r.output).slice(-900).replaceAll(root, "<private>"),
+      throw Object.assign(
+        Error(
+          c +
+            " failed: " +
+            (r.error || r.output).slice(-900).replaceAll(root, "<private>"),
+        ),
+        { diagnostics: r.diagnostics || [] },
       );
     return r.output;
   };
@@ -230,13 +238,21 @@ export async function runBusiness({
       clearInterval(tick);
       await Promise.allSettled([...commands]);
       await processing?.catch(() => {});
-      await (chrome || (await chromeStarting?.catch(() => null)))?.close();
-      await stopOwnedChild(host);
-      if (server)
-        await new Promise((r) => {
-          server.closeAllConnections();
-          server.close(r);
-        });
+      const browser = chrome || (await chromeStarting?.catch(() => null));
+      await cleanupOwned([
+        () => {
+          if (commandCleanupFailure) throw commandCleanupFailure;
+        },
+        () => browser?.close(),
+        () => stopOwnedChild(host),
+        () =>
+          server
+            ? new Promise((resolve) => {
+                server.closeAllConnections();
+                server.close(resolve);
+              })
+            : undefined,
+      ]);
       fs.rmSync(root, { recursive: true, force: true });
     })());
   }
@@ -849,6 +865,7 @@ export async function runBusiness({
             },
     };
   } catch (error) {
+    primaryFailure = error;
     if (outDir && suite !== "sidebar-model")
       fs.writeFileSync(
         path.join(outDir, "failure-host.txt"),
@@ -891,7 +908,16 @@ export async function runBusiness({
     }
     throw error;
   } finally {
-    await cleanup();
+    try {
+      await cleanup();
+    } catch (error) {
+      throw Object.assign(combineFailure(primaryFailure, error), {
+        retainedWorkDir: root,
+      });
+    } finally {
+      process.off("SIGINT", interrupt);
+      process.off("SIGTERM", interrupt);
+    }
     process.off("SIGINT", interrupt);
     process.off("SIGTERM", interrupt);
     if (result) {

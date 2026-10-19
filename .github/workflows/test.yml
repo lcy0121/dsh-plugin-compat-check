@@ -48,6 +48,7 @@ jobs:
         shell: bash
         env:
           DSC_SLOW: '1'
+          DSC_EXECUTION_DIAGNOSTICS: linux-execution-diagnostics
           DSC_REQUIRE_RC2_UI: '1'
           DSC_RC2_LIVE_LOG: linux-rc2.json
           DSC_ENGINEERING_LIVE_LOG: linux-engineering.json
@@ -64,6 +65,7 @@ jobs:
         with:
           name: linux-live-evidence-${{ matrix.dsh }}
           path: |
+            linux-execution-diagnostics/
             linux-live.tap
             linux-engineering.json
             linux-rc2.json

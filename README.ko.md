@@ -156,6 +156,8 @@ node tools/meta-check.mjs --json
 
 느린 통합 검사는 명시적 `DSC_SLOW=1`이 필요합니다. macOS DSH/Chrome, Ubuntu arm64 VM 및 Linux x64 CI 기록은 실제 tgz, 도구·skill, UI 대조와 자원 시나리오를 포함합니다. 정확한 커밋과 범위는 [Plan](docs/Plan.md#5-验证记录与复现)을 참고하세요. 과거 CI가 이후 로컬 단언·문서 변경을 인증하지는 않으며 Windows는 보류합니다. [엔지니어링 재현](docs/Plan.md#53-p2工程验收)을 참고하세요. 과거 88.3% 재현율, 66/66 도착 및 loader 라벨은 업무 기능 정확도가 아닙니다. Python parity도 구형 정규식 참고이며 AST의 정답이 아닙니다.
 
+저장소 CLI/개발 도구는 `DSC_EXECUTION_DIAGNOSTICS=<비공개-디렉터리>`로 Chrome 시작/대상/파이프 및 회수 실패 진단을 보존합니다. 일반 JSON에는 stderr 본문이 없으며 비공개 파일은 길이 제한과 비밀값 가림을 적용하므로 공유 전 확인하세요. 실제 회수 실패 시 workDir을 보존합니다. Darwin EPERM은 동일 UID의 좀비 그룹 또는 실제 종료와 그룹 소멸을 확인할 때만 허용합니다. [Plan](docs/Plan.md#53-p2工程验收)을 참고하세요.
+
 보조 측정은 독립 loader 원시 라벨과 서비스 관측만 받는 예측기를 분리합니다. [Plan 보조 측정 기록](docs/Plan.md#51-已验证范围)을 참고하세요. `node tools/labels.mjs --nm web --synthetic --json`은 비공개 환경을 만들고 실제 누락을 보고하면 exit1을 반환합니다. 기존 대상은 `--probe-boot`, 파일 입력은 `--probe`와 `--labels`를 함께 사용합니다. 이 수치는 첫 계층의 해당 표본에만 적용되며 생태계 정확도가 아닙니다.
 
 저장소 업무 도구는 `node tools/business-labels.mjs --live --suite sidebar-ui --out-dir <빈-증거-디렉터리> --json`으로 실행합니다(기본 market). 고정 dshmarket1.66.37은 메모·즐겨찾기, POST503, 동작 전/저장 후 버튼 누락과 복구를 확인합니다. dsh-better-sidebar0.28.0은 저장·미리보기 HTTP, 실제 편집기 입력·저장·재로드와 UTF-8 BOM/UTF-16LE·CRLF 바이트를 검사합니다. 결함을 주입하지 않은0.26.1 비교에서는 파일 트리HTTP405 두 건과 기능 위험 미탐을 보존하며, 회귀가 도입된 버전을 단정하지 않습니다. 예측은 동작 전에 봉인하며 업무/loader 정답을 사용하지 않습니다. 완료 요청, 대상 카드/편집기 DOM과 독립 디스크 데이터로 판정합니다. 자연적인 버튼 누락은 업무 실패, 성립하지 않은 결함 대조군은 개별 미채점입니다.

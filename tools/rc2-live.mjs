@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /** Owned real-host acceptance: declaration gates, metadata, actual settings UI and reload. */
 import fs from "node:fs";
+import { failureDiagnostic, cleanupOwned } from "../lib/owned-process.mjs";
 import path from "node:path";
 import os from "node:os";
 import crypto from "node:crypto";
@@ -35,7 +36,7 @@ for (const k of [
 ])
   delete env[k];
 const children = new Set();
-let chrome, chromeStarting, result;
+let chrome, chromeStarting, result, commandCleanupFailure;
 const cancellation = new AbortController(),
   commands = new Set();
 const redact = (text) =>
@@ -56,10 +57,15 @@ const exec = async (c, a, timeoutMs = 120000, commandEnv = env) => {
   } finally {
     commands.delete(pending);
   }
-  requireTrue(
-    r.code === 0,
-    c + " failed: " + redact(r.error || r.output).slice(-900),
-  );
+  if (r.cleanup?.stopped === false)
+    commandCleanupFailure = Object.assign(new Error(r.error), {
+      diagnostics: r.diagnostics || [],
+    });
+  if (r.code !== 0)
+    throw Object.assign(
+      new Error(c + " failed: " + redact(r.error || r.output).slice(-900)),
+      { diagnostics: r.diagnostics || [] },
+    );
   return r.output;
 };
 const writeJSON = (p, value) =>
@@ -161,8 +167,13 @@ async function cleanup() {
   cancellation.abort();
   await Promise.allSettled([...commands]);
   const browser = chrome || (await chromeStarting?.catch(() => null));
-  await browser?.close();
-  await Promise.allSettled([...children].map(stopOwnedChild));
+  await cleanupOwned([
+    () => {
+      if (commandCleanupFailure) throw commandCleanupFailure;
+    },
+    () => browser?.close(),
+    ...[...children].map((child) => () => stopOwnedChild(child)),
+  ]);
   fs.rmSync(root, { recursive: true, force: true });
 }
 for (const signal of ["SIGTERM", "SIGINT"])
@@ -588,12 +599,29 @@ try {
     ...result,
     ok: false,
     error: redact(error.stack || error.message),
+    diagnostics: failureDiagnostic(error),
   };
   process.exitCode = 1;
 } finally {
-  await cleanup();
+  try {
+    await cleanup();
+  } catch (error) {
+    result = {
+      ...result,
+      ok: false,
+      error: [result?.error, error.message].filter(Boolean).join("; "),
+      diagnostics: [
+        ...(result?.diagnostics || []),
+        ...failureDiagnostic(error),
+      ],
+    };
+    process.exitCode = 1;
+  }
 }
-result.cleanup = { privateRootRemoved: !fs.existsSync(root) };
+result.cleanup = {
+  privateRootRemoved: !fs.existsSync(root),
+  ...(fs.existsSync(root) ? { workDir: root } : {}),
+};
 if (process.env.DSC_RC2_LIVE_LOG)
   writeJSON(process.env.DSC_RC2_LIVE_LOG, result);
 console.log(JSON.stringify(result, null, 2));

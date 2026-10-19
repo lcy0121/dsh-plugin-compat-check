@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-更新于2026-10-19。已发布版本为0.1.3；本轮已补服务前提度量、Origin同源校验与npm子目录元数据，尚未推送本仓库或发布新npm；公开0.1.3不包含这些本地修改。本文维护现行契约、交付边界与待办；用法见[README](../README.md)，逐次证据见[docs/current-state.json](current-state.json)。[原始审计](GPT审计及重构方案文档.md)与[旧提取器反例](extraction-findings.md)保留历史身份，施工过程查Git历史。
+更新于2026-10-19。已发布版本为0.1.3；本轮已补服务前提度量、Origin同源校验、npm子目录元数据及工程回收/Chrome诊断，尚未推送本仓库或发布新npm；公开0.1.3不包含这些本地修改。本文维护现行契约、交付边界与待办；用法见[README](../README.md)，逐次证据见[docs/current-state.json](current-state.json)。[原始审计](GPT审计及重构方案文档.md)与[旧提取器反例](extraction-findings.md)保留历史身份，施工过程查Git历史。
 
 ## 1. 项目定位与交付状态
 
@@ -96,6 +96,8 @@
 
 宣传仅保留可核验事实：HTTP 200不等于收录，下载不等于用户，star不代表兼容性；“故障时被想到”是待验证的定位假设。删除“唯一自动增长渠道”“纯链接转化近零”“每个rc后24小时普查”等未经验证或尚无资源保证的断言。其它市场按其npm/子目录/制品规则评估，不给private根包添加虚假bundle声明，也不从根扫描限制推出所有合规入口都不可能。
 
+工程故障诊断已闭合：Darwin真实对照复现“全组仅Z仍返回EPERM”与“内核Z先于Node exit事件”两种边界，新版联合现场也抓到后者的原栈/UID/PGID/状态。仅在有界确认实际退出后，完整快照为同UID全组Z或组已消失时接受停止；活进程拒绝/不可读仍失败。命令和probe同时保留原始/清理错误，清理失败保留私有workDir，不再未处理拒绝或宣称删除成功。Chrome先做Browser.getVersion握手，区分建页、附加、会话、EOF/退出/超时，记录有界元数据及可选私有stderr；仍用自有fd3/4，不加生产超时或重试。多个资源均尝试清理，CI已配置失败诊断留存。[Darwin信号源码](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_sig.c#L1548-L1624)与本机复现互证。历史Linux Target.createTarget原日志缺少Chrome/管道信息，不能追认具体Chrome根因；已用阶段负例和真实Chrome暂停对照验收诊断及回收，不以重跑代替修复。证据见`verification.engineeringDiagnostics20261019`。
+
 ## 5. 验证记录与复现
 
 ### 5.1 已验证范围
@@ -109,7 +111,9 @@
 | 独立业务队列 / 首轮 | Node24.19/26.12默认各526/526；专项12/12含真实Chrome中备注/收藏四病例及取消回收。正常组TN2、503对照组FN2；离线回放保留exit1，缺病例exit3。两项重要审阅问题已修，该阶段尚未跑新远端CI，最终发布CI另列；见`verification.independentBusinessTruth` |
 | 业务扩展 / 0.1.3发布前 | Node24.19/26.12默认各529/529；业务专项17/17（14离线、两组真实插件、1项真实Chrome边界）；最终rc.2联合36/36（含原19项）；本地旧DSH联合35项中33通过、2项rc.2业务明确不适用；最终Linux旧版矩阵新增浏览器边界项后为34通过、2跳过。确切0.1.3 tgz实际安装/启动exit0，覆盖仍有限。发布前闸门通过；见`verification.businessSampleExpansion`、`verification.release013` |
 | 编辑器/模型扩展检查点 / 2026-10-19 | Node24.19/26.12默认各540/540；rc.2联合51/51；旧DSH联合51项中47通过、4项rc.2业务明确不适用；显式真实模型专项1/1（两条回复）。本地macOS arm64；新远端Linux/Node22及Windows未认证。见`verification.marketUiAndBusinessExpansion` |
-| 本轮边界/分发收尾 / 2026-10-19 | Node24.19/26.12默认各550/550；rc.2联合52/52；旧DSH联合52项48通过、4项rc.2专项不适用；确切本地tgz Origin专项1/1；公开0.1.3真实市场安装/升级及37文件核验。无新模型调用，无新远端CI/Windows认证。一次新版联合probe报kill EPERM，隔离2/2与完整重跑52/52通过，原因未证实，保留首发记录；见本轮两项verification |
+| 边界/分发阶段检查点 / 2026-10-19 | Node24.19/26.12默认各550/550；rc.2联合52/52；旧DSH联合52项48通过、4项rc.2专项不适用；确切本地tgz Origin专项1/1；公开0.1.3真实市场安装/升级及37文件核验。无新模型调用，无新远端CI/Windows认证。一次新版联合probe报kill EPERM，隔离2/2与完整重跑52/52通过，原因未证实，保留首发记录；见本轮两项verification |
+
+本轮工程诊断：Node24.19/26.12默认各561通过；rc.2联合73/73，旧版联合73项69通过、4项rc.2专项跳过；含真实Darwin僵尸组、三条CLI拒绝/目录保留及client-arrival正负例。真实Chrome12/12次启动（3并发、4批，无重试）与暂停后超时回收负例通过；发布前闸门通过。新远端Linux/Node22和Windows未认证，见`verification.engineeringDiagnostics20261019`。
 
 辅助标签独立于预测；四个固定病例TP1/FP0/FN1/TN2（精确率1、召回率0.5）暴露漏报，不是生态准确率。P2的21例归属反例TP0/FN14→TP14/FN0、FP为0，另4例未知有诊断，只评价该队列。默认suite不代替真实集成，旧skill正文/旧CI不追写成新认证，所有阶段数字以对应记录为准。
 
@@ -161,14 +165,23 @@ node tools/engineering-check.mjs
 DSC_SLOW=1 node --test --test-reporter=tap test/engineering-live.test.mjs test/profile-lock.test.mjs
 ```
 
+工程故障复现（本地夹具；DSC_SLOW额外编译C夹具核验Darwin真实僵尸组，缺编译器明确跳过）：
+
+```bash
+node --test test/owned-process.test.mjs test/debugger.test.mjs
+DSC_SLOW=1 node --test test/owned-process.test.mjs test/debugger.test.mjs
+DSC_EXECUTION_DIAGNOSTICS=<私有诊断目录> node bin/compat-check.mjs --nm <目标node_modules> --probe-boot --json
+```
+
+`DSC_EXECUTION_DIAGNOSTICS`只在故障时可选写入0700目录/0600 JSON，拒绝symlink目录；失败JSON保留`diagnostics`，probe在`inputs.probeBoot`下，并标注落盘失败。普通诊断不包含argv/env或stderr正文；可选私有文件保留限长、脱敏stderr。诊断文件不是自动可分享报告，仍需预览。受控负例也会产生诊断，CI成败以对应TAP/退出码为准。真实回收失败保留workDir及PID/组归属，不能按进程名清场或盲删仍在用的目录；多个资源失败保留原始错误并尝试其余清理。
+
 覆盖2402文件/约50MB预算弃权、受控超时、32MiB与默认提取器堆耗尽/恢复、64请求single-flight、8进程192次基线争用/原子读取；旧宿主4000函数/3并发刷新期间仍可响应。超时分别检查等待/总流程、停止后计数不增长及恢复。只证明限定版本/输入的工程行为，不是全进程RSS、任意脱离进程组隔离或生产性能保证。
 
 ## 6. 后续工作
 
-本轮两项已完成本地实现、因果对照、0.1.3真实市场安装/升级和已授权上游交付；§4记录具体边界。上游采纳与商店私有采集尚不受本仓库控制，以下继续保留为可验收事项：
+服务前提/分发交付及本轮工程诊断已完成本地实现与验收；§4记录具体边界。上游采纳与商店私有采集尚不受本仓库控制，以下继续保留为可验收事项：
 
-1. **本地补丁交付。** 审查并授权本仓库push/合并，运行新远端Linux新旧DSH及Node22/24矩阵；随后准备下一补丁候选（Origin端口校验、激活前提说明、npm目录元数据），核对确切制品后另取npm发布授权。公开0.1.3不追写为含这些修复。
+1. **本地补丁交付。** 审查并授权本仓库push/合并，运行新远端Linux新旧DSH及Node22/24矩阵；随后准备下一补丁候选（Origin端口校验、激活前提说明、npm目录元数据及工程诊断），核对确切制品后另取npm发布授权。公开0.1.3不追写为含这些修复。
 2. **上游验收。** 跟进主目录#8057公开索引采纳及市场#931/#932修复，使用明确市场版本再次核验误提示和全球线路的确切安装版本；1024#22须维护者补采集/投影，出现npm方法后再真实安装；0xsline#717待采纳。bruc3van#138已关闭收录，无须继续等待。没有新证据不重复发帖、不把帖子已提交当问题已修复。
-3. **工程故障保留诊断。** 本轮一次probe的kill EPERM及历史Target.createTarget超时均重跑通过，根因未证实；若再现须捕获原栈/进程归属再定位，不吞清理失败或以重试冒充修复。固定业务队列仍不是盲测；扩展插件/复杂模型任务须另定制品、资源与独立真值。
-4. **有限批量与自动化（后置）。** 先验证固定哈希样本的静态JSON聚合、限制及“待作者复核”，再评估低权限Action、逐版增量与摘要。工具错误/覆盖不足单列，不默认写第三方仓库、不承诺24小时SLA；公共端点先确认隐私、缓存与维护成本。
-5. **Windows真实验收。** 取得环境后实跑路径、安装器、回收和打包；按用户选择暂缓，不用POSIX或模拟充数。
+3. **有限批量与自动化（后置）。** 先验证固定哈希样本的静态JSON聚合、限制及“待作者复核”，再评估低权限Action、逐版增量与摘要。工具错误/覆盖不足单列，不默认写第三方仓库、不承诺24小时SLA；公共端点先确认隐私、缓存与维护成本。固定业务队列不是盲测；扩展插件或复杂模型任务须另定制品、资源与独立真值。
+4. **Windows真实验收。** 取得环境后实跑路径、安装器、回收和打包；按用户选择暂缓，不用POSIX或模拟充数。

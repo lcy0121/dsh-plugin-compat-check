@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from "node:fs";
+import { failureDiagnostic } from "../lib/owned-process.mjs";
 import { scoreBusiness, businessExitCode } from "./business-metrics.mjs";
 const usage =
   "用法: node tools/business-labels.mjs [--live | --predictions <预测.json> --labels <业务标签.json>] [--suite market|sidebar|sidebar-ui|sidebar-ui-previous|sidebar-model] [--model-profile <显式来源profile>] [--observe-services（仅live编辑器）] [--out-dir <空证据目录>] [--json]";
@@ -86,6 +87,12 @@ try {
       schemaVersion: 1,
       kind: "plugin-compat-check/business-error",
       error: error.message,
+      ...(error.retainedWorkDir
+        ? { retainedWorkDir: error.retainedWorkDir }
+        : {}),
+      ...(failureDiagnostic(error).length
+        ? { diagnostics: failureDiagnostic(error) }
+        : {}),
     }),
   );
   process.exitCode = 3;

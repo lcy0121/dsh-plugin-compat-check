@@ -251,7 +251,7 @@ export async function runAsync(options={}) {
   const before=run({...options,probeBoot:false,baseline:false,_ignoreAutoProbe:true});
   if(before.error)return before;
   const boot=await probeProfile(before.inputs.nodeModules,{timeoutSec:options.probeTimeout||40,keepDir:options.probeKeepDir,services:before.extract.report.services,manifests:before.extract.report.manifests});
-  const info={notes:boot.notes,error:boot.error,tempProfile:boot.tempProfile,tempProfileRemoved:boot.tempProfileRemoved};
+  const info={notes:boot.notes,error:boot.error,tempProfile:boot.tempProfile,tempProfileRemoved:boot.tempProfileRemoved,...(boot.diagnostics?.length?{diagnostics:boot.diagnostics}:{}),...(boot.workDir?{workDir:boot.workDir}:{})};
   if(boot.error)return {...before,error:boot.error,inputs:{...before.inputs,probeBoot:info}};
   return run({...options,dshVersion:options.dshVersion||boot.surface?.dshVersion||null,probeBoot:false,_hostSurface:boot.surface,_ignoreAutoProbe:true,_probeBootInfo:info});
 }

@@ -159,6 +159,8 @@ node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 
 默认套件不启用 `DSC_SLOW=1` 集成。已有macOS真实DSH/Chrome、Ubuntu arm64 VM及Linux x64 CI证据，覆盖实际tgz、tool/skill、界面正负例与工程资源场景；各自提交和范围见[Plan](docs/Plan.md#5-验证记录与复现)。本地新补强与文档修订不能套用旧CI，Windows按约定待验收。工程复现见[Plan](docs/Plan.md#53-p2工程验收)。历史88.3%召回、66/66到货及loader标签都不等于业务准确率；Python parity也是旧正则参考，不是AST真值。
 
+仓库CLI/开发工具另支持`DSC_EXECUTION_DIAGNOSTICS=<私有目录>`保留工程失败诊断：区分Chrome启动/建页/管道故障及真实回收失败；普通JSON不含stderr正文，私有文件限长脱敏并需预览。真实回收失败保留workDir；Darwin仅核验同UID全组Z或确认退出且组已消失时接受停止，不忽略活进程EPERM。详见[Plan](docs/Plan.md#53-p2工程验收)。
+
 辅助度量使用 [Plan辅助度量记录](docs/Plan.md#51-已验证范围) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
 
 仓库独立业务工具用`node tools/business-labels.mjs --live --suite sidebar-ui --out-dir <空证据目录> --json`（默认market）。固定dshmarket1.66.37覆盖备注/收藏的正常、503、操作前/保存后控件缺失及恢复；dsh-better-sidebar0.28.0覆盖保存/预览HTTP路径、真实编辑器输入/保存/重载和UTF-8 BOM/UTF-16LE、CRLF字节保留。0.26.1另作无故障注入的版本对照：两例文件树HTTP405、无法编辑，保留功能风险漏报，不认定具体引入回归的版本。预测提前封存，业务与loader答案不进入预测；完成请求、目标卡片/编辑器DOM和独立磁盘数据共同核验。自然缺控件记业务失败；无法建立故障的对照逐例不计分，驱动错误不冒充业务失败。
