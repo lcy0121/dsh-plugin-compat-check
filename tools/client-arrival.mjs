@@ -48,6 +48,12 @@
  *     node tools/client-arrival.mjs --keep             # 留下临时 profile 与 Chrome 数据目录
  */
 
+import {
+  failureDiagnostic,
+  cleanupOwned,
+  combineFailure,
+  stopOwnedChild,
+} from "../lib/owned-process.mjs";
 import { launchChromePipe } from "../lib/debugger.mjs";
 import { command } from "../lib/probe-runner.mjs";
 import { compatibilityText } from "./arrival-text.mjs";
@@ -145,38 +151,10 @@ async function main() {
   let chrome = null;
   const cleanup = async () => {
     if (cleaned) return cleaned;
-    try {
-      if (host?.pid) {
-        if (process.platform !== "win32") process.kill(-host.pid, "SIGTERM");
-        else host.kill("SIGTERM");
-      }
-    } catch {
-      /* 尽力而为 */
-    }
-    await new Promise((resolve) => setTimeout(resolve, 150));
-    try {
-      if (host?.pid && process.platform !== "win32")
-        process.kill(-host.pid, "SIGKILL");
-      else host?.kill("SIGKILL");
-    } catch {}
-    try {
-      await chrome?.close();
-    } catch {
-      /* 尽力而为 */
-    }
-    // 兜底：确认端口进程真的没了（`--port 0` 起的宿主不会自己退）
-    // Never scan a global process namespace. Only this launch's child handles are owned.
+    await cleanupOwned([() => stopOwnedChild(host), () => chrome?.close()]);
     if (!opts.keep) {
-      try {
-        fs.rmSync(tmpProfile, { recursive: true, force: true });
-      } catch {
-        /* 尽力而为 */
-      }
-      try {
-        fs.rmSync(chromeDir, { recursive: true, force: true });
-      } catch {
-        /* 尽力而为 */
-      }
+      fs.rmSync(tmpProfile, { recursive: true, force: true });
+      fs.rmSync(chromeDir, { recursive: true, force: true });
       fs.rmSync(artifactDir, { recursive: true, force: true });
     }
     cleaned = {
@@ -640,8 +618,17 @@ async function main() {
     await cleanup();
     process.exit(bad ? 1 : 0);
   } catch (error) {
-    process.stderr.write(`${error.message}\n`);
-    await cleanup();
+    try {
+      await cleanup();
+    } catch (failure) {
+      error = combineFailure(error, failure);
+    }
+    process.stderr.write(
+      JSON.stringify({
+        error: error.message,
+        diagnostics: failureDiagnostic(error),
+      }) + "\n",
+    );
     process.exit(3);
   }
 }

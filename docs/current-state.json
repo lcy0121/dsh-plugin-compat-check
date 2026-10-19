@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.3",
-  "recordedAt": "2026-10-18T13:57:37.293Z",
-  "testFiles": 37,
-  "tests": 529,
+  "recordedAt": "2026-10-19T12:26:01.747Z",
+  "testFiles": 38,
+  "tests": 561,
   "repositoryFiles": {
-    "total": 241,
+    "total": 248,
     "fixtures": 90,
-    "other": 151
+    "other": 158
   },
   "verification": {
     "platform": "darwin",
@@ -19,7 +19,7 @@
     "realChrome": true,
     "windows": false,
     "nodeVersions": [
-      "22.19.0",
+      "24.19.0",
       "26.12.0"
     ],
     "independentReview": {
@@ -3396,7 +3396,7 @@
         "Windows remains deferred by user",
         "Historical marketplace install accepted published0.1.2; published0.1.3 has separate exact-tgz/public-npm and integration evidence",
         "Coverage remains limited; transport fault FN values are preserved, not fixed by changing truth labels",
-        "Market post-action navigation still requires note/favorite controls; a loaded page missing those controls can be classified as driver error/unobserved instead of business failure. No general UI-failure classification claim; follow-up tracked in Plan."
+        "Historical release0.1.3 checkpoint: loaded market controls could still be misclassified as driver failure. Current repository follow-up resolves the controlled missing-action boundary; see marketUiAndBusinessExpansion. This does not rewrite historical release evidence."
       ],
       "publicNpmInstallation": {
         "spec": "dsh-plugin-compat-check@0.1.3",
@@ -3410,6 +3410,1505 @@
         "tempProfileRemoved": true,
         "scope": "Public npm specification in a private actual DSH host; report and boot evidence, not a repeat marketplace UI or comprehensive business certification"
       }
+    },
+    "marketUiAndBusinessExpansion": {
+      "recordedAt": "2026-10-19T05:32:12.510742+00:00",
+      "baseCommit": "3d7b29d6fa8892c2cd5cc515bd350733d5f2d288",
+      "branch": "codex/market-ui-business-samples",
+      "delivery": "Local repository tools and documents only; no push, merge or new npm publication",
+      "platform": "macOS arm64; actual DSH0.2.1-rc.2 and real Chrome; legacy DSH0.2.0-rc.2 separately checked",
+      "prediction": "Fixed published bytes + version-specific hand-reviewed feature spans, sealed before host/actions; no business/loader answers; feature API-risk flags, not whole-plugin verdicts",
+      "changes": [
+        "Market navigation readiness uses loaded target card independently of note/favorite controls. Target-card-scoped controls and values; action missing before request is failed without fabricated HTTP receipt.",
+        "Market phase plan adds recovery and action missing before/after completed save. Failed injection or reappearing controls is per-case harness-error, preserving baseline observations.",
+        "Actual CodeMirror select-all/insertText, visible Save and fresh editor reload; independent raw BOM/encoding/CRLF oracle; blocked save preserves old bytes.",
+        "Known file-tree precondition failure requires visible UI error plus matching completed fs response. Unavailable controlled save is unscored and retains sealed control identity.",
+        "Owned dirty-document navigation explicitly discards only beforeunload test changes. Other dialogs/transport failures remain harness errors.",
+        "Explicit model suite/profile only, selected credential reference copied owner-only into owned temporary home; original profile unchanged; generic setup errors; no model host log export.",
+        "Owned model host denies tool execution, removes tool schemas and admits at most two direct-child first steps globally. No retries/automatic titles, thinking off,256 output token limit per step.",
+        "Model success requires current completed turn, non-interrupted durable assistant text and fresh actual assistant DOM, never prompt/reasoning echoes.",
+        "Default tests/DSC_SLOW/CI do not implicitly call models. CI collects new editor evidence directories; remote results remain pending."
+      ],
+      "cohorts": [
+        {
+          "suite": "market",
+          "package": "dshmarket@1.66.37",
+          "sampleId": "364f66f6-70cd-4cca-8089-84eb95348e7f",
+          "collectedAt": "2026-10-19T05:29:40.990Z",
+          "artifactDigest": "fd4b6882674daafeeb089f09795b2820b80da036152f65f4810f07186c673296",
+          "packageFingerprint": {
+            "files": 182,
+            "digest": "a26339e13c9adcff506c1d0c00842d0e6cf104226c5a1954a5e091c40dd6f583"
+          },
+          "publishedTarballSha256": "8b29d156e3ea45330623b4cd66736992456f5ef4c92c8fb00243ccc3b101f188",
+          "outcomes": [
+            "passed",
+            "failed",
+            "failed",
+            "failed",
+            "passed",
+            "passed",
+            "failed",
+            "failed",
+            "failed",
+            "passed"
+          ],
+          "counts": {
+            "baseline": {
+              "scored": 4,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 4
+            },
+            "faultInjected": {
+              "scored": 6,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 6,
+              "trueNegative": 0
+            }
+          },
+          "cleanup": {
+            "privateRootRemoved": true,
+            "hostStopped": true
+          },
+          "sha256": {
+            "predictions.json": "afc9b9189162470398a92fd0ab8412a0112c8d00cd7e83caa95ddb6ad1916714",
+            "labels.json": "6d177946e6d49997bf37b7af0d73572eab7c9a60f3c396c5531267f54d760194",
+            "measurement.json": "362c09cc239bc193aa6c9c4edcd195cd5e006d9df589008e9020f900f429827f"
+          }
+        },
+        {
+          "suite": "sidebar",
+          "package": "dsh-better-sidebar@0.28.0",
+          "sampleId": "4ea9da08-a1df-4023-8f3a-8bec00d864d6",
+          "collectedAt": "2026-10-19T05:29:49.698Z",
+          "artifactDigest": "797536168c074957fc44730a7494fe6781b484308951c16d4fb505abc0f0c49b",
+          "packageFingerprint": {
+            "files": 471,
+            "digest": "2c3b5619b4a8ee9ab87ea179b0163a1230dbbb63e8cdbea3de8b08f9147d6892"
+          },
+          "publishedTarballSha256": "40b7ce32a6d90bff069b3bb4d0e5dd692281e0ac0598163196b816ac12335b6f",
+          "outcomes": [
+            "passed",
+            "failed",
+            "passed",
+            "passed",
+            "failed",
+            "passed"
+          ],
+          "counts": {
+            "baseline": {
+              "scored": 4,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 4
+            },
+            "faultInjected": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 2,
+              "trueNegative": 0
+            }
+          },
+          "cleanup": {
+            "privateRootRemoved": true,
+            "hostStopped": true
+          },
+          "sha256": {
+            "predictions.json": "6672efe8737a0846918253a3fe6fed068411504bf39c47de1ad780119e875ad8",
+            "labels.json": "88eeee577373f85c8fdf7134e281d99a19ffa326232b546a4e46ecea0be3cdfe",
+            "measurement.json": "74e21651a62a719331dc4dad77aa57c586dee26f776226f1579434adde07a14b"
+          }
+        },
+        {
+          "suite": "sidebar-ui",
+          "package": "dsh-better-sidebar@0.28.0",
+          "sampleId": "2860e28f-94e2-4b1a-8488-9bcf5b561eff",
+          "collectedAt": "2026-10-19T05:29:59.397Z",
+          "artifactDigest": "72bda5830e8577b246494e75012a77cbc25d192960a2301542b3e302a4044069",
+          "packageFingerprint": {
+            "files": 471,
+            "digest": "2c3b5619b4a8ee9ab87ea179b0163a1230dbbb63e8cdbea3de8b08f9147d6892"
+          },
+          "publishedTarballSha256": "40b7ce32a6d90bff069b3bb4d0e5dd692281e0ac0598163196b816ac12335b6f",
+          "outcomes": [
+            "passed",
+            "failed",
+            "passed",
+            "passed",
+            "failed",
+            "passed"
+          ],
+          "counts": {
+            "baseline": {
+              "scored": 4,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 4
+            },
+            "faultInjected": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 2,
+              "trueNegative": 0
+            }
+          },
+          "cleanup": {
+            "privateRootRemoved": true,
+            "hostStopped": true
+          },
+          "sha256": {
+            "predictions.json": "abfbc82a2368848a853b63009efe53795a817116ced6209538bc7fd6ef5a0dbc",
+            "labels.json": "9c7ebe9914e63a9a88eace8f5e78dcd45bec2731bf87b29497525ac77df00c4d",
+            "measurement.json": "ec6f332195b81089c79d3f8d57c46d841c0302a6fce44dc4cb6ea8fe6a35abd2"
+          }
+        },
+        {
+          "suite": "sidebar-ui-previous",
+          "package": "dsh-better-sidebar@0.26.1",
+          "sampleId": "6baaf99a-6fea-495b-b313-6fe778d51fac",
+          "collectedAt": "2026-10-19T05:30:05.576Z",
+          "artifactDigest": "3835e8e29c08ce24bd65b907fd2f99a31d4b38225b0de2d871b9d4356b91ebae",
+          "packageFingerprint": {
+            "files": 460,
+            "digest": "a262b6ef39c7bed72e6ebb47ac2d1c0f0f82544eb36966bb69494f2d1f059562"
+          },
+          "publishedTarballSha256": "cd2d3d85d3d4a2d54c36b8bf86a24f2ec099f85a2936a72ef83edf7612c7402a",
+          "outcomes": [
+            "failed",
+            "failed"
+          ],
+          "counts": {
+            "baseline": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 2,
+              "trueNegative": 0
+            },
+            "faultInjected": {
+              "scored": 0,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 0
+            }
+          },
+          "cleanup": {
+            "privateRootRemoved": true,
+            "hostStopped": true
+          },
+          "sha256": {
+            "predictions.json": "a6582b5d93c943f7f7bff6155b04bb168e0d9bbdf6a2faac93638b28569f3a5b",
+            "labels.json": "d4f0f749d6b58d7b4881e0d447e9fb56d5b57025edbba847f325589d71604266",
+            "measurement.json": "d08c32f96eca32e096d84400aeaea268325ca5c0949d67cc427e09fbc87c4c8b"
+          }
+        },
+        {
+          "suite": "sidebar-model",
+          "package": "dsh-better-sidebar@0.28.0",
+          "sampleId": "de973a79-11aa-4f63-acd7-6b39cadc2f58",
+          "collectedAt": "2026-10-18T15:35:26.130Z",
+          "artifactDigest": "844b6fac6340bbea2c167476fbd63c6edd845155109f5e2a43ba789d1f9d4020",
+          "packageFingerprint": {
+            "files": 471,
+            "digest": "2c3b5619b4a8ee9ab87ea179b0163a1230dbbb63e8cdbea3de8b08f9147d6892"
+          },
+          "publishedTarballSha256": "40b7ce32a6d90bff069b3bb4d0e5dd692281e0ac0598163196b816ac12335b6f",
+          "outcomes": [
+            "passed",
+            "passed"
+          ],
+          "counts": {
+            "baseline": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 2
+            },
+            "faultInjected": {
+              "scored": 0,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 0
+            }
+          },
+          "cleanup": {
+            "privateRootRemoved": true,
+            "hostStopped": true
+          },
+          "sha256": {
+            "predictions.json": "990202d822bfd8345c9a33b4c45b073609b6916f15c47ef7bfd000b48a3da231",
+            "labels.json": "0cbc0b193e08d3edd269d4243fcb05407c06c75b3119b6a4602b8ea3a7a798b7",
+            "measurement.json": "01d80fed3f94ddb21eeeb3fe932a2cfbcb5f72df3ba17db64b82f346821457ec"
+          }
+        }
+      ],
+      "liveCheckpointHarnessHashes": {
+        "tools/business-live.mjs": "fb2bd47eb1cb5b0cac148cf92e8a33e5756914a39b720811ac710c53771dc320",
+        "tools/browser-session.mjs": "2e111ad13ba0595ae467427a7bef20692d49cb336e6ef3b8705bdcad237fe9a3",
+        "tools/business-market.mjs": "ad793e7d176773b641c57d1ea3f7ec402c91484f18383a9cea8d314dd335713e",
+        "tools/business-sidebar.mjs": "9972eee599dd555d69e32e3f60fd67a96f8db442ab08a80ef30f20753040d7f4",
+        "tools/business-sidebar-ui.mjs": "7eaa9d801fdbf98ceb2b95eb0e701a9e3b156636b201ef36cbb29216140088e1"
+      },
+      "modelCheckpointHarnessHashes": {
+        "tools/business-live.mjs": "ee60e637e0cbbc961150a11d94121a0be8bb2e8d078b73e54148d46134a84c35",
+        "tools/browser-session.mjs": "2e111ad13ba0595ae467427a7bef20692d49cb336e6ef3b8705bdcad237fe9a3",
+        "tools/business-sidebar.mjs": "9972eee599dd555d69e32e3f60fd67a96f8db442ab08a80ef30f20753040d7f4",
+        "tools/business-sidebar-ui.mjs": "73873980046db789556538eba7a87f1be49ba9aeb8e23f642c7ade82232c0ca0",
+        "tools/business-model.mjs": "505093bd43664ac6488555e66a5d35603aa33b14bbcda531b1e1d03e34ae35b8"
+      },
+      "postModelCheckpointChanges": "Only unused import/format cleanup in business-live and editorCases precondition-control fix; model policy/receipt/browser path unchanged. Editor branch covered by added offline negative and final joint runs; model labels retain their actual checkpoint hashes.",
+      "naturalFailure": {
+        "observed": "Published sidebar0.26.1: both encoding cases show completed POST /sidebar/api/fs.trees HTTP405 and visible explorer error; edit action unavailable and owned disk bytes unchanged, no fault injection.",
+        "separateDiagnosis": "Owned-host diagnostic reports better-sidebar pending on webRuntime; older compiled inject/apply uses webRuntime while0.28.0 uses connection. This is not the business oracle or proof of regression-introduction version.",
+        "predictionLimit": "Two feature-risk false negatives preserved. Whole-plugin static report is partial, including degraded/unobserved webRuntime evidence; it was not reported as globally ok. No severity/rule changes to force agreement."
+      },
+      "model": {
+        "authorization": "User allowed small real-model calls using configured account",
+        "route": "deepseek-official/deepseek-flash; reasoning off in owned profile only",
+        "finalCheckpoint": {
+          "matches": true,
+          "requestHeaders": 1,
+          "interruptedAttempts": 0,
+          "usage": {
+            "inputTokens": 909,
+            "outputTokens": 25
+          },
+          "assistantMessages": 2,
+          "budget": {
+            "admitted": 2,
+            "limit": 2,
+            "toolsAllowed": false
+          },
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "off"
+        },
+        "successfulRepliesAcrossDevelopment": 6,
+        "developmentUsageFromLastReceiptOfEachRun": {
+          "inputTokens": 10989,
+          "outputTokens": 73
+        },
+        "accounting": "Per-row usage is cumulative within the child session; do not sum rows. requestHeaders is not provider request count. Earlier calls=1 metadata meant one request/header, not one model call; preserved historical checkpoint unchanged. Usage is provider-reported, not billing certification.",
+        "setupFailures": "Earlier missing model selection/invalid retry-policy configuration produced no accepted response; excluded from business truth. One later bounded live suite produced two valid replies but its test accessed modelEvidence on scored rows instead of raw labels; assertion fixed, final live test passed. No label rewritten to make setup failures pass.",
+        "privacy": "Only selected managed reference copied with0700 owned home/0600 file; no credential values or source profile contents in committed evidence; owned roots removed."
+      },
+      "validation": {
+        "node26.12.0": {
+          "tests": 540,
+          "pass": 540,
+          "fail": 0,
+          "skipped": 0,
+          "tapSha256": "58656e026878f23ed912ef1f8c018cc6e9f74d298144ea08db3abc314373b93a"
+        },
+        "node24.19.0": {
+          "tests": 540,
+          "pass": 540,
+          "fail": 0,
+          "skipped": 0,
+          "tapSha256": "446802976a21bccbc2807bc87a4b04bcce042fbb1d0516658494a8dc4718b854"
+        },
+        "rc2Joint": {
+          "tests": 51,
+          "pass": 51,
+          "fail": 0,
+          "skipped": 0,
+          "tapSha256": "bff416958ce1a38e9b7ca0fc764a6d3f771f232950a02ea0aebdc2de313dce4e"
+        },
+        "legacyJoint": {
+          "tests": 51,
+          "pass": 47,
+          "fail": 0,
+          "skipped": 4,
+          "tapSha256": "62659847e4b56089fd3f711251839b34a5b7d920def3dfa0d0aeb368344d3ad2"
+        },
+        "explicitModel": {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "skipped": 0,
+          "tapSha256": "453e7d87fecd09817882883d3bbf0d4fd77948c1a3b15240d562dea2082d6feb"
+        },
+        "node24CancellationAfterAtomicMarker": {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "tapSha256": "6561342d5718a0586f3fd30b4cdbd041a39d972e194556b4725efe7313bc38cc"
+        },
+        "prepublishGate": {
+          "exitCode": 0,
+          "version": "0.1.3",
+          "sha256": "e5edc01dba5961cab23678de9bbf28353f1ff7fc68d8952588298fe2460934b3",
+          "scope": "Runs complete default suite and document/version checks; no npm publish performed"
+        }
+      },
+      "fixtureRaceRepair": "Final parallel Node26 run failed one cancellation test with Unexpected end of JSON input: the parent observed the fixture marker before write completion. Fixture now publishes via write-to-temp + rename, without changing assertions or production cleanup. The single orphan fake dsh group/home was identity-checked and reclaimed; original failed TAP retained.",
+      "review": "Independent read-only review: no remaining Critical/Important after missing-control, interruption, resource-limit, scoped-value fixes. Added RED/GREEN negative checks for naturally absent/reappearing market controls and unavailable editor save controls.",
+      "metadataCheck": {
+        "observedAt": "2026-10-19T05:28:11.107Z",
+        "exitCode": 0,
+        "errors": 0,
+        "notice": "Published npm0.1.3 README is immutable and differs from locally edited plugin README; expected unpublished-doc notice, no new release requested."
+      },
+      "scope": "Fixed/exploratory cohorts only; no ecosystem accuracy, blinded holdout, complete model quality, new remote Linux/Node22, Windows or public-market0.1.3 upgrade certification. Raw local artifacts remain outside repository; hashes identify exact checkpoints."
+    },
+    "naturalFailureBoundaries20261019": {
+      "recordedAt": "2026-10-19T11:44:07.326697+00:00",
+      "baseCommit": "46a2a8a",
+      "delivery": "Local source only, no new npm release or repository push/merge",
+      "platform": "macOS arm64, DSH0.2.1-rc.2, real Chrome",
+      "newModelCalls": 0,
+      "conclusion": "0.26.1 requires root webRuntime before activation. Static unknown is not absent; explicit same-profile service absence predicts an activation prerequisite obstruction. Feature API absence, activation and completed business outcomes remain distinct.",
+      "changes": [
+        "Unobserved required-inject findings add status/hardInject/catalog evidence and explicitly uncertain activation-prerequisite wording; unchanged degraded/suspected severity.",
+        "--observe-services is opt-in and limited to live editor suites. Root descriptors are sampled independently in the same host/profile before actions, normalized and reconstructed; no loader/business answer fields enter prediction.",
+        "Service-observed and original static predictions have distinct sample/suite/artifact identities and sealed hashes. Saved artifacts and actual CLI replay retain mode/rootOnly/observationSha256; historical files without context remain static.",
+        "Original static FN2 and controlled503 FN2 remain, not relabelled as fixed accuracy."
+      ],
+      "cohorts": [
+        {
+          "suiteId": "dsh-better-sidebar-0.26.1-editor-actions-v1",
+          "sampleId": "89ea0c63-4719-475b-b4de-d64c10497200",
+          "artifactDigest": "2c2fbc3d38d0c13bb94e9d482bb791cb432325bf30bf7508e2979caed72ba6da",
+          "dshVersion": "0.2.1-rc.2",
+          "toolVersion": "0.1.3",
+          "metrics": {
+            "baseline": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 2,
+              "trueNegative": 0,
+              "precision": null,
+              "recall": 0
+            },
+            "faultInjected": {
+              "scored": 0,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 0,
+              "precision": null,
+              "recall": null
+            }
+          },
+          "prediction": {
+            "mode": "feature-scoped-static-api-risk",
+            "businessLabelsUsed": false,
+            "loaderLabelsUsed": false,
+            "autoProbeDiscovery": false,
+            "sealedBeforeActions": true,
+            "sha256": "410d4c526ef3c37a8e38b3190830ab3480febd3c519cbd00083ead36c729da0a"
+          },
+          "cleanup": {
+            "privateRootRemoved": true,
+            "hostStopped": true
+          },
+          "publishedPackage": "dsh-better-sidebar",
+          "packageFingerprint": {
+            "files": 460,
+            "digest": "a262b6ef39c7bed72e6ebb47ac2d1c0f0f82544eb36966bb69494f2d1f059562"
+          },
+          "sourceArtifact": {
+            "package": "dsh-better-sidebar",
+            "version": "0.26.1",
+            "sourceHashes": {
+              "package.json": "6fe80e07a120792ad7e93951bd527cb4aecce9c66a397f1d83afb0d42ad38328",
+              "lib/index.js": "8e019c68308d6dcb8eb209d01ccdd03f9118114c3c375d5a8dfd0405031c504a",
+              "lib/client.js": "2b817830a027dafd8ce35e8b98d5ee96e45e7860d69aafed538ac7c0ae6396bc",
+              "lib/client-editor.js": "24b9e78d5c945413a74c9cbcb8dd58f308002533dd8a4ef913c833522e5666c6",
+              "src/index.ts": "11ade7d11580827f951b7c1d5b870b58678f465dc8f6ed2c781d70be0021a6e5",
+              "src/client/TextEditor.tsx": "772e726a3e4cd16b8412f7f3cea4737e9a069f7841a06ac9e33e202f91144703",
+              "src/client/EditorHost.tsx": "c39692e5fd9558cd14cc00786da8c0891112f0c36942520e456c53e6caa1cc8a",
+              "src/fs-operations.ts": "1a0d84d4872f0fa42170dc1797bb3bd4d3a66b2186c94847b6e4ce2608de5511"
+            },
+            "packageFingerprint": {
+              "files": 460,
+              "digest": "a262b6ef39c7bed72e6ebb47ac2d1c0f0f82544eb36966bb69494f2d1f059562"
+            },
+            "publishedTarballSha256": "cd2d3d85d3d4a2d54c36b8bf86a24f2ec099f85a2936a72ef83edf7612c7402a",
+            "harnessSources": {
+              "tools/business-live.mjs": "f7127b27563aef1551c680828882854cfd997c6ba4553aa540cf9a5c069df232",
+              "tools/browser-session.mjs": "2e111ad13ba0595ae467427a7bef20692d49cb336e6ef3b8705bdcad237fe9a3",
+              "tools/business-sidebar.mjs": "9972eee599dd555d69e32e3f60fd67a96f8db442ab08a80ef30f20753040d7f4",
+              "tools/business-sidebar-ui.mjs": "7eaa9d801fdbf98ceb2b95eb0e701a9e3b156636b201ef36cbb29216140088e1",
+              "tools/business-observation.mjs": "34e8e8b6347e42fc363fabd923fbe5c7b83a38b93d7b6f15f1428465327eefbf"
+            },
+            "serviceObserverSourceHash": "e0bd99f0bb42f76dbd4f48acced71823d1d6fde0060caf859891d534b39bf55e",
+            "predictorSources": {
+              "lib/baseline.mjs": "0b0d6c5af52726dca7f256c14797253894319a253b2803e1012ffd52d3238e5c",
+              "lib/catalog.mjs": "cc6907448b094f287407b1716dadeacbb1eceddb6f53788c96b072778860ee25",
+              "lib/contracts.mjs": "824a618a76378143edebba82c2bcb50d0ba77d6c87739d6754619610afed5a53",
+              "lib/debugger.mjs": "898f5aae87b90e2f8f4d7a5841244e0ef420997a737dd543cc99dbca541d0245",
+              "lib/declarations.mjs": "f1dd328c58f74e1746caa0bfbf7abee6128a395ebf28a9d16cd290ec0ffbcd94",
+              "lib/extract-worker.mjs": "e4f5483000904b8f2fd3433a0855e8937f8f7c45c1ae597a529634137b9f8832",
+              "lib/extract.mjs": "f768f4c45113fafbd36f71c45321fbe5e281442d2164e8c464b32af58f176dba",
+              "lib/flow-values.mjs": "35ff6ed575a1f13ff1a69db06ccdfee05a07b3f7fc4051cc2b3ac244a530c7e4",
+              "lib/observation.mjs": "5af424f184c8fd580f89ca3092c42df4287e5237329c8552a3466153c8fb939d",
+              "lib/probe-runner.mjs": "7b9979e892cd4d1df16b9d6580471fe17f6a142903c45607df1661c0f02e4a0d",
+              "lib/profile-compatibility.mjs": "64fb77af68dc56f609660de24039acb825d920c279e9b998ebf383825a665ebb",
+              "lib/report-service.mjs": "7571588e43ec74ddd19e24eba9cf586fdcc4c5fe5be0ee71b22fa391fbb80adf",
+              "lib/report.mjs": "dba8f174bb5fd4aba4918ade021ced020ee56ff94a5967070a821ff80b84ea7a",
+              "lib/source-analysis.mjs": "7d9ce10c59f582be953620543a30eb55578c2f2816012df9f8b49b8e68abd947",
+              "lib/source-graph.mjs": "29687a5475c695761834fc681f0ee7e9951880330a016bc61a910126d8198a0a",
+              "lib/state-store.mjs": "edcdcb3d7953023ae3fc703baca61dd2a1ac27d8b5acc943220977d39168f2c8",
+              "lib/syntax.mjs": "0371c1dce726ee2977c387e323a054c1798b5f2d5b24a563b5d29097d603daa4",
+              "lib/verdict.mjs": "c5f7bda10af66df675aec8fb7e328520e02641ba861a4764fb8cb33862fceba1",
+              "lib/version.mjs": "3f2fa209e3462081dc9b0afd95e973f444000ee37ce4aa4cf0523803e0631dc6",
+              "lib/worker-analysis.mjs": "8b18f5c5101602fd2f231b00cd6cbc68ad9a56b18d8b9ade4084214a5ce1b594",
+              "bin/compat-check.mjs": "06df41526a7f812a8b50770db537f74abcec079f8075ee7af4a2586789568ba9",
+              "tools/business-metrics.mjs": "d25a1f1853393097f2f41d4f0b4d686e6d45edb2fa93024ed27d67abaddd2d7f"
+            },
+            "rulesHash": "8aa022ce423c25337b0c670c2b2a4c52d4af624cccee35d3da8c7532ef041593",
+            "catalogueHash": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+            "fixtureSourceHash": "bf59cfc9131ec2bb95dc893e797b4da556d9b566c75f082ec6832cfaf47d5ad7",
+            "publishedIntegrity": "sha512-0/BXLEAqFJnd3SI/aryQVFHayrjE+RHcFgWIy57GrCYUeppEFTujfQOkO4U9V4QRd3qTVHFE7DZzNzUyU+kscw=="
+          },
+          "serviceObserved": {
+            "sampleId": "89ea0c63-4719-475b-b4de-d64c10497200-services",
+            "suiteId": "dsh-better-sidebar-0.26.1-editor-actions-v1-service-observed-v1",
+            "artifactDigest": "3992fea25a77cc6a1cf00e4e77b3d37c2b64aab583f17f50e94f4c590cb4c5aa",
+            "metrics": {
+              "baseline": {
+                "scored": 2,
+                "unscored": 0,
+                "truePositive": 2,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 0,
+                "precision": 1,
+                "recall": 1
+              },
+              "faultInjected": {
+                "scored": 0,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 0,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "prediction": {
+              "mode": "feature-scoped-service-observed-api-risk",
+              "loaderLabelsUsed": false,
+              "businessLabelsUsed": false,
+              "sealedBeforeActions": true,
+              "rootOnly": true,
+              "observationSha256": "67449fc4188d69de2ca5b941c4222dadd58b34adf0f3f925ddbec501a2853f6d",
+              "sha256": "1457bb03a122b6d34aeedca9819d13bf1031d0b88fbcfd97fe53809e001dc25b"
+            },
+            "artifacts": {
+              "staticArtifactDigest": "2c2fbc3d38d0c13bb94e9d482bb791cb432325bf30bf7508e2979caed72ba6da",
+              "rootServiceInputSha256": "67449fc4188d69de2ca5b941c4222dadd58b34adf0f3f925ddbec501a2853f6d"
+            }
+          },
+          "sha256": {
+            "labels.json": "e4e8043d61e60ff0cc5427b3f27001d94812408807ea8715cf166054214b7b40",
+            "measurement.json": "a099bd37dc4101339b376fded0e0509845d6c290215a46344e2e87c33fd04620",
+            "service-observation.json": "0977cf1d98a56b7ecac48fd6442df23e2c872c22e72363c6a81709a098b524ce",
+            "service-predictions.json": "5338b8630d7a2e709e16a496fe5af5ee69273dfd75a9a12b66d8c351477ccc90",
+            "predictions.json": "a99f38cc2afd4f3da81125d9945eaf70f1adff80f44a8e1f0f310f067fcadd25",
+            "service-labels.json": "6703b8b1c1930eac1983cbaa70e5d91166acf09e8a1640d4edfed9b6163cb613"
+          },
+          "outcomes": [
+            "failed",
+            "failed"
+          ],
+          "collectedAt": "2026-10-19T05:55:54.585Z",
+          "rootServiceStatuses": {
+            "agentDefaultModel": "present",
+            "agentPresets": "present",
+            "agentTeams": "absent",
+            "agents": "present",
+            "betterLocale": "absent",
+            "betterSidebar": "absent",
+            "connection": "present",
+            "conversation": "absent",
+            "jobs": "present",
+            "llm": "present",
+            "loader": "present",
+            "locale": "absent",
+            "logger": "absent",
+            "modules": "absent",
+            "profileContext": "present",
+            "remote": "absent",
+            "remote.session": "absent",
+            "sessionController": "present",
+            "sessionPersistence": "present",
+            "sessionTitle": "present",
+            "sessions": "present",
+            "settings": "present",
+            "sidebarRight": "absent",
+            "sidebarRightTabs": "absent",
+            "slots": "absent",
+            "subagents": "present",
+            "tools": "present",
+            "webRuntime": "absent",
+            "webServer": "present",
+            "webTerminals": "absent",
+            "workspaces": "absent"
+          }
+        },
+        {
+          "suiteId": "dsh-better-sidebar-0.28.0-editor-actions-v1",
+          "sampleId": "73b5d83e-21da-42c6-9010-3d4496eca013",
+          "artifactDigest": "0cd18fabc620efe471a00897f75b745a2bb5449d35a36ad22ddaea6420831a9a",
+          "dshVersion": "0.2.1-rc.2",
+          "toolVersion": "0.1.3",
+          "metrics": {
+            "baseline": {
+              "scored": 4,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 4,
+              "precision": null,
+              "recall": null
+            },
+            "faultInjected": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 2,
+              "trueNegative": 0,
+              "precision": null,
+              "recall": 0
+            }
+          },
+          "prediction": {
+            "mode": "feature-scoped-static-api-risk",
+            "businessLabelsUsed": false,
+            "loaderLabelsUsed": false,
+            "autoProbeDiscovery": false,
+            "sealedBeforeActions": true,
+            "sha256": "ba96e17cd49064b3589626f7d98db16c705004295347155fbbc4ac1c023e9515"
+          },
+          "cleanup": {
+            "privateRootRemoved": true,
+            "hostStopped": true
+          },
+          "publishedPackage": "dsh-better-sidebar",
+          "packageFingerprint": {
+            "files": 471,
+            "digest": "2c3b5619b4a8ee9ab87ea179b0163a1230dbbb63e8cdbea3de8b08f9147d6892"
+          },
+          "sourceArtifact": {
+            "package": "dsh-better-sidebar",
+            "version": "0.28.0",
+            "sourceHashes": {
+              "package.json": "e557306a7af1f8ea020caffae62c36df4591ced90cf4626db464df5dce8fcc36",
+              "lib/index.js": "00080091516184efe0005d8521cb890ae89032b9abcd514b752c4ef7642fa129",
+              "src/index.ts": "7658d35cb8a0d9c8c9ea816413817c338b56a18fe6f21d62f55ec3e849682f42",
+              "src/fs-operations.ts": "1a0d84d4872f0fa42170dc1797bb3bd4d3a66b2186c94847b6e4ce2608de5511",
+              "src/html-route.ts": "73974a8649ac8332258dae896f0129da2b16541ad9ea1ab5cb1c40576ec6885e",
+              "lib/client.js": "53b70b1b5317205247c074b8121e1ececec1df2dc3771b0641f0a66b8fd127e1",
+              "lib/client-editor.js": "e899df938ceb8ea29ff2319e15a89e76155775ba07c8cf65a970a1c8596b69fd",
+              "src/client/TextEditor.tsx": "772e726a3e4cd16b8412f7f3cea4737e9a069f7841a06ac9e33e202f91144703",
+              "src/client/EditorHost.tsx": "c39692e5fd9558cd14cc00786da8c0891112f0c36942520e456c53e6caa1cc8a"
+            },
+            "packageFingerprint": {
+              "files": 471,
+              "digest": "2c3b5619b4a8ee9ab87ea179b0163a1230dbbb63e8cdbea3de8b08f9147d6892"
+            },
+            "publishedTarballSha256": "40b7ce32a6d90bff069b3bb4d0e5dd692281e0ac0598163196b816ac12335b6f",
+            "harnessSources": {
+              "tools/business-live.mjs": "f7127b27563aef1551c680828882854cfd997c6ba4553aa540cf9a5c069df232",
+              "tools/browser-session.mjs": "2e111ad13ba0595ae467427a7bef20692d49cb336e6ef3b8705bdcad237fe9a3",
+              "tools/business-sidebar.mjs": "9972eee599dd555d69e32e3f60fd67a96f8db442ab08a80ef30f20753040d7f4",
+              "tools/business-sidebar-ui.mjs": "7eaa9d801fdbf98ceb2b95eb0e701a9e3b156636b201ef36cbb29216140088e1",
+              "tools/business-observation.mjs": "34e8e8b6347e42fc363fabd923fbe5c7b83a38b93d7b6f15f1428465327eefbf"
+            },
+            "serviceObserverSourceHash": "edfc895c50efd100c0d8c310ee721ca71be9725bda1fa166abaf25d599eca26f",
+            "predictorSources": {
+              "lib/baseline.mjs": "0b0d6c5af52726dca7f256c14797253894319a253b2803e1012ffd52d3238e5c",
+              "lib/catalog.mjs": "cc6907448b094f287407b1716dadeacbb1eceddb6f53788c96b072778860ee25",
+              "lib/contracts.mjs": "824a618a76378143edebba82c2bcb50d0ba77d6c87739d6754619610afed5a53",
+              "lib/debugger.mjs": "898f5aae87b90e2f8f4d7a5841244e0ef420997a737dd543cc99dbca541d0245",
+              "lib/declarations.mjs": "f1dd328c58f74e1746caa0bfbf7abee6128a395ebf28a9d16cd290ec0ffbcd94",
+              "lib/extract-worker.mjs": "e4f5483000904b8f2fd3433a0855e8937f8f7c45c1ae597a529634137b9f8832",
+              "lib/extract.mjs": "f768f4c45113fafbd36f71c45321fbe5e281442d2164e8c464b32af58f176dba",
+              "lib/flow-values.mjs": "35ff6ed575a1f13ff1a69db06ccdfee05a07b3f7fc4051cc2b3ac244a530c7e4",
+              "lib/observation.mjs": "5af424f184c8fd580f89ca3092c42df4287e5237329c8552a3466153c8fb939d",
+              "lib/probe-runner.mjs": "7b9979e892cd4d1df16b9d6580471fe17f6a142903c45607df1661c0f02e4a0d",
+              "lib/profile-compatibility.mjs": "64fb77af68dc56f609660de24039acb825d920c279e9b998ebf383825a665ebb",
+              "lib/report-service.mjs": "7571588e43ec74ddd19e24eba9cf586fdcc4c5fe5be0ee71b22fa391fbb80adf",
+              "lib/report.mjs": "dba8f174bb5fd4aba4918ade021ced020ee56ff94a5967070a821ff80b84ea7a",
+              "lib/source-analysis.mjs": "7d9ce10c59f582be953620543a30eb55578c2f2816012df9f8b49b8e68abd947",
+              "lib/source-graph.mjs": "29687a5475c695761834fc681f0ee7e9951880330a016bc61a910126d8198a0a",
+              "lib/state-store.mjs": "edcdcb3d7953023ae3fc703baca61dd2a1ac27d8b5acc943220977d39168f2c8",
+              "lib/syntax.mjs": "0371c1dce726ee2977c387e323a054c1798b5f2d5b24a563b5d29097d603daa4",
+              "lib/verdict.mjs": "c5f7bda10af66df675aec8fb7e328520e02641ba861a4764fb8cb33862fceba1",
+              "lib/version.mjs": "3f2fa209e3462081dc9b0afd95e973f444000ee37ce4aa4cf0523803e0631dc6",
+              "lib/worker-analysis.mjs": "8b18f5c5101602fd2f231b00cd6cbc68ad9a56b18d8b9ade4084214a5ce1b594",
+              "bin/compat-check.mjs": "06df41526a7f812a8b50770db537f74abcec079f8075ee7af4a2586789568ba9",
+              "tools/business-metrics.mjs": "d25a1f1853393097f2f41d4f0b4d686e6d45edb2fa93024ed27d67abaddd2d7f"
+            },
+            "rulesHash": "8aa022ce423c25337b0c670c2b2a4c52d4af624cccee35d3da8c7532ef041593",
+            "catalogueHash": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+            "fixtureSourceHash": "76beaa5a1bb11a313e0e0da8722dabf725dfcda434ff8ccf885fd45d480b0639",
+            "publishedIntegrity": "sha512-x7+/YmH/HrSlXWOBZkhL7qQqcDgZEnDcWrhR5GlizzUZjz+w84FbQ6jo8trJC9tyaQxMaNvXVnXwDxn4I330Ew=="
+          },
+          "serviceObserved": {
+            "sampleId": "73b5d83e-21da-42c6-9010-3d4496eca013-services",
+            "suiteId": "dsh-better-sidebar-0.28.0-editor-actions-v1-service-observed-v1",
+            "artifactDigest": "1d350938e3706034eaad46a4f3f53f53fbb55f58b8170662d28eb793f9a16f49",
+            "metrics": {
+              "baseline": {
+                "scored": 4,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 4,
+                "precision": null,
+                "recall": null
+              },
+              "faultInjected": {
+                "scored": 2,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 2,
+                "trueNegative": 0,
+                "precision": null,
+                "recall": 0
+              }
+            },
+            "prediction": {
+              "mode": "feature-scoped-service-observed-api-risk",
+              "loaderLabelsUsed": false,
+              "businessLabelsUsed": false,
+              "sealedBeforeActions": true,
+              "rootOnly": true,
+              "observationSha256": "41804a01dfb7573d4d44e1967e4fbf3252ab2fde1ed25f5fceaa5763d330529f",
+              "sha256": "f581760f9fa73d98258f509e583fdea604b6e4b2b711e808634242b7ebcae19f"
+            },
+            "artifacts": {
+              "staticArtifactDigest": "0cd18fabc620efe471a00897f75b745a2bb5449d35a36ad22ddaea6420831a9a",
+              "rootServiceInputSha256": "41804a01dfb7573d4d44e1967e4fbf3252ab2fde1ed25f5fceaa5763d330529f"
+            }
+          },
+          "sha256": {
+            "labels.json": "677acb7f17574fa791b932b2420c091625fe7a635468383ad43a481ece805b35",
+            "measurement.json": "ea1c5f77fa24b5111e819858dd5a7aa945f6904bcffc470ef97135f253357b6a",
+            "service-observation.json": "ac35d18a78926be2fdaab5e25b2891db64e3458aab50942a036dc80ec6c6241d",
+            "service-predictions.json": "9cc3f2b41b39ce72264719653d6accc27ba884ab1f66e02a82286cbad2782812",
+            "predictions.json": "dfbd82747ed1a27433f8b883719fffcb70110a79313d6e490b86d891f16cfa8a",
+            "service-labels.json": "75cd2ef9c40457c3c6712b8b88f43e1759602ed2d39dfc562878067eebb9c48c"
+          },
+          "outcomes": [
+            "passed",
+            "failed",
+            "passed",
+            "passed",
+            "failed",
+            "passed"
+          ],
+          "collectedAt": "2026-10-19T05:55:46.181Z",
+          "rootServiceStatuses": {
+            "agentDefaultModel": "present",
+            "agentPresets": "present",
+            "agentTeams": "absent",
+            "agents": "present",
+            "betterLocale": "absent",
+            "betterSidebar": "absent",
+            "connection": "present",
+            "conversation": "absent",
+            "jobs": "present",
+            "layout": "absent",
+            "llm": "present",
+            "loader": "present",
+            "locale": "absent",
+            "logger": "absent",
+            "modules": "absent",
+            "profileContext": "present",
+            "remote": "absent",
+            "remote.session": "absent",
+            "sessionController": "present",
+            "sessionPersistence": "present",
+            "sessionQuery": "present",
+            "sessionTitle": "present",
+            "sessions": "present",
+            "settings": "present",
+            "sidebarRight": "absent",
+            "sidebarRightTabs": "absent",
+            "slots": "absent",
+            "subagents": "present",
+            "tools": "present",
+            "uiWorkspace": "absent",
+            "webServer": "present",
+            "webTerminals": "absent",
+            "workingDirectory": "present",
+            "workspaces": "absent"
+          }
+        }
+      ],
+      "causalProviderControl": {
+        "package": "dsh-better-sidebar@0.26.1",
+        "targetPackageUnmodified": true,
+        "fixtureOnly": "Owned diagnostic host provides webRuntime.trustedHosts=[]; not a product workaround or new natural sample",
+        "observedOutcome": "Both actual editor actions and durable encoding/byte checks restored",
+        "cohort": {
+          "suiteId": "dsh-better-sidebar-0.26.1-editor-actions-v1",
+          "sampleId": "15680967-05df-4253-9831-72b45e23d812",
+          "artifactDigest": "705164db79893bcbad475736da4d1b7d2a6bfac1cfa1f7b749ea449d4ac12971",
+          "dshVersion": "0.2.1-rc.2",
+          "toolVersion": "0.1.3",
+          "metrics": {
+            "baseline": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 2,
+              "precision": null,
+              "recall": null
+            },
+            "faultInjected": {
+              "scored": 0,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 0,
+              "precision": null,
+              "recall": null
+            }
+          },
+          "prediction": {
+            "mode": "feature-scoped-static-api-risk",
+            "businessLabelsUsed": false,
+            "loaderLabelsUsed": false,
+            "autoProbeDiscovery": false,
+            "sealedBeforeActions": true,
+            "sha256": "4c94207c5a1100dbbbea7e1abb98c7a1fbd6002e6a094749d71dc10f4776fddd"
+          },
+          "cleanup": {
+            "privateRootRemoved": true,
+            "hostStopped": true
+          },
+          "publishedPackage": "dsh-better-sidebar",
+          "packageFingerprint": {
+            "files": 460,
+            "digest": "a262b6ef39c7bed72e6ebb47ac2d1c0f0f82544eb36966bb69494f2d1f059562"
+          },
+          "sourceArtifact": {
+            "package": "dsh-better-sidebar",
+            "version": "0.26.1",
+            "sourceHashes": {
+              "package.json": "6fe80e07a120792ad7e93951bd527cb4aecce9c66a397f1d83afb0d42ad38328",
+              "lib/index.js": "8e019c68308d6dcb8eb209d01ccdd03f9118114c3c375d5a8dfd0405031c504a",
+              "lib/client.js": "2b817830a027dafd8ce35e8b98d5ee96e45e7860d69aafed538ac7c0ae6396bc",
+              "lib/client-editor.js": "24b9e78d5c945413a74c9cbcb8dd58f308002533dd8a4ef913c833522e5666c6",
+              "src/index.ts": "11ade7d11580827f951b7c1d5b870b58678f465dc8f6ed2c781d70be0021a6e5",
+              "src/client/TextEditor.tsx": "772e726a3e4cd16b8412f7f3cea4737e9a069f7841a06ac9e33e202f91144703",
+              "src/client/EditorHost.tsx": "c39692e5fd9558cd14cc00786da8c0891112f0c36942520e456c53e6caa1cc8a",
+              "src/fs-operations.ts": "1a0d84d4872f0fa42170dc1797bb3bd4d3a66b2186c94847b6e4ce2608de5511"
+            },
+            "packageFingerprint": {
+              "files": 460,
+              "digest": "a262b6ef39c7bed72e6ebb47ac2d1c0f0f82544eb36966bb69494f2d1f059562"
+            },
+            "publishedTarballSha256": "cd2d3d85d3d4a2d54c36b8bf86a24f2ec099f85a2936a72ef83edf7612c7402a",
+            "harnessSources": {
+              "tools/business-live.mjs": "df8d4a04ef19251bca37ac9d784c8d23ba4072720ae399502bba0af67c37c305",
+              "tools/browser-session.mjs": "2e111ad13ba0595ae467427a7bef20692d49cb336e6ef3b8705bdcad237fe9a3",
+              "tools/business-sidebar.mjs": "9972eee599dd555d69e32e3f60fd67a96f8db442ab08a80ef30f20753040d7f4",
+              "tools/business-sidebar-ui.mjs": "7eaa9d801fdbf98ceb2b95eb0e701a9e3b156636b201ef36cbb29216140088e1",
+              "tools/business-observation.mjs": "17bcd523898813f5e55d3e5716d97da3b125b12fc0489294b514e82827f77843"
+            },
+            "serviceObserverSourceHash": "356c2affd8f48de99db71088adada6075b3472b9af79324c6b2d9e40eed558bc",
+            "predictorSources": {
+              "lib/baseline.mjs": "0b0d6c5af52726dca7f256c14797253894319a253b2803e1012ffd52d3238e5c",
+              "lib/catalog.mjs": "cc6907448b094f287407b1716dadeacbb1eceddb6f53788c96b072778860ee25",
+              "lib/contracts.mjs": "824a618a76378143edebba82c2bcb50d0ba77d6c87739d6754619610afed5a53",
+              "lib/debugger.mjs": "898f5aae87b90e2f8f4d7a5841244e0ef420997a737dd543cc99dbca541d0245",
+              "lib/declarations.mjs": "f1dd328c58f74e1746caa0bfbf7abee6128a395ebf28a9d16cd290ec0ffbcd94",
+              "lib/extract-worker.mjs": "e4f5483000904b8f2fd3433a0855e8937f8f7c45c1ae597a529634137b9f8832",
+              "lib/extract.mjs": "f768f4c45113fafbd36f71c45321fbe5e281442d2164e8c464b32af58f176dba",
+              "lib/flow-values.mjs": "35ff6ed575a1f13ff1a69db06ccdfee05a07b3f7fc4051cc2b3ac244a530c7e4",
+              "lib/observation.mjs": "5af424f184c8fd580f89ca3092c42df4287e5237329c8552a3466153c8fb939d",
+              "lib/probe-runner.mjs": "7b9979e892cd4d1df16b9d6580471fe17f6a142903c45607df1661c0f02e4a0d",
+              "lib/profile-compatibility.mjs": "64fb77af68dc56f609660de24039acb825d920c279e9b998ebf383825a665ebb",
+              "lib/report-service.mjs": "7571588e43ec74ddd19e24eba9cf586fdcc4c5fe5be0ee71b22fa391fbb80adf",
+              "lib/report.mjs": "dba8f174bb5fd4aba4918ade021ced020ee56ff94a5967070a821ff80b84ea7a",
+              "lib/source-analysis.mjs": "7d9ce10c59f582be953620543a30eb55578c2f2816012df9f8b49b8e68abd947",
+              "lib/source-graph.mjs": "29687a5475c695761834fc681f0ee7e9951880330a016bc61a910126d8198a0a",
+              "lib/state-store.mjs": "edcdcb3d7953023ae3fc703baca61dd2a1ac27d8b5acc943220977d39168f2c8",
+              "lib/syntax.mjs": "0371c1dce726ee2977c387e323a054c1798b5f2d5b24a563b5d29097d603daa4",
+              "lib/verdict.mjs": "c5f7bda10af66df675aec8fb7e328520e02641ba861a4764fb8cb33862fceba1",
+              "lib/version.mjs": "3f2fa209e3462081dc9b0afd95e973f444000ee37ce4aa4cf0523803e0631dc6",
+              "lib/worker-analysis.mjs": "8b18f5c5101602fd2f231b00cd6cbc68ad9a56b18d8b9ade4084214a5ce1b594",
+              "bin/compat-check.mjs": "06df41526a7f812a8b50770db537f74abcec079f8075ee7af4a2586789568ba9",
+              "tools/business-metrics.mjs": "d1a565722c9a180d42271cfe314a4ab4310c1e5a041bd130a66eeacebd2e66b9"
+            },
+            "rulesHash": "8aa022ce423c25337b0c670c2b2a4c52d4af624cccee35d3da8c7532ef041593",
+            "catalogueHash": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+            "fixtureSourceHash": "b15ce759dbb2ea36a18ec21ed131f1a16fb7118a368d782f678bad094a591916",
+            "publishedIntegrity": "sha512-0/BXLEAqFJnd3SI/aryQVFHayrjE+RHcFgWIy57GrCYUeppEFTujfQOkO4U9V4QRd3qTVHFE7DZzNzUyU+kscw=="
+          },
+          "serviceObserved": {
+            "sampleId": "15680967-05df-4253-9831-72b45e23d812-services",
+            "suiteId": "dsh-better-sidebar-0.26.1-editor-actions-v1-service-observed-v1",
+            "artifactDigest": "de9249c4e1f7b95c635c84623d02737846169eae476dce61806e716f6ee7418f",
+            "metrics": {
+              "baseline": {
+                "scored": 2,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 2,
+                "precision": null,
+                "recall": null
+              },
+              "faultInjected": {
+                "scored": 0,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 0,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "prediction": {
+              "mode": "feature-scoped-service-observed-api-risk",
+              "loaderLabelsUsed": false,
+              "businessLabelsUsed": false,
+              "sealedBeforeActions": true,
+              "rootOnly": true,
+              "sha256": "ed0b5690aa3df8ba70904f4d958545ad69b098c990aee354fba1cdd58fbc7a58"
+            },
+            "artifacts": {
+              "staticArtifactDigest": "705164db79893bcbad475736da4d1b7d2a6bfac1cfa1f7b749ea449d4ac12971",
+              "rootServiceInputSha256": "665db8527ca473071f55b15b21f8f77566e7b3cecaf16bb94093140490a302eb"
+            }
+          },
+          "sha256": {
+            "labels.json": "53139afd5cff275cd0a667e0efee20449f425b62f4fb4b8a1d24343611ef965e",
+            "measurement.json": "0c7822c8f44c19c157626d00b349fd7a02fc3cffc2d6f67de30ba30ae16de243",
+            "service-observation.json": "479713bc132db12f92c097985f5b55e593aaffda83886dc97cfdcee6e21a07c2",
+            "service-predictions.json": "68def3fcf6475121794b60fba4b3c9f41c722337cb67dd56c5f80c4079307c08",
+            "predictions.json": "e7bead3631af74e0b00ea4b121619f45c26e5db2cfaf5ed50d8ec6cb7a099f77",
+            "service-labels.json": "494fcaa7c76bf586c5fc96eb6cdfd6ef54f98dc8073aa2d7facf8a770dbdea96"
+          },
+          "outcomes": [
+            "passed",
+            "passed"
+          ],
+          "collectedAt": "2026-10-19T05:49:10.778Z",
+          "rootServiceStatuses": {
+            "agentDefaultModel": "present",
+            "agentPresets": "present",
+            "agentTeams": "absent",
+            "agents": "present",
+            "betterLocale": "absent",
+            "betterSidebar": "absent",
+            "connection": "present",
+            "conversation": "absent",
+            "jobs": "present",
+            "llm": "present",
+            "loader": "present",
+            "locale": "absent",
+            "logger": "absent",
+            "modules": "absent",
+            "profileContext": "present",
+            "remote": "absent",
+            "remote.session": "absent",
+            "sessionController": "present",
+            "sessionPersistence": "present",
+            "sessionTitle": "present",
+            "sessions": "present",
+            "settings": "present",
+            "sidebarRight": "absent",
+            "sidebarRightTabs": "absent",
+            "slots": "absent",
+            "subagents": "present",
+            "tools": "present",
+            "webRuntime": "present",
+            "webServer": "present",
+            "webTerminals": "absent",
+            "workspaces": "absent"
+          }
+        }
+      },
+      "verification": {
+        "default26": {
+          "tests": 550,
+          "passed": 550
+        },
+        "default24": {
+          "tests": 550,
+          "passed": 550
+        },
+        "newDshJoint": {
+          "tests": 52,
+          "passed": 52
+        },
+        "legacyDshJoint": {
+          "tests": 52,
+          "passed": 48,
+          "skippedRc2Specific": 4
+        },
+        "exactLocalTarballOriginLive": {
+          "tests": 1,
+          "passed": 1
+        },
+        "independentReview": {
+          "importantFindings": 2,
+          "fixedImportantFindings": 2,
+          "fixedMinorDigestTypeValidation": true,
+          "offlineTests": 45,
+          "actualCliReplayChecked": true,
+          "remainingImportantFindingsAtLastReview": 0
+        },
+        "finalSkillBodyCharacters": 7949,
+        "prepublishCheck": true,
+        "finalDefaultTapSha256": {
+          "default26-delivery.tap": "2423e01a2878a0c67e259ec3ca0e87f629ad8721fa86167dc102483297b8f97d",
+          "default24-delivery.tap": "debaf77bf81f107d9cf6c15d6fa85e8f4ab6340f8d896400b8bea23453695ff7"
+        }
+      },
+      "nonPassingEvidence": [
+        {
+          "run": "default-first",
+          "result": "549/550; doc testFiles37 vs38 only, metadata updated without weakening assertions"
+        },
+        {
+          "run": "initial sandbox joint runs",
+          "result": "Loopback bind/registry blocked; superseded by explicit allowed real-host runs, not counted as product regression fixes"
+        },
+        {
+          "run": "first permitted rc2 joint",
+          "result": "One probe kill EPERM; remaining51 tests passed. Isolated probe2/2 and whole joint52/52 later passed; root cause unconfirmed, first failure retained."
+        },
+        {
+          "run": "default post-skill documentation update",
+          "result": "549/550: stale skill README body length7787 vs7949, corrected documentation only; no weakened assertions"
+        }
+      ],
+      "scope": "Pinned explanatory cohorts, not blind ecosystem accuracy. No new Windows/Linux CI/model certification. A late same-host observation may differ with another profile or service provider; unknown/unreadable does not mean absent."
+    },
+    "distributionCloseout20261019": {
+      "recordedAt": "2026-10-19T11:44:07.330005+00:00",
+      "upstreamCheckedAt": "2026-10-19T11:40:43.640414+00:00",
+      "publicNpmVersion": "0.1.3",
+      "repositoryPatchPublished": false,
+      "scope": "Real dshmarket1.66.37 on rc.2/web, public primary catalog, local private profiles and Chrome; no alternate GitHub-subdirectory fallback or full business certification.",
+      "publicMarketAcceptance": {
+        "verifiedAt": "2026-10-19T11:40:22.188289+00:00",
+        "publicTarballSha256": "7b4ae580beb80b91f71c23d7534b5014b30039029e0a150a58a6f73e5f98d038",
+        "profiles": {
+          "market-upgrade": {
+            "initialVersion": "0.1.2",
+            "installedVersion": "0.1.3",
+            "dependency": "0.1.3",
+            "region": "china",
+            "matchingPublishedFiles": 37,
+            "fileManifestSha256": "1f0bca1d7e2e6a7eec1e62ee3cd95161b51b8b62de2e079ed7a2a50f041c485c",
+            "kernelPresent": true,
+            "postRestartVersion": "0.1.3"
+          },
+          "market-fresh-cn": {
+            "initialVersion": null,
+            "installedVersion": "0.1.3",
+            "dependency": "0.1.3",
+            "region": "china",
+            "matchingPublishedFiles": 37,
+            "fileManifestSha256": "1f0bca1d7e2e6a7eec1e62ee3cd95161b51b8b62de2e079ed7a2a50f041c485c",
+            "kernelPresent": true
+          }
+        }
+      },
+      "authenticatedRuntimeReports": {
+        "market-upgrade": {
+          "httpStatus": 200,
+          "toolVersion": "0.1.3",
+          "ok": true,
+          "kind": "plugin-compat-check/report",
+          "reportKind": "plugin-compat-check/result"
+        },
+        "market-fresh-cn": {
+          "httpStatus": 200,
+          "toolVersion": "0.1.3",
+          "ok": true,
+          "kind": "plugin-compat-check/report",
+          "reportKind": "plugin-compat-check/result"
+        }
+      },
+      "freshGlobalAttempt": {
+        "catalogVersion": "0.1.3",
+        "actualInstalledVersion": "0.1.2",
+        "dependency": "^0.1.2",
+        "outcome": "failed desired-version acceptance; retained",
+        "installTimeMetadataResponseCaptured": false
+      },
+      "laterOriginalHelperCheck": {
+        "latestEndpointStatus": 429,
+        "latestEndpointError": "Cloudflare1015",
+        "fullPackumentStatus": 200,
+        "distTagLatest": "0.1.3",
+        "causality": "Subsequent helper reproduction, not evidence of the original install-time response. Bare-name resolution and fresh-release hold are consistent, not a fully captured first-request causal trace."
+      },
+      "latestMarketSource": {
+        "publishedVersion": "1.66.42",
+        "gitHead": "3679d7eae82fbeecc4fee9e1f356e21293a283bc",
+        "publishedTarballSha1Verified": true,
+        "sourceOnly": "Original helper429/HTML -> null -> bare name remains.1.66.42 was source-checked, not claimed as a second runtime installation."
+      },
+      "terminalWarning": {
+        "rootCause": "Exact looksTerminal scans positive repository-companion CLI mentions; metadata removal makes both localized descriptions false under original function",
+        "actualWarningObserved": true,
+        "runtimeAcceptanceDoesNotCertifyAllBusiness": true
+      },
+      "upstream": {
+        "primary": {
+          "url": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/8057",
+          "state": "OPEN",
+          "comments": 0
+        },
+        "warning": {
+          "url": "https://github.com/dsh-market/dsh-market/issues/931",
+          "state": "OPEN",
+          "comments": 0
+        },
+        "fallback": {
+          "url": "https://github.com/dsh-market/dsh-market/issues/932",
+          "state": "OPEN",
+          "comments": 0
+        },
+        "store": {
+          "url": "https://github.com/imsai-sh/dsh-1024store/issues/22",
+          "state": "OPEN",
+          "comments": 1
+        },
+        "awesome": {
+          "url": "https://github.com/0xsline/awesome-deepseek-harness/pull/717",
+          "state": "OPEN",
+          "comments": 0
+        },
+        "bruc3van": {
+          "url": "https://github.com/bruc3van/awesome-dsh-plugin/issues/138",
+          "state": "CLOSED",
+          "comments": 1
+        }
+      },
+      "authorizedDelivery": {
+        "primaryDescriptionPr": {
+          "url": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/8057",
+          "head": "7815df746560d16c48ecc97e6df8fa1d59e08610",
+          "files": 1,
+          "additions": 2,
+          "deletions": 2
+        },
+        "terminalIssue": "https://github.com/dsh-market/dsh-market/issues/931",
+        "versionFallbackIssue": "https://github.com/dsh-market/dsh-market/issues/932",
+        "storeFollowup": "https://github.com/imsai-sh/dsh-1024store/issues/22#issuecomment-6260932365"
+      },
+      "storeDiagnosis": {
+        "publicMethod": "GitHub only, unknown/not_checked, no npm",
+        "catalogSchemaAllowsNpmFields": false,
+        "collectionImplementationPublic": false,
+        "catalogOnlyCorrectionAvailable": false,
+        "sourceContractWithPublishedPackageFacts": "deriveInstallMethods produces npm0.1.3; not an actual Store install",
+        "localRepositoryDirectory": "plugin",
+        "public013RepositoryDirectory": null,
+        "originalBindingFunction": {
+          "public013": "mismatch",
+          "exactLocalManifest": "strict"
+        },
+        "bindingCorrectionResolvesMissingNpm": false,
+        "maintainerActions": [
+          "Check exact fullid enrichment attempt/queue/error and manifest path",
+          "Inspect D1 npm/git fact columns and deployed collector rules",
+          "Refresh/reconcile KV projection and normalized-id winner",
+          "Verify public v2 npm method, then run fresh installation"
+        ]
+      },
+      "originPatch": {
+        "published": false,
+        "protocolHostEffectivePortRequired": true,
+        "localNoOriginAllowed": true,
+        "realLocalTarball": {
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403
+        },
+        "unitCases": "different port/hostname/protocol, invalid Host/Origin/path/null/port65536 rejected; same-origin/default80/IPv6/no-Origin accepted"
+      },
+      "cleanup": {
+        "ownedMarketProfilesRemoved": true,
+        "ownedHostsStopped": true,
+        "createdTabsClosed": true
+      },
+      "remoteRepositoryPushMerge": false,
+      "newNpmPublication": false,
+      "metadataCheck": {
+        "observedAt": "2026-10-19T11:46:30.581Z",
+        "exitCode": 0,
+        "skipped": [],
+        "notices": [
+          {
+            "id": "npm.readme-is-current",
+            "severity": "notice"
+          }
+        ]
+      },
+      "lastPublicIndex": {
+        "checkedAt": "2026-10-19T11:47:34.702022+00:00",
+        "updated": "2026-10-18",
+        "entry": {
+          "name": "dsh-plugin-compat-check#plugin",
+          "owner": "lcy0121",
+          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/tree/main/plugin",
+          "page": "https://awesome-dsh-plugin.com/p/lcy0121/dsh-plugin-compat-check--plugin/",
+          "npm": "dsh-plugin-compat-check",
+          "version": "0.1.3",
+          "install": "dsh plugin --profile web add dsh-plugin-compat-check"
+        },
+        "descriptionPrAlreadyProjected": false
+      },
+      "lastStoreDetail": {
+        "checkedAt": "2026-10-19T11:47:34.702117+00:00",
+        "installMethods": [
+          {
+            "kind": "github",
+            "spec": "github:lcy0121/dsh-plugin-compat-check#path:plugin",
+            "command": "dsh plugin --profile web add github:lcy0121/dsh-plugin-compat-check#path:plugin",
+            "verification": "unknown",
+            "code": "not_checked",
+            "requiresBuildAllowance": false,
+            "buildPackage": null,
+            "revision": null,
+            "checkedAt": null
+          }
+        ]
+      },
+      "fetchLimitations": [
+        "One uncompressed full-index download timed out mid-response; retained as incomplete, followed by successful compressed full JSON fetch. No success inferred from the incomplete response."
+      ]
+    },
+    "engineeringDiagnostics20261019": {
+      "recordedAt": "2026-10-19T12:26:01.694289+00:00",
+      "baseCommit": "8d4ae0f",
+      "delivery": "Local source and documents only; no repository push/merge/npm publication",
+      "platform": {
+        "os": "macOS26.6",
+        "darwin": "25.6.0",
+        "arch": "arm64",
+        "nodeVersions": [
+          "24.19.0",
+          "26.12.0"
+        ],
+        "dshVersions": [
+          "0.2.0-rc.2",
+          "0.2.1-rc.2"
+        ],
+        "chrome": "155.0.8059.84"
+      },
+      "scope": "Owned CLI/development processes, debugger and failure evidence; no changes to verdict severity rules, no new model calls, no new Linux CI or Windows certification.",
+      "confirmedCause": {
+        "mechanism": "Darwin killpg may return EPERM for an all-zombie group; kernel exit/teardown state can precede Node ChildProcess exit delivery. A real joint run captured Z and a second run captured ?Es before the JS exit event.",
+        "kernelReference": "https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_sig.c#L1548-L1624",
+        "actualFailureSnapshots": [
+          {
+            "logSha256": "e31d9714bd611d05c1d7b3d271fc0a452c71c8448aa17806a7a584285a66975f",
+            "phase": "SIGKILL",
+            "leaderExitEventDelivered": false,
+            "memberStates": [
+              "Z"
+            ],
+            "allSameUid": true,
+            "caller": "labels"
+          },
+          {
+            "logSha256": "7399b54048f2aae77197e2bc0e7070231d7b07febe61124f792455639cb41a1a",
+            "phase": "SIGKILL",
+            "leaderExitEventDelivered": false,
+            "memberStates": [
+              "?Es"
+            ],
+            "allSameUid": true,
+            "caller": "rc2-live"
+          }
+        ],
+        "minimalNativeBefore": {
+          "result": "EPERM",
+          "leaderExitCode": 0,
+          "memberStates": [
+            "Z"
+          ],
+          "logSha256": "5bc7e03d3f936ce50afe0fc16c0690f0986ea5c3ce0a5d6adf46e71845314f31"
+        },
+        "minimalNativeAfter": {
+          "result": "stopped/zombie-only",
+          "logSha256": "ea3edaa35e0297d218edd91b8bde74cb0400960a62a7b70f0e88b0ae78a717b0"
+        },
+        "historicalLimit": "The earlier bare kill EPERM contained no process snapshot; the now reproduced mechanism is proven locally, not retroactively asserted for every historical occurrence."
+      },
+      "cleanupContract": [
+        "Signal only the spawned handle/group; no process-name kill, broad signal or PID fallback. Group snapshots are bounded; Darwin ps targets only the known pgid.",
+        "Retain TERM then KILL escalation even after leader exit. On Darwin EPERM during teardown, await bounded actual exit confirmation without resending the signal, then verify a complete same-uid zombie group or confirmed exit plus no remaining group. Unknown/live/foreign/truncated snapshots remain failures.",
+        "Commands settle with both primary and cleanup errors instead of an unhandled async rejection. Probe, auxiliary labels and installer retain code3 and structured diagnostics.",
+        "Host and setup-command cleanup failures retain their owned workDir; no deletion is claimed while a command remains unreaped. Other owned resources still get cleanup attempts."
+      ],
+      "chromeContract": [
+        "Browser.getVersion handshake before owned target creation/attachment. Pipe fd3/4 only; no shared tab, TCP debugger or discovery fallback.",
+        "Separate spawn/handshake/target-create/target-attach/session diagnostics with code/method, platform/version, exit/signal, byte counts and bounded recent methods; EOF and pipe errors fail promptly.",
+        "Keep production command timeout15000ms and no automatic retries. Bounded stderr retained only in opt-in private diagnostics, not ordinary error JSON."
+      ],
+      "diagnosticStorage": {
+        "environment": "DSC_EXECUTION_DIAGNOSTICS",
+        "directoryMode": "0700",
+        "fileMode": "0600",
+        "symlinkDirectoryRefused": true,
+        "persistenceFailureExplicit": true,
+        "normalJsonOmits": [
+          "argv",
+          "environment",
+          "stderr body"
+        ],
+        "privateStderr": "Last8192 characters, URL/authorization/common credential redaction; preview required, not an automatic shareable report.",
+        "ciArtifact": "linux-execution-diagnostics/ with always-upload; configured but remote CI not run this round"
+      },
+      "verification": {
+        "defaultNode26": {
+          "tests": 561,
+          "pass": 561,
+          "fail": 0,
+          "source": "prepublish-check internally ran full suite and doc summary on final code",
+          "gateLogSha256": "e5edc01dba5961cab23678de9bbf28353f1ff7fc68d8952588298fe2460934b3"
+        },
+        "defaultNode24": {
+          "tests": 561,
+          "pass": 561,
+          "fail": 0,
+          "skipped": 0,
+          "logSha256": "9a6d7d8a9e8760cc591bd500f4265063b29ef5715800784549ffef797c72067f"
+        },
+        "jointRc2": {
+          "tests": 73,
+          "pass": 73,
+          "fail": 0,
+          "skipped": 0,
+          "logSha256": "cb55d542cfe295ed01088de0cb95c22883a5a2fd142193c536f382bef206b2e7"
+        },
+        "jointLegacy": {
+          "tests": 73,
+          "pass": 69,
+          "fail": 0,
+          "skipped": 4,
+          "logSha256": "69116526b9dc51cfac533ca59b3e7307f3669bb5a79b2d49a5cbe79ea2bfa9dc"
+        },
+        "targetedOwnedBrowser": {
+          "defaultTests": 16,
+          "darwinSlowExtra": 1,
+          "allIncludedInFinalJoint": true
+        },
+        "chromeFreshStarts": {
+          "attempts": 12,
+          "success": 12,
+          "concurrency": 3,
+          "batches": 4,
+          "retries": 0,
+          "independentRuntimeValue": 42,
+          "logSha256": "25e0f9c7b10b640c68efd243d6dd3960e4966e935f51177465abc68a2d79f6cb"
+        },
+        "realChromeStoppedControl": {
+          "signal": "SIGSTOP to owned newly launched group",
+          "code": "CDP_COMMAND_TIMEOUT",
+          "method": "Runtime.evaluate",
+          "phase": "session",
+          "ownedPidAbsent": true,
+          "cleanupStopped": true,
+          "retries": 0,
+          "logSha256": "760f6475ea24ad105127c5d0c63f27f0d09ae4698ea4c4ed5820fad0758b2f62"
+        },
+        "prepublishCheck": true
+      },
+      "preservedNonPassingEvidence": [
+        "Four initial diagnostic regressions failed before changes, plus actual CLI lost-primary-error regression.",
+        "Native all-zombie EPERM, JS-unreaped zombie and accepted-TERM teardown controls each have before/after evidence.",
+        "Real joint-run Z and ?Es failures drove lifecycle confirmation; failures were not hidden with retries or severity changes.",
+        "New Node protocol fixtures initially used1s budgets, causing cold-start noise under concurrent suites. Fixture budget is5s and kernel-state fixture uses state readiness; production15s budget unchanged.",
+        "Setup-command retention regression first showed its workDir deleted despite denied cleanup; guard now retains workDir and original timeout."
+      ],
+      "historicalChromeTimeout": {
+        "source": "release0.1.3 Linux CI failure artifact,2026-10-18",
+        "reportedMethod": "Target.createTarget",
+        "originalRootCause": "Not recoverable from original artifact: no Chrome stderr/exit/pipe state was captured.",
+        "closedWork": "Handshake/target-stall, EOF, spawn/malformed-frame controls, real fresh starts and paused-Chrome timeout/reclamation now verified; no false assertion that the old incident cause was proven."
+      },
+      "sourceSha256": {
+        "lib/owned-process.mjs": "d59ec1f19001a95097cb7cce01c1a6a73b8abb68a65b96f93bf102007e0043cb",
+        "lib/probe-runner.mjs": "160d741eed4acc2f3eb004423731136e62df2c2c8a484448dddecc7d04b327c5",
+        "lib/debugger.mjs": "d7432c80d62206c59370fa444bc84a90e8063a14c322d77c1fa6cca4451490e2",
+        "bin/compat-check.mjs": "418790d6a16033d0da751e02c042132e138bb7a3d635260b9c2263c4cf7fdee8",
+        "tools/labels.mjs": "92d3ea2a69c546f41167b2fc66a1c852c6ecc422b9b006c5be74b4e1eda240c5",
+        "tools/business-labels.mjs": "c0a8b3e6f6c6633c8584c13671e451f4a4b6f9804319cd2e88bda31832b5af0d",
+        "tools/business-live.mjs": "2de5f247fd332d430920672fde820ff94ebd32288b5832b0d19bcde66dd3b170",
+        "tools/rc2-live.mjs": "ee57255df07239f46f71b2ef0d5909cd902bf7b143603ae864169211b304957a",
+        "tools/client-arrival.mjs": "3357e7c1c4020c574dac6c6404bb378d4a69b4fd8835b998a0fb6faabdc5a1e3",
+        "test/owned-process.test.mjs": "8a0027bf4ec2b2c89f47a30ec1894a33f56470945a78dee4199316e84648c6c5",
+        "test/debugger.test.mjs": "b4f605d075935bcd41e98ee53034001020fd9bb139952c8a929091e4af8715ec",
+        "test/support/zombie-group.c": "7a7ae13051d508906a2b7a149ac61991b6c0a01f9e3d296b9ac34d7c7338e85b",
+        ".github/workflows/test.yml": "a2f19a9c362d528787190d13e6db7748322b871a9364eeb10bb71547667a3685"
+      }
+    },
+    "sourceDelivery20261019": {
+      "recordType": "Source delivery checkpoint; historical local-only/CI flags above retain their original dates and are superseded only for the exact commits verified here.",
+      "verifiedAt": "2026-10-19T12:37:31.397825+00:00",
+      "sourceCommits": [
+        "46a2a8a",
+        "8d4ae0f",
+        "5f81e35"
+      ],
+      "authorization": "User authorized repository documentation audit, push and merge; explicitly deferred version publication.",
+      "npm": {
+        "version": "0.1.3",
+        "latest": "0.1.3",
+        "publicationPerformed": false,
+        "versionBumpPerformed": false,
+        "publicArtifactIncludesSourcePatches": false
+      },
+      "documentation": {
+        "maintainedDocuments": 11,
+        "scope": [
+          "three root READMEs",
+          "plugin README",
+          "skill source and packaged copy",
+          "skill README",
+          "rules README",
+          "docs Markdown and current-state",
+          "GitHub description/topics/homepage/license",
+          "npm version/latest/description/keywords/repository/runtime metadata/README"
+        ],
+        "corrections": [
+          "Include process cleanup/Chrome diagnostics in all three unpublished-source summaries",
+          "Separate repository source delivery from a future npm release",
+          "Clarify plugin README version scope and skill/rules source vs registry status",
+          "Preserve dated historical audit and acceptance snapshots rather than rewriting old results",
+          "Distinguish DSC_OUT_DIR probe/loader diagnostics from DSC_EXECUTION_DIAGNOSTICS engineering diagnostics",
+          "Relabel extraction history constraints without implying the current release is0.1.1"
+        ],
+        "metadataObservedAt": "2026-10-19T12:36:51.655Z",
+        "metadataErrors": 0,
+        "metadataNotices": [
+          "npm.readme-is-current"
+        ],
+        "metadataUnavailable": [],
+        "upstreamRecheck": "GitHub API on 2026-10-19: primary PR8057 and 0xsline PR717 open/unmerged; dsh-market issues931/932 and 1024Store issue22 open, matching Plan. No external posts made."
+      },
+      "localChecks": {
+        "node": "26.12.0",
+        "defaultTests": 561,
+        "defaultPassed": 561,
+        "defaultFailed": 0,
+        "docsAndSkillTests": 35,
+        "docsAndSkillPassed": 35,
+        "format": "passed",
+        "documentFacts": "passed",
+        "generatedContract": "passed",
+        "skillCopies": "byte-identical",
+        "evidenceDirectory": "/private/tmp/dsc-source-delivery.Fs1rlx",
+        "node22DefaultTests": 561,
+        "node22DefaultPassed": 561,
+        "node22OwnedProcessTests": 11,
+        "finalNode26Gate": "passed; default561 plus document/artifact checks; no publication"
+      },
+      "remote": {
+        "pullRequest": "https://github.com/lcy0121/dsh-plugin-compat-check/pull/6",
+        "firstSourceHead": "4c1f8481b5ba5de253577cd1637a2d4f3778fc4c",
+        "uploadMethod": "GitHub Git Data API after Git HTTPS connection failures; all original blob/tree/commit SHAs verified",
+        "firstPushRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39253880605",
+        "firstPrRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39253946578",
+        "firstResult": "Node22 multi-resource cleanup fixture cancelled with unresolved Promise; Node24 jobs cancelled by matrix fail-fast, Linux dependent jobs skipped. Do not count as passed.",
+        "reproduction": "Node22.19.0 isolated multi-resource test reproduced cancelledByParent on macOS; Node26 isolated test passed. Failure cleanup unrefs child; fixture awaiting final kill/exit had no referenced handle.",
+        "correction": "Test-only final cleanup refs the owned child before awaiting exit; production unref/error/retained-directory behavior unchanged. Node22 owned-process11/11 and default561/561 verified afterward. No retry or budget relaxation.",
+        "status": "Source checkpoint e0b487c passed all push/PR jobs; final record/main delivery tracked by linked PR.",
+        "verifiedSourceHead": "e0b487c034d1373dd221c6ac855c7c7cabd0629f",
+        "verifiedPushCi": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390",
+        "verifiedPrCi": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254434881",
+        "pushAndPrChecksPassed": 8,
+        "jobs": [
+          {
+            "name": "test (22.19.0)",
+            "conclusion": "success",
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390/job/118066021133"
+          },
+          {
+            "name": "test (24)",
+            "conclusion": "success",
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390/job/118066021515"
+          },
+          {
+            "name": "linux-live (0.2.0-rc.2)",
+            "conclusion": "success",
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390/job/118066338075"
+          },
+          {
+            "name": "linux-live (0.2.1-rc.2)",
+            "conclusion": "success",
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390/job/118066338258"
+          }
+        ],
+        "linuxRuntime": "Ubuntu24.04 x64, Node24.21.0; default matrix Node22.19.0 and24.21.0",
+        "linuxLive": {
+          "legacy": {
+            "tests": 52,
+            "passed": 48,
+            "failed": 0,
+            "notApplicable": 4
+          },
+          "rc2": {
+            "tests": 52,
+            "passed": 52,
+            "failed": 0,
+            "notApplicable": 0
+          }
+        },
+        "finalDeliveryTracking": "PR6 tracks final record-only commit checks, merge status and main CI; exact e0b487c results above do not certify a later commit automatically.",
+        "restoredFilesTabFollowup": {
+          "head": "73850df153c2d7dde524e79c70fec687c80cdf0b",
+          "failedPushRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39255124679",
+          "sameHeadPrRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39255134162",
+          "results": "push7/8, PR4/4; failing old-editor case was a driver error Missing business control: 文件, not a business pass/failure label",
+          "retainedEvidence": "failed-rc2-artifact/linux-editors/sidebar-ui-previous/failure{.png,-ui.txt,-host.txt,-profile.json}; first-case screenshot also retained",
+          "cause": "After reload the published plugin restored Files as a draggable div inside data-dsh-bottom-panel, while driver only searched fresh-entry buttons. Screenshot/text show existing file tree HTTP405 and host pending webRuntime. Source src/client/TabBar.tsx confirms existing div vs new-entry button.",
+          "fix": "Prefer a visible owned Files tab, otherwise a visible Files entry button. Ignore hidden matching buttons. No extra retry or poll budget; original UI405+completed response and disk criteria preserved.",
+          "realChromeRegression": "Before: Missing business control: 文件. After: restored-tab and hidden-first-button cases both open the requested editor exactly once.",
+          "liveRc2Original0261": "exit1; both business outcomes failed, original staticFN2 and separate serviceTP2 retained, hostStopped/privateRootRemoved true. No model call.",
+          "evidenceDirectory": "/private/tmp/dsc-source-delivery.Fs1rlx"
+        }
+      },
+      "scope": "Source/docs delivery only. Existing real macOS/DSH/Chrome and model evidence retains its exact dated scope; no new model calls, Windows certification, npm tag or npm release."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

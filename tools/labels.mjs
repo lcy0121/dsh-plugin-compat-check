@@ -4,6 +4,7 @@
  * File mode requires paired --probe and --labels artifacts from the same sample.
  */
 import fs from "node:fs";
+import { failureDiagnostic } from "../lib/owned-process.mjs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -159,8 +160,15 @@ async function main() {
         manifests: extracted.extract.report.manifests,
         keepDir: opts.keepDir || null,
       });
-      cleanup = { tempProfileRemoved: boot.tempProfileRemoved };
-      if (boot.error) throw new Error(boot.error);
+      cleanup = {
+        tempProfileRemoved: boot.tempProfileRemoved,
+        ...(boot.workDir ? { workDir: boot.workDir } : {}),
+      };
+      if (boot.error)
+        throw Object.assign(new Error(boot.error), {
+          diagnostics: boot.diagnostics || [],
+          cleanup,
+        });
       surface = boot.surface;
       labels = boot.labels;
     } else {
@@ -199,10 +207,18 @@ async function main() {
           ? 1
           : 0;
   } catch (error) {
-    report = { error: error.message };
+    report = {
+      error: error.message,
+      ...(failureDiagnostic(error).length
+        ? { diagnostics: failureDiagnostic(error) }
+        : {}),
+      ...(error.cleanup ? { cleanup: error.cleanup } : {}),
+    };
   } finally {
     if (root) {
-      fs.rmSync(root, { recursive: true, force: true });
+      if (report?.cleanup?.tempProfileRemoved !== false)
+        fs.rmSync(root, { recursive: true, force: true });
+      else report.cleanup.retainedSyntheticRoot = root;
       if (report?.cleanup)
         report.cleanup.syntheticRootRemoved = !fs.existsSync(root);
     }

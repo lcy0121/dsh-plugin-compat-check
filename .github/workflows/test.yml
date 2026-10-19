@@ -48,11 +48,13 @@ jobs:
         shell: bash
         env:
           DSC_SLOW: '1'
+          DSC_EXECUTION_DIAGNOSTICS: linux-execution-diagnostics
           DSC_REQUIRE_RC2_UI: '1'
           DSC_RC2_LIVE_LOG: linux-rc2.json
           DSC_ENGINEERING_LIVE_LOG: linux-engineering.json
           DSC_BUSINESS_LIVE_DIR: linux-business
           DSC_SIDEBAR_LIVE_DIR: linux-sidebar
+          DSC_EDITOR_LIVE_ROOT: linux-editors
         run: |
           test_status=0
           node --test --test-reporter=tap test/probe-boot.test.mjs test/labels.test.mjs test/engineering-live.test.mjs test/profile-lock.test.mjs test/rc2-live.test.mjs test/business-labels.test.mjs > linux-live.tap 2>&1 || test_status=$?
@@ -63,8 +65,10 @@ jobs:
         with:
           name: linux-live-evidence-${{ matrix.dsh }}
           path: |
+            linux-execution-diagnostics/
             linux-live.tap
             linux-engineering.json
             linux-rc2.json
             linux-business/
             linux-sidebar/
+            linux-editors/

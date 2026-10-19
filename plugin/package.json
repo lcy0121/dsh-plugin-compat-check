@@ -53,7 +53,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lcy0121/dsh-plugin-compat-check.git"
+    "url": "git+https://github.com/lcy0121/dsh-plugin-compat-check.git",
+    "directory": "plugin"
   },
   "homepage": "https://github.com/lcy0121/dsh-plugin-compat-check#readme",
   "bugs": {

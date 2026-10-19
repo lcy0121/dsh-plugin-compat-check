@@ -64,10 +64,45 @@ export function savedDocumentBytes(text, encoding) {
     ]);
   throw Error("Unknown business document encoding");
 }
-export function installSidebarFixture(profile, workspace) {
+// Installed only inside the owned, opt-in model host. Never changes the source account/profile.
+export function installModelBudget(ctx, onAdmission = () => {}) {
+  let admitted = 0;
+  ctx.tools.guard(() => "Tools are disabled in bounded model acceptance");
+  ctx.on("system-prompt/assemble", async (_assembly, _context, next) => ({
+    ...(await next()),
+    tools: [],
+  }));
+  ctx.on(
+    "agent/pre-step",
+    async ({ agent, step }, next) => {
+      if (
+        agent?.session?.header?.parentSession !== "business-sidebar" ||
+        step !== 1 ||
+        admitted >= 2
+      )
+        return { kind: "reject" };
+      const decision = await next();
+      if (decision.kind === "enter" && decision.messages.length) {
+        admitted++;
+        onAdmission(admitted);
+      }
+      return decision;
+    },
+    { prepend: true },
+  );
+}
+export function installSidebarFixture(
+  profile,
+  workspace,
+  withAgent = false,
+  modelSelection = null,
+) {
   const dir = path.join(profile, "node_modules/@business/session");
   fs.mkdirSync(dir, { recursive: true });
-  const source = `export const inject=['sessions'];export function apply(ctx){ctx.sessions.create('business-sidebar',{meta:{cwd:${JSON.stringify(workspace)}}});}`;
+  const source = withAgent
+    ? `import fs from 'node:fs';export const inject=['agents','workspaceRegistry','sessionTitle'${modelSelection ? ", 'llm', 'tools'" : ""}];export async function apply(ctx){const marker=${JSON.stringify(path.join(workspace, "fixture.json"))};fs.writeFileSync(marker,JSON.stringify({stage:'workspace'}));try{${modelSelection ? `(${installModelBudget})(ctx,n=>fs.writeFileSync(${JSON.stringify(path.join(workspace, "model-budget.json"))},JSON.stringify({admitted:n,limit:2,toolsAllowed:false})));await ctx.llm.resolveModelInfo(${JSON.stringify(modelSelection.provider)},${JSON.stringify(modelSelection.model)});` : ""}const w=await ctx.workspaceRegistry.create(${JSON.stringify(workspace)},'Business workspace');fs.writeFileSync(marker,JSON.stringify({stage:'agent'}));const h=await ctx.agents.create({sessionId:'business-sidebar',meta:{cwd:${JSON.stringify(workspace)}},seed:[{type:'turn/start',seq:0,time:Date.now(),data:{turn:1}},{type:'turn/end',seq:1,time:Date.now(),data:{turn:1,reason:{kind:'completed'}}}],agentOptions:${JSON.stringify(modelSelection || {})}});fs.writeFileSync(marker,JSON.stringify({stage:'title',agentId:h.agent.id,sessionId:h.agent.session.id}));ctx.effect(()=>()=>h.dispose());ctx.sessionTitle.rename(h.agent.session,'Business sidebar');await w.attachSession(h.agent.id);fs.writeFileSync(marker,JSON.stringify({stage:'ready',agentId:h.agent.id,title:ctx.sessionTitle.get(h.agent.session)}));}catch(e){fs.writeFileSync(marker,JSON.stringify({stage:'error',error:'Owned fixture setup failed'}));throw e;}}`
+    : `export const inject=['sessions'];export function apply(ctx){ctx.sessions.create('business-sidebar',{meta:{cwd:${JSON.stringify(workspace)}}});}`;
+
   fs.writeFileSync(path.join(dir, "index.js"), source);
   fs.writeFileSync(
     path.join(dir, "package.json"),

@@ -8,6 +8,8 @@
 
 저장소와 npm의 현재 버전은 **0.1.3**이며 `latest`로 배포되었습니다(2026-10-18 공개 tarball 바이트 일치와 실제 설치 확인). rc.2 선언 판정, 버전별 카탈로그, 비활성화 정리 수정 및 최신 skill을 포함합니다. 저장소 CLI와 업무 측정 도구는 npm 플러그인에 포함되지 않습니다. [Plan](docs/Plan.md)과 [검증 범위·통계](docs/current-state.json)를 참고하세요. Node `^22.19.0 || >=24`를 지원합니다.
 
+저장소 소스에는 npm에 아직 배포되지 않은 활성화 전제 설명, HTTP Origin 프로토콜/호스트/포트 검사, npm 하위 디렉터리 메타데이터 및 프로세스 정리/Chrome 진단 수정이 있습니다. 소스를 push하거나 병합해도 npm 패키지는 배포되지 않습니다. 같은0.1.3 버전 번호만으로 공개 패키지에 포함되었다고 판단하지 마세요. 소스 전달 상태는 [Plan](docs/Plan.md)을 참고하세요.
+
 | 진입점 | 역할 |
 |---|---|
 | npm 플러그인 | 호스트 관측, 호환성 탭, 플러그인별 발견·배지, `compat_check`, skill provider; 설치 전 검사는 불가 |
@@ -115,7 +117,7 @@ shell은 Node 진입 전 기존 사용법·커널 오류 코드를 유지합니�
 
 기본 정적 CLI는 DSH를 시작하거나 대상을 설치하지 않습니다. 호스트 플러그인은 분석 worker를 사용하지만 검사를 위해 외부 명령·네트워크를 호출하지 않으며 자신의 기준선을 기본 기록합니다. schema2는 canonical profile, 경로 해시, 모드, 도구·규칙·카탈로그를 구분합니다. 경로는 `$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`이며 잠금과 원자적 교체를 사용합니다. 불완전한 소스 검사는 기준선을 갱신하지 않습니다. 정적·파일·프로세스 내부 관측은 모드가 다릅니다.
 
-descriptor 샘플링은 getter를 실행하지 않으며 접근자 메서드는 미확인으로 남깁니다. 진단 출력에는 명시적 비공개 `DSC_OUT_DIR`이 필요합니다. 다른 profile 조회는 현재 호스트의 서비스를 빌리지 않고 정적 증거를 사용합니다. 보존된 현장에는 로컬 정보가 포함될 수 있으므로 공유 전 확인하세요.
+descriptor 샘플링은 getter를 실행하지 않으며 접근자 메서드는 미확인으로 남깁니다. probe/loader 진단 출력에는 명시적 비공개 `DSC_OUT_DIR`이 필요합니다. 다른 profile 조회는 현재 호스트의 서비스를 빌리지 않고 정적 증거를 사용합니다. 보존된 현장에는 로컬 정보가 포함될 수 있으므로 공유 전 확인하세요.
 
 ## 저장소 구조
 
@@ -154,9 +156,15 @@ node tools/meta-check.mjs --json
 
 느린 통합 검사는 명시적 `DSC_SLOW=1`이 필요합니다. macOS DSH/Chrome, Ubuntu arm64 VM 및 Linux x64 CI 기록은 실제 tgz, 도구·skill, UI 대조와 자원 시나리오를 포함합니다. 정확한 커밋과 범위는 [Plan](docs/Plan.md#5-验证记录与复现)을 참고하세요. 과거 CI가 이후 로컬 단언·문서 변경을 인증하지는 않으며 Windows는 보류합니다. [엔지니어링 재현](docs/Plan.md#53-p2工程验收)을 참고하세요. 과거 88.3% 재현율, 66/66 도착 및 loader 라벨은 업무 기능 정확도가 아닙니다. Python parity도 구형 정규식 참고이며 AST의 정답이 아닙니다.
 
+저장소 CLI/개발 도구는 `DSC_EXECUTION_DIAGNOSTICS=<비공개-디렉터리>`로 Chrome 시작/대상/파이프 및 회수 실패 진단을 보존합니다. 일반 JSON에는 stderr 본문이 없으며 비공개 파일은 길이 제한과 비밀값 가림을 적용하므로 공유 전 확인하세요. 실제 회수 실패 시 workDir을 보존합니다. Darwin EPERM은 동일 UID의 좀비 그룹 또는 실제 종료와 그룹 소멸을 확인할 때만 허용합니다. [Plan](docs/Plan.md#53-p2工程验收)을 참고하세요.
+
 보조 측정은 독립 loader 원시 라벨과 서비스 관측만 받는 예측기를 분리합니다. [Plan 보조 측정 기록](docs/Plan.md#51-已验证范围)을 참고하세요. `node tools/labels.mjs --nm web --synthetic --json`은 비공개 환경을 만들고 실제 누락을 보고하면 exit1을 반환합니다. 기존 대상은 `--probe-boot`, 파일 입력은 `--probe`와 `--labels`를 함께 사용합니다. 이 수치는 첫 계층의 해당 표본에만 적용되며 생태계 정확도가 아닙니다.
 
-저장소 업무 측정은 `node tools/business-labels.mjs --live --suite sidebar --out-dir <빈-증거-디렉터리> --json`으로 실행합니다(suite 하나 선택, 기본 market). 고정 dshmarket1.66.37은 메모·즐겨찾기, dsh-better-sidebar0.28.0은 저장·미리보기 HTTP 경로와 UTF-8 BOM/UTF-16LE·CRLF 보존 및 POST503 후 복구를 확인합니다. 전용 rc.2와 실제 Chrome에서 완료 요청, 새 문서 DOM, 독립 디스크 데이터를 검증하며 정적 API 위험 예측에는 업무/loader 정답을 넣지 않습니다. 두 집단은 각각 정상 TN2/TN4, 제어 장애 FN2/FN2와 exit1을 보고합니다. 사례 누락·신원 불일치는 거부하며 드라이버 오류를 업무 실패로 세지 않습니다. 전체 편집기 UI·자연 버전 회귀·원본 결함·생태계 정확도 인증은 아닙니다. [Plan](docs/Plan.md#52-日常检查与真实集成)을 참고하세요.
+저장소 업무 도구는 `node tools/business-labels.mjs --live --suite sidebar-ui --out-dir <빈-증거-디렉터리> --json`으로 실행합니다(기본 market). 고정 dshmarket1.66.37은 메모·즐겨찾기, POST503, 동작 전/저장 후 버튼 누락과 복구를 확인합니다. dsh-better-sidebar0.28.0은 저장·미리보기 HTTP, 실제 편집기 입력·저장·재로드와 UTF-8 BOM/UTF-16LE·CRLF 바이트를 검사합니다. 결함을 주입하지 않은0.26.1 비교에서는 파일 트리HTTP405 두 건과 기능 위험 미탐을 보존하며, 회귀가 도입된 버전을 단정하지 않습니다. 예측은 동작 전에 봉인하며 업무/loader 정답을 사용하지 않습니다. 완료 요청, 대상 카드/편집기 DOM과 독립 디스크 데이터로 판정합니다. 자연적인 버튼 누락은 업무 실패, 성립하지 않은 결함 대조군은 개별 미채점입니다.
+
+편집기 suite에 `--observe-services`를 추가하면 원래 정적 집단은 유지하고 동작 전 동일 profile의 루트 서비스 예측을 별도 봉인하여 `service-*` 증거로 기록합니다.0.26.1의 필수 webRuntime 부재는 TP2,0.28.0은 TN4/FP0이며 원래 정적 FN2와503 미탐은 그대로 남습니다. 진단 호스트에서만 이전 전제 서비스를 제공하면 두 편집이 복구되므로 활성화 전제와 편집 메서드 실패를 구분할 수 있습니다. 임의 업무 동작을 보장하지 않습니다. [Plan](docs/Plan.md#4-已完成的关键工作)을 참고하세요.
+
+실제 계정은 명시적인 `--suite sidebar-model --model-profile <설정된-원본-profile-디렉터리>`에서만 사용합니다(현재 deepseek-official 지원). 선택한 자격 증명만 전용 임시 home에 복사하며 프롬프트/제공자 첫 단계는 최대2회, 단계당 출력256토큰, 재시도·자동 제목 없음, 도구 실행은 코드로 차단합니다. 기본 테스트·`DSC_SLOW=1`·CI는 모델을 호출하지 않습니다. 정상/결함 집단은 분리하며 고정 표본은 생태계 정확도나 전체 모델 능력 인증이 아닙니다. 명령과 검증 범위는 [Plan](docs/Plan.md#52-日常检查与真实集成)을 참고하세요.
 
 [lib/contracts.mjs](lib/contracts.mjs)가 CLI JSON·HTTP·도구·패널의 보고서 계약 원본입니다. 추가 필드는 보존하고 필수 필드 누락이나 미지원 버전은 도구 오류로 처리합니다. 0.1.3은 DSH≥0.2.1-rc.2이면 rc.2 카탈로그(host98/client8), 나머지/미상은 기존 0.2.0-rc.2 카탈로그(host91/client8)를 선택합니다. 명시적 `--catalog`가 우선하며 미래 DSH 버전은 미검증입니다. 카탈로그는 런타임 관측이나 심각도 증거가 아닙니다. AST 목록은 날짜가 있는 부분 표본입니다. [Plan](docs/Plan.md#2-现行判定与集成契约)을 참고하세요.
 

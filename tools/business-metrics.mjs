@@ -25,7 +25,7 @@ export function businessOutcome(observed) {
       throw Error("Malformed harness error");
     return "harness-error";
   }
-  for (const k of ["persisted", "uiAfterReload"])
+  for (const k of ["persisted", "uiAfterReload", "actionAvailable"])
     if (observed[k] !== undefined && typeof observed[k] !== "boolean")
       throw Error("Malformed business postcondition: " + k);
   if (
@@ -35,6 +35,11 @@ export function businessOutcome(observed) {
       observed.requestStatus > 599)
   )
     throw Error("Malformed request postcondition");
+  if (observed.actionAvailable === false) {
+    if (observed.requestStatus !== undefined)
+      throw Error("Unavailable action contradicts HTTP receipt");
+    return "failed";
+  }
   if (
     observed.requestStatus === undefined ||
     observed.persisted === undefined ||
@@ -109,6 +114,23 @@ export function scoreBusiness(predictions, labels) {
     !Array.isArray(labels.rows)
   )
     throw Error("Unsupported business artifact schema/source");
+  const context = predictions.predictionContext;
+  if (
+    context !== undefined &&
+    (!object(context) ||
+      ![
+        "feature-scoped-static-api-risk",
+        "feature-scoped-service-observed-api-risk",
+      ].includes(context.mode) ||
+      (context.mode === "feature-scoped-service-observed-api-risk" &&
+        (context.rootOnly !== true ||
+          typeof context.observationSha256 !== "string" ||
+          !/^[a-f0-9]{64}$/.test(context.observationSha256))) ||
+      (context.mode === "feature-scoped-static-api-risk" &&
+        (context.rootOnly !== undefined ||
+          context.observationSha256 !== undefined)))
+  )
+    throw Error("Unsupported business prediction context");
   const identity = identityOf(predictions);
   for (const k of identityKeys)
     if (labels[k] !== identity[k])
@@ -142,7 +164,7 @@ export function scoreBusiness(predictions, labels) {
       !c.caseId ||
       plan.has(c.caseId) ||
       !byFeature.has(c.featureId) ||
-      !["none", "http-503"].includes(c.control)
+      !["none", "http-503", "dom-control-missing"].includes(c.control)
     )
       throw Error("Invalid planned business case");
     plan.set(c.caseId, c);
@@ -170,7 +192,7 @@ export function scoreBusiness(predictions, labels) {
     )
       throw Error("Business case feature/control differs from sealed plan");
     if (!byFeature.has(row.featureId)) throw Error("Unknown business feature");
-    if (!["none", "http-503"].includes(row.control))
+    if (!["none", "http-503", "dom-control-missing"].includes(row.control))
       throw Error("Unknown business case control");
     const p = byFeature.get(row.featureId),
       outcome = businessOutcome(row.observed),
@@ -219,13 +241,16 @@ export function scoreBusiness(predictions, labels) {
     rows,
     metrics,
     prediction: {
-      mode: "feature-scoped-static-api-risk",
+      mode: context?.mode || "feature-scoped-static-api-risk",
+      ...(context?.mode === "feature-scoped-service-observed-api-risk"
+        ? { rootOnly: true, observationSha256: context.observationSha256 }
+        : {}),
       businessLabelsUsed: false,
       loaderLabelsUsed: false,
       autoProbeDiscovery: false,
     },
     scope:
-      "No API-risk warning is not business success. Limited/client coverage remains disclosed. Baseline and browser HTTP faults are separate cohorts; neither measures ecosystem accuracy. Historical paired artifacts can be replayed, not treated as current runtime evidence.",
+      "No API-risk warning is not business success. Limited/client coverage remains disclosed. Baseline and controlled HTTP/DOM faults are separate cohorts; neither measures ecosystem accuracy. Historical paired artifacts can be replayed, not treated as current runtime evidence.",
   };
 }
 export function businessExitCode(report) {
