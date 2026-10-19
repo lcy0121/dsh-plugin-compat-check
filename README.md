@@ -159,7 +159,9 @@ node tools/meta-check.mjs --json   # 联网，需要 gh/npm
 
 辅助度量使用 [Plan辅助度量记录](docs/Plan.md#51-已验证范围) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
 
-仓库独立业务队列用`node tools/business-labels.mjs --live --suite sidebar --out-dir <空证据目录> --json`（suite二选一，默认market）。固定dshmarket1.66.37测备注/收藏；dsh-better-sidebar0.28.0测保存/预览HTTP路径、UTF-8 BOM/UTF-16LE与CRLF保留，以及503失败后恢复。私有rc.2宿主/真实Chrome中，以完成请求、新文档界面及独立磁盘数据核验；源码/静态API风险预测提前封存，业务与loader答案不进入预测。两队列分别记录正常TN2/TN4、故障FN2/FN2及原始exit1；缺病例或身份不符拒绝计分，驱动错误不算业务失败。这不是编辑器整套UI、自然版本回归、原插件缺陷或生态准确率认证；见[Plan](docs/Plan.md#52-日常检查与真实集成)。
+仓库独立业务工具用`node tools/business-labels.mjs --live --suite sidebar-ui --out-dir <空证据目录> --json`（默认market）。固定dshmarket1.66.37覆盖备注/收藏的正常、503、操作前/保存后控件缺失及恢复；dsh-better-sidebar0.28.0覆盖保存/预览HTTP路径、真实编辑器输入/保存/重载和UTF-8 BOM/UTF-16LE、CRLF字节保留。0.26.1另作无故障注入的版本对照：两例文件树HTTP405、无法编辑，保留功能风险漏报，不认定具体引入回归的版本。预测提前封存，业务与loader答案不进入预测；完成请求、目标卡片/编辑器DOM和独立磁盘数据共同核验。自然缺控件记业务失败；无法建立故障的对照逐例不计分，驱动错误不冒充业务失败。
+
+显式`--suite sidebar-model --model-profile <已配置来源profile目录>`才会使用真实账户，当前仅支持deepseek-official；只复制所选凭据到自有临时home，最多两个提示/提供方首步、每步最多256输出token、无重试/自动标题，代码禁用工具。默认套件、`DSC_SLOW=1`和CI均不调用模型。正常/受控故障分组，固定样本不代表生态准确率或完整模型能力；用法和限定实测见[Plan](docs/Plan.md#52-日常检查与真实集成)。
 
 报告契约以 [lib/contracts.mjs](lib/contracts.mjs) 为单一真源，CLI JSON、HTTP、工具与面板保留完整证据；新字段可扩展，缺少必需字段或不支持的版本报工具错误。0.1.3按已知目标选择目录：DSH≥0.2.1-rc.2用新增rc.2目录（host98/client8），其余/未知用原0.2.0-rc.2目录（host91/client8），`--catalog`显式覆盖优先；未来DSH版本尚未认证。目录不等于运行时面，严重度不能只靠目录增删推定；库存仍是明确标记不完整的旧AST样本。见 [Plan](docs/Plan.md#2-现行判定与集成契约)。
 

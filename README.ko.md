@@ -156,7 +156,9 @@ node tools/meta-check.mjs --json
 
 보조 측정은 독립 loader 원시 라벨과 서비스 관측만 받는 예측기를 분리합니다. [Plan 보조 측정 기록](docs/Plan.md#51-已验证范围)을 참고하세요. `node tools/labels.mjs --nm web --synthetic --json`은 비공개 환경을 만들고 실제 누락을 보고하면 exit1을 반환합니다. 기존 대상은 `--probe-boot`, 파일 입력은 `--probe`와 `--labels`를 함께 사용합니다. 이 수치는 첫 계층의 해당 표본에만 적용되며 생태계 정확도가 아닙니다.
 
-저장소 업무 측정은 `node tools/business-labels.mjs --live --suite sidebar --out-dir <빈-증거-디렉터리> --json`으로 실행합니다(suite 하나 선택, 기본 market). 고정 dshmarket1.66.37은 메모·즐겨찾기, dsh-better-sidebar0.28.0은 저장·미리보기 HTTP 경로와 UTF-8 BOM/UTF-16LE·CRLF 보존 및 POST503 후 복구를 확인합니다. 전용 rc.2와 실제 Chrome에서 완료 요청, 새 문서 DOM, 독립 디스크 데이터를 검증하며 정적 API 위험 예측에는 업무/loader 정답을 넣지 않습니다. 두 집단은 각각 정상 TN2/TN4, 제어 장애 FN2/FN2와 exit1을 보고합니다. 사례 누락·신원 불일치는 거부하며 드라이버 오류를 업무 실패로 세지 않습니다. 전체 편집기 UI·자연 버전 회귀·원본 결함·생태계 정확도 인증은 아닙니다. [Plan](docs/Plan.md#52-日常检查与真实集成)을 참고하세요.
+저장소 업무 도구는 `node tools/business-labels.mjs --live --suite sidebar-ui --out-dir <빈-증거-디렉터리> --json`으로 실행합니다(기본 market). 고정 dshmarket1.66.37은 메모·즐겨찾기, POST503, 동작 전/저장 후 버튼 누락과 복구를 확인합니다. dsh-better-sidebar0.28.0은 저장·미리보기 HTTP, 실제 편집기 입력·저장·재로드와 UTF-8 BOM/UTF-16LE·CRLF 바이트를 검사합니다. 결함을 주입하지 않은0.26.1 비교에서는 파일 트리HTTP405 두 건과 기능 위험 미탐을 보존하며, 회귀가 도입된 버전을 단정하지 않습니다. 예측은 동작 전에 봉인하며 업무/loader 정답을 사용하지 않습니다. 완료 요청, 대상 카드/편집기 DOM과 독립 디스크 데이터로 판정합니다. 자연적인 버튼 누락은 업무 실패, 성립하지 않은 결함 대조군은 개별 미채점입니다.
+
+실제 계정은 명시적인 `--suite sidebar-model --model-profile <설정된-원본-profile-디렉터리>`에서만 사용합니다(현재 deepseek-official 지원). 선택한 자격 증명만 전용 임시 home에 복사하며 프롬프트/제공자 첫 단계는 최대2회, 단계당 출력256토큰, 재시도·자동 제목 없음, 도구 실행은 코드로 차단합니다. 기본 테스트·`DSC_SLOW=1`·CI는 모델을 호출하지 않습니다. 정상/결함 집단은 분리하며 고정 표본은 생태계 정확도나 전체 모델 능력 인증이 아닙니다. 명령과 검증 범위는 [Plan](docs/Plan.md#52-日常检查与真实集成)을 참고하세요.
 
 [lib/contracts.mjs](lib/contracts.mjs)가 CLI JSON·HTTP·도구·패널의 보고서 계약 원본입니다. 추가 필드는 보존하고 필수 필드 누락이나 미지원 버전은 도구 오류로 처리합니다. 0.1.3은 DSH≥0.2.1-rc.2이면 rc.2 카탈로그(host98/client8), 나머지/미상은 기존 0.2.0-rc.2 카탈로그(host91/client8)를 선택합니다. 명시적 `--catalog`가 우선하며 미래 DSH 버전은 미검증입니다. 카탈로그는 런타임 관측이나 심각도 증거가 아닙니다. AST 목록은 날짜가 있는 부분 표본입니다. [Plan](docs/Plan.md#2-现行判定与集成契约)을 참고하세요.
 

@@ -1,6 +1,8 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 const api = await import("../tools/business-metrics.mjs").catch(() => ({}));
 const identity = {
   sampleId: "sample-a",
@@ -57,6 +59,417 @@ const row = (caseId, control, observed) => ({
 });
 const pass = { requestStatus: 200, persisted: true, uiAfterReload: true };
 const fail = { requestStatus: 503, persisted: false, uiAfterReload: false };
+
+test("a loaded market card missing its action is a business failure without inventing an HTTP receipt", () => {
+  const observed = {
+    actionAvailable: false,
+    persisted: false,
+    uiAfterReload: false,
+  };
+  assert.equal(api.businessOutcome(observed), "failed");
+  const p = prediction(false, [
+    { caseId: "missing", featureId: "note", control: "dom-control-missing" },
+  ]);
+  const result = api.scoreBusiness(
+    p,
+    labels([row("missing", "dom-control-missing", observed)]),
+  );
+  assert.equal(result.metrics.faultInjected.falseNegative, 1);
+  assert.equal(api.businessExitCode(result), 1);
+  assert.throws(
+    () => api.businessOutcome({ ...pass, actionAvailable: false }),
+    /receipt|contradict/i,
+  );
+  assert.throws(
+    () => api.businessOutcome({ actionAvailable: "false" }),
+    /postcondition/i,
+  );
+});
+
+test("naturally absent market actions retain baseline failures and exclude unestablished controls", async () => {
+  const { marketCases } = await import("../tools/business-market.mjs");
+  const rows = await marketCases(
+    {
+      evalx: async () => false,
+      openMarket: async () => {},
+      disk: () => ({}),
+      entry: { url: "target" },
+      screenshot: async () => {},
+      armFault: async () => {
+        throw Error("No available action");
+      },
+    },
+    [{ id: "market.favorite" }],
+  );
+  assert.equal(rows.length, 5);
+  assert.deepEqual(
+    rows.map((r) => r.outcome),
+    ["failed", "harness-error", "harness-error", "harness-error", "failed"],
+  );
+  assert.ok(rows.every((r) => r.observed.requestStatus === undefined));
+});
+
+test("interrupted or unsuccessful model turns cannot satisfy a completed response", async () => {
+  const { assistantReceipt } = await import("../tools/business-model.mjs");
+  const start = { type: "turn/start", data: { turn: 2 } };
+  const message = {
+    type: "assistant/message",
+    data: { message: { content: [{ type: "text", text: "ACK" }] } },
+  };
+  const end = (kind) => ({
+    type: "turn/end",
+    data: { turn: 2, reason: { kind } },
+  });
+  assert.equal(
+    assistantReceipt([start, message, end("completed")], "ACK").matches,
+    true,
+  );
+  assert.equal(
+    assistantReceipt(
+      [
+        start,
+        { ...message, data: { ...message.data, interrupted: true } },
+        end("completed"),
+      ],
+      "ACK",
+    ).matches,
+    false,
+  );
+  for (const kind of ["aborted", "error", "blocked", "max-tokens"])
+    assert.equal(
+      assistantReceipt([start, message, end(kind)], "ACK").matches,
+      false,
+    );
+  assert.equal(
+    assistantReceipt(
+      [message, end("completed"), start, end("completed")],
+      "ACK",
+    ).matches,
+    false,
+  );
+});
+
+test("owned model policy denies tools and admits at most two first steps", async () => {
+  const { installModelBudget } = await import("../tools/business-sidebar.mjs");
+  const handlers = new Map();
+  let guard,
+    count = 0;
+  installModelBudget(
+    {
+      on: (name, fn) => handlers.set(name, fn),
+      tools: {
+        guard: (fn) => {
+          guard = fn;
+        },
+      },
+    },
+    () => {
+      count++;
+    },
+  );
+  assert.equal(typeof guard({}), "string");
+  const assembly = await handlers.get("system-prompt/assemble")(
+    {},
+    {},
+    async () => ({ tools: [{ name: "bash" }], variables: { model: "chosen" } }),
+  );
+  assert.deepEqual(assembly.tools, []);
+  assert.equal(assembly.variables.model, "chosen");
+  const admit = handlers.get("agent/pre-step");
+  const agent = { session: { header: { parentSession: "business-sidebar" } } };
+  const next = async () => ({ kind: "enter", messages: [{}] });
+  assert.equal((await admit({ agent, step: 1 }, next)).kind, "enter");
+  assert.equal((await admit({ agent, step: 2 }, next)).kind, "reject");
+  assert.equal(
+    (await admit({ agent: { session: { header: {} } }, step: 1 }, next)).kind,
+    "reject",
+  );
+  assert.equal((await admit({ agent, step: 1 }, next)).kind, "enter");
+  assert.equal((await admit({ agent, step: 1 }, next)).kind, "reject");
+  assert.equal(count, 2);
+});
+
+test("reappearing market controls invalidate DOM fault establishment", async () => {
+  const { marketCases } = await import("../tools/business-market.mjs");
+  const rows = await marketCases(
+    {
+      evalx: async () => true,
+      openMarket: async () => {},
+      disk: () => ({}),
+      entry: { url: "target" },
+      armFault: async () => 0,
+      finishRequest: async () => ({ status: 200 }),
+      screenshot: async () => {},
+    },
+    [{ id: "market.favorite" }],
+  );
+  assert.equal(rows[2].outcome, "harness-error");
+  assert.equal(rows[3].outcome, "harness-error");
+});
+
+test("a sidebar file-tree precondition failure preserves all cases without claiming an injected save fault", async () => {
+  const { editorCases } = await import("../tools/business-sidebar-ui.mjs");
+  const fs = await import("node:fs"),
+    os = await import("node:os");
+  const workspace = fs.mkdtempSync(
+    join(os.tmpdir(), "dsc-editor-unavailable-"),
+  );
+  try {
+    fs.writeFileSync(
+      join(workspace, "fixture.json"),
+      JSON.stringify({ stage: "ready" }),
+    );
+    const rows = await editorCases({
+      workspace,
+      suite: "sidebar-ui",
+      url: "http://owned.invalid",
+      navigate: async () => {},
+      click: async () => {},
+      screenshot: async () => {},
+      resetResponseWindow: () => {},
+      responseRows: () => [
+        {
+          completed: true,
+          method: "POST",
+          path: "/sidebar/api/fs.trees",
+          status: 405,
+        },
+      ],
+      poll: async (fn) => {
+        const value = await fn();
+        assert.ok(value);
+        return value;
+      },
+      evalx: async (source) =>
+        source.includes("explorerError")
+          ? ["HTTP 405"]
+          : source.includes("data-row-key") ||
+            source.includes("data-dsh-bottom-toggle"),
+    });
+    assert.deepEqual(
+      rows.map((r) => r.control),
+      ["none", "http-503", "none", "none", "http-503", "none"],
+    );
+    assert.deepEqual(
+      rows.map((r) => r.outcome),
+      [
+        "failed",
+        "harness-error",
+        "failed",
+        "failed",
+        "harness-error",
+        "failed",
+      ],
+    );
+  } finally {
+    fs.rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
+test("model acceptance copies only the selected credential into an owned private home and never returns it", async () => {
+  const m = await import("../tools/business-model.mjs").catch(() => ({}));
+  assert.equal(typeof m.prepareModelProfile, "function");
+  const fs = await import("node:fs"),
+    os = await import("node:os"),
+    path = await import("node:path");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-model-scope-"));
+  try {
+    const source = path.join(root, "source/profiles/desktop"),
+      home = path.join(root, "owned"),
+      profile = path.join(home, "profiles/business");
+    fs.mkdirSync(source, { recursive: true });
+    fs.mkdirSync(profile, { recursive: true });
+    fs.writeFileSync(
+      path.join(source, "cordis.patch.yml"),
+      "- id: agent-default-model\n  config:\n    provider: deepseek-official\n    model: deepseek-flash\n",
+    );
+    const sentinel = ["test", "only", "selected", "key"].join("-");
+    const unrelated = ["test", "only", "private", "key"].join("-");
+    const original = `version: 1\nrefs:\n  DEEPSEEK_API_KEY: ${sentinel}\n  UNRELATED_KEY: ${unrelated}\n`;
+    const credentials = path.join(root, "source/.credentials.yaml");
+    fs.writeFileSync(credentials, original, { mode: 0o600 });
+    const info = m.prepareModelProfile(source, home, profile);
+    assert.equal(info.model, "deepseek-flash");
+    assert.ok(!JSON.stringify(info).includes("test-only"));
+    const copied = fs.readFileSync(
+      path.join(home, ".credentials.yaml"),
+      "utf8",
+    );
+    assert.ok(copied.includes(sentinel));
+    assert.ok(!copied.includes(unrelated));
+    assert.equal(
+      fs.statSync(path.join(home, ".credentials.yaml")).mode & 0o777,
+      0o600,
+    );
+    assert.equal(fs.readFileSync(credentials, "utf8"), original);
+    assert.match(
+      fs.readFileSync(path.join(profile, "cordis.patch.yml"), "utf8"),
+      /session-title-llm/,
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("model gold ignores prompt echoes and reasoning, requiring a durable assistant text response", async () => {
+  const m = await import("../tools/business-model.mjs");
+  assert.equal(typeof m.assistantReceipt, "function");
+  const prompt = {
+    type: "user/message",
+    data: { content: [{ type: "text", text: "ACK42" }] },
+  };
+  assert.equal(m.assistantReceipt([prompt], "ACK42").matches, false);
+  const response = {
+    type: "assistant/message",
+    data: {
+      message: {
+        content: [
+          { type: "reasoning", text: "ACK42" },
+          { type: "text", text: "wrong" },
+        ],
+      },
+      usage: { inputTokens: 9, outputTokens: 2 },
+    },
+  };
+  assert.equal(m.assistantReceipt([prompt, response], "ACK42").matches, false);
+  response.data.message.content[1].text = "ACK42";
+  assert.equal(
+    m.assistantReceipt(
+      [
+        { type: "turn/start", data: { turn: 1 } },
+        prompt,
+        { type: "request/header", data: {} },
+        response,
+        { type: "turn/end", data: { reason: { kind: "completed" } } },
+      ],
+      "ACK42",
+    ).matches,
+    true,
+  );
+  assert.deepEqual(
+    m.assistantReceipt(
+      [{ type: "request/header", data: {} }, response],
+      "ACK42",
+    ).usage,
+    { inputTokens: 9, outputTokens: 2 },
+  );
+  const two = m.assistantReceipt(
+    [{ type: "request/header", data: {} }, response, response],
+    "ACK42",
+  );
+  assert.equal(two.requestHeaders, 1);
+  assert.equal(two.assistantMessages, 2);
+  assert.equal(m.assistantReceipt([], "ACK42").usage, null);
+});
+
+test("a child without the configured provider/model is a fixture error before any billable prompt", async () => {
+  const m = await import("../tools/business-model.mjs");
+  assert.equal(typeof m.requireModelSelection, "function");
+  const selected = {
+    provider: "deepseek-official",
+    model: "deepseek-flash",
+    reasoningEffort: "off",
+  };
+  assert.throws(() => m.requireModelSelection({}, selected), /selection/i);
+  assert.throws(
+    () => m.requireModelSelection({ ...selected, model: "other" }, selected),
+    /selection/i,
+  );
+  assert.doesNotThrow(() => m.requireModelSelection(selected, selected));
+});
+
+test("editor precondition failure needs both a loaded UI error and a completed matching filesystem response", async () => {
+  const m = await import("../tools/business-sidebar-ui.mjs");
+  assert.equal(typeof m.editorLoadFailure, "function");
+  const response = {
+    path: "/sidebar/api/fs.treeBatch",
+    method: "POST",
+    status: 405,
+    completed: true,
+  };
+  assert.deepEqual(m.editorLoadFailure(["HTTP 405"], [response]), {
+    path: "/sidebar/api/fs.treeBatch",
+    status: 405,
+    method: "POST",
+  });
+  assert.equal(m.editorLoadFailure([], [response]), null);
+  assert.equal(
+    m.editorLoadFailure(["HTTP 405"], [{ ...response, completed: false }]),
+    null,
+  );
+  assert.equal(
+    m.editorLoadFailure(["HTTP 405"], [{ ...response, path: "/unrelated" }]),
+    null,
+  );
+  assert.equal(m.editorLoadFailure(["HTTP 500"], [response]), null);
+});
+
+test("model live suite requires an explicit source profile before touching credentials or starting a host", () => {
+  const r = spawnSync(
+    process.execPath,
+    [
+      "tools/business-labels.mjs",
+      "--live",
+      "--suite",
+      "sidebar-model",
+      "--json",
+    ],
+    { encoding: "utf8" },
+  );
+  assert.equal(r.status, 3);
+  assert.match(JSON.parse(r.stdout).error, /model-profile/i);
+});
+
+describe(
+  "explicit real model business acceptance",
+  { skip: process.env.DSC_MODEL_LIVE !== "1" },
+  () => {
+    test("side chat sends two bounded prompts and persists actual assistant replies across reload", () => {
+      assert.ok(
+        process.env.DSC_MODEL_PROFILE,
+        "Explicit model source profile required",
+      );
+      const r = spawnSync(
+        process.execPath,
+        [
+          "tools/business-labels.mjs",
+          "--live",
+          "--suite",
+          "sidebar-model",
+          "--model-profile",
+          process.env.DSC_MODEL_PROFILE,
+          "--json",
+          ...(process.env.DSC_MODEL_LIVE_DIR
+            ? ["--out-dir", process.env.DSC_MODEL_LIVE_DIR]
+            : []),
+        ],
+        { encoding: "utf8", timeout: 360000 },
+      );
+      assert.ok(r.status === 0 || r.status === 1, r.stdout + r.stderr);
+      const v = JSON.parse(r.stdout);
+      assert.equal(v.rows.length, 2);
+      assert.equal(v.metrics.baseline.scored, 2);
+      assert.equal(v.cleanup.privateRootRemoved, true);
+      assert.deepEqual(
+        v.rows.map((r) => r.outcome),
+        ["passed", "passed"],
+      );
+      assert.equal(v.controls.model.providerStepLimit, 2);
+      assert.equal(v.controls.model.toolsAllowed, false);
+      if (process.env.DSC_MODEL_LIVE_DIR) {
+        const evidence = JSON.parse(
+          readFileSync(
+            join(process.env.DSC_MODEL_LIVE_DIR, "labels.json"),
+            "utf8",
+          ),
+        );
+        assert.equal(evidence.rows.at(-1).modelEvidence.budget.admitted, 2);
+        assert.equal(evidence.rows.at(-1).modelEvidence.interruptedAttempts, 0);
+      }
+      assert.equal(v.prediction.businessLabelsUsed, false);
+    });
+  },
+);
 
 test("business postconditions require both durable data and visible reload result, never an ACTIVE loader label", () => {
   assert.equal(typeof api.businessOutcome, "function");
@@ -234,13 +647,24 @@ describe(
         t.skip(v.reason);
         return;
       }
-      assert.equal(v.rows.length, 4);
+      assert.equal(v.rows.length, 10);
       assert.deepEqual(
         v.rows.map((r) => r.outcome),
-        ["passed", "failed", "passed", "failed"],
+        [
+          "passed",
+          "failed",
+          "failed",
+          "failed",
+          "passed",
+          "passed",
+          "failed",
+          "failed",
+          "failed",
+          "passed",
+        ],
       );
-      assert.equal(v.metrics.baseline.scored, 2);
-      assert.equal(v.metrics.faultInjected.scored, 2);
+      assert.equal(v.metrics.baseline.scored, 4);
+      assert.equal(v.metrics.faultInjected.scored, 6);
       assert.equal(v.cleanup.privateRootRemoved, true);
       assert.equal(v.cleanup.hostStopped, true);
       assert.equal(v.prediction.businessLabelsUsed, false);
@@ -355,7 +779,7 @@ test(
     try {
       fs.writeFileSync(
         path.join(root, "dsh"),
-        `#!${process.execPath}\nconst fs=require('node:fs'),path=require('node:path');fs.writeFileSync(process.env.BUSINESS_CANCEL_MARKER,JSON.stringify({pid:process.pid,root:path.dirname(process.env.DSH_HOME)}));setInterval(()=>{},1000);`,
+        `#!${process.execPath}\nconst fs=require('node:fs'),path=require('node:path');const marker=process.env.BUSINESS_CANCEL_MARKER;fs.writeFileSync(marker+'.tmp',JSON.stringify({pid:process.pid,root:path.dirname(process.env.DSH_HOME)}));fs.renameSync(marker+'.tmp',marker);setInterval(()=>{},1000);`,
         { mode: 0o700 },
       );
       child = spawn(
@@ -475,6 +899,51 @@ describe(
   },
 );
 
+describe(
+  "real sidebar editor widgets across published versions",
+  { skip: process.env.DSC_SLOW !== "1" },
+  () => {
+    for (const suite of ["sidebar-ui", "sidebar-ui-previous"])
+      test(
+        suite + " edits and saves through CodeMirror and reloads durable bytes",
+        (t) => {
+          const r = spawnSync(
+            process.execPath,
+            [
+              "tools/business-labels.mjs",
+              "--live",
+              "--suite",
+              suite,
+              "--json",
+              ...(process.env.DSC_EDITOR_LIVE_ROOT
+                ? ["--out-dir", process.env.DSC_EDITOR_LIVE_ROOT + "/" + suite]
+                : []),
+            ],
+            { encoding: "utf8", timeout: 240000 },
+          );
+          assert.ok(r.status === 0 || r.status === 1, r.stdout + r.stderr);
+          const v = JSON.parse(r.stdout);
+          if (v.applicable === false) {
+            t.skip(v.reason);
+            return;
+          }
+          const previous = suite === "sidebar-ui-previous";
+          assert.equal(v.rows.length, previous ? 2 : 6);
+          assert.equal(v.metrics.baseline.scored, previous ? 2 : 4);
+          assert.equal(v.metrics.faultInjected.scored, previous ? 0 : 2);
+          assert.deepEqual(
+            v.rows.map((r) => r.outcome),
+            previous
+              ? ["failed", "failed"]
+              : ["passed", "failed", "passed", "passed", "failed", "passed"],
+          );
+          assert.equal(v.cleanup.privateRootRemoved, true);
+          assert.equal(v.prediction.sealedBeforeActions, true);
+        },
+      );
+  },
+);
+
 test("navigation completion belongs to the requested new document, never the previous loaded page", async () => {
   const m = await import("../tools/business-live.mjs");
   assert.equal(typeof m.loadedNavigation, "function");
@@ -500,6 +969,166 @@ describe(
   "real browser driver boundaries",
   { skip: process.env.DSC_SLOW !== "1" },
   () => {
+    test("explicit editor reload confirms a real dirty-document beforeunload dialog", async () => {
+      const helpers = await import("../tools/browser-session.mjs");
+      assert.equal(typeof helpers.navigateOwnedDocument, "function");
+      const http = await import("node:http"),
+        fs = await import("node:fs");
+      const server = http.createServer((req, res) =>
+        res.end(
+          '<button style="width:100px;height:100px">activate</button><script>onbeforeunload=()=>"unsaved"</script>',
+        ),
+      );
+      await new Promise((r) => server.listen(0, "127.0.0.1", r));
+      const { launchChromePipe } = await import("../lib/debugger.mjs");
+      const browser = await launchChromePipe(
+        process.env.DSC_CHROME ||
+          [
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            "/usr/bin/google-chrome",
+            "/usr/bin/chromium",
+          ].find((p) => fs.existsSync(p)),
+      );
+      const poll = async (fn, message) => {
+        const end = Date.now() + 10000;
+        do {
+          const v = await fn();
+          if (v) return v;
+          await new Promise((r) => setTimeout(r, 20));
+        } while (Date.now() < end);
+        throw Error(message);
+      };
+      try {
+        await browser.send("Page.enable");
+        await browser.send("Page.setLifecycleEventsEnabled", { enabled: true });
+        const url = "http://127.0.0.1:" + server.address().port;
+        await helpers.navigateOwnedDocument(browser, url, poll);
+        await browser.send("Input.dispatchMouseEvent", {
+          type: "mousePressed",
+          x: 20,
+          y: 20,
+          button: "left",
+          clickCount: 1,
+        });
+        await browser.send("Input.dispatchMouseEvent", {
+          type: "mouseReleased",
+          x: 20,
+          y: 20,
+          button: "left",
+          clickCount: 1,
+        });
+        const n = await helpers.navigateOwnedDocument(
+          browser,
+          url + "?fresh",
+          poll,
+          { discardChanges: true },
+        );
+        assert.equal(n.discardedBeforeUnload, 1);
+        assert.equal(
+          (
+            await browser.send("Runtime.evaluate", {
+              expression: "location.search",
+              returnByValue: true,
+            })
+          ).result.value,
+          "?fresh",
+        );
+      } finally {
+        await browser.close();
+        await new Promise((r) => server.close(r));
+      }
+    });
+    test("market navigation accepts a loaded target card without controls and never borrows another card's action", async () => {
+      const m = await import("../tools/business-market.mjs").catch(() => ({}));
+      assert.equal(typeof m.marketNavigationStep, "function");
+      const { launchChromePipe } = await import("../lib/debugger.mjs");
+      const fs = await import("node:fs");
+      const browser = await launchChromePipe(
+        process.env.DSC_CHROME ||
+          [
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            "/usr/bin/google-chrome",
+            "/usr/bin/chromium",
+          ].find((p) => fs.existsSync(p)),
+      );
+      try {
+        const evaluate = async (expression) => {
+          const r = await browser.send("Runtime.evaluate", {
+            expression,
+            returnByValue: true,
+            awaitPromise: true,
+          });
+          assert.equal(r.exceptionDetails, undefined);
+          return r.result?.value;
+        };
+        await evaluate(
+          `document.body.innerHTML=${JSON.stringify('<div data-dsh-market-root data-dsh-market-tab="installed"><div class="x_irow"><a title="unrelated">unrelated</a><button>添加备注</button></div><div class="x_irow"><a title="dsh-plugin-compat-check">target</a></div></div>')}`,
+        );
+        assert.equal(
+          await evaluate(`(${m.marketNavigationStep})('installed')`),
+          true,
+        );
+        assert.equal(
+          await evaluate(`(${m.marketControl})('market.note','observe')`),
+          false,
+        );
+        const missing = { actionAvailable: false };
+        assert.equal(api.businessOutcome(missing), "failed");
+        await evaluate(
+          `document.querySelector('a[title="dsh-plugin-compat-check"]').parentElement.insertAdjacentHTML('beforeend','<button>编辑备注</button>')`,
+        );
+        assert.equal(
+          await evaluate(`(${m.marketControl})('market.note','observe')`),
+          true,
+        );
+        assert.equal(
+          await evaluate(`(${m.marketControl})('market.note','remove')`),
+          true,
+        );
+        assert.equal(
+          await evaluate(`(${m.marketNavigationStep})('installed')`),
+          true,
+        );
+        assert.equal(
+          await evaluate(`(${m.marketControl})('market.note','observe')`),
+          false,
+        );
+        assert.equal(
+          await evaluate("document.querySelector('button').innerText"),
+          "添加备注",
+        );
+        await evaluate(
+          `document.body.innerHTML=${JSON.stringify('<div data-dsh-market-root><div class="x_card"><a title="unrelated">desired-note</a><button aria-label="取消收藏">添加备注</button></div><div class="x_card"><a title="dsh-plugin-compat-check">target</a><button aria-label="加入收藏">添加备注</button></div></div>')}`,
+        );
+        assert.equal(
+          await evaluate(
+            `(${m.marketControl})('market.favorite','value',true)`,
+          ),
+          false,
+        );
+        assert.equal(
+          await evaluate(
+            `(${m.marketControl})('market.note','value','desired-note')`,
+          ),
+          false,
+        );
+        await evaluate(
+          `document.querySelector('a[title="dsh-plugin-compat-check"]').parentElement.querySelector('button').setAttribute('aria-label','取消收藏')`,
+        );
+        assert.equal(
+          await evaluate(
+            `(${m.marketControl})('market.favorite','value',true)`,
+          ),
+          true,
+        );
+        assert.equal(
+          api.businessOutcome({ ...pass, uiAfterReload: false }),
+          "failed",
+        );
+      } finally {
+        await browser.close();
+      }
+    });
     test("browser locale is explicit and a loaded preview without its heading is a business failure", async () => {
       const helpers = await import("../tools/browser-session.mjs").catch(
         () => ({}),

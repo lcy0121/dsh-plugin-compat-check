@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.3",
-  "recordedAt": "2026-10-18T13:57:37.293Z",
+  "recordedAt": "2026-10-19T05:32:12.489Z",
   "testFiles": 37,
-  "tests": 529,
+  "tests": 540,
   "repositoryFiles": {
-    "total": 241,
+    "total": 244,
     "fixtures": 90,
-    "other": 151
+    "other": 154
   },
   "verification": {
     "platform": "darwin",
@@ -3396,7 +3396,7 @@
         "Windows remains deferred by user",
         "Historical marketplace install accepted published0.1.2; published0.1.3 has separate exact-tgz/public-npm and integration evidence",
         "Coverage remains limited; transport fault FN values are preserved, not fixed by changing truth labels",
-        "Market post-action navigation still requires note/favorite controls; a loaded page missing those controls can be classified as driver error/unobserved instead of business failure. No general UI-failure classification claim; follow-up tracked in Plan."
+        "Historical release0.1.3 checkpoint: loaded market controls could still be misclassified as driver failure. Current repository follow-up resolves the controlled missing-action boundary; see marketUiAndBusinessExpansion. This does not rewrite historical release evidence."
       ],
       "publicNpmInstallation": {
         "spec": "dsh-plugin-compat-check@0.1.3",
@@ -3410,6 +3410,366 @@
         "tempProfileRemoved": true,
         "scope": "Public npm specification in a private actual DSH host; report and boot evidence, not a repeat marketplace UI or comprehensive business certification"
       }
+    },
+    "marketUiAndBusinessExpansion": {
+      "recordedAt": "2026-10-19T05:32:12.510742+00:00",
+      "baseCommit": "3d7b29d6fa8892c2cd5cc515bd350733d5f2d288",
+      "branch": "codex/market-ui-business-samples",
+      "delivery": "Local repository tools and documents only; no push, merge or new npm publication",
+      "platform": "macOS arm64; actual DSH0.2.1-rc.2 and real Chrome; legacy DSH0.2.0-rc.2 separately checked",
+      "prediction": "Fixed published bytes + version-specific hand-reviewed feature spans, sealed before host/actions; no business/loader answers; feature API-risk flags, not whole-plugin verdicts",
+      "changes": [
+        "Market navigation readiness uses loaded target card independently of note/favorite controls. Target-card-scoped controls and values; action missing before request is failed without fabricated HTTP receipt.",
+        "Market phase plan adds recovery and action missing before/after completed save. Failed injection or reappearing controls is per-case harness-error, preserving baseline observations.",
+        "Actual CodeMirror select-all/insertText, visible Save and fresh editor reload; independent raw BOM/encoding/CRLF oracle; blocked save preserves old bytes.",
+        "Known file-tree precondition failure requires visible UI error plus matching completed fs response. Unavailable controlled save is unscored and retains sealed control identity.",
+        "Owned dirty-document navigation explicitly discards only beforeunload test changes. Other dialogs/transport failures remain harness errors.",
+        "Explicit model suite/profile only, selected credential reference copied owner-only into owned temporary home; original profile unchanged; generic setup errors; no model host log export.",
+        "Owned model host denies tool execution, removes tool schemas and admits at most two direct-child first steps globally. No retries/automatic titles, thinking off,256 output token limit per step.",
+        "Model success requires current completed turn, non-interrupted durable assistant text and fresh actual assistant DOM, never prompt/reasoning echoes.",
+        "Default tests/DSC_SLOW/CI do not implicitly call models. CI collects new editor evidence directories; remote results remain pending."
+      ],
+      "cohorts": [
+        {
+          "suite": "market",
+          "package": "dshmarket@1.66.37",
+          "sampleId": "364f66f6-70cd-4cca-8089-84eb95348e7f",
+          "collectedAt": "2026-10-19T05:29:40.990Z",
+          "artifactDigest": "fd4b6882674daafeeb089f09795b2820b80da036152f65f4810f07186c673296",
+          "packageFingerprint": {
+            "files": 182,
+            "digest": "a26339e13c9adcff506c1d0c00842d0e6cf104226c5a1954a5e091c40dd6f583"
+          },
+          "publishedTarballSha256": "8b29d156e3ea45330623b4cd66736992456f5ef4c92c8fb00243ccc3b101f188",
+          "outcomes": [
+            "passed",
+            "failed",
+            "failed",
+            "failed",
+            "passed",
+            "passed",
+            "failed",
+            "failed",
+            "failed",
+            "passed"
+          ],
+          "counts": {
+            "baseline": {
+              "scored": 4,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 4
+            },
+            "faultInjected": {
+              "scored": 6,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 6,
+              "trueNegative": 0
+            }
+          },
+          "cleanup": {
+            "privateRootRemoved": true,
+            "hostStopped": true
+          },
+          "sha256": {
+            "predictions.json": "afc9b9189162470398a92fd0ab8412a0112c8d00cd7e83caa95ddb6ad1916714",
+            "labels.json": "6d177946e6d49997bf37b7af0d73572eab7c9a60f3c396c5531267f54d760194",
+            "measurement.json": "362c09cc239bc193aa6c9c4edcd195cd5e006d9df589008e9020f900f429827f"
+          }
+        },
+        {
+          "suite": "sidebar",
+          "package": "dsh-better-sidebar@0.28.0",
+          "sampleId": "4ea9da08-a1df-4023-8f3a-8bec00d864d6",
+          "collectedAt": "2026-10-19T05:29:49.698Z",
+          "artifactDigest": "797536168c074957fc44730a7494fe6781b484308951c16d4fb505abc0f0c49b",
+          "packageFingerprint": {
+            "files": 471,
+            "digest": "2c3b5619b4a8ee9ab87ea179b0163a1230dbbb63e8cdbea3de8b08f9147d6892"
+          },
+          "publishedTarballSha256": "40b7ce32a6d90bff069b3bb4d0e5dd692281e0ac0598163196b816ac12335b6f",
+          "outcomes": [
+            "passed",
+            "failed",
+            "passed",
+            "passed",
+            "failed",
+            "passed"
+          ],
+          "counts": {
+            "baseline": {
+              "scored": 4,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 4
+            },
+            "faultInjected": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 2,
+              "trueNegative": 0
+            }
+          },
+          "cleanup": {
+            "privateRootRemoved": true,
+            "hostStopped": true
+          },
+          "sha256": {
+            "predictions.json": "6672efe8737a0846918253a3fe6fed068411504bf39c47de1ad780119e875ad8",
+            "labels.json": "88eeee577373f85c8fdf7134e281d99a19ffa326232b546a4e46ecea0be3cdfe",
+            "measurement.json": "74e21651a62a719331dc4dad77aa57c586dee26f776226f1579434adde07a14b"
+          }
+        },
+        {
+          "suite": "sidebar-ui",
+          "package": "dsh-better-sidebar@0.28.0",
+          "sampleId": "2860e28f-94e2-4b1a-8488-9bcf5b561eff",
+          "collectedAt": "2026-10-19T05:29:59.397Z",
+          "artifactDigest": "72bda5830e8577b246494e75012a77cbc25d192960a2301542b3e302a4044069",
+          "packageFingerprint": {
+            "files": 471,
+            "digest": "2c3b5619b4a8ee9ab87ea179b0163a1230dbbb63e8cdbea3de8b08f9147d6892"
+          },
+          "publishedTarballSha256": "40b7ce32a6d90bff069b3bb4d0e5dd692281e0ac0598163196b816ac12335b6f",
+          "outcomes": [
+            "passed",
+            "failed",
+            "passed",
+            "passed",
+            "failed",
+            "passed"
+          ],
+          "counts": {
+            "baseline": {
+              "scored": 4,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 4
+            },
+            "faultInjected": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 2,
+              "trueNegative": 0
+            }
+          },
+          "cleanup": {
+            "privateRootRemoved": true,
+            "hostStopped": true
+          },
+          "sha256": {
+            "predictions.json": "abfbc82a2368848a853b63009efe53795a817116ced6209538bc7fd6ef5a0dbc",
+            "labels.json": "9c7ebe9914e63a9a88eace8f5e78dcd45bec2731bf87b29497525ac77df00c4d",
+            "measurement.json": "ec6f332195b81089c79d3f8d57c46d841c0302a6fce44dc4cb6ea8fe6a35abd2"
+          }
+        },
+        {
+          "suite": "sidebar-ui-previous",
+          "package": "dsh-better-sidebar@0.26.1",
+          "sampleId": "6baaf99a-6fea-495b-b313-6fe778d51fac",
+          "collectedAt": "2026-10-19T05:30:05.576Z",
+          "artifactDigest": "3835e8e29c08ce24bd65b907fd2f99a31d4b38225b0de2d871b9d4356b91ebae",
+          "packageFingerprint": {
+            "files": 460,
+            "digest": "a262b6ef39c7bed72e6ebb47ac2d1c0f0f82544eb36966bb69494f2d1f059562"
+          },
+          "publishedTarballSha256": "cd2d3d85d3d4a2d54c36b8bf86a24f2ec099f85a2936a72ef83edf7612c7402a",
+          "outcomes": [
+            "failed",
+            "failed"
+          ],
+          "counts": {
+            "baseline": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 2,
+              "trueNegative": 0
+            },
+            "faultInjected": {
+              "scored": 0,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 0
+            }
+          },
+          "cleanup": {
+            "privateRootRemoved": true,
+            "hostStopped": true
+          },
+          "sha256": {
+            "predictions.json": "a6582b5d93c943f7f7bff6155b04bb168e0d9bbdf6a2faac93638b28569f3a5b",
+            "labels.json": "d4f0f749d6b58d7b4881e0d447e9fb56d5b57025edbba847f325589d71604266",
+            "measurement.json": "d08c32f96eca32e096d84400aeaea268325ca5c0949d67cc427e09fbc87c4c8b"
+          }
+        },
+        {
+          "suite": "sidebar-model",
+          "package": "dsh-better-sidebar@0.28.0",
+          "sampleId": "de973a79-11aa-4f63-acd7-6b39cadc2f58",
+          "collectedAt": "2026-10-18T15:35:26.130Z",
+          "artifactDigest": "844b6fac6340bbea2c167476fbd63c6edd845155109f5e2a43ba789d1f9d4020",
+          "packageFingerprint": {
+            "files": 471,
+            "digest": "2c3b5619b4a8ee9ab87ea179b0163a1230dbbb63e8cdbea3de8b08f9147d6892"
+          },
+          "publishedTarballSha256": "40b7ce32a6d90bff069b3bb4d0e5dd692281e0ac0598163196b816ac12335b6f",
+          "outcomes": [
+            "passed",
+            "passed"
+          ],
+          "counts": {
+            "baseline": {
+              "scored": 2,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 2
+            },
+            "faultInjected": {
+              "scored": 0,
+              "unscored": 0,
+              "truePositive": 0,
+              "falsePositive": 0,
+              "falseNegative": 0,
+              "trueNegative": 0
+            }
+          },
+          "cleanup": {
+            "privateRootRemoved": true,
+            "hostStopped": true
+          },
+          "sha256": {
+            "predictions.json": "990202d822bfd8345c9a33b4c45b073609b6916f15c47ef7bfd000b48a3da231",
+            "labels.json": "0cbc0b193e08d3edd269d4243fcb05407c06c75b3119b6a4602b8ea3a7a798b7",
+            "measurement.json": "01d80fed3f94ddb21eeeb3fe932a2cfbcb5f72df3ba17db64b82f346821457ec"
+          }
+        }
+      ],
+      "liveCheckpointHarnessHashes": {
+        "tools/business-live.mjs": "fb2bd47eb1cb5b0cac148cf92e8a33e5756914a39b720811ac710c53771dc320",
+        "tools/browser-session.mjs": "2e111ad13ba0595ae467427a7bef20692d49cb336e6ef3b8705bdcad237fe9a3",
+        "tools/business-market.mjs": "ad793e7d176773b641c57d1ea3f7ec402c91484f18383a9cea8d314dd335713e",
+        "tools/business-sidebar.mjs": "9972eee599dd555d69e32e3f60fd67a96f8db442ab08a80ef30f20753040d7f4",
+        "tools/business-sidebar-ui.mjs": "7eaa9d801fdbf98ceb2b95eb0e701a9e3b156636b201ef36cbb29216140088e1"
+      },
+      "modelCheckpointHarnessHashes": {
+        "tools/business-live.mjs": "ee60e637e0cbbc961150a11d94121a0be8bb2e8d078b73e54148d46134a84c35",
+        "tools/browser-session.mjs": "2e111ad13ba0595ae467427a7bef20692d49cb336e6ef3b8705bdcad237fe9a3",
+        "tools/business-sidebar.mjs": "9972eee599dd555d69e32e3f60fd67a96f8db442ab08a80ef30f20753040d7f4",
+        "tools/business-sidebar-ui.mjs": "73873980046db789556538eba7a87f1be49ba9aeb8e23f642c7ade82232c0ca0",
+        "tools/business-model.mjs": "505093bd43664ac6488555e66a5d35603aa33b14bbcda531b1e1d03e34ae35b8"
+      },
+      "postModelCheckpointChanges": "Only unused import/format cleanup in business-live and editorCases precondition-control fix; model policy/receipt/browser path unchanged. Editor branch covered by added offline negative and final joint runs; model labels retain their actual checkpoint hashes.",
+      "naturalFailure": {
+        "observed": "Published sidebar0.26.1: both encoding cases show completed POST /sidebar/api/fs.trees HTTP405 and visible explorer error; edit action unavailable and owned disk bytes unchanged, no fault injection.",
+        "separateDiagnosis": "Owned-host diagnostic reports better-sidebar pending on webRuntime; older compiled inject/apply uses webRuntime while0.28.0 uses connection. This is not the business oracle or proof of regression-introduction version.",
+        "predictionLimit": "Two feature-risk false negatives preserved. Whole-plugin static report is partial, including degraded/unobserved webRuntime evidence; it was not reported as globally ok. No severity/rule changes to force agreement."
+      },
+      "model": {
+        "authorization": "User allowed small real-model calls using configured account",
+        "route": "deepseek-official/deepseek-flash; reasoning off in owned profile only",
+        "finalCheckpoint": {
+          "matches": true,
+          "requestHeaders": 1,
+          "interruptedAttempts": 0,
+          "usage": {
+            "inputTokens": 909,
+            "outputTokens": 25
+          },
+          "assistantMessages": 2,
+          "budget": {
+            "admitted": 2,
+            "limit": 2,
+            "toolsAllowed": false
+          },
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "off"
+        },
+        "successfulRepliesAcrossDevelopment": 6,
+        "developmentUsageFromLastReceiptOfEachRun": {
+          "inputTokens": 10989,
+          "outputTokens": 73
+        },
+        "accounting": "Per-row usage is cumulative within the child session; do not sum rows. requestHeaders is not provider request count. Earlier calls=1 metadata meant one request/header, not one model call; preserved historical checkpoint unchanged. Usage is provider-reported, not billing certification.",
+        "setupFailures": "Earlier missing model selection/invalid retry-policy configuration produced no accepted response; excluded from business truth. One later bounded live suite produced two valid replies but its test accessed modelEvidence on scored rows instead of raw labels; assertion fixed, final live test passed. No label rewritten to make setup failures pass.",
+        "privacy": "Only selected managed reference copied with0700 owned home/0600 file; no credential values or source profile contents in committed evidence; owned roots removed."
+      },
+      "validation": {
+        "node26.12.0": {
+          "tests": 540,
+          "pass": 540,
+          "fail": 0,
+          "skipped": 0,
+          "tapSha256": "58656e026878f23ed912ef1f8c018cc6e9f74d298144ea08db3abc314373b93a"
+        },
+        "node24.19.0": {
+          "tests": 540,
+          "pass": 540,
+          "fail": 0,
+          "skipped": 0,
+          "tapSha256": "446802976a21bccbc2807bc87a4b04bcce042fbb1d0516658494a8dc4718b854"
+        },
+        "rc2Joint": {
+          "tests": 51,
+          "pass": 51,
+          "fail": 0,
+          "skipped": 0,
+          "tapSha256": "bff416958ce1a38e9b7ca0fc764a6d3f771f232950a02ea0aebdc2de313dce4e"
+        },
+        "legacyJoint": {
+          "tests": 51,
+          "pass": 47,
+          "fail": 0,
+          "skipped": 4,
+          "tapSha256": "62659847e4b56089fd3f711251839b34a5b7d920def3dfa0d0aeb368344d3ad2"
+        },
+        "explicitModel": {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "skipped": 0,
+          "tapSha256": "453e7d87fecd09817882883d3bbf0d4fd77948c1a3b15240d562dea2082d6feb"
+        },
+        "node24CancellationAfterAtomicMarker": {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "tapSha256": "6561342d5718a0586f3fd30b4cdbd041a39d972e194556b4725efe7313bc38cc"
+        },
+        "prepublishGate": {
+          "exitCode": 0,
+          "version": "0.1.3",
+          "sha256": "e5edc01dba5961cab23678de9bbf28353f1ff7fc68d8952588298fe2460934b3",
+          "scope": "Runs complete default suite and document/version checks; no npm publish performed"
+        }
+      },
+      "fixtureRaceRepair": "Final parallel Node26 run failed one cancellation test with Unexpected end of JSON input: the parent observed the fixture marker before write completion. Fixture now publishes via write-to-temp + rename, without changing assertions or production cleanup. The single orphan fake dsh group/home was identity-checked and reclaimed; original failed TAP retained.",
+      "review": "Independent read-only review: no remaining Critical/Important after missing-control, interruption, resource-limit, scoped-value fixes. Added RED/GREEN negative checks for naturally absent/reappearing market controls and unavailable editor save controls.",
+      "metadataCheck": {
+        "observedAt": "2026-10-19T05:28:11.107Z",
+        "exitCode": 0,
+        "errors": 0,
+        "notice": "Published npm0.1.3 README is immutable and differs from locally edited plugin README; expected unpublished-doc notice, no new release requested."
+      },
+      "scope": "Fixed/exploratory cohorts only; no ecosystem accuracy, blinded holdout, complete model quality, new remote Linux/Node22, Windows or public-market0.1.3 upgrade certification. Raw local artifacts remain outside repository; hashes identify exact checkpoints."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

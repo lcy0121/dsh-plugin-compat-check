@@ -34,3 +34,46 @@ export async function observeHeading(evaluate, expected) {
     expected
   );
 }
+
+/** Only an explicit owned-editor reload may discard a dirty test document. */
+export async function navigateOwnedDocument(
+  chrome,
+  url,
+  poll,
+  { discardChanges = false } = {},
+) {
+  let result,
+    error,
+    settled = false,
+    cursor = chrome.events.length,
+    discardedBeforeUnload = 0;
+  const navigation = chrome.send("Page.navigate", { url }).then(
+    (r) => {
+      result = r;
+      settled = true;
+    },
+    (e) => {
+      error = e;
+      settled = true;
+    },
+  );
+  await poll(async () => {
+    for (; cursor < chrome.events.length; cursor++) {
+      const e = chrome.events[cursor];
+      if (e.method !== "Page.javascriptDialogOpening") continue;
+      if (e.params.type !== "beforeunload" || !discardChanges)
+        throw Error("Unexpected browser dialog during owned navigation");
+      await chrome.send("Page.handleJavaScriptDialog", { accept: true });
+      discardedBeforeUnload++;
+    }
+    if (error) throw error;
+    return settled;
+  }, "Owned navigation command did not complete");
+  await navigation;
+  if (result.errorText) throw Error("Business page navigation failed");
+  await poll(
+    () => loadedNavigation(chrome.events, result.loaderId),
+    "New business document did not finish loading",
+  );
+  return { discardedBeforeUnload };
+}

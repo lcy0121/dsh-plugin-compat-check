@@ -9,7 +9,7 @@ import http from "node:http";
 import {
   configureChineseBrowser,
   disableCredentialOnboarding,
-  loadedNavigation,
+  navigateOwnedDocument,
 } from "./browser-session.mjs";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -17,11 +17,12 @@ import { command, stopOwnedChild } from "../lib/probe-runner.mjs";
 import { launchChromePipe } from "../lib/debugger.mjs";
 import { run } from "../bin/compat-check.mjs";
 import { toJSON } from "../lib/report.mjs";
+import { featurePredictions, scoreBusiness } from "./business-metrics.mjs";
 import {
-  featurePredictions,
-  scoreBusiness,
-  businessOutcome,
-} from "./business-metrics.mjs";
+  marketCases,
+  marketPhases,
+  marketNavigationStep,
+} from "./business-market.mjs";
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourceHashes = {
   "package.json":
@@ -90,13 +91,47 @@ export function completedResponse(rows, finished, failed, route, start) {
   return match && finished.has(match.requestId) ? match : null;
 }
 export { loadedNavigation } from "./browser-session.mjs";
-export async function runBusiness({ outDir, suite = "market" } = {}) {
-  if (!["market", "sidebar"].includes(suite))
+export async function runBusiness({
+  outDir,
+  suite = "market",
+  modelProfile,
+} = {}) {
+  if (
+    ![
+      "market",
+      "sidebar",
+      "sidebar-ui",
+      "sidebar-ui-previous",
+      "sidebar-model",
+    ].includes(suite)
+  )
     throw Error("Unknown business suite: " + suite);
-  const sidebar =
-    suite === "sidebar" ? await import("./business-sidebar.mjs") : null;
-  const features = sidebar ? sidebar.sidebarFeatures : marketFeatures;
-  const pin = sidebar?.sidebarPin || {
+  if (Boolean(modelProfile) !== (suite === "sidebar-model"))
+    throw Error("--model-profile is required only for sidebar-model");
+  const model =
+    suite === "sidebar-model" ? await import("./business-model.mjs") : null;
+  const sidebar = suite.startsWith("sidebar")
+    ? await import("./business-sidebar.mjs")
+    : null;
+  const editor = suite.startsWith("sidebar-ui")
+    ? await import("./business-sidebar-ui.mjs")
+    : null;
+  const features = model
+    ? model.modelFeatures
+    : editor
+      ? suite === "sidebar-ui-previous"
+        ? editor.previousEditorFeatures
+        : editor.editorFeatures
+      : sidebar
+        ? sidebar.sidebarFeatures
+        : marketFeatures;
+  const pin = (model
+    ? model.modelPin
+    : editor
+      ? suite === "sidebar-ui-previous"
+        ? editor.previousSidebarPin
+        : editor.editorPin
+      : sidebar?.sidebarPin) || {
     package: "dshmarket",
     version: "1.66.37",
     files: 182,
@@ -139,6 +174,7 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
       delete env[key];
   const cancellation = new AbortController(),
     commands = new Set();
+  let hostOutput = "";
   let host,
     chrome,
     chromeStarting,
@@ -220,6 +256,9 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
       "--dump-config",
     ]);
     disableCredentialOnboarding(profile);
+    const modelContext = model
+      ? model.prepareModelProfile(path.resolve(modelProfile), home, profile)
+      : null;
     await exec("dsh", [
       "plugin",
       "--profile",
@@ -229,8 +268,20 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
       ...(sidebar ? [] : ["dsh-plugin-compat-check@0.1.2"]),
     ]);
     const workspace = path.join(profile, "business-workspace");
+    if (sidebar) fs.mkdirSync(workspace, { recursive: true });
     const fixtureSource = sidebar
-      ? sidebar.installSidebarFixture(profile, workspace)
+      ? sidebar.installSidebarFixture(
+          profile,
+          workspace,
+          Boolean(editor || model),
+          modelContext
+            ? {
+                provider: modelContext.provider,
+                model: modelContext.model,
+                reasoningEffort: modelContext.reasoningEffort,
+              }
+            : null,
+        )
       : null;
     const pkg = path.join(nm, pin.package);
     for (const [file, digest] of Object.entries(pin.sourceHashes))
@@ -240,6 +291,8 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
     if (fingerprint.files !== pin.files || fingerprint.digest !== pin.digest)
       throw Error("Full pinned business artifact bytes changed");
     const artifact = {
+      suite,
+      ...(modelContext ? { modelContext } : {}),
       package: pin.package,
       version: pin.version,
       sourceHashes: pin.sourceHashes,
@@ -271,7 +324,13 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
         [
           "tools/business-live.mjs",
           "tools/browser-session.mjs",
-          ...(sidebar ? ["tools/business-sidebar.mjs"] : []),
+          ...(sidebar
+            ? [
+                "tools/business-sidebar.mjs",
+                ...(editor || model ? ["tools/business-sidebar-ui.mjs"] : []),
+                ...(model ? ["tools/business-model.mjs"] : []),
+              ]
+            : ["tools/business-market.mjs"]),
         ].map((f) => [f, hash(fs.readFileSync(path.join(REPO, f)))]),
       ),
       rulesHash: hash(fs.readFileSync(path.join(REPO, "rules/severity.json"))),
@@ -292,19 +351,60 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
     const canonical = toJSON(predicted),
       identity = {
         sampleId: crypto.randomUUID(),
-        suiteId: pin.package + "-" + pin.version + "-actions-v1",
+        suiteId:
+          pin.package +
+          "-" +
+          pin.version +
+          (model
+            ? "-sidechat-actions-v1"
+            : editor
+              ? "-editor-actions-v1"
+              : sidebar
+                ? "-actions-v1"
+                : "-actions-v2"),
         artifactDigest: hash(JSON.stringify(artifact)),
         dshVersion: version,
         toolVersion: canonical.toolVersion,
       };
     predictions = featurePredictions(canonical, features, identity);
-    predictions.casePlan = features.flatMap((f) => [
-      { caseId: f.id + ".healthy", featureId: f.id, control: "none" },
-      { caseId: f.id + ".blocked", featureId: f.id, control: "http-503" },
-      ...(sidebar
-        ? [{ caseId: f.id + ".recovered", featureId: f.id, control: "none" }]
-        : []),
-    ]);
+    predictions.casePlan =
+      suite === "sidebar-ui-previous"
+        ? features.map((f) => ({
+            caseId: f.id + ".healthy",
+            featureId: f.id,
+            control: "none",
+          }))
+        : model
+          ? ["reply", "followup"].map((id) => ({
+              caseId: "sidebar.sidechat." + id,
+              featureId: "sidebar.sidechat.reply",
+              control: "none",
+            }))
+          : features.flatMap((f) =>
+              sidebar
+                ? [
+                    {
+                      caseId: f.id + ".healthy",
+                      featureId: f.id,
+                      control: "none",
+                    },
+                    {
+                      caseId: f.id + ".blocked",
+                      featureId: f.id,
+                      control: "http-503",
+                    },
+                    {
+                      caseId: f.id + ".recovered",
+                      featureId: f.id,
+                      control: "none",
+                    },
+                  ]
+                : marketPhases.map((p) => ({
+                    caseId: f.id + "." + p.id,
+                    featureId: f.id,
+                    control: p.control,
+                  })),
+            );
     const sealed = JSON.stringify(predictions);
     fs.writeFileSync(path.join(root, "predictions.json"), sealed);
     // No host, browser, executed mutation/fault or gold observations existed when sealed.
@@ -360,6 +460,7 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
       }, 45000);
       const append = (b) => {
         if (output.length < 1024 * 1024) output += b;
+        hostOutput = output;
         const m = /(https?:\/\/127\.0\.0\.1:\d+\/?\?token=[\w.-]+)/.exec(
           output,
         );
@@ -433,13 +534,8 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
       } while (Date.now() < end);
       throw Error(message);
     }
-    async function navigate(url) {
-      const navigation = await chrome.send("Page.navigate", { url });
-      if (navigation.errorText) throw Error("Business page navigation failed");
-      await poll(
-        () => loadedNavigation(chrome.events, navigation.loaderId),
-        "New business document did not finish loading",
-      );
+    async function navigate(url, options) {
+      return navigateOwnedDocument(chrome, url, poll, options);
     }
     const textButton = (t) =>
       `[...document.querySelectorAll('button')].find(b=>b.innerText.trim()===${JSON.stringify(t)})`;
@@ -456,34 +552,8 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
       clickElement(textButton(t), "Missing business control: " + t);
     async function openMarket(tab) {
       await navigate(url);
-      // The official shell may close settings when its async onboarding step appears.
-      // Navigate idempotently from the current visible DOM until the target card is ready.
-      // Only navigation is repeated: no business POST is issued by this state machine.
       await poll(
-        () =>
-          evalx(`(()=>{
-        const visible=e=>e&&e.isConnected&&e.getClientRects().length&&!e.closest('[inert]')&&!e.disabled;
-        const button=t=>[...document.querySelectorAll('button')].find(b=>visible(b)&&b.innerText.trim()===t);
-        const cont=button('继续');if(cont){cont.click();return false;}
-        const discover=button('发现');
-        if(discover){
-          if(${JSON.stringify(tab)}==='installed'){
-            if(button('添加备注')||button('编辑备注'))return true;
-            const installed=[...document.querySelectorAll('button')].find(b=>visible(b)&&b.innerText.startsWith('已安装'));
-            if(installed)installed.click();
-          }else{
-            if([...document.querySelectorAll('button[aria-label="加入收藏"],button[aria-label="取消收藏"]')].some(visible))return true;
-            discover.click();
-          }
-          return false;
-        }
-        const market=button('插件市场');if(market){market.click();return false;}
-        const settings=[...document.querySelectorAll('[role="menuitem"]')].find(b=>visible(b)&&b.innerText.startsWith('设置'));
-        if(settings){settings.click();return false;}
-        const account=document.querySelector('button[aria-label="账号菜单"]');
-        if(visible(account)&&account.getAttribute('aria-expanded')!=='true')account.click();
-        return false;
-      })()`),
+        () => evalx(`(${marketNavigationStep})(${JSON.stringify(tab)})`),
         "Market target card did not become ready",
       );
     }
@@ -576,138 +646,68 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
         { flag: "wx" },
       );
     };
-    if (sidebar)
-      labels.rows = await sidebar.sidebarCases({
-        workspace,
-        url,
-        evalx,
-        poll,
-        screenshot,
-        navigate,
-        armFault: async (route) => {
-          faultRoute = route;
-          if (route)
-            await chrome.send("Fetch.enable", {
-              patterns: [
-                { urlPattern: "*" + route + "*", requestStage: "Request" },
-              ],
-            });
-          return responses.length;
-        },
-        finishRequest: async (route, start) => {
-          const receipt = await poll(() => {
-            if (pumpError) throw pumpError;
-            return completedResponse(
-              responses,
-              finishedRequests,
-              failedRequests,
-              route,
-              start,
-            );
-          }, "Sidebar save did not complete its request");
-          if (faultRoute) {
-            await chrome.send("Fetch.disable");
-            faultRoute = null;
-          }
-          return receipt;
-        },
-      });
-    else
-      for (const feature of features) {
-        for (const control of ["none", "http-503"]) {
-          const note = feature.id === "market.note",
-            caseId =
-              feature.id + "." + (control === "none" ? "healthy" : "blocked");
-          await openMarket(note ? "installed" : "discover");
-          const desired = note
-            ? "business-note-" + (control === "none" ? "one" : "two")
-            : control === "none";
-          const route = note ? "/dsh-market/note" : "/dsh-market/favorite";
-          faultRoute = control === "http-503" ? route : null;
-          if (faultRoute)
-            await chrome.send("Fetch.enable", {
-              patterns: [{ urlPattern: "*" + route, requestStage: "Request" }],
-            });
-          const before = responses.length;
-          if (note) {
-            await clickElement(
-              `(${textButton("添加备注")}||${textButton("编辑备注")})`,
-              "Note control unavailable",
-            );
-            await poll(
-              () =>
-                evalx(
-                  "Boolean(document.querySelector('input[placeholder=\"用你自己的话描述这个插件，将代替作者简介显示\"]'))",
-                ),
-              "Note editor missing",
-            );
-            await evalx(
-              `(()=>{const i=document.querySelector('input[placeholder="用你自己的话描述这个插件，将代替作者简介显示"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,${JSON.stringify(desired)});i.dispatchEvent(new Event('input',{bubbles:true}));})()`,
-            );
-            await click("保存");
-          } else {
-            const label = control === "none" ? "加入收藏" : "取消收藏";
-            await clickElement(
-              `document.querySelector('button[aria-label="${label}"]')`,
-              "Favorite control unavailable",
-            );
-          }
-          const response = await poll(() => {
-            if (pumpError) throw pumpError;
-            return completedResponse(
-              responses,
-              finishedRequests,
-              failedRequests,
-              route,
-              before,
-            );
-          }, "Business action did not complete its request");
-          if (faultRoute) {
-            await chrome.send("Fetch.disable");
-            faultRoute = null;
-          }
-          await openMarket(note ? "installed" : "discover");
-          const state = disk();
-          const persisted = note
-            ? state.notes?.["dsh-plugin-compat-check"] === desired
-            : (state.favorites || []).includes(entry.url) === desired;
-          const uiAfterReload = note
-            ? await evalx(
-                `document.body.innerText.includes(${JSON.stringify(desired)})`,
-              )
-            : await evalx(
-                `document.querySelector('button[aria-label="${desired ? "取消收藏" : "加入收藏"}"]')!==null`,
-              );
-          const observed = {
-            requestStatus: response.status,
-            persisted,
-            uiAfterReload,
-          };
-          const label = {
-            caseId,
-            featureId: feature.id,
-            control,
-            action: note
-              ? "Save a new note, then reload"
-              : "Toggle catalog favorite, then reload",
-            expected:
-              "Requested value must persist on disk and remain visible after reload",
-            observed,
-            outcome: businessOutcome(observed),
-          };
-          labels.rows.push(label);
-          if (outDir) {
-            const screenshot = await chrome.send("Page.captureScreenshot", {
-              format: "png",
-            });
-            fs.writeFileSync(
-              path.join(outDir, caseId + ".png"),
-              Buffer.from(screenshot.data, "base64"),
-              { flag: "wx" },
-            );
-          }
+    let responseWindow = 0;
+    const driver = {
+      suite,
+      resetResponseWindow: () => {
+        responseWindow = responses.length;
+      },
+      responseRows: () =>
+        responses.slice(responseWindow).map((r) => ({
+          ...r,
+          completed:
+            finishedRequests.has(r.requestId) &&
+            !failedRequests.has(r.requestId),
+        })),
+      workspace,
+      home,
+      modelContext,
+      outDir,
+      url,
+      evalx,
+      poll,
+      screenshot,
+      navigate,
+      click,
+      chrome,
+      openMarket,
+      disk,
+      entry,
+      armFault: async (route) => {
+        faultRoute = route;
+        if (route)
+          await chrome.send("Fetch.enable", {
+            patterns: [
+              { urlPattern: "*" + route + "*", requestStage: "Request" },
+            ],
+          });
+        return responses.length;
+      },
+      finishRequest: async (route, start) => {
+        const receipt = await poll(() => {
+          if (pumpError) throw pumpError;
+          return completedResponse(
+            responses,
+            finishedRequests,
+            failedRequests,
+            route,
+            start,
+          );
+        }, "Business action did not complete its request");
+        if (faultRoute) {
+          await chrome.send("Fetch.disable");
+          faultRoute = null;
         }
-      }
+        return receipt;
+      },
+    };
+    labels.rows = model
+      ? await model.modelCases(driver)
+      : editor
+        ? await editor.editorCases(driver)
+        : sidebar
+          ? await sidebar.sidebarCases(driver)
+          : await marketCases(driver, features);
     labels.collectedAt = new Date().toISOString();
     if (
       JSON.stringify(predictions) !== sealed ||
@@ -727,29 +727,45 @@ export async function runBusiness({ outDir, suite = "market" } = {}) {
         sealedBeforeActions: true,
         sha256: hash(sealed),
       },
-      controls: sidebar
+      controls: model
         ? {
-            credentialOnboarding:
-              "Disabled through official private-profile config; no model readiness or credential claim",
-            catalogue:
-              "No market catalog; published sidebar + owned empty official session and two disposable workspace files",
-            faults:
-              "Browser intercepts only POST /sidebar/write with HTTP503; installed plugin bytes unchanged",
+            model: modelContext,
+            fixture:
+              "Owned workspace and official agent with an explicit closed empty fixture turn; no inherited assistant reply",
             scope:
-              "Save/preview HTTP path for UTF8 BOM/UTF16LE + CRLF: healthy, blocked and recovery. Not editor widget UI, natural version regression, or original-plugin defect certification.",
+              "Two real side-chat composer prompts; independent v4 JSONL assistant content and actual reloaded plugin assistant DOM; no broader model/task quality claim",
           }
-        : {
-            credentialOnboarding:
-              "Disabled through official private-profile config; no model readiness or credential claim",
-            catalogue:
-              "Single real public entry as a controlled local catalog; not a public-market installation test",
-            faults:
-              "Browser intercepts only the selected feature POST with HTTP503; installed plugin bytes unchanged",
-            scope:
-              "Normal note save and favorite toggle plus failure controls; transport failures expose blind spots, not original plugin defects.",
-          },
+        : sidebar
+          ? {
+              credentialOnboarding:
+                "Disabled through official private-profile config; no model readiness or credential claim",
+              catalogue:
+                "No market catalog; published sidebar + owned empty official session and two disposable workspace files",
+              faults:
+                "Browser intercepts only POST /sidebar/write with HTTP503; installed plugin bytes unchanged",
+              scope: editor
+                ? "Native CodeMirror input and visible Save button, exact BOM/encoding/CRLF bytes, fresh editor reload; fixed published version comparison, not a pre-established natural regression."
+                : "Save/preview HTTP path for UTF8 BOM/UTF16LE + CRLF: healthy, blocked and recovery. Not editor widget UI, natural version regression, or original-plugin defect certification.",
+            }
+          : {
+              credentialOnboarding:
+                "Disabled through official private-profile config; no model readiness or credential claim",
+              catalogue:
+                "Single real public entry as a controlled local catalog; not a public-market installation test",
+              faults:
+                "Browser intercepts selected POST with HTTP503, or removes only target-card action controls before action/after completed save; installed plugin bytes unchanged",
+              scope:
+                "Target-card notes/favorites: healthy, HTTP503, missing controls before/after action, recovery. Controlled failures expose blind spots, not natural regressions or original-plugin defects.",
+            },
     };
   } catch (error) {
+    if (outDir && suite !== "sidebar-model")
+      fs.writeFileSync(
+        path.join(outDir, "failure-host.txt"),
+        hostOutput
+          .replaceAll(root, "<private>")
+          .replace(/([?&]token=)[\w.-]+/g, "$1<redacted>"),
+      );
     if (outDir && chrome) {
       try {
         const text = await chrome.send("Runtime.evaluate", {

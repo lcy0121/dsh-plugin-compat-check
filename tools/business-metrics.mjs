@@ -25,7 +25,7 @@ export function businessOutcome(observed) {
       throw Error("Malformed harness error");
     return "harness-error";
   }
-  for (const k of ["persisted", "uiAfterReload"])
+  for (const k of ["persisted", "uiAfterReload", "actionAvailable"])
     if (observed[k] !== undefined && typeof observed[k] !== "boolean")
       throw Error("Malformed business postcondition: " + k);
   if (
@@ -35,6 +35,11 @@ export function businessOutcome(observed) {
       observed.requestStatus > 599)
   )
     throw Error("Malformed request postcondition");
+  if (observed.actionAvailable === false) {
+    if (observed.requestStatus !== undefined)
+      throw Error("Unavailable action contradicts HTTP receipt");
+    return "failed";
+  }
   if (
     observed.requestStatus === undefined ||
     observed.persisted === undefined ||
@@ -142,7 +147,7 @@ export function scoreBusiness(predictions, labels) {
       !c.caseId ||
       plan.has(c.caseId) ||
       !byFeature.has(c.featureId) ||
-      !["none", "http-503"].includes(c.control)
+      !["none", "http-503", "dom-control-missing"].includes(c.control)
     )
       throw Error("Invalid planned business case");
     plan.set(c.caseId, c);
@@ -170,7 +175,7 @@ export function scoreBusiness(predictions, labels) {
     )
       throw Error("Business case feature/control differs from sealed plan");
     if (!byFeature.has(row.featureId)) throw Error("Unknown business feature");
-    if (!["none", "http-503"].includes(row.control))
+    if (!["none", "http-503", "dom-control-missing"].includes(row.control))
       throw Error("Unknown business case control");
     const p = byFeature.get(row.featureId),
       outcome = businessOutcome(row.observed),
