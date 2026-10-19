@@ -4840,7 +4840,8 @@
         "evidenceDirectory": "/private/tmp/dsc-source-delivery.Fs1rlx",
         "node22DefaultTests": 561,
         "node22DefaultPassed": 561,
-        "node22OwnedProcessTests": 11
+        "node22OwnedProcessTests": 11,
+        "finalNode26Gate": "passed; default561 plus document/artifact checks; no publication"
       },
       "remote": {
         "pullRequest": "https://github.com/lcy0121/dsh-plugin-compat-check/pull/6",
@@ -4851,7 +4852,49 @@
         "firstResult": "Node22 multi-resource cleanup fixture cancelled with unresolved Promise; Node24 jobs cancelled by matrix fail-fast, Linux dependent jobs skipped. Do not count as passed.",
         "reproduction": "Node22.19.0 isolated multi-resource test reproduced cancelledByParent on macOS; Node26 isolated test passed. Failure cleanup unrefs child; fixture awaiting final kill/exit had no referenced handle.",
         "correction": "Test-only final cleanup refs the owned child before awaiting exit; production unref/error/retained-directory behavior unchanged. Node22 owned-process11/11 and default561/561 verified afterward. No retry or budget relaxation.",
-        "status": "Fix awaiting fresh PR/main CI; no new remote success claimed at this checkpoint."
+        "status": "Source checkpoint e0b487c passed all push/PR jobs; final record/main delivery tracked by linked PR.",
+        "verifiedSourceHead": "e0b487c034d1373dd221c6ac855c7c7cabd0629f",
+        "verifiedPushCi": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390",
+        "verifiedPrCi": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254434881",
+        "pushAndPrChecksPassed": 8,
+        "jobs": [
+          {
+            "name": "test (22.19.0)",
+            "conclusion": "success",
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390/job/118066021133"
+          },
+          {
+            "name": "test (24)",
+            "conclusion": "success",
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390/job/118066021515"
+          },
+          {
+            "name": "linux-live (0.2.0-rc.2)",
+            "conclusion": "success",
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390/job/118066338075"
+          },
+          {
+            "name": "linux-live (0.2.1-rc.2)",
+            "conclusion": "success",
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390/job/118066338258"
+          }
+        ],
+        "linuxRuntime": "Ubuntu24.04 x64, Node24.21.0; default matrix Node22.19.0 and24.21.0",
+        "linuxLive": {
+          "legacy": {
+            "tests": 52,
+            "passed": 48,
+            "failed": 0,
+            "notApplicable": 4
+          },
+          "rc2": {
+            "tests": 52,
+            "passed": 52,
+            "failed": 0,
+            "notApplicable": 0
+          }
+        },
+        "finalDeliveryTracking": "PR6 tracks final record-only commit checks, merge status and main CI; exact e0b487c results above do not certify a later commit automatically."
       },
       "scope": "Source/docs delivery only. Existing real macOS/DSH/Chrome and model evidence retains its exact dated scope; no new model calls, Windows certification, npm tag or npm release."
     }
