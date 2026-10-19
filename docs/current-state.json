@@ -4814,7 +4814,9 @@
           "Include process cleanup/Chrome diagnostics in all three unpublished-source summaries",
           "Separate repository source delivery from a future npm release",
           "Clarify plugin README version scope and skill/rules source vs registry status",
-          "Preserve dated historical audit and acceptance snapshots rather than rewriting old results"
+          "Preserve dated historical audit and acceptance snapshots rather than rewriting old results",
+          "Distinguish DSC_OUT_DIR probe/loader diagnostics from DSC_EXECUTION_DIAGNOSTICS engineering diagnostics",
+          "Relabel extraction history constraints without implying the current release is0.1.1"
         ],
         "metadataObservedAt": "2026-10-19T12:36:51.655Z",
         "metadataErrors": 0,
@@ -4835,10 +4837,21 @@
         "documentFacts": "passed",
         "generatedContract": "passed",
         "skillCopies": "byte-identical",
-        "evidenceDirectory": "/private/tmp/dsc-source-delivery.Fs1rlx"
+        "evidenceDirectory": "/private/tmp/dsc-source-delivery.Fs1rlx",
+        "node22DefaultTests": 561,
+        "node22DefaultPassed": 561,
+        "node22OwnedProcessTests": 11
       },
       "remote": {
-        "status": "Awaiting authorized push and fresh PR/main CI; no new remote success claimed at this checkpoint."
+        "pullRequest": "https://github.com/lcy0121/dsh-plugin-compat-check/pull/6",
+        "firstSourceHead": "4c1f8481b5ba5de253577cd1637a2d4f3778fc4c",
+        "uploadMethod": "GitHub Git Data API after Git HTTPS connection failures; all original blob/tree/commit SHAs verified",
+        "firstPushRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39253880605",
+        "firstPrRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39253946578",
+        "firstResult": "Node22 multi-resource cleanup fixture cancelled with unresolved Promise; Node24 jobs cancelled by matrix fail-fast, Linux dependent jobs skipped. Do not count as passed.",
+        "reproduction": "Node22.19.0 isolated multi-resource test reproduced cancelledByParent on macOS; Node26 isolated test passed. Failure cleanup unrefs child; fixture awaiting final kill/exit had no referenced handle.",
+        "correction": "Test-only final cleanup refs the owned child before awaiting exit; production unref/error/retained-directory behavior unchanged. Node22 owned-process11/11 and default561/561 verified afterward. No retry or budget relaxation.",
+        "status": "Fix awaiting fresh PR/main CI; no new remote success claimed at this checkpoint."
       },
       "scope": "Source/docs delivery only. Existing real macOS/DSH/Chrome and model evidence retains its exact dated scope; no new model calls, Windows certification, npm tag or npm release."
     }

@@ -117,7 +117,7 @@ The pinned Babel JS/TS AST analyser tracks lexical bindings, per-call positions,
 
 Default static CLI checks do not start DSH or install targets. The host plugin uses an analysis worker but no external command/network for checks, and writes its own baseline by default. Schema2 identity includes canonical profile, path hash, mode, tool, rules and catalogue. Files live at `$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`. Comparison runs under a lock with atomic replacement; incomplete scans do not advance the baseline. Static, file and in-process observations have separate modes.
 
-Descriptor sampling does not execute getters; unknown accessor methods remain unknown. Diagnostics require an explicit private `DSC_OUT_DIR`. Queries of another profile use static evidence rather than borrowing the current host's services. Inspect kept evidence for local information before sharing.
+Descriptor sampling does not execute getters; unknown accessor methods remain unknown. Probe/loader diagnostics require an explicit private `DSC_OUT_DIR`. Queries of another profile use static evidence rather than borrowing the current host's services. Inspect kept evidence for local information before sharing.
 
 ## Repository layout
 

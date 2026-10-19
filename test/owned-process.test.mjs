@@ -214,6 +214,9 @@ test(
       patch.mock.restore();
     } finally {
       t.mock.restoreAll();
+      // Failure cleanup intentionally unrefs this child; the fixture owns the
+      // final kill and must keep the event loop alive until its exit arrives.
+      child.ref();
       const exited = once(child, "exit");
       original(-child.pid, "SIGKILL");
       await exited;
@@ -463,6 +466,7 @@ test(
       t.mock.restoreAll();
       for (const child of [denied, healthy]) {
         if (child.exitCode === null && child.signalCode === null) {
+          child.ref();
           const exited = once(child, "exit");
           kill(child.pid, true);
           await exited;
@@ -575,6 +579,7 @@ test(
     } finally {
       t.mock.restoreAll();
       if (child.exitCode === null && child.signalCode === null) {
+        child.ref();
         const exited = once(child, "exit");
         kill(child.pid, true);
         await exited;
