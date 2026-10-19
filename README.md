@@ -94,4 +94,12 @@ node tools/meta-check.mjs --json
 
 [Plan：契约、验证与待办](docs/Plan.md) · [current-state.json：计数与证据](docs/current-state.json) · [规则](rules/README.md) · [skill](skill/README.md)。工程诊断、独立业务度量及显式模型测试的命令与权限见 [复现指南](docs/Plan.md#5-验证记录与复现)，这些开发工具不随 npm 插件分发。
 
-项目已收录于 [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)。[MIT License](LICENSE)。
+项目已收录于：
+
+- [Awesome DSH Plugin（主目录）](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)
+- [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)
+- [dsh.works 插件目录](https://github.com/dshworks/awesome-dsh-plugins)
+- [Bruce 的 Awesome DSH Plugins](https://github.com/bruc3van/awesome-dsh-plugin)
+- [1024 生态目录](https://github.com/imsai-sh/awesome-deepseek-harness-plugins)（[1024 Store](https://deepseek1024.com) 展示）
+
+收录不等于兼容性认证；1024 Store 的 npm 安装方式仍待上游修复，状态见 [Plan](docs/Plan.md)。[MIT License](LICENSE)。

@@ -94,4 +94,12 @@ Default tests do not start real DSH or call models. Artifact tests install with 
 
 [Plan: contracts, verification and next steps](docs/Plan.md) · [current-state.json: counts and evidence](docs/current-state.json) · [Rules](rules/README.md) · [Skill](skill/README.md). Commands and authorization boundaries for engineering diagnostics, independent business measurements and explicit model tests are in the [reproduction guide](docs/Plan.md#5-验证记录与复现); these development tools are not shipped in the npm plugin.
 
-Listed in [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness). [MIT License](LICENSE).
+Listed in:
+
+- [Awesome DSH Plugin (primary catalog)](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)
+- [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)
+- [dsh.works plugin catalog](https://github.com/dshworks/awesome-dsh-plugins)
+- [Bruce’s Awesome DSH Plugins](https://github.com/bruc3van/awesome-dsh-plugin)
+- [1024 ecosystem catalog](https://github.com/imsai-sh/awesome-deepseek-harness-plugins) (displayed in [1024 Store](https://deepseek1024.com))
+
+Listing is not compatibility certification. The npm installation method in 1024 Store still awaits an upstream fix; see [Plan](docs/Plan.md). [MIT License](LICENSE).

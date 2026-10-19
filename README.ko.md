@@ -94,4 +94,12 @@ node tools/meta-check.mjs --json
 
 [Plan: 계약·검증·후속 작업](docs/Plan.md) · [current-state.json: 통계·증거](docs/current-state.json) · [규칙](rules/README.md) · [skill](skill/README.md). 엔지니어링 진단, 독립 업무 측정과 명시적 모델 테스트의 명령·권한 경계는 [재현 안내](docs/Plan.md#5-验证记录与复现)에 있으며 이 개발 도구들은 npm 플러그인에 포함되지 않습니다.
 
-[Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)에 수록되어 있습니다. [MIT License](LICENSE).
+다음 목록에 수록되어 있습니다:
+
+- [Awesome DSH Plugin (주요 카탈로그)](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)
+- [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)
+- [dsh.works 플러그인 카탈로그](https://github.com/dshworks/awesome-dsh-plugins)
+- [Bruce의 Awesome DSH Plugins](https://github.com/bruc3van/awesome-dsh-plugin)
+- [1024 생태계 카탈로그](https://github.com/imsai-sh/awesome-deepseek-harness-plugins) ([1024 Store](https://deepseek1024.com)에 표시)
+
+수록은 호환성 인증을 뜻하지 않습니다. 1024 Store의 npm 설치 방식은 아직 상위 프로젝트의 수정이 필요합니다. 상태는 [Plan](docs/Plan.md)을 참고하세요. [MIT License](LICENSE).
