@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.3",
-  "recordedAt": "2026-10-19T13:24:41.013Z",
+  "recordedAt": "2026-10-19T18:14:22.019Z",
   "testFiles": 38,
-  "tests": 561,
+  "tests": 567,
   "repositoryFiles": {
-    "total": 247,
+    "total": 248,
     "fixtures": 90,
-    "other": 157
+    "other": 158
   },
   "verification": {
     "platform": "darwin",
@@ -5219,6 +5219,271 @@
           "failed": 0
         },
         "gitDiffCheck": "passed"
+      }
+    },
+    "linuxChromeStartup20261020": {
+      "recordedAt": "2026-10-19T18:26:07.981948+00:00",
+      "sourceBase": "bff3369",
+      "status": "Local implementation, real Linux Chrome controls and rc.2 DSH joint integration passed; remote Ubuntu x64 CI pending separately authorized push.",
+      "historicalIncident": {
+        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39260114242",
+        "commit": "fffec7f5fb1a3e50b335bbe744ae5a77eecaeef0",
+        "diagnosticSha256": "e72a00dd8c4468d2f9c916e4bd4e9dfbfe21d7122d16b6ddeb4554e5b19156f4",
+        "known": "Browser.getVersion10000ms,51 bytes written,0 read; owned cleanup succeeded.",
+        "rootCause": "Not established: original process/thread scheduler state and inherited session-bus response were not captured. Do not retroactively attribute it to the controlled mechanism below.",
+        "runnerImage": {
+          "os": "ubuntu-24.04",
+          "version": "20261012.334.1",
+          "includedSoftware": "https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md",
+          "manifestBlob": "e627f14a3702c8c01ea2cc3ed3a7eae6b1941da5",
+          "preinstalledGoogleChrome": "155.0.8059.39",
+          "failedBrowserVersionDirectlyObserved": false
+        }
+      },
+      "linuxEnvironment": {
+        "os": "Debian13",
+        "kernel": "6.12.113+deb13-cloud-arm64",
+        "virtualization": "Owned QEMU HVF VM",
+        "arch": "arm64",
+        "vcpus": 2,
+        "memoryMiB": 3072,
+        "nodeVersion": "24.21.0",
+        "chromiumVersion": "150.0.7871.181",
+        "imageUrl": "https://cloud.debian.org/images/cloud/trixie/latest/debian-13-genericcloud-arm64.qcow2",
+        "imageSha512": "0199ea72dd82e84264fda5068c5756412c778f395fca6748a186f2d0a34f524fe406e87339bda0b7f71aa9bab066b9850cde44cd1650116f389dc3f786cb232b",
+        "nodeSha256": "6ad1325edbdb5649c379b75a237147a666c95d4f9ae8d340fef2d1575d289ad2",
+        "limits": "Different distribution/architecture/browser from original GitHub Ubuntu x64 runner; this is real Linux kernel evidence, not exact historical environment reproduction."
+      },
+      "initialUnmodifiedBatch": {
+        "serial": 4,
+        "parallel": 4,
+        "passed": 8,
+        "retries": 0,
+        "millisecondsRange": [
+          133.01218000000006,
+          502.56702499999994
+        ],
+        "conclusion": "Ordinary four-way concurrency did not reproduce the historical timeout; no concurrency restriction added."
+      },
+      "controlledBusExperiments": {
+        "combined": [
+          {
+            "scenario": "invalid-address",
+            "ok": true,
+            "milliseconds": 159.203732,
+            "stderrBytes": 4914,
+            "dbusErrorLines": 14
+          },
+          {
+            "scenario": "unresponsive-bus",
+            "ok": false,
+            "milliseconds": 10130.705296,
+            "stderrBytes": 0,
+            "dbusErrorLines": 0,
+            "phase": "browser-handshake",
+            "receivedBytes": 0,
+            "leaderState": "S",
+            "waitChannel": "do_sys_poll",
+            "parentTiming": {
+              "requestElapsedMs": 10006.867954,
+              "timerOverrunMs": 6.867953999999372,
+              "parentCpuMilliseconds": 1.248,
+              "eventLoopUtilization": 0.00010170302410842452
+            },
+            "cleanup": {
+              "stopped": true,
+              "status": "stopped"
+            }
+          }
+        ],
+        "singleVariable": [
+          {
+            "scenario": "session-only",
+            "ok": false,
+            "milliseconds": 10146.920395,
+            "stderrBytes": 0,
+            "dbusErrorLines": 0,
+            "phase": "browser-handshake",
+            "receivedBytes": 0,
+            "leaderState": "S",
+            "waitChannel": "do_sys_poll",
+            "parentTiming": {
+              "requestElapsedMs": 10008.489561,
+              "timerOverrunMs": 8.489561000000322,
+              "parentCpuMilliseconds": 2.778,
+              "eventLoopUtilization": 0.0002949975551462086
+            },
+            "cleanup": {
+              "stopped": true,
+              "status": "stopped"
+            }
+          },
+          {
+            "scenario": "system-only",
+            "ok": true,
+            "milliseconds": 133.72122899999886,
+            "stderrBytes": 441,
+            "dbusErrorLines": 0
+          }
+        ],
+        "conclusion": "A reachable session bus that accepts but never replies reproducibly blocks real Chromium before CDP. An invalid address generates dbus errors but starts; a stalled system bus alone starts. The test-only redirected stderr means the direct child pipe stderr count is0 in these controlled wrappers, not proof of no log output."
+      },
+      "fix": {
+        "scope": "Linux child process of launchChromePipe only",
+        "sessionBus": "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null",
+        "behavior": "Do not connect the private headless acceptance browser to an inherited desktop session bus; leave parent environment, system bus, sandbox flags, command timeouts and retry behavior unchanged.",
+        "red": "Real unresponsive inherited session bus: one attempt, Browser.getVersion timeout at10000ms; failure TAP retained.",
+        "green": "Initial Linux full regression248.49821ms; final deterministic-controls run268.9204ms. Both evaluate6*7=42 and observe zero connections to the private unresponsive bus, without retry.",
+        "npm": "New helper excluded from staged kernel, like debugger/probe-runner; no product version change or npm publication."
+      },
+      "diagnostics": {
+        "capture": "Initial leader snapshot after spawn and bounded process/thread snapshot at failure before TERM/KILL; cumulative counters retain process startTimeTicks.",
+        "budget": {
+          "maxThreads": 32,
+          "maxBytesPerFile": 4096
+        },
+        "fields": [
+          "state",
+          "user/system ticks",
+          "thread count",
+          "start time",
+          "scheduler runtime/runqueue/timeslices",
+          "wait channel",
+          "sched_schedstats enabled/disabled/unavailable",
+          "per-field read/parse failures and thread truncation",
+          "monotonic request elapsed/timer overrun",
+          "parent CPU milliseconds and event-loop utilization"
+        ],
+        "privacy": "No /proc comm strings, arguments, environment, source paths or raw kernel files retained; existing executable basename and private stderr policy unchanged.",
+        "limits": "Raw counters and wchan are observations, not automatic root-cause labels; disabled/unknown scheduler statistics or wchan0 cannot establish absence of waiting. Parent CPU/event-loop measurements are not Chrome CPU.",
+        "references": [
+          "https://www.kernel.org/doc/html/latest/scheduler/sched-stats.html",
+          "https://nodejs.org/api/perf_hooks.html#performanceeventlooputilizationutilization1-utilization2"
+        ]
+      },
+      "verification": {
+        "linuxChrome": {
+          "tests": 11,
+          "passed": 11,
+          "failed": 0,
+          "includes": [
+            "paused actual Chrome captures pre-kill T state and matching start identity; cleanup verified",
+            "fixed2 serial+2 parallel starts and page script results",
+            "inherited unresponsive session bus isolation",
+            "pipe EOF/spawn/malformed/target stall and private diagnostics",
+            "bounded/malformed/unavailable scheduler inputs and blocked-parent timing"
+          ],
+          "finalControlRefinement": "Pause only after Chrome has completed startup, confirm kernel T state, then issue the command. Avoid a new polling race against startup; the separate unresponsive-session-bus case covers deterministic startup blockage."
+        },
+        "macDefault": {
+          "node": "26.12.0",
+          "tests": 567,
+          "passed": 564,
+          "skipped": 3,
+          "failed": 0,
+          "skips": "Three Linux-only real Chrome cases; fixture/parent timing cases execute."
+        },
+        "format": "passed on final source",
+        "prepublish": "passed on final source; validation only, no publish",
+        "sandboxAttempt": {
+          "tests": 566,
+          "passed": 560,
+          "failed": 4,
+          "skipped": 2,
+          "failures": [
+            "live owned group denied by OS: /bin/ps restricted",
+            "Darwin zombie before Node exit: process snapshot unavailable",
+            "Darwin accepted TERM teardown: EPERM cleanup under sandbox",
+            "packaging: npm cache/log directory denied"
+          ],
+          "disposition": "Retained initial sandbox TAP. Authorized full run passes; production logic not changed to hide these environmental restrictions."
+        },
+        "macLive": {
+          "node": "26.12.0",
+          "dsh": "0.2.1-rc.2",
+          "tests": 35,
+          "passed": 35,
+          "failed": 0,
+          "scope": "rc2-live and business-labels: private DSH/tgz/Chrome, market/HTTP/editor and navigation controls; no model calls."
+        },
+        "linuxDshJoint": {
+          "node": "24.21.0",
+          "dsh": "0.2.1-rc.2",
+          "tests": 53,
+          "passed": 53,
+          "failed": 0,
+          "skipped": 0,
+          "command": "DSC_SLOW=1 DSC_CHROME=/usr/bin/chromium DSC_REQUIRE_RC2_UI=1 node --test test/probe-boot.test.mjs test/labels.test.mjs test/engineering-live.test.mjs test/profile-lock.test.mjs test/rc2-live.test.mjs test/business-labels.test.mjs",
+          "scope": "Same test-file command as current CI, real Debian arm64 kernel and Chromium150; original Ubuntu x64 Chrome155 is not certified by this run. No model requests."
+        },
+        "packedArtifact": {
+          "version": "0.1.3",
+          "sha256": "9bb1f68c2b2ddb6580103ee99bbf542542d613032cdaf77a5aa2e2c4afebd397",
+          "fileCount": 38,
+          "developmentChromeModulesAbsent": true,
+          "sourceKernelCleaned": true
+        },
+        "finalDocumentFacts": "passed:0.1.3,38 test files,10 maintained documents,567-test final TAP",
+        "docsTests": {
+          "tests": 9,
+          "passed": 9,
+          "failed": 0
+        },
+        "workflowYaml": "parsed"
+      },
+      "ci": {
+        "change": "Add DSC_SLOW debugger suite before both Linux DSH matrix jobs; retain browser/kernel/Node/CPU environment, linux-chrome-startup.tap and existing failure diagnostics.",
+        "remoteRun": "Not run: pushing this new change requires separate authorization."
+      },
+      "evidence": {
+        "directory": "/private/tmp/dsc-linux-chrome-20261020",
+        "files": {
+          "linux-evidence/dbus-red.tap": "8999cd83ff18941a59b641040655901dcd767292f24b7bcd990373aee452502c",
+          "linux-evidence/debugger-final.tap": "45d66727fbc28fc9654a1cfeb0d4d473e16edc53bc3727125f0d6f3b0a2d7f7e",
+          "linux-evidence/baseline-results.json": "22a88a4b504638da5b9d1ecffdb0d9ede93331a3b7dcfb4a1bc459f8436202fd",
+          "linux-evidence/dbus-controls.json": "3ab6e20ad00f229036dd145d516528d42eb0c85527d7ce74baa143b4c66083b0",
+          "linux-evidence/dbus-split-controls.json": "ede9a517a7f0762c01b2cd6fefdf3bce4b6e90cb676e908714a7b44d4bef69cb",
+          "default-final.tap": "f51ff2dc7ce007355deef6a40765f7650eeb02f23fd01ab47d53a0bf0097b281",
+          "format.log": "1bc31198d2d9d497eb41482a9cf485536d7f37d25e56a9fe9a686359ffb89024",
+          "prepublish.log": "e5edc01dba5961cab23678de9bbf28353f1ff7fc68d8952588298fe2460934b3",
+          "mac-live.tap": "c22b40c6da7468273a6ebcfbd11a39600224a195bb782972800f99808a6fcc98",
+          "packed-verification.json": "d503c35a8cba680b86c47b7193d9754de2440d1ce98b06f474d4d677ca36a4a5",
+          "linux-evidence/linux-live-final.tap": "bfd9bbd63e14594b4675edbaf9b4d1aa33d95731518dec4a30fff1fabb1ee944",
+          "linux-evidence/linux-rc2.json": "3ef2af8ca38dbbc74479482c0945af151f7313d730f10ecf29162006e2ed4123",
+          "linux-evidence/linux-engineering.json": "7962371400bbf0340d8c3a92a29ff5ee04f750eae5ced0f8731c1b56919fb4b4",
+          "original-image-manifest.md": "3911b4bc1aa423be7b7469a75f3093f51306c02f2638f2a8b4f5ed31f3ffe791",
+          "linux-evidence/debugger-stable-controls.tap": "90bc00555e4f8069130392ace6f9c67d0ab8e082a4a65672ab110f72563a7f37",
+          "default-stable-controls.tap": "9d6fa2af09a501ac4e0940f8369020a216ab7ddf7ff099ab916140073dd04ce9",
+          "prepublish-final.log": "e5edc01dba5961cab23678de9bbf28353f1ff7fc68d8952588298fe2460934b3",
+          "format-final.log": "1bc31198d2d9d497eb41482a9cf485536d7f37d25e56a9fe9a686359ffb89024",
+          "docs-final.tap": "498414ae78ccbcb6211ad185c802749b8f6ef8d704c5d3553d0efd09f7beb248"
+        }
+      },
+      "cleanup": {
+        "linuxRc2PrivateRootRemoved": true,
+        "linuxEngineering": {
+          "hostStopped": true,
+          "privateRootRemoved": true
+        },
+        "vmShutdown": "QEMU exited normally after guest systemctl poweroff; final VM file cleanup recorded below.",
+        "vm": {
+          "vmExited": true,
+          "vmDiskImagesRemoved": true,
+          "temporarySshKeyRemoved": true,
+          "recordedAt": "2026-10-19T18:22:07.766181+00:00"
+        },
+        "finalControlVm": {
+          "exited": true,
+          "imagesRemoved": true,
+          "temporarySshKeyRemoved": true
+        }
+      },
+      "sourceFiles": {
+        "lib/debugger.mjs": "40ca21a7123eb69d83d62b70eb07e01516d38decd9e6da0191a9865394bb6697",
+        "lib/chrome-diagnostics.mjs": "5265671328e6ecc6a08053ddc3dae6c84bf277cb687a457d94f382a648ebc7c7",
+        "test/debugger.test.mjs": "a68bf2a9c9186432342a0102be2cb8dc850e5955ef117454f534ebbc5f8fdd3f",
+        ".github/workflows/test.yml": "a6b0afd4ac488f6ba3f7db7313258a36bddbe278ecd3b16314c880b8e603d4f5",
+        "plugin/scripts/stage-kernel.mjs": "20df9512788a263d68ed2a1fb5eea004c825eecad772a01b9a036ec26ba847f4"
       }
     }
   },

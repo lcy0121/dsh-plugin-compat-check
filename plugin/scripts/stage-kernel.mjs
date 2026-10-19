@@ -16,7 +16,7 @@ const REPO = path.resolve(PLUGIN, '..');
 const DEST = path.join(PLUGIN, 'kernel');
 
 // 插件半边真正 import 的内核模块（改 index.js 的 import 时要同步这里）
-const KERNEL_LIBS = fs.readdirSync(path.join(REPO,'lib')).filter(f=>f.endsWith('.mjs')&&!['probe-runner.mjs','debugger.mjs'].includes(f)).sort();
+const KERNEL_LIBS = fs.readdirSync(path.join(REPO,'lib')).filter(f=>f.endsWith('.mjs')&&!['probe-runner.mjs','debugger.mjs','chrome-diagnostics.mjs'].includes(f)).sort();
 
 function bail(message) {
   process.stderr.write(`[stage-kernel] ${message}\n`);
