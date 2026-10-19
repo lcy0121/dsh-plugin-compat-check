@@ -5022,6 +5022,204 @@
         "evidenceDirectory": "/private/tmp/dsc-docs-trim.9iFYyP/failed-rc2",
         "followup": "docs/Plan.md section6 Linux Chrome startup stability. Later doc-only checkpoint gets its own CI; a later pass does not retrospectively fix this original failure."
       }
+    },
+    "upstreamAcceptance20261020": {
+      "recordedAt": "2026-10-19T17:55:11.135580+00:00",
+      "localDate": "2026-10-20",
+      "timezone": "Asia/Shanghai",
+      "sourceBase": "fa17a42e693756da35d1939923333aee644efe66",
+      "scope": "Read-only upstream recheck, exact published/helper controlled cases and a real private DSH0.2.1-rc.2/web global-market fresh install. Documentation only; no product code/version changes, model calls, external posts, push or npm release.",
+      "primaryCatalog": {
+        "pr": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/8057",
+        "state": "merged",
+        "mergedAt": "2026-10-19T17:05:21Z",
+        "registrationBlob": "6affba047a1cdb392b6800c0e99ee8d2e4bbf7ad",
+        "publicIndex": {
+          "url": "https://awesome-dsh-plugin.com/plugins.json",
+          "observedAt": "2026-10-19T17:46:04.084057+00:00",
+          "exitCode": 0,
+          "http": "200",
+          "error": "",
+          "sha256": "507f5f767e3ceaff97bfb56517424baad49556166b3272305d71d176961b3faf"
+        },
+        "publicDetail": {
+          "url": "https://awesome-dsh-plugin.com/p/lcy0121/dsh-plugin-compat-check--plugin/",
+          "observedAt": "2026-10-19T17:46:04.050888+00:00",
+          "exitCode": 0,
+          "http": "200",
+          "error": "",
+          "sha256": "bea1b0ef5ede62323bd8d80f229679aa9533d53f7b1eea3fb45bd603710ca483"
+        },
+        "publicDescription": "Still old companion-CLI prose in both languages; same index SHA256 as the previous snapshot. Registration merge has not propagated to these observed public surfaces.",
+        "indexedNpmVersion": "0.1.3"
+      },
+      "marketVersionResolution": {
+        "issue": "https://github.com/dsh-market/dsh-market/issues/932",
+        "state": "closed",
+        "maintainerReply": "https://github.com/dsh-market/dsh-market/issues/932#issuecomment-6272556239",
+        "publishedArtifact": {
+          "version": "1.66.43",
+          "gitHead": "350b0201adf9fec5b4742e7bad9a2bf69d3106d8",
+          "sha1": "8c0e05e94840fbb4d31837c3b9456dfb95c2e3da",
+          "sha256": "fdb69576cfc4721b85f58c74cb666e839f5e8e2eb9ee83cd81a13eb28c9701f1",
+          "integrity": "sha512-vCZk+h9rq0mAuhtvcTHxiLSIt5wtyLTUsonG2sC/+86doWXktL4t+5FTbg+DAq6x7S2FNS+IWCSZd9v6+M7q0g==",
+          "verified": true
+        },
+        "exactHelperSha256": "19559463d958620ddf298363f640b891e7f7bed801f6bed602dd12385ce58e28",
+        "controlledCases": [
+          {
+            "case": "fast",
+            "resolvedVersion": "0.1.3",
+            "requestCount": 1,
+            "resultingSpec": "dsh-plugin-compat-check@0.1.3"
+          },
+          {
+            "case": "429",
+            "resolvedVersion": "0.1.3",
+            "requestCount": 2,
+            "resultingSpec": "dsh-plugin-compat-check@0.1.3"
+          },
+          {
+            "case": "html",
+            "resolvedVersion": "0.1.3",
+            "requestCount": 2,
+            "resultingSpec": "dsh-plugin-compat-check@0.1.3"
+          },
+          {
+            "case": "missing-version",
+            "resolvedVersion": "0.1.3",
+            "requestCount": 2,
+            "resultingSpec": "dsh-plugin-compat-check@0.1.3"
+          },
+          {
+            "case": "both-fail",
+            "resolvedVersion": null,
+            "requestCount": 2,
+            "resultingSpec": "dsh-plugin-compat-check"
+          },
+          {
+            "case": "invalid-packument",
+            "resolvedVersion": null,
+            "requestCount": 2,
+            "resultingSpec": "dsh-plugin-compat-check"
+          }
+        ],
+        "limits": "Controlled tests execute extracted exact upstream helper; resulting spec records the route expression, not an actual failed-network install. /latest fallback is verified; both endpoints failing or providing no valid version still returns null and permits bare-name installation. Maintainer explicitly leaves warning behavior to a separate change. Earlier1.66.37 wrong-version observation remains historical evidence."
+      },
+      "marketTerminalClassification": {
+        "issue": "https://github.com/dsh-market/dsh-market/issues/931",
+        "state": "open",
+        "maintainerReply": "https://github.com/dsh-market/dsh-market/issues/931#issuecomment-6272642535",
+        "fixBranch": "nightly1014",
+        "fixCommit": "7b70165dc9cae584a1c7867df849868e2ffd1c16",
+        "fixSourceSha256": "b67ea1a8b0505e30c7f01bb0007395c8ef2e7f955e7b8827d48582db506e3750",
+        "published1_66_43": "Retains old looksTerminal; real UI still labels current public entry as a terminal plugin.",
+        "controlledCases": 20,
+        "controlledResult": "Exact published/nightly functions, both languages: old public descriptions warn only in published code; merged registration descriptions warn in neither; terminal package name and terminal-UI description continue to warn, negated CLI description does not.",
+        "limits": "Nightly source verification only; no nightly package installation or released/UI fix claim."
+      },
+      "realGlobalMarketInstall": {
+        "verifiedAt": "2026-10-19T17:53:40.653131+00:00",
+        "dshVersion": "0.2.1-rc.2",
+        "marketVersion": "1.66.43",
+        "region": "global",
+        "initialTargetInstalled": false,
+        "installedVersion": "0.1.3",
+        "dependency": "0.1.3",
+        "publicTarballSha256": "7b4ae580beb80b91f71c23d7534b5014b30039029e0a150a58a6f73e5f98d038",
+        "matchingPublishedFiles": 37,
+        "matchingFileManifestSha256": "afbac5fdf144d30ada8b6999405d5f77b80720f1d1d6e3bf9c0af59fb7cbc97b",
+        "http": {
+          "status": 200,
+          "ok": true,
+          "toolVersion": "0.1.3",
+          "kind": "plugin-compat-check/report",
+          "reportKind": "plugin-compat-check/result"
+        },
+        "ui": {
+          "warningReproduced": true,
+          "runningComponents": 1,
+          "source": "dsh-plugin-compat-check@0.1.3",
+          "warningScreenshot": "market-warning.png",
+          "installedScreenshot": "market-installed.png"
+        },
+        "scope": "Real public/global market fresh install; no network fault injection or capture of first latest request. Does not establish resolution of both-endpoints-fail fallback."
+      },
+      "store1024": {
+        "issue": "https://github.com/imsai-sh/dsh-1024store/issues/22",
+        "state": "open",
+        "maintainerReply": false,
+        "head": "2294b97a75709c39af03126475d8ff8a457e2e73",
+        "publicEndpoint": {
+          "url": "https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin",
+          "observedAt": "2026-10-19T17:46:04.662484+00:00",
+          "exitCode": 0,
+          "http": "200",
+          "error": "",
+          "sha256": "ea23240433b88c1a6106a0b4e7bcb8e0dc0921348de8f5f490ad0969a2e0405d"
+        },
+        "id": "lcy0121/dsh-plugin-compat-check/plugin",
+        "installMethods": [
+          {
+            "kind": "github",
+            "spec": "github:lcy0121/dsh-plugin-compat-check#path:plugin",
+            "command": "dsh plugin --profile web add github:lcy0121/dsh-plugin-compat-check#path:plugin",
+            "verification": "unknown",
+            "code": "not_checked",
+            "requiresBuildAllowance": false,
+            "buildPackage": null,
+            "revision": null,
+            "checkedAt": null
+          }
+        ],
+        "limits": "No npm method; no real installation attempt. GitHub source-subdirectory fallback is not accepted as the complete public tgz. Some repository activity fields are populated; this does not establish npm collection/projection repair."
+      },
+      "awesome0xsline": {
+        "pr": "https://github.com/0xsline/awesome-deepseek-harness/pull/717",
+        "state": "open",
+        "comments": 0,
+        "merged": false,
+        "defaultBranchDescription": "Still old pre-install prose; pending existing revision."
+      },
+      "cleanup": {
+        "rootRemoved": true,
+        "ownedPids": [
+          33565
+        ],
+        "stoppedAt": "2026-10-19T17:54:09.911Z"
+      },
+      "evidence": {
+        "directory": "/private/tmp/dsc-upstream-20261020.nIP3jC",
+        "files": [
+          "contract-results.json",
+          "runtime-verification.json",
+          "market-warning.dom.txt",
+          "market-installed.dom.txt"
+        ],
+        "screenshots": {
+          "market-warning.png": "30c87bd08abb5a1b9d974f0b5f3dda4f9828df83391ebe84c2991c3ce50e33a1",
+          "market-installed.png": "09703220d3110fd25a7e049f1d1c5f992b85d52a80cfb4122a65cee9a072522c"
+        },
+        "privacy": "Raw private host log/URL includes local authentication material and is excluded from this repository record."
+      },
+      "remaining": [
+        "Public catalog description propagation",
+        "Released terminal-classification fix and real UI verification",
+        "Both version endpoints unavailable: explicit warning or safe failure and acceptance",
+        "1024 collector/projection npm method and real install",
+        "0xsline PR717 adoption"
+      ],
+      "validation": {
+        "defaultSuiteRerun": false,
+        "reason": "Documentation/evidence only; earlier561-test checkpoint remains dated and is not new certification.",
+        "documentFacts": "passed:10 maintained documents",
+        "docsTests": {
+          "tests": 9,
+          "passed": 9,
+          "failed": 0
+        },
+        "gitDiffCheck": "passed"
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."
