@@ -98,7 +98,7 @@
 
 工程故障诊断已闭合：Darwin真实对照复现“全组仅Z仍返回EPERM”与“内核Z先于Node exit事件”两种边界，新版联合现场也抓到后者的原栈/UID/PGID/状态。仅在有界确认实际退出后，完整快照为同UID全组Z或组已消失时接受停止；活进程拒绝/不可读仍失败。命令和probe同时保留原始/清理错误，清理失败保留私有workDir，不再未处理拒绝或宣称删除成功。Chrome先做Browser.getVersion握手，区分建页、附加、会话、EOF/退出/超时，记录有界元数据及可选私有stderr；仍用自有fd3/4，不加生产超时或重试。多个资源均尝试清理，CI已配置失败诊断留存。[Darwin信号源码](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_sig.c#L1548-L1624)与本机复现互证。历史Linux Target.createTarget原日志缺少Chrome/管道信息，不能追认具体Chrome根因；已用阶段负例和真实Chrome暂停对照验收诊断及回收，不以重跑代替修复。证据见`verification.engineeringDiagnostics20261019`。
 
-源码交付由[PR #6](https://github.com/lcy0121/dsh-plugin-compat-check/pull/6)跟踪：e0b487c的[push CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390)与[PR CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254434881)共8项通过，覆盖Node22.19/24.21默认闸门及资源检查、Linux旧DSH 48通过/4不适用、新rc.2 52通过。首轮Node22因测试清场等待已unref子进程而取消，已单例复现并在夹具最终清场前ref，生产回收策略未改；首发失败保留。最终记录提交、合并状态及main CI以PR为准，不套用前一提交的通过；见`verification.sourceDelivery20261019`。本轮不改版本、不创建tag/Release、不发布npm。
+源码交付由[PR #6](https://github.com/lcy0121/dsh-plugin-compat-check/pull/6)跟踪：e0b487c的[push CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390)与[PR CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254434881)共8项通过，覆盖Node22.19/24.21默认闸门及资源检查、Linux旧DSH 48通过/4不适用、新rc.2 52通过。首轮Node22因测试清场等待已unref子进程而取消，已单例复现并在夹具最终清场前ref，生产回收策略未改；首发失败保留。后续文档提交的单轮rc.2 CI另暴露旧编辑器恢复标签为div、驱动只找button的边界；已留存失败页面并做真实Chrome红/绿对照，改为优先已有可见文件标签，0.26.1实跑仍保留静态FN2/服务TP2及两例HTTP405，不改业务判据。最终提交、合并状态及main CI以PR为准，不套用前一提交的通过；见`verification.sourceDelivery20261019`。本轮不改版本、不创建tag/Release、不发布npm。
 
 ## 5. 验证记录与复现
 

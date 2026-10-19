@@ -244,7 +244,8 @@ test("a sidebar file-tree precondition failure preserves all cases without claim
         source.includes("explorerError")
           ? ["HTTP 405"]
           : source.includes("data-row-key") ||
-            source.includes("data-dsh-bottom-toggle"),
+            source.includes("data-dsh-bottom-toggle") ||
+            source.includes("data-dsh-bottom-panel"),
     });
     assert.deepEqual(
       rows.map((r) => r.control),
@@ -1004,6 +1005,69 @@ describe(
   "real browser driver boundaries",
   { skip: process.env.DSC_SLOW !== "1" },
   () => {
+    test("editor navigation reuses a restored Files tab and ignores hidden entry buttons", async () => {
+      const { openEditorFile } = await import(
+        "../tools/business-sidebar-ui.mjs"
+      );
+      const { launchChromePipe } = await import("../lib/debugger.mjs");
+      const fs = await import("node:fs");
+      const browser = await launchChromePipe(
+        process.env.DSC_CHROME ||
+          [
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            "/usr/bin/google-chrome",
+            "/usr/bin/chromium",
+          ].find((p) => fs.existsSync(p)),
+      );
+      const evalx = async (expression) => {
+        const r = await browser.send("Runtime.evaluate", {
+          expression,
+          returnByValue: true,
+        });
+        assert.equal(r.exceptionDetails, undefined);
+        return r.result?.value;
+      };
+      const poll = async (fn, message) => {
+        const end = Date.now() + 1000;
+        do {
+          const v = await fn();
+          if (v) return v;
+          await new Promise((r) => setTimeout(r, 20));
+        } while (Date.now() < end);
+        throw Error(message);
+      };
+      const file = "/owned/utf16le.txt";
+      try {
+        for (const entry of [
+          '<div data-dsh-bottom-panel><div title="文件" draggable="true" onclick="openFile()">文件</div></div>',
+          '<button style="display:none">文件</button><button onclick="openFile()">文件</button>',
+        ]) {
+          await evalx(`document.body.innerHTML=${JSON.stringify(entry)};
+            window.openFile=()=>{document.body.dataset.opened=String(Number(document.body.dataset.opened||0)+1);document.body.insertAdjacentHTML('beforeend',${JSON.stringify('<input title="/owned/utf16le.txt"><div class="cm-content" contenteditable="true">editable</div>')})};delete document.body.dataset.opened;`);
+          const opened = await openEditorFile(
+            {
+              evalx,
+              poll,
+              chrome: browser,
+              click: () =>
+                poll(
+                  () =>
+                    evalx(
+                      `(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='文件');if(!b||!b.getClientRects().length)return false;b.click();return true;})()`,
+                    ),
+                  "Missing business control: 文件",
+                ),
+              responseRows: () => [],
+            },
+            file,
+          );
+          assert.deepEqual(opened, { available: true });
+          assert.equal(await evalx("document.body.dataset.opened"), "1");
+        }
+      } finally {
+        await browser.close();
+      }
+    });
     test("explicit editor reload confirms a real dirty-document beforeunload dialog", async () => {
       const helpers = await import("../tools/browser-session.mjs");
       assert.equal(typeof helpers.navigateOwnedDocument, "function");

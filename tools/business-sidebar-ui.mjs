@@ -119,7 +119,7 @@ export function editorLoadFailure(uiErrors, responses) {
     : null;
 }
 export async function openEditorFile(driver, file) {
-  const { evalx, poll, chrome, click } = driver;
+  const { evalx, poll, chrome } = driver;
   const current = await evalx(
     `Boolean([...document.querySelectorAll('input[title]')].find(e=>e.title===${JSON.stringify(file)}&&e.getClientRects().length))`,
   );
@@ -144,7 +144,18 @@ export async function openEditorFile(driver, file) {
         windowsVirtualKeyCode: 13,
       });
     } else {
-      await click("文件");
+      // The plugin restores existing tabs as draggable divs, while a fresh
+      // workbench offers a button. Reuse the visible owned tab after reload.
+      await poll(
+        () =>
+          evalx(`(()=>{
+ const visible=e=>e&&e.isConnected&&e.getClientRects().length&&!e.closest('[inert]')&&!e.disabled;
+ const tab=[...document.querySelectorAll('[data-dsh-bottom-panel] div[draggable][title="文件"]')].find(visible);
+ const entry=tab||[...document.querySelectorAll('button')].find(e=>visible(e)&&e.innerText.trim()==='文件');
+ if(!entry)return false;entry.click();return true;
+ })()`),
+        "Missing business control: 文件",
+      );
       const opened = await poll(async () => {
         const clicked = await evalx(
           `(()=>{const e=[...document.querySelectorAll('[title]')].find(e=>e.title===${JSON.stringify(file)}&&e.getClientRects().length);if(!e)return false;e.click();return true;})()`,

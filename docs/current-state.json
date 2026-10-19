@@ -4894,7 +4894,19 @@
             "notApplicable": 0
           }
         },
-        "finalDeliveryTracking": "PR6 tracks final record-only commit checks, merge status and main CI; exact e0b487c results above do not certify a later commit automatically."
+        "finalDeliveryTracking": "PR6 tracks final record-only commit checks, merge status and main CI; exact e0b487c results above do not certify a later commit automatically.",
+        "restoredFilesTabFollowup": {
+          "head": "73850df153c2d7dde524e79c70fec687c80cdf0b",
+          "failedPushRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39255124679",
+          "sameHeadPrRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39255134162",
+          "results": "push7/8, PR4/4; failing old-editor case was a driver error Missing business control: 文件, not a business pass/failure label",
+          "retainedEvidence": "failed-rc2-artifact/linux-editors/sidebar-ui-previous/failure{.png,-ui.txt,-host.txt,-profile.json}; first-case screenshot also retained",
+          "cause": "After reload the published plugin restored Files as a draggable div inside data-dsh-bottom-panel, while driver only searched fresh-entry buttons. Screenshot/text show existing file tree HTTP405 and host pending webRuntime. Source src/client/TabBar.tsx confirms existing div vs new-entry button.",
+          "fix": "Prefer a visible owned Files tab, otherwise a visible Files entry button. Ignore hidden matching buttons. No extra retry or poll budget; original UI405+completed response and disk criteria preserved.",
+          "realChromeRegression": "Before: Missing business control: 文件. After: restored-tab and hidden-first-button cases both open the requested editor exactly once.",
+          "liveRc2Original0261": "exit1; both business outcomes failed, original staticFN2 and separate serviceTP2 retained, hostStopped/privateRootRemoved true. No model call.",
+          "evidenceDirectory": "/private/tmp/dsc-source-delivery.Fs1rlx"
+        }
       },
       "scope": "Source/docs delivery only. Existing real macOS/DSH/Chrome and model evidence retains its exact dated scope; no new model calls, Windows certification, npm tag or npm release."
     }
