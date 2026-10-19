@@ -4781,6 +4781,66 @@
         "test/support/zombie-group.c": "7a7ae13051d508906a2b7a149ac61991b6c0a01f9e3d296b9ac34d7c7338e85b",
         ".github/workflows/test.yml": "a2f19a9c362d528787190d13e6db7748322b871a9364eeb10bb71547667a3685"
       }
+    },
+    "sourceDelivery20261019": {
+      "recordType": "Source delivery checkpoint; historical local-only/CI flags above retain their original dates and are superseded only for the exact commits verified here.",
+      "verifiedAt": "2026-10-19T12:37:31.397825+00:00",
+      "sourceCommits": [
+        "46a2a8a",
+        "8d4ae0f",
+        "5f81e35"
+      ],
+      "authorization": "User authorized repository documentation audit, push and merge; explicitly deferred version publication.",
+      "npm": {
+        "version": "0.1.3",
+        "latest": "0.1.3",
+        "publicationPerformed": false,
+        "versionBumpPerformed": false,
+        "publicArtifactIncludesSourcePatches": false
+      },
+      "documentation": {
+        "maintainedDocuments": 11,
+        "scope": [
+          "three root READMEs",
+          "plugin README",
+          "skill source and packaged copy",
+          "skill README",
+          "rules README",
+          "docs Markdown and current-state",
+          "GitHub description/topics/homepage/license",
+          "npm version/latest/description/keywords/repository/runtime metadata/README"
+        ],
+        "corrections": [
+          "Include process cleanup/Chrome diagnostics in all three unpublished-source summaries",
+          "Separate repository source delivery from a future npm release",
+          "Clarify plugin README version scope and skill/rules source vs registry status",
+          "Preserve dated historical audit and acceptance snapshots rather than rewriting old results"
+        ],
+        "metadataObservedAt": "2026-10-19T12:36:51.655Z",
+        "metadataErrors": 0,
+        "metadataNotices": [
+          "npm.readme-is-current"
+        ],
+        "metadataUnavailable": [],
+        "upstreamRecheck": "GitHub API on 2026-10-19: primary PR8057 and 0xsline PR717 open/unmerged; dsh-market issues931/932 and 1024Store issue22 open, matching Plan. No external posts made."
+      },
+      "localChecks": {
+        "node": "26.12.0",
+        "defaultTests": 561,
+        "defaultPassed": 561,
+        "defaultFailed": 0,
+        "docsAndSkillTests": 35,
+        "docsAndSkillPassed": 35,
+        "format": "passed",
+        "documentFacts": "passed",
+        "generatedContract": "passed",
+        "skillCopies": "byte-identical",
+        "evidenceDirectory": "/private/tmp/dsc-source-delivery.Fs1rlx"
+      },
+      "remote": {
+        "status": "Awaiting authorized push and fresh PR/main CI; no new remote success claimed at this checkpoint."
+      },
+      "scope": "Source/docs delivery only. Existing real macOS/DSH/Chrome and model evidence retains its exact dated scope; no new model calls, Windows certification, npm tag or npm release."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

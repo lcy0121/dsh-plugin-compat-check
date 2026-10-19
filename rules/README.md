@@ -28,7 +28,7 @@
 
 宿主、客户端及shared调用点必须分开。客户端方法不能拿宿主probe判缺失；同名服务也不保证同一语义。对源码归属不确定的Context/别名保留suspected。certainty与impactBasis分别表达证据强度和影响是否实测。
 
-本地未发布说明补强：必需inject未观测保持degraded/suspected，仅提示激活前提未确认；同profile明确absent才推断激活障碍，optional/scoped依赖与方法缺失分别处理，不借业务答案调严重度。`--observe-services`另记服务预测身份/摘要，不覆盖静态FN，也不改变生产certainty或impactBasis。
+仓库源码中尚未发布到npm的说明补强：必需inject未观测保持degraded/suspected，仅提示激活前提未确认；同profile明确absent才推断激活障碍，optional/scoped依赖与方法缺失分别处理，不借业务答案调严重度。`--observe-services`另记服务预测身份/摘要，不覆盖静态FN，也不改变生产certainty或impactBasis。
 
 仓库独立业务队列将手审的功能调用区间内API风险与真实市场操作、侧栏HTTP/编辑器及有限模型回复结果对照，保持业务、loader标签及预测隔离；不把整个插件的其它发现挪给本功能。正常/自然失败与HTTP503/控件缺失故障组分别计分，限定样本不能改变生产报告中的certainty或impactBasis，也不是新增严重度规则的充分证据。复现见[Plan](../docs/Plan.md#52-日常检查与真实集成)。
 

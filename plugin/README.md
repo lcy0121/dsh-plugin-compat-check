@@ -4,7 +4,7 @@
 
 ![插件详情页：部分可用，含 file:line、影响与依据](https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/main/plugin/assets/compat-detail-partial.png)
 
-本文描述 **0.1.3** 的实现；是否已发布及 npm latest 以[发布记录](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)与registry为准。安装公开版本（发布前不能用源码测试代替公开包验收）：
+公开npm版本及latest为 **0.1.3**（2026-10-19复核）。本文还标注了仓库源码中尚未发布到npm的修订；源码交付状态见[Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，不能用源码测试代替公开包验收。安装公开版本：
 
 ```bash
 dsh plugin --profile <profile> add dsh-plugin-compat-check
@@ -24,7 +24,7 @@ prepack复制权威skill、同步单源报告契约的宿主/客户端产物，�
 
 npm产物**不带CLI bin、安装检查shell或probe入口**。CLI和安装检查从仓库使用；仓库源码现提供`--issue-report`默认脱敏Markdown导出，不读写基线、保留原退出码，须预览后自行分享，该功能不在npm包内。本插件不能做安装前检查。仓库使用说明：[README](https://github.com/lcy0121/dsh-plugin-compat-check#readme)。版本说明与发布状态请查看[开发计划与验收记录](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，本地路径为docs/Plan.md。
 
-工作树另有未发布修订：Origin须协议/主机/有效端口同源（本机无Origin调用仍允许）、必需inject未观测时明确提示激活前提未确认，以及`repository.directory=plugin`。公开npm0.1.3尚不包含这些修订；缺失服务与未知服务继续区分，不把激活障碍等同某方法实测失败。
+仓库源码另有尚未发布到npm的修订：Origin须协议/主机/有效端口同源（本机无Origin调用仍允许）、必需inject未观测时明确提示激活前提未确认、`repository.directory=plugin`，以及共享进程回收和仓库Chrome开发工具诊断。公开npm0.1.3尚不包含这些修订；源码推送、合并不会发布npm新版本。缺失服务与未知服务继续区分，不把激活障碍等同某方法实测失败。
 
 0.1.3增加目标版本声明适配、rc.2目录与卸载清理；历史0.1.2只修正文案和版本，算法与0.1.1一致；0.1.3改变了新版DSH声明判定。
 

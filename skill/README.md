@@ -21,7 +21,7 @@ node --test test/skill.test.mjs test/docs.test.mjs
 
 provider name与skill name均为dsh-plugin-compat-check，source=bundled、rank=600；提供list/get、description、invocation和正文。frontmatter保持单行name/description，name为kebab-case。不支持的旧键可能使文件系统发现失效；不要添加disableModelInvocation等旧字段。
 
-本地未发布正文另明确必需inject、未知服务与方法缺失的边界，公开npm0.1.3仍保留其发布时正文。
+仓库中尚未发布到npm的正文另明确必需inject、未知服务与方法缺失的边界；源码合并不更新已发布正文，公开npm0.1.3仍保留其发布时内容。
 
 当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为 **7949 字符**，由docs测试核对。不要把历史探针的contentLength手工替换成新正文长度：那会篡改历史实测。
 

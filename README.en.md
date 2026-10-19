@@ -8,7 +8,7 @@ Check the compatibility of **installed DSH plugins** with a target DSH version, 
 
 The repository and npm are at **0.1.3**, now tagged `latest` (public tarball bytes and installation verified on 2026-10-18). This release includes rc.2 declarations, versioned catalogues, unload cleanup fixes and the updated skill. Repository CLI and business measurement tools are not shipped in the npm plugin. See [Plan](docs/Plan.md) and [verification facts and scope](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
 
-The local working tree additionally contains unpublished activation-prerequisite explanations, an HTTP Origin protocol/host/port fence and npm subdirectory metadata. The shared 0.1.3 version number does not mean these changes are in the public package.
+The repository source additionally contains activation-prerequisite explanations, an HTTP Origin protocol/host/port fence, npm subdirectory metadata, and process cleanup/Chrome diagnostics that have not been published to npm. Pushing or merging source does not publish a package. The shared 0.1.3 version number does not mean these changes are in the public package; see [Plan](docs/Plan.md) for delivery status.
 
 | Entry | Purpose |
 |---|---|
