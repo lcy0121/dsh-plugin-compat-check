@@ -100,9 +100,11 @@
 
 宣传仅保留可核验事实：HTTP 200不等于收录，下载不等于用户，star不代表兼容性；“故障时被想到”是待验证的定位假设。删除“唯一自动增长渠道”“纯链接转化近零”“每个rc后24小时普查”等未经验证或尚无资源保证的断言。其它市场按其npm/子目录/制品规则评估，不给private根包添加虚假bundle声明，也不从根扫描限制推出所有合规入口都不可能。
 
-工程故障诊断已闭合：Darwin真实对照复现“全组仅Z仍返回EPERM”与“内核Z先于Node exit事件”两种边界，新版联合现场也抓到后者的原栈/UID/PGID/状态。仅在有界确认实际退出后，完整快照为同UID全组Z或组已消失时接受停止；活进程拒绝/不可读仍失败。命令和probe同时保留原始/清理错误，清理失败保留私有workDir，不再未处理拒绝或宣称删除成功。Chrome先做Browser.getVersion握手，区分建页、附加、会话、EOF/退出/超时，记录有界元数据及可选私有stderr；仍用自有fd3/4，不加生产超时或重试。多个资源均尝试清理，CI已配置失败诊断留存。[Darwin信号源码](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_sig.c#L1548-L1624)与本机复现互证。历史Linux Target.createTarget原日志缺少Chrome/管道信息，不能追认具体Chrome根因；已用阶段负例和真实Chrome暂停对照验收诊断及回收，不以重跑代替修复。证据见`verification.engineeringDiagnostics20261019`。
+工程故障诊断与回收证据已补齐：Darwin真实对照复现“全组仅Z仍返回EPERM”与“内核Z先于Node exit事件”两种边界，新版联合现场也抓到后者的原栈/UID/PGID/状态。仅在有界确认实际退出后，完整快照为同UID全组Z或组已消失时接受停止；活进程拒绝/不可读仍失败。命令和probe同时保留原始/清理错误，清理失败保留私有workDir，不再未处理拒绝或宣称删除成功。Chrome先做Browser.getVersion握手，区分建页、附加、会话、EOF/退出/超时，记录有界元数据及可选私有stderr；仍用自有fd3/4，不加生产超时或重试。多个资源均尝试清理，CI已配置失败诊断留存。[Darwin信号源码](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_sig.c#L1548-L1624)与本机复现互证。历史Linux Target.createTarget原日志缺少Chrome/管道信息，不能追认具体Chrome根因；已用阶段负例和真实Chrome暂停对照验收诊断及回收，不以重跑代替修复。证据见`verification.engineeringDiagnostics20261019`。
 
 源码交付由[PR #6](https://github.com/lcy0121/dsh-plugin-compat-check/pull/6)跟踪：e0b487c的[push CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390)与[PR CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254434881)共8项通过，覆盖Node22.19/24.21默认闸门及资源检查、Linux旧DSH 48通过/4不适用、新rc.2 52通过。首轮Node22因测试清场等待已unref子进程而取消，已单例复现并在夹具最终清场前ref，生产回收策略未改；首发失败保留。后续文档提交的单轮rc.2 CI另暴露旧编辑器恢复标签为div、驱动只找button的边界；已留存失败页面并做真实Chrome红/绿对照，改为优先已有可见文件标签，0.26.1实跑仍保留静态FN2/服务TP2及两例HTTP405，不改业务判据。最终788e149的push/PR共8项通过；已合入main提交1c7e12a，合并[CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39257051964)四项通过，旧DSH 49通过/4不适用、新rc.2 53通过；不套用前一提交的通过。见`verification.sourceDelivery20261019`。本轮不改版本、不创建tag/Release、不发布npm。
+
+2026-10-19文档精简提交fffec7f的[CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39260114242)为3/4通过：Node22/24及旧DSH通过，rc.2市场业务宿主中Chrome的Browser.getVersion握手10秒超时（收到0字节）。结构化诊断及私有stderr已留存，清理成功；D-Bus提示不足以证明根因。此为新工程失败记录，不是文档/判定算法失败，也未以重跑、加超时或弃用例冒充修复；待排查见§6。
 
 ## 5. 验证记录与复现
 
@@ -189,5 +191,6 @@ DSC_EXECUTION_DIAGNOSTICS=<私有诊断目录> node bin/compat-check.mjs --nm <�
 
 1. **下一补丁候选（暂缓）。** 用户决定发布后，再准备候选，纳入Origin端口校验、激活前提说明、npm目录元数据及工程诊断；核对确切制品后另取npm发布授权。公开0.1.3不追写为含这些修复。
 2. **上游验收。** 跟进主目录#8057公开索引采纳及市场#931/#932修复，使用明确市场版本再次核验误提示和全球线路的确切安装版本；1024#22须维护者补采集/投影，出现npm方法后再真实安装；0xsline#717待采纳。bruc3van#138已关闭收录，无须继续等待。没有新证据不重复发帖、不把帖子已提交当问题已修复。
-3. **有限批量与自动化（后置）。** 先验证固定哈希样本的静态JSON聚合、限制及“待作者复核”，再评估低权限Action、逐版增量与摘要。工具错误/覆盖不足单列，不默认写第三方仓库、不承诺24小时SLA；公共端点先确认隐私、缓存与维护成本。固定业务队列不是盲测；扩展插件或复杂模型任务须另定制品、资源与独立真值。
-4. **Windows真实验收。** 取得环境后实跑路径、安装器、回收和打包；按用户选择暂缓，不用POSIX或模拟充数。
+3. **Linux Chrome启动稳定性。** 排查fffec7f CI首次握手超时，补实际Chrome启动/调度的因果证据；保持现有握手超时、失败分类和回收判据，不把D-Bus日志或单次重跑通过当作根因/修复。当前诊断机制已捕获现场，问题尚未解决。
+4. **有限批量与自动化（后置）。** 先验证固定哈希样本的静态JSON聚合、限制及“待作者复核”，再评估低权限Action、逐版增量与摘要。工具错误/覆盖不足单列，不默认写第三方仓库、不承诺24小时SLA；公共端点先确认隐私、缓存与维护成本。固定业务队列不是盲测；扩展插件或复杂模型任务须另定制品、资源与独立真值。
+5. **Windows真实验收。** 取得环境后实跑路径、安装器、回收和打包；按用户选择暂缓，不用POSIX或模拟充数。

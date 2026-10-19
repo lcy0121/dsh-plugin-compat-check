@@ -4998,7 +4998,30 @@
         "archiveHash": "verified",
         "evidenceDirectory": "/private/tmp/dsc-docs-trim.9iFYyP"
       },
-      "delivery": "User authorized direct main commit/push; this documentation and checker maintenance is not an npm release or new runtime/security certification. CI for the new commit is tracked in the repository main workflow; prior source CI retains its exact commit scope."
+      "delivery": "User authorized direct main commit/push; this documentation and checker maintenance is not an npm release or new runtime/security certification. CI for the new commit is tracked in the repository main workflow; prior source CI retains its exact commit scope.",
+      "remoteCiCheckpoint": {
+        "head": "fffec7f5fb1a3e50b335bbe744ae5a77eecaeef0",
+        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39260114242",
+        "passedJobs": 3,
+        "failedJob": "linux-live (0.2.1-rc.2)",
+        "liveTests": 53,
+        "livePassed": 52,
+        "liveFailed": 1,
+        "failure": {
+          "component": "chrome-pipe",
+          "phase": "browser-handshake",
+          "method": "Browser.getVersion",
+          "timeoutMs": 10000,
+          "elapsedMs": 10028,
+          "receivedBytes": 0,
+          "cleanupStopped": true,
+          "privateStderrBytes": 955,
+          "privateStderrSha256": "14ded7dddd48d4adae1df730db4fbf93e921a55ae4ac369bcd653e4069fe7aed"
+        },
+        "rootCause": "Unresolved. Retained stderr contains D-Bus address errors; this does not establish causation. No production or timeout changes, retries, skips or model calls in this documentation task.",
+        "evidenceDirectory": "/private/tmp/dsc-docs-trim.9iFYyP/failed-rc2",
+        "followup": "docs/Plan.md section6 Linux Chrome startup stability. Later doc-only checkpoint gets its own CI; a later pass does not retrospectively fix this original failure."
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."
