@@ -1,178 +1,97 @@
 # dsh-plugin-compat-check
 
-体检**已安装的 DSH 插件**与目标 DSH 版本的兼容性，给出源码位置、依据和证据限制。声明放行、激活成功都不能单独证明功能可用。
+检查**已安装的 DSH 插件**与目标 DSH 版本的兼容性，提供源码位置、依据和覆盖限制。声明放行、激活成功不等于业务功能正常。
 
 **简体中文** | [English](README.en.md) | [한국어](README.ko.md)
 
-## 当前版本与交付
+## 版本与入口
 
-仓库与npm当前版本均为 **0.1.3**，npm `latest`已更新（2026-10-18回下载逐字节核验及公开规格实装通过）。本版包含rc.2声明适配、版本目录、卸载清理修复及同步skill；仓库CLI与业务度量工具仍不随npm插件分发。发布与验证范围见 [Plan](docs/Plan.md#1-项目定位与交付状态) 和 [current-state.json](docs/current-state.json)。支持 Node `^22.19.0 || >=24`。
+npm `latest` 为 **0.1.3**，支持 Node `^22.19.0 || >=24`。main 另含尚未发布到 npm 的激活前提说明、Origin 同源校验、子目录元数据和工程诊断修订；同为 0.1.3 的源码与公开包不完全相同。发布、验证及后续工作见 [Plan](docs/Plan.md)。
 
-插件、CLI、skill三种形态共享判定内核；安装检查脚本是CLI编排入口。只有**相同输入与采样证据**才应得出相同结果。
-
-仓库源码另含尚未发布到npm的激活前提说明、HTTP Origin协议/主机/端口校验、npm子目录元数据及工程回收/Chrome诊断修订。源码推送、合并不等于npm发布；不能据版本号0.1.3认定这些修改已进入公开包，交付状态见[Plan](docs/Plan.md)。
-
-| 入口 | 提供什么 |
+| 入口 | 用途 |
 |---|---|
-| npm 插件 | 当前宿主采样、兼容性标签、插件详情发现/角标、`compat_check`、skill provider；不能做安装前检查 |
-| 仓库 CLI | 静态体检已装插件，可读已有探针；显式 `--probe-boot` 才启动临时宿主 |
-| 仓库安装检查脚本 | 将安装规格装进临时 profile，检查安装、启动和兼容性 |
-| skill | 教 agent 调用工具或仓库 CLI，不是另一套判定实现 |
+| npm 插件 | 兼容性标签、插件详情发现/角标、`compat_check` 工具与 skill provider |
+| 仓库 CLI | 检查已装插件，读取已有探针或显式启动临时宿主 |
+| 仓库安装检查 | 在临时 profile 中安装、启动并检查一个安装规格 |
+| skill | 指导 agent 使用同一工具或 CLI；[交付说明](skill/README.md) |
 
-npm 包**没有 CLI `bin`**，不支持 `npx dsh-plugin-compat-check`。默认报告列出客户端待验证项；客户端到货开发工具没有接入兼容性面板，且不认证业务功能。
+三种形态共享判定内核，只有相同输入和观测证据才应得到相同结果。npm 包**没有 CLI bin**，不支持 `npx dsh-plugin-compat-check`。
 
-## 长什么样
+## 界面示例
 
-以下是仓库记录的详情页截图，不是全面兼容认证。API发现可给出真实file:line；声明或loader事实可能没有源码位置，需说明依据。
+记录的详情页截图，仅展示报告呈现，不是完整兼容认证：
 
-![插件详情页：部分可用，含 file:line、影响与依据](plugin/assets/compat-detail-partial.png)
+![部分可用：源码位置、影响与依据](plugin/assets/compat-detail-partial.png)
+![声明冲突：区分工具推断与宿主提示](plugin/assets/compat-detail-declared.png)
 
-![声明冲突示例：工具推断与宿主提示分别解读](plugin/assets/compat-detail-declared.png)
+## 快速开始
 
-## 使用
+### 插件
+
+```bash
+dsh plugin --profile <profile> add dsh-plugin-compat-check
+```
+
+DSH 0.2.1-rc.2 入口：**更多 → 设置 → 内置插件 → 兼容性**。agent 可调用 `compat_check`。请选择实际 profile，不默认使用 desktop。
 
 ### 仓库 CLI
-
-仓库提供共享判定源码和根开发工作区，npm只包含plugin子包。取得仓库后在根目录安装依赖：
 
 ```bash
 git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
 cd dsh-plugin-compat-check
 npm ci --ignore-scripts
-
 node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
-node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --probe /path/to/probe-report.json --dsh-version <version> --no-baseline --json
 node bin/compat-check.mjs --help
 ```
 
-`--nm` 接受 profile 或 node_modules 目录。请确认目标，不能默认所有用户都使用 desktop。没有探针时，方法级目录推断为 suspected；提供探针也不保证每条发现都是 certain，仍取决于身份、时间、完整性和源码归属。
-
 | 选项 | 作用 |
 |---|---|
-| `--nm <dir>` | 要检查的目录，必需 |
-| `--probe <json>` | 已有运行时观测；同时给 `--probe-boot` 时优先使用此文件 |
-| `--probe-boot` | 显式复制 profile、安装探针、启动临时宿主；会执行目标插件 |
-| `--probe-timeout <秒>` / `--probe-keep-dir <dir>` | 启动等待上限，默认40秒；将现场留到显式私有目录 |
-| `--dsh-version <v>` | 声明判断及目录选择的目标版本；显式值优先于启动采集值 |
-| `--rules <json>` / `--catalog <json>` | 覆盖规则和 API 目录 |
-| `--no-baseline` | 不读写基线，适合一次性检查 |
-| `--baseline-file <path>` / `--dry-run` | 指定基线；只比较、不写入 |
-| `--json` / `--quiet` | 一份机器可读 JSON；或仅总结行 |
-| `--issue-report` | 默认脱敏的 Markdown 故障报告；不读写基线，与 `--json`/`--quiet` 互斥 |
-| `--version` / `--help` | 版本或完整帮助，不需要目标目录 |
+| `--nm <dir>` | 必需；接受 profile 或 node_modules 目录 |
+| `--probe <json>` / `--probe-boot` | 读取已有观测，或显式启动临时宿主；同时给时文件优先 |
+| `--dsh-version <v>` | 声明判断与目录选择的目标版本，显式值优先 |
+| `--json` / `--quiet` | 完整 JSON / 仅总结行 |
+| `--no-baseline` / `--dry-run` | 禁止基线读写 / 只比较不写入 |
+| `--baseline-file <path>` | 指定基线文件 |
+| `--issue-report` | 默认脱敏 Markdown；不读写基线，与 json/quiet 互斥 |
+| `--rules <json>` / `--catalog <json>` | 覆盖规则 / API 目录 |
+| `--probe-timeout <秒>` / `--probe-keep-dir <dir>` | 启动等待默认40秒 / 将探针证据留至显式私有目录 |
+| `--help` / `--version` | 完整帮助 / 工具版本，无需目标目录 |
 
-分享故障时，可运行 `node bin/compat-check.mjs --nm <目标目录> --issue-report > issue-report.md`。报告保留版本、证据模式、发现、可用包内位置、certainty/impactBasis、覆盖和占位符复现命令；不导出原始日志/探针、绝对路径或基线，含路径、链接、常见凭据或控制字符的说明整项隐藏。仍保留插件名和相对文件名，不能保证任意业务文字均无敏感信息，务必预览后自行分享。退出码仍为0/1/2/3；需要保存时在下一条命令用 `report_status=$?`，避免后续命令覆盖。此旗标目前只在仓库源码中提供，npm插件没有CLI。
+`--issue-report` 输出仍保留插件名与包内相对路径，分享前须预览；原始日志、探针和基线不导出，不自动发帖。私有现场和工程诊断也不能直接当作可分享报告。
 
-### 安装插件与 skill
+### 安装检查与独立 skill
 
 ```bash
-# 安装 npm 已发布版（2026-10-18核验为0.1.3）
-dsh plugin --profile <profile> add dsh-plugin-compat-check
-
-# 只使用 CLI 时，安装独立 skill
+node bin/check-install.mjs <spec> --json
+./dsh-plugin-compat-check.sh <spec> --json
 ./dsh-plugin-compat-check.sh --install-skill
 ```
 
-插件注册兼容性面板、插件详情角标、`compat_check` 与 skill provider；2026-10-15已从实际tgz安装，在DSH0.2.0-rc.2/macOS arm64中验证工具和skill，并通过真实Chrome操作确认面板、角标及基线差分。独立 skill 安装至 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`，已有文件需 `--force` 才覆盖。
+安装检查需要 Node、DSH、pnpm；接受 DSH 支持的 npm/GitHub/git/file 规格，支持 `--keep`、`--timeout`（默认30秒）。安装可能联网，并会启动宿主、执行目标插件，**临时 profile 不是 OS 沙箱**。独立 skill 已存在时需 `--force` 才覆盖，位置见 [skill 说明](skill/README.md)。
 
-rc.2入口为“更多 → 设置 → 内置插件 → 兼容性”。2026-10-18用0.1.3候选完整tgz、私有rc.2宿主与真实Chrome验证标签和报告，禁用/启用后路由移除及恢复、标签仍唯一。10月17日标签未显示的历史记录保留，但本次未复现，不能仅据入口差异确定当时原因；这也不是所有插件的业务功能认证。
+仓库根是 private 开发工作区，不是可激活的插件包。测试源码请先打完整 tgz，再让 DSH 安装；不要将根 GitHub spec 或裸 `plugin/` 复制等同于完整产物。[源码打包方法](plugin/README.md#从源码构建安装)。
 
-源码仓库根是私有开发工作区，**不是可直接激活的 DSH 插件包**。根目录 GitHub spec 不等同于安装 `plugin/`。测试本地源码时，在仓库根运行 `npm ci --ignore-scripts`，再在 `plugin/` 中执行 `npm pack --pack-destination <已存在的绝对输出目录>`，最后让 DSH 安装生成的 `.tgz`。打包会暂存内核和 LICENSE；不要直接复制裸 `plugin/` 并假定内核已在包内。细节见 [插件说明](plugin/README.md)。
+## 理解结果与边界
 
-### 安装检查
+CLI/Node 安装检查退出码：**0** 未发现问题、**1** 部分可用或未知、**2** 不兼容或安装 peer 闸门拒绝、**3** 输入/执行错误，无法判定。shell 进入 Node 前仍有用法/内核错误码；自动化使用 Node 入口并检查 `status`。
 
-```bash
-./dsh-plugin-compat-check.sh <spec> [--keep] [--timeout 秒] [--json]
-# 同一 Node 安装检查入口（跨平台流程仍需验收）
-node bin/check-install.mjs <spec> --json
-```
+- 始终转述 `certainty`、`impactBasis`、`coverage` 和 `vacuous`；未知、未采样和省略键不等于缺失，目录不是运行时面。客户端功能须另验收。
+- 默认静态 CLI 不启动 DSH、不安装目标包；宿主体检不调用外部命令或联网，使用有预算的分析 worker。默认会写自身基线，一次性检查加 `--no-baseline`。
+- 方法级分析基于有界 Babel AST/包内值流，动态行为仍有限；声明与 API 风险不保证业务行为。现代观测须匹配 profile、版本和时效，不能借用另一 profile 的证据。
+- 0.1.3 支持新版 DSH 声明规则、精确兼容豁免及 rc.2 目录；未来 DSH 版本未经认证。已有 macOS/Linux 的限定验证，Windows 待真实验收。[完整契约与限制](docs/Plan.md#2-现行判定与集成契约)。
 
-需要 Node、DSH、pnpm；依赖解析和安装可能联网。`spec` 接受 npm、GitHub、git、file 等 DSH 支持的安装规格。流程使用唯一临时 profile 和私有现场，只清理自己启动的进程；**临时 profile 不是操作系统沙箱**。
-
-| 选项 | 作用 |
-|---|---|
-| `--keep` | 保留本次 profile 与现场，读取返回路径 |
-| `--timeout N` | 启动等待秒数，默认30 |
-| `--json` | stdout 一份 JSON，安装进度不混入其中 |
-| `--install-skill` / `--force` | shell 的独立 skill 安装与显式覆盖 |
-| `--help` / `--version` | shell 的帮助和版本 |
-
-CLI 和 Node 安装检查的结果码：
-
-| 码 | 含义 |
-|---|---|
-| `0` | 没有报告问题；仍须检查 coverage、vacuous 和采样限制 |
-| `1` | 至少一个插件部分可用或未知 |
-| `2` | 至少一个插件不兼容，或安装阶段明确 peer 闸门拒绝 |
-| `3` | 输入、安装、网络、准备或启动出错，本次无法判定 |
-
-shell 在进入 Node 前保留旧的用法/内核缺失错误码；调用自动化时使用上面的 Node 入口并检查结果 `status`，不能把包装层错误当插件结论。
-
-## 如何理解证据
-
-- 服务区分 `present`、`absent`、`unobserved`、`unreadable`；省略键是未采集，不能判成不存在。现代探针需匹配 profile、DSH版本，默认超过24小时失效；旧报告只使用明确记录的键并提示未绑定。
-- `certainty` 是 `certain` 或 `suspected`，与“过滤/弃权”这种去处不同。声明能确定依赖关系，不能单独确定方法缺失。`impactBasis=inferred` 的用户影响要保留“推断，非实测”；可靠映射的 loader FAILED/PENDING 可提供实际未激活证据。
-- 0.1.3对目标DSH从0.2.1-rc.1起优先使用自有`engines.dsh`，没有该字段才检查官方peer；旧目标保持旧规则（engines仅建议）。声明冲突/非法字段仍为`declared-incompatible`及推断影响，不冒充实测加载失败。只读目标profile的独立`compatibility.json`，按插件名、插件精确版本、DSH精确版本匹配豁免；无效整条忽略并限制覆盖，文件不可读/超64KiB则豁免未观测，绝不自动授予。豁免只放行声明，不证明API或业务可用。
-- `coverage.status=limited`、`vacuous`、解析/读取/预算诊断、无法映射的 loader 状态都必须转述。“可用”不等于完整功能验收通过。
-- 宿主、客户端、共享调用点分开处理。声明 provide 只是提供方线索，不能证明服务已激活；已确认存在服务的完整方法观测仍参与判断。
-
-静态提取使用固定版本 Babel JS/TS AST，追踪词法绑定、逐调用位置、能力守卫及包内相对导入（含副作用导入），不执行被分析源码。支持常量计算属性、直接函数参数/返回值、包内ESM/CommonJS别名与调用、空handler的透明Proxy；只对已证明的Context/服务扩展跨函数流。未知动态键、trap、异步返回、歧义及超预算仍会限制分析，详见[Plan](docs/Plan.md#21-证据与分析边界)。扫描有文件/字节/目录/时间预算；宿主分析放在有超时和内存上限的 worker 中。
-
-默认静态 CLI 不启动 DSH、不安装目标包；宿主插件不为体检启动外部命令或联网，但会使用分析 worker，并默认写自己的基线。schema2 基线按 canonical profile、路径哈希、模式和工具/规则/目录身份比较，位于 `$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`；锁内比较、原子替换，不完整源码扫描不推进。静态、文件探针与进程内观测分模式保存，不能强求面板与 CLI 共用一次观测。
-
-探针通过描述符采样，不调用 getter；未知访问器保留为未知。默认不写共享诊断路径，只有显式私有 `DSC_OUT_DIR` 才输出诊断。其它 profile 查询只用静态证据，不能借用当前宿主观测。`--keep` 的现场可能有本机信息，提交前须人工检查。
-
-## 目录结构
-
-```text
-dsh-plugin-compat-check/
-├── README.md / README.en.md / README.ko.md
-├── package.json / package-lock.json   # private development workspace
-├── bin/                              # compat-check.mjs, check-install.mjs
-├── lib/                              # shared analysis, evidence, state and runner modules
-├── plugin/                           # npm plugin, client, packaging scripts and skill copy
-├── probe/                            # opt-in runtime probe, staged by the owned runner
-├── skill/                            # authoritative SKILL.md and delivery notes
-├── rules/                            # severity rules, API catalogue and historical inventory
-├── docs/                             # current contracts, verification and history
-│   ├── Plan.md
-│   ├── GPT审计及重构方案文档.md
-│   ├── current-state.json
-│   └── extraction-findings.md
-├── test/                             # behavior, invariants, snapshots and artifact tests
-└── tools/                            # documentation, metadata and diagnostic utilities
-```
-
-## 验证与维护
+## 开发与文档
 
 ```bash
 npm test
 npm run format:check
 node tools/doc-check.mjs
 node plugin/scripts/prepublish-check.mjs
-node tools/meta-check.mjs --json   # 联网，需要 gh/npm
+node tools/meta-check.mjs --json
 ```
 
-默认套件在启动时捕获本机可选profile的测试专用只读副本，供提取、源码回读及子进程共享；单文件测试自行捕获。捕获期间输入变化或超预算会明确报错，未安装的profile明确跳过，不以重试消除失败。副本在结束后清理；这不改变生产扫描或安装检查行为。
+默认套件不启动真实 DSH/模型；打包回归使用私有空缓存安装，需要 npm registry。`doc-check` 不递归跑测试；元数据核验需要 gh/npm 和联网，未发布 README 差异为 notice，取数失败不是通过。发布前检查本身不发布版本。
 
-`doc-check` 离线检查文档链接、版本、入口与 skill 副本；**不会自己运行测试**。记录新结果时先保存 TAP 摘要，再执行 `node tools/update-current-state.mjs --test-summary <log>` 和 `node tools/doc-check.mjs --test-summary <log>`。发布前检查只运行一次完整默认套件并复用摘要，含独立tarball安装后在受控宿主上下文中调用注册工具；这不等于启动真实DSH；该打包回归使用私有空npm缓存，需要访问npm registry，不依赖本机历史缓存。GitHub/npm 元数据检查为联网步骤；未发布候选的版本和 README 差异是 notice，取数失败不能称“全部一致”。
+[Plan：契约、验证与待办](docs/Plan.md) · [current-state.json：计数与证据](docs/current-state.json) · [规则](rules/README.md) · [skill](skill/README.md)。工程诊断、独立业务度量及显式模型测试的命令与权限见 [复现指南](docs/Plan.md#5-验证记录与复现)，这些开发工具不随 npm 插件分发。
 
-默认套件不启用 `DSC_SLOW=1` 集成。已有macOS真实DSH/Chrome、Ubuntu arm64 VM及Linux x64 CI证据，覆盖实际tgz、tool/skill、界面正负例与工程资源场景；各自提交和范围见[Plan](docs/Plan.md#5-验证记录与复现)。本地新补强与文档修订不能套用旧CI，Windows按约定待验收。工程复现见[Plan](docs/Plan.md#53-p2工程验收)。历史88.3%召回、66/66到货及loader标签都不等于业务准确率；Python parity也是旧正则参考，不是AST真值。
-
-仓库CLI/开发工具另支持`DSC_EXECUTION_DIAGNOSTICS=<私有目录>`保留工程失败诊断：区分Chrome启动/建页/管道故障及真实回收失败；普通JSON不含stderr正文，私有文件限长脱敏并需预览。真实回收失败保留workDir；Darwin仅核验同UID全组Z或确认退出且组已消失时接受停止，不忽略活进程EPERM。详见[Plan](docs/Plan.md#53-p2工程验收)。
-
-辅助度量使用 [Plan辅助度量记录](docs/Plan.md#51-已验证范围) 的独立loader标签；预测不读取标签。`node tools/labels.mjs --nm web --synthetic --json` 初始化私有环境并可能诚实返回漏报（exit1）；现有目标可用`--probe-boot`，文件模式须同时给`--probe`和`--labels`。数字仅覆盖第一层，不能代表生态准确率。
-
-仓库独立业务工具用`node tools/business-labels.mjs --live --suite sidebar-ui --out-dir <空证据目录> --json`（默认market）。固定dshmarket1.66.37覆盖备注/收藏的正常、503、操作前/保存后控件缺失及恢复；dsh-better-sidebar0.28.0覆盖保存/预览HTTP路径、真实编辑器输入/保存/重载和UTF-8 BOM/UTF-16LE、CRLF字节保留。0.26.1另作无故障注入的版本对照：两例文件树HTTP405、无法编辑，保留功能风险漏报，不认定具体引入回归的版本。预测提前封存，业务与loader答案不进入预测；完成请求、目标卡片/编辑器DOM和独立磁盘数据共同核验。自然缺控件记业务失败；无法建立故障的对照逐例不计分，驱动错误不冒充业务失败。
-
-编辑器suite可加`--observe-services`：保留原静态队列，另封存动作前、同profile的根服务观测，输出独立`service-*`证据。0.26.1必需webRuntime缺失时该队列TP2，0.28.0为TN4且FP0；原静态FN2及503漏报仍保留。仅给诊断宿主提供旧版要求的服务后两例编辑恢复，说明激活前提缺失，不证明编辑方法或所有业务可由静态分析预测。详见[Plan](docs/Plan.md#4-已完成的关键工作)。
-
-显式`--suite sidebar-model --model-profile <已配置来源profile目录>`才会使用真实账户，当前仅支持deepseek-official；只复制所选凭据到自有临时home，最多两个提示/提供方首步、每步最多256输出token、无重试/自动标题，代码禁用工具。默认套件、`DSC_SLOW=1`和CI均不调用模型。正常/受控故障分组，固定样本不代表生态准确率或完整模型能力；用法和限定实测见[Plan](docs/Plan.md#52-日常检查与真实集成)。
-
-报告契约以 [lib/contracts.mjs](lib/contracts.mjs) 为单一真源，CLI JSON、HTTP、工具与面板保留完整证据；新字段可扩展，缺少必需字段或不支持的版本报工具错误。0.1.3按已知目标选择目录：DSH≥0.2.1-rc.2用新增rc.2目录（host98/client8），其余/未知用原0.2.0-rc.2目录（host91/client8），`--catalog`显式覆盖优先；未来DSH版本尚未认证。目录不等于运行时面，严重度不能只靠目录增删推定；库存仍是明确标记不完整的旧AST样本。见 [Plan](docs/Plan.md#2-现行判定与集成契约)。
-
-[施工记录与后续计划](docs/Plan.md) · [历史审计](docs/GPT审计及重构方案文档.md) · [规则说明](rules/README.md) · [skill交付](skill/README.md)。项目已收录于 [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)。
-
-## License
-
-[MIT](LICENSE)。
+项目已收录于 [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)。[MIT License](LICENSE)。

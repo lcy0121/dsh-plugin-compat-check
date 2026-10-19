@@ -60,7 +60,8 @@ function main(argv) {
   }
   for (const name of ['Plan.md', 'GPT审计及重构方案文档.md']) {
     if (fs.existsSync(path.join(ROOT, name))) problems.push(`${name}: obsolete root copy`);
-    if (!fs.existsSync(path.join(ROOT, 'docs', name))) problems.push(`docs/${name}: missing migrated document`);
+    if (name === 'Plan.md' && !fs.existsSync(path.join(ROOT, 'docs', name)))
+      problems.push(`docs/${name}: missing maintained plan`);
   }
   if (read('skill/SKILL.md') !== read('plugin/skill/SKILL.md')) problems.push('packaged skill differs from source');
   const documents = maintainedDocuments(ROOT);

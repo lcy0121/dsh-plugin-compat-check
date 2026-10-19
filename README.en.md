@@ -1,146 +1,86 @@
 # dsh-plugin-compat-check
 
-Check the compatibility of **installed DSH plugins** with a target DSH version, with source locations, evidence and coverage limits. Accepted declarations or successful activation do not establish that every feature works.
+Check **installed DSH plugins** against a target DSH version, with source locations, evidence and coverage limits. Accepted declarations or successful activation do not establish working business features.
 
-**简体中文** | [English](README.en.md) | [한국어](README.ko.md)
+[简体中文](README.md) | **English** | [한국어](README.ko.md)
 
-## Version and delivery
+## Version and entry points
 
-The repository and npm are at **0.1.3**, now tagged `latest` (public tarball bytes and installation verified on 2026-10-18). This release includes rc.2 declarations, versioned catalogues, unload cleanup fixes and the updated skill. Repository CLI and business measurement tools are not shipped in the npm plugin. See [Plan](docs/Plan.md) and [verification facts and scope](docs/current-state.json). Node `^22.19.0 || >=24` is supported.
-
-The repository source additionally contains activation-prerequisite explanations, an HTTP Origin protocol/host/port fence, npm subdirectory metadata, and process cleanup/Chrome diagnostics that have not been published to npm. Pushing or merging source does not publish a package. The shared 0.1.3 version number does not mean these changes are in the public package; see [Plan](docs/Plan.md) for delivery status.
+npm `latest` is **0.1.3**, supporting Node `^22.19.0 || >=24`. main also contains activation-prerequisite explanations, an Origin fence, subdirectory metadata and engineering diagnostics that have not been published to npm. Source and public packages sharing version 0.1.3 are not identical. See [Plan](docs/Plan.md) for delivery, verification and next steps.
 
 | Entry | Purpose |
 |---|---|
-| npm plugin | In-process sampling, compatibility tab, per-plugin findings/badge, `compat_check` and skill provider; no pre-install checks |
-| Repository CLI | Static checks of installed packages; optional file observations or explicit temporary-host probing |
-| Repository installation runner | Install a spec into a temporary profile and check installation, startup and compatibility |
-| Skill | Teaches an agent to use the registered tool or repository CLI |
+| npm plugin | Compatibility tab, per-plugin findings/badge, `compat_check` and skill provider |
+| Repository CLI | Check installed plugins, read observations or explicitly start a temporary host |
+| Repository installation runner | Install, start and check a spec in a temporary profile |
+| Skill | Guide an agent to the same tool or CLI; [delivery notes](skill/README.md) |
 
-The entries share one verdict kernel. Only identical inputs and observation evidence should produce identical results. The npm package has **no CLI `bin`**; `npx dsh-plugin-compat-check` is unavailable. Client arrival diagnostics are a separate development tool, not a panel feature or a full UI test.
+The forms share one verdict kernel; only identical inputs and observations should produce identical results. The npm package has **no CLI bin**; `npx dsh-plugin-compat-check` is unavailable.
 
-## What it looks like
+## UI examples
 
-These recorded detail-page screenshots are not complete compatibility certification. API findings can carry real source locations; declaration or loader facts may have no source location and must retain their basis.
+Recorded detail pages illustrate the report, not complete compatibility certification:
 
-![Plugin detail page: partially working, with file:line, impact and basis](plugin/assets/compat-detail-partial.png)
+![Partially usable: source locations, impact and basis](plugin/assets/compat-detail-partial.png)
+![Declaration conflict: distinguish tool inference from the host warning](plugin/assets/compat-detail-declared.png)
 
-![Declaration-conflict example: interpret tool inference separately from the host warning](plugin/assets/compat-detail-declared.png)
+## Quick start
 
-## Usage
+### Plugin
+
+```bash
+dsh plugin --profile <profile> add dsh-plugin-compat-check
+```
+
+DSH 0.2.1-rc.2 navigation: **More → Settings → Built-in plugins → Compatibility**. Agents can call `compat_check`. Select the actual profile; do not assume desktop.
 
 ### Repository CLI
-
-The repository provides the shared kernel and root development workspace; npm ships only the plugin package. Obtain the repository and install dependencies at its root:
 
 ```bash
 git clone https://github.com/lcy0121/dsh-plugin-compat-check.git
 cd dsh-plugin-compat-check
 npm ci --ignore-scripts
-
 node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
-node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --probe /path/to/probe-report.json --dsh-version <version> --no-baseline --json
 node bin/compat-check.mjs --help
 ```
 
-Select the actual profile; do not assume desktop. `--nm` accepts a profile or node_modules directory. Without runtime evidence, method conclusions from the catalogue are suspected. A probe file alone does not make every finding certain: identity, age, completeness and source attribution still matter.
-
 | Option | Effect |
 |---|---|
-| `--nm <dir>` | Required target directory |
-| `--probe <json>` | Existing runtime observation; takes priority over `--probe-boot` |
-| `--probe-boot` | Explicitly copy the profile, install the probe and start a temporary host, executing target plugins |
-| `--probe-timeout <seconds>` / `--probe-keep-dir <dir>` | Startup limit, default40s; preserve evidence in an explicit private directory |
-| `--dsh-version <v>` | Target version for declarations and catalogue selection; explicit value takes priority over boot observation |
-| `--rules <json>` / `--catalog <json>` | Override rules and API catalogue |
-| `--no-baseline` | Disable baseline reads and writes |
-| `--baseline-file <path>` / `--dry-run` | Explicit baseline; compare without writing |
-| `--json` / `--quiet` | One JSON document; or summary only |
-| `--issue-report` | Redacted Markdown report; no baseline reads/writes; exclusive with `--json`/`--quiet` |
-| `--version` / `--help` | Version or full usage, no target required |
+| `--nm <dir>` | Required; profile or node_modules directory |
+| `--probe <json>` / `--probe-boot` | Read an observation or explicitly start a temporary host; file takes priority |
+| `--dsh-version <v>` | Target for declarations and catalogue selection; explicit value takes priority |
+| `--json` / `--quiet` | Full JSON / summary only |
+| `--no-baseline` / `--dry-run` | No baseline reads/writes / compare without writing |
+| `--baseline-file <path>` | Explicit baseline file |
+| `--issue-report` | Redacted Markdown; no baseline reads/writes; exclusive with json/quiet |
+| `--rules <json>` / `--catalog <json>` | Override rules / API catalogue |
+| `--probe-timeout <seconds>` / `--probe-keep-dir <dir>` | Startup limit, default40s / preserve probe evidence in an explicit private directory |
+| `--help` / `--version` | Full usage / tool version, no target required |
 
-To prepare a report, run `node bin/compat-check.mjs --nm <target> --issue-report > issue-report.md`. It retains versions, observation mode, findings, available package-relative positions, certainty/impactBasis, coverage and a reproduction command with placeholders. Raw logs/probes, absolute paths and baselines are omitted; explanation fields containing paths, links, common credentials or control characters are hidden in full. Package names and relative filenames remain, and arbitrary business text may still be sensitive: preview before sharing. Exit codes remain 0/1/2/3; capture immediately with `report_status=$?` if needed. This flag is currently a repository-source feature; the npm plugin has no CLI.
+`--issue-report` retains package names and package-relative paths: preview before sharing. It omits raw logs, probes and baselines and never posts automatically. Private working directories and engineering diagnostics are not ready-to-share reports either.
 
-### Plugin and skill
+### Installation checks and standalone skill
 
 ```bash
-# Published npm version (0.1.3 verified on 2026-10-18)
-dsh plugin --profile <profile> add dsh-plugin-compat-check
-
-# Standalone skill for CLI users
+node bin/check-install.mjs <spec> --json
+./dsh-plugin-compat-check.sh <spec> --json
 ./dsh-plugin-compat-check.sh --install-skill
 ```
 
-The plugin registers a compatibility panel, detail badges, `compat_check` and a skill provider. On 2026-10-15, the actual tarball was installed into DSH0.2.0-rc.2 on macOS arm64; tool and skill calls, the panel, badges and baseline changes were verified with a real Chrome session. Standalone skill destination: `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`; existing files require `--force` to overwrite.
+Installation checks require Node, DSH and pnpm; specs follow DSH's npm/GitHub/git/file conventions. Options include `--keep` and `--timeout` (default30s). Installation may use the network, and checks start a host and execute target plugins; **a temporary profile is not an OS sandbox**. An existing standalone skill requires `--force` to overwrite; see [skill delivery](skill/README.md) for its location.
 
-rc.2 navigation: More → Settings → Built-in plugins → Compatibility. On 2026-10-18 the 0.1.3 candidate tarball, a private rc.2 host and real Chrome showed the tab/report and confirmed route removal/recovery on disable/re-enable, with one tab afterward. The historical 2026-10-17 missing-tab report was not reproduced; this does not establish its original cause or certify plugin business functions.
+The repository root is a private development workspace, not an installable plugin. Test source by packing a complete tgz and installing it through DSH. A root GitHub spec or bare `plugin/` copy is not a complete artifact. See [source packaging](plugin/README.md#从源码构建安装).
 
-The repository root is a **private development workspace**, not the installable DSH bundle. A root GitHub spec is not equivalent to installing `plugin/`. To test the source, run `npm ci --ignore-scripts` at the root, then `npm pack --pack-destination <existing-absolute-output-dir>` inside `plugin/`, and install the resulting `.tgz` through DSH. Packing stages the kernel and LICENSE. Copying a bare `plugin/` directory does not stage the kernel; see [plugin delivery](plugin/README.md).
+## Results and limits
 
-### Installation checks
+CLI/Node installation-runner exit codes: **0** no issue reported, **1** partially usable or unknown, **2** incompatible or installation peer-gate rejection, **3** input/execution error, no verdict. The shell retains usage/kernel-error codes before entering Node; automation should use the Node entry and inspect `status`.
 
-```bash
-./dsh-plugin-compat-check.sh <spec> [--keep] [--timeout seconds] [--json]
-node bin/check-install.mjs <spec> --json
-```
+- Retain `certainty`, `impactBasis`, `coverage` and `vacuous`. Unknown, unobserved or omitted keys do not mean absence; a catalogue is not a runtime observation. Client features need separate acceptance.
+- Default static CLI checks do not start DSH or install targets. Host checks use a budgeted analysis worker without external commands/network. Baselines are written by default; use `--no-baseline` for one-off checks.
+- Method analysis uses bounded Babel AST/package-local value flow; dynamic behavior remains limited. Declarations/API risks do not guarantee business behavior. Modern observations must match profile, version and age; another profile's evidence cannot be borrowed.
+- 0.1.3 supports newer DSH declarations, exact compatibility grants and the rc.2 catalogue. Future DSH versions are unverified. Scoped macOS/Linux evidence exists; Windows awaits real acceptance. See [contracts and limits](docs/Plan.md#2-现行判定与集成契约).
 
-Requires Node, DSH and pnpm; dependency resolution and installation may use the network. Specs follow DSH's npm/GitHub/git/file conventions. Each run owns a unique profile, private working directory and its spawned processes. **A temporary profile is not an OS sandbox.**
-
-| Option | Effect |
-|---|---|
-| `--keep` | Keep this run's profile and evidence; use returned paths |
-| `--timeout N` | Startup timeout in seconds, default30 |
-| `--json` | One JSON document on stdout, separate progress output |
-| `--install-skill` / `--force` | Shell-only skill installation and explicit overwrite |
-| `--help` / `--version` | Shell help and version |
-
-CLI and Node installation-runner result codes:
-
-| Code | Meaning |
-|---|---|
-| `0` | No issue reported; still inspect coverage, vacuous results and observation limits |
-| `1` | At least one partially usable or unknown plugin |
-| `2` | An incompatible plugin or an explicit installation peer-gate rejection |
-| `3` | Input, installation, network, preparation or startup failed; no reliable verdict |
-
-The shell retains legacy usage/kernel-error codes before entering Node. For automation use the Node entry and inspect `status`; wrapper errors are not plugin findings.
-
-## Evidence and limits
-
-Services have distinct present, absent, unobserved and unreadable states. Omitted keys are unobserved. Modern observations must match profile and DSH version and expire after24h by default. Legacy reports use explicit keys only and carry an unbound warning.
-
-`certainty` is certain or suspected; filtered/abstained are separate dispositions. Declarations establish dependency relationships, not method absence. Preserve inferred impact; reliably mapped loader FAILED/PENDING supplies measured activation evidence. The 0.1.3 uses own `engines.dsh` first for DSH≥0.2.1-rc.1, falling back to official peers only if absent; older targets retain advisory engines. Conflicts/invalid fields produce inferred `declared-incompatible`, not measured load failure. Read-only profile `compatibility.json` grants require exact plugin name/version and runtime version. Invalid rows are ignored with coverage limits; unreadable/over-64KiB files leave grants unobserved. No grants are written. Exemption permits declarations, not API or business success.
-
-Always retain `coverage.status=limited`, vacuous results, parse/read/budget diagnostics and unmapped-loader limits. No finding is not a feature certificate. Host, client and shared sites are kept separate. Provider declarations are hints, not evidence of activation; complete method observations of present services still apply.
-
-The pinned Babel JS/TS AST analyser tracks lexical bindings, per-call positions, capability guards and package-local relative imports, including side effects, without executing inspected source. Bounded flow supports constant computed keys, direct parameters/returns, package-local ESM/CommonJS aliases and calls, and transparent Proxies with empty handlers. Interprocedural expansion requires proven Context/service bindings; unknown keys, traps, async returns, ambiguity and budget limits remain explicit limitations. See [Plan](docs/Plan.md#21-证据与分析边界). Source scanning has file/byte/directory/time budgets; host analysis uses a worker with time and memory limits.
-
-Default static CLI checks do not start DSH or install targets. The host plugin uses an analysis worker but no external command/network for checks, and writes its own baseline by default. Schema2 identity includes canonical profile, path hash, mode, tool, rules and catalogue. Files live at `$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`. Comparison runs under a lock with atomic replacement; incomplete scans do not advance the baseline. Static, file and in-process observations have separate modes.
-
-Descriptor sampling does not execute getters; unknown accessor methods remain unknown. Probe/loader diagnostics require an explicit private `DSC_OUT_DIR`. Queries of another profile use static evidence rather than borrowing the current host's services. Inspect kept evidence for local information before sharing.
-
-## Repository layout
-
-```text
-dsh-plugin-compat-check/
-├── README.md / README.en.md / README.ko.md
-├── package.json / package-lock.json   # private development workspace
-├── bin/                              # compat-check.mjs, check-install.mjs
-├── lib/                              # shared analysis, evidence, state and runner modules
-├── plugin/                           # npm plugin, client, packaging scripts and skill copy
-├── probe/                            # opt-in runtime probe, staged by the owned runner
-├── skill/                            # authoritative SKILL.md and delivery notes
-├── rules/                            # severity rules, API catalogue and historical inventory
-├── docs/                             # current contracts, verification and history
-│   ├── Plan.md
-│   ├── GPT审计及重构方案文档.md
-│   ├── current-state.json
-│   └── extraction-findings.md
-├── test/                             # behavior, invariants, snapshots and artifact tests
-└── tools/                            # documentation, metadata and diagnostic utilities
-```
-
-## Verification and maintenance
+## Development and documentation
 
 ```bash
 npm test
@@ -150,26 +90,8 @@ node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-The default suite captures one private read-only copy of optional local profiles for extraction, source rereads and child processes. Standalone test files capture their own inputs. Changes during capture or exceeded budgets fail explicitly; absent profiles are skipped explicitly. Copies are cleaned up afterward. Production scans and installation checks are unchanged.
+Default tests do not start real DSH or call models. Artifact tests install with a private empty cache and require npm registry access. `doc-check` never recursively runs tests. Metadata checks need gh/npm and network; unpublished README differences are notices, unavailable sources are not passes. The prepublish check itself publishes nothing.
 
-`doc-check` checks links, versions, document entry points and the skill copy offline; it does not run tests. Record a successful TAP log with `node tools/update-current-state.mjs --test-summary <log>` and validate it with `node tools/doc-check.mjs --test-summary <log>`. The prepublish check runs the default suite once and reuses the summary, including isolated tarball installation and registered-tool execution in a controlled host context; it does not start real DSH. That artifact test uses a private empty npm cache and requires npm registry access rather than a prewarmed machine cache. Metadata checks require network and gh/npm; an unpublished newer local version or README is a notice, while unavailable sources remain unverified.
+[Plan: contracts, verification and next steps](docs/Plan.md) · [current-state.json: counts and evidence](docs/current-state.json) · [Rules](rules/README.md) · [Skill](skill/README.md). Commands and authorization boundaries for engineering diagnostics, independent business measurements and explicit model tests are in the [reproduction guide](docs/Plan.md#5-验证记录与复现); these development tools are not shipped in the npm plugin.
 
-Slow integrations require explicit `DSC_SLOW=1`. Existing macOS DSH/Chrome, Ubuntu arm64 VM and Linux x64 CI evidence covers actual tarballs, tool/skill registration, UI controls and engineering scenarios; see [Plan](docs/Plan.md#5-验证记录与复现) for exact commits and scopes. Earlier CI does not certify later local assertion or documentation changes. Windows remains deferred. See [engineering checks](docs/Plan.md#53-p2工程验收). Historical 88.3% recall, 66/66 arrival and loader labels are not business-function accuracy; Python parity is a legacy regex reference, not AST ground truth.
-
-Repository CLI/development tools also accept `DSC_EXECUTION_DIAGNOSTICS=<private-directory>` for execution failures: Chrome handshake/target/pipe stages and actual cleanup errors. Normal JSON omits stderr bodies; private files contain bounded redacted stderr and need preview. Failed cleanup retains workDir. Darwin EPERM is accepted only for verified same-user zombies or confirmed exit with no remaining group. See [Plan](docs/Plan.md#53-p2工程验收).
-
-Auxiliary measurement uses independent raw loader labels; the predictor receives service observations only. See [auxiliary measurement records in Plan](docs/Plan.md#51-已验证范围). `node tools/labels.mjs --nm web --synthetic --json` creates a private environment and can correctly report a false negative (exit1). Use `--probe-boot` for an existing target, or paired `--probe` and `--labels` files. These sample metrics cover the first layer only, not ecosystem accuracy.
-
-Repository business tools run with `node tools/business-labels.mjs --live --suite sidebar-ui --out-dir <empty-evidence-directory> --json` (default: market). Pinned dshmarket1.66.37 covers notes/favorites, POST503, missing controls before/after saving, and recovery. dsh-better-sidebar0.28.0 covers save/preview HTTP paths, actual editor input/Save/reload and UTF-8 BOM/UTF-16LE/CRLF bytes. An uninjected 0.26.1 comparison records two file-tree HTTP405 failures and feature-risk misses; it does not identify a regression-introducing version. Predictions are sealed before actions, without business/loader answers. Completed requests, target-card/editor DOM and independent disk bytes establish outcomes. Naturally absent controls fail the business case; unestablished fault controls are individually unscored.
-
-Editor suites accept `--observe-services`: the original static cohort remains, while a separate same-profile root-service prediction is sealed before actions and written as `service-*` artifacts. Required webRuntime absence in0.26.1 yields TP2;0.28.0 yields TN4/FP0. Original static FN2 and503 misses remain. Providing the old prerequisite only in a diagnostic host restores both edits; this distinguishes activation prerequisites from editor-method failures, without certifying arbitrary business behavior. See [Plan](docs/Plan.md#4-已完成的关键工作).
-
-Only explicit `--suite sidebar-model --model-profile <configured-source-profile-directory>` uses a real account (currently deepseek-official only). It copies only the selected credential into an owned temporary home: at most two prompts/provider first steps,256 output tokens per step, no retries/automatic titles, and enforced tool denial. Default tests, `DSC_SLOW=1` and CI never call a model. Baseline/fault groups remain separate; fixed samples do not certify ecosystem accuracy or complete model capability. See [Plan](docs/Plan.md#52-日常检查与真实集成) for commands and scoped evidence.
-
-[lib/contracts.mjs](lib/contracts.mjs) is the single report contract source across CLI JSON, HTTP, tools and panel. Additive fields are retained; missing required fields and unsupported versions fail as tool errors. Version 0.1.3 selects the rc.2 catalogue (host98/client8) for DSH≥0.2.1-rc.2, otherwise/unknown the unchanged 0.2.0-rc.2 catalogue (host91/client8); explicit `--catalog` wins. Future DSH versions remain unverified. A catalogue is not a runtime observation or sufficient severity evidence. The AST inventory remains a dated partial sample. See [Plan](docs/Plan.md#2-现行判定与集成契约).
-
-[Development history and next steps](docs/Plan.md) · [Historical audit](docs/GPT审计及重构方案文档.md) · [Rules](rules/README.md) · [Skill delivery](skill/README.md). Listed in [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness).
-
-## License
-
-[MIT](LICENSE).
+Listed in [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness). [MIT License](LICENSE).

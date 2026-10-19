@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.3",
-  "recordedAt": "2026-10-19T12:26:01.747Z",
+  "recordedAt": "2026-10-19T13:24:41.013Z",
   "testFiles": 38,
   "tests": 561,
   "repositoryFiles": {
-    "total": 248,
+    "total": 247,
     "fixtures": 90,
-    "other": 158
+    "other": 157
   },
   "verification": {
     "platform": "darwin",
@@ -4852,7 +4852,7 @@
         "firstResult": "Node22 multi-resource cleanup fixture cancelled with unresolved Promise; Node24 jobs cancelled by matrix fail-fast, Linux dependent jobs skipped. Do not count as passed.",
         "reproduction": "Node22.19.0 isolated multi-resource test reproduced cancelledByParent on macOS; Node26 isolated test passed. Failure cleanup unrefs child; fixture awaiting final kill/exit had no referenced handle.",
         "correction": "Test-only final cleanup refs the owned child before awaiting exit; production unref/error/retained-directory behavior unchanged. Node22 owned-process11/11 and default561/561 verified afterward. No retry or budget relaxation.",
-        "status": "Source checkpoint e0b487c passed all push/PR jobs; final record/main delivery tracked by linked PR.",
+        "status": "Completed source delivery at main1c7e12a; final PR8/8 and main4/4 passed. Earlier failing checkpoints retained above.",
         "verifiedSourceHead": "e0b487c034d1373dd221c6ac855c7c7cabd0629f",
         "verifiedPushCi": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390",
         "verifiedPrCi": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254434881",
@@ -4906,9 +4906,99 @@
           "realChromeRegression": "Before: Missing business control: 文件. After: restored-tab and hidden-first-button cases both open the requested editor exactly once.",
           "liveRc2Original0261": "exit1; both business outcomes failed, original staticFN2 and separate serviceTP2 retained, hostStopped/privateRootRemoved true. No model call.",
           "evidenceDirectory": "/private/tmp/dsc-source-delivery.Fs1rlx"
+        },
+        "completedDelivery": {
+          "mergedPr": 6,
+          "mergeCommit": "1c7e12ad8c549dd2d60734108ff3080c70431af7",
+          "finalSourceHead": "788e149d9f33e132eb365c0e91fb1f39f3da85a2",
+          "finalPrChecksPassed": 8,
+          "mainCi": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39257051964",
+          "mainChecksPassed": 4,
+          "legacyLive": {
+            "tests": 53,
+            "passed": 49,
+            "notApplicable": 4
+          },
+          "rc2Live": {
+            "tests": 53,
+            "passed": 53
+          },
+          "scope": "Exact original delivery commits; later documentation-only main commits require their own CI. No npm release."
         }
       },
       "scope": "Source/docs delivery only. Existing real macOS/DSH/Chrome and model evidence retains its exact dated scope; no new model calls, Windows certification, npm tag or npm release."
+    },
+    "auditArchive20261019": {
+      "archivedAt": "2026-10-19T13:23:30.746636+00:00",
+      "originalDate": "2026-10-14",
+      "originalCodeBaseline": "4722716126614a4404eafa682e87a9742acbea9b",
+      "originalNpmBaseline": "0.1.0",
+      "archivedPath": "docs/GPT审计及重构方案文档.md",
+      "retainedCommit": "1c7e12ad8c549dd2d60734108ff3080c70431af7",
+      "originalDocumentSha256": "a29bab3aeb2363186f13f560473932469e69481a29bacf1fc1db7012f9b3e8aa",
+      "currentSummary": "docs/Plan.md section4; current contracts in section2, boundaries in section3, acceptance in section5",
+      "disposition": "Remove historical long report from maintained docs; full original remains recoverable from the recorded Git commit. Historical verification lists naming this file retain their dated scope.",
+      "implementedScope": [
+        "B01–B14: explicit evidence/side/scope, AST/source graph/guards, loader/profile/error presentation, owned execution, baseline identity/concurrency",
+        "S01: private diagnostic directories and symlink rejection",
+        "S02: owned inherited Chrome CDP pipe, no predictable TCP debugger endpoint",
+        "S03: canonical package boundaries and bounded scans/workers"
+      ],
+      "securityScan": {
+        "id": "67adc733-02ab-46cb-a6f5-830aa4c807e2",
+        "originalFindings": 3,
+        "originalSeverity": "medium",
+        "coverage": "partial",
+        "validation": "source evidence; no cross-user dynamic attack or remote-takeover proof",
+        "limits": [
+          "No exhaustive security certification",
+          "Old audit did not verify historical credential rotation",
+          "Invalid token accounting in original scanner output is not usage/billing evidence",
+          "Authorized target execution retains user permissions; temporary profile is not an OS sandbox"
+        ]
+      }
+    },
+    "documentationConsolidation20261019": {
+      "verifiedAt": "2026-10-19T13:25:11.297034+00:00",
+      "sourceBase": "1c7e12ad8c549dd2d60734108ff3080c70431af7",
+      "changes": "Three root READMEs reduced to97 lines with matching sections, commands, flags and evidence boundaries; detailed acceptance remains in Plan/current-state. Historical audit removed after summary and immutable Git archive verification; no new summary file.",
+      "archive": "verification.auditArchive20261019; original SHA256 verified against retained Git bytes",
+      "maintainedDocuments": 10,
+      "githubMetadata": {
+        "decision": "Retain existing description/topics/homepage: describes installed DSH declaration/API risks, panel/tool/source evidence and coverage limits without promising pre-install or complete feature certification. Nine topics cover DSH/DeepSeek, compatibility, developer tools, skills, Cordis and health checks.",
+        "observedAt": "2026-10-19T13:22:42.337Z",
+        "description": "检查已安装DSH插件的版本声明、API风险与覆盖限制；提供兼容性面板、agent工具及可用源码位置。Check installed DSH plugins for declaration/API risks, with a compatibility panel, agent tool, source locations when available and coverage limits.",
+        "topics": [
+          "compatibility",
+          "deepseek-harness",
+          "developer-tools",
+          "dsh",
+          "deepseek",
+          "dsh-plugin",
+          "agent-skills",
+          "cordis",
+          "health-check"
+        ]
+      },
+      "metadata": {
+        "errors": 0,
+        "notices": [
+          "npm.readme-is-current"
+        ],
+        "unavailable": [],
+        "npmLatest": "0.1.3"
+      },
+      "localChecks": {
+        "defaultTests": 561,
+        "passed": 561,
+        "failed": 0,
+        "docsAndSkillTests": 35,
+        "format": "passed",
+        "documentFacts": "passed",
+        "archiveHash": "verified",
+        "evidenceDirectory": "/private/tmp/dsc-docs-trim.9iFYyP"
+      },
+      "delivery": "User authorized direct main commit/push; this documentation and checker maintenance is not an npm release or new runtime/security certification. CI for the new commit is tracked in the repository main workflow; prior source CI retains its exact commit scope."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-更新于2026-10-19。已发布版本为0.1.3；仓库源码已补服务前提度量、Origin同源校验、npm子目录元数据及工程回收/Chrome诊断，公开npm0.1.3不包含这些修订。本轮文档已核验，源码交付由[PR #6](https://github.com/lcy0121/dsh-plugin-compat-check/pull/6)跟踪；暂不发布新版本，后续见§6。本文维护现行契约、交付边界与待办；用法见[README](../README.md)，逐次证据见[docs/current-state.json](current-state.json)。[原始审计](GPT审计及重构方案文档.md)与[旧提取器反例](extraction-findings.md)保留历史身份，施工过程查Git历史。
+更新于2026-10-19。已发布版本为0.1.3；仓库源码已补服务前提度量、Origin同源校验、npm子目录元数据及工程回收/Chrome诊断，公开npm0.1.3不包含这些修订。补丁源码已由[PR #6](https://github.com/lcy0121/dsh-plugin-compat-check/pull/6)合入main，合并提交1c7e12a的[CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39257051964)四项通过；暂不发布新版本，后续见§6。本文维护现行契约、交付边界与待办；用法见[README](../README.md)，逐次证据见[docs/current-state.json](current-state.json)。原始审计已归纳到§4并从当前目录删除；[旧提取器反例](extraction-findings.md)保留历史身份，施工过程查Git历史。
 
 ## 1. 项目定位与交付状态
 
@@ -61,7 +61,11 @@
 
 ## 4. 已完成的关键工作
 
-已完成原审计B01–B14/S01–S03整改、P0集成、P1标签真值隔离/规则质量/契约稳定、有界P2分析与工程验证。规则复核保留readImage实际读取路径和sessions.open旧回退，移除getSnapshot/settings.get/sessions.map无依据影响；sessions.refresh不补无依据规则。历史安全审阅为partial，库存是partial样本，不以调用数或历史覆盖率代替准确率。
+2026-10-14原始审计以4722716、npm0.1.0为基准；其14项正确性问题（B01–B14）及3项安全问题（S01–S03）已完成对应整改和回归。核心修正为：区分未知/缺失与宿主/客户端，以词法AST和逐调用span取代正则猜测，将loader、profile、错误、原子基线与跨通道报告纳入一致契约。采用渐进重构，动态与超预算路径继续弃权，不追求全程序证明。完整原文保留在[归档提交](https://github.com/lcy0121/dsh-plugin-compat-check/blob/1c7e12ad8c549dd2d60734108ff3080c70431af7/docs/GPT审计及重构方案文档.md)，不再作为现行文档维护。
+
+安全整改分别为私有输出目录/拒绝不安全链接（S01）、自有Chrome继承管道替代可预测CDP端口（S02）、规范包内路径及扫描/worker预算（S03）；临时profile仍不是OS沙箱。原扫描为3项medium、源码验证、覆盖partial，未执行跨用户攻击或确认远程接管；历史凭据轮换不在旧审计范围，不能把回归通过等同全量安全认证。扫描ID及归档摘要见`verification.auditArchive20261019`。
+
+后续已完成P0集成、P1标签真值隔离/规则质量/契约稳定、有界P2分析与工程验证。规则复核保留readImage实际读取路径和sessions.open旧回退，移除getSnapshot/settings.get/sessions.map无依据影响；sessions.refresh不补无依据规则。库存仍是partial样本，不以调用数或历史覆盖率代替准确率。
 
 独立业务预测按固定制品、静态API目录和手审功能区间提前封存；不读业务/loader答案。完成请求、目标DOM与独立磁盘数据决定真值，驱动错误与无法建立的故障对照单列。当前仓库队列：
 
@@ -92,13 +96,13 @@
 | dshworks / bruc3van | dshworks[PR #169](https://github.com/dshworks/awesome-dsh-plugins/pull/169)已合并。bruc3van[#138](https://github.com/bruc3van/awesome-dsh-plugin/issues/138)已关闭并收录，旧排除理由已移除；readme/manifest核验不是运行时认证 |
 | 0xsline Awesome | [PR #717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)仍待处理；主分支仍旧简介，已有修订，不重复发帖 |
 
-公开0.1.3缺少`repository.directory`，本地已补`plugin`，原1024绑定函数由mismatch变strict；当前公开投影不以此隐藏npm方法，不能声称此字段已解决采集故障。Origin修复要求协议/主机/有效端口完全同源，保留本机无Origin调用；确切本地tgz真实宿主验证同源200、跨端口403。这两项待下一补丁候选交付，不改变公开0.1.3的历史证据。10月18日市场0.1.2验收、定时复查及其它旧渠道快照保留在current-state；源码子目录与完整tgz不等价，备用GitHub回退仍未认证。
+公开0.1.3缺少`repository.directory`，main源码已补`plugin`，原1024绑定函数由mismatch变strict；当前公开投影不以此隐藏npm方法，不能声称此字段已解决采集故障。Origin修复要求协议/主机/有效端口完全同源，保留本机无Origin调用；确切本地tgz真实宿主验证同源200、跨端口403。这两项待下一补丁候选交付，不改变公开0.1.3的历史证据。10月18日市场0.1.2验收、定时复查及其它旧渠道快照保留在current-state；源码子目录与完整tgz不等价，备用GitHub回退仍未认证。
 
 宣传仅保留可核验事实：HTTP 200不等于收录，下载不等于用户，star不代表兼容性；“故障时被想到”是待验证的定位假设。删除“唯一自动增长渠道”“纯链接转化近零”“每个rc后24小时普查”等未经验证或尚无资源保证的断言。其它市场按其npm/子目录/制品规则评估，不给private根包添加虚假bundle声明，也不从根扫描限制推出所有合规入口都不可能。
 
 工程故障诊断已闭合：Darwin真实对照复现“全组仅Z仍返回EPERM”与“内核Z先于Node exit事件”两种边界，新版联合现场也抓到后者的原栈/UID/PGID/状态。仅在有界确认实际退出后，完整快照为同UID全组Z或组已消失时接受停止；活进程拒绝/不可读仍失败。命令和probe同时保留原始/清理错误，清理失败保留私有workDir，不再未处理拒绝或宣称删除成功。Chrome先做Browser.getVersion握手，区分建页、附加、会话、EOF/退出/超时，记录有界元数据及可选私有stderr；仍用自有fd3/4，不加生产超时或重试。多个资源均尝试清理，CI已配置失败诊断留存。[Darwin信号源码](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_sig.c#L1548-L1624)与本机复现互证。历史Linux Target.createTarget原日志缺少Chrome/管道信息，不能追认具体Chrome根因；已用阶段负例和真实Chrome暂停对照验收诊断及回收，不以重跑代替修复。证据见`verification.engineeringDiagnostics20261019`。
 
-源码交付由[PR #6](https://github.com/lcy0121/dsh-plugin-compat-check/pull/6)跟踪：e0b487c的[push CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390)与[PR CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254434881)共8项通过，覆盖Node22.19/24.21默认闸门及资源检查、Linux旧DSH 48通过/4不适用、新rc.2 52通过。首轮Node22因测试清场等待已unref子进程而取消，已单例复现并在夹具最终清场前ref，生产回收策略未改；首发失败保留。后续文档提交的单轮rc.2 CI另暴露旧编辑器恢复标签为div、驱动只找button的边界；已留存失败页面并做真实Chrome红/绿对照，改为优先已有可见文件标签，0.26.1实跑仍保留静态FN2/服务TP2及两例HTTP405，不改业务判据。最终提交、合并状态及main CI以PR为准，不套用前一提交的通过；见`verification.sourceDelivery20261019`。本轮不改版本、不创建tag/Release、不发布npm。
+源码交付由[PR #6](https://github.com/lcy0121/dsh-plugin-compat-check/pull/6)跟踪：e0b487c的[push CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254428390)与[PR CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39254434881)共8项通过，覆盖Node22.19/24.21默认闸门及资源检查、Linux旧DSH 48通过/4不适用、新rc.2 52通过。首轮Node22因测试清场等待已unref子进程而取消，已单例复现并在夹具最终清场前ref，生产回收策略未改；首发失败保留。后续文档提交的单轮rc.2 CI另暴露旧编辑器恢复标签为div、驱动只找button的边界；已留存失败页面并做真实Chrome红/绿对照，改为优先已有可见文件标签，0.26.1实跑仍保留静态FN2/服务TP2及两例HTTP405，不改业务判据。最终788e149的push/PR共8项通过；已合入main提交1c7e12a，合并[CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39257051964)四项通过，旧DSH 49通过/4不适用、新rc.2 53通过；不套用前一提交的通过。见`verification.sourceDelivery20261019`。本轮不改版本、不创建tag/Release、不发布npm。
 
 ## 5. 验证记录与复现
 
