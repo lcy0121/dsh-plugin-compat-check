@@ -6190,11 +6190,11 @@
         "test/debugger.test.mjs": "c1445ac8db16f66a28bb53a179a2fd92c447a824a7a9d2b9898ef2c41a07e511",
         ".github/workflows/test.yml": "e827ca0a0330e324289c879ac097fc4d00fe20800f2d8fe9fea0af97a17d48c9"
       },
-      "followUp": "This is the successful c52f652 checkpoint. Later ba82dc6 failed on a newer runner image before SIGSTOP; see verification.linuxChromeInputPreparation20261020. It does not certify the later commit."
+      "followUp": "Successful intermediate c52f652 checkpoint; later ba82dc6 failure and final prepared-input acceptance are recorded in verification.linuxChromeInputPreparation20261020."
     },
     "linuxChromeInputPreparation20261020": {
       "recordedAt": "2026-10-20T08:44:17.286474+00:00",
-      "status": "Investigating: separate CI browser-file preparation added; remote verification pending.",
+      "status": "Completed: prepared-input protocol acceptance and full two-version DSH matrices passed in four CI jobs, including both observed runner image/browser versions.",
       "sourceBase": "ba82dc6e9f1f76fed74f75f12f175d2ffefe4134",
       "laterFailure": {
         "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39394691006",
@@ -6243,13 +6243,255 @@
           "final-first-new/linux-chrome-startup.tap": "1575d1d16bd7e6bb0ab387b8db914e7a37ab03f415baa01a2d004899f7786e64",
           "final-first-new/linux-chrome-environment.txt": "e954d8e69b18c95321357500a45ae6fb4e62305ae5d23ef8b7aef738525c4ecf",
           "final-first-new-job.log": "9c4713fab0668d7777156e692891693c6aec4763861ac213176eada96e773d6a",
-          "preparation-step.sh": "159709f97f646a856819a29ad1bf41c12f6f8ab29ea0ac756b0f267232265d31"
+          "preparation-step.sh": "159709f97f646a856819a29ad1bf41c12f6f8ab29ea0ac756b0f267232265d31",
+          "run-39395590460-final.json": "485fce5759a987acac59840f6de30b9bc22192d9a1c61f51c08a8152200e2576",
+          "prepared-run.log": "441190b8012846a02cfa61aee29993badc65e89ffd97a4d71456d17e9c8e773f",
+          "prepared-artifacts.json": "042c86b0dbeff5d864da4ad5ee9522c605a84f8b443ba565e0b2ec0f230c1d0e"
         }
       },
       "localValidation": {
         "workflowYaml": "parsed",
         "bashSyntax": "passed",
         "pythonSyntax": "passed"
+      },
+      "acceptance": {
+        "recordedAt": "2026-10-20T08:51:33.381891+00:00",
+        "sourceCommit": "4d0ba08080cab3d9fa06a7031ad2adb2960f3bcd",
+        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39395590460",
+        "runId": 39395590460,
+        "runAttempt": 1,
+        "jobs": [
+          {
+            "name": "test (22.19.0)",
+            "id": 118537423057,
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39395590460/job/118537423057",
+            "conclusion": "success",
+            "runnerImage": "ubuntu-24.04",
+            "runnerImageVersion": "20261018.339.1",
+            "nodeVersion": "22.19.0"
+          },
+          {
+            "name": "test (24)",
+            "id": 118537423344,
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39395590460/job/118537423344",
+            "conclusion": "success",
+            "runnerImage": "ubuntu-24.04",
+            "runnerImageVersion": "20261012.334.1",
+            "nodeVersion": "24.21.0"
+          },
+          {
+            "name": "linux-live (0.2.1-rc.2)",
+            "id": 118537732495,
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39395590460/job/118537732495",
+            "conclusion": "success",
+            "runnerImage": "ubuntu-24.04",
+            "runnerImageVersion": "20261018.339.1",
+            "nodeVersion": "24.22.0"
+          },
+          {
+            "name": "linux-live (0.2.0-rc.2)",
+            "id": 118537732497,
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39395590460/job/118537732497",
+            "conclusion": "success",
+            "runnerImage": "ubuntu-24.04",
+            "runnerImageVersion": "20261012.334.1",
+            "nodeVersion": "24.21.0"
+          }
+        ],
+        "matrices": {
+          "0.2.0-rc.2": {
+            "environmentText": "Google Chrome 155.0.8059.39 \n{\"node\":\"24.21.0\",\"kernel\":\"6.17.0-1022-azure\",\"arch\":\"x64\",\"parallelism\":4}",
+            "preparation": {
+              "complete": true,
+              "files": 341,
+              "bytes": 495368230,
+              "milliseconds": 8038.97713500001,
+              "chromeLaunches": 0,
+              "sha256": "50a4fdeed408a2f51e3c6004e2627eb0a6940d242897e6aab24538251ae5a99e",
+              "largestRead": {
+                "file": "chrome",
+                "bytes": 297798984,
+                "sha256": "9bfb381296dffe75f3419d07b6cc64525105ed117d1453a4ef3b291cb97d2b58",
+                "milliseconds": 4786.471500000005
+              }
+            },
+            "chromePrecheck": {
+              "tests": 11,
+              "pass": 11,
+              "fail": 0,
+              "cancelled": 0,
+              "skipped": 0
+            },
+            "dshJoint": {
+              "tests": 53,
+              "pass": 49,
+              "fail": 0,
+              "cancelled": 0,
+              "skipped": 4
+            },
+            "stoppedCommandControl": {
+              "startupMilliseconds": 664.9462919999987,
+              "timeoutMs": 10000,
+              "phase": "session",
+              "state": "T",
+              "cleanup": {
+                "stopped": true,
+                "status": "stopped"
+              }
+            },
+            "startupBatchAttempts": 4,
+            "startupBatchRetries": 0,
+            "controlledNegative": [
+              {
+                "file": "prepared/old/linux-execution-diagnostics/chrome-pipe-7ac93744-baf1-4742-93fc-0d3bb724e241.json",
+                "sha256": "2893c880f3254c1248376176197c99439a9f4907330723813f9f88a77416635c",
+                "phase": "session",
+                "state": "T",
+                "matchingStartIdentity": true,
+                "cleanup": {
+                  "stopped": true,
+                  "status": "stopped"
+                }
+              }
+            ],
+            "hostCleanup": {
+              "hostStopped": true,
+              "privateRootRemoved": true
+            },
+            "rc2Cleanup": {
+              "privateRootRemoved": true
+            },
+            "files": {
+              "linux-chrome-environment.txt": "014fd1a3cb7db6138b0441968fc7fab9fd9f7c72ba46d44fdaf96746678766f5",
+              "linux-chrome-startup.tap": "e8b0cf7728b5fc08e5cd896eee60e3a55721a0e5bd796b2a5e7b8bbedb33f6d5",
+              "linux-live.tap": "84cd7679403482325b9b284c8cba2bc7839755fad241381c9ddf7b7c36bf8e8d",
+              "linux-engineering.json": "ffc7a1755d802674b73a559c12bc56e3208b60537752a5c609a0cd2340840f46",
+              "linux-rc2.json": "29a7975389be7f6b15a6eb808fa6b1317e226e9c7c1119099d60b66bff6d2b8d"
+            }
+          },
+          "0.2.1-rc.2": {
+            "environmentText": "Google Chrome 155.0.8059.84 \n{\"node\":\"24.22.0\",\"kernel\":\"7.0.0-1017-azure\",\"arch\":\"x64\",\"parallelism\":4}",
+            "preparation": {
+              "complete": true,
+              "files": 341,
+              "bytes": 496794868,
+              "milliseconds": 9891.915161000014,
+              "chromeLaunches": 0,
+              "sha256": "dbbb2262c767f7291ad2dd6c7543f8f15aceb56a7a45c4af16bab440a20efaed",
+              "largestRead": {
+                "file": "chrome",
+                "bytes": 298913096,
+                "sha256": "cb19b59995072b86cc7f887b3b1c7ab1f63518a7f2ed9f0d33249e1a040e2c76",
+                "milliseconds": 5336.723704999997
+              }
+            },
+            "chromePrecheck": {
+              "tests": 11,
+              "pass": 11,
+              "fail": 0,
+              "cancelled": 0,
+              "skipped": 0
+            },
+            "dshJoint": {
+              "tests": 53,
+              "pass": 53,
+              "fail": 0,
+              "cancelled": 0,
+              "skipped": 0
+            },
+            "stoppedCommandControl": {
+              "startupMilliseconds": 1578.6354699999993,
+              "timeoutMs": 10000,
+              "phase": "session",
+              "state": "T",
+              "cleanup": {
+                "stopped": true,
+                "status": "stopped"
+              }
+            },
+            "startupBatchAttempts": 4,
+            "startupBatchRetries": 0,
+            "controlledNegative": [
+              {
+                "file": "prepared/new/linux-execution-diagnostics/chrome-pipe-e15e5aa8-438a-4719-944a-c87d128c3132.json",
+                "sha256": "8abc426ae1b69594993074a40358a54afbb7dd58b84fe99eda028a17c8a1d5f0",
+                "phase": "session",
+                "state": "T",
+                "matchingStartIdentity": true,
+                "cleanup": {
+                  "stopped": true,
+                  "status": "stopped"
+                }
+              }
+            ],
+            "hostCleanup": {
+              "hostStopped": true,
+              "privateRootRemoved": true
+            },
+            "rc2Cleanup": {
+              "privateRootRemoved": true
+            },
+            "files": {
+              "linux-chrome-environment.txt": "e954d8e69b18c95321357500a45ae6fb4e62305ae5d23ef8b7aef738525c4ecf",
+              "linux-chrome-startup.tap": "f32e1315e696e5bb51a710747116c675ef4a65deddd78dda18debe151f1a4372",
+              "linux-live.tap": "aca445cd4e8c98130a10ae0e972ab0f36ca0629f484161b82a4b0b291cbfc853",
+              "linux-engineering.json": "a0cfa382f4eb077723d88bc1ebd650de02365a28e7015b923cbcf40420a5162f",
+              "linux-rc2.json": "57e2c4e06240e73b6afedfc9cc3ad25f19059475213b43e496162fda3b36c207"
+            }
+          }
+        },
+        "nodeEngineering": [
+          {
+            "nodeVersion": "22.19.0",
+            "ok": true,
+            "metrics": 6,
+            "sha256": "df1aa2cddfecba5d1f8b208cd5afb7e6f1e8497c0351ba6d0c43fa3f2182ad68"
+          },
+          {
+            "nodeVersion": "24.21.0",
+            "ok": true,
+            "metrics": 6,
+            "sha256": "d17115d6b5f4fcbdb23aa7d76b1f1c279f2a44ec09d97ae6b15bbd9a08d69aca"
+          }
+        ],
+        "artifacts": [
+          {
+            "id": 12251712658,
+            "name": "linux-live-evidence-0.2.0-rc.2",
+            "digest": "sha256:e542e2dc2943a9669ed96ff2279832e9b1205517de4724128844149be4cd1470",
+            "expired": false
+          },
+          {
+            "id": 12251637449,
+            "name": "engineering-node-24",
+            "digest": "sha256:de667a7098a714d9768e290b1fb19a51aba2d06f4ff1ead56f527f21ad15c23d",
+            "expired": false
+          },
+          {
+            "id": 12251278894,
+            "name": "linux-live-evidence-0.2.1-rc.2",
+            "digest": "sha256:ac49db8856e34e837eb01ab95378462b7e637011f1b90ed7c867fbb452937f33",
+            "expired": false
+          },
+          {
+            "id": 12250514863,
+            "name": "engineering-node-22.19.0",
+            "digest": "sha256:5c4c695d17e559bc2835d6cae51a2f9e21dd6079769b833a024387a227393ce6",
+            "expired": false
+          }
+        ],
+        "interpretation": "Reading vendor/library inputs took8038.98/9891.92ms; first protocol readiness after preparation took664.95/1578.64ms. This supports a prepared-input CI boundary, not cold-cache latency certification, a proof of the storage root cause, or a retrospective diagnosis of fffec7f.",
+        "productionSourceUnchangedFromBa82dc6": true,
+        "retryCount": 0,
+        "validation": {
+          "documentFacts": "passed:0.1.3,38 test files,10 maintained documents",
+          "docsTests": {
+            "tests": 9,
+            "passed": 9,
+            "failed": 0
+          },
+          "gitDiffCheck": "passed"
+        }
       }
     }
   },
