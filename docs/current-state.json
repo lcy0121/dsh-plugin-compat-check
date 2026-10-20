@@ -6493,6 +6493,118 @@
           "gitDiffCheck": "passed"
         }
       }
+    },
+    "marketDisplayName20261020": {
+      "recordedAt": "2026-10-20T09:29:01.567329+00:00",
+      "status": "Upstream PR948 submitted; published market UI still awaits maintainer merge/release and acceptance.",
+      "product": "dsh-plugin-compat-check",
+      "publishedProductVersion": "0.1.3",
+      "localPackageNameCorrect": true,
+      "pluginExportNameCorrect": true,
+      "catalog": {
+        "identity": "dsh-plugin-compat-check#plugin",
+        "npm": "dsh-plugin-compat-check",
+        "repositoryUrl": "https://github.com/lcy0121/dsh-plugin-compat-check/tree/main/plugin",
+        "registration": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/data/plugins/lcy0121__dsh-plugin-compat-check--plugin.yml",
+        "registrationBlob": "6affba047a1cdb392b6800c0e99ee8d2e4bbf7ad"
+      },
+      "cause": {
+        "marketBase": "29dcbd78290be89d83771e3734b128be110645c5",
+        "marketVersion": "1.66.44",
+        "file": "src/client/market-data.ts",
+        "sourceBlob": "4c14e91207957170d5999f3ef655ad5b1bdbff88",
+        "function": "pluginName",
+        "behavior": "Uses the last directory segment after # as the display title, so #plugin becomes plugin. It ignores the existing npm mapping. This is a market presentation bug, not a product/package identity error."
+      },
+      "fix": {
+        "pr": "https://github.com/dsh-market/dsh-market/pull/948",
+        "fork": "https://github.com/lcy0121/dsh-market",
+        "branch": "codex/catalog-product-name",
+        "commit": "9567b7b4dc33de34d1cb9a821e858d9a07666500",
+        "base": "main",
+        "rule": "For compound catalog identities, prefer a non-empty trimmed npm mapping; retain the directory-leaf fallback without one and leave ordinary catalog titles unchanged.",
+        "surfaces": [
+          "discovery cards",
+          "theme cards and preview labels",
+          "operation titles",
+          "install confirmation",
+          "comments"
+        ],
+        "identityAndInstallTargetsUnchanged": true,
+        "generatedBrowserBundleIncluded": true,
+        "files": [
+          "src/client/market-data.ts",
+          "src/client/MarketSection.tsx",
+          "tests/plugin-name.spec.ts",
+          "tests/client/market-section.client.spec.tsx",
+          "client/client.js"
+        ],
+        "prObservedState": "OPEN",
+        "prMergeable": "MERGEABLE",
+        "statusChecksObserved": []
+      },
+      "validation": {
+        "red": "Pure-function and real-component tests reproduce plugin instead of dsh-plugin-compat-check on unchanged source.",
+        "targeted": {
+          "files": 2,
+          "tests": 318,
+          "passed": 318
+        },
+        "fullNode24": {
+          "node": "24.19.0",
+          "files": 84,
+          "tests": 2556,
+          "passed": 2556,
+          "failed": 0
+        },
+        "typecheck": "passed",
+        "hostAndClientBuild": "passed",
+        "bundlePrivatePathsAbsent": true,
+        "node26": {
+          "node": "26.12.0",
+          "tests": 2556,
+          "passed": 2554,
+          "failed": 2,
+          "undiciAbortErrors": 166,
+          "failures": [
+            "refuses to reorder when the full pre-write composition cannot be captured",
+            "round-trips: create → corrupt the order → restore → delete"
+          ],
+          "unmodifiedBaseline": "Same two route failures and166 built-in-undici abort errors on Node26. Baseline route suite passes83/83 on Node24. Not introduced by the display-name change; Node26 is not reported as a passing full run."
+        },
+        "repositoryDocs": {
+          "documentFacts": "passed:10 maintained documents",
+          "tests": 9,
+          "passed": 9,
+          "failed": 0,
+          "gitDiffCheck": "passed"
+        }
+      },
+      "publication": {
+        "userAuthorizedPrAndTrackingPush": true,
+        "upstreamPrSubmitted": true,
+        "productVersionChanged": false,
+        "npmPublished": false,
+        "userInstalledMarketModified": false
+      },
+      "remaining": "Wait for upstream adoption and a published dshmarket artifact containing the change, then verify the public card and confirmation title. No public-UI fix claim yet.",
+      "evidence": {
+        "directory": "/private/tmp/dsc-market-name-20261020",
+        "files": {
+          "registration.yml": "f4196f3b0a150cce9c88f715429c8dacf6b3bc57c904db25cfdce63d624442ce",
+          "market-data.ts": "b67ea1a8b0505e30c7f01bb0007395c8ef2e7f955e7b8827d48582db506e3750",
+          "display-name.patch": "6f1f325346cdfd54b9a1cfe692af05966b1b91ae87160d9b7e0abff51e6d13bd",
+          "pr-body.md": "360806610e3f29efa5bbdc859c67c14ef14acc59ab752426cde7a768e1aeb013",
+          "red-corrected.log": "da5bc5bf80f3f49ae62d1d70fc3efb8d0fe23e1f0c9dfc5d4e5bfacd71537778",
+          "targeted-green.log": "620411551c5f3653ec2778fdb792c4e9089694ec550e798b7758a55ef400c277",
+          "full-tests.log": "a679096d620997a559109a8288a364623ffb1250a01d844c5f896d199c745c00",
+          "full-tests-node24.log": "2422db100437f464d19ddbb1ce0f96825561b85c733260deeee4d7a97e98ff3e",
+          "baseline-routes.log": "cb727736f676959359f4ae67b752e7519c88bd9ca07280eb33b72ac437e94936",
+          "baseline-routes-node24.log": "cab0ce562c62960a2b2d71196af92f575ce1e71dac6bf75972fb8b5eaadf0c84",
+          "typecheck.log": "4fc2988e6370eac6765705019cf0f4383f7cb3425ee7bcab33861663c096011e",
+          "build.log": "20adbeef1db9205424ddbf5d63e1e288734cd48397417a231bc779bf610c8f4d"
+        }
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

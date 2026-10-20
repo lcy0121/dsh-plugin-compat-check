@@ -91,10 +91,12 @@
 | 对象 | 当前结果与交付 |
 |---|---|
 | 主目录 / dsh-market | 公开索引和详情映射npm0.1.3。10月20日真实Chrome、rc.2/web、公开dshmarket1.66.43全球线路空profile安装并运行0.1.3，认证HTTP报告及37个公开tgz文件一致；本次未捕获首次latest请求，不冒充故障注入。10月19日1.66.37中国大陆线路全新安装/升级成功、全球首轮装入0.1.2的失败仍保留 |
-| 版本解析与终端提示 | 主目录[PR #8057](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/8057)的双语简介已同步公开索引和详情。[#931](https://github.com/dsh-market/dsh-market/issues/931)已关闭、修复发布于1.66.44；确切发布函数10例及真实Chrome/rc.2安装确认窗验收通过，不再误称终端插件，本轮取消安装。[#932](https://github.com/dsh-market/dsh-market/issues/932)的packument回退在1.66.44精确helper的6例受控检查仍成立；两端均失败/无有效版本仍允许裸名安装，静默风险未全消除。早前1.66.43的误提示与实装证据保留 |
+| 版本解析与终端提示 | 主目录[PR #8057](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/8057)的双语简介已同步公开索引和详情。[#931](https://github.com/dsh-market/dsh-market/issues/931)已关闭、修复发布于1.66.44；确切发布函数10例及真实Chrome/rc.2安装确认窗验收通过，不再误称终端插件，本轮取消安装。[#932](https://github.com/dsh-market/dsh-market/issues/932)的packument回退在1.66.44精确helper的6例受控检查仍成立；两端均失败/无有效版本仍允许裸名安装，静默风险未全消除。早前1.66.43的误提示与实装证据保留；市场把`#plugin`目录末级当成标题，导致显示为`plugin`，已提交[PR #948](https://github.com/dsh-market/dsh-market/pull/948)，改为优先映射的npm包名，待发布后验收 |
 | 1024 Store | 目录[PR #628](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/628)已合并；10月20日v2仍仅GitHub unknown/not_checked方法，没有npm方式。[#22](https://github.com/imsai-sh/dsh-1024store/issues/22#issuecomment-6260932365)仍开放，暂无维护者回复。登记schema拒绝npm/path字段，须维护者核对完整id、外部D1采集及KV投影，出现npm方法后再实装，不重复登记或用源码子目录替代完整tgz |
 | dshworks / bruc3van | dshworks[PR #169](https://github.com/dshworks/awesome-dsh-plugins/pull/169)已合并。bruc3van[#138](https://github.com/bruc3van/awesome-dsh-plugin/issues/138)已关闭并收录，旧排除理由已移除；readme/manifest核验不是运行时认证 |
 | 0xsline Awesome | 10月20日[PR #717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)仍开放、无评论、未合并；已有修订，不重复发帖 |
+
+显示名修复在dsh-market临时副本完成：相关318项及Node24完整2556项通过，类型检查和构建通过，已授权提交PR；Node26的两项路由失败及166项undici错误在未修改基线复现，保留为运行环境对照，不写成通过。不需要改本插件包名、重命名`plugin/`或发布本插件新版本；公共展示仍待上游发布，证据见`verification.marketDisplayName20261020`。
 
 公开0.1.3缺少`repository.directory`，main源码已补`plugin`，原1024绑定函数由mismatch变strict；当前公开投影不以此隐藏npm方法，不能声称此字段已解决采集故障。Origin修复要求协议/主机/有效端口完全同源，保留本机无Origin调用；确切本地tgz真实宿主验证同源200、跨端口403。这两项待下一补丁候选交付，不改变公开0.1.3的历史证据。10月18日市场0.1.2验收、定时复查及其它旧渠道快照保留在current-state；源码子目录与完整tgz不等价，备用GitHub回退仍未认证。
 
@@ -194,7 +196,7 @@ DSC_EXECUTION_DIAGNOSTICS=<私有诊断目录> node bin/compat-check.mjs --nm <�
 服务前提/分发交付及本轮工程诊断已完成实现与验收，源码交付见§4；上游采纳与商店私有采集尚不受本仓库控制，以下继续保留为可验收事项：
 
 1. **下一补丁候选（暂缓）。** 用户决定发布后，再准备候选，纳入Origin端口校验、激活前提说明、npm目录元数据及工程诊断；核对确切制品后另取npm发布授权。公开0.1.3不追写为含这些修复。
-2. **上游验收（10月20日15时复核）。** #8057公开简介同步与#931正式1.66.44终端误提示修复已验收，移出待办。余项：#932双端查询失败仍裸名安装，待明确告警或安全失败后验收；1024#22仍无npm方式/维护者回复，待采集投影修复后实装；0xsline#717仍待采纳。1.66.44本轮只验安装确认窗，全球全新安装0.1.3仍以先前1.66.43记录为准。无新证据不重复发帖，任何新对外补充另取授权。
+2. **上游验收（10月20日更新）。** #8057公开简介同步与#931正式1.66.44终端误提示修复已验收，移出待办。余项：市场显示名[PR #948](https://github.com/dsh-market/dsh-market/pull/948)待采纳发布，随后验卡片与安装窗显示`dsh-plugin-compat-check`，不改目录身份或安装目标；#932双端查询失败仍裸名安装，待明确告警或安全失败后验收；1024#22仍无npm方式/维护者回复，待采集投影修复后实装；0xsline#717仍待采纳。1.66.44本轮只验安装确认窗，全球全新安装0.1.3仍以先前1.66.43记录为准。无新证据不重复发帖，任何新对外补充另取授权。
 3. **有限批量与自动化（后置）。** 先验证固定哈希样本的静态JSON聚合、限制及“待作者复核”，再评估低权限Action、逐版增量与摘要。工具错误/覆盖不足单列，不默认写第三方仓库、不承诺24小时SLA；公共端点先确认隐私、缓存与维护成本。固定业务队列不是盲测；扩展插件或复杂模型任务须另定制品、资源与独立真值。
    Perch语义规则仅作为可选评估：恢复文件标签行为已有真实Chrome回归，移除复用的隔离反例会失败；须先证明增量收益、核清权限/源码数据处理/费用，再决定是否试用，不能替代浏览器验收。详见`verification.semanticRuleAssessment20261020`。
 4. **Windows真实验收。** 取得环境后实跑路径、安装器、回收和打包；按用户选择暂缓，不用POSIX或模拟充数。
