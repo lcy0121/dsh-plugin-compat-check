@@ -86,15 +86,15 @@
 
 可选profile输入隔离已由[PR #4](https://github.com/lcy0121/dsh-plugin-compat-check/pull/4)交付；9项隔离回归、本机Node22.19/26.12默认各491/491，合并提交ec6f06a的[CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39033059918)通过Node22/24及Linux真实DSH。只适用于各自输入/日期，不认证后续源码或其它宿主版本。
 
-**分发状态（2026-10-20复核；最新证据见`verification.upstreamAcceptance20261020`，前轮见`verification.distributionCloseout20261019`）：**
+**分发状态（2026-10-20复核；最新证据见`verification.upstreamFollowup20261020`，前轮见`verification.upstreamAcceptance20261020`）：**
 
 | 对象 | 当前结果与交付 |
 |---|---|
 | 主目录 / dsh-market | 公开索引和详情映射npm0.1.3。10月20日真实Chrome、rc.2/web、公开dshmarket1.66.43全球线路空profile安装并运行0.1.3，认证HTTP报告及37个公开tgz文件一致；本次未捕获首次latest请求，不冒充故障注入。10月19日1.66.37中国大陆线路全新安装/升级成功、全球首轮装入0.1.2的失败仍保留 |
-| 版本解析与终端提示 | [#932](https://github.com/dsh-market/dsh-market/issues/932)已关闭，公开1.66.43精确helper的6例受控检查确认：`/latest`返回429、HTML或缺版本时可回退完整packument；两端均失败/无有效版本仍裸名安装，静默风险未全消除。[#931](https://github.com/dsh-market/dsh-market/issues/931)仍开放，修复仅在nightly1014的7b70165；20条新旧函数/双语对照通过，待发布后UI验收。主目录[PR #8057](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/8057)已合并，但公开索引与详情仍旧简介，本次1.66.43真实安装弹窗仍误称终端插件 |
-| 1024 Store | 目录[PR #628](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/628)已合并；10月20日v2仍仅GitHub unknown/not_checked方法，没有npm方式。[#22](https://github.com/imsai-sh/dsh-1024store/issues/22#issuecomment-6260932365)仍开放，暂无维护者回复；仓库主分支仍2294b97。登记schema拒绝npm/path字段，须维护者核对完整id、外部D1采集及KV投影，出现npm方法后再实装，不重复登记或用源码子目录替代完整tgz |
+| 版本解析与终端提示 | 主目录[PR #8057](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/8057)的双语简介已同步公开索引和详情。[#931](https://github.com/dsh-market/dsh-market/issues/931)已关闭、修复发布于1.66.44；确切发布函数10例及真实Chrome/rc.2安装确认窗验收通过，不再误称终端插件，本轮取消安装。[#932](https://github.com/dsh-market/dsh-market/issues/932)的packument回退在1.66.44精确helper的6例受控检查仍成立；两端均失败/无有效版本仍允许裸名安装，静默风险未全消除。早前1.66.43的误提示与实装证据保留 |
+| 1024 Store | 目录[PR #628](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/628)已合并；10月20日v2仍仅GitHub unknown/not_checked方法，没有npm方式。[#22](https://github.com/imsai-sh/dsh-1024store/issues/22#issuecomment-6260932365)仍开放，暂无维护者回复。登记schema拒绝npm/path字段，须维护者核对完整id、外部D1采集及KV投影，出现npm方法后再实装，不重复登记或用源码子目录替代完整tgz |
 | dshworks / bruc3van | dshworks[PR #169](https://github.com/dshworks/awesome-dsh-plugins/pull/169)已合并。bruc3van[#138](https://github.com/bruc3van/awesome-dsh-plugin/issues/138)已关闭并收录，旧排除理由已移除；readme/manifest核验不是运行时认证 |
-| 0xsline Awesome | 10月20日[PR #717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)仍开放、无评论，主分支仍旧简介；已有修订，不重复发帖 |
+| 0xsline Awesome | 10月20日[PR #717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)仍开放、无评论、未合并；已有修订，不重复发帖 |
 
 公开0.1.3缺少`repository.directory`，main源码已补`plugin`，原1024绑定函数由mismatch变strict；当前公开投影不以此隐藏npm方法，不能声称此字段已解决采集故障。Origin修复要求协议/主机/有效端口完全同源，保留本机无Origin调用；确切本地tgz真实宿主验证同源200、跨端口403。这两项待下一补丁候选交付，不改变公开0.1.3的历史证据。10月18日市场0.1.2验收、定时复查及其它旧渠道快照保留在current-state；源码子目录与完整tgz不等价，备用GitHub回退仍未认证。
 
@@ -192,7 +192,8 @@ DSC_EXECUTION_DIAGNOSTICS=<私有诊断目录> node bin/compat-check.mjs --nm <�
 服务前提/分发交付及本轮工程诊断已完成实现与验收，源码交付见§4；上游采纳与商店私有采集尚不受本仓库控制，以下继续保留为可验收事项：
 
 1. **下一补丁候选（暂缓）。** 用户决定发布后，再准备候选，纳入Origin端口校验、激活前提说明、npm目录元数据及工程诊断；核对确切制品后另取npm发布授权。公开0.1.3不追写为含这些修复。
-2. **上游验收（10月20日已复核，余项保留）。** #8057已合并，继续等公开索引/详情同步；#931仅nightly修复，等正式发布后重验终端误提示。#932在1.66.43的packument回退及全球全新安装0.1.3已验收，但双端查询失败仍裸名安装，需后续上游明确告警或安全失败再验收；不以issue关闭代表全部风险消失。1024#22仍无npm方式/维护者回复，待采集投影修复后实装；0xsline#717仍待采纳。无新证据不重复发帖，任何新对外补充另取授权。
+2. **上游验收（10月20日15时复核）。** #8057公开简介同步与#931正式1.66.44终端误提示修复已验收，移出待办。余项：#932双端查询失败仍裸名安装，待明确告警或安全失败后验收；1024#22仍无npm方式/维护者回复，待采集投影修复后实装；0xsline#717仍待采纳。1.66.44本轮只验安装确认窗，全球全新安装0.1.3仍以先前1.66.43记录为准。无新证据不重复发帖，任何新对外补充另取授权。
 3. **Linux Chrome精确CI验收。** 本轮已实现会话总线阻塞隔离及调度/父进程计时诊断，真实Linux红绿回归见§4；经授权推送后，验收新增Chrome预检和原DSH0.2.0-rc.2/0.2.1-rc.2 Linux x64矩阵。原fffec7f的历史根因仍未证实，若再失败按新现场处理，不以D-Bus文本、单次通过、加超时或重试宣称解决。
 4. **有限批量与自动化（后置）。** 先验证固定哈希样本的静态JSON聚合、限制及“待作者复核”，再评估低权限Action、逐版增量与摘要。工具错误/覆盖不足单列，不默认写第三方仓库、不承诺24小时SLA；公共端点先确认隐私、缓存与维护成本。固定业务队列不是盲测；扩展插件或复杂模型任务须另定制品、资源与独立真值。
+   Perch语义规则仅作为可选评估：恢复文件标签行为已有真实Chrome回归，移除复用的隔离反例会失败；须先证明增量收益、核清权限/源码数据处理/费用，再决定是否试用，不能替代浏览器验收。详见`verification.semanticRuleAssessment20261020`。
 5. **Windows真实验收。** 取得环境后实跑路径、安装器、回收和打包；按用户选择暂缓，不用POSIX或模拟充数。

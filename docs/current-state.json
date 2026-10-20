@@ -5485,6 +5485,269 @@
         ".github/workflows/test.yml": "a6b0afd4ac488f6ba3f7db7313258a36bddbe278ecd3b16314c880b8e603d4f5",
         "plugin/scripts/stage-kernel.mjs": "20df9512788a263d68ed2a1fb5eea004c825eecad772a01b9a036ec26ba847f4"
       }
+    },
+    "upstreamFollowup20261020": {
+      "recordedAt": "2026-10-20T07:52:46.655545+00:00",
+      "localDate": "2026-10-20",
+      "timezone": "Asia/Shanghai",
+      "sourceBase": "31009b71193083b3c3e3e88d06e917598ec1e620",
+      "scope": "Public upstream recheck, exact published-function controlled cases and real Chrome installation-confirmation UI in a private DSH0.2.1-rc.2/web host. Target installation was cancelled; no new product install certification, model calls, posts, push or release.",
+      "primaryCatalog": {
+        "pr": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/8057",
+        "state": "merged",
+        "publicIndex": {
+          "url": "https://awesome-dsh-plugin.com/plugins.json",
+          "observedAt": "2026-10-20T07:37:01.130700+00:00",
+          "response": "200 https://awesome-dsh-plugin.com/plugins.json",
+          "exitCode": 0,
+          "error": "",
+          "sha256": "a83a68437faf286fd6f91cc09d40a62a12ce36db7702fac0b27a55a92ad0c395"
+        },
+        "publicDetail": {
+          "url": "https://awesome-dsh-plugin.com/p/lcy0121/dsh-plugin-compat-check--plugin/",
+          "observedAt": "2026-10-20T07:36:59.300118+00:00",
+          "response": "200 https://awesome-dsh-plugin.com/p/lcy0121/dsh-plugin-compat-check--plugin/",
+          "exitCode": 0,
+          "error": "",
+          "sha256": "91257c638cd82c247ede4357eb368a5de659c9362722c45d301d6b924c6f773d"
+        },
+        "publicDescription": "Updated bilingual description has propagated to both public surfaces; old companion-CLI prose is absent from the target description.",
+        "indexedNpmVersion": "0.1.3"
+      },
+      "publishedMarket": {
+        "version": "1.66.44",
+        "gitHead": "29dcbd78290be89d83771e3734b128be110645c5",
+        "tarball": "https://registry.npmjs.org/dshmarket/-/dshmarket-1.66.44.tgz",
+        "sha1": "d1e84545d08ea5862c2a35973e0edd33f88a1032",
+        "integrity": "sha512-NtkqdxnGrSiOORBPAlkHn0gckVu+iGzulI+ryRuAOgfd9giTpACUQQtgMAFBfQGXKX5VIV9xVGHW8tdNpoFizQ==",
+        "sha256": "2111cca5263aa9230b075d7d6f491ec3635fb0fbbdf1708aa75662224a591094",
+        "registrySha1Verified": true
+      },
+      "marketTerminalClassification": {
+        "issue": "https://github.com/dsh-market/dsh-market/issues/931",
+        "state": "closed",
+        "maintainerReply": "https://github.com/dsh-market/dsh-market/issues/931#issuecomment-6274206525",
+        "publishedVersion": "1.66.44",
+        "sourceSha256": "93a17266db1fa3b2ea94b8cfbde4f861c98060cf82004f04db24769e87d6cba7",
+        "controlledCases": [
+          {
+            "sample": "old-companion-cli",
+            "lang": "en",
+            "warning": false
+          },
+          {
+            "sample": "old-companion-cli",
+            "lang": "zh",
+            "warning": false
+          },
+          {
+            "sample": "current-description",
+            "lang": "en",
+            "warning": false
+          },
+          {
+            "sample": "current-description",
+            "lang": "zh",
+            "warning": false
+          },
+          {
+            "sample": "terminal-name",
+            "lang": "en",
+            "warning": true
+          },
+          {
+            "sample": "terminal-name",
+            "lang": "zh",
+            "warning": true
+          },
+          {
+            "sample": "terminal-ui",
+            "lang": "en",
+            "warning": true
+          },
+          {
+            "sample": "terminal-ui",
+            "lang": "zh",
+            "warning": true
+          },
+          {
+            "sample": "negative-cli",
+            "lang": "en",
+            "warning": false
+          },
+          {
+            "sample": "negative-cli",
+            "lang": "zh",
+            "warning": false
+          }
+        ],
+        "ui": {
+          "dshVersion": "0.2.1-rc.2",
+          "marketVersion": "1.66.44",
+          "realChrome": true,
+          "targetVersion": "0.1.3",
+          "updatedDescriptionVisible": true,
+          "terminalWarningPresent": false,
+          "genericThirdPartyNoticePresent": true,
+          "confirmedInstall": false,
+          "cancelled": true,
+          "screenshot": "market16644-confirmation.png"
+        }
+      },
+      "marketVersionResolution": {
+        "issue": "https://github.com/dsh-market/dsh-market/issues/932",
+        "state": "closed",
+        "exactHelperSha256": "19559463d958620ddf298363f640b891e7f7bed801f6bed602dd12385ce58e28",
+        "controlledCases": [
+          {
+            "case": "healthy",
+            "version": "0.1.3",
+            "requests": 1
+          },
+          {
+            "case": "latest429",
+            "version": "0.1.3",
+            "requests": 2
+          },
+          {
+            "case": "latestHTML",
+            "version": "0.1.3",
+            "requests": 2
+          },
+          {
+            "case": "missing-latest-version",
+            "version": "0.1.3",
+            "requests": 2
+          },
+          {
+            "case": "both-fail",
+            "version": null,
+            "requests": 2
+          },
+          {
+            "case": "invalid-packument",
+            "version": null,
+            "requests": 2
+          }
+        ],
+        "remaining": "Both endpoints failing or returning no valid version still yields null; lib/routes.js permits plainTarget. Controlled exact-helper tests do not certify real failed-network installation."
+      },
+      "store1024": {
+        "issue": "https://github.com/imsai-sh/dsh-1024store/issues/22",
+        "state": "open",
+        "maintainerReply": false,
+        "publicEndpoint": {
+          "url": "https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin",
+          "observedAt": "2026-10-20T07:37:00.201735+00:00",
+          "response": "200 https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin",
+          "exitCode": 0,
+          "error": "",
+          "sha256": "0df7f1474d716743097d0ae0d06b7fdaae8d0ec3622642b3125123eb04ae34e3"
+        },
+        "installMethods": [
+          {
+            "kind": "github",
+            "spec": "github:lcy0121/dsh-plugin-compat-check#path:plugin",
+            "verification": "unknown",
+            "code": "not_checked",
+            "revision": null,
+            "checkedAt": null
+          }
+        ],
+        "npmMethodPresent": false,
+        "realInstallAttempted": false
+      },
+      "awesome0xsline": {
+        "pr": "https://github.com/0xsline/awesome-deepseek-harness/pull/717",
+        "state": "open",
+        "comments": 0,
+        "merged": false
+      },
+      "cleanup": {
+        "ownedHostStopped": true,
+        "privateRootRemoved": true,
+        "finishedAt": "2026-10-20T07:51:17.517Z"
+      },
+      "evidence": {
+        "directory": "/private/tmp/dsc-upstream-perch-20261020",
+        "files": {
+          "market-contracts.json": "3dcb99c5e5fac602f723eaad0a3f6383504551cd8468a6679293f47bd5407027",
+          "verify-market.mjs": "aa0ee9b6d1326aaef6870424c17a94065948f663e98f1ead39484c6794e89793",
+          "market16644-confirmation.dom.txt": "648a9d82d047962ebadd5b6588c061ea77c653b89adf4e29a12d489f973c8e88",
+          "market16644-confirmation.png": "117795e16d3efa8dfe6527e7aeec0f190919d721fe7304f95f5758898b196016"
+        },
+        "privacy": "Private host URL/token, host log and account state are excluded from repository records."
+      },
+      "remaining": [
+        "Both version endpoints unavailable: explicit warning or safe failure and acceptance",
+        "1024 collector/projection npm method and real install",
+        "0xsline PR717 adoption"
+      ],
+      "validation": {
+        "defaultSuiteRerun": false,
+        "reason": "Documentation/evidence only; previous full-suite numbers remain dated checkpoints.",
+        "documentFacts": "passed:10 maintained documents",
+        "docsTests": {
+          "tests": 9,
+          "passed": 9,
+          "failed": 0
+        },
+        "gitDiffCheck": "passed"
+      }
+    },
+    "semanticRuleAssessment20261020": {
+      "recordedAt": "2026-10-20T07:52:46.655545+00:00",
+      "sourceBase": "31009b71193083b3c3e3e88d06e917598ec1e620",
+      "subject": "Optional semantic regression rule for restored Files-tab reuse in tools/business-sidebar-ui.mjs; technical assessment only.",
+      "existingBehavior": "When neither the target editor nor a visible path input is open and the Files panel must be selected, prefer an eligible visible restored tab; ignore hidden/inert/disabled controls, otherwise use a visible Files button. Existing editor/path-input fast paths remain valid.",
+      "existingRegression": {
+        "file": "test/business-labels.test.mjs",
+        "name": "editor navigation reuses a restored Files tab and ignores hidden entry buttons",
+        "command": "DSC_SLOW=1 node --test --test-reporter=tap --test-name-pattern='editor navigation reuses a restored Files tab' test/business-labels.test.mjs",
+        "current": {
+          "tests": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        "isolatedMutation": {
+          "change": "Private source copy only: replace restored-tab lookup with const tab=null.",
+          "exitCode": 1,
+          "failed": 1,
+          "error": "Missing business control: 文件"
+        },
+        "ci": ".github/workflows/test.yml Linux live suite includes this test file; default DSC_SLOW-disabled suite skips this browser group.",
+        "limits": "Existing cases cover restored-tab-only and hidden-button/visible-button fallback. They do not exhaust coexistence priority or hidden/inert restored-tab variants."
+      },
+      "perch": {
+        "repository": "https://github.com/lakeday-org/perch",
+        "license": "MIT",
+        "inspectedCliVersion": "0.4.4",
+        "officialHomepage": "https://perchscan.com",
+        "rules": "https://docs.perchscan.com/rules/",
+        "ci": "https://docs.perchscan.com/ci/",
+        "privacy": "https://perchscan.com/privacy/",
+        "mechanism": "Tree-sitter context selection plus model questions; semantic review, not execution of browser behavior.",
+        "dataHandling": "Official cloud/privacy documentation describes sending relevant code/questions for analysis with third-party model providers; public source and policy inspection is not independent security certification. Direct model endpoint configuration is supported.",
+        "permissions": "Exact hosted GitHub App installation permissions were not established from the inspected public CLI source/docs.",
+        "pricing": "Cloud usage-based pricing; confirm open-source/public-repository terms before adoption."
+      },
+      "recommendation": "Request the exact rule and healthy/mutant/refactor examples first. Consider a narrowly scoped, pinned-version, nonblocking advisory trial only after permissions, data handling and cost are agreed; keep deterministic Chrome regression.",
+      "actions": {
+        "perchInstalled": false,
+        "perchExecuted": false,
+        "githubAppConnected": false,
+        "modelCalls": false,
+        "externalMessagesSent": false
+      },
+      "evidence": {
+        "directory": "/private/tmp/dsc-upstream-perch-20261020",
+        "files": {
+          "restored-tab-current.tap": "67663a47f977a5ae75aafc2be80b73263cab27bd818bbce072b8978a9aea99fd",
+          "restored-tab-mutant.tap": "b84dee3fe910608203583a3e513f87352e2755e33cd81615949a4e31539db42f",
+          "perch-source/README.md": "38c95b953fcea1ee7d9455fad3161bec13e96d066089482e3dcd96cfabd8b23a",
+          "perch-source/package.json": "22f1b4154331676c36709c07f2e61a8fad102ce329007996032c177f052ed93f"
+        }
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."
