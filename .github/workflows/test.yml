@@ -45,6 +45,41 @@ jobs:
         run: |
           npm install --prefix "$RUNNER_TEMP/dsh-runtime" --no-audit --no-fund @deepseek-ai/dsh@${{ matrix.dsh }} pnpm@11.25.0
           echo "$RUNNER_TEMP/dsh-runtime/node_modules/.bin" >> "$GITHUB_PATH"
+      - name: Prepare preinstalled Chrome files before timed protocol acceptance
+        shell: bash
+        run: |
+          chrome_path="$(command -v google-chrome)"
+          echo "DSC_CHROME=$chrome_path" >> "$GITHUB_ENV"
+          python3 - <<'PY' > linux-chrome-preparation.json
+          import hashlib, json, pathlib, re, subprocess, time
+          root = pathlib.Path('/opt/google/chrome')
+          binary = root / 'chrome'
+          if not binary.is_file():
+              raise RuntimeError('Expected the official runner Chrome installation')
+          # Read the fixed vendor installation and its linked libraries once.
+          # This is input preparation, not a Chrome launch or protocol retry.
+          started = time.monotonic()
+          linked = subprocess.run(['ldd', str(binary)], check=True, text=True, capture_output=True).stdout
+          files = {p.resolve() for p in root.rglob('*') if p.is_file()}
+          files.update(pathlib.Path(p).resolve() for p in re.findall(r'(/[^\s()]+)', linked))
+          if len(files) > 4096 or sum(p.stat().st_size for p in files) > 1024**3:
+              raise RuntimeError('Chrome preparation exceeds the file/byte budget')
+          rows = []
+          for p in sorted(files):
+              before = p.stat()
+              digest, size, at = hashlib.sha256(), 0, time.monotonic()
+              with p.open('rb') as stream:
+                  while block := stream.read(1024**2):
+                      digest.update(block)
+                      size += len(block)
+              if size != before.st_size or p.stat().st_mtime_ns != before.st_mtime_ns:
+                  raise RuntimeError('Chrome installation changed during preparation')
+              rows.append(dict(file=str(p.relative_to(root)) if p.is_relative_to(root) else p.name,
+                               bytes=size, sha256=digest.hexdigest(), milliseconds=(time.monotonic()-at)*1000))
+          print(json.dumps(dict(complete=True, files=len(rows), bytes=sum(r['bytes'] for r in rows),
+                                milliseconds=(time.monotonic()-started)*1000, chromeLaunches=0, rows=rows)))
+          PY
+          node -e 'const x=require("./linux-chrome-preparation.json");console.log(JSON.stringify({complete:x.complete,files:x.files,bytes:x.bytes,milliseconds:x.milliseconds,chromeLaunches:x.chromeLaunches}))'
       - name: Real Linux Chrome startup and failure evidence
         shell: bash
         env:
@@ -81,6 +116,7 @@ jobs:
           name: linux-live-evidence-${{ matrix.dsh }}
           path: |
             linux-execution-diagnostics/
+            linux-chrome-preparation.json
             linux-live.tap
             linux-chrome-startup.tap
             linux-chrome-environment.txt

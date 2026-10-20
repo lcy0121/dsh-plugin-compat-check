@@ -6189,6 +6189,67 @@
         "lib/chrome-diagnostics.mjs": "5265671328e6ecc6a08053ddc3dae6c84bf277cb687a457d94f382a648ebc7c7",
         "test/debugger.test.mjs": "c1445ac8db16f66a28bb53a179a2fd92c447a824a7a9d2b9898ef2c41a07e511",
         ".github/workflows/test.yml": "e827ca0a0330e324289c879ac097fc4d00fe20800f2d8fe9fea0af97a17d48c9"
+      },
+      "followUp": "This is the successful c52f652 checkpoint. Later ba82dc6 failed on a newer runner image before SIGSTOP; see verification.linuxChromeInputPreparation20261020. It does not certify the later commit."
+    },
+    "linuxChromeInputPreparation20261020": {
+      "recordedAt": "2026-10-20T08:44:17.286474+00:00",
+      "status": "Investigating: separate CI browser-file preparation added; remote verification pending.",
+      "sourceBase": "ba82dc6e9f1f76fed74f75f12f175d2ffefe4134",
+      "laterFailure": {
+        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39394691006",
+        "headSha": "ba82dc6e9f1f76fed74f75f12f175d2ffefe4134",
+        "jobs": {
+          "test (24)": "success",
+          "test (22.19.0)": "success",
+          "linux-live (0.2.0-rc.2)": "success",
+          "linux-live (0.2.1-rc.2)": "failure"
+        },
+        "runnerImage": "ubuntu-24.04/20261018.339.1",
+        "kernel": "7.0.0-1017-azure",
+        "chrome": "155.0.8059.84",
+        "node": "24.22.0",
+        "chromePrecheck": {
+          "tests": 11,
+          "passed": 10,
+          "failed": 1
+        },
+        "jointRun": "Skipped after precheck failure; old DSH matrix completed independently.",
+        "phase": "browser-handshake",
+        "method": "Browser.getVersion",
+        "timeoutMs": 10000,
+        "receivedBytes": 0,
+        "leaderState": "D",
+        "waitChannel": "folio_wait_bit_common",
+        "timing": {
+          "requestElapsedMs": 10001.756495999998,
+          "timerOverrunMs": 1.756495999998151,
+          "parentCpuMilliseconds": 2.115,
+          "eventLoopUtilization": 0.00013892104241282593
+        },
+        "cleanup": {
+          "stopped": true,
+          "status": "stopped"
+        },
+        "diagnosticSha256": "87d70248a67073de2bb0cb17f7dd8843b63396dcabddb4468d25905924c9314f"
+      },
+      "hypothesis": "First access to lazily backed vendor/library pages can consume the CDP readiness budget before Chrome is ready; D/folio_wait_bit_common supports a page-wait observation but does not identify the underlying storage cause. Image/kernel/browser all changed, so no single-version causal claim.",
+      "change": "CI reads/hashes the fixed /opt/google/chrome installation and ldd-resolved library files before timed acceptance. Bounded at4096 files/1GiB; detects length/mtime changes and records duration, per-file hashes and zero Chrome launches. Selects the same google-chrome path for version reporting and all tests. No browser warm-up launch, retry, sandbox bypass or product timeout change.",
+      "scope": "Protocol checks now explicitly follow artifact input preparation; do not call them cold-cache timing certification or claim the historical fffec7f root cause is established.",
+      "evidence": {
+        "directory": "/private/tmp/dsc-linux-ci-20261020",
+        "files": {
+          "run-39394691006-final.json": "c498a8217934fc90ec68c35e9a618185572861f417bf82c00e3396fe00f95909",
+          "final-first-new/linux-chrome-startup.tap": "1575d1d16bd7e6bb0ab387b8db914e7a37ab03f415baa01a2d004899f7786e64",
+          "final-first-new/linux-chrome-environment.txt": "e954d8e69b18c95321357500a45ae6fb4e62305ae5d23ef8b7aef738525c4ecf",
+          "final-first-new-job.log": "9c4713fab0668d7777156e692891693c6aec4763861ac213176eada96e773d6a",
+          "preparation-step.sh": "159709f97f646a856819a29ad1bf41c12f6f8ab29ea0ac756b0f267232265d31"
+        }
+      },
+      "localValidation": {
+        "workflowYaml": "parsed",
+        "bashSyntax": "passed",
+        "pythonSyntax": "passed"
       }
     }
   },
