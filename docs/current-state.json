@@ -6607,8 +6607,8 @@
       }
     },
     "release014": {
-      "status": "candidate-validated-awaiting-exact-source-ci-and-publication",
-      "recordedAt": "2026-10-20T14:27:58.997731+00:00",
+      "status": "published-and-public-artifact-verified",
+      "recordedAt": "2026-10-20T14:40:31.153744+00:00",
       "version": "0.1.4",
       "authorization": "User explicitly requested source delivery and publication to GitHub and npm on 2026-10-20; no new third-party posts authorized",
       "validation": {
@@ -6640,7 +6640,149 @@
           "logSha256": "2d2c3e734c6f75813b49773ab2ed0722b2253a136c0458d62124cd2e6f725f85"
         },
         "formatCheck": true,
-        "documentCheck": true
+        "documentCheck": true,
+        "exactInstallCli": {
+          "exitCode": 0,
+          "status": "checked",
+          "toolVersion": "0.1.4",
+          "dshVersion": "0.2.1-rc.2",
+          "summary": {
+            "limited": 2,
+            "vacuousOk": 1,
+            "ok": 2,
+            "partial": 0,
+            "broken": 0,
+            "unknown": 0
+          },
+          "cleanup": {
+            "tempProfileRemoved": true
+          },
+          "logSha256": "2d3e86fbf1d35c8a94a134050b045499bc4e8575505ca17a664536729120c040",
+          "scope": "Owned private tgz installation, official host startup and checker; coverage remains limited, no business certification"
+        },
+        "ci-legacy": {
+          "chromeStartup": {
+            "tests": 11,
+            "pass": 11,
+            "fail": 0,
+            "skipped": 0,
+            "tapSha256": "01488f8ea5a634cd3ca8d96c15e1f507db6ef0d267e0b6cfb64397ed1e2a59b1"
+          },
+          "joint": {
+            "tests": 53,
+            "pass": 49,
+            "fail": 0,
+            "skipped": 4,
+            "tapSha256": "78633fda3385abe5547f5ff75226f10455419f021310b653d7fb29b5cc7367a9"
+          },
+          "rc2Acceptance": {
+            "ok": true,
+            "applicable": false,
+            "dshVersion": "0.2.0-rc.2",
+            "reason": "rc.2-specific live acceptance; legacy runtime remains covered by other live tests.",
+            "cleanup": {
+              "privateRootRemoved": true
+            }
+          },
+          "scope": "CI independently rebuilt artifacts from the exact source commit; its gzip hash is distinct from the separately accepted release tgz. Do not claim byte identity from CI alone."
+        },
+        "ci-rc2": {
+          "chromeStartup": {
+            "tests": 11,
+            "pass": 11,
+            "fail": 0,
+            "skipped": 0,
+            "tapSha256": "933d86802f7f56352e17fa3e5c84f74e4289d0419d8789950a0296ec5f39e8b8"
+          },
+          "joint": {
+            "tests": 53,
+            "pass": 53,
+            "fail": 0,
+            "skipped": 0,
+            "tapSha256": "e35f3b50e3e9e79968d39c7ef1b04138e5a86bb2a1201421560497853b25c260"
+          },
+          "rc2Acceptance": {
+            "ok": true,
+            "applicable": true,
+            "dshVersion": "0.2.1-rc.2",
+            "artifactVersion": "0.1.4",
+            "declarationCases": [
+              {
+                "id": "engines-allow",
+                "expectedAccepted": true,
+                "checkerAccepted": true,
+                "actualAccepted": true,
+                "actualRejected": false,
+                "matched": true
+              },
+              {
+                "id": "engines-reject",
+                "expectedAccepted": false,
+                "checkerAccepted": false,
+                "actualAccepted": false,
+                "actualRejected": true,
+                "matched": true
+              },
+              {
+                "id": "exact-exemption",
+                "expectedAccepted": true,
+                "checkerAccepted": true,
+                "actualAccepted": true,
+                "actualRejected": false,
+                "matched": true
+              },
+              {
+                "id": "wrong-exemption",
+                "expectedAccepted": false,
+                "checkerAccepted": false,
+                "actualAccepted": false,
+                "actualRejected": true,
+                "matched": true
+              },
+              {
+                "id": "peer-fallback",
+                "expectedAccepted": false,
+                "checkerAccepted": false,
+                "actualAccepted": false,
+                "actualRejected": true,
+                "matched": true
+              }
+            ],
+            "ui": {
+              "available": true,
+              "navigation": "More > Settings > Built-in plugins > Compatibility",
+              "tabCount": 1,
+              "reenabled": true,
+              "httpRestored": true,
+              "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+            },
+            "scope": "Controlled declaration gates and unprivileged local browser UI only; no model call, real plugin business-function or Windows certification.",
+            "subpathMetadata": true,
+            "artifactSha256": "b67960509b44db8d12c6588cc9d17c17513036e5929923f9df01c531ca09d3d9",
+            "httpReport": true,
+            "originFence": {
+              "sameOriginStatus": 200,
+              "crossPortStatus": 403
+            },
+            "disabledDiagnostic": {
+              "status": 404,
+              "type": null
+            },
+            "cleanup": {
+              "privateRootRemoved": true
+            }
+          },
+          "scope": "CI independently rebuilt artifacts from the exact source commit; its gzip hash is distinct from the separately accepted release tgz. Do not claim byte identity from CI alone."
+        },
+        "postPublicationDocumentation": {
+          "tests": 44,
+          "passed": 44,
+          "failed": 0,
+          "tapSha256": "6afa3ac9eb474aaf519f8a3e6cbcf2328953825d403107c6dec58080380e33aa",
+          "metadataProblems": [],
+          "metadataSkipped": [],
+          "metadataLogSha256": "df1f5783a4cc350eb021671942ded47284a239441e8cc7fa14138f4e52608597"
+        }
       },
       "artifact": {
         "filename": "dsh-plugin-compat-check-0.1.4.tgz",
@@ -6730,7 +6872,7 @@
         "maintainedDocuments": 10,
         "threeReadmesAligned": true,
         "planCharactersBefore": 18373,
-        "planCharactersAfter": 9732,
+        "planCharactersAfter": 10052,
         "historicalEvidencePreserved": true,
         "githubMetadata": "description, topics, homepage and license verified suitable; no changes needed",
         "npmMetadata": "candidate version/readme notices expected before publication; repository.directory=plugin in exact artifact",
@@ -6738,7 +6880,105 @@
         "scope": "Historical checkpoints remain dated; exact version CI and public artifact verification added separately"
       },
       "scope": "Bounded compatibility checks and owned test hosts/browser, no new model calls; Windows unverified; upstream market name and Store collection remain independent",
-      "privateEvidenceRoot": "/private/tmp/dsc-release014-20261020"
+      "privateEvidenceRoot": "/private/tmp/dsc-release014-20261020",
+      "sourceCommit": "7bb5e6a982e81e1009eb8283c741b4124fe4357f",
+      "ci": {
+        "runId": 39439507425,
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39439507425",
+        "headSha": "7bb5e6a982e81e1009eb8283c741b4124fe4357f",
+        "conclusion": "success",
+        "jobs": [
+          {
+            "name": "test (24)",
+            "conclusion": "success",
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39439507425/job/118685323933"
+          },
+          {
+            "name": "test (22.19.0)",
+            "conclusion": "success",
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39439507425/job/118685324653"
+          },
+          {
+            "name": "linux-live (0.2.1-rc.2)",
+            "conclusion": "success",
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39439507425/job/118685734434"
+          },
+          {
+            "name": "linux-live (0.2.0-rc.2)",
+            "conclusion": "success",
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39439507425/job/118685734675"
+          }
+        ]
+      },
+      "npmPublication": {
+        "accepted": true,
+        "version": "0.1.4",
+        "latest": "0.1.4",
+        "registryVerified": true,
+        "processing": "Initial two version reads returned E404 during npm processing; verified after propagation, no republish attempted"
+      },
+      "githubPublication": {
+        "assets": [
+          {
+            "apiUrl": "https://api.github.com/repos/lcy0121/dsh-plugin-compat-check/releases/assets/659573713",
+            "contentType": "application/x-gtar",
+            "createdAt": "2026-10-20T14:37:14Z",
+            "digest": "sha256:6b1c709c2b604d3b02982109b3048eefd0acdb9395fe285c3ef880dd1868ecc2",
+            "downloadCount": 0,
+            "id": "RA_kwDOU-XYvc4nUEvR",
+            "label": "",
+            "name": "dsh-plugin-compat-check-0.1.4.tgz",
+            "size": 138921,
+            "state": "uploaded",
+            "updatedAt": "2026-10-20T14:37:14Z",
+            "url": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/download/v0.1.4/dsh-plugin-compat-check-0.1.4.tgz"
+          }
+        ],
+        "isDraft": false,
+        "publishedAt": "2026-10-20T14:37:46Z",
+        "tagName": "v0.1.4",
+        "targetCommitish": "7bb5e6a982e81e1009eb8283c741b4124fe4357f",
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.1.4"
+      },
+      "publicArtifactVerification": {
+        "version": "0.1.4",
+        "files": 38,
+        "sha256": "6b1c709c2b604d3b02982109b3048eefd0acdb9395fe285c3ef880dd1868ecc2",
+        "integrity": "sha512-TW5wX1W61yfmQH1xMIS11Q8y+gYGeTSUuy6dCSF3riecSQ2wV+EF+/ghUNLJszZMctwrMn1dDHHvae20ZwpFOA==",
+        "registryTarball": "https://registry.npmjs.org/dsh-plugin-compat-check/-/dsh-plugin-compat-check-0.1.4.tgz",
+        "exactTgzBytesMatch": true,
+        "allFilesMatch": true,
+        "readmeMatches": true,
+        "repositoryDirectory": "plugin",
+        "githubReleaseUrl": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.1.4",
+        "githubAssetSha256": "sha256:6b1c709c2b604d3b02982109b3048eefd0acdb9395fe285c3ef880dd1868ecc2",
+        "githubDownloadedBytesMatch": true,
+        "tagSourceCommit": "7bb5e6a982e81e1009eb8283c741b4124fe4357f"
+      },
+      "publicInstallation": {
+        "status": "checked",
+        "exitCode": 0,
+        "toolVersion": "0.1.4",
+        "dshVersion": "0.2.1-rc.2",
+        "summary": {
+          "limited": 2,
+          "vacuousOk": 1,
+          "ok": 2,
+          "partial": 0,
+          "broken": 0,
+          "unknown": 0
+        },
+        "tempProfileRemoved": true,
+        "logSha256": "437812c4a8b7c11df46da69a9584a02e393b193463acc043911332c3f3ebc977",
+        "scope": "Exact public npm spec with an owned fresh cache, actual official DSH startup and checker; limited coverage remains, no business certification"
+      },
+      "distributionAfterPublication": {
+        "observedAt": "2026-10-20T14:41:38.585348+00:00",
+        "npmLatest": "0.1.4",
+        "primaryIndexVersion": "0.1.3",
+        "primaryIndexSha256": "a83a68437faf286fd6f91cc09d40a62a12ce36db7702fac0b27a55a92ad0c395",
+        "scope": "Public npm and exact npm installation verified; market index refresh and market UI installation of0.1.4 remain upstream follow-up. No new external posts."
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

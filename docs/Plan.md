@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-更新于2026-10-20。正在准备 **0.1.4**；公开 npm latest 仍为0.1.3，完成发布后更新本文。用法见[README](../README.md)，计数与逐次验收证据见[docs/current-state.json](current-state.json)。本文只保留现行契约、关键结论和待办，施工过程查Git历史；[旧提取器反例](extraction-findings.md)仅作历史参考。
+更新于2026-10-20。**0.1.4已发布至GitHub与npm，npm latest为0.1.4**；确切制品与公开安装均已核验。用法见[README](../README.md)，计数与逐次验收证据见[docs/current-state.json](current-state.json)。本文只保留现行契约、关键结论和待办，施工过程查Git历史；[旧提取器反例](extraction-findings.md)仅作历史参考。
 
 ## 1. 项目定位与交付状态
 
@@ -14,7 +14,7 @@
 
 单仓库、单版本、一份Node判定内核；版本真源为`lib/version.mjs`。根目录是private开发工作区，npm仅打包`plugin/`，没有CLI bin、安装shell或probe入口，不支持`npx dsh-plugin-compat-check`。prepack同步skill/契约、暂存kernel与LICENSE，postpack清理kernel；裸源码子目录不等同完整tgz。市场截图声明与图片在`plugin/screenshots.json`、`plugin/assets/`，不随当前npm files打包；npm README引用GitHub图片。
 
-0.1.3于2026-10-18发布至[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.1.3)，发布源ada1d78及37文件制品证据见`verification.release013`。0.1.4候选纳入Origin有效端口校验、激活前提说明、npm子目录元数据，以及仓库工程回收/Chrome诊断；不把这些追写到公开0.1.3中。发布流程见§6。
+0.1.3于2026-10-18发布至[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.1.3)，发布源ada1d78及37文件制品证据见`verification.release013`。0.1.4于2026-10-20发布至[npm](https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.1.4)和[GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.1.4)：纳入Origin有效端口校验、激活前提说明、npm子目录元数据及仓库工程回收/Chrome诊断。源提交7bb5e6a的[CI四项通过](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39439507425)，公开npm与Release附件均与验收tgz字节一致（38文件），公开规格实装/启动exit0，覆盖仍有限；见`verification.release014`。这些修订不追写到公开0.1.3中。
 
 ## 2. 现行判定与集成契约
 
@@ -82,7 +82,7 @@ CLI退出码：**0=未发现冲突，1=部分可用或未知，2=不兼容，3=�
 
 | 渠道 | 已完成与剩余边界 |
 |---|---|
-| 主目录 / dsh-market | #8057双语简介已同步索引/详情，公开映射npm0.1.3；1.66.43真实Chrome/rc.2空profile全球线路实装0.1.3且37文件一致。#931终端误提示已在1.66.44实际确认窗验收；#932的packument回退有效，但双端失败仍裸名安装。显示名`plugin`来自目录末级解析，[PR #948](https://github.com/dsh-market/dsh-market/pull/948)仍开放，修复不改身份/安装目标，也不要求本插件改名 |
+| 主目录 / dsh-market | #8057双语简介已同步索引/详情，0.1.4发布后公开映射仍为npm0.1.3；1.66.43真实Chrome/rc.2空profile全球线路实装0.1.3且37文件一致。#931终端误提示已在1.66.44实际确认窗验收；#932的packument回退有效，但双端失败仍裸名安装。显示名`plugin`来自目录末级解析，[PR #948](https://github.com/dsh-market/dsh-market/pull/948)仍开放，修复不改身份/安装目标，也不要求本插件改名 |
 | 1024 Store | 目录#628已合并；v2仍只有GitHub unknown/not_checked方式，无npm。[#22](https://github.com/imsai-sh/dsh-1024store/issues/22)仍开放、无维护者回复。0.1.4补repository.directory有助绑定，不证明私有D1/KV采集故障已解决；不拿裸源码回退冒充tgz验收 |
 | 其它Awesome | dshworks#169已合并，bruc3van#138已关闭并收录；0xsline已收录，但简介修订[PR #717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)仍开放 |
 
@@ -94,7 +94,7 @@ CLI退出码：**0=未发现冲突，1=部分可用或未知，2=不兼容，3=�
 
 每次结果仅对应其版本、制品和输入。macOS arm64已有DSH0.2.0-rc.2/0.2.1-rc.2、tgz、tool/skill、HTTP和真实Chrome的限定证据；Linux有arm64 VM及x64 CI，Windows未验收。旧rc.1的0.1.2有限集成不代表rc.2或当前认证。当前默认计数见current-state顶层，各次默认/慢测/业务/发布数字保留在对应verification，不在本文重复抄录。
 
-Linux准备输入后的最近发布前基线[CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39401059094)四项通过，提交c20053f；它不代替0.1.4候选的精确提交验收。未来冷缓存性能与底层存储原因未获保证，原始失败不能追写成已定位。
+0.1.4源提交7bb5e6a的Node22/24及Linux新旧DSH[CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39439507425)四项通过。Linux真实Chrome各11/11，新版联合53/53，旧版联合49通过/4项rc.2不适用；本地Node24/26默认各564通过/3项Linux不适用。确切发布tgz另做本地空缓存、HTTP/UI及公开安装验收，不能从CI重打包的gzip哈希推定制品字节一致。未来冷缓存性能与底层存储原因未获保证，原始失败不能追写成已定位。
 
 ### 5.2 日常检查与真实集成
 
@@ -143,7 +143,6 @@ DSC_EXECUTION_DIAGNOSTICS=<私有目录> node bin/compat-check.mjs --nm <目标n
 
 ## 6. 后续工作
 
-1. **0.1.4候选与发布（本轮）。** 已授权源码交付及GitHub/npm发布：核对全部维护文档、统一版本、完整默认/工程与新旧DSH验收；私有副本打包、核对确切tgz并空缓存实装；精确提交CI通过后发布同一制品，再核验registry/latest、GitHub附件、公开安装及发布后文档。只有真实发布成功才改为已发布，不追改0.1.3证据。
-2. **上游验收。** #948采纳发布后验卡片/安装窗产品名；#932双端失败待明确告警或安全失败后复验；1024#22出现npm方式后实装；0xsline#717待采纳。1.66.44目前仅验确认窗，全球全新实装仍是1.66.43证据；0.1.4发布不自动证明商店同步。无新证据不重复发帖，新外部补充另取授权。
-3. **有限批量与自动化（后置）。** 先做固定哈希样本的静态JSON聚合、限制及“待作者复核”，再评估低权限Action/增量摘要和端点隐私、缓存、维护成本。业务扩展另定制品/资源/独立真值。Perch仅可选评估：Files恢复复用已有真实Chrome正负例，须证明增量收益并核清权限、源码处理与费用，不能代替浏览器验收（`semanticRuleAssessment20261020`）。
-4. **Windows真实验收。** 取得环境后实跑路径、安装器、回收和打包；依用户选择暂缓，不用POSIX或模拟充数。
+1. **上游验收。** #948采纳发布后验卡片/安装窗产品名；#932双端失败待明确告警或安全失败后复验；1024#22出现npm方式后实装；0xsline#717待采纳。1.66.44目前仅验确认窗，全球全新实装仍是1.66.43证据；主目录当前仍映射0.1.3，待刷新后另验0.1.4市场路径；发布本身不证明商店同步。无新证据不重复发帖，新外部补充另取授权。
+2. **有限批量与自动化（后置）。** 先做固定哈希样本的静态JSON聚合、限制及“待作者复核”，再评估低权限Action/增量摘要和端点隐私、缓存、维护成本。业务扩展另定制品/资源/独立真值。Perch仅可选评估：Files恢复复用已有真实Chrome正负例，须证明增量收益并核清权限、源码处理与费用，不能代替浏览器验收（`semanticRuleAssessment20261020`）。
+3. **Windows真实验收。** 取得环境后实跑路径、安装器、回收和打包；依用户选择暂缓，不用POSIX或模拟充数。
