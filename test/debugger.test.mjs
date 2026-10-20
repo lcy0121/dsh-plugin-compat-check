@@ -310,7 +310,7 @@ test(
   "Linux real Chrome paused before a command retains the pre-kill kernel state and is reclaimed",
   {
     skip: process.env.DSC_SLOW !== "1" || process.platform !== "linux",
-    timeout: 15000,
+    timeout: 30000,
   },
   async () => {
     const exe =
@@ -322,7 +322,12 @@ test(
     const { linuxProcessSnapshot } = await import(
       "../lib/chrome-diagnostics.mjs"
     );
-    const browser = await launchChromePipe(exe, { timeoutMs: 2000 });
+    // This is a stopped-command control, not a two-second cold-start SLA.
+    // Use the same real-browser budget as the startup batch below, so the
+    // first disk-backed launch reaches the SIGSTOP precondition on CI.
+    const started = performance.now();
+    const browser = await launchChromePipe(exe, { timeoutMs: 10000 });
+    const startupMilliseconds = performance.now() - started;
     const pid = browser.child.pid;
     try {
       process.kill(-pid, "SIGSTOP");
@@ -348,6 +353,8 @@ test(
       assert.equal(failure.code, "CDP_COMMAND_TIMEOUT");
       assert.equal(d.phase, "session");
       assert.equal(d.method, "Browser.getVersion");
+      assert.equal(d.timeoutMs, 10000);
+      assert.ok(d.timing.requestElapsedMs >= d.timeoutMs);
       assert.equal(d.linux.atFailure.available, true);
       assert.equal(d.linux.atFailure.leader.state, "T");
       assert.equal(
@@ -359,6 +366,16 @@ test(
       assert.throws(
         () => process.kill(pid, 0),
         (e) => e.code === "ESRCH",
+      );
+      console.log(
+        "Linux Chrome stopped-command control: " +
+          JSON.stringify({
+            startupMilliseconds,
+            timeoutMs: d.timeoutMs,
+            phase: d.phase,
+            state: d.linux.atFailure.leader.state,
+            cleanup: d.cleanup,
+          }),
       );
     } finally {
       await browser.close();
