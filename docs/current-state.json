@@ -1,6 +1,6 @@
 {
-  "toolVersion": "0.1.3",
-  "recordedAt": "2026-10-19T18:14:22.019Z",
+  "toolVersion": "0.1.4",
+  "recordedAt": "2026-10-20T14:26:09.303Z",
   "testFiles": 38,
   "tests": 567,
   "repositoryFiles": {
@@ -6605,6 +6605,140 @@
           "build.log": "20adbeef1db9205424ddbf5d63e1e288734cd48397417a231bc779bf610c8f4d"
         }
       }
+    },
+    "release014": {
+      "status": "candidate-validated-awaiting-exact-source-ci-and-publication",
+      "recordedAt": "2026-10-20T14:27:58.997731+00:00",
+      "version": "0.1.4",
+      "authorization": "User explicitly requested source delivery and publication to GitHub and npm on 2026-10-20; no new third-party posts authorized",
+      "validation": {
+        "defaultNode24": {
+          "nodeVersion": "24.19.0",
+          "tests": 567,
+          "pass": 564,
+          "fail": 0,
+          "skipped": 3,
+          "tapSha256": "4d2bb211df0b3773d66f465b45e7961c84a85e9afc512e60005da8e29b73eb51"
+        },
+        "defaultNode26": {
+          "nodeVersion": "26.12.0",
+          "tests": 567,
+          "pass": 564,
+          "fail": 0,
+          "skipped": 3,
+          "tapSha256": "66bb204fbdf429b0cae041187ed0c2d7f7f7ab41665ff568e955a8565a36ce52"
+        },
+        "engineering": {
+          "ok": true,
+          "nodeVersion": "24.19.0",
+          "metrics": 6,
+          "sha256": "2b916d4eb069f54b0d3629614d366d1fc9488afb09f78bcd9728477651dd6cd4"
+        },
+        "prepublishGate": {
+          "ok": true,
+          "nodeVersion": "24.19.0",
+          "logSha256": "2d2c3e734c6f75813b49773ab2ed0722b2253a136c0458d62124cd2e6f725f85"
+        },
+        "formatCheck": true,
+        "documentCheck": true
+      },
+      "artifact": {
+        "filename": "dsh-plugin-compat-check-0.1.4.tgz",
+        "version": "0.1.4",
+        "files": 38,
+        "bytes": 138921,
+        "sha256": "6b1c709c2b604d3b02982109b3048eefd0acdb9395fe285c3ef880dd1868ecc2",
+        "shasum": "e0d1fe9d5d577e68aac6958865084b4c0c3c2397",
+        "integrity": "sha512-TW5wX1W61yfmQH1xMIS11Q8y+gYGeTSUuy6dCSF3riecSQ2wV+EF+/ghUNLJszZMctwrMn1dDHHvae20ZwpFOA==",
+        "fileManifestSha256": "0a3a2a5b7731c4c084429645d80f7c8d8f8019e0777ba16afd29c3f77951f53e",
+        "readmeSha256": "7937eec7bbb2f43ba5e7d58ea95de3da517245123f19d12c75e01d3eba59f026",
+        "skillSha256": "55c46a7ffc6724b16cb8f2d5d138b7b5b0b42026ffc4c5a4ce1e54fd88a83bce"
+      },
+      "exactTarballAcceptance": {
+        "ok": true,
+        "applicable": true,
+        "dshVersion": "0.2.1-rc.2",
+        "artifactVersion": "0.1.4",
+        "declarationCases": [
+          {
+            "id": "engines-allow",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "engines-reject",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "exact-exemption",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "wrong-exemption",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "peer-fallback",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          }
+        ],
+        "ui": {
+          "available": true,
+          "navigation": "More > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+        },
+        "scope": "Controlled declaration gates and unprivileged local browser UI only; no model call, real plugin business-function or Windows certification.",
+        "subpathMetadata": true,
+        "artifactSha256": "6b1c709c2b604d3b02982109b3048eefd0acdb9395fe285c3ef880dd1868ecc2",
+        "exactArtifactFilesVerified": 38,
+        "httpReport": true,
+        "originFence": {
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403
+        },
+        "disabledDiagnostic": {
+          "status": 404,
+          "type": null
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        }
+      },
+      "documentationAudit": {
+        "maintainedDocuments": 10,
+        "threeReadmesAligned": true,
+        "planCharactersBefore": 18373,
+        "planCharactersAfter": 9732,
+        "historicalEvidencePreserved": true,
+        "githubMetadata": "description, topics, homepage and license verified suitable; no changes needed",
+        "npmMetadata": "candidate version/readme notices expected before publication; repository.directory=plugin in exact artifact",
+        "upstream": "PR948 and PR717 remain open; Store22 open with no maintainer reply and no npm method; market931/932 closed but dual lookup failure residual retained",
+        "scope": "Historical checkpoints remain dated; exact version CI and public artifact verification added separately"
+      },
+      "scope": "Bounded compatibility checks and owned test hosts/browser, no new model calls; Windows unverified; upstream market name and Store collection remain independent",
+      "privateEvidenceRoot": "/private/tmp/dsc-release014-20261020"
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

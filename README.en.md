@@ -6,7 +6,7 @@ Check **installed DSH plugins** against a target DSH version, with source locati
 
 ## Version and entry points
 
-npm `latest` is **0.1.3**, supporting Node `^22.19.0 || >=24`. main also contains activation-prerequisite explanations, an Origin fence, subdirectory metadata and engineering diagnostics that have not been published to npm. Source and public packages sharing version 0.1.3 are not identical. See [Plan](docs/Plan.md) for delivery, verification and next steps.
+Preparing **0.1.4**; public npm `latest` remains **0.1.3**. Node `^22.19.0 || >=24` is supported. This patch includes activation-prerequisite explanations, effective-port Origin checks, npm subdirectory metadata and repository engineering diagnostics. See [Plan](docs/Plan.md) for delivery, verification and next steps.
 
 | Entry | Purpose |
 |---|---|
@@ -78,7 +78,7 @@ CLI/Node installation-runner exit codes: **0** no issue reported, **1** partiall
 - Retain `certainty`, `impactBasis`, `coverage` and `vacuous`. Unknown, unobserved or omitted keys do not mean absence; a catalogue is not a runtime observation. Client features need separate acceptance.
 - Default static CLI checks do not start DSH or install targets. Host checks use a budgeted analysis worker without external commands/network. Baselines are written by default; use `--no-baseline` for one-off checks.
 - Method analysis uses bounded Babel AST/package-local value flow; dynamic behavior remains limited. Declarations/API risks do not guarantee business behavior. Modern observations must match profile, version and age; another profile's evidence cannot be borrowed.
-- 0.1.3 supports newer DSH declarations, exact compatibility grants and the rc.2 catalogue. Future DSH versions are unverified. Scoped macOS/Linux evidence exists; Windows awaits real acceptance. See [contracts and limits](docs/Plan.md#2-现行判定与集成契约).
+- Since 0.1.3, the tool supports newer DSH declarations, exact compatibility grants and the rc.2 catalogue. Future DSH versions are unverified. Scoped macOS/Linux evidence exists; Windows awaits real acceptance. See [contracts and limits](docs/Plan.md#2-现行判定与集成契约).
 
 ## Development and documentation
 
