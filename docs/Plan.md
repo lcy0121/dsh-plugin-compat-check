@@ -60,9 +60,9 @@ JSON为独立的`schemaVersion:1 / kind:plugin-compat-check/batch-result`，逐�
 
 `--previous <上次JSON>`有界校验结构及结论/计数/退出码，始终重新扫描；工具版本及仓库分析源码/依赖锁哈希、Node与已装依赖版本、规则/目录哈希、目标DSH、策略和预算一致才比较同id同制品。摘要区分added/removed/changed/unchanged/incomparable；身份变化中性处理，无变化不表示业务通过，旧报告不是可信签名。坏旧输入使整批无法判定，不默默丢弃。
 
-自动化采用[手动Action](../.github/workflows/static-batch.yml)：固定公开合成队列、Node24、contents:read、checkout不保留凭据，官方Actions锁定已核验提交；无schedule、写权限、用户URL/安装规格、目标生命周期脚本或模型调用。JSON作为7天制品，步骤摘要仅固定文案和计数；合成队列预期exit2，workflow只把工具错误视为失败，不能从绿色工作流推断兼容。此处权限和固定SHA选择依据[GitHub安全指引](https://docs.github.com/en/actions/reference/security/secure-use)。源码ded1132的[远端手动Action](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39448417209)已通过：Ubuntu24.04/Node24.22.0，下载ZIP摘要与GitHub一致，JSON的清单/制品/分析源码/规则/目录身份及四项结论、覆盖限制均核验；有效token权限仅contents:read及metadata:read。同提交的[完整CI四项](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39448400101)全部通过。完整记录见`verification.staticBatch20261020`，不代表业务功能验收。
+自动化采用[手动Action](../.github/workflows/static-batch.yml)：固定公开合成队列、Node24、contents:read、checkout不保留凭据，官方Actions锁定已核验提交；无schedule、写权限、用户URL/安装规格、目标生命周期脚本或模型调用。JSON作为7天制品，步骤摘要仅固定文案和计数；合成队列预期exit2，workflow只把工具错误视为失败，不能从绿色工作流推断兼容。此处权限和固定SHA选择依据[GitHub安全指引](https://docs.github.com/en/actions/reference/security/secure-use)，验收及复现见§5.4。
 
-端点评估结论：暂不部署，避免源码上传、账户配置、滥用配额及持续托管责任。结果缓存暂不增加，增量摘要只读本地旧报告，避免跨身份复用和缓存失效成本；Action也不开持久缓存。费用仅手动CI时长/7天制品存储，受账户配额影响，不承诺零费用或固定耗时；维护集中在人工样本/哈希更新、固定Actions提交更新和结论复核。业务扩展仍须独立制品、资源预算及业务真值；Perch当前无调用、费用或权限授权，不替代Chrome验收。
+端点评估结论：暂不部署，避免源码上传、账户配置、滥用配额及持续托管责任。结果缓存暂不增加，增量摘要只读本地旧报告，避免跨身份复用和缓存失效成本；Action也不开持久缓存。费用仅手动CI时长/7天制品存储，受账户配额影响，不承诺零费用或固定耗时；维护集中在人工样本/哈希更新、固定Actions提交更新和结论复核。业务扩展仍须独立制品、资源预算及业务真值。Perch仅保留可选评估结论，当前无调用、费用或权限授权；若Files恢复且另行立项，须复用已有真实Chrome正负例证明增量收益，并核清权限、源码处理与费用，不替代Chrome验收（`semanticRuleAssessment20261020`）。
 
 ## 3. 开发与文档维护约定
 
@@ -70,7 +70,7 @@ JSON为独立的`schemaVersion:1 / kind:plugin-compat-check/batch-result`，逐�
 2. 不重建快照消除失败。版本漂移须审查`test/__baseline-versions.json`并单独提交；默认suite共享测试专用只读profile副本，提取/回读用同一字节。观测不稳或超预算明确报错，不重试或交付半份输入；不是OS原子快照。
 3. 分析运行在有预算worker，只清理自有目录/PID组。安装克隆排除node_modules，重定位manifest/pnpm9单importer本地锁路径、保留远程pins；拒绝不支持格式和不安全链接，不改原profile。
 4. 私有源码副本打tgz、空缓存实装并调用；文件存在或日志干净不证明业务成功。默认10秒/512+64MiB worker预算、1秒工程超时负例及总流程<5秒分别维护；Python parity仅为旧参考。
-5. 本地可提交；push/合并/npm发布及对外发帖分别取得授权。0.1.4发布及本轮有限批量源码推送/Action验收已授权，不延伸到下一版本发布或新上游发帖。仅stage本项路径。README写用法、Plan写契约/状态/待办、current-state写证据；同步skill/契约，不逐轮新增总结文件。历史日期、版本和失败不得改写为当前认证。
+5. 本地可提交；push/合并/npm发布及对外发帖分别取得授权。0.1.4发布及本轮有限批量源码推送/Action验收已授权，不延伸到下一版本发布或新上游发帖。仅stage本项路径。README写用法、Plan写契约/状态/待办、current-state写证据；交付后将事项从§6移至§4，契约归§2、验收与复现归§5，不在待办中保留“已完成”项。同步skill/契约，不逐轮新增总结文件。历史日期、版本和失败不得改写为当前认证。
 
 ## 4. 已完成的关键工作
 
@@ -82,7 +82,7 @@ JSON为独立的`schemaVersion:1 / kind:plugin-compat-check/batch-result`，逐�
 | 规则质量 | 保留readImage实际路径及sessions.open旧回退；移除getSnapshot/settings.get/sessions.map无依据影响，不为sessions.refresh臆造规则；库存为partial，不等于准确率 |
 | 故障诊断与回收 | Darwin全组Z/exit事件竞态现场互证；仅确认退出且完整同UID组快照均Z/消失后接受停止，活进程或不可读仍失败。多资源均尝试回收，保留主错误、清理错误及私有workDir；Chrome按握手/建页/附加/会话记录有界诊断，见`engineeringDiagnostics20261019` |
 | Linux Chrome CI | 子进程D-Bus隔离、暂停负例先确认启动、CI读入确切Chrome文件/共享库后开始原协议计时，无预热启动、自动重试或增加生产超时。准备后旧/新DSH矩阵通过；原fffec7f握手失败根因仍未知，新镜像D/page等待只是现场证据，见`linuxChromeCiAcceptance20261020`、`linuxChromeInputPreparation20261020` |
-| 有限批量 / 手动Action | 固定文件树哈希、本地静态聚合、预算及错误隔离、待作者复核、身份约束增量摘要已交付；源码ded1132远端手动Action和确切JSON制品核验通过，见`staticBatch20261020`。四个公开合成样本不构成业务或生态认证 |
+| 有限批量 / 手动Action | 固定文件树哈希、本地静态聚合、预算及错误隔离、待作者复核、身份约束增量摘要已交付；契约见§2.5，验收与复现见§5.4，证据见`staticBatch20261020`。四个公开合成样本不构成业务或生态认证 |
 
 独立业务预测在动作前按固定制品/API目录/手审功能区间封存，业务真值来自请求、DOM及磁盘，不读loader答案。固定队列如下；并非盲测、生态准确率或完整模型认证：
 
@@ -158,8 +158,19 @@ DSC_EXECUTION_DIAGNOSTICS=<私有目录> node bin/compat-check.mjs --nm <目标n
 
 工程证据包括扫描预算/堆耗尽弃权及恢复、受控超时、single-flight、基线争用与原子读取；不承诺全进程RSS、任意脱离进程组隔离或生产性能。Darwin真实负例需编译器，缺失明确跳过。普通诊断不含argv/env或stderr正文；私有可选stderr限长脱敏，仍不保证可直接分享。Linux保留有界进程/线程状态、等待与调度计数，零计数不证明未等待，父进程计时不直接归因Chrome。清理失败保留workDir及进程身份，不按进程名清场、不盲删仍在用目录。
 
+### 5.4 有限静态批量验收与复现
+
+2026-10-20源码ded1132的[远端手动Action](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39448417209)及[完整CI四项](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39448400101)全部通过。Action环境为Ubuntu24.04/Node24.22.0，有效token权限仅contents:read及metadata:read；下载ZIP摘要与GitHub一致，JSON的清单/制品/分析源码/规则/目录身份、四项结论和覆盖限制均已核验。本地默认套件578通过/3项平台跳过，新增14项测试在Node24/26均通过。逐项摘要和确切哈希见`verification.staticBatch20261020`，不代表业务功能验收。
+
+```bash
+node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.json
+node tools/static-batch.mjs --manifest test/fixtures/static-batch.json --previous batch.json > next.json
+node tools/static-batch.mjs --hash <本地包目录>
+```
+
+自带合成队列预期exit2：2项无发现、1项部分可用、1项不兼容，全部覆盖有限且待作者复核。增量比较重新扫描，不复用旧结论；制品、分析身份或预算变化时中性处理，分享JSON前须预览。
+
 ## 6. 后续工作
 
 1. **上游验收。** #948采纳发布后验卡片/安装窗产品名；#932双端失败待明确告警或安全失败后复验；1024#22出现npm方式后实装；0xsline#717待采纳。1.66.44目前仅验确认窗，全球全新实装仍是1.66.43证据；主目录当前仍映射0.1.3，待刷新后另验0.1.4市场路径；发布本身不证明商店同步。无新证据不重复发帖，新外部补充另取授权。
-2. **有限批量与自动化（已交付）。** 固定哈希静态JSON聚合、预算/失败隔离、“待作者复核”、身份约束增量摘要及低权限手动Action已完成本地与远端限定验收；契约及端点隐私/缓存/维护成本取舍见§2.5，证据见`verification.staticBatch20261020`。无远端端点或结果缓存；业务样本扩展仍另定制品/资源/独立真值。Perch保持可选评估：Files恢复时复用已有真实Chrome正负例，须证明增量收益并核清权限、源码处理与费用，不能代替浏览器验收（`semanticRuleAssessment20261020`）。
-3. **Windows真实验收。** 取得环境后实跑路径、安装器、回收和打包；依用户选择暂缓，不用POSIX或模拟充数。
+2. **Windows真实验收。** 取得环境后实跑路径、安装器、回收和打包；依用户选择暂缓，不用POSIX或模拟充数。
