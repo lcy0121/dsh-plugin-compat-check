@@ -59,6 +59,18 @@ node bin/compat-check.mjs --help
 
 `--issue-report` retains package names and package-relative paths: preview before sharing. It omits raw logs, probes and baselines and never posts automatically. Private working directories and engineering diagnostics are not ready-to-share reports either.
 
+### Fixed static batch (repository tool)
+
+```bash
+node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.json
+node tools/static-batch.mjs --manifest test/fixtures/static-batch.json --previous batch.json > next.json
+node tools/static-batch.mjs --hash <local-package-directory>
+```
+
+The manifest pins package names, exact versions and whole-tree SHA-256 hashes. Private copies are verified, then scanned independently with the shared kernel. Limits: 16 samples, 10 seconds each, 60 seconds total. No target installation/execution, probe or baseline reads. Exit 0/1/2 preserves static verdicts; 3 means input, hash, budget or tool failure. The synthetic example intentionally exits 2. Every result remains **pending author review**, including limited coverage, vacuous verdicts and incomplete scans; it is not business certification. Delta mode always rescans and treats changed artifact, analyzer source, rules, catalogue, target version or budgets as incomparable. Preview JSON before sharing.
+
+Manifest format, hashing and permission/cost decisions: [Plan §2.5](docs/Plan.md#25-有限静态批量契约). The manual [static-batch.yml](.github/workflows/static-batch.yml) Action scans only fixed public repository samples with read-only repository permissions. No remote endpoint or result cache is deployed; this tool is not in the npm plugin.
+
 ### Installation checks and standalone skill
 
 ```bash

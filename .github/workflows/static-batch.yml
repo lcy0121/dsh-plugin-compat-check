@@ -1,0 +1,53 @@
+name: Fixed static batch (author review)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: static-batch-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  static-batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Scan only the checked-in fixed public samples
+        shell: bash
+        run: |
+          code=0
+          node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > static-batch.json || code=$?
+          # 1/2 are static plugin findings, expected in this synthetic queue; 3 is a tool failure.
+          if [ "$code" -gt 2 ]; then exit "$code"; fi
+      - name: Publish counts and review status only
+        if: always()
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r = JSON.parse(fs.readFileSync('static-batch.json', 'utf8'));
+          const s = r.summary;
+          const lines = [
+            '# Fixed static batch — 待作者复核', '',
+            `Tool exit code: ${r.exitCode}`,
+            `Samples: ${s.samples}; analyzed: ${s.analyzed}; tool errors: ${s.errors}.`,
+            `ok=${s.ok}, partial=${s.partial}, broken=${s.broken}, unknown=${s.unknown}.`,
+            `Limited coverage: ${s.limited}; vacuous ok: ${s.vacuousOk}.`, '',
+            'Fixed synthetic samples only. No target install, runtime probe, model call or business certification.',
+            'The JSON artifact retains limitations and findings. Review it before sharing.',
+          ];
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n') + '\n');
+          NODE
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: fixed-static-batch
+          path: static-batch.json
+          if-no-files-found: error
+          retention-days: 7

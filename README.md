@@ -59,6 +59,18 @@ node bin/compat-check.mjs --help
 
 `--issue-report` 输出仍保留插件名与包内相对路径，分享前须预览；原始日志、探针和基线不导出，不自动发帖。私有现场和工程诊断也不能直接当作可分享报告。
 
+### 固定样本静态批量检查（仓库工具）
+
+```bash
+node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.json
+node tools/static-batch.mjs --manifest test/fixtures/static-batch.json --previous batch.json > next.json
+node tools/static-batch.mjs --hash <本地包目录>
+```
+
+清单锁定包名、精确版本及完整文件树 SHA-256；先校验私有副本，再用同一内核独立扫描。最多16项、每项10秒、整批60秒，不装包、不执行目标、不读探针或基线。退出0/1/2保留静态结论，3表示清单、哈希、预算或工具错误；自带合成队列预期退出2。所有结果标记“待作者复核”，保留覆盖有限、空洞结论和扫描不完整信息，不能当作业务认证。增量比较始终重新扫描；制品、工具源码、规则、目录、目标版本或预算变化时不比较。分享 JSON 前须预览。
+
+清单格式、指纹算法及权限/成本取舍见 [Plan §2.5](docs/Plan.md#25-有限静态批量契约)。手动 Action [static-batch.yml](.github/workflows/static-batch.yml)仅扫描仓库内固定公开样本，仓库权限只读；当前未部署远程端点或结果缓存，也不随 npm 插件分发。
+
 ### 安装检查与独立 skill
 
 ```bash

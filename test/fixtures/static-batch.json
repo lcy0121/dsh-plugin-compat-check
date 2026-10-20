@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "kind": "plugin-compat-check/batch-manifest",
+  "dshVersion": "0.2.1-rc.2",
+  "samples": [
+    {
+      "id": "healthy",
+      "path": "labels/healthy",
+      "name": "@label/healthy",
+      "version": "1.0.0",
+      "sha256": "c2cfb01a37b68c83b453fb3f0210f774c70520b2da4ce2a73bb6967e22ac6ef2"
+    },
+    {
+      "id": "broken-service",
+      "path": "labels/broken-service",
+      "name": "@label/broken-service",
+      "version": "1.0.0",
+      "sha256": "1dd49fe033b55a20c715a2144abb9d96d5b62db1963b7ff8bfee1db3836f77f8"
+    },
+    {
+      "id": "broken-client",
+      "path": "labels/broken-client",
+      "name": "@label/broken-client",
+      "version": "1.0.0",
+      "sha256": "67e5eee0882de3151716db8301b235ffd929b931c9ba276da4c876e1501253eb"
+    },
+    {
+      "id": "real-service",
+      "path": "labels/real-service",
+      "name": "@label/real-service",
+      "version": "1.0.0",
+      "sha256": "b30be773d83514e3c2598aafcf6c08ede78fbb923a7849195ce9681571c3abb0"
+    }
+  ]
+}

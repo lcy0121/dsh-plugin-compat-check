@@ -59,6 +59,18 @@ node bin/compat-check.mjs --help
 
 `--issue-report`에는 패키지 이름과 패키지 상대 경로가 남으므로 공유 전 확인하세요. 원시 로그·probe·기준선은 제외하며 자동 게시하지 않습니다. 비공개 작업 디렉터리와 엔지니어링 진단도 그대로 공유할 보고서가 아닙니다.
 
+### 고정 표본 정적 일괄 검사（저장소 도구）
+
+```bash
+node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.json
+node tools/static-batch.mjs --manifest test/fixtures/static-batch.json --previous batch.json > next.json
+node tools/static-batch.mjs --hash <로컬-패키지-디렉터리>
+```
+
+매니페스트에 패키지 이름·정확한 버전·전체 파일 트리 SHA-256을 고정합니다. 비공개 복사본을 검증한 뒤 같은 커널로 각각 분석합니다. 최대16개, 항목당10초, 전체60초이며 대상 설치·실행, probe·기준선 읽기는 하지 않습니다. 종료0/1/2는 정적 판정, 3은 입력·해시·예산·도구 오류입니다. 합성 예제는 의도적으로2를 반환합니다. 모든 결과는 **작성자 검토 대기**이며 제한된 범위·공허한 판정·불완전 스캔 정보를 유지합니다. 업무 기능 인증이 아닙니다. 증분 비교도 매번 다시 분석하며 분석 대상·분석기 소스·규칙·카탈로그·대상 버전·예산이 바뀌면 비교하지 않습니다. JSON 공유 전에 확인하세요.
+
+형식·해시 알고리즘·권한과 비용 결정은 [Plan §2.5](docs/Plan.md#25-有限静态批量契约)를 참고하세요. 수동 [static-batch.yml](.github/workflows/static-batch.yml) Action은 저장소의 고정 공개 표본만 읽기 전용 권한으로 분석합니다. 원격 엔드포인트나 결과 캐시는 배포하지 않았으며 npm 플러그인에는 포함되지 않습니다.
+
 ### 설치 검사와 독립 skill
 
 ```bash

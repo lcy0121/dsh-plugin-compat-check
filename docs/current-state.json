@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.4",
-  "recordedAt": "2026-10-20T14:26:09.303Z",
-  "testFiles": 38,
-  "tests": 567,
+  "recordedAt": "2026-10-20T15:26:03.353Z",
+  "testFiles": 39,
+  "tests": 581,
   "repositoryFiles": {
-    "total": 248,
+    "total": 254,
     "fixtures": 90,
-    "other": 158
+    "other": 164
   },
   "verification": {
     "platform": "darwin",
@@ -6978,6 +6978,251 @@
         "primaryIndexVersion": "0.1.3",
         "primaryIndexSha256": "a83a68437faf286fd6f91cc09d40a62a12ce36db7702fac0b27a55a92ad0c395",
         "scope": "Public npm and exact npm installation verified; market index refresh and market UI installation of0.1.4 remain upstream follow-up. No new external posts."
+      }
+    },
+    "staticBatch20261020": {
+      "recordedAt": "2026-10-20T15:22:47.423193+00:00",
+      "status": "implemented-local-verified-remote-action-pending",
+      "baseCommit": "33f5a365f946fc3f20b3ea703d05c4b113854366",
+      "scope": "Repository-only finite static batch; no new npm release, push, endpoint, result cache, target execution, live DSH or model calls.",
+      "entry": "tools/static-batch.mjs",
+      "manifest": {
+        "file": "test/fixtures/static-batch.json",
+        "sha256": "aa80a3bc07767e1f6c5b1b230f351bab420e90dec59f7355c22cc01f53a72d39",
+        "synthetic": true,
+        "samples": [
+          {
+            "id": "healthy",
+            "name": "@label/healthy",
+            "version": "1.0.0",
+            "sha256": "c2cfb01a37b68c83b453fb3f0210f774c70520b2da4ce2a73bb6967e22ac6ef2",
+            "verdict": "ok",
+            "coverage": "limited",
+            "vacuous": true,
+            "scanComplete": true
+          },
+          {
+            "id": "broken-service",
+            "name": "@label/broken-service",
+            "version": "1.0.0",
+            "sha256": "1dd49fe033b55a20c715a2144abb9d96d5b62db1963b7ff8bfee1db3836f77f8",
+            "verdict": "partial",
+            "coverage": "limited",
+            "vacuous": false,
+            "scanComplete": true
+          },
+          {
+            "id": "broken-client",
+            "name": "@label/broken-client",
+            "version": "1.0.0",
+            "sha256": "67e5eee0882de3151716db8301b235ffd929b931c9ba276da4c876e1501253eb",
+            "verdict": "broken",
+            "coverage": "limited",
+            "vacuous": false,
+            "scanComplete": false
+          },
+          {
+            "id": "real-service",
+            "name": "@label/real-service",
+            "version": "1.0.0",
+            "sha256": "b30be773d83514e3c2598aafcf6c08ede78fbb923a7849195ce9681571c3abb0",
+            "verdict": "ok",
+            "coverage": "limited",
+            "vacuous": true,
+            "scanComplete": true
+          }
+        ]
+      },
+      "identity": {
+        "toolVersion": "0.1.4",
+        "dshVersion": "0.2.1-rc.2",
+        "nodeVersion": "26.12.0",
+        "dependencyVersions": {
+          "@babel/parser": "7.29.9",
+          "semver": "7.7.3",
+          "yaml": "2.8.1"
+        },
+        "analysisSha256": "30fb1957484cbd2a199bcc6c6979a7033463e7c3bac8cabc1989b88653f80afd",
+        "rulesSha256": "8aa022ce423c25337b0c670c2b2a4c52d4af624cccee35d3da8c7532ef041593",
+        "catalogSha256": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743"
+      },
+      "aggregate": {
+        "exitCode": 2,
+        "summary": {
+          "samples": 4,
+          "analyzed": 4,
+          "errors": 0,
+          "ok": 2,
+          "partial": 1,
+          "broken": 1,
+          "unknown": 0,
+          "limited": 4,
+          "vacuousOk": 2
+        },
+        "reviewStatus": "pending-author-review",
+        "businessCertification": false,
+        "accuracyMetric": false,
+        "jsonSha256": "7c1fd3d634a9fec6a1d99e41bdf72121d2ba4f3b61ff11cb9f70443337e7e67d"
+      },
+      "delta": {
+        "sameIdentity": {
+          "comparable": true,
+          "note": "仅比较固定身份报告；每次重新扫描，无变化不代表业务通过，旧文件不是可信真值或签名。",
+          "samples": [
+            {
+              "id": "healthy",
+              "status": "unchanged"
+            },
+            {
+              "id": "broken-service",
+              "status": "unchanged"
+            },
+            {
+              "id": "broken-client",
+              "status": "unchanged"
+            },
+            {
+              "id": "real-service",
+              "status": "unchanged"
+            }
+          ]
+        },
+        "runtimeChange": {
+          "comparable": false,
+          "note": "仅比较固定身份报告；每次重新扫描，无变化不代表业务通过，旧文件不是可信真值或签名。",
+          "samples": [
+            {
+              "id": "healthy",
+              "status": "incomparable"
+            },
+            {
+              "id": "broken-service",
+              "status": "incomparable"
+            },
+            {
+              "id": "broken-client",
+              "status": "incomparable"
+            },
+            {
+              "id": "real-service",
+              "status": "incomparable"
+            }
+          ]
+        },
+        "alwaysRescanned": true,
+        "previousIsSigned": false
+      },
+      "tests": {
+        "newFocused": {
+          "tests": 14,
+          "pass": 14,
+          "fail": 0,
+          "nodeVersions": [
+            "24.19.0",
+            "26.12.0"
+          ]
+        },
+        "defaultSuite": {
+          "node": "26.12.0",
+          "tests": 581,
+          "pass": 578,
+          "fail": 0,
+          "skipped": 3,
+          "platform": "darwin",
+          "arch": "arm64",
+          "tapSha256": "3aca766c85e6bf7ff327cb7654679e444fdded13a1cceacccb0703f9349fdbc3"
+        },
+        "negativeCoverage": [
+          "hash-mismatch-with-healthy-followup",
+          "package-identity-mismatch",
+          "target-top-level-code-not-executed",
+          "adjacent-probe-and-exemption-not-consumed",
+          "no-baseline-write",
+          "links-and-FIFO",
+          "manifest-invalid-empty-traversal-excess-and-duplicate",
+          "entry-depth-file-total-byte-and-report-budgets",
+          "worker-timeout-cleanup-and-total-budget",
+          "incoherent-previous-verdict-and-comparison-identity",
+          "added-removed-changed-unchanged-incomparable",
+          "stale-success-never-reused"
+        ]
+      },
+      "checks": {
+        "format": true,
+        "docCheck": true,
+        "prepublishCheck": true,
+        "prepublishDoesNotPublish": true,
+        "diffCheck": true
+      },
+      "independentReview": {
+        "readOnly": true,
+        "actionableCorrectnessFindings": 0,
+        "focusedTestsPass": 14,
+        "remoteAndBusinessBehaviorNotCertified": true
+      },
+      "workflow": {
+        "file": ".github/workflows/static-batch.yml",
+        "trigger": "workflow_dispatch",
+        "permissions": {
+          "contents": "read"
+        },
+        "persistCheckoutCredentials": false,
+        "fixedPublicSamplesOnly": true,
+        "targetLifecycleScripts": false,
+        "persistentCache": false,
+        "retentionDays": 7,
+        "jobTimeoutMinutes": 5,
+        "officialActionCommitRefsVerifiedViaGitHubAPI": true,
+        "localActualScanAndSummaryReplay": [
+          {
+            "negative": false,
+            "nodeVersion": "24.19.0",
+            "scanStepExit": 0,
+            "reportExit": 2,
+            "errors": 0,
+            "analyzed": 4
+          },
+          {
+            "negative": true,
+            "nodeVersion": "24.19.0",
+            "scanStepExit": 3,
+            "reportExit": 3,
+            "errors": 1,
+            "analyzed": 3
+          }
+        ],
+        "remoteRun": false,
+        "pending": "Explicitly authorized push and remote dispatch/acceptance; local replay does not verify GitHub execution or billing."
+      },
+      "decisions": {
+        "endpoint": "deferred: source privacy, quotas, auth and hosting maintenance",
+        "resultCache": "deferred: always rescan; identity-sensitive local delta only",
+        "perch": "not invoked; no new permissions or fees",
+        "windows": "not verified"
+      },
+      "evidenceFiles": {
+        "directory": "/private/tmp",
+        "ephemeral": true,
+        "node24FocusedTapSha256": "f2d1c0054e02f10dcaa5567b77c049bff1d9bad0b40640a33108c2053fa7647e",
+        "prepublishLogSha256": "2d2c3e734c6f75813b49773ab2ed0722b2253a136c0458d62124cd2e6f725f85",
+        "workflowReplaySha256": "555c860495df6f83405f044a54399c5ec38a140c6fb4e4cba751ddcf8dd540bd",
+        "summarySha256": "138d5f1157d1de7e828dbdd4731ad0c5311d2e13aad708a6f701bed06b8e255d"
+      },
+      "delivery": {
+        "status": "local-checks-complete-preparing-authorized-push",
+        "recordedAt": "2026-10-20T15:26:03.378366+00:00",
+        "defaultSuite": {
+          "tests": 581,
+          "pass": 578,
+          "skipped": 3,
+          "fail": 0,
+          "node": "26.12.0",
+          "tapSha256": "76955fdcb79d9fc35919d17baf385c0a8feb69946c3cf6decebaac06c9b210f7"
+        },
+        "focusedTests": 14,
+        "format": true,
+        "docCheck": true,
+        "diffCheck": true
       }
     }
   },
