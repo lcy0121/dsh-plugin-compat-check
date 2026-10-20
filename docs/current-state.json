@@ -6982,7 +6982,7 @@
     },
     "staticBatch20261020": {
       "recordedAt": "2026-10-20T15:22:47.423193+00:00",
-      "status": "implemented-local-verified-remote-action-pending",
+      "status": "delivered-and-remote-verified",
       "baseCommit": "33f5a365f946fc3f20b3ea703d05c4b113854366",
       "scope": "Repository-only finite static batch; no new npm release, push, endpoint, result cache, target execution, live DSH or model calls.",
       "entry": "tools/static-batch.mjs",
@@ -7191,8 +7191,70 @@
             "analyzed": 3
           }
         ],
-        "remoteRun": false,
-        "pending": "Explicitly authorized push and remote dispatch/acceptance; local replay does not verify GitHub execution or billing."
+        "remoteRun": true,
+        "remoteAcceptance": {
+          "runId": 39448417209,
+          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39448417209",
+          "headSha": "ded1132c0aec8b82bc5fbe48b7c36c8ae3864cb1",
+          "event": "workflow_dispatch",
+          "conclusion": "success",
+          "createdAt": "2026-10-20T15:26:29Z",
+          "completedAt": "2026-10-20T15:26:47Z",
+          "platform": "Linux x64 GitHub-hosted ubuntu-latest",
+          "nodeVersion": "24.22.0",
+          "identity": {
+            "toolVersion": "0.1.4",
+            "dshVersion": "0.2.1-rc.2",
+            "nodeVersion": "24.22.0",
+            "dependencyVersions": {
+              "@babel/parser": "7.29.9",
+              "semver": "7.7.3",
+              "yaml": "2.8.1"
+            },
+            "analysisSha256": "30fb1957484cbd2a199bcc6c6979a7033463e7c3bac8cabc1989b88653f80afd",
+            "rulesSha256": "8aa022ce423c25337b0c670c2b2a4c52d4af624cccee35d3da8c7532ef041593",
+            "catalogSha256": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743"
+          },
+          "manifestSha256": "aa80a3bc07767e1f6c5b1b230f351bab420e90dec59f7355c22cc01f53a72d39",
+          "exitCode": 2,
+          "summary": {
+            "samples": 4,
+            "analyzed": 4,
+            "errors": 0,
+            "ok": 2,
+            "partial": 1,
+            "broken": 1,
+            "unknown": 0,
+            "limited": 4,
+            "vacuousOk": 2
+          },
+          "allSamplesPendingAuthorReview": true,
+          "allSamplesCoverageLimited": true,
+          "reportSha256": "9e4c21506906de5ccc5caec099b49cdf03517057a01458455427737c7202e7c7",
+          "artifact": {
+            "id": 12276543330,
+            "name": "fixed-static-batch",
+            "bytes": 2482,
+            "sha256": "af7a8423304b7c329b3f1ea9fbb6cf0712b19fc7a5d19e933831363af2d60c34",
+            "exactZipAndJsonVerified": true,
+            "expiresAt": "2026-10-27T15:26:42Z"
+          },
+          "effectiveTokenPermissions": {
+            "contents": "read",
+            "metadata": "read"
+          },
+          "summaryStep": "success",
+          "logsSha256": "c17d5f511a4443f39c12d54db70f00bd97aff76a7a90e18bd8d2c44d70946b9a",
+          "notBusinessCertification": true,
+          "operatingSystem": "Ubuntu 24.04.5 LTS",
+          "runnerImage": "ubuntu-24.04 20261018.339.1",
+          "localReplayOfDownloadedReport": {
+            "acceptedAsPrevious": true,
+            "nodeChangeNeutral": true,
+            "samplesIncomparable": 4,
+            "errors": 0
+          }
+        }
       },
       "decisions": {
         "endpoint": "deferred: source privacy, quotas, auth and hosting maintenance",
@@ -7209,7 +7271,7 @@
         "summarySha256": "138d5f1157d1de7e828dbdd4731ad0c5311d2e13aad708a6f701bed06b8e255d"
       },
       "delivery": {
-        "status": "local-checks-complete-preparing-authorized-push",
+        "status": "source-pushed-static-action-and-full-ci-passed",
         "recordedAt": "2026-10-20T15:26:03.378366+00:00",
         "defaultSuite": {
           "tests": 581,
@@ -7222,8 +7284,40 @@
         "focusedTests": 14,
         "format": true,
         "docCheck": true,
-        "diffCheck": true
-      }
+        "diffCheck": true,
+        "sourceCommit": "ded1132c0aec8b82bc5fbe48b7c36c8ae3864cb1",
+        "fullCi": {
+          "runId": 39448400101,
+          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39448400101",
+          "headSha": "ded1132c0aec8b82bc5fbe48b7c36c8ae3864cb1",
+          "conclusion": "success",
+          "jobs": [
+            {
+              "name": "test (22.19.0)",
+              "conclusion": "success",
+              "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39448400101/job/118716347025"
+            },
+            {
+              "name": "test (24)",
+              "conclusion": "success",
+              "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39448400101/job/118716347895"
+            },
+            {
+              "name": "linux-live (0.2.0-rc.2)",
+              "conclusion": "success",
+              "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39448400101/job/118716839594"
+            },
+            {
+              "name": "linux-live (0.2.1-rc.2)",
+              "conclusion": "success",
+              "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39448400101/job/118716839868"
+            }
+          ]
+        },
+        "prepublishCheck": true,
+        "prepublishLogSha256": "2d2c3e734c6f75813b49773ab2ed0722b2253a136c0458d62124cd2e6f725f85"
+      },
+      "completedAt": "2026-10-20T15:31:53.977580+00:00"
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."
