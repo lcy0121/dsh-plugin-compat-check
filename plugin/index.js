@@ -1034,7 +1034,7 @@ function renderForModel(compat) {
     const L = [];
     const s = r.summary || {};
     L.push(`结论：可用 ${s.ok || 0}　部分可用 ${s.partial || 0}　不兼容 ${s.broken || 0}`
-      + (s.vacuousOk ? `（其中 ${s.vacuousOk} 个「可用」是空洞的：该插件没有用过任何 DSH 服务，因此没有可检查的东西）` : ''));
+      + (s.vacuousOk ? `（其中 ${s.vacuousOk} 个「可用」没有已验证调用，不等于业务通过）` : ''));
     L.push(`工具版本：${compat.toolVersion || '未知'}`);
     for(const note of r.observation?.notes||[])L.push(`采样说明：${note}`);
     if(s.limited)L.push(`证据覆盖有限：${s.limited} 个插件尚有未验证部分`);
@@ -1052,18 +1052,20 @@ function renderForModel(compat) {
     for (const name of names) {
       const p = r.plugins[name];
       const label = { broken: '不兼容', partial: '部分可用', unknown: '未知', ok: '可用' }[p.verdict] || p.verdict;
-      L.push(`${label}  ${name}@${p.version || '?'}${p.vacuous ? '　[空洞的结论：无可检查对象]' : ''}`);
+      L.push(`${label}  ${name}@${p.version || '?'}${p.vacuous ? '　[无已验证调用]' : ''}`);
+      if(p.coverage){L.push(`    证据覆盖：${p.coverage.status==='complete'?'完整':'有限'}；已验证调用 ${p.coverage.verifiedCalls}`);for(const note of p.coverage.limitations)L.push(`      覆盖限制：${note}`);}
       for (const f of p.findings || []) {
         const api = f.service ? (f.method ? `${f.service}.${f.method}` : f.service) : '(包声明)';
         const loc = f.location ? `${f.location.file}:${f.location.line}` : '—';
         const cat = {
           'host-service-missing': '服务缺失', 'host-method-missing': '方法缺失',
-          'unprovided-dependency': '无人提供的依赖', 'declaration-mismatch': '声明与实测不符',
+          'unprovided-dependency': '依赖服务待确认', 'declaration-mismatch': '声明与实测不符',
+          'client-entry-missing': '客户端入口不可交付', 'host-entry-inactive': '宿主条目未激活',
       'declared-incompatible':'版本声明不支持',
         }[f.category] || f.category;
         const sev = { fatal: '致命', 'feature-dead': '功能失效', degraded: '降级' }[f.severity] || f.severity;
-        L.push(`    ${sev} / ${cat}${f.certainty === 'certain' ? '' : ' [疑似]'}  ${api}  @ ${loc}`);
-        if (f.impact) L.push(`      影响${f.impactBasis==='inferred'?'（推断，非实测）':''}：${f.impact}`);
+        L.push(`    ${sev} / ${cat}${f.certainty === 'certain' ? ' [确定]' : ' [疑似]'}  ${api}  @ ${loc}`);
+        if (f.impact) L.push(`      影响${f.impactBasis==='measured'?'（实测）':f.impactBasis==='inferred'?'（推断，非实测）':'（依据未提供）'}：${f.impact}`);
         if(f.basis)L.push(`      依据：${f.basis}`);
       }
       const cs = p.clientSide || [];
@@ -1074,11 +1076,13 @@ function renderForModel(compat) {
     }
 
     L.push('');
-    L.push('读这个结果时注意两点：');
+    L.push('确定（certain）表示当前证据足以支持该条发现，可来自明确静态事实或合格运行时观测；疑似（suspected）表示当前证据不足以确定该条发现。');
+    L.push('impactBasis=measured/inferred 分别表示影响有对应实测依据/影响由证据推断；确定发现不等于影响已实测。未观测不等于缺失。');
+    L.push('没有已验证调用仍可能存在服务依赖或客户端功能；调用核验和覆盖完整均不等于业务验收通过。');
+    L.push('读这个结果时注意：');
     L.push('  1) 「可用」不等于"功能验证过"。它只说明本轮未发现冲突；请同时看证据覆盖与未验证项。'
       + '插件仍然可能因为自身逻辑、配置或第三方依赖而出问题。');
-    L.push('  2) 「客户端半边」的那些服务默认报告不验证 —— 它们活在浏览器里，'
-      + '只能靠"界面上有没有出现该插件的 UI"来验证。别把"没报错"当成"没问题"。');
+    L.push('  2) 客户端功能需在浏览器实际操作并核验结果；元素出现和没有报错均不等于业务成功。');
     return L.join('\n');
   } catch (error) {
     return `渲染结论时出错（工具的问题）：${errText(error)}`;
@@ -1091,7 +1095,7 @@ const TOOL_SERVICES = ['tools', 'agents'];
 function toolResult(compat,text){
  const s=compat.report?.summary||{};
  return {schemaVersion:1,kind:'plugin-compat-check/tool-result',ok:compat.ok,error:compat.error,toolVersion:compat.toolVersion,exitCode:compat.exitCode,report:compat.report,baseline:compat.baseline,cache:compat.cache||null,
- summary:compat.ok?`可用 ${s.ok||0} / 部分可用 ${s.partial||0} / 不兼容 ${s.broken||0}`:'无法判定',nodeModules:compat.nodeModules||'',hasRuntimeSurface:!!compat.report?.hasRuntimeSurface,text};
+ summary:compat.ok?`可用 ${s.ok||0} / 部分可用 ${s.partial||0} / 不兼容 ${s.broken||0}；覆盖有限 ${s.limited||0}；无已验证调用 ${s.vacuousOk||0}`:'无法判定',nodeModules:compat.nodeModules||'',hasRuntimeSurface:!!compat.report?.hasRuntimeSurface,text};
 }
 
 function registerTool(ctx, state) {
@@ -1107,14 +1111,17 @@ function registerTool(ctx, state) {
       const dispose = scope.tools.register({
         name: 'compat_check',
         description:
-          'Check whether the DSH plugins installed in this profile are actually compatible with the '
-          + 'current DSH version, and report the exact file:line and reason for anything that is not. '
+          'Assess compatibility risks for the DSH plugins installed in this profile against the '
+          + 'current DSH version, reporting evidence, coverage limits and file:line locations where available. '
           + 'Use it when the user asks whether a plugin still works, why a feature disappeared after '
-          + 'updating DSH, or whether something they installed is safe to keep. It reads the installed '
+          + 'updating DSH, or what compatibility evidence is available for an installed plugin. It reads the installed '
           + 'profile; it does not install anything or check a plugin that is not yet installed. '
-          + 'Findings are labelled "certain" (backed by the live runtime surface) or "suspected" '
-          + '(inferred from the official API catalogue, which is a contract catalogue and not the '
-          + 'runtime surface) — report that distinction to the user instead of flattening it.',
+          + 'Certainty is separate from impact evidence: certain means supported by explicit static facts or qualified runtime observations; '
+          + 'suspected means insufficient evidence to establish that finding, even when some runtime observations exist. '
+          + 'impactBasis=measured requires corresponding impact/state observations; inferred means an inferred impact, not a measured business outcome. '
+          + 'vacuous means no verified calls in an otherwise ok result; service dependencies or unverified client features may still exist. '
+          + 'Preserve coverage limits: unobserved does not mean absent, and no findings or verified calls do not certify business behavior. '
+          + 'The official API catalogue is a contract catalogue, not a runtime observation.',
         parameters: {
           type: 'object',
           additionalProperties: false,

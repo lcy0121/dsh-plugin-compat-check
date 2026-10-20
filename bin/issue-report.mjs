@@ -147,7 +147,7 @@ export function renderIssueReport(body, options = {}) {
     "",
     "## 判读限制",
     "",
-    "certain/suspected 表示确定性；impactBasis=measured/inferred 区分实测与推断。catalogue 不是运行时观测，limited/vacuous 或客户端未验证均不能省略。声明放行、激活或没有发现不证明业务成功。",
+    "certain 表示当前证据足以支持该条发现，可来自明确静态事实或合格运行时观测；suspected 表示当前证据不足以确定该条发现。impactBasis=measured/inferred 分别表示影响有对应实测依据/影响由证据推断，确定发现不等于影响已实测。vacuous 表示本轮未发现冲突但没有已验证调用，仍可能存在服务依赖或客户端功能。catalogue 不是运行时观测，未观测不等于缺失；limited/vacuous 或客户端未验证均不能省略。声明放行、激活、调用核验或覆盖完整不证明业务成功。",
     "",
     "本工具0.1.3按目标版本选择已知目录：0.2.1-rc.2及以后用rc.2目录，其余/未知用旧目录；显式--catalog优先，未来版本未经认证。声明从0.2.1-rc.1起优先engines.dsh，否则回退官方peer；旧目标保留旧规则。精确豁免只表示声明获准，不证明业务成功；请以实际宿主复核。",
     "",

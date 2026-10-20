@@ -554,9 +554,11 @@ return { assertEnvelope: assertEnvelope };
     var CATEGORY = {
       "host-service-missing": "服务缺失",
       "host-method-missing": "方法缺失",
-      "unprovided-dependency": "无人提供的依赖",
+      "unprovided-dependency": "依赖服务待确认",
       "declaration-mismatch": "声明与实测不符",
       "declared-incompatible": "版本声明不支持",
+      "client-entry-missing": "客户端入口不可交付",
+      "host-entry-inactive": "宿主条目未激活",
     };
 
     // 渲染侧标记：只在我们的组件体里设置。页面上出现同名文字**不能**证明
@@ -677,13 +679,30 @@ return { assertEnvelope: assertEnvelope };
       return React.createElement("span", { style: { color: color, fontWeight: 600 } }, SEVERITY[s] || s);
     }
 
+    function Coverage(p) {
+      var c = p.plugin.coverage;
+      if (!c) return null;
+      return React.createElement("div", { style: styles.dim },
+        "证据覆盖：" + (c.status === "complete" ? "完整" : "有限") + "；已验证调用 " + c.verifiedCalls,
+        (c.limitations || []).map(function (note, i) {
+          return React.createElement("div", { key: i }, "覆盖限制：" + note);
+        }));
+    }
+
+    function EvidenceLegend() {
+      return React.createElement("div", { style: styles.note },
+        "确定（certain）可由明确静态事实或合格运行时观测支持；疑似（suspected）表示当前证据不足以确定该条发现。",
+        "影响依据：实测（measured）须有对应观测，推断（inferred）不等于业务影响已实测。",
+        "未观测不等于缺失；没有已验证调用仍可能存在服务依赖或客户端功能；调用核验和覆盖完整均不等于业务验收通过。");
+    }
+
     function Findings(p) {
       var pl = p.plugin;
       if (!pl.findings || pl.findings.length === 0) {
-        var parts = [];
+        var parts = [React.createElement(Coverage, { key: "coverage", plugin: pl })];
         if (pl.vacuous) {
           parts.push(React.createElement("div", { key: "v", style: styles.suspect },
-            "这个插件没有用过任何 DSH 服务，因此没有可检查的东西 —— 「可用」在这里是空洞的。"));
+            "本轮未发现冲突，但没有已验证调用；插件仍可能依赖 DSH 服务或包含未验证的客户端功能，不能据此确认业务可用。"));
         }
         var noCalls = Object.keys(pl.resolved || {})
           .map(function (k) { return pl.resolved[k]; })
@@ -698,7 +717,7 @@ return { assertEnvelope: assertEnvelope };
         }
         return parts.length ? React.createElement("div", null, parts) : null;
       }
-      return React.createElement("div", null, pl.findings.map(function (f, i) {
+      return React.createElement("div", null, React.createElement(Coverage, { plugin: pl }), pl.findings.map(function (f, i) {
         var api = f.service ? (f.method ? f.service + "." + f.method : f.service) : "(包声明)";
         var loc = f.location ? f.location.file + ":" + f.location.line : "—";
         return React.createElement("div", { key: i, style: styles.finding },
@@ -706,11 +725,12 @@ return { assertEnvelope: assertEnvelope };
           React.createElement("span", null, " " + (CATEGORY[f.category] || f.category) + " "),
           React.createElement("code", { style: styles.mono }, api),
           React.createElement("span", { style: styles.mono }, " @ " + loc),
-          f.certainty !== "certain"
-            ? React.createElement("span", { style: styles.suspect, title: "没有运行时面，只能靠官方目录推断" }, " [疑似]")
-            : null,
+          React.createElement("span", {
+            style: styles.suspect,
+            title: f.certainty === "certain" ? "当前证据足以支持该条发现，可来自明确静态事实或合格运行时观测；不等于影响已实测。" : "当前证据不足以确定该条发现；存在运行时观测也不代表该调用已验证。",
+          }, f.certainty === "certain" ? " [确定]" : " [疑似]"),
           f.impact ? React.createElement("div", { style: styles.dim },
-            (f.impactBasis === "inferred" ? "影响（推断，非实测）：" : "影响：") + f.impact) : null,
+            (f.impactBasis === "measured" ? "影响（实测）：" : f.impactBasis === "inferred" ? "影响（推断，非实测）：" : "影响（依据未提供）：") + f.impact) : null,
           f.basis ? React.createElement("div", { style: styles.dim }, "依据：" + f.basis) : null);
       }));
     }
@@ -910,8 +930,7 @@ return { assertEnvelope: assertEnvelope };
             onClick: function () { st.reload(true); },
           }, "重新检查")),
         React.createElement(Findings, { plugin: pl }),
-        pl.vacuous ? React.createElement("div", { style: styles.dim },
-          "这个插件的结论是空洞的：它没有用过任何 DSH 服务，所以没有可检查的东西。") : null);
+        React.createElement(EvidenceLegend));
     }
 
     /** C3 · 详情页角标：一行字，放在标题行 */
@@ -947,7 +966,7 @@ return { assertEnvelope: assertEnvelope };
           React.createElement("span", { style: styles.meta },
             names.length + " 个插件 · 可用 " + (s.ok || 0) + " · 部分可用 " + (s.partial || 0)
             + " · 不兼容 " + (s.broken || 0)
-            + (s.vacuousOk ? " · 其中 " + s.vacuousOk + " 个「可用」无可检查对象" : "")),
+            + (s.vacuousOk ? " · 其中 " + s.vacuousOk + " 个「可用」没有已验证调用" : "")),
           React.createElement("button", {
             style: styles.btn, type: "button",
             onClick: function () { p.onReload(); },
@@ -965,11 +984,12 @@ return { assertEnvelope: assertEnvelope };
               React.createElement("td", { style: styles.td },
                 React.createElement("div", null, n),
                 React.createElement("div", { style: styles.mono },
-                  "@" + (pl.version || "?") + (pl.vacuous ? " · 无可检查对象" : ""))),
+                  "@" + (pl.version || "?") + (pl.vacuous ? " · 无已验证调用" : ""))),
               React.createElement("td", { style: styles.td },
                 React.createElement("span", { style: Object.assign({}, styles.pill, { background: v.color }) }, v.text)),
               React.createElement("td", { style: styles.td }, React.createElement(Findings, { plugin: pl })));
           }))),
+        React.createElement(EvidenceLegend),
         React.createElement("div", { style: styles.note },
           "工具版本：" + (data.toolVersion || "未知") + " · " + (report.summary.limited ? "部分证据尚未验证。 " : "") + (report.hasRuntimeSurface
             ? "方法级判定依据：宿主运行时面；确定性以每条证据为准。"

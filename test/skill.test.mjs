@@ -14,8 +14,6 @@
  *     而那是**静默**失效：文件在那里，skill 却不存在）。
  */
 
-import { optionalProfiles } from './support/profile-snapshot.mjs'
-
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
@@ -381,33 +379,18 @@ describe('脚本：不需要内核的那些入口', () => {
  * 手写示例必然会腐烂，所以这里把它变成**可校验的**：抽出示例块，
  * 与同一输入的真实输出逐行比对。改输出就必须改示例，反之亦然。
  *
- * 示例**故意省略**了尾部那段「说明: ...」（那是给终端读者的排版，不是结论），
- * 所以比对时按前缀匹配，而不是要求全文相等。
+ * 当前示例使用仓库固定夹具，包含完整说明，不依赖本机真实profile。
  */
 describe('skill 的示例输出必须与真实输出一致', () => {
-  test('示例块 = 真实运行的前缀（逐行）', (t) => {
+  test('固定夹具示例与实际CLI输出一致，不依赖个人profile', () => {
     const body = frontmatter(readSkill()).body
-    const m = /```\n(插件数: \d[\s\S]*?)\n```/.exec(body)
+    const m = /```(?:text)?\n(插件数: \d[\s\S]*?)\n```/.exec(body)
     assert.ok(m, '找不到示例输出块 —— 它被删了还是改了开头？这条测试要跟着改')
 
-    const PARITYFIX = optionalProfiles().find(p => p.name === 'parityfix')?.nm
-    if (!PARITYFIX) {
-      // 与别的 skill 测试一致：本机没有这个 profile 就跳过并说明，不静默通过
-      t.skip('本机没有 parityfix profile')
-      return
-    }
-    const r = runCLI(['--nm', PARITYFIX,
-      '--probe', path.join(REPO, 'tools/parity/fixtures/host-surface-parityfix.json'),
-      '--dsh-version', '0.2.0-rc.2', '--no-baseline'])
-    const example = m[1].split('\n').map((l) => l.trimEnd())
-    const real = (r.out || '').split('\n').map((l) => l.trimEnd())
-
-    for (let i = 0; i < example.length; i++) {
-      if (example[i] === '') continue
-      assert.equal(example[i], real[i],
-        `skill 的示例输出与真实输出第 ${i + 1} 行不一致 —— `
-        + `示例是手写的就必然会腐烂。把真实输出抄回 SKILL.md（或改这条测试）。`)
-    }
+    const r = runCLI(['--nm', path.join(REPO, 'test/fixtures/labels'),
+      '--dsh-version', '0.2.1-rc.2', '--no-baseline'])
+    assert.equal(r.code, 2)
+    assert.equal(m[1].trimEnd(), r.out.trimEnd(), '固定夹具示例须与当前CLI实际输出一致')
   })
 })
 

@@ -25,6 +25,8 @@ import path from 'node:path'
 import vm from 'node:vm'
 
 import { REPO } from './helpers.mjs'
+import { run } from '../bin/compat-check.mjs'
+import { toJSON } from '../lib/report.mjs'
 
 const CLIENT = path.join(REPO, 'plugin', 'lib', 'client.js')
 const SRC = fs.readFileSync(CLIENT, 'utf8')
@@ -43,6 +45,69 @@ function factoryBody(src) {
 }
 
 const BODY = factoryBody(SRC)
+
+/** Render the registered components with real kernel reports; collect visible text and tooltips. */
+function explainClient(body, subject) {
+  const data = {schemaVersion:1,kind:'plugin-compat-check/report',ok:true,error:null,exitCode:body.exitCode,toolVersion:body.toolVersion,baseline:null,report:{...body,hasRuntimeSurface:body.observation.usable}}
+  const React = {
+    createElement: (type, props, ...children) => ({type,props:props||{},children}),
+    useState: () => [{phase:'done',data}, () => {}],
+    useRef: initial => ({current:initial}), useCallback: fn => fn, useEffect() {},
+  }
+  let loaded
+  vm.runInNewContext(SRC, {window:{__ModuleLoader__:{load:m=>{loaded=m}}},console})
+  const components = {}
+  loaded.factory(n=>n==='react'?React:{}).apply({slots:{inject:(_s,cb)=>cb(),register:(spec,Comp)=>{components[spec.name]=Comp}}})
+  const text = []
+  const walk = el => {
+    if(el===null || el===undefined || typeof el==='boolean')return
+    if(Array.isArray(el)){el.forEach(walk);return}
+    if(typeof el==='string' || typeof el==='number'){text.push(String(el));return}
+    if(typeof el.type==='function'){walk(el.type(el.props));return}
+    if(el.props?.title)text.push(el.props.title)
+    walk(el.children)
+  }
+  const Comp=components[subject?'plugins.detail.section':'settings.plugins.tab']
+  walk(React.createElement(Comp,subject?{subject:{kind:'package',pkg:{name:subject}}}:{}))
+  return text.join('\n')
+}
+
+test('面板和详情：服务依赖没有已验证调用，不被解释成没有使用服务', () => {
+  const body=toJSON(run({nm:path.join(REPO,'test/fixtures/labels'),dshVersion:'0.2.1-rc.2',baseline:false,_ignoreAutoProbe:true}))
+  const original=JSON.stringify(body)
+  assert.equal(body.plugins['@label/real-service'].resolved.settings.disposition,'no-calls')
+  for(const subject of [null,'@label/real-service']) {
+    const text=explainClient(body,subject)
+    assert.match(text,/没有已验证调用/)
+    assert.match(text,/settings/)
+    assert.match(text,/证据覆盖.*有限/)
+    assert.doesNotMatch(text,/没有用过任何 DSH 服务|没有任何可检查的依赖/)
+  }
+  assert.equal(JSON.stringify(body),original)
+})
+test('面板和详情：静态确定的入口缺失仍显示推断影响与覆盖限制', () => {
+  const body=toJSON(run({nm:path.join(REPO,'test/fixtures/labels'),dshVersion:'0.2.1-rc.2',baseline:false,_ignoreAutoProbe:true}))
+  const f=body.plugins['@label/broken-client'].findings[0]
+  assert.equal(f.certainty,'certain');assert.equal(f.impactBasis,'inferred')
+  assert.equal(body.observation.usable,false)
+  for(const subject of [null,'@label/broken-client']) {
+    const text=explainClient(body,subject)
+    assert.match(text,/\[确定\]/)
+    assert.match(text,/影响（推断，非实测）/)
+    assert.match(text,/静态事实/)
+    assert.match(text,/证据覆盖.*有限/)
+  }
+})
+test('已有运行时观测的疑似发现，不被工具提示解释成完全没有运行时面', () => {
+  const body=toJSON(run({nm:path.join(REPO,'test/fixtures/micro/node_modules'),probe:path.join(REPO,'test/fixtures/micro/host-surface.json'),dshVersion:'0.2.0-rc.2',baseline:false}))
+  assert.equal(body.observation.usable,true)
+  assert(body.plugins['@fixture/unresolved'].findings.some(f=>f.certainty==='suspected'))
+  const text=explainClient(body,'@fixture/unresolved')
+  assert.match(text,/\[疑似\]/)
+  assert.match(text,/证据不足/)
+  assert.doesNotMatch(text,/没有运行时面，只能靠官方目录推断/)
+  assert.doesNotMatch(text,/无人提供的依赖/)
+})
 
 describe('客户端半边：结构完整性', () => {
   test('文件里有 factory，且能被静态解析', () => {

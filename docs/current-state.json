@@ -1,8 +1,8 @@
 {
   "toolVersion": "0.1.4",
-  "recordedAt": "2026-10-20T15:26:03.353Z",
+  "recordedAt": "2026-10-20T16:13:05.109Z",
   "testFiles": 39,
-  "tests": 581,
+  "tests": 590,
   "repositoryFiles": {
     "total": 254,
     "fixtures": 90,
@@ -7318,6 +7318,187 @@
         "prepublishLogSha256": "2d2c3e734c6f75813b49773ab2ed0722b2253a136c0458d62124cd2e6f725f85"
       },
       "completedAt": "2026-10-20T15:31:53.977580+00:00"
+    },
+    "productExplanations20261021": {
+      "recordedAt": "2026-10-20T16:13:52.406Z",
+      "baseCommit": "cd53643",
+      "status": "completed-in-local-source-unpublished",
+      "scope": "Presentation and interpretation only; no changes to verdict rules, severity, JSON report fields, version or published artifacts.",
+      "explanations": {
+        "certainty": "certain can follow explicit static facts or qualified runtime observations; suspected means evidence does not establish that finding, even if other runtime observations exist.",
+        "impactBasis": "measured requires corresponding observations; inferred does not assert measured business outcomes.",
+        "vacuous": "ok with zero verified calls; service dependencies and unverified client features may still exist.",
+        "coverage": "Show actual per-plugin limitations. Unobserved is not absent; no findings, verified calls and complete coverage do not certify business behavior.",
+        "dependencyLabel": "unprovided-dependency remains the JSON category; human label is 依赖服务待确认."
+      },
+      "regression": {
+        "added": 9,
+        "red": {
+          "tests": 62,
+          "pass": 53,
+          "fail": 9
+        },
+        "focusedBeforeFinalWording": {
+          "tests": 97,
+          "pass": 97,
+          "fail": 0
+        },
+        "focusedAfterFinalWording": {
+          "tests": 57,
+          "pass": 57,
+          "fail": 0
+        },
+        "defaultSuite": {
+          "tests": 590,
+          "pass": 587,
+          "fail": 0,
+          "skip": 3,
+          "testFiles": 39
+        },
+        "cases": [
+          "settings dependency with no verified calls",
+          "static missing client entry is certain with inferred impact and no runtime observation",
+          "runtime surface exists while an individual dependency remains unobserved and suspected",
+          "observed loader FAILED has measured impact while static missing entry remains inferred"
+        ],
+        "surfaces": [
+          "CLI normal and quiet",
+          "issue-report Markdown",
+          "overview and plugin detail component rendering including tooltips",
+          "registered agent tool description, text and summary"
+        ],
+        "reportMutation": "Real kernel reports are serialized before and after rendering; unchanged."
+      },
+      "skill": {
+        "bodyLengthUtf16": 8512,
+        "sourceEqualsPackaged": true,
+        "example": {
+          "command": "node bin/compat-check.mjs --nm test/fixtures/labels --dsh-version 0.2.1-rc.2 --no-baseline",
+          "exitCode": 2,
+          "validation": "Full text compared against real subprocess output; independent of optional personal profiles."
+        },
+        "controlledApplication": {
+          "scenarios": 3,
+          "beforeCorrect": 3,
+          "afterCorrect": 3,
+          "scope": "One fresh-context reference application per revision using hypothetical supplied fields. Both revisions interpreted all three correctly; no measured model capability improvement, production conversation or real DSH model/account call is claimed."
+        }
+      },
+      "independentReview": {
+        "initialFindings": 2,
+        "resolved": 2,
+        "remainingBlockers": 0,
+        "finalVerification": "Host, skill and documentation tests 49/49 passed; source and packaged skill identical."
+      },
+      "liveIntegration": {
+        "ok": true,
+        "applicable": true,
+        "dshVersion": "0.2.1-rc.2",
+        "artifactVersion": "0.1.4",
+        "declarationCases": [
+          {
+            "id": "engines-allow",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "engines-reject",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "exact-exemption",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "wrong-exemption",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "peer-fallback",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          }
+        ],
+        "ui": {
+          "available": true,
+          "navigation": "More > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+        },
+        "scope": "Controlled declaration gates and unprivileged local browser UI only; no model call, real plugin business-function or Windows certification.",
+        "subpathMetadata": true,
+        "artifactSha256": "fb64402e3023d5e9b1c46f036061dbf01fcd2509d7a9fd4ea47b154b7998a10e",
+        "httpReport": true,
+        "originFence": {
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403
+        },
+        "explanationPresentation": {
+          "realBrowser": true,
+          "certaintyAndImpactSeparated": true,
+          "perPluginCoverageVisible": true,
+          "noServiceUseClaimRemoved": true,
+          "scope": "Actual installed artifact overview; fixed-case overview/details are also exercised by component tests. Not business certification."
+        },
+        "disabledDiagnostic": {
+          "status": 404,
+          "type": null
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        }
+      },
+      "sourceSha256": {
+        "lib/report.mjs": "cbdeb3432c8470e487ea56bb82ef9a2a334228b988611df5d707eeac36d7b9cb",
+        "bin/issue-report.mjs": "51ee7c209e786692edc13677e70b90f30548e9ddb33293f56198a39b0c9d131d",
+        "plugin/index.js": "6f8be2ada905bf8f2569cf3fd66f17fd0efe2895bae2e77c74463c2930b88ae3",
+        "plugin/lib/client.js": "ce13d9dae7d221c81a8949c0fe4193d50f7bddb561ebb5f323c1da864cabbca6",
+        "skill/SKILL.md": "fd3c9e7a0129f39c2cf7a77ffee6f771950c32b6db438e79f4a51c7396ac3630",
+        "plugin/skill/SKILL.md": "fd3c9e7a0129f39c2cf7a77ffee6f771950c32b6db438e79f4a51c7396ac3630"
+      },
+      "delivery": {
+        "npmPublished": false,
+        "remotePushed": false,
+        "versionUnchanged": "0.1.4",
+        "plan": "Contract in section 2.2, completion in section 4, acceptance in section 5.5; removed completed task from section 6."
+      },
+      "limitations": [
+        "Actual Chrome validates overview explanations for the installed artifact; fixed fault overview/detail cases use component tests.",
+        "No ecosystem accuracy, plugin business certification, Windows acceptance or model capability improvement is established."
+      ],
+      "finalChecks": {
+        "prepublishCheck": "passed; runs full default suite and document check without publishing",
+        "formatCheck": "passed",
+        "docCheck": "passed with 590-test summary",
+        "diffCheck": "passed",
+        "publicMetadata": {
+          "observedAt": "2026-10-20T16:14:45.589Z",
+          "problems": 0,
+          "skipped": 0,
+          "npmVersion": "0.1.4",
+          "scope": "Read-only; no remote edits."
+        }
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

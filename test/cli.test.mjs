@@ -30,6 +30,7 @@ const CLI = path.join(REPO, 'bin', 'compat-check.mjs')
 const MICRO = path.join(REPO, 'test/fixtures/micro/node_modules')
 const MICRO_SURFACE = path.join(REPO, 'test/fixtures/micro/host-surface.json')
 const BASELINE_SURFACE = path.join(REPO, 'tools/parity/fixtures/host-surface-parityfix.json')
+const LABELS = path.join(REPO, 'test/fixtures/labels')
 const PARITYFIX = optionalProfiles().find(p => p.name === 'parityfix')?.nm
 
 /**
@@ -59,6 +60,41 @@ const runCLI = (args, extraEnv) => {
 }
 
 process.on('exit', () => { try { fs.rmSync(TEST_HOME, { recursive: true, force: true }) } catch { /* 忽略 */ } })
+
+describe('CLI：解释保留证据边界', () => {
+  const args = ['--nm', LABELS, '--dsh-version', '0.2.1-rc.2', '--no-baseline']
+  test('有依赖但无已验证调用，不被解释成没有使用服务', () => {
+    const r = runCLI(args)
+    const body = JSON.parse(runCLI([...args, '--json']).out)
+    const plugin = body.plugins['@label/real-service']
+    assert.equal(plugin.resolved.settings.disposition, 'no-calls')
+    assert.equal(plugin.vacuous, true)
+    assert.equal(plugin.coverage.verifiedCalls, 0)
+    assert.match(r.out, /没有已验证调用/)
+    assert.doesNotMatch(r.out, /没有任何可检查的依赖|没有用过任何 DSH 服务/)
+    assert.doesNotMatch(r.out, /无人提供的依赖/)
+    assert.equal(r.code, 2)
+  })
+  test('静态确定的入口缺失与推断影响分开解释', () => {
+    const r = runCLI(args)
+    const line = r.out.split('\n').find(l => l.includes('客户端入口不可交付'))
+    assert.match(line, /\[确定\]/)
+    assert.match(r.out, /影响（推断，非实测）/)
+    assert.match(r.out, /确定.*静态.*运行时/)
+    assert.match(r.out, /疑似.*证据不足/)
+    const md = runCLI([...args, '--issue-report'])
+    assert.match(md.out, /certainty=certain.*impactBasis=inferred/)
+    assert.match(md.out, /vacuous.*没有已验证调用/)
+    assert.equal(md.code, r.code)
+  })
+  test('quiet仍是一行，但保留有限覆盖与无已验证调用的限定', () => {
+    const r = runCLI([...args, '--quiet'])
+    assert.equal(r.out.trim().split('\n').length, 1)
+    assert.match(r.out, /覆盖有限/)
+    assert.match(r.out, /无已验证调用/)
+    assert.equal(r.code, 2)
+  })
+})
 
 describe('CLI：参数解析', () => {
   test('--help 打印用法并以 0 退出', () => {

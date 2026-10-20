@@ -506,6 +506,24 @@ try {
         );
       };
       await settings();
+      const explanationText = await evalx("document.body.innerText");
+      requireTrue(
+        explanationText.includes(
+          "确定（certain）可由明确静态事实或合格运行时观测支持",
+        ) &&
+          explanationText.includes("推断（inferred）不等于业务影响已实测") &&
+          explanationText.includes("证据覆盖：") &&
+          !explanationText.includes("没有用过任何 DSH 服务"),
+        "Actual compatibility DOM lost evidence explanations or coverage",
+      );
+      result.explanationPresentation = {
+        realBrowser: true,
+        certaintyAndImpactSeparated: true,
+        perPluginCoverageVisible: true,
+        noServiceUseClaimRemoved: true,
+        scope:
+          "Actual installed artifact overview; fixed-case overview/details are also exercised by component tests. Not business certification.",
+      };
       await evalx(
         `[...document.querySelectorAll('button')].find(b=>b.innerText==='关闭').click();document.querySelector('button[aria-label="插件"]').click()`,
       );

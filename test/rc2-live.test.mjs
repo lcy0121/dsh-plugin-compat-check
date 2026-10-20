@@ -24,6 +24,18 @@ describe(
       });
       assert.equal(value.cleanup.privateRootRemoved, true);
       if (value.ui.available) {
+        assert.equal(
+          value.explanationPresentation.certaintyAndImpactSeparated,
+          true,
+        );
+        assert.equal(
+          value.explanationPresentation.perPluginCoverageVisible,
+          true,
+        );
+        assert.equal(
+          value.explanationPresentation.noServiceUseClaimRemoved,
+          true,
+        );
         assert.equal(value.ui.tabCount, 1);
         assert.equal(value.ui.reenabled, true);
         assert.equal(value.ui.httpRestored, true);

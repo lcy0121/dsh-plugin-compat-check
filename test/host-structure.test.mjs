@@ -40,6 +40,9 @@ import { pathToFileURL } from 'node:url'
 import { createRequire } from 'node:module'
 
 import { REPO } from './helpers.mjs'
+import { run } from '../bin/compat-check.mjs'
+import { toJSON, render } from '../lib/report.mjs'
+import { buildVerdicts } from '../lib/verdict.mjs'
 
 // vm 里的沙箱没有 CommonJS 的 `require`，但我们要用它去加载真实的 node: 模块
 // （fs / os / path / url / module），这样替身的行为与真身完全一致。
@@ -107,6 +110,47 @@ function loadHost(env = {}) {
   vm.runInContext('__out.resolveDshVersion = resolveDshVersion', sandbox)
   return { apply: sandbox.__out.apply, logs, sandbox }
 }
+
+test('agent文本与摘要保留无已验证调用，并分开标注静态确定性和推断影响', () => {
+  const result=run({nm:path.join(REPO,'test/fixtures/labels'),dshVersion:'0.2.1-rc.2',baseline:false,_ignoreAutoProbe:true})
+  const body=toJSON(result),before=JSON.stringify(body)
+  const compat={ok:true,toolVersion:body.toolVersion,report:{...body,hasRuntimeSurface:false},nodeModules:'fixture',nodeModulesWhy:'test'}
+  const {sandbox}=loadHost()
+  const text=sandbox.renderForModel(compat)
+  assert.match(text,/没有已验证调用/)
+  assert.doesNotMatch(text,/没有用过任何 DSH 服务|没有任何可检查的依赖/)
+  assert.match(text,/\[确定\]/)
+  assert.match(text,/影响（推断，非实测）/)
+  assert.match(text,/静态事实/)
+  assert.match(text,/疑似.*证据不足/)
+  assert.doesNotMatch(text,/无人提供的依赖/)
+  const output=sandbox.toolResult(compat,text)
+  assert.match(output.summary,/覆盖有限/)
+  assert.match(output.summary,/无已验证调用/)
+  assert.equal(JSON.stringify(body),before)
+})
+test('注册给agent的工具描述区分证据确定性与影响依据', () => {
+  const {sandbox}=loadHost();let registered
+  sandbox.registerTool({inject:(_deps,cb)=>cb({tools:{register:spec=>{registered=spec}}})},{})
+  assert(registered)
+  assert.match(registered.description,/certain.*static facts.*runtime observations/)
+  assert.match(registered.description,/suspected.*insufficient evidence/)
+  assert.match(registered.description,/impactBasis.*measured.*inferred/)
+  assert.match(registered.description,/vacuous.*verified calls/)
+})
+test('CLI和agent仅对已有影响观测显示实测，静态入口问题仍显示推断', () => {
+  const result=run({nm:path.join(REPO,'test/fixtures/labels'),dshVersion:'0.2.1-rc.2',baseline:false,_ignoreAutoProbe:true})
+  result.verdict=buildVerdicts({report:result.extract.report,dshVersion:'0.2.1-rc.2',entryStates:[{id:'observed-entry',packageName:'@label/real-service',state:'FAILED',disabled:false,group:false}]})
+  const body=toJSON(result)
+  const measured=body.plugins['@label/real-service'].findings.find(f=>f.category==='host-entry-inactive')
+  assert.equal(measured.certainty,'certain');assert.equal(measured.impactBasis,'measured')
+  const {sandbox}=loadHost()
+  const text=sandbox.renderForModel({ok:true,toolVersion:body.toolVersion,report:{...body,hasRuntimeSurface:false}})
+  for(const out of [text,render(result,{})]){
+    assert.match(out,/影响（实测）.*FAILED/)
+    assert.match(out,/影响（推断，非实测）/)
+  }
+})
 
 describe('宿主半边：结构完整性（功能全灭的回归）', () => {
   test('apply 不是空壳 —— 它至少要注册三样东西', () => {
