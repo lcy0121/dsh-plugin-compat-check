@@ -80,7 +80,8 @@ try {
         path.basename(file) !== "node_modules" &&
         file !== path.join(repo, "plugin", "kernel"),
     });
-  fs.copyFileSync(path.join(repo, "LICENSE"), path.join(source, "LICENSE"));
+  for (const file of ["LICENSE", "THIRD_PARTY_NOTICES.md"])
+    fs.copyFileSync(path.join(repo, file), path.join(source, file));
   await run("npm", [
     "pack",
     path.join(source, "plugin"),

@@ -15,7 +15,7 @@ npm `latest` 为 **0.1.4**，支持 Node `^22.19.0 || >=24`。本次补丁包含
 | 仓库安装检查 | 在临时 profile 中安装、启动并检查一个安装规格 |
 | skill | 指导 agent 使用同一工具或 CLI；[交付说明](skill/README.md) |
 
-三种形态共享判定内核，只有相同输入和观测证据才应得到相同结果。npm 包**没有 CLI bin**，不支持 `npx dsh-plugin-compat-check`。
+这些入口共享判定内核，只有相同输入和观测证据才应得到相同结果。npm 包**没有 CLI bin**，不支持 `npx dsh-plugin-compat-check`。
 
 ## 界面示例
 
@@ -114,6 +114,7 @@ node bin/check-install.mjs <spec> --json
 npm test
 npm run format:check
 node tools/doc-check.mjs
+npm run notices:check
 node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
@@ -130,7 +131,7 @@ node tools/meta-check.mjs --json
 - [Bruce 的 Awesome DSH Plugins](https://github.com/bruc3van/awesome-dsh-plugin)
 - [1024 生态目录](https://github.com/imsai-sh/awesome-deepseek-harness-plugins)（[1024 Store](https://deepseek1024.com) 展示）
 
-收录不等于兼容性认证；1024 Store 的 npm 安装方式仍待上游修复，状态见 [Plan](docs/Plan.md)。[MIT License](LICENSE)。
+收录不等于兼容性认证；1024 Store 的 npm 安装方式仍待上游修复，状态见 [Plan](docs/Plan.md)。
 
 固定真实插件故障回归仅用于仓库开发，默认两轮，需真实DSH/Chrome和联网安装：
 
@@ -140,3 +141,9 @@ node tools/real-regression.mjs --replay <证据根目录>
 ```
 
 绿色表示固定正常/故障/恢复重现，仍保留分模式FP/FN；范围和资源预算见 [Plan](docs/Plan.md#56-真实插件故障回归验收与复现)。
+
+## License
+
+[MIT](LICENSE)
+
+第三方依赖及其许可证见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

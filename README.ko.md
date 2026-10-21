@@ -99,7 +99,7 @@ node bin/check-install.mjs <spec> --json
 
 ## 결과와 한계
 
-CLI/Node 설치 검사 종료 코드: **0** 보고된 문제 없음, **1** 부분 사용 가능 또는 미확정, **2** 비호환 또는 설치 peer 차단, **3** 입력·실행 오류로 판정 불가. shell은 Node 진입 전 사용법·커널 오류 코드를 유지하므로 자동화에는 Node 진입점과 `status`를 사용하세요.
+일반 CLI/Node 설치 검사 종료 코드: **0** 보고된 문제 없음, **1** 부분 사용 가능 또는 미확정, **2** 비호환 또는 설치 peer 차단, **3** 입력·실행 오류로 판정 불가. 업그레이드 미리 검사는 위의 별도 차이 종료 코드를 사용합니다. shell은 Node 진입 전 사용법·커널 오류 코드를 유지하므로 자동화에는 Node 진입점과 `status`를 사용하세요.
 
 - `certainty`, `impactBasis`, `coverage`, `vacuous`를 함께 전달하세요. 미확인·미관측·누락된 키는 부재가 아니며 카탈로그는 런타임 관측이 아닙니다. 클라이언트 기능은 별도 검증이 필요합니다.
 - 기본 정적 CLI는 DSH를 시작하거나 대상을 설치하지 않습니다. 호스트 검사는 외부 명령·네트워크 없이 예산이 있는 분석 worker를 사용합니다. 기준선은 기본 기록하므로 일회성 검사에는 `--no-baseline`을 쓰세요.
@@ -112,6 +112,7 @@ CLI/Node 설치 검사 종료 코드: **0** 보고된 문제 없음, **1** 부�
 npm test
 npm run format:check
 node tools/doc-check.mjs
+npm run notices:check
 node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
@@ -128,6 +129,12 @@ node tools/meta-check.mjs --json
 - [Bruce의 Awesome DSH Plugins](https://github.com/bruc3van/awesome-dsh-plugin)
 - [1024 생태계 카탈로그](https://github.com/imsai-sh/awesome-deepseek-harness-plugins) ([1024 Store](https://deepseek1024.com)에 표시)
 
-수록은 호환성 인증을 뜻하지 않습니다. 1024 Store의 npm 설치 방식은 아직 상위 프로젝트의 수정이 필요합니다. 상태는 [Plan](docs/Plan.md)을 참고하세요. [MIT License](LICENSE).
+수록은 호환성 인증을 뜻하지 않습니다. 1024 Store의 npm 설치 방식은 아직 상위 프로젝트의 수정이 필요합니다. 상태는 [Plan](docs/Plan.md)을 참고하세요.
 
 아직 배포되지 않은 소스에는 플러그인 검색, 결론·확실성·미검증 상태의 조합 필터, 접을 수 있는 발견 항목, 전체 보고서 미리보기/복사, 기준선 기반 신규 위험 보기가 추가됩니다. 각 발견에는 근거에 맞는 확인 절차가 제공되며 필터는 내보낼 보고서를 줄이지 않습니다. 실제 플러그인 고정 회귀 도구는 저장소에서만 사용합니다: `node tools/real-regression.mjs --live --out-dir <빈-디렉터리>` 또는 `--replay <증거-루트>`. 통과는 고정 결과 재현을 뜻하며 오탐/누락을 그대로 기록합니다. 범위와 예산은 [Plan](docs/Plan.md)을 참고하세요.
+
+## License
+
+[MIT](LICENSE)
+
+서드파티 의존성과 해당 라이선스는 다음 문서에 공개되어 있습니다: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

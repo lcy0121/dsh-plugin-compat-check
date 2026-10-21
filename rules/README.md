@@ -7,7 +7,7 @@
 | 文件 | 用途 |
 |---|---|
 | severity.json | 方法严重度/影响文案；引擎读取services下的方法规则，并与代码内默认档合用 |
-| dsh-api-catalog.json / dsh-api-catalog-0.2.1-rc.2.json | 原0.2.0-rc.2（host91/client8）与新rc.2（host98/client8）契约快照；DSH≥0.2.1-rc.2选新目录，其余/未知选旧目录，CLI显式覆盖优先；未来版本未认证 |
+| dsh-api-catalog.json / dsh-api-catalog-0.2.1-rc.2.json | 原0.2.0-rc.2（host91/client8）与新rc.2（host98/client8）契约快照；普通体检对DSH≥0.2.1-rc.2选新目录，其余/未知选旧目录，CLI显式覆盖优先；升级预检只接受这两个精确版本并拒绝未知版本，未来环境未认证 |
 | usage-inventory.json | 带日期/版本/profile及完整性标记的AST库存快照；由coverage显式刷新，不保证与后续提取器重扫同数 |
 
 严重度由 `lib/verdict.mjs` 的确定性逻辑、缺失证据、方法规则及默认档共同决定，不由LLM决定。方法规则的severity/impact参与判定与输出，layer控制端别：方法自身优先、服务layer回退。summary/basis/evidence/knownGoneIn/needsReview等用于解释与维护；knownExtractionArtifacts是历史反例登记，不是自动过滤黑名单。
@@ -204,7 +204,7 @@ node tools/coverage.mjs --probe <报告> --write             # 顺带刷新 rule
 
 ## 历史待复核登记（2026-10-11；现已按上文处理）
 
-改这些条目会改变输出，按 `docs/Plan.md` §3 第 2 条应先摊开差异再决定，当时仅登记证据。以下保留当时的疑问；当前处理决定在needsReview.reviewed中：
+改这些条目会改变输出，按当时的维护约定应先摊开差异再决定，故仅登记证据。以下保留当时的疑问；当前处理决定在needsReview.reviewed中：
 
 - `sessions.open` / `sessions.getSnapshot`：两个目录里都没有；客户端真正的跳转入口是 `uiWorkspace.openSession`。
 - `sessions.refresh`：两个目录里都没有（客户端目录里的是 `refreshProjections`）。

@@ -12,7 +12,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 DSH 0.2.1-rc.2 入口：**更多 → 设置 → 内置插件 → 兼容性**。agent 可调用 `compat_check`；请选择实际 profile，不默认使用 desktop。
 
-0.1.4 补充必需 inject 未观测时的激活前提说明，修正 Origin 校验以比较协议、主机和有效端口（保留本机无 Origin 调用），并提供 `repository.directory=plugin`。仓库另增强了进程回收、Chrome 启动诊断及 Linux CI；浏览器开发工具不随 npm 插件交付。市场显示名已在上游 1.66.45 验收；1024 Store 的 npm 安装方式仍待上游采集修复，详见 Plan。
+0.1.4 补充必需 inject 未观测时的激活前提说明，修正 Origin 校验以比较协议、主机和有效端口（保留本机无 Origin 调用），并提供 `repository.directory=plugin`。仓库另增强了进程回收、Chrome 启动诊断及 Linux CI；浏览器开发工具不随 npm 插件交付。市场显示名已在上游 1.66.45 验收；1024 Store 的 npm 安装方式仍不可用，待上游提供后复验；私有采集故障根因未确认，详见 Plan。
 
 ## 当前源码增量（尚未发布）
 
@@ -40,7 +40,7 @@ npm pack --pack-destination <已存在的绝对输出目录>
 dsh plugin --profile <临时profile> add file:<生成的tgz绝对路径>
 ```
 
-prepack 同步权威 skill/报告契约，暂存共享 kernel 和 MIT LICENSE，postpack 清理 kernel。运行时依赖固定为 `@babel/parser@7.29.9`、`semver@7.7.3`。不要将根 GitHub spec、裸 `plugin/` 复制或源码 file 安装等同完整 tgz。
+prepack 同步权威 skill/报告契约，暂存共享 kernel、MIT LICENSE 和第三方依赖说明，postpack 清理 kernel。直接运行时依赖固定为 `@babel/parser@7.29.9`、`semver@7.7.3`。不要将根 GitHub spec、裸 `plugin/` 复制或源码 file 安装等同完整 tgz。
 
 npm 产物**没有 CLI bin、安装检查 shell 或 probe 入口**，不支持 `npx dsh-plugin-compat-check`，本面板不做安装前检查。安装前入口及 CLI 的 `--issue-report` 默认脱敏 Markdown 导出从[仓库](https://github.com/lcy0121/dsh-plugin-compat-check#readme)使用。显式安装检查会联网、启动宿主并执行目标插件；临时 profile 不是 OS 沙箱。
 
@@ -51,9 +51,15 @@ npm 产物**没有 CLI bin、安装检查 shell 或 probe 入口**，不支持 `
 - 转述保留 `certainty`、`impactBasis`、`coverage` 和 `vacuous`。API 发现通常有 `file:line`，loader/声明事实可能无位置；声明放行、激活成功、条目到货和 ok 均不证明业务正常，客户端功能须另验收。
 - 从 DSH 0.2.1-rc.1 起优先自有 `engines.dsh`，缺失才回退官方 peer，旧目标保留旧规则。声明冲突/非法字段是推断风险，不冒充实际加载失败。只读独立 `compatibility.json`，按插件名、插件精确版本、DSH 精确版本匹配豁免；无效/不可读/超64KiB保留限制，不自动授予，非法字段不可豁免。
 - 普通体检对 DSH≥0.2.1-rc.2 用新目录（host98/client8），其余/未知用旧0.2.0-rc.2目录（host91/client8）；未来 DSH 未认证。升级预检严格限定上文的两个精确版本，不采用普通体检的目录回退。rc.2 的历史真实 Chrome 验收覆盖导航、报告渲染、禁用后路由移除及重启用后恢复/标签唯一；不认证所有插件业务。
-- 体检不装包、不调用外部命令或联网；默认写自身 schema2 基线：`$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`。模式隔离、锁内比较、原子替换，不完整扫描不推进。完全禁基线读写须用仓库 CLI 的 `--no-baseline`。
-- HTTP envelope.report 和 `compat_check.report` 保留完整发现、覆盖、观测和基线，原 summary/text 保留；新面板拒绝损坏或不支持版本的负载。旧 probe 提示未绑定，旧 schema1 基线中性重建，不兼容报告变更须升 schema。
+- 体检不装包、不调用外部命令或联网；默认写自身 schema2 基线：`$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`。模式隔离、锁内比较、原子替换，不完整扫描不推进。普通体检若需完全禁基线读写，使用仓库 CLI 的 `--no-baseline`；升级预检始终隔离基线。
+- 普通体检的 HTTP envelope.report 和 `compat_check.report` 保留完整发现、覆盖、观测和基线，原 summary/text 保留；新面板拒绝损坏或不支持版本的负载。旧 probe 提示未绑定，旧 schema1 基线中性重建，不兼容报告变更须升 schema。
 
 限定 macOS/Linux、真实 DSH/Chrome、独立 tgz 和工程验收的逐次版本及证据见 [current-state.json](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。Windows 待真实验收。独立业务/模型度量属于仓库开发工具，不随 npm 分发、不进入产品判定，默认测试/CI不调用模型；固定样本不是生态准确率或完整模型质量认证。
 
-[完整契约与复现](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md#2-现行判定与集成契约) · [源码及问题反馈](https://github.com/lcy0121/dsh-plugin-compat-check) · [MIT License](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/LICENSE)
+[完整契约与复现](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md#2-现行判定与集成契约) · [源码及问题反馈](https://github.com/lcy0121/dsh-plugin-compat-check)
+
+## License
+
+[MIT](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/LICENSE)
+
+第三方依赖及其许可证见 [THIRD_PARTY_NOTICES.md](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/THIRD_PARTY_NOTICES.md)，源码构建的 npm 包内也附有该文件。

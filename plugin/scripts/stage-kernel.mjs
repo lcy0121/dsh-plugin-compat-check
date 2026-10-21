@@ -2,7 +2,7 @@
 /**
  * Stage the single-source lib/rules tree into the npm plugin. Include transitive
  * AST, observation, state and worker modules; only opt-in process/browser runners
- * are excluded. Root LICENSE is copied at pack time. Kernel copies are ignored
+ * are excluded. Root LICENSE and third-party notices are copied at pack time. Kernel copies are ignored
  * and postpack removes them; independent artifact execution tests completeness.
  */
 
@@ -33,7 +33,8 @@ fs.rmSync(DEST, { recursive: true, force: true });
 fs.mkdirSync(path.join(DEST, 'lib'), { recursive: true });
 fs.mkdirSync(path.join(DEST, 'rules'), { recursive: true });
 
-fs.copyFileSync(path.join(REPO,'LICENSE'),path.join(PLUGIN,'LICENSE'));
+for (const file of ['LICENSE','THIRD_PARTY_NOTICES.md'])
+  fs.copyFileSync(path.join(REPO,file),path.join(PLUGIN,file));
 
 for (const f of KERNEL_LIBS) {
   const src = path.join(REPO, 'lib', f);

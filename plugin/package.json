@@ -29,7 +29,8 @@
     "cordis.patch.yml",
     "kernel/",
     "scripts/",
-    "LICENSE"
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "engines": {
     "node": "^22.19.0 || >=24"

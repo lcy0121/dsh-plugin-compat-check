@@ -99,7 +99,7 @@ The repository root is a private development workspace, not an installable plugi
 
 ## Results and limits
 
-CLI/Node installation-runner exit codes: **0** no issue reported, **1** partially usable or unknown, **2** incompatible or installation peer-gate rejection, **3** input/execution error, no verdict. The shell retains usage/kernel-error codes before entering Node; automation should use the Node entry and inspect `status`.
+Ordinary CLI/Node installation-runner exit codes: **0** no issue reported, **1** partially usable or unknown, **2** incompatible or installation peer-gate rejection, **3** input/execution error, no verdict. Upgrade previews use the separate delta exit codes above. The shell retains usage/kernel-error codes before entering Node; automation should use the Node entry and inspect `status`.
 
 - Retain `certainty`, `impactBasis`, `coverage` and `vacuous`. Unknown, unobserved or omitted keys do not mean absence; a catalogue is not a runtime observation. Client features need separate acceptance.
 - Default static CLI checks do not start DSH or install targets. Host checks use a budgeted analysis worker without external commands/network. Baselines are written by default; use `--no-baseline` for one-off checks.
@@ -112,6 +112,7 @@ CLI/Node installation-runner exit codes: **0** no issue reported, **1** partiall
 npm test
 npm run format:check
 node tools/doc-check.mjs
+npm run notices:check
 node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
@@ -128,6 +129,12 @@ Listed in:
 - [Bruce’s Awesome DSH Plugins](https://github.com/bruc3van/awesome-dsh-plugin)
 - [1024 ecosystem catalog](https://github.com/imsai-sh/awesome-deepseek-harness-plugins) (displayed in [1024 Store](https://deepseek1024.com))
 
-Listing is not compatibility certification. The npm installation method in 1024 Store still awaits an upstream fix; see [Plan](docs/Plan.md). [MIT License](LICENSE).
+Listing is not compatibility certification. The npm installation method in 1024 Store still awaits an upstream fix; see [Plan](docs/Plan.md).
 
 Unreleased source changes add plugin search, combined verdict/certainty/pending filters, collapsible findings, full report preview/copy and a baseline risk view. Findings include evidence-matched follow-up checks; filters do not trim exported reports. The fixed real-plugin regression runner is repository-only: `node tools/real-regression.mjs --live --out-dir <empty-directory>` or `--replay <evidence-root>`. A green run reproduces fixed outcomes while retaining false positives/negatives; see [Plan](docs/Plan.md).
+
+## License
+
+[MIT](LICENSE)
+
+Third-party dependencies and their licenses are disclosed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

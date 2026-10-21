@@ -269,10 +269,8 @@ async function main() {
             file !== path.join(REPO, "plugin", "kernel"),
         });
       }
-      fs.copyFileSync(
-        path.join(REPO, "LICENSE"),
-        path.join(packRoot, "LICENSE"),
-      );
+      for (const file of ["LICENSE", "THIRD_PARTY_NOTICES.md"])
+        fs.copyFileSync(path.join(REPO, file), path.join(packRoot, file));
       const packed = await command(
         "npm",
         [

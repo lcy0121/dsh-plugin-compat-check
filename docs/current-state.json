@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.4",
-  "recordedAt": "2026-10-21T12:15:27.323Z",
+  "recordedAt": "2026-10-21T12:38:13.077Z",
   "testFiles": 47,
   "tests": 667,
   "repositoryFiles": {
-    "total": 273,
+    "total": 275,
     "fixtures": 90,
-    "other": 183
+    "other": 185
   },
   "verification": {
     "platform": "darwin",
@@ -8490,6 +8490,245 @@
         "npmPublished": false,
         "versionUnchanged": "0.1.4",
         "publishedNpmArtifactUnchanged": true
+      }
+    },
+    "documentationMaintenance20261021": {
+      "verifiedAt": "2026-10-21T12:39:43.306948+00:00",
+      "sourceBase": "47fcba7",
+      "orderedWork": [
+        "Compressed Plan while preserving all numbered section headings and link anchors",
+        "Moved License to the final section of all three root READMEs and plugin README; added root third-party notices",
+        "Reviewed all repository Markdown, generated copies, dependency/package metadata and dated evidence boundaries",
+        "User authorized pushing all pending commits after validation; npm release was not requested"
+      ],
+      "planCompression": {
+        "beforeCharacters": 19967,
+        "afterCharacters": 12517,
+        "reductionPercent": 37.3,
+        "scope": "Repeated numerical/tarball/narrative history replaced by dated current-state evidence keys; active contracts, reproduction commands and pending work preserved."
+      },
+      "licenses": {
+        "reference": [
+          "https://github.com/deepseek-ai/deepseek-harness#license",
+          "https://github.com/deepseek-ai/deepseek-harness/blob/master/THIRD_PARTY_NOTICES.md"
+        ],
+        "rootNotices": "THIRD_PARTY_NOTICES.md",
+        "noticesSha256": "324bd01978e87ed54f04f9276b03d102ec584690b195b4891d012079d493ad06",
+        "generator": "tools/third-party-notices.mjs",
+        "lockedPackageCount": 7,
+        "pluginDirect": [
+          "@babel/parser@7.29.9 MIT",
+          "semver@7.7.3 ISC"
+        ],
+        "pluginTransitive": [
+          "@babel/helper-string-parser@7.29.7 MIT",
+          "@babel/helper-validator-identifier@7.29.7 MIT",
+          "@babel/types@7.29.8 MIT"
+        ],
+        "repositoryOnly": [
+          "yaml@2.8.1 ISC"
+        ],
+        "developmentOnly": [
+          "prettier@3.6.2 MIT plus its own bundled third-party notices"
+        ],
+        "scope": "Installed versions/licenses match lock and direct plugin pins. Transitive dependency ranges of a fresh plugin installation can resolve differently; package license files remain authoritative. Notices copied byte-for-byte into tgz and checked by packaging regression. Existing published npm tarballs unchanged.",
+        "staleGuard": {
+          "cleanExit": 0,
+          "staleExit": 1,
+          "staleDetected": true,
+          "ownedRootRemoved": true
+        }
+      },
+      "consistencyReview": {
+        "repositoryMarkdownFiles": 12,
+        "automated": [
+          "All tracked/untracked non-ignored Markdown paths, local file links and heading anchors",
+          "Final License section and third-party notice link in every root/plugin README",
+          "Generated notices match lock, installed package versions and license text",
+          "Source/packaged skill equality, UTF16 body10233, report contracts and version/metadata checks"
+        ],
+        "corrections": [
+          "Ordinary versus preview delta exit codes and catalogue fallback scopes",
+          "Ordinary report versus upgradePreview and baseline isolation scopes",
+          "Source versus immutable published0.1.4, historical snapshots and future-version limits",
+          "Compressed Plan budget pointer includes source-analysis; old maintenance-number reference removed",
+          "1024 npm method remains unavailable; private ingestion root cause not asserted"
+        ],
+        "independentReview": {
+          "remainingImportantIssues": 0,
+          "scope": "Read-only review of all12 Markdown files, Plan diff, seven dependency licenses and generator/checker/packaging paths."
+        }
+      },
+      "upstreamReadOnlyRecheck": {
+        "dshMarket932": {
+          "state": "CLOSED",
+          "closedAt": "2026-10-19T16:56:25Z",
+          "maintainer": "fkysly",
+          "result": "Maintainer confirms1.66.43 packument fallback fixes measured shortcut case; both-read failure retains bare-name behavior, warning is separate."
+        },
+        "store22": {
+          "state": "OPEN",
+          "updatedAt": "2026-10-19T06:14:20Z",
+          "maintainerReply": false
+        },
+        "awesome717": {
+          "state": "OPEN",
+          "updatedAt": "2026-10-17T12:54:55Z"
+        },
+        "scope": "Issue/PR state and comments only; no external posts or claim of new market business acceptance."
+      },
+      "checks": {
+        "defaultSuite": {
+          "tests": 667,
+          "pass": 664,
+          "fail": 0,
+          "skipped": 3,
+          "testFiles": 47,
+          "log": "/private/tmp/dsc-doc-maintenance-full.tap",
+          "sha256": "59689daae8a60b7def91be054c2d7d4c3565a6f35c6dc6636048a92280be702e"
+        },
+        "docsSkillFocused": {
+          "tests": 35,
+          "pass": 35,
+          "fail": 0,
+          "log": "/private/tmp/dsc-doc-maintenance-skill-final.tap"
+        },
+        "prepublishCheck": true,
+        "prepublishLog": "/private/tmp/dsc-doc-maintenance-prepublish.log",
+        "formatCheck": true,
+        "docCheck": true,
+        "contractCheck": true,
+        "noticesCheck": true,
+        "metaCheck": {
+          "errors": 0,
+          "notices": 1,
+          "skipped": 0,
+          "log": "/private/tmp/dsc-doc-maintenance-meta.json",
+          "scope": "GitHub/npm metadata read-only; only expected unreleased README notice."
+        }
+      },
+      "finalArtifactAcceptance": {
+        "ok": true,
+        "applicable": true,
+        "dshVersion": "0.2.1-rc.2",
+        "artifactVersion": "0.1.4",
+        "declarationCases": [
+          {
+            "id": "engines-allow",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "engines-reject",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "exact-exemption",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "wrong-exemption",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "peer-fallback",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          }
+        ],
+        "ui": {
+          "available": true,
+          "navigation": "More > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+        },
+        "scope": "Final source tgz with updated README/skill and staged notices, private DSH0.2.1-rc.2 and real Chrome HTTP/DOM/filter/upgrade/lifecycle acceptance. No model/account call, business certification or npm publish.",
+        "subpathMetadata": true,
+        "artifactSha256": "51517c92c4fcf5f2241fe1c9e98ea924db259388d5674bc72d9628381f61145d",
+        "runtimeExportContext": true,
+        "httpReport": true,
+        "originFence": {
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403
+        },
+        "upgradePreview": {
+          "installedArtifact": true,
+          "positiveNewRisk": true,
+          "staticEvidenceOnly": true,
+          "inputAndCatalogIdentities": true,
+          "ordinaryStateUnchanged": true,
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403,
+          "wrongMethodStatus": 405,
+          "unknownTargetUncertified": true,
+          "artifactSha256": "051d45598e256b0f42e6e892f8ae7287ea261708415ce0193f7541c6241f6607",
+          "catalogSha256": {
+            "current": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+            "target": "1331bf3220c1e06cfe087237077118d002dc04c32d027ce01da74c6a0d1dc9ad"
+          },
+          "ui": {
+            "realBrowser": true,
+            "positiveNewRisk": true,
+            "sourceIdentitiesVisible": true,
+            "staticLimitationsVisible": true,
+            "unknownTargetUncertified": true,
+            "ordinaryRowsAndFiltersUnchanged": true
+          },
+          "routeRemovedAndRestored": true
+        },
+        "panelExperience": {
+          "realBrowser": true,
+          "syntheticCases": 5,
+          "searchAndCombinedFilters": true,
+          "expandedGuidance": true,
+          "fullReportPreview": true,
+          "explicitClipboardCopy": true,
+          "absentBaselineNeutral": true,
+          "clearFilters": true,
+          "scope": "Actual installed candidate with five scanned, inactive public synthetic packages; comparable baseline branches are covered by component tests. No business certification."
+        },
+        "explanationPresentation": {
+          "realBrowser": true,
+          "certaintyAndImpactSeparated": true,
+          "perPluginCoverageVisible": true,
+          "noServiceUseClaimRemoved": true,
+          "scope": "Actual installed artifact overview; fixed-case overview/details are also exercised by component tests. Not business certification."
+        },
+        "disabledDiagnostic": {
+          "status": 404,
+          "type": null
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        },
+        "log": "/private/tmp/dsc-doc-maintenance-live-final.json",
+        "logSha256": "ecf9a0a5a7f14470515b84d59b007cbb63c46d991663b70095d26ae129906371"
+      },
+      "delivery": {
+        "sourcePushAuthorized": true,
+        "npmPublished": false,
+        "toolVersionUnchanged": "0.1.4",
+        "historicalRecordsPreserved": true
       }
     }
   },

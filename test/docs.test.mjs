@@ -56,6 +56,10 @@ test('文档核验能发现迁移后断开的相对链接，忽略代码块里�
     fs.writeFileSync(path.join(root, 'docs', 'Plan.md'), '# Plan\n')
     fs.writeFileSync(path.join(root, 'README.md'), '[计划](docs/Plan.md)\n```md\n[演示](not-real.md)\n```\n')
     assert.deepEqual(mod.checkDocumentLinks(root, ['README.md']), [])
+    fs.writeFileSync(path.join(root,'README.md'),'[标题](docs/Plan.md#plan)\n');
+    assert.deepEqual(mod.checkDocumentLinks(root,['README.md']),[]);
+    fs.writeFileSync(path.join(root,'README.md'),'[旧标题](docs/Plan.md#removed)\n');
+    assert.match(mod.checkDocumentLinks(root,['README.md']).join('\n'),/missing heading/);
     fs.writeFileSync(path.join(root, 'README.md'), '[旧计划](Plan.md)\n')
     assert.match(mod.checkDocumentLinks(root, ['README.md']).join('\n'), /README.md.*Plan.md/)
   } finally { fs.rmSync(root, { recursive: true, force: true }) }

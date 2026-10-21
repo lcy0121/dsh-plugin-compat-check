@@ -78,9 +78,11 @@ describe('打包自足性：npm pack 出来的包必须自己能算结论', () =
       const list = execFileSync('tar', ['-tzf', tgz], { encoding: 'utf8' })
       for (const need of ['kernel/lib/extract.mjs', 'kernel/lib/verdict.mjs',
         'kernel/lib/baseline.mjs', 'kernel/rules/dsh-api-catalog.json',
-        'kernel/rules/severity.json','kernel/lib/source-analysis.mjs','kernel/lib/extract-worker.mjs','kernel/lib/state-store.mjs','LICENSE', 'lib/client.js', 'index.js']) {
+        'kernel/rules/severity.json','kernel/lib/source-analysis.mjs','kernel/lib/extract-worker.mjs','kernel/lib/state-store.mjs','LICENSE', 'THIRD_PARTY_NOTICES.md', 'lib/client.js', 'index.js']) {
         assert.ok(list.includes(need), `tarball 里缺少 ${need} —— 装上去就是"找不到判定内核"`)
       }
+      const packedNotices=execFileSync('tar',['-xOzf',tgz,'package/THIRD_PARTY_NOTICES.md'],{encoding:'utf8'});
+      assert.equal(packedNotices,fs.readFileSync(path.join(REPO,'THIRD_PARTY_NOTICES.md'),'utf8'));
       const install=path.join(tmp,'installed');fs.mkdirSync(install);
       // npm ci caches tarballs, but need not cache registry metadata. Resolve
       // dependencies normally in an owned empty cache, as a fresh user would.
