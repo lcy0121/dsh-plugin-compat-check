@@ -27,7 +27,7 @@ These packages support repository-only tools and are not declared as npm plugin 
 
 | Package | Locked version | License |
 | --- | --- | --- |
-| [`yaml`](https://www.npmjs.com/package/yaml/v/2.8.1) | 2.8.1 | ISC |
+| [`yaml`](https://www.npmjs.com/package/yaml/v/2.9.1) | 2.9.1 | ISC |
 
 ## Development-only dependencies
 
@@ -118,7 +118,7 @@ DeepSeek Harness and React are supplied by the host, not bundled here. The API c
 > ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 > IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-### yaml@2.8.1 (ISC)
+### yaml@2.9.1 (ISC)
 
 > Copyright Eemeli Aro <eemeli@gmail.com>
 >

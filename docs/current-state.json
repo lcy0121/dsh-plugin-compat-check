@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.4",
-  "recordedAt": "2026-10-21T12:38:13.077Z",
-  "testFiles": 47,
-  "tests": 667,
+  "recordedAt": "2026-10-21T18:40:14.344Z",
+  "testFiles": 50,
+  "tests": 701,
   "repositoryFiles": {
-    "total": 275,
+    "total": 280,
     "fixtures": 90,
-    "other": 185
+    "other": 190
   },
   "verification": {
     "platform": "darwin",
@@ -8729,6 +8729,239 @@
         "npmPublished": false,
         "toolVersionUnchanged": "0.1.4",
         "historicalRecordsPreserved": true
+      }
+    },
+    "identityYamlCatalog20261022": {
+      "verifiedAt": "2026-10-22",
+      "sourceOnly": true,
+      "publishedVersionUnchanged": "0.1.4",
+      "baseCommit": "66900d6",
+      "platform": "darwin",
+      "arch": "arm64",
+      "defaultSuite": {
+        "tests": 701,
+        "passed": 698,
+        "failed": 0,
+        "skipped": 3,
+        "testFiles": 50
+      },
+      "targetedSuite": {
+        "tests": 40,
+        "passed": 40,
+        "failed": 0,
+        "skipped": 0,
+        "includesRealOfflinePnpmLockRelocation": true
+      },
+      "duplicateIdentity": {
+        "policy": "Reject duplicate effective plugin property identities before source analysis; aliases and differing versions remain ambiguous.",
+        "regressions": 16,
+        "sameAndDifferentVersions": true,
+        "healthAndTraversalOrderVariants": true,
+        "malformedPropertyKeyCollisions": true,
+        "cliWorkerHostAgentFailureExitCode": 3,
+        "existingBaselineUnchanged": true,
+        "absentBaselineParentNotCreated": true
+      },
+      "yaml": {
+        "from": "2.8.1",
+        "to": "2.9.1",
+        "advisory": "https://github.com/eemeli/yaml/security/advisories/GHSA-48c2-rrv3-qjmp",
+        "affectedScope": "Repository lock-file and business tooling only; not an npm plugin runtime dependency.",
+        "red": "5000 nested flow sequences threw RangeError through relocateProfileLock on 2.8.1.",
+        "green": "Controlled Invalid profile lock YAML failure on 2.9.1; malformed/recursive/expanding aliases rejected; temporary copies removed and source preserved.",
+        "auditLockOnly": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "total": 0
+        },
+        "thirdPartyNoticesChecked": true
+      },
+      "catalogue": {
+        "ordinaryReportIdentity": [
+          "targetVersion",
+          "referenceVersion",
+          "sha256",
+          "selection",
+          "verified",
+          "certifiedVersions",
+          "scope",
+          "warning"
+        ],
+        "reviewedVersions": [
+          "0.2.0-rc.2",
+          "0.2.1-rc.2"
+        ],
+        "futureUnknownAndOverrideUncertified": true,
+        "bundledDigestDriftRejected": true,
+        "cliQuietIssueHostAgentPanelCovered": true,
+        "upgradeExactVersionGateUnchanged": true,
+        "realLocalAsarSourceVerified": true,
+        "reviewedCandidateSha256": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+        "candidateSourceSha256": {
+          "host": "ec9d470867ab2b08c50c189fe10bb00201839b67e0f3866ad081daff1284c6a0",
+          "client": "ad3488b2cdbe6b5077962aa05dbeff9499f5b782838f1b658c6c902aa538bcd0"
+        },
+        "sourceDiff": {
+          "host": {
+            "servicesAdded": 8,
+            "servicesRemoved": 1,
+            "methodsAdded": 26,
+            "methodsRemoved": 5
+          },
+          "client": {
+            "servicesAdded": 0,
+            "servicesRemoved": 0,
+            "methodsAdded": 0,
+            "methodsRemoved": 0
+          }
+        },
+        "reviewToolOnly": "Provenance and API diff; semanticReview/integrationAcceptance remain pending and certification not-granted for new candidates.",
+        "scope": "Pinned catalogue identity/integration evidence only; no business or future-version certification."
+      },
+      "liveIntegration": {
+        "ok": true,
+        "applicable": true,
+        "dshVersion": "0.2.1-rc.2",
+        "artifactVersion": "0.1.4",
+        "declarationCases": [
+          {
+            "id": "engines-allow",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "engines-reject",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "exact-exemption",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "wrong-exemption",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "peer-fallback",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          }
+        ],
+        "ui": {
+          "available": true,
+          "navigation": "More > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+        },
+        "scope": "Controlled declaration gates and unprivileged local browser UI only; no model call, real plugin business-function or Windows certification.",
+        "subpathMetadata": true,
+        "artifactSha256": "7667d6c40e9daefaffc7f2212fe4b322aebe886920922401375ff80e75259a61",
+        "runtimeExportContext": true,
+        "httpReport": true,
+        "catalogIdentity": true,
+        "originFence": {
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403
+        },
+        "upgradePreview": {
+          "installedArtifact": true,
+          "positiveNewRisk": true,
+          "staticEvidenceOnly": true,
+          "inputAndCatalogIdentities": true,
+          "ordinaryStateUnchanged": true,
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403,
+          "wrongMethodStatus": 405,
+          "unknownTargetUncertified": true,
+          "artifactSha256": "6af2d3664e3aceb3b19879a29725bcabc99ea8a4cd542aa2a9bd8840970a05e4",
+          "catalogSha256": {
+            "current": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+            "target": "1331bf3220c1e06cfe087237077118d002dc04c32d027ce01da74c6a0d1dc9ad"
+          },
+          "ui": {
+            "realBrowser": true,
+            "positiveNewRisk": true,
+            "sourceIdentitiesVisible": true,
+            "staticLimitationsVisible": true,
+            "unknownTargetUncertified": true,
+            "ordinaryRowsAndFiltersUnchanged": true
+          },
+          "routeRemovedAndRestored": true
+        },
+        "catalogUiIdentity": true,
+        "panelExperience": {
+          "realBrowser": true,
+          "syntheticCases": 5,
+          "searchAndCombinedFilters": true,
+          "expandedGuidance": true,
+          "fullReportPreview": true,
+          "explicitClipboardCopy": true,
+          "absentBaselineNeutral": true,
+          "clearFilters": true,
+          "scope": "Actual installed candidate with five scanned, inactive public synthetic packages; comparable baseline branches are covered by component tests. No business certification."
+        },
+        "explanationPresentation": {
+          "realBrowser": true,
+          "certaintyAndImpactSeparated": true,
+          "perPluginCoverageVisible": true,
+          "noServiceUseClaimRemoved": true,
+          "scope": "Actual installed artifact overview; fixed-case overview/details are also exercised by component tests. Not business certification."
+        },
+        "disabledDiagnostic": {
+          "status": 404,
+          "type": null
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        }
+      },
+      "checks": {
+        "format": true,
+        "docCheckWithSuccessfulTap": true,
+        "prepublishCheck": true,
+        "noticesCheck": true,
+        "metaCheck": {
+          "problems": [
+            {
+              "id": "npm.readme-is-current",
+              "severity": "notice"
+            }
+          ],
+          "skipped": [],
+          "observedAt": "2026-10-21T18:40:45.548Z"
+        },
+        "scope": "Private candidate package acceptance and local checks; no npm publication or Git push."
+      },
+      "independentReview": {
+        "baseCommit": "66900d6",
+        "reviewedWorkingTree": true,
+        "importantFindings": 0,
+        "independentlyExecutedTargetedTests": 38,
+        "targetedFailures": 0,
+        "scope": "Read-only review of all three P1 implementations, generated contracts, tests and documentation; checked full-suite and actual DSH/Chrome evidence. No release authorization."
       }
     }
   },

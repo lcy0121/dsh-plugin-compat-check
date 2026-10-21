@@ -1,5 +1,7 @@
 # dsh-plugin-compat-check
 
+如果你觉得这个项目有用或有趣，欢迎点个 [Star ⭐](https://github.com/lcy0121/dsh-plugin-compat-check) 支持一下！
+
 检查**已经安装的 DSH 插件**与当前 DSH 版本的兼容性，提供源码位置、运行时证据与覆盖限制。包含兼容性标签、插件详情发现/角标、`compat_check` 对话工具和 skill provider。
 
 ![插件详情页：部分可用，含 file:line、影响与依据](https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/main/plugin/assets/compat-detail-partial.png)
@@ -19,6 +21,8 @@ DSH 0.2.1-rc.2 入口：**更多 → 设置 → 内置插件 → 兼容性**。a
 从下述源码构建的候选提供：搜索和结论/确定性/待验证筛选、折叠发现、完整报告预览/显式复制，以及基线新增风险视图。界面、CLI和agent共用“下一步核实”，不自动修改插件或配置。报告时间、目标、缓存及覆盖限制保持可见；筛选不删减分享报告，复制失败可手动选择文本。
 
 仓库的固定真实插件故障回归单独运行，不随npm包提供；历史公开0.1.4及其验收范围见前述发布记录。
+
+源码普通体检遇到同名重复安装（含alias、不同版本）明确失败且不推进基线。报告、agent和面板同时展示目标DSH、参考目录版本/SHA-256及验收范围；未知/未来版本回退、自定义目录保持未认证警告，内置目录摘要不符则无法判定。[新目录治理](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/catalog-governance.md)须经过来源核验、API差分、规则复核与集成验收，提取不自动认证。仓库YAML依赖修复不涉及npm插件运行时依赖。
 
 ### 升级前兼容性预检
 

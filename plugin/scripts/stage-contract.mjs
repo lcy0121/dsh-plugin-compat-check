@@ -14,7 +14,7 @@ for (const item of [
     host: "report-contract",
     label: "REPORT CONTRACT",
     global: "ReportContract",
-    exports: "assertEnvelope: assertEnvelope",
+    exports: "assertEnvelope: assertEnvelope, catalogLines: catalogLines",
   },
   {
     source: "upgrade-contract",

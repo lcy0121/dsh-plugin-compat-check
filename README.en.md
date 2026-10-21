@@ -1,5 +1,7 @@
 # dsh-plugin-compat-check
 
+If you find this project useful or interesting, please consider giving it a [star ⭐](https://github.com/lcy0121/dsh-plugin-compat-check)!
+
 Check **installed DSH plugins** against a target DSH version, with source locations, evidence and coverage limits. Accepted declarations or successful activation do not establish working business features.
 
 [简体中文](README.md) | **English** | [한국어](README.ko.md)
@@ -33,6 +35,8 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
 DSH 0.2.1-rc.2 navigation: **More → Settings → Built-in plugins → Compatibility**. Agents can call `compat_check`. Select the actual profile; do not assume desktop.
+
+Unreleased source rejects ambiguous duplicate plugin identities without advancing the baseline. Ordinary reports show the target DSH, reference catalogue version/hash and reviewed scope; future/unknown versions and custom catalogues remain uncertified. See the [catalogue governance workflow](docs/catalog-governance.md). The repository YAML tooling dependency is also patched; it is not a plugin runtime dependency.
 
 ### Repository CLI
 

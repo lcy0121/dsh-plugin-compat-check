@@ -28,7 +28,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire as __createRequire } from 'node:module';
 
 import {loaderObservations,privateDiagnostic} from './lib/host-resources.js';
-import {assertEnvelope,failureEnvelope} from './lib/report-contract.js';
+import {assertEnvelope,failureEnvelope,catalogLines} from './lib/report-contract.js';
 import {nextSteps} from './lib/finding-guidance.js';
 import {createUpgradeFailure as upgradeFailure, SUPPORTED_PREVIEW_VERSIONS} from './lib/upgrade-contract.js';
 
@@ -890,10 +890,9 @@ async function computeReport(state, ctx, options = {}) {
     const { extractInWorker } = await import(pathToFileURL(join(kernel, 'lib', 'worker-analysis.mjs')).href);
     const { buildVerdicts } = await import(pathToFileURL(join(kernel, 'lib', 'verdict.mjs')).href);
 
-    const {catalogPathFor}=await import(pathToFileURL(join(kernel,'lib','catalog.mjs')).href);
-    const catalogPath = catalogPathFor(kernel,resolveDshVersion());
+    const {loadCatalog}=await import(pathToFileURL(join(kernel,'lib','catalog.mjs')).href);
+    const {file:catalogPath,catalog,evidence:catalogEvidence} = loadCatalog(kernel,resolveDshVersion());
     const rulesPath = join(kernel, 'rules', 'severity.json');
-    const catalog = JSON.parse(readFileSync(catalogPath, 'utf8'));
     const rules = JSON.parse(readFileSync(rulesPath, 'utf8'));
 
     // 运行时面：宿主半边**自己就在进程里**，所以它能拿到比探针更准的东西。
@@ -984,7 +983,7 @@ async function computeReport(state, ctx, options = {}) {
     const {toJSON}=await import(pathToFileURL(join(kernel,'lib','report.mjs')).href);
     const {renderIssueReport}=await import(pathToFileURL(join(kernel,'lib','issue-report.mjs')).href);
     if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
-    const canonical=toJSON({error:null,extract:extracted,verdict,baseline,inputs:{nodeModules:nm.dir,hasRuntimeSurface:verdict.observation.usable,catalog:catalogPath,rules:rulesPath}});
+    const canonical=toJSON({error:null,extract:extracted,verdict,baseline,catalog:catalogEvidence,inputs:{nodeModules:nm.dir,hasRuntimeSurface:verdict.observation.usable,catalog:catalogPath,rules:rulesPath}});
     out.issueReport=renderIssueReport(canonical);
     out.baseline = canonical.baseline;
     out.dshVersion = canonical.dshVersion;
@@ -1040,6 +1039,7 @@ function renderForModel(compat) {
     L.push(`结论：可用 ${s.ok || 0}　部分可用 ${s.partial || 0}　不兼容 ${s.broken || 0}`
       + (s.vacuousOk ? `（其中 ${s.vacuousOk} 个「可用」没有已验证调用，不等于业务通过）` : ''));
     L.push(`工具版本：${compat.toolVersion || '未知'}`);
+    L.push(...catalogLines(r.catalog));
     for(const note of r.observation?.notes||[])L.push(`采样说明：${note}`);
     if(s.limited)L.push(`证据覆盖有限：${s.limited} 个插件尚有未验证部分`);
     L.push(`体检对象：${compat.nodeModules}（${compat.nodeModulesWhy}）`);

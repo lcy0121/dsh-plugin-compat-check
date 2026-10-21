@@ -9,6 +9,61 @@
 export const REPORT_SCHEMA = 1;
 export const REPORT_KIND = "plugin-compat-check/result";
 export const ENVELOPE_KIND = "plugin-compat-check/report";
+/** Reviewed catalogue bytes, not a promise of plugin business compatibility.
+ * Adding a version requires source verification, rule review and integration
+ * evidence; extraction alone must never extend this list. */
+export const CATALOG_REFERENCES = Object.freeze([
+  Object.freeze({
+    version: "0.2.0-rc.2",
+    file: "dsh-api-catalog.json",
+    sha256: "1331bf3220c1e06cfe087237077118d002dc04c32d027ce01da74c6a0d1dc9ad",
+  }),
+  Object.freeze({
+    version: "0.2.1-rc.2",
+    file: "dsh-api-catalog-0.2.1-rc.2.json",
+    sha256: "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+  }),
+]);
+export function describeCatalog({
+  targetVersion = null,
+  referenceVersion = null,
+  sha256,
+  override = false,
+}) {
+  const known =
+    !override &&
+    CATALOG_REFERENCES.find(
+      (c) => c.version === referenceVersion && c.sha256 === sha256,
+    );
+  const verified = Boolean(known && targetVersion === referenceVersion);
+  return {
+    targetVersion,
+    referenceVersion,
+    sha256,
+    selection: override ? "override" : verified ? "exact" : "fallback",
+    verified,
+    certifiedVersions: known ? [known.version] : [],
+    scope:
+      "仅核验内置目录字节及对应精确版本的集成；不代表业务验收或运行时观测。",
+    warning: verified
+      ? null
+      : override
+        ? "自定义参考目录未认证；目录自报版本或相同字节不扩大已验收范围，请在实际目标宿主复核。"
+        : "目标 DSH 版本未知或未认证；普通体检使用参考目录回退，不能据此认定该版本已验收。",
+  };
+}
+export function catalogLines(c) {
+  if (!c) return ["API 目录身份未提供；版本范围未认证，请重新体检。"];
+  return [
+    "目标 DSH：" + (c.targetVersion || "未知"),
+    "参考目录：" + (c.referenceVersion || "未知") + " · SHA-256：" + c.sha256,
+    "目录认证范围：" +
+      (c.certifiedVersions.join("、") || "无") +
+      "；" +
+      c.scope,
+    ...(c.warning ? [c.warning] : []),
+  ];
+}
 const record = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const text = (v) => typeof v === "string" && v.length > 0;
 const nullableText = (v) => v === null || typeof v === "string";
@@ -283,6 +338,37 @@ export function validateReportBody(body) {
   }
   need(e, body.error === null, "report.error");
   need(e, nullableText(body.dshVersion), "report.dshVersion");
+  // Older schema-1 reports remain readable, but consumers show missing identity.
+  if (body.catalog !== undefined) {
+    const c = body.catalog;
+    if (
+      !record(c) ||
+      !nullableText(c.referenceVersion) ||
+      !/^[a-f0-9]{64}$/.test(c.sha256)
+    )
+      e.push("report.catalog");
+    else {
+      const expected = describeCatalog({
+        targetVersion: body.dshVersion,
+        referenceVersion: c.referenceVersion,
+        sha256: c.sha256,
+        override: c.selection === "override",
+      });
+      if (
+        c.selection !== "override" &&
+        !CATALOG_REFERENCES.some(
+          (k) => k.version === c.referenceVersion && k.sha256 === c.sha256,
+        )
+      )
+        e.push("report.catalog.identity");
+      for (const [key, value] of Object.entries(expected))
+        need(
+          e,
+          JSON.stringify(c[key]) === JSON.stringify(value),
+          "report.catalog." + key,
+        );
+    }
+  }
   e.push(...validateObservation(body.observation));
   if (
     record(body.observation) &&

@@ -34,7 +34,7 @@ import { buildVerdicts } from '../lib/verdict.mjs';
 import { render, toJSON } from '../lib/report.mjs';
 import { renderIssueReport } from './issue-report.mjs';
 import { readProfileCompatibility } from '../lib/profile-compatibility.mjs';
-import { catalogPathFor } from '../lib/catalog.mjs';
+import { loadCatalog } from '../lib/catalog.mjs';
 import { snapshotForBaseline, diffAgainstBaseline, badgeFor, BASELINE_SCHEMA } from '../lib/baseline.mjs';
 import {baselinePath,baselineIdentity,baselineTransaction,readBaseline as readStoredBaseline,writeBaseline as writeStoredBaseline} from '../lib/state-store.mjs';
 import {probeProfile} from '../lib/probe-runner.mjs';
@@ -207,9 +207,9 @@ export function run(options = {}) {
     const nm = resolveNodeModules(options.nm);
     result.inputs.nodeModules = nm;
 
-    const catalogPath = catalogPathFor(REPO, options.dshVersion, options.catalog);
+    const {file:catalogPath,catalog,evidence} = loadCatalog(REPO, options.dshVersion, options.catalog);
     const rulesPath = options.rules || path.join(REPO, 'rules', 'severity.json');
-    const catalog = readJSON(catalogPath, '官方 API 目录');
+    result.catalog = evidence;
     const rules = readJSON(rulesPath, 'severity 规则表');
     result.inputs.catalog = catalogPath;
     result.inputs.rules = rulesPath;

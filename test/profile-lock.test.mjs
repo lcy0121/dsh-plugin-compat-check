@@ -3,9 +3,22 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { parse, stringify } from "yaml";
 import { relocateProfileLock } from "../tools/profile-lock.mjs";
 import { command } from "../lib/probe-runner.mjs";
+const deeplyNestedLock =
+  "lockfileVersion: '9.0'\nimporters: { .: {} }\nextra: " +
+  "[".repeat(5000) +
+  "1" +
+  "]".repeat(5000) +
+  "\n";
+const aliasExpansionLock = `lockfileVersion: '9.0'
+importers: { .: {} }
+a: &a [one, two, three, four, five, six, seven, eight, nine, ten]
+b: &b [*a, *a, *a, *a, *a, *a, *a, *a, *a, *a]
+c: &c [*b, *b, *b, *b, *b, *b, *b, *b, *b, *b]
+`;
 function setup() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc lock 中文-")),
     source = path.join(root, "source", "profiles", "source"),
@@ -130,6 +143,88 @@ test("unsupported, malformed and recursive locks fail without rewriting their in
     f.cleanup();
   }
 });
+test("deeply nested profile lock fails as invalid YAML instead of overflowing the stack", () => {
+  const f = setup();
+  try {
+    const file = path.join(f.copy, "pnpm-lock.yaml");
+    fs.writeFileSync(file, deeplyNestedLock);
+    assert.throws(() => relocateProfileLock(f.copy, f.source), {
+      name: "Error",
+      message: "Invalid profile lock YAML",
+    });
+    assert.equal(fs.readFileSync(file, "utf8"), deeplyNestedLock);
+  } finally {
+    f.cleanup();
+  }
+});
+test("profile lock refuses excessive alias expansion without rewriting the lock", () => {
+  const f = setup();
+  try {
+    const file = path.join(f.copy, "pnpm-lock.yaml");
+    fs.writeFileSync(file, aliasExpansionLock);
+    assert.throws(() => relocateProfileLock(f.copy, f.source), {
+      name: "Error",
+      message: /Invalid profile lock aliases/,
+    });
+    assert.equal(fs.readFileSync(file, "utf8"), aliasExpansionLock);
+  } finally {
+    f.cleanup();
+  }
+});
+for (const [name, text, error] of [
+  [
+    "malformed YAML",
+    "lockfileVersion: '9.0'\nimporters: [unterminated\n",
+    /Invalid profile lock YAML/,
+  ],
+  ["deep nesting", deeplyNestedLock, /Invalid profile lock YAML/],
+  ["alias expansion", aliasExpansionLock, /Invalid profile lock aliases/],
+  [
+    "recursive alias",
+    "lockfileVersion: '9.0'\nimporters:\n  .: &cycle\n    self: *cycle\n",
+    /Recursive profile lock alias/,
+  ],
+]) {
+  test(`probe rejects ${name} and removes its private clone while retaining source bytes`, () => {
+    const f = setup();
+    try {
+      const file = path.join(f.source, "pnpm-lock.yaml"),
+        manifest = '{"name":"source-profile","version":"1.0.0"}';
+      fs.writeFileSync(file, text);
+      fs.writeFileSync(path.join(f.source, "package.json"), manifest);
+      fs.mkdirSync(path.join(f.source, "node_modules"));
+      const module = new URL("../lib/probe-runner.mjs", import.meta.url).href;
+      const script = `import {probeProfile} from ${JSON.stringify(module)};
+        console.log(JSON.stringify(await probeProfile(${JSON.stringify(path.join(f.source, "node_modules"))})));`;
+      const result = spawnSync(
+        process.execPath,
+        ["--input-type=module", "-e", script],
+        {
+          encoding: "utf8",
+          timeout: 10000,
+          // Invalid locks must be rejected before invoking external installers.
+          env: { ...process.env, PATH: f.copy },
+        },
+      );
+      assert.equal(result.status, 0, result.stderr);
+      const out = JSON.parse(result.stdout);
+      assert.equal(out.surface, null);
+      assert.match(out.error, error);
+      assert.equal(out.tempProfileRemoved, true);
+      assert.equal(out.workDir, null);
+      assert.equal(fs.existsSync(out.tempProfile), false);
+      const work = path.dirname(path.dirname(path.dirname(out.tempProfile)));
+      assert.equal(fs.existsSync(work), false);
+      assert.equal(fs.readFileSync(file, "utf8"), text);
+      assert.equal(
+        fs.readFileSync(path.join(f.source, "package.json"), "utf8"),
+        manifest,
+      );
+    } finally {
+      f.cleanup();
+    }
+  });
+}
 test("clone lock refuses symlinks and oversized data, preserving the original file", () => {
   const f = setup();
   try {

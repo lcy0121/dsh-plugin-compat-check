@@ -439,6 +439,14 @@ try {
     );
     result.runtimeExportContext = true;
     result.httpReport = true;
+    requireTrue(
+      initial.body.report.catalog?.verified === true &&
+        initial.body.report.catalog.referenceVersion === version &&
+        initial.body.report.catalog.sha256 ===
+          "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+      "Installed report lost reviewed catalogue identity",
+    );
+    result.catalogIdentity = true;
     const sameOrigin = await fetch(reportUrl, {
       headers: { ...headers, Origin: reportUrl.origin },
       signal: AbortSignal.timeout(15000),
@@ -680,6 +688,13 @@ try {
         );
       };
       await settings();
+      requireTrue(
+        await evalx(
+          `document.querySelector('[data-catalog-status="verified"]')?.innerText.includes('90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743') && document.body.innerText.includes('目录认证范围：0.2.1-rc.2')`,
+        ),
+        "Actual DOM lacks catalogue digest and certification scope",
+      );
+      result.catalogUiIdentity = true;
       const explanationText = await evalx("document.body.innerText");
       requireTrue(
         explanationText.includes(

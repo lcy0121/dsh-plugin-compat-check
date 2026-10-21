@@ -77,7 +77,7 @@ function loadHost(env = {}) {
   vm.createContext(sandbox)
   // 把 ESM 的 import 换成受控替身；导出换成赋值
   const cjs = SRC.replace(/^import.*from '\.\/lib\/host-resources\.js';?$/gm, 'const {privateDiagnostic,loaderObservations}=__hostResources;')
-    .replace(/^import.*from '\.\/lib\/report-contract\.js';?$/gm, 'const {assertEnvelope,failureEnvelope}=__reportContract;')
+    .replace(/^import.*from '\.\/lib\/report-contract\.js';?$/gm, 'const {assertEnvelope,failureEnvelope,catalogLines}=__reportContract;')
     .replace(/^import.*from '\.\/lib\/finding-guidance\.js';?$/gm, 'const {nextSteps}=__findingGuidance;')
     .replace(/^import.*from '\.\/lib\/upgrade-contract\.js';?$/gm, 'const {createUpgradeFailure:upgradeFailure,SUPPORTED_PREVIEW_VERSIONS}=__upgradeContract;')
     .replace(/^import\s+\{([^}]+)\}\s+from\s+'node:([^']+)';?$/gm, (m, names, mod) => {

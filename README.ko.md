@@ -1,5 +1,7 @@
 # dsh-plugin-compat-check
 
+이 프로젝트가 유용하거나 흥미롭다면 [Star ⭐](https://github.com/lcy0121/dsh-plugin-compat-check)를 눌러 응원해 주세요!
+
 **설치된 DSH 플러그인**과 대상 DSH 버전의 호환성을 검사하고 소스 위치, 근거, 증거 범위를 제공합니다. 선언 통과나 활성화 성공만으로 업무 기능의 정상 동작을 보장하지 않습니다.
 
 [简体中文](README.md) | [English](README.en.md) | **한국어**
@@ -33,6 +35,8 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
 DSH 0.2.1-rc.2 경로: **더 보기 → 설정 → 내장 플러그인 → 호환성**. agent는 `compat_check`를 호출할 수 있습니다. 실제 profile을 선택하고 desktop을 기본으로 가정하지 마세요.
+
+미출시 소스는 같은 플러그인 이름의 중복 설치를 명확히 거부하며 기준선을 갱신하지 않습니다. 일반 보고서는 대상 DSH, 참조 카탈로그 버전·해시와 검증 범위를 구분하고, 미지·미래 버전 및 사용자 카탈로그는 미인증으로 표시합니다. [카탈로그 관리 절차](docs/catalog-governance.md)를 참고하세요. 저장소 도구의 YAML 의존성도 수정했으며 npm 플러그인 런타임 의존성에는 해당하지 않습니다.
 
 ### 저장소 CLI
 
