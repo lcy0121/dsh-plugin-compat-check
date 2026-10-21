@@ -100,12 +100,17 @@ describe('打包自足性：npm pack 出来的包必须自己能算结论', () =
         plugin.apply(ctx);
         const out=await tool.execute({profile:'test'});
         if(out.summary==='无法判定')throw new Error(JSON.stringify(out));
+        const upgrade=await tool.execute({profile:'test',upgradeTo:'0.2.1-rc.2'});
+        if(!upgrade.ok||upgrade.upgradePreview?.status!=='compared'||upgrade.report!==null||upgrade.baseline!==null||upgrade.cache!==null||upgrade.hasRuntimeSurface!==false)throw new Error('Packaged upgrade tool lost static isolation: '+JSON.stringify(upgrade));
+        if(Object.keys(upgrade.upgradePreview.currentReport.plugins).length!==27||Object.keys(upgrade.upgradePreview.targetReport.plugins).length!==27)throw new Error('Packaged upgrade tool lost installed inventory');
+        const unsupported=await tool.execute({profile:'test',upgradeTo:'9.9.9'});
+        if(unsupported.ok||unsupported.upgradePreview?.status!=='unsupported-version'||unsupported.exitCode!==3)throw new Error('Packaged unknown target was certified');
         const report=await globalThis.__DSH_COMPAT_CHECK__.compatReport();
         if(report.toolVersion!==${JSON.stringify(JSON.parse(fs.readFileSync(path.join(PLUGIN,'package.json'),'utf8')).version)})throw new Error('Artifact lost its kernel version');
         if(!report.ok||report.report.manifests.length!==27)throw new Error('Artifact did not analyze the fixture');
         console.log('packaged host computed 27 plugins');
       `);
-      const executed=execFileSync(process.execPath,[entry],{cwd:install,encoding:'utf8',timeout:20000,env:{...process.env,DSH_HOME:home,DSC_AUTORUN_MS:'0',DSC_PROFILE:'test'}});
+      const executed=execFileSync(process.execPath,[entry],{cwd:install,encoding:'utf8',timeout:20000,env:{...process.env,DSH_HOME:home,DSC_AUTORUN_MS:'0',DSC_PROFILE:'test',DSH_VERSION:'0.2.0-rc.2'}});
       assert.match(executed,/packaged host computed 27 plugins/);
 
     } finally {

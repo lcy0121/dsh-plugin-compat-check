@@ -17,6 +17,14 @@ for (const item of [
     exports: "assertEnvelope: assertEnvelope",
   },
   {
+    source: "upgrade-contract",
+    host: "upgrade-contract",
+    label: "UPGRADE CONTRACT",
+    global: "UpgradeContract",
+    exports:
+      "assertUpgradePreview: assertUpgradePreview, SUPPORTED_PREVIEW_VERSIONS: SUPPORTED_PREVIEW_VERSIONS",
+  },
+  {
     source: "finding-guidance",
     host: "finding-guidance",
     label: "FINDING GUIDANCE",

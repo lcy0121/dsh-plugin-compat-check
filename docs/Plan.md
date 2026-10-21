@@ -9,7 +9,7 @@
 | 入口 | 职责与副作用 |
 |---|---|
 | npm插件 | 当前宿主观测、兼容性面板、详情发现/角标、tool和skill；不联网、装包或启动外部命令，使用分析worker并写自身基线 |
-| 仓库CLI / 安装检查 | 默认静态扫描不执行目标源码；显式probe/安装检查会装依赖、启动宿主并执行插件，临时profile不是OS沙箱 |
+| 仓库CLI / 安装检查 | 默认静态扫描及独立升级预检不执行目标源码；显式probe/安装检查会装依赖、启动宿主并执行插件，临时profile不是OS沙箱 |
 | skill | 指导agent调用同一工具或CLI，不另实现判定 |
 
 单仓库、单版本、一份Node判定内核；版本真源为`lib/version.mjs`。根目录是private开发工作区，npm仅打包`plugin/`，没有CLI bin、安装shell或probe入口，不支持`npx dsh-plugin-compat-check`。prepack同步skill/契约、暂存kernel与LICENSE，postpack清理kernel；裸源码子目录不等同完整tgz。市场截图声明与图片在`plugin/screenshots.json`、`plugin/assets/`，不随当前npm files打包；npm README引用GitHub图片。
@@ -38,7 +38,7 @@
 
 `lib/contracts.mjs`是运行时/JSDoc真源。CLI为`schemaVersion:1 / kind:plugin-compat-check/result`，HTTP为`kind:plugin-compat-check/report`的envelope；tool保留summary/text和完整report/baseline/cache。字段、严重度、摘要、退出码、span及身份须自洽；面板拒绝损坏负载。新增字段兼容，不兼容变更须升schema，生成副本由`stage-contract.mjs --check`防漂移。
 
-CLI退出码：**0=未发现冲突，1=部分可用或未知，2=不兼容，3=工具无法判定**。安装检查另有gate-rejected等状态；网络/安装/启动错误不是插件结论。同目标single-flight，失败刷新保留最近成功报告及错误，缓存不冒充业务验收。
+普通CLI退出码：**0=未发现冲突，1=部分可用或未知，2=不兼容，3=工具无法判定**；升级预检的差异退出码见§2.7。安装检查另有gate-rejected等状态；网络/安装/启动错误不是插件结论。同目标single-flight，失败刷新保留最近成功报告及错误，缓存不冒充业务验收。
 
 `--issue-report`从同一结果导出Markdown，不读写基线，与json/quiet互斥并保留退出码。共享渲染器为`lib/issue-report.mjs`，原bin入口保留；宿主从同一canonical报告生成可选`issueReport`文本，界面筛选不删减导出内容，只在用户明确复制时写剪贴板，失败保留可选中文本。保留版本、观测、发现、可用位置、certainty/impactBasis、覆盖及占位符命令；不导出原始日志、探针、源码片段、基线或evidence。可疑说明整项隐藏，不安全位置隐藏；仍保留插件名与包内相对文件名，须预览，不保证任意文本完全脱敏，不自动发帖。
 
@@ -46,7 +46,7 @@ CLI退出码：**0=未发现冲突，1=部分可用或未知，2=不兼容，3=�
 
 - UI为`settings.plugins.tab`、`plugins.detail.section`及`.badge`；`plugins.item`缺可靠身份。客户端导出预构建`window.__ModuleLoader__.load({id,factory})`，inject声明其它插件包名，宿主不代构建。
 - loader entries可迭代，entry id映射包身份；0–5为PENDING/LOADING/ACTIVE/FAILED/DISPOSED/UNLOADING，import失败可无fiber。本插件空inject避免自身挂起；工具required是顶层数组，skill须注册运行时provider，按实际启动参数解析profile。
-- DSH≥0.2.1-rc.2选新目录（host98/291方法、client8/43），其余/未知选旧0.2.0-rc.2目录，CLI显式覆盖优先；未来版本未认证。ASAR起点为8+headerSize，校验边界/原始字节/摘要；不凭方法名迁移严重度，未知影响回退，未整体重写AST/worker。
+- 普通体检对DSH≥0.2.1-rc.2选新目录（host98/291方法、client8/43），其余/未知选旧0.2.0-rc.2目录，CLI显式覆盖优先；未来版本未认证。独立升级预检仅接受§2.7的已知精确版本，不采用该回退。ASAR起点为8+headerSize，校验边界/原始字节/摘要；不凭方法名迁移严重度，未知影响回退，未整体重写AST/worker。
 - rc.2界面入口为“更多 → 设置 → 内置插件 → 兼容性”。HMR撤销route/tool/skill、计时器及诊断handle，在途任务卸载后不得写基线或返回新成功报告；worker仍按原预算回收，不声称立即取消。Origin要求协议/主机/有效端口完全同源，本机无Origin调用仍允许。
 
 ### 2.5 有限静态批量契约
@@ -77,6 +77,20 @@ JSON为独立的`schemaVersion:1 / kind:plugin-compat-check/batch-result`，逐�
 
 面板提供名称搜索、结论/确定性/待验证状态组合筛选、发现及覆盖限制折叠、完整报告预览复制；待验证指覆盖有限、无已验证调用或客户端尚待验证。“本次新增风险”复用可比基线中的worsened及含发现的added，无可比基线明确中性提示；筛选只改变呈现。报告时间、目标和缓存状态同时可见，完整覆盖仍不等于业务通过。
 
+### 2.7 升级前静态预检契约
+
+`lib/upgrade-preview.mjs`提供独立的`runUpgradePreview({nm,currentVersion,targetVersion})`及纯文本呈现；CLI、agent与面板复用该入口，不从普通体检结果推演未来宿主。当前与目标仅接受`0.2.0-rc.2`和`0.2.1-rc.2`两个精确版本。未知/范围版本在读目标目录前返回`status=unsupported-version`、退出3并说明未认证，不默选相邻版本或普通目录回退，也不自动安装、升级或修改目标插件。
+
+目标已装制品经有界复制和两次目录/文件字节/链接身份一致性观察后形成私有只读副本；两端识别名集合取目录并集，联合静态提取一次，再分别按各自目录及声明规则判定。保留整体及逐插件制品SHA-256、两端目录的版本/文件/来源/摘要及规则摘要。普通并发变化、同名插件重复安装（含alias）、特殊文件或捕获预算超限明确失败，不交付半份输入；这不是OS原子快照或防协同篡改签名。捕获上限为256MiB总字节、8MiB单文件、50000目录项、32层和10秒；worker另受现有10秒/512+64MiB预算约束，先回收再清理自有副本，不承诺全进程RSS或硬实时清理。
+
+两端报告均不读取当前宿主运行时、文件/环境探针、loader条目状态、profile兼容豁免、普通报告缓存或基线；不执行目标代码、不联网，不写产品状态。每次重新读取已装制品并分析；同目标在途请求可合并，不将完成结果作为缓存。保留确定性、影响依据、coverage/vacuous、源码诊断、弃权和客户端待验证信息；扫描不完整仍列出发现与限制，未发现或已消失不证明修复或业务通过。
+
+JSON为`schemaVersion:1 / kind:plugin-compat-check/upgrade-preview / mode:static-version-comparison`，状态为`compared / unsupported-version / error`。`currentReport`、`targetReport`保留普通canonical结论及各自退出码；`changes`按插件身份与发现的类别/服务/方法/源码span对照，列出`added / worsened / resolved / unchanged / improved`，`summary`是对应计数及覆盖有限插件数。严重度或确定性提升可形成变重，不能把变化解释为实际业务恶化。顶层退出码仅反映新增/变重发现：含fatal为2，其余新增/变重为1，无新增/变重为0；输入、捕获、worker或契约错误为3。`ok=true/status=compared`表示成功比较，**不表示目标可用**；退出0仍可能有未变化的旧风险。失败时两端报告、制品与目录证据为空，`baseline/cache`始终为null。`lib/upgrade-contract.mjs`校验该独立契约，生成副本随报告契约同步。
+
+CLI使用`--nm <profile或node_modules> --dsh-version <当前精确版本> --upgrade-to <目标精确版本>`，支持普通文本或`--json`；要求显式当前版本，拒绝probe/boot及其参数、规则/目录覆盖、baseline-file、dry-run、quiet、issue-report和profile旗标，可带无操作的`--no-baseline`。help/version仍无需目标目录。agent使用`compat_check({upgradeTo:"0.2.1-rc.2",profile:"实际profile"})`，当前版本从运行宿主解析；结果在工具的`upgradePreview`中，普通`report`、baseline/cache为null。
+
+面板明确输入目标精确版本并点击“运行升级预检”，通过独立同源GET路由`/plugin-compat-check/upgrade-preview`请求；只传目标及当前版本上下文，不接收调用者指定的探针、豁免或规则。当前版本变化拒绝旧上下文，卸载不返回新成功结果；不同目标的并发请求明确失败。预检分开展示制品/目录身份、当前/目标已有风险、新增差异及限制，不覆盖普通报告；HTTP或契约失败不显示成“无新增风险”。未来环境及完整业务仍须在目标宿主独立验收。
+
 ## 3. 开发与文档维护约定
 
 1. 先复现再修改，保留未知、弃权和覆盖诊断；不以自洽测试替代目标行为，不编造实测或影响。
@@ -100,6 +114,7 @@ JSON为独立的`schemaVersion:1 / kind:plugin-compat-check/batch-result`，逐�
 | 真实插件故障回归集 | 固定真实制品、18病例与两轮独立运行、分模式度量和有界回放已完成；保留自然/受控FN，契约见§2.6，验收见§5.6及`realPluginRegression20261021` |
 | 发现的下一步核实 | 全入口共用结构化核实步骤，未知依赖保持待确认；分享报告与CLI同源，契约见§2.6及`actionableFindings20261021`；源码尚未发布 |
 | 面板体验 | 搜索/组合筛选、详情折叠、完整报告预览与显式复制、基线新增风险视图、目标/时间/缓存信息已完成；见§2.6、§5.7及`panelExperience20261021`；源码尚未发布 |
+| 升级前兼容性预检 | 已实现同字节制品的双版本静态比较、独立CLI/agent/面板入口、精确版本与目录来源校验及新增风险差分；隔离运行时、豁免、缓存和基线，不自动升级。源码尚未发布；契约见§2.7，验收与复现见§5.8及`upgradePreview20261021` |
 
 独立业务预测在动作前按固定制品/API目录/手审功能区间封存，业务真值来自请求、DOM及磁盘，不读loader答案。固定队列如下；并非盲测、生态准确率或完整模型认证：
 
@@ -221,9 +236,24 @@ live使用现有DSH/pnpm及真实Chrome，联网安装固定插件，业务动�
 
 完整默认套件628通过、3项平台跳过（共631项），发布前检查、文档/格式与生成副本检查通过。源码已完成，本轮没有push或npm发布，公开0.1.4的历史制品与既有验收记录不变。
 
+### 5.8 升级前预检验收与复现
+
+固定制品回归覆盖两个已知版本下的声明变化与API方法移除、新增/变重/消失差异、同版本旧风险仍在但顶层退出0；同时核验未知版本未认证、旁置/环境探针和profile豁免隔离、源码不执行、基线/缓存隔离、profile路径、有界捕获/竞态失败及worker清理。独立审查发现的同名alias覆盖风险已修复为明确失败；制品身份遗漏、重复或两端不一致均拒绝。升级核心/CLI/宿主/面板定向36/36通过，连同普通报告契约和宿主回归的联合检查61/61通过；新上下文skill检索能选用`upgradeTo`及无工具时单条CLI，保留静态预测边界，不是模型业务测评。
+
+从最终源码独立打包、私有空缓存安装的插件工具可脱离仓库执行升级预检，并拒绝未知版本。最终tgz SHA-256为`1edce4ab1cd5dba6d1cc5ce610edaa74688c8fded2a89b02d316110a30969a15`，另在macOS arm64的真实DSH0.2.1-rc.2及Chrome中验收静态预检HTTP与DOM、输入/目录摘要、200/403/405、未知版本未认证、普通报告/筛选及产品状态不变、禁用移除/重启用恢复路由；临时现场清理完成。真实宿主只能证明两个已知目录之间的受限静态版本对比，不认证未来宿主或真实插件完整业务；正向新增风险来自5个未激活的合成病例中的固定声明样本。
+
+完整默认套件667项：664通过、3项平台跳过；发布前验证（不发布）、格式、文档及生成副本检查通过，详细记录见`current-state.json`的`upgradePreview20261021`。本项本地交付，不push或npm发布，工具版本仍为0.1.4。
+```bash
+node bin/compat-check.mjs --nm <profile或node_modules> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json
+node --test test/upgrade-preview.test.mjs test/upgrade-cli.test.mjs test/upgrade-host.test.mjs test/upgrade-panel.test.mjs
+node plugin/scripts/stage-contract.mjs --check
+node tools/doc-check.mjs
+```
+
+实际宿主与Chrome复现可运行`DSC_REQUIRE_RC2_UI=1 node tools/rc2-live.mjs`（私有安装需要registry及本机DSH/Chrome）。第一条命令依实际制品返回差异退出码0/1/2/3，不给真实用户环境预设通过结果。面板从当前源码完整tgz进入兼容性页，输入目标精确版本并显式预检；agent调用`compat_check({upgradeTo:"0.2.1-rc.2"})`。两端仅认证目录支持范围，不认证目标业务；CLI与宿主当前版本不同须分别明确来源。本项不追改旧快照、基线版本或已发布0.1.4制品证据，尚未发布。
+
 ## 6. 后续工作
 
 1. **P1：小规模真实用户试用。** 邀请几位插件作者和普通用户，观察其完成“安装→理解报告→定位问题”的过程，记录误读、定位失败、误报反馈和报告分享障碍，据此调整后续优先级。验收产出可复核的反馈、问题分类及对应改进项，不以下载/star代替使用效果；联系他人、收集或公开现场资料分别取得授权，不默认增加遥测。
-2. **P2：升级前兼容性预检。** 面向已有API目录支持的目标DSH版本，比较同一组已安装插件在当前版本与目标版本下可能新增的静态风险，复用现有版本选择和判定内核，并隔离当前宿主运行时证据、缓存与基线身份。验收须有固定制品的前后对照、版本/目录来源及预测限制；未知目标版本明确提示未认证，不借用当前运行时面证明未来环境，也不自动升级或将静态预检表述为业务通过。
-3. **上游验收。** #932在版本查询双端失败且未显式请求版本时仍无提示裸名安装，待明确告警或安全失败后复验；1024#22仍无维护者回复，v2出现npm方式后另做全新实装；0xsline#717待采纳。无新证据不重复发帖，新外部补充另取授权。
-4. **Windows真实验收。** 取得环境后实跑路径、安装器、回收和打包；依用户选择暂缓，不用POSIX或模拟充数。
+2. **上游验收。** #932在版本查询双端失败且未显式请求版本时仍无提示裸名安装，待明确告警或安全失败后复验；1024#22仍无维护者回复，v2出现npm方式后另做全新实装；0xsline#717待采纳。无新证据不重复发帖，新外部补充另取授权。
+3. **Windows真实验收。** 取得环境后实跑路径、安装器、回收和打包；依用户选择暂缓，不用POSIX或模拟充数。

@@ -40,6 +40,7 @@ import {baselinePath,baselineIdentity,baselineTransaction,readBaseline as readSt
 import {probeProfile} from '../lib/probe-runner.mjs';
 import { TOOL_VERSION, versionLine } from '../lib/version.mjs';
 import {createFailure,exitCodeForSummary} from '../lib/contracts.mjs';
+import { runUpgradePreview, renderUpgradePreview, createUpgradeFailure } from '../lib/upgrade-preview.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -59,6 +60,9 @@ ${versionLine()}
   --probe-timeout <秒>  --probe-boot 的启动等待上限（默认 40）
   --probe-keep-dir <dir>  把探针报告与 services.json 留一份到该目录（排查用）
   --dsh-version <v> 目标 DSH 版本（用于声明判断及目录选择；显式值优先）。
+  --upgrade-to <精确版本> 升级前静态对比；--dsh-version 必须明确给出当前精确版本。
+                   仅支持已认证目录版本，不读取探针、profile 豁免或基线，不启动宿主。
+                   仅支持普通文本/--json（可带 --no-baseline），不可与观测/覆盖规则参数混用。
   --rules <json>   覆盖 severity 规则表（默认 rules/severity.json）
   --catalog <json> 覆盖官方 API 目录（默认按目标版本选择 rules/ 下的已知目录）
   --no-baseline    不读写本机基线（CI / 一次性检查用）
@@ -75,6 +79,9 @@ ${versionLine()}
   1  有插件"部分可用"
   2  有插件"不兼容"
   3  无法判定（用法错误 / 目录不存在 / 工具自身出错 —— 都不是插件的结论）
+
+升级预检的 0/1/2 仅描述新增/恶化风险：无新增风险 / 有风险 / 含致命风险。
+目标版本本身的结论保留在 targetReport；退出 0 仍可能有已有问题，不等于业务通过。
 `;
 
 /* ── 参数解析：手写，零依赖；未知参数一律报错而不是忽略 ────────────── */
@@ -83,7 +90,8 @@ ${versionLine()}
 
 function parseArgs(argv) {
   const out = { json: false, quiet: false };
-  const takesValue = new Set(['--nm', '--probe', '--dsh-version', '--rules', '--catalog', '--baseline-file', '--profile', '--probe-timeout', '--probe-keep-dir']);
+  const upgradeMode = argv.includes('--upgrade-to');
+  const takesValue = new Set(['--nm', '--probe', '--dsh-version', '--upgrade-to', '--rules', '--catalog', '--baseline-file', '--profile', '--probe-timeout', '--probe-keep-dir']);
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--json') { out.json = true; continue; }
@@ -96,7 +104,7 @@ function parseArgs(argv) {
     if (a === '--version' || a === '-V') { out.version = true; continue; }
     if (takesValue.has(a)) {
       const v = argv[++i];
-      if (v === undefined) throw new Error(`${a} 需要一个值`);
+      if (v === undefined || (upgradeMode && v.startsWith('--'))) throw new Error(`${a} 需要一个值`);
       out[a.replace(/^--/, '').replace(/-(\w)/g, (_, c) => c.toUpperCase())] = v;
       continue;
     }
@@ -104,7 +112,7 @@ function parseArgs(argv) {
     // 「跑完了但没有 JSON 输出」，而用户会以为工具不支持 JSON。
     throw new Error(`无法识别的参数: ${a}`);
   }
-  if(out.issueReport && (out.json || out.quiet))throw new Error('--issue-report 与 --json/--quiet 互斥');
+  if(!upgradeMode && out.issueReport && (out.json || out.quiet))throw new Error('--issue-report 与 --json/--quiet 互斥');
   if(out.issueReport)out.baseline=false;
   return out;
 }
@@ -262,10 +270,23 @@ export async function runAsync(options={}) {
 
 async function main() {
   let opts;
+  const argv = process.argv.slice(2);
+  const upgradeMode = argv.includes('--upgrade-to');
+  const rawValue = flag => {
+    const index = argv.indexOf(flag);
+    const value = index < 0 ? null : argv[index + 1];
+    return typeof value === 'string' && !value.startsWith('--') ? value : null;
+  };
+  const upgradeFailure = error => createUpgradeFailure(error, {
+    currentVersion: opts?.dshVersion ?? rawValue('--dsh-version'),
+    targetVersion: opts?.upgradeTo ?? rawValue('--upgrade-to'),
+  });
+  const outputUpgrade = result => process.stdout.write(`${opts?.json || argv.includes('--json') ? JSON.stringify(result, null, 2) : renderUpgradePreview(result)}\n`);
   try {
-    opts = parseArgs(process.argv.slice(2));
+    opts = parseArgs(argv);
   } catch (error) {
-    if(process.argv.includes('--issue-report'))process.stdout.write(renderIssueReport(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');
+    if(upgradeMode)outputUpgrade(upgradeFailure(error.message));
+    else if(process.argv.includes('--issue-report'))process.stdout.write(renderIssueReport(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');
     else if(process.argv.includes('--json'))process.stdout.write(JSON.stringify(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');else process.stderr.write(`${error.message}\n\n${USAGE}`);
     process.exit(3);
   }
@@ -274,6 +295,21 @@ async function main() {
   if (opts.version) {
     process.stdout.write(`${versionLine()}\n`);
     process.exit(0);
+  }
+  if (upgradeMode && !opts.help) {
+    try {
+      const forbidden = ['--probe', '--probe-boot', '--probe-timeout', '--probe-keep-dir', '--baseline-file', '--dry-run', '--rules', '--catalog', '--issue-report', '--quiet', '--profile'];
+      const conflict = forbidden.find(flag => argv.includes(flag));
+      if (conflict) throw new Error(`--upgrade-to 不接受 ${conflict}`);
+      if (!opts.nm) throw new Error('--upgrade-to 需要 --nm');
+      if (!opts.dshVersion) throw new Error('--upgrade-to 需要 --dsh-version 当前精确版本');
+      const result = await runUpgradePreview({ nm: opts.nm, currentVersion: opts.dshVersion, targetVersion: opts.upgradeTo });
+      outputUpgrade(result);
+      process.exit(result.exitCode);
+    } catch (error) {
+      outputUpgrade(upgradeFailure(error.message));
+      process.exit(3);
+    }
   }
   if (opts.help || !opts.nm) {
     if(!opts.help && opts.issueReport)process.stdout.write(renderIssueReport(createFailure('需要 --nm',{toolVersion:TOOL_VERSION}),opts)+'\n');

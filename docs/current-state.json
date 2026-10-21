@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.4",
-  "recordedAt": "2026-10-21T07:08:24.581Z",
-  "testFiles": 43,
-  "tests": 631,
+  "recordedAt": "2026-10-21T12:15:27.323Z",
+  "testFiles": 47,
+  "tests": 667,
   "repositoryFiles": {
-    "total": 264,
+    "total": 273,
     "fixtures": 90,
-    "other": 174
+    "other": 183
   },
   "verification": {
     "platform": "darwin",
@@ -8202,6 +8202,287 @@
           },
           "scope": "Read-only review; final live checks independently run by owning tasks."
         }
+      },
+      "delivery": {
+        "localOnly": true,
+        "pushed": false,
+        "npmPublished": false,
+        "versionUnchanged": "0.1.4",
+        "publishedNpmArtifactUnchanged": true
+      }
+    },
+    "upgradePreview20261021": {
+      "verifiedAt": "2026-10-21T12:17:30.812609+00:00",
+      "sourceBase": "a59328d55be6888848d2efa24500c772c61e10ee",
+      "runnerNode": "26.12.0",
+      "platform": "darwin",
+      "arch": "arm64",
+      "sourceSha256": {
+        "lib/upgrade-preview.mjs": "aa39da866a1053df48e0f6aac29819ce09169db221b63950afea14e6496bbb37",
+        "lib/upgrade-input.mjs": "75ca6b37ecdd945a7ce60df2c04b8e4cd76b3811f180903f6c55beec9c832d28",
+        "lib/upgrade-worker.mjs": "9ba65b4e482663bf833b8ad210b3e5c2ad21187da90f1b46d1f5ad2a8022a02c",
+        "lib/upgrade-contract.mjs": "2478afbe7dca98e204063e3fbc8e3d9e20a534badc7a77e4803664673761e016",
+        "bin/compat-check.mjs": "2ed9b4265475043515a2a33193abfc7de2eeb37813bb8d02dce882e6f0b7871b",
+        "plugin/index.js": "943e44d47a14270d880f65d727b593d9237875b103fcc408e8c687278c30de85",
+        "plugin/lib/client.js": "cedb06fe7cf074f5db99a9492091ef0f3679bf3de1147be9a4422de4e025d8ea",
+        "plugin/lib/upgrade-contract.js": "f57fa965053a3cbc4976a36423e0d90586e05839b69acdd928fe13ee71d5879b",
+        "plugin/skill/SKILL.md": "0787a502bfd3431eed39848542bad111f4f0fd646565b0edf8b22e81f7919657"
+      },
+      "contract": {
+        "schemaVersion": 1,
+        "kind": "plugin-compat-check/upgrade-preview",
+        "mode": "static-version-comparison",
+        "supportedExactVersions": [
+          "0.2.0-rc.2",
+          "0.2.1-rc.2"
+        ],
+        "interfaces": [
+          "repository CLI --upgrade-to with explicit --dsh-version",
+          "compat_check({upgradeTo,profile?})",
+          "explicit panel action and independent same-origin GET /plugin-compat-check/upgrade-preview"
+        ],
+        "staticInputs": "One bounded private copy, two matching observations of inventory/bytes/links; joint recognition union and one extraction; each version uses its own immutable catalog and declaration policy. Same manifest name in multiple installed aliases fails explicitly; no silent canonical overwrite.",
+        "identity": "Overall and per-plugin SHA-256, catalog version/file/source/hash, shared rules hash. Canonical plugin identities must match artifact identities without duplicates.",
+        "isolation": [
+          "No target code execution, external commands, network, installation or upgrade",
+          "No current runtime surface, loader state, adjacent/environment probe or profile exemptions",
+          "No ordinary report cache/baseline read/write; null cache/baseline; same-key in-flight sharing only",
+          "Unknown/approximate versions fail before installed input lookup; unavailable is never a clean comparison",
+          "Worker termination precedes private input cleanup; only owned temporary files removed"
+        ],
+        "exitCodes": {
+          "0": "No added/worsened static finding; unchanged old risks can remain. Not future compatibility or business success.",
+          "1": "Added/worsened nonfatal static finding",
+          "2": "Added/worsened fatal static finding",
+          "3": "Unsupported version, input/capture/worker/contract/tool error"
+        },
+        "budgets": {
+          "captureBytes": 268435456,
+          "captureFileBytes": 8388608,
+          "captureEntries": 50000,
+          "captureDepth": 32,
+          "captureMs": 10000,
+          "workerMs": 10000,
+          "workerOldGenerationMiB": 512,
+          "workerYoungGenerationMiB": 64
+        },
+        "limits": [
+          "Not an OS atomic snapshot or tamper-proof signature",
+          "Heap/time caps are bounded analysis controls, not OS RSS or hard realtime guarantees",
+          "Incomplete extraction, uncertain evidence, vacuous and client-side verification limits remain visible",
+          "Current known-version catalog comparison does not certify an unobserved future host or plugin business function"
+        ]
+      },
+      "regression": {
+        "initialRed": {
+          "panel": {
+            "tests": 4,
+            "fail": 4,
+            "reason": "Missing explicit upgrade input/action before implementation",
+            "log": "/private/tmp/dsc-upgrade-panel-red.tap"
+          },
+          "cli": {
+            "reason": "Unknown upgrade flag / ordinary result kind before implementation"
+          },
+          "alias": {
+            "reason": "Risk exists alone; duplicate healthy alias previously returned a false clean delta, now rejected",
+            "log": "/private/tmp/dsc-upgrade-alias-red.tap"
+          }
+        },
+        "upgradeFocused": {
+          "tests": 36,
+          "pass": 36,
+          "fail": 0,
+          "scope": "Core16 + CLI9 + host5 + panel6; independently rechecked after alias fix"
+        },
+        "jointFocused": {
+          "tests": 61,
+          "pass": 61,
+          "fail": 0,
+          "skipped": 0,
+          "log": "/private/tmp/dsc-upgrade-reviewed-focused.tap"
+        },
+        "defaultSuite": {
+          "tests": 667,
+          "pass": 664,
+          "fail": 0,
+          "skipped": 3,
+          "testFiles": 47,
+          "log": "/private/tmp/dsc-upgrade-full-final.tap",
+          "sha256": "74c322a2a104eee51b149a34b23b61a43def2a183fb4843fb90ac84860290560"
+        },
+        "independentPackagedTool": {
+          "tests": 3,
+          "pass": 3,
+          "fail": 0,
+          "skipped": 0,
+          "log": "/private/tmp/dsc-upgrade-package-green.tap",
+          "scope": "Fresh private empty-cache npm installation, no checkout kernel; ordinary27-plugin report plus upgrade tool for both supported versions and unknown-target refusal."
+        },
+        "coverage": [
+          "Fixed declaration change and actual catalog method removal/addition",
+          "Unchanged preexisting target risk with preview exit0 and nonzero targetReport",
+          "No execution marker; malformed adjacent/environment probe and exemption ignored",
+          "pnpm root link accepted, escaped links unresolved with diagnostics",
+          "Input mutation, worker timeout, budgets, owned cleanup",
+          "Duplicate alias names, missing/changed/duplicate artifact identity rejected",
+          "Stale current version, same-origin/method fence, singleflight/busy and disposed generation",
+          "Explicit browser action, stale target response discarded, wrong-target/malformed payload refused, ordinary rows preserved"
+        ]
+      },
+      "liveAcceptance": {
+        "ok": true,
+        "applicable": true,
+        "dshVersion": "0.2.1-rc.2",
+        "artifactVersion": "0.1.4",
+        "declarationCases": [
+          {
+            "id": "engines-allow",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "engines-reject",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "exact-exemption",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "wrong-exemption",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "peer-fallback",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          }
+        ],
+        "ui": {
+          "available": true,
+          "navigation": "More > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+        },
+        "scope": "Final source tgz installed in private DSH0.2.1-rc.2 with five scanned inactive synthetic fixtures, real Chrome DOM and disable/re-enable. Positive new risk uses known older target0.2.0-rc.2 with explicit peer conflict; core tests cover forward0.2.0-rc.2 to0.2.1-rc.2. No model/account call or business certification.",
+        "subpathMetadata": true,
+        "artifactSha256": "1edce4ab1cd5dba6d1cc5ce610edaa74688c8fded2a89b02d316110a30969a15",
+        "runtimeExportContext": true,
+        "httpReport": true,
+        "originFence": {
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403
+        },
+        "upgradePreview": {
+          "installedArtifact": true,
+          "positiveNewRisk": true,
+          "staticEvidenceOnly": true,
+          "inputAndCatalogIdentities": true,
+          "ordinaryStateUnchanged": true,
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403,
+          "wrongMethodStatus": 405,
+          "unknownTargetUncertified": true,
+          "artifactSha256": "06682c99e568fdd870fece2ff5e6d6ade70fe0cf549e32cb8aa85c3a043cba17",
+          "catalogSha256": {
+            "current": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+            "target": "1331bf3220c1e06cfe087237077118d002dc04c32d027ce01da74c6a0d1dc9ad"
+          },
+          "ui": {
+            "realBrowser": true,
+            "positiveNewRisk": true,
+            "sourceIdentitiesVisible": true,
+            "staticLimitationsVisible": true,
+            "unknownTargetUncertified": true,
+            "ordinaryRowsAndFiltersUnchanged": true
+          },
+          "routeRemovedAndRestored": true
+        },
+        "panelExperience": {
+          "realBrowser": true,
+          "syntheticCases": 5,
+          "searchAndCombinedFilters": true,
+          "expandedGuidance": true,
+          "fullReportPreview": true,
+          "explicitClipboardCopy": true,
+          "absentBaselineNeutral": true,
+          "clearFilters": true,
+          "scope": "Actual installed candidate with five scanned, inactive public synthetic packages; comparable baseline branches are covered by component tests. No business certification."
+        },
+        "explanationPresentation": {
+          "realBrowser": true,
+          "certaintyAndImpactSeparated": true,
+          "perPluginCoverageVisible": true,
+          "noServiceUseClaimRemoved": true,
+          "scope": "Actual installed artifact overview; fixed-case overview/details are also exercised by component tests. Not business certification."
+        },
+        "disabledDiagnostic": {
+          "status": 404,
+          "type": null
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        },
+        "log": "/private/tmp/dsc-upgrade-rc2-live-reviewed.json",
+        "logSha256": "6724a6071c3db06d749c9edd7e8ae58d81f3609de0974753591713514724a671"
+      },
+      "skill": {
+        "bodyUtf16Length": 10223,
+        "sourceAndPackagedBytesEqual": true,
+        "sha256": "0787a502bfd3431eed39848542bad111f4f0fd646565b0edf8b22e81f7919657",
+        "freshContextBefore": "Without new guidance, proposed two ordinary checks instead of the single upgrade mode; controlled independent skill retrieval only.",
+        "freshContextFinal": "Selected compat_check({upgradeTo:0.2.1-rc.2,profile:profileA}); no-tool fallback is one CLI with explicit current and target. Preserved delta exits and rejected probe/business-success substitution. Read-only fresh subagent, no actual DSH model call.",
+        "docsAndSkillFocused": {
+          "tests": 35,
+          "pass": 35
+        }
+      },
+      "independentReview": {
+        "initialAdditionalP2": 1,
+        "resolved": 1,
+        "remainingBlockers": 0,
+        "fix": "Reject duplicate installed manifest names before canonical mapping and reject duplicate artifact identities in preview contract",
+        "finalFocused": {
+          "tests": 36,
+          "pass": 36
+        },
+        "scope": "Read-only independent review of full unstaged tracked and new implementation relative to sourceBase; no unresolved Critical/Important/required P2."
+      },
+      "checks": {
+        "format": true,
+        "generatedContract": true,
+        "docCheck": true,
+        "prepublishCheck": true,
+        "metaCheck": {
+          "errors": 0,
+          "notices": 1,
+          "skipped": 0,
+          "log": "/private/tmp/dsc-upgrade-meta-final.json",
+          "scope": "Read-only GitHub/npm fetch. Expected notice: local unreleased npm README differs from published immutable README; no remote edit."
+        },
+        "prepublishLog": "/private/tmp/dsc-upgrade-prepublish-final.log",
+        "prepublishLogSha256": "2d2c3e734c6f75813b49773ab2ed0722b2253a136c0458d62124cd2e6f725f85"
       },
       "delivery": {
         "localOnly": true,

@@ -146,7 +146,7 @@ describe('面板报告也带版本', () => {
     const ctx = {
       get: () => undefined,
       inject: (deps, cb) => cb({
-        webServer: { register: (r) => { route = r } },
+        webServer: { register: (r) => { if(r.path==='/plugin-compat-check/report')route = r } },
         tools: null, agents: null, skills: null,
       }),
       effect: () => {},

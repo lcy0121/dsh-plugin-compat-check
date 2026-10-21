@@ -52,6 +52,7 @@ const nodeRequire = createRequire(import.meta.url)
 
 import * as hostResources from '../plugin/lib/host-resources.js'
 import * as reportContract from '../plugin/lib/report-contract.js'
+import * as upgradeContract from '../plugin/lib/upgrade-contract.js'
 const HOST = path.join(REPO, 'plugin', 'index.js')
 const SRC = fs.readFileSync(HOST, 'utf8')
 
@@ -78,6 +79,7 @@ function loadHost(env = {}) {
   const cjs = SRC.replace(/^import.*from '\.\/lib\/host-resources\.js';?$/gm, 'const {privateDiagnostic,loaderObservations}=__hostResources;')
     .replace(/^import.*from '\.\/lib\/report-contract\.js';?$/gm, 'const {assertEnvelope,failureEnvelope}=__reportContract;')
     .replace(/^import.*from '\.\/lib\/finding-guidance\.js';?$/gm, 'const {nextSteps}=__findingGuidance;')
+    .replace(/^import.*from '\.\/lib\/upgrade-contract\.js';?$/gm, 'const {createUpgradeFailure:upgradeFailure,SUPPORTED_PREVIEW_VERSIONS}=__upgradeContract;')
     .replace(/^import\s+\{([^}]+)\}\s+from\s+'node:([^']+)';?$/gm, (m, names, mod) => {
       const pairs = names.split(',').map((s) => s.trim()).filter(Boolean)
       return pairs.map((p) => {
@@ -101,6 +103,7 @@ function loadHost(env = {}) {
     .replace(/\bexport\s+default\s+/g, 'const __default = ')
   sandbox.__hostResources=hostResources
   sandbox.__reportContract=reportContract
+  sandbox.__upgradeContract=upgradeContract
   sandbox.__findingGuidance={nextSteps}
   sandbox.__importMetaUrl = pathToFileURL(HOST).href
   sandbox.__node = (mod, name) => {
@@ -189,7 +192,7 @@ describe('宿主半边：结构完整性（功能全灭的回归）', () => {
     apply(ctx)
 
     assert.equal(registered.tools.length, 1, 'compat_check 工具没注册（apply 可能是空壳）')
-    assert.equal(registered.routes.length, 1, 'C2 路由没注册')
+    assert.equal(registered.routes.length, 2, 'C2 路由没注册')
     assert.equal(registered.providers.length, 1, 'E1 skill provider 没注册')
     assert.ok(logs.some((l) => /F2 启动自检|runAutoCheck/.test(l)) || SRC.includes('state.runAutoCheck = ()'),
       'F2 启动自检的挂载点不见了')
@@ -293,7 +296,7 @@ test('host subscriptions return route/tool/provider disposers to their owner',()
   const off=cb({get:()=>undefined,webServer:{register},tools:{register},skills:{registerProvider:register}});
   if(typeof off==='function')cleanup.push(off);return()=>{};
  }};
- apply(ctx);assert.equal(active,3);for(const off of cleanup)off();assert.equal(active,0,'no owned registrations may survive unload');
+ apply(ctx);assert.equal(active,4);for(const off of cleanup)off();assert.equal(active,0,'no owned registrations may survive unload');
 });
 
 
@@ -320,7 +323,7 @@ test('unloading an in-flight report before a pending manager read cannot write a
 describe('report route enforces the complete local origin authority',()=>{
  test('another loopback port or hostname cannot read a report, while same-origin and local non-browser requests still work',async()=>{
   const {apply}=loadHost({DSC_KERNEL:'/nonexistent-owned-kernel',DSC_OUT_DIR:''});let route;
-  apply({get:()=>undefined,inject:(deps,fn)=>fn(deps.includes('webServer')?{webServer:{register:r=>{route=r;}}}:{}),effect:()=>{}});
+  apply({get:()=>undefined,inject:(deps,fn)=>fn(deps.includes('webServer')?{webServer:{register:r=>{if(r.path==='/plugin-compat-check/report')route=r;}}}:{}),effect:()=>{}});
   assert.ok(route);
   const cases=[
    [{host:'127.0.0.1:8123',origin:'http://127.0.0.1:8124'},false],

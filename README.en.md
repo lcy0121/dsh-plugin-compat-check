@@ -59,6 +59,20 @@ node bin/compat-check.mjs --help
 
 `--issue-report` retains package names and package-relative paths: preview before sharing. It omits raw logs, probes and baselines and never posts automatically. Private working directories and engineering diagnostics are not ready-to-share reports either.
 
+### Pre-upgrade compatibility preview (unreleased source)
+
+```bash
+node bin/compat-check.mjs --nm <profile-or-node_modules> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json
+```
+
+In this mode `--dsh-version` is the explicit **current exact version**; `--upgrade-to` is the target. Both must be **0.2.0-rc.2 or 0.2.1-rc.2**, the versions with known catalogues. Unknown versions or ranges return `status=unsupported-version`, exit3 and an uncertified notice, without catalogue fallback. Omit `--json` for plain text. The npm package still has no CLI bin.
+
+The unreleased plugin source also offers a target-version field and an explicit preview button on the Compatibility page. Agents can call `compat_check({"upgradeTo":"0.2.1-rc.2"})`, optionally selecting the actual `profile`; the current version comes from the running host. Build a complete source tgz to use these additions.
+
+The preview analyzes one private byte copy of the installed plugins against both catalogues and declaration policies. It includes artifact hashes, catalogue files/sources/hashes, both reports, changes and coverage limits. It executes no target code, starts or upgrades no host, and uses no runtime observations, probes, profile exemptions, report cache or baseline. Bounded capture checks consistency; it is not an OS atomic snapshot.
+
+Top-level exit codes describe **added/worsened risks**: 0=none, 1=nonfatal risk, 2=fatal risk, 3=preview unavailable. Existing risks may remain in `targetReport`; exit0 does not certify target compatibility or business success. Preserve certainty/impactBasis, coverage/vacuous, incomplete scans and unverified client behavior. This mode rejects probe/boot, rule/catalogue override, baseline-file, dry-run, quiet and issue-report options; `--no-baseline` is an optional no-op. See [Plan §2.7](docs/Plan.md#27-升级前静态预检契约) for the separate contract.
+
 ### Fixed static batch (repository tool)
 
 ```bash

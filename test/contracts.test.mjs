@@ -295,7 +295,7 @@ test("HTTP and model consumers carry the same complete report and baseline as th
         },
       }),
     );
-    const script = `import {apply} from ${JSON.stringify(new URL("../plugin/index.js", import.meta.url).href)};import {run} from ${JSON.stringify(new URL("../bin/compat-check.mjs", import.meta.url).href)};import {toJSON} from ${JSON.stringify(new URL("../lib/report.mjs", import.meta.url).href)};process.argv=['node','fake','--profile','A'];let tool,handler;const loader={entries:()=>[]};apply({get:n=>n==='loader'?loader:undefined,inject:(names,cb)=>{if(names.includes('tools'))cb({tools:{register:t=>tool=t},agents:{}});if(names.includes('webServer'))cb({webServer:{register:r=>handler=r.handler}});return ()=>{}}});let http;await handler({headers:{host:'127.0.0.1'},url:'/plugin-compat-check/report'},{writeHead(){},end(s){http=JSON.parse(s)}});const model=await tool.execute({});const error=await tool.execute({profile:'missing'});const cli=toJSON(run({nm:${JSON.stringify(nm)},probe:${JSON.stringify(probe)},dshVersion:'0.2.0-rc.2',baseline:false}));console.log('RESULT '+JSON.stringify({http,model,error,cli,schema:tool.output.schema}));`;
+    const script = `import {apply} from ${JSON.stringify(new URL("../plugin/index.js", import.meta.url).href)};import {run} from ${JSON.stringify(new URL("../bin/compat-check.mjs", import.meta.url).href)};import {toJSON} from ${JSON.stringify(new URL("../lib/report.mjs", import.meta.url).href)};process.argv=['node','fake','--profile','A'];let tool,handler;const loader={entries:()=>[]};apply({get:n=>n==='loader'?loader:undefined,inject:(names,cb)=>{if(names.includes('tools'))cb({tools:{register:t=>tool=t},agents:{}});if(names.includes('webServer'))cb({webServer:{register:r=>{if(r.path==='/plugin-compat-check/report')handler=r.handler}}});return ()=>{}}});let http;await handler({headers:{host:'127.0.0.1'},url:'/plugin-compat-check/report'},{writeHead(){},end(s){http=JSON.parse(s)}});const model=await tool.execute({});const error=await tool.execute({profile:'missing'});const cli=toJSON(run({nm:${JSON.stringify(nm)},probe:${JSON.stringify(probe)},dshVersion:'0.2.0-rc.2',baseline:false}));console.log('RESULT '+JSON.stringify({http,model,error,cli,schema:tool.output.schema}));`;
     const child = spawnSync(
       process.execPath,
       ["--input-type=module", "-e", script],
@@ -331,7 +331,8 @@ test("HTTP and model consumers carry the same complete report and baseline as th
     assert.equal(data.model.exitCode, 1);
     assert.equal(data.error.exitCode, 3);
     assert.equal(data.error.report.ok, false);
-    assert.equal(data.schema.properties.report.type, "object");
+    assert.equal(data.schema.properties.report.oneOf[0].type, "object");
+    assert.equal(data.schema.properties.report.oneOf[1].type, "null");
   } finally {
     f.cleanup();
     fs.rmSync(home, { recursive: true, force: true });
@@ -395,6 +396,8 @@ test("staging detects stale host/browser artifacts and updates both from the can
     for (const name of [
       "lib/contracts.mjs",
       "lib/finding-guidance.mjs",
+      "lib/upgrade-contract.mjs",
+      "plugin/lib/upgrade-contract.js",
       "plugin/lib/client.js",
       "plugin/lib/report-contract.js",
       "plugin/lib/finding-guidance.js",

@@ -1,7 +1,7 @@
 /** Run the shipped client factory and its event handlers with persistent hooks. */
 import fs from "node:fs";
 import vm from "node:vm";
-export async function panelHarness(data, { clipboard, subject } = {}) {
+export async function panelHarness(data, { clipboard, subject, fetcher } = {}) {
   const stores = new Map(),
     effects = [];
   let frame, loaded, tree;
@@ -58,10 +58,12 @@ export async function panelHarness(data, { clipboard, subject } = {}) {
       window: win,
       navigator: { clipboard },
       console,
-      fetch: async () => ({
-        ok: true,
-        json: async () => JSON.parse(JSON.stringify(data)),
-      }),
+      fetch:
+        fetcher ||
+        (async () => ({
+          ok: true,
+          json: async () => JSON.parse(JSON.stringify(data)),
+        })),
       setTimeout,
       clearTimeout,
     },

@@ -1,6 +1,6 @@
 ---
 name: dsh-plugin-compat-check
-description: 当用户询问已安装DSH插件是否适配当前版本，或排查更新后插件不工作、设置页/面板消失、工具无响应、did not activate和兼容声明时使用。Use when checking installed DeepSeek Harness plugin compatibility, investigating post-update failures or missing features, or verifying peerDependencies and engines.dsh declarations.
+description: 当用户询问已安装DSH插件是否适配当前版本、升级前对比，或排查更新后插件不工作、设置页/面板消失、工具无响应、did not activate和兼容声明时使用。Use when checking installed DeepSeek Harness plugin compatibility, comparing versions before upgrading, investigating post-update failures or missing features, or verifying peerDependencies and engines.dsh declarations.
 ---
 
 # dsh-plugin-compat-check
@@ -12,6 +12,18 @@ description: 当用户询问已安装DSH插件是否适配当前版本，或排�
 ## 先看能不能直接调工具
 
 如果**当前会话已经注册了 `compat_check` 工具**（插件半边提供的对话入口，跑的是同一个内核），优先用它；没有就按下面的命令跑 CLI。两者结论同源，不要为了"多一点信息"去绕别的路。
+
+## 升级前对比
+
+用户要比较当前与目标版本时，已注册工具优先调用 `compat_check({"upgradeTo":"0.2.1-rc.2"})`，需要时指定实际 `profile`；当前版本由运行宿主解析，读取返回的 `upgradePreview`，普通 `report`、baseline/cache为null。没有工具时使用仓库 CLI 的独立预检模式，先明确 profile、当前精确版本和目标精确版本，再运行：
+
+```bash
+node <repo>/bin/compat-check.mjs --nm <profile或node_modules目录> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json
+```
+
+此模式的 `--dsh-version` 是**当前精确版本**，`--upgrade-to` 是目标精确版本；当前已认证目录仅为 `0.2.0-rc.2` 和 `0.2.1-rc.2`。未知版本或版本范围返回 `status=unsupported-version`、退出3并标明未认证，不能用邻近目录替代。普通文本输出省略 `--json`；此模式不接受 `--quiet`、探针/启动参数、规则/目录覆盖、基线参数或故障报告，可带无操作的 `--no-baseline`。
+
+JSON 使用独立的 `schemaVersion=1 / kind=plugin-compat-check/upgrade-preview`；读取 `currentReport`、`targetReport`、带插件身份的 `changes`、`summary` 与 `limitations`。它对**同一份已安装制品**做静态版本对比：不执行插件、不启动或升级宿主，不读取旁置/环境探针、profile豁免、基线或缓存，也不写状态。新增/恶化风险含致命项时退出2，其余新增/恶化风险退出1，无新增/恶化风险退出0；输入/扫描失败或未认证版本为3。保留提取不完整、coverage/vacuous和客户端未验证限制；0仍可能有未变化的旧问题。差异是目录与声明策略下的预测，不能据此认定升级后业务通过，也不能代替目标宿主的运行时与业务验收。
 
 ## 怎么跑
 

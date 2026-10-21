@@ -17,6 +17,7 @@ import {
 } from "./browser-session.mjs";
 import { run as check } from "../bin/compat-check.mjs";
 import { TOOL_VERSION } from "../lib/version.mjs";
+import { assertUpgradePreview } from "../lib/upgrade-contract.mjs";
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-rc2-live-"));
@@ -385,6 +386,28 @@ try {
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.cpSync(source, target, { recursive: true });
     }
+    const upgradeFixture = path.join(
+      profile,
+      "node_modules",
+      "@rc2",
+      "upgrade-risk",
+    );
+    fs.mkdirSync(upgradeFixture, { recursive: true });
+    writeJSON(path.join(upgradeFixture, "package.json"), {
+      name: "@rc2/upgrade-risk",
+      version: "1.0.0",
+      type: "module",
+      main: "index.js",
+      dsh: {},
+      engines: { dsh: "0.2.1-rc.2" },
+      peerDependencies: { "@deepseek-ai/dsh": "0.2.1-rc.2" },
+    });
+    // A scanned, inactive package makes a positive prediction reproducible without
+    // loading its code or changing any real user's profile.
+    fs.writeFileSync(
+      path.join(upgradeFixture, "index.js"),
+      "export function apply(){}\n",
+    );
     const host = await boot("rc2-ui");
     requireTrue(
       host.url,
@@ -440,6 +463,137 @@ try {
     result.originFence = {
       sameOriginStatus: sameOrigin.status,
       crossPortStatus: crossOrigin.status,
+    };
+    const upgradeUrl = new URL(
+      "/plugin-compat-check/upgrade-preview",
+      host.url,
+    );
+    upgradeUrl.searchParams.set("targetVersion", "0.2.0-rc.2");
+    upgradeUrl.searchParams.set("currentVersion", version);
+    const fetchUpgrade = async (url = upgradeUrl, options = {}) => {
+      const response = await fetch(url, {
+        headers,
+        signal: AbortSignal.timeout(30000),
+        ...options,
+      });
+      return { status: response.status, body: await response.json() };
+    };
+    const baselineDir = path.join(env.DSH_HOME, "dsh-plugin-compat-check");
+    const stateFiles = () =>
+      fs.existsSync(baselineDir)
+        ? fs
+            .readdirSync(baselineDir)
+            .sort()
+            .map((name) => [
+              name,
+              crypto
+                .createHash("sha256")
+                .update(fs.readFileSync(path.join(baselineDir, name)))
+                .digest("hex"),
+            ])
+        : [];
+    const stateBeforeUpgrade = stateFiles();
+    const upgrade = await fetchUpgrade();
+    requireTrue(
+      upgrade.status === 200 && upgrade.body.ok,
+      "Installed upgrade preview failed: " + JSON.stringify(upgrade.body),
+    );
+    assertUpgradePreview(upgrade.body);
+    requireTrue(
+      upgrade.body.currentVersion === version &&
+        upgrade.body.targetVersion === "0.2.0-rc.2" &&
+        upgrade.body.changes.added.some(
+          (x) =>
+            x.plugin === "@rc2/upgrade-risk" &&
+            x.finding.category === "declared-incompatible",
+        ) &&
+        upgrade.body.exitCode > 0,
+      "Installed preview lost its positive declaration-risk case",
+    );
+    requireTrue(
+      [upgrade.body.currentReport, upgrade.body.targetReport].every(
+        (r) =>
+          r.observation.mode === "catalogue" &&
+          r.observation.usable === false &&
+          r.observation.bound === false,
+      ) &&
+        upgrade.body.baseline === null &&
+        upgrade.body.cache === null &&
+        JSON.stringify(stateBeforeUpgrade) === JSON.stringify(stateFiles()),
+      "Upgrade preview reused runtime evidence or changed ordinary state",
+    );
+    const installedKernel = path.join(
+      profile,
+      "node_modules",
+      "dsh-plugin-compat-check",
+      "kernel",
+    );
+    for (const side of ["current", "target"]) {
+      const catalog = upgrade.body.catalogs[side];
+      requireTrue(
+        catalog.sha256 ===
+          crypto
+            .createHash("sha256")
+            .update(fs.readFileSync(path.join(installedKernel, catalog.file)))
+            .digest("hex") &&
+          Boolean(catalog.source.host && catalog.source.client),
+        "Upgrade catalogue identity differs from the installed artifact",
+      );
+    }
+    requireTrue(
+      /^[a-f0-9]{64}$/.test(upgrade.body.artifact.sha256) &&
+        upgrade.body.artifact.packages.some(
+          (p) =>
+            p.name === "@rc2/upgrade-risk" && /^[a-f0-9]{64}$/.test(p.sha256),
+        ),
+      "Upgrade preview lost installed input identities",
+    );
+    const sameOriginUpgrade = await fetchUpgrade(upgradeUrl, {
+      headers: { ...headers, Origin: upgradeUrl.origin },
+    });
+    const crossOriginUpgrade = await fetchUpgrade(upgradeUrl, {
+      headers: { ...headers, Origin: wrongPort.origin },
+    });
+    const methodUpgrade = await fetchUpgrade(upgradeUrl, { method: "POST" });
+    const unknownUpgradeUrl = new URL(upgradeUrl);
+    unknownUpgradeUrl.searchParams.set("targetVersion", "9.9.9");
+    const unknownUpgrade = await fetchUpgrade(unknownUpgradeUrl);
+    requireTrue(
+      sameOriginUpgrade.status === 200 &&
+        sameOriginUpgrade.body.ok &&
+        crossOriginUpgrade.status === 403 &&
+        !JSON.stringify(crossOriginUpgrade.body).includes("nodeModules") &&
+        methodUpgrade.status === 405,
+      "Installed upgrade route origin/method fence failed",
+    );
+    assertUpgradePreview(unknownUpgrade.body);
+    requireTrue(
+      unknownUpgrade.status === 200 &&
+        unknownUpgrade.body.ok === false &&
+        unknownUpgrade.body.status === "unsupported-version" &&
+        unknownUpgrade.body.exitCode === 3 &&
+        unknownUpgrade.body.currentReport === null &&
+        unknownUpgrade.body.targetReport === null &&
+        unknownUpgrade.body.error.includes("未认证"),
+      "Unknown upgrade target was presented as a clean comparison",
+    );
+    result.upgradePreview = {
+      installedArtifact: true,
+      positiveNewRisk: true,
+      staticEvidenceOnly: true,
+      inputAndCatalogIdentities: true,
+      ordinaryStateUnchanged: true,
+      sameOriginStatus: sameOriginUpgrade.status,
+      crossPortStatus: crossOriginUpgrade.status,
+      wrongMethodStatus: methodUpgrade.status,
+      unknownTargetUncertified: true,
+      artifactSha256: upgrade.body.artifact.sha256,
+      catalogSha256: Object.fromEntries(
+        Object.entries(upgrade.body.catalogs).map(([side, item]) => [
+          side,
+          item.sha256,
+        ]),
+      ),
     };
     const chromePath =
       process.env.DSC_CHROME ||
@@ -637,12 +791,12 @@ try {
         `Array.from(document.querySelectorAll('button')).find(e=>e.innerText==='清除筛选').click()`,
       );
       await poll(
-        async () => (await rowNames()).length === 5,
+        async () => (await rowNames()).length === 6,
         "Clearing filters did not restore full report",
       );
       result.panelExperience = {
         realBrowser: true,
-        syntheticCases: 4,
+        syntheticCases: 5,
         searchAndCombinedFilters: true,
         expandedGuidance: true,
         fullReportPreview: true,
@@ -650,8 +804,106 @@ try {
         absentBaselineNeutral: true,
         clearFilters: true,
         scope:
-          "Actual installed candidate with four scanned, inactive public synthetic packages; comparable baseline branches are covered by component tests. No business certification.",
+          "Actual installed candidate with five scanned, inactive public synthetic packages; comparable baseline branches are covered by component tests. No business certification.",
       };
+      await evalx(`${field("搜索插件")}.focus()`);
+      await chrome.send("Input.insertText", { text: "healthy" });
+      await poll(
+        async () =>
+          JSON.stringify(await rowNames()) ===
+          JSON.stringify(["@label/healthy"]),
+        "Pre-upgrade ordinary filter failed",
+      );
+      await evalx(
+        `document.querySelector('[data-upgrade-preview] > summary').click()`,
+      );
+      await poll(
+        () => evalx(`Boolean(${field("目标 DSH 版本")})`),
+        "Upgrade target input missing",
+      );
+      const enterTarget = async (target) => {
+        await evalx(
+          `${field("目标 DSH 版本")}.focus();${field("目标 DSH 版本")}.select()`,
+        );
+        await chrome.send("Input.insertText", { text: target });
+        await evalx(
+          `Array.from(document.querySelectorAll('button')).find(e=>e.innerText==='运行升级预检').click()`,
+        );
+      };
+      await enterTarget("0.2.0-rc.2");
+      await poll(
+        () =>
+          evalx(
+            `Boolean(document.querySelector('[data-upgrade-result="compared"]'))`,
+          ),
+        "Actual upgrade result did not render",
+        40000,
+      );
+      const upgradeDom = await evalx(
+        `document.querySelector('[data-upgrade-result="compared"]').innerText`,
+      );
+      requireTrue(
+        upgradeDom.includes("@rc2/upgrade-risk") &&
+          upgradeDom.includes("declared-incompatible") &&
+          upgradeDom.includes("新增") &&
+          upgradeDom.includes("0.2.1-rc.2 → 0.2.0-rc.2"),
+        "Actual DOM lost predicted new-risk details",
+      );
+      await evalx(
+        `Array.from(document.querySelectorAll('[data-upgrade-result="compared"] summary')).find(e=>e.innerText==='查看输入制品、目录来源与预测限制').click()`,
+      );
+      const provenanceDom = await evalx(
+        `document.querySelector('[data-upgrade-result="compared"]').innerText`,
+      );
+      requireTrue(
+        provenanceDom.includes(upgrade.body.artifact.sha256) &&
+          Object.values(upgrade.body.catalogs).every(
+            (c) =>
+              provenanceDom.includes(c.sha256) &&
+              provenanceDom.includes(c.source.host) &&
+              provenanceDom.includes(c.source.client),
+          ) &&
+          provenanceDom.includes("未认证未来环境或业务通过") &&
+          JSON.stringify(await rowNames()) ===
+            JSON.stringify(["@label/healthy"]) &&
+          (await evalx(`${field("搜索插件")}.value==='healthy'`)),
+        "Actual upgrade provenance or ordinary filter isolation failed",
+      );
+      await enterTarget("9.9.9");
+      await poll(
+        () =>
+          evalx(
+            `document.querySelector('[data-upgrade-preview]').innerText.includes('版本未认证')`,
+          ),
+        "Unknown version UI was not uncertified",
+      );
+      const unknownDom = await evalx(
+        `document.querySelector('[data-upgrade-preview]').innerText`,
+      );
+      requireTrue(
+        !(await evalx(
+          `Boolean(document.querySelector('[data-upgrade-result="compared"]'))`,
+        )) &&
+          !/新增 0|没有发现新增|业务通过。/.test(unknownDom) &&
+          JSON.stringify(await rowNames()) ===
+            JSON.stringify(["@label/healthy"]),
+        "Unknown version retained a stale clean comparison or reset ordinary rows",
+      );
+      result.upgradePreview.ui = {
+        realBrowser: true,
+        positiveNewRisk: true,
+        sourceIdentitiesVisible: true,
+        staticLimitationsVisible: true,
+        unknownTargetUncertified: true,
+        ordinaryRowsAndFiltersUnchanged: true,
+      };
+      await evalx(
+        `Array.from(document.querySelectorAll('button')).find(e=>e.innerText==='清除筛选').click()`,
+      );
+      await poll(
+        async () => (await rowNames()).length === 6,
+        "Post-upgrade full ordinary report changed",
+      );
       result.explanationPresentation = {
         realBrowser: true,
         certaintyAndImpactSeparated: true,
@@ -699,6 +951,23 @@ try {
           return false;
         }
       }, "Owned route survived disable");
+      await poll(async () => {
+        try {
+          const response = await fetch(upgradeUrl, {
+            headers,
+            signal: AbortSignal.timeout(2000),
+          });
+          return (
+            response.status === 404 ||
+            (response.status === 200 &&
+              !response.headers
+                .get("content-type")
+                ?.includes("application/json"))
+          );
+        } catch {
+          return false;
+        }
+      }, "Upgrade route survived disable");
       await evalx(`${toggle}.click()`);
       await poll(
         () => evalx(`${toggle}?.getAttribute('aria-checked')==='true'`),
@@ -712,6 +981,27 @@ try {
           return false;
         }
       }, "Report did not recover after enable");
+      await poll(
+        async () => {
+          try {
+            const restored = await fetchUpgrade();
+            return (
+              restored.status === 200 &&
+              restored.body.ok &&
+              restored.body.changes.added.some(
+                (x) =>
+                  x.plugin === "@rc2/upgrade-risk" &&
+                  x.finding.category === "declared-incompatible",
+              )
+            );
+          } catch {
+            return false;
+          }
+        },
+        "Upgrade route did not recover after enable",
+        40000,
+      );
+      result.upgradePreview.routeRemovedAndRestored = true;
       await settings();
       result.ui = {
         available: true,

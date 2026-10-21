@@ -20,6 +20,16 @@ DSH 0.2.1-rc.2 入口：**更多 → 设置 → 内置插件 → 兼容性**。a
 
 仓库的固定真实插件故障回归单独运行，不随npm包提供；历史公开0.1.4及其验收范围见前述发布记录。
 
+### 升级前兼容性预检
+
+当前源码在兼容性页提供“目标 DSH 版本”输入和“运行升级预检”按钮。agent 可调用 `compat_check({"upgradeTo":"0.2.1-rc.2"})`，需要时指定实际 `profile`；当前版本由正在运行的宿主解析。结果放在独立的 `upgradePreview`，普通 `report`、缓存和基线不参与，也不被预检覆盖。新目标需要重新运行，不借用先前结论。
+
+当前与目标两端仅支持已有明确 API 目录的精确版本 **0.2.0-rc.2、0.2.1-rc.2**。未知版本或版本范围返回 `status=unsupported-version`、退出3并提示未认证，不使用邻近目录。预检对同一组插件的私有字节副本联合静态提取，再按各自目录和声明策略独立判定；保留制品 SHA-256、目录文件/来源/摘要、当前/目标报告、差异、certainty/impactBasis 和覆盖限制。输入有界且作一致性观察，不是 OS 原子快照。
+
+它不执行插件、不启动/安装/升级宿主，不读取当前运行时、探针、loader状态、profile豁免、缓存或基线，不写产品状态。结果码0/1/2仅表示无新增或变重风险/有非致命新增或变重/含致命新增或变重；3表示预检不可用。目标已有问题可能仍在 `targetReport` 中，0不代表目标可用或业务通过；客户端和目标宿主业务仍需另验收。
+
+CLI 从仓库运行：`node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json`，此处 `--dsh-version` 明确表示当前精确版本。npm包没有CLI bin；以上面板/agent增量尚未发布，须从源码构建完整tgz。契约与验收边界见 [Plan §2.7](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md#27-升级前静态预检契约)。
+
 ## 从源码构建安装
 
 仓库根是 private 开发工作区，不是可激活的插件包。先在根运行 `npm ci --ignore-scripts`，然后：
@@ -40,7 +50,7 @@ npm 产物**没有 CLI bin、安装检查 shell 或 probe 入口**，不支持 `
 - Babel AST 扫描不执行目标源码，分析运行在有时间/内存上限的 worker 中；有界包内值流支持部分别名、参数/返回值和透明 Proxy，动态行为仍有限。必需 inject 的激活障碍与方法失效分别判断。
 - 转述保留 `certainty`、`impactBasis`、`coverage` 和 `vacuous`。API 发现通常有 `file:line`，loader/声明事实可能无位置；声明放行、激活成功、条目到货和 ok 均不证明业务正常，客户端功能须另验收。
 - 从 DSH 0.2.1-rc.1 起优先自有 `engines.dsh`，缺失才回退官方 peer，旧目标保留旧规则。声明冲突/非法字段是推断风险，不冒充实际加载失败。只读独立 `compatibility.json`，按插件名、插件精确版本、DSH 精确版本匹配豁免；无效/不可读/超64KiB保留限制，不自动授予，非法字段不可豁免。
-- DSH≥0.2.1-rc.2 用新目录（host98/client8），其余/未知用旧0.2.0-rc.2目录（host91/client8）；未来 DSH 未认证。rc.2 的真实 Chrome 验收覆盖导航、报告渲染、禁用后路由移除及重启用后恢复/标签唯一；不认证所有插件业务。
+- 普通体检对 DSH≥0.2.1-rc.2 用新目录（host98/client8），其余/未知用旧0.2.0-rc.2目录（host91/client8）；未来 DSH 未认证。升级预检严格限定上文的两个精确版本，不采用普通体检的目录回退。rc.2 的历史真实 Chrome 验收覆盖导航、报告渲染、禁用后路由移除及重启用后恢复/标签唯一；不认证所有插件业务。
 - 体检不装包、不调用外部命令或联网；默认写自身 schema2 基线：`$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`。模式隔离、锁内比较、原子替换，不完整扫描不推进。完全禁基线读写须用仓库 CLI 的 `--no-baseline`。
 - HTTP envelope.report 和 `compat_check.report` 保留完整发现、覆盖、观测和基线，原 summary/text 保留；新面板拒绝损坏或不支持版本的负载。旧 probe 提示未绑定，旧 schema1 基线中性重建，不兼容报告变更须升 schema。
 

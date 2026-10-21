@@ -30,6 +30,7 @@ import { createRequire as __createRequire } from 'node:module';
 import {loaderObservations,privateDiagnostic} from './lib/host-resources.js';
 import {assertEnvelope,failureEnvelope} from './lib/report-contract.js';
 import {nextSteps} from './lib/finding-guidance.js';
+import {createUpgradeFailure as upgradeFailure, SUPPORTED_PREVIEW_VERSIONS} from './lib/upgrade-contract.js';
 
 export const name = 'dsh-plugin-compat-check';
 
@@ -1095,6 +1096,82 @@ function renderForModel(compat) {
 }
 
 /** 工具的服务集合：`tools`；`agents` 用来把相对路径解析到会话工作目录。 */
+/** Static version comparisons never enter the ordinary report cache or baseline path. */
+function unavailableUpgrade(error, options = {}) {
+  let toolVersion = 'unknown';
+  try { toolVersion = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version; } catch {}
+  return upgradeFailure(error, {toolVersion, currentVersion:resolveDshVersion(), targetVersion:options.targetVersion, ...options});
+}
+
+async function serveUpgradePreview(state, options = {}) {
+  const currentVersion = resolveDshVersion(), targetVersion = options.targetVersion || null;
+  const failure = error => unavailableUpgrade(error,{currentVersion,targetVersion});
+  try {
+    if (state.disposed) return failure('Plugin generation disposed / 已卸载');
+    if (options.currentVersion && options.currentVersion !== currentVersion)
+      return failure('当前 DSH 版本已变化，请刷新普通报告后重新预检');
+    if (options.invalidRequest) return failure(options.invalidRequest);
+    if (!SUPPORTED_PREVIEW_VERSIONS.includes(currentVersion) || !SUPPORTED_PREVIEW_VERSIONS.includes(targetVersion))
+      return unavailableUpgrade('版本未认证：仅支持有明确 API 目录的精确版本 '+SUPPORTED_PREVIEW_VERSIONS.join('、'),{currentVersion,targetVersion,status:'unsupported-version'});
+    const kernel = resolveKernelDir();
+    if (!kernel) return failure('找不到升级预检内核');
+    const engine = await import(pathToFileURL(join(kernel, 'lib/upgrade-preview.mjs')).href);
+    if (state.disposed) return failure('Plugin generation disposed / 已卸载');
+    const nm = resolveNodeModules(options.profile || null);
+    const key = JSON.stringify([nm.dir && realpathSync(nm.dir), currentVersion, targetVersion]);
+    if (state.upgradeFlight && state.upgradeFlight.key !== key)
+      return failure('另一目标的升级预检正在运行，请稍后重试');
+    let flight = state.upgradeFlight;
+    if (!flight) {
+      flight = {key, promise: engine.runUpgradePreview({nm:nm.dir, currentVersion, targetVersion})};
+      state.upgradeFlight = flight;
+    }
+    try {
+      const result = await flight.promise;
+      return state.disposed ? failure('Plugin generation disposed / 已卸载') : result;
+    } finally {
+      if (state.upgradeFlight === flight) state.upgradeFlight = null;
+    }
+  } catch (error) {return failure(errText(error));}
+}
+
+async function upgradeToolResult(state, options) {
+  let preview, text;
+  try {
+    const kernel = resolveKernelDir();
+    if (!kernel) throw Error('找不到升级预检内核');
+    const {renderUpgradePreview} = await import(pathToFileURL(join(kernel, 'lib/upgrade-preview.mjs')).href);
+    preview = await serveUpgradePreview(state, options);
+    text = renderUpgradePreview(preview);
+  } catch (error) {
+    preview = unavailableUpgrade(errText(error),{targetVersion:options.targetVersion});
+    text = '升级预检无法比较：'+preview.error+'；静态预测不等于目标版本业务通过。';
+  }
+  return {schemaVersion:1,kind:'plugin-compat-check/tool-result',ok:preview.ok,error:preview.error,exitCode:preview.exitCode,toolVersion:preview.toolVersion,
+    report:null,baseline:null,cache:null,nodeModules:'',hasRuntimeSurface:false,
+    summary:preview.ok?`静态升级预检：新增 ${preview.summary.added} / 变重 ${preview.summary.worsened}；不等于目标版本业务通过`:'升级预检无法比较',
+    text,upgradePreview:preview};
+}
+
+function registerUpgradeRoute(ctx, state) {
+  if (typeof ctx.inject !== 'function') return;
+  ctx.inject(['webServer'], scope => {
+    try {
+      return scope.webServer.register({name:'dsh-plugin-compat-check/upgrade-preview',kind:'exact',path:'/plugin-compat-check/upgrade-preview',handler:async(req,res)=>{
+        const send=(status,body)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(body));};
+        if (!isTrustedRequest(req)) return send(403,{error:'refused: untrusted request'});
+        if (req.method !== 'GET') return send(405,{error:'升级预检仅支持 GET'});
+        try {
+          const url=new URL(req.url||'/', 'http://127.0.0.1');
+          const invalid=(req.url||'').length>2048 || [...url.searchParams.keys()].some(k=>!['targetVersion','currentVersion'].includes(k));
+          const out=await serveUpgradePreview(state,{targetVersion:url.searchParams.get('targetVersion'),currentVersion:url.searchParams.get('currentVersion'),invalidRequest:invalid?'升级预检请求参数无效':null});
+          send(200,out);
+        } catch (error) {send(500,{error:'升级预检无法完成，请在本机核对插件与宿主版本'});}
+      }});
+    } catch (error) {log('Upgrade preview route registration failed: '+errText(error));}
+  });
+}
+
 const TOOL_SERVICES = ['tools', 'agents'];
 
 function toolResult(compat,text){
@@ -1126,11 +1203,13 @@ function registerTool(ctx, state) {
           + 'impactBasis=measured requires corresponding impact/state observations; inferred means an inferred impact, not a measured business outcome. '
           + 'vacuous means no verified calls in an otherwise ok result; service dependencies or unverified client features may still exist. '
           + 'Preserve coverage limits: unobserved does not mean absent, and no findings or verified calls do not certify business behavior. '
-          + 'The official API catalogue is a contract catalogue, not a runtime observation.',
+          + 'The official API catalogue is a contract catalogue, not a runtime observation. '
+          + 'Provide upgradeTo for a separate static pre-upgrade comparison against an exact supported DSH version. It reuses no live observations, cache or baseline, performs no upgrade and does not certify future business behavior.',
         parameters: {
           type: 'object',
           additionalProperties: false,
           properties: {
+            upgradeTo: {type:'string',description:'Optional exact target DSH version for static upgrade preflight; known catalogues: 0.2.0-rc.2 and 0.2.1-rc.2. Unknown versions are uncertified.'},
             profile: {
               type: 'string',
               description:
@@ -1155,7 +1234,8 @@ function registerTool(ctx, state) {
               error: {oneOf:[{type:'string'},{type:'null'}]},
               exitCode: {type:'integer',enum:[0,1,2,3]},
               toolVersion: {oneOf:[{type:'string'},{type:'null'}]},
-              report: {type:'object',additionalProperties:true},
+              report: {oneOf:[{type:'object',additionalProperties:true},{type:'null'}]},
+              upgradePreview: {type:'object',additionalProperties:true},
               baseline: {oneOf:[{type:'object',additionalProperties:true},{type:'null'}]},
               cache: {oneOf:[{type:'object',additionalProperties:true},{type:'null'}]},
               summary: { type: 'string' },
@@ -1179,6 +1259,9 @@ function registerTool(ctx, state) {
             const wanted = args && typeof args.profile === 'string' && args.profile.trim() !== ''
               ? args.profile.trim()
               : null;
+            if (args && Object.prototype.hasOwnProperty.call(args,'upgradeTo')) {
+              return await upgradeToolResult(state,{profile:wanted,targetVersion:args.upgradeTo,invalidRequest:typeof args.upgradeTo !== 'string'?'upgradeTo 必须为确切 DSH 版本':null});
+            }
             const compat = await serveReport(state,ctx,false,wanted?{profile:wanted}:{});
             const text = renderForModel(compat);
             return toolResult(compat,text);
@@ -1429,7 +1512,8 @@ export function apply(ctx) {
 
     // E1：注册随包的 skill。**失败只留日志，绝不抛** —— 见文件顶部硬规矩。
     try {
-      registerSkill(ctx);
+      registerUpgradeRoute(ctx, state);
+    registerSkill(ctx);
     } catch (error) {
       log(`WARN SKILL registration threw: ${errText(error)}`);
     }
