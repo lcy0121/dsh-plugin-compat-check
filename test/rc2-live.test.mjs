@@ -18,6 +18,7 @@ describe(
       assert.equal(value.declarationCases.length, 5);
       assert.ok(value.declarationCases.every((x) => x.matched));
       assert.equal(value.subpathMetadata, true);
+      assert.equal(value.runtimeExportContext, true);
       assert.deepEqual(value.originFence, {
         sameOriginStatus: 200,
         crossPortStatus: 403,
@@ -36,6 +37,16 @@ describe(
           value.explanationPresentation.noServiceUseClaimRemoved,
           true,
         );
+        for (const key of [
+          "realBrowser",
+          "searchAndCombinedFilters",
+          "expandedGuidance",
+          "fullReportPreview",
+          "explicitClipboardCopy",
+          "absentBaselineNeutral",
+          "clearFilters",
+        ])
+          assert.equal(value.panelExperience[key], true, key);
         assert.equal(value.ui.tabCount, 1);
         assert.equal(value.ui.reenabled, true);
         assert.equal(value.ui.httpRestored, true);

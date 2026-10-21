@@ -29,6 +29,7 @@ import { createRequire as __createRequire } from 'node:module';
 
 import {loaderObservations,privateDiagnostic} from './lib/host-resources.js';
 import {assertEnvelope,failureEnvelope} from './lib/report-contract.js';
+import {nextSteps} from './lib/finding-guidance.js';
 
 export const name = 'dsh-plugin-compat-check';
 
@@ -980,8 +981,10 @@ async function computeReport(state, ctx, options = {}) {
     }
 
     const {toJSON}=await import(pathToFileURL(join(kernel,'lib','report.mjs')).href);
+    const {renderIssueReport}=await import(pathToFileURL(join(kernel,'lib','issue-report.mjs')).href);
     if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
     const canonical=toJSON({error:null,extract:extracted,verdict,baseline,inputs:{nodeModules:nm.dir,hasRuntimeSurface:verdict.observation.usable,catalog:catalogPath,rules:rulesPath}});
+    out.issueReport=renderIssueReport(canonical);
     out.baseline = canonical.baseline;
     out.dshVersion = canonical.dshVersion;
     out.exitCode = canonical.exitCode;
@@ -1067,6 +1070,7 @@ function renderForModel(compat) {
         L.push(`    ${sev} / ${cat}${f.certainty === 'certain' ? ' [确定]' : ' [疑似]'}  ${api}  @ ${loc}`);
         if (f.impact) L.push(`      影响${f.impactBasis==='measured'?'（实测）':f.impactBasis==='inferred'?'（推断，非实测）':'（依据未提供）'}：${f.impact}`);
         if(f.basis)L.push(`      依据：${f.basis}`);
+        for(const step of nextSteps(f))L.push(`      下一步：${step}`);
       }
       const cs = p.clientSide || [];
       if (cs.length) L.push(`    客户端半边（命令行测不到，需界面验证）：${cs.map((c) => c.service).join('、')}`);
@@ -1079,6 +1083,7 @@ function renderForModel(compat) {
     L.push('确定（certain）表示当前证据足以支持该条发现，可来自明确静态事实或合格运行时观测；疑似（suspected）表示当前证据不足以确定该条发现。');
     L.push('impactBasis=measured/inferred 分别表示影响有对应实测依据/影响由证据推断；确定发现不等于影响已实测。未观测不等于缺失。');
     L.push('没有已验证调用仍可能存在服务依赖或客户端功能；调用核验和覆盖完整均不等于业务验收通过。');
+    L.push('下一步是核实建议；本工具不会自动安装、升级或修改配置与源码。');
     L.push('读这个结果时注意：');
     L.push('  1) 「可用」不等于"功能验证过"。它只说明本轮未发现冲突；请同时看证据覆盖与未验证项。'
       + '插件仍然可能因为自身逻辑、配置或第三方依赖而出问题。');

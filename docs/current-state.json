@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.4",
-  "recordedAt": "2026-10-20T16:13:05.109Z",
-  "testFiles": 39,
-  "tests": 590,
+  "recordedAt": "2026-10-21T07:08:24.581Z",
+  "testFiles": 43,
+  "tests": 631,
   "repositoryFiles": {
-    "total": 254,
+    "total": 264,
     "fixtures": 90,
-    "other": 164
+    "other": 174
   },
   "verification": {
     "platform": "darwin",
@@ -7498,6 +7498,717 @@
           "npmVersion": "0.1.4",
           "scope": "Read-only; no remote edits."
         }
+      }
+    },
+    "upstreamAcceptance20261021": {
+      "recordedAt": "2026-10-21T07:11:03.384Z",
+      "localDate": "2026-10-21",
+      "timezone": "Asia/Shanghai",
+      "baseCommit": "0509603",
+      "scope": "Read-only public follow-up and real global installation in fresh private no-credential DSH profile. No external posts, model calls, push or release.",
+      "primaryCatalog": {
+        "indexUrl": "https://awesome-dsh-plugin.com/plugins.json",
+        "indexSha256": "d6fbc7372dfde2eb03a02963f162a6997b5080509f3d233b821ee570187f2638",
+        "detailUrl": "https://awesome-dsh-plugin.com/p/lcy0121/dsh-plugin-compat-check--plugin/",
+        "detailSha256": "507dcf9b325830c31bd596fceef071d1148ef3b367dbdba5f8537369ea158210",
+        "npmPackage": "dsh-plugin-compat-check",
+        "version": "0.1.4"
+      },
+      "market": {
+        "version": "1.66.45",
+        "gitHead": "eb72f8917129dabd281aef14169e5b57f43cd50e",
+        "displayNamePR": {
+          "state": "closed",
+          "merged": true,
+          "merged_at": "2026-10-20T16:45:22Z",
+          "html_url": "https://github.com/dsh-market/dsh-market/pull/948"
+        },
+        "ui": {
+          "realChrome": true,
+          "cardTitle": "dsh-plugin-compat-check",
+          "confirmationTitle": "安装 dsh-plugin-compat-check?",
+          "targetVersion": "0.1.4",
+          "terminalWarningPresent": false,
+          "genericThirdPartyNoticePresent": true,
+          "confirmedInstall": true
+        },
+        "region": "global",
+        "installedProductVersion": "0.1.4",
+        "registryIntegrity": {
+          "dshmarket": {
+            "sha1Matches": true,
+            "integrityMatches": true,
+            "sha256": "5267bdcdf66ab16d349d7481ca0ae4caff8393f61fa902fca25ff2b608627415"
+          },
+          "dsh-plugin-compat-check": {
+            "sha1Matches": true,
+            "integrityMatches": true,
+            "sha256": "6b1c709c2b604d3b02982109b3048eefd0acdb9395fe285c3ef880dd1868ecc2"
+          }
+        },
+        "installedTrees": {
+          "dshmarket": {
+            "files": 186,
+            "digest": "ac7b438905fe32e9f2bf22c38e6bc7f00b442d8e8c0cdef050b51c57efbced23",
+            "registryTreeDigest": "ac7b438905fe32e9f2bf22c38e6bc7f00b442d8e8c0cdef050b51c57efbced23",
+            "byteComparison": "All files matched registry tarball; both registry sha1/integrity matched."
+          },
+          "dsh-plugin-compat-check": {
+            "files": 38,
+            "digest": "d5364bdbb0349f2b6496cc6890999a63fc5d1a9619b6be56557449ea73d017fd",
+            "registryTreeDigest": "d5364bdbb0349f2b6496cc6890999a63fc5d1a9619b6be56557449ea73d017fd",
+            "byteComparison": "All files matched registry tarball; both registry sha1/integrity matched."
+          }
+        },
+        "http": {
+          "status": 200,
+          "ok": true,
+          "schemaVersion": 1,
+          "kind": "plugin-compat-check/report",
+          "toolVersion": "0.1.4",
+          "reportDshVersion": "0.2.1-rc.2",
+          "reportToolVersion": "0.1.4",
+          "reportAvailable": true,
+          "exitCode": 1,
+          "contractValid": true
+        },
+        "restart": {
+          "status": 200,
+          "ok": true,
+          "toolVersion": "0.1.4",
+          "dshVersion": "0.2.1-rc.2",
+          "contractValid": true
+        },
+        "lookupFailure": {
+          "issue": "https://github.com/dsh-market/dsh-market/issues/932",
+          "handlerSha256": "8b1a6e6791b2d89e8c327472904b2abec663809916f34b86c67033ab9bf1a119",
+          "routeSourceSha256": "77c2287425003f8e57c30b899f7cc078c155a692f4998d82b14ae496ba066d1f",
+          "helperSha256": "3d6615a1d8178d895ea2f4347c2aad26a50be0ecef45e740e02823f05199fd08",
+          "cases": [
+            {
+              "requestedVersion": null,
+              "installCommand": [
+                "add",
+                "dsh-plugin-compat-check"
+              ],
+              "responseStatus": 200,
+              "warningFields": []
+            },
+            {
+              "requestedVersion": "0.1.4",
+              "installCommand": [
+                "add",
+                "dsh-plugin-compat-check@0.1.4"
+              ],
+              "responseStatus": 200,
+              "warningFields": []
+            },
+            {
+              "requestedVersion": "invalid",
+              "installCommand": [
+                "add",
+                "dsh-plugin-compat-check"
+              ],
+              "responseStatus": 200,
+              "warningFields": []
+            }
+          ],
+          "remaining": "Normal UI confirms without explicit body.version. With both lookup endpoints failing, no valid requested version still installs a bare name without warning; explicit valid version stays pinned.",
+          "scope": "Exact complete published install handler and exact fetchNpmLatest executed with controlled collaborators; no actual network or install in this test."
+        }
+      },
+      "store1024": {
+        "issue": "https://github.com/imsai-sh/dsh-1024store/issues/22",
+        "state": "open",
+        "maintainerReply": false,
+        "publicUrl": "https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin",
+        "publicSha256": "02a8cba0de76adf28df3ade705d4278034159325b9eb534353e3fde593dbe805",
+        "installMethods": [
+          {
+            "kind": "github",
+            "spec": "github:lcy0121/dsh-plugin-compat-check#path:plugin",
+            "command": "dsh plugin --profile web add github:lcy0121/dsh-plugin-compat-check#path:plugin",
+            "verification": "unknown",
+            "code": "not_checked",
+            "requiresBuildAllowance": false,
+            "buildPackage": null,
+            "revision": null,
+            "checkedAt": null
+          }
+        ],
+        "npmMethodPresent": false,
+        "realInstallAttempted": false
+      },
+      "awesome0xsline": {
+        "url": "https://github.com/0xsline/awesome-deepseek-harness/pull/717",
+        "state": "open",
+        "merged": false
+      },
+      "cleanup": {
+        "processesStopped": true,
+        "errors": [],
+        "privateRootRemoved": true
+      },
+      "evidenceSha256": {
+        "acceptance": "173e7b323eee359e046a984fed7d55a762d894685da3d7403162807165bbd658",
+        "exactInstallHandler": "625fd3ffa922c2b444017bea6fdaec7e23a4a0d9570d3de142d2a72ab505868b",
+        "cardScreenshot": "5fb8934dd98dc07b3193a5bad1fbe05106cfc773bf926addef96cb079151e12e",
+        "confirmationScreenshot": "4fe42afd4e889c94d4cb02d27e879f2ca64538cf177b61d655fc8350b545cbc3"
+      },
+      "historicalFailures": "Initial first-page lookup timed out and was cleaned up. Actual public search located the target; no local catalog substitution. An earlier truncated-expression check was superseded by complete exact-handler execution, not treated as a valid route conclusion."
+    },
+    "realPluginRegression20261021": {
+      "recordedAt": "2026-10-21T07:11:03.384Z",
+      "baseCommit": "0509603",
+      "status": "completed-in-local-source-unpublished",
+      "scope": "Repository-only fixed real-plugin normal/natural-failure/recovery/client-fault regression. Green certifies reproduced fixed outcomes, not product compatibility or ecosystem accuracy.",
+      "runner": "tools/real-regression.mjs",
+      "manifest": "tools/real-regression-manifest.json",
+      "runnerSha256": "b0bb93f77526d289e0fff5d37c9baa11327d8fcff047ccbad9efffdb190bfef5",
+      "manifestSha256": "895a4d41d981049a2788c2d6fe979d07406f85e94280fab16252b81c255a1718",
+      "budgets": {
+        "defaultRepeats": 2,
+        "maxRepeats": 2,
+        "suiteWallMs": 600000,
+        "cleanupGraceMs": 15000,
+        "commandOutputBytes": 1048576,
+        "modelCalls": 0,
+        "accountCalls": 0,
+        "maxEvidenceFiles": 64,
+        "maxFileBytes": 8388608,
+        "maxJsonBytes": 2097152,
+        "maxCohortBytes": 33554432,
+        "maxIndexBytes": 262144
+      },
+      "dshVersion": "0.2.1-rc.2",
+      "knownCasesPerRepeat": 18,
+      "repeats": 2,
+      "independentSamples": 6,
+      "liveDurationMs": 70442,
+      "summary": {
+        "knownOutcomeCases": 36,
+        "staticIdentifiedFailures": 0,
+        "serviceOnlyIdentifiedFailures": 4,
+        "unflaggedNaturalFailures": 4,
+        "unflaggedBusinessOrClientFailures": 16,
+        "driverErrors": 0,
+        "validationErrors": 0
+      },
+      "perSuite": [
+        {
+          "suite": "sidebar-ui-previous",
+          "acrossRepeats": 2,
+          "modes": {
+            "static": {
+              "baseline": {
+                "scored": 4,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 4,
+                "trueNegative": 0
+              },
+              "faultInjected": {
+                "scored": 0,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 0
+              }
+            },
+            "serviceObserved": {
+              "baseline": {
+                "scored": 4,
+                "unscored": 0,
+                "truePositive": 4,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 0
+              },
+              "faultInjected": {
+                "scored": 0,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 0
+              }
+            }
+          }
+        },
+        {
+          "suite": "sidebar-ui",
+          "acrossRepeats": 2,
+          "modes": {
+            "static": {
+              "baseline": {
+                "scored": 8,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 8
+              },
+              "faultInjected": {
+                "scored": 4,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 4,
+                "trueNegative": 0
+              }
+            },
+            "serviceObserved": {
+              "baseline": {
+                "scored": 8,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 8
+              },
+              "faultInjected": {
+                "scored": 4,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 4,
+                "trueNegative": 0
+              }
+            }
+          }
+        },
+        {
+          "suite": "market",
+          "acrossRepeats": 2,
+          "modes": {
+            "static": {
+              "baseline": {
+                "scored": 8,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 0,
+                "trueNegative": 8
+              },
+              "faultInjected": {
+                "scored": 12,
+                "unscored": 0,
+                "truePositive": 0,
+                "falsePositive": 0,
+                "falseNegative": 12,
+                "trueNegative": 0
+              }
+            }
+          }
+        }
+      ],
+      "replayStatus": "passed",
+      "sourceHashMatchesLive": true,
+      "allSixLivePredictorSourcesMatchCurrentTree": true,
+      "cleanup": [
+        {
+          "suite": "run-1/sidebar-ui-previous",
+          "privateRootRemoved": true,
+          "hostStopped": true
+        },
+        {
+          "suite": "run-1/sidebar-ui",
+          "privateRootRemoved": true,
+          "hostStopped": true
+        },
+        {
+          "suite": "run-1/market",
+          "privateRootRemoved": true,
+          "hostStopped": true
+        },
+        {
+          "suite": "run-2/sidebar-ui-previous",
+          "privateRootRemoved": true,
+          "hostStopped": true
+        },
+        {
+          "suite": "run-2/sidebar-ui",
+          "privateRootRemoved": true,
+          "hostStopped": true
+        },
+        {
+          "suite": "run-2/market",
+          "privateRootRemoved": true,
+          "hostStopped": true
+        }
+      ],
+      "negativeCases": [
+        {
+          "name": "oversized-json",
+          "exit": 1,
+          "status": "failed",
+          "error": "Evidence file bytes exceed read budget: predictions.json"
+        },
+        {
+          "name": "oversized-png",
+          "exit": 1,
+          "status": "failed",
+          "error": "Evidence file bytes exceed read budget: sidebar.editor.utf8-bom.healthy.png"
+        },
+        {
+          "name": "too-many-files",
+          "exit": 1,
+          "status": "failed",
+          "error": "Evidence file-count budget exceeded"
+        },
+        {
+          "name": "cohort-byte-budget",
+          "exit": 1,
+          "status": "failed",
+          "error": "Evidence cohort byte budget exceeded"
+        },
+        {
+          "name": "symlink-file",
+          "exit": 1,
+          "status": "failed",
+          "error": "Evidence must contain regular files only, never symlinks"
+        },
+        {
+          "name": "prediction-tamper",
+          "exit": 1,
+          "status": "failed",
+          "error": "Prediction sealed sha256 mismatch"
+        },
+        {
+          "name": "symlink-directory",
+          "exit": 1,
+          "status": "failed",
+          "error": "Evidence directory must be a regular directory, never a symlink"
+        },
+        {
+          "name": "oversized-index",
+          "exit": 1,
+          "status": "failed",
+          "error": "Evidence file bytes exceed read budget: regression-index.json"
+        }
+      ],
+      "negativeCopiesRemoved": true,
+      "focused": {
+        "tests": 49,
+        "pass": 49,
+        "fail": 0
+      },
+      "redGreen": {
+        "initialValidatorTests": 11,
+        "initialRedReason": "Missing fixed-evidence validator; integrity and known-outcome checks then implemented.",
+        "budgetRed": {
+          "priorPass": 16,
+          "newFail": 7
+        },
+        "budgetGreen": {
+          "newRunnerTests": 23,
+          "pass": 23
+        }
+      },
+      "evidence": {
+        "indexSha256": "fd41a35aafd3e753ed816815037fa75c0bd108d882f37c88be5bf11bf78ab9e0",
+        "reportSha256": "c3cf2771d4ba4fbc13d47da8ea1aa9fdd30023da1bed0130a1041bd2479d21c8",
+        "verificationSha256": "96bbfaa92159ee4644b1957cd27985575a9c1b24c8a3c94f216e1caa128a91bb"
+      },
+      "limitations": [
+        "Old-version natural failure remains static FN; qualified same-host service observation identifies its prerequisite obstruction.",
+        "Controlled HTTP/DOM business failures remain blind spots; results and predictions are separate.",
+        "Saved timestamp partial order and seals do not prove each individual action time or prevent coordinated malicious rewrites.",
+        "Input read budgets are not RSS limits or an OS-atomic snapshot; historical replay is not current certification."
+      ],
+      "modelCalls": 0,
+      "accountCalls": 0,
+      "checks": {
+        "defaultSuite": {
+          "tests": 631,
+          "pass": 628,
+          "fail": 0,
+          "skip": 3,
+          "testFiles": 43
+        },
+        "format": "passed",
+        "documents": "passed",
+        "prepublishCheck": "passed; no publish",
+        "generatedModules": "stage-contract --check passed",
+        "publicMetadata": {
+          "observedAt": "2026-10-21T07:08:33.395Z",
+          "skipped": [],
+          "notices": [
+            {
+              "id": "npm.readme-is-current",
+              "severity": "notice"
+            }
+          ],
+          "scope": "One expected notice: unreleased local README differs from published npm README; no remote edit."
+        },
+        "independentReview": {
+          "initialP2": 1,
+          "resolved": 1,
+          "remainingBlockers": 0,
+          "finalFocused": {
+            "tests": 33,
+            "pass": 33
+          },
+          "scope": "Read-only review; final live checks independently run by owning tasks."
+        }
+      }
+    },
+    "actionableFindings20261021": {
+      "recordedAt": "2026-10-21T07:11:03.384Z",
+      "baseCommit": "0509603",
+      "status": "completed-in-local-source-unpublished",
+      "source": "lib/finding-guidance.mjs",
+      "sourceSha256": "c227cb8e5c1a2574cf95adc74f8bf45477546b3077ba8f4724847553f28afe77",
+      "surfaces": [
+        "CLI",
+        "agent text",
+        "overview expanded findings",
+        "plugin details",
+        "shared sanitized issue report"
+      ],
+      "categories": [
+        "client-entry-missing",
+        "declared-incompatible",
+        "host-entry-inactive:FAILED/PENDING",
+        "unprovided-dependency:unobserved/unreadable/absent",
+        "other categories with conservative fallback"
+      ],
+      "canonicalFindingMutation": false,
+      "sharedRenderer": "lib/issue-report.mjs",
+      "rendererSha256": "92eb7df351c303eeb4e978692cbad69d6a7ddf1e46faa901dfdd77f281f2bd29",
+      "oldBinReexport": true,
+      "envelopeOptionalField": "issueReport:string",
+      "runtimeExportContext": {
+        "redTests": 3,
+        "passed": 3,
+        "scope": "Real engine input comparison demonstrates runtime absent broken vs static partial, and runtime FAILED/PENDING broken vs static ok; generated report now requires qualified same-target observations and separates original-host loader recheck. Explicit CLI boot retains side-effect and new-host limitations."
+      },
+      "skill": {
+        "bodyLengthUtf16": 9261,
+        "sha256": "84adad93b84c5a0955106ef3f321e921afaa0047ee40d8627c14732cca238767",
+        "sourceEqualsPackaged": true,
+        "example": "Exact real CLI output from repository fixed labels; not a model capability score."
+      },
+      "limitations": [
+        "Only follow-up checks; no automatic installation, upgrade, config/source edits, invented replacement APIs or guessed fixed versions.",
+        "Sanitized sharing retains package identifiers and relative positions; arbitrary business text is not guaranteed secret-free."
+      ],
+      "checks": {
+        "defaultSuite": {
+          "tests": 631,
+          "pass": 628,
+          "fail": 0,
+          "skip": 3,
+          "testFiles": 43
+        },
+        "format": "passed",
+        "documents": "passed",
+        "prepublishCheck": "passed; no publish",
+        "generatedModules": "stage-contract --check passed",
+        "publicMetadata": {
+          "observedAt": "2026-10-21T07:08:33.395Z",
+          "skipped": [],
+          "notices": [
+            {
+              "id": "npm.readme-is-current",
+              "severity": "notice"
+            }
+          ],
+          "scope": "One expected notice: unreleased local README differs from published npm README; no remote edit."
+        },
+        "independentReview": {
+          "initialP2": 1,
+          "resolved": 1,
+          "remainingBlockers": 0,
+          "finalFocused": {
+            "tests": 33,
+            "pass": 33
+          },
+          "scope": "Read-only review; final live checks independently run by owning tasks."
+        }
+      }
+    },
+    "panelExperience20261021": {
+      "recordedAt": "2026-10-21T07:11:03.384Z",
+      "baseCommit": "0509603",
+      "status": "completed-in-local-source-unpublished",
+      "sourceSha256": "ea20b04e225b242f0a56f72d2ef4896a247fba84befad69e2eb6328f8c40923c",
+      "features": [
+        "name search",
+        "combined verdict/certainty/pending filters",
+        "collapsible findings and coverage limits",
+        "full report preview and explicit copy with manual fallback",
+        "existing comparable baseline worsened plus risky added view",
+        "report time, target and cache status"
+      ],
+      "renderOnly": true,
+      "canonicalReportMutation": false,
+      "focused": {
+        "newPanelTests": 7,
+        "pass": 7,
+        "priorTestsRetained": true
+      },
+      "redGreen": {
+        "initialMissingControls": {
+          "tests": 5,
+          "fail": 5
+        },
+        "guidanceDisplay": {
+          "priorPass": 6,
+          "newFail": 1
+        },
+        "greenPanelAndExistingClient": {
+          "tests": 15,
+          "pass": 15
+        }
+      },
+      "baseline": {
+        "comparable": "Uses existing diff, includes worsened and newly added plugins with findings; component test uses canonical snapshots/diff.",
+        "incomparable": "Neutral explanation; never clean certification."
+      },
+      "export": {
+        "sameCanonicalRenderer": true,
+        "filtersDoNotTrim": true,
+        "requiresExplicitUserCopy": true,
+        "clipboardDenied": "Selectable preview remains; manual-copy guidance."
+      },
+      "liveIntegration": {
+        "ok": true,
+        "applicable": true,
+        "dshVersion": "0.2.1-rc.2",
+        "artifactVersion": "0.1.4",
+        "declarationCases": [
+          {
+            "id": "engines-allow",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "engines-reject",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "exact-exemption",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "wrong-exemption",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "peer-fallback",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          }
+        ],
+        "ui": {
+          "available": true,
+          "navigation": "More > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+        },
+        "scope": "Controlled declaration gates and unprivileged local browser UI only; no model call, real plugin business-function or Windows certification.",
+        "subpathMetadata": true,
+        "artifactSha256": "6ffd81e4128fd1f551a969c4b66cb581e9ad5e628d259fea18d8ec6a108070ca",
+        "runtimeExportContext": true,
+        "httpReport": true,
+        "originFence": {
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403
+        },
+        "panelExperience": {
+          "realBrowser": true,
+          "syntheticCases": 4,
+          "searchAndCombinedFilters": true,
+          "expandedGuidance": true,
+          "fullReportPreview": true,
+          "explicitClipboardCopy": true,
+          "absentBaselineNeutral": true,
+          "clearFilters": true,
+          "scope": "Actual installed candidate with four scanned, inactive public synthetic packages; comparable baseline branches are covered by component tests. No business certification."
+        },
+        "explanationPresentation": {
+          "realBrowser": true,
+          "certaintyAndImpactSeparated": true,
+          "perPluginCoverageVisible": true,
+          "noServiceUseClaimRemoved": true,
+          "scope": "Actual installed artifact overview; fixed-case overview/details are also exercised by component tests. Not business certification."
+        },
+        "disabledDiagnostic": {
+          "status": 404,
+          "type": null
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        }
+      },
+      "screenshotSha256": "98edf5573adcf53d099612d1fc05927b1b4d2052e8822a334caf6267b63f3c22",
+      "liveScope": "Final private candidate tgz + four inactive public synthetic packages in actual DSH0.2.1-rc.2/Chrome. Fixed real business regressions are separate.",
+      "diagnosticHistory": [
+        "Static labels test expectations initially failed on real host: qualified absent hard dependency is broken with complete API evidence, unlike static suspected/limited. Expectations corrected to observed evidence; verdict code unchanged. Both failed attempts cleaned up."
+      ],
+      "checks": {
+        "defaultSuite": {
+          "tests": 631,
+          "pass": 628,
+          "fail": 0,
+          "skip": 3,
+          "testFiles": 43
+        },
+        "format": "passed",
+        "documents": "passed",
+        "prepublishCheck": "passed; no publish",
+        "generatedModules": "stage-contract --check passed",
+        "publicMetadata": {
+          "observedAt": "2026-10-21T07:08:33.395Z",
+          "skipped": [],
+          "notices": [
+            {
+              "id": "npm.readme-is-current",
+              "severity": "notice"
+            }
+          ],
+          "scope": "One expected notice: unreleased local README differs from published npm README; no remote edit."
+        },
+        "independentReview": {
+          "initialP2": 1,
+          "resolved": 1,
+          "remainingBlockers": 0,
+          "finalFocused": {
+            "tests": 33,
+            "pass": 33
+          },
+          "scope": "Read-only review; final live checks independently run by owning tasks."
+        }
+      },
+      "delivery": {
+        "localOnly": true,
+        "pushed": false,
+        "npmPublished": false,
+        "versionUnchanged": "0.1.4",
+        "publishedNpmArtifactUnchanged": true
       }
     }
   },

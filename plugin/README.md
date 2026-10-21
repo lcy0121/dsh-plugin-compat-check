@@ -12,7 +12,13 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 DSH 0.2.1-rc.2 入口：**更多 → 设置 → 内置插件 → 兼容性**。agent 可调用 `compat_check`；请选择实际 profile，不默认使用 desktop。
 
-0.1.4 补充必需 inject 未观测时的激活前提说明，修正 Origin 校验以比较协议、主机和有效端口（保留本机无 Origin 调用），并提供 `repository.directory=plugin`。仓库另增强了进程回收、Chrome 启动诊断及 Linux CI；浏览器开发工具不随 npm 插件交付。市场显示名与 1024 Store 采集问题须由相应上游修复，不因本包升级自动解决。
+0.1.4 补充必需 inject 未观测时的激活前提说明，修正 Origin 校验以比较协议、主机和有效端口（保留本机无 Origin 调用），并提供 `repository.directory=plugin`。仓库另增强了进程回收、Chrome 启动诊断及 Linux CI；浏览器开发工具不随 npm 插件交付。市场显示名已在上游 1.66.45 验收；1024 Store 的 npm 安装方式仍待上游采集修复，详见 Plan。
+
+## 当前源码增量（尚未发布）
+
+从下述源码构建的候选提供：搜索和结论/确定性/待验证筛选、折叠发现、完整报告预览/显式复制，以及基线新增风险视图。界面、CLI和agent共用“下一步核实”，不自动修改插件或配置。报告时间、目标、缓存及覆盖限制保持可见；筛选不删减分享报告，复制失败可手动选择文本。
+
+仓库的固定真实插件故障回归单独运行，不随npm包提供；历史公开0.1.4及其验收范围见前述发布记录。
 
 ## 从源码构建安装
 
@@ -26,7 +32,7 @@ dsh plugin --profile <临时profile> add file:<生成的tgz绝对路径>
 
 prepack 同步权威 skill/报告契约，暂存共享 kernel 和 MIT LICENSE，postpack 清理 kernel。运行时依赖固定为 `@babel/parser@7.29.9`、`semver@7.7.3`。不要将根 GitHub spec、裸 `plugin/` 复制或源码 file 安装等同完整 tgz。
 
-npm 产物**没有 CLI bin、安装检查 shell 或 probe 入口**，不支持 `npx dsh-plugin-compat-check`，本面板不做安装前检查。这些入口及 `--issue-report` 默认脱敏 Markdown 导出从[仓库](https://github.com/lcy0121/dsh-plugin-compat-check#readme)使用。显式安装检查会联网、启动宿主并执行目标插件；临时 profile 不是 OS 沙箱。
+npm 产物**没有 CLI bin、安装检查 shell 或 probe 入口**，不支持 `npx dsh-plugin-compat-check`，本面板不做安装前检查。安装前入口及 CLI 的 `--issue-report` 默认脱敏 Markdown 导出从[仓库](https://github.com/lcy0121/dsh-plugin-compat-check#readme)使用。显式安装检查会联网、启动宿主并执行目标插件；临时 profile 不是 OS 沙箱。
 
 ## 判定与边界
 

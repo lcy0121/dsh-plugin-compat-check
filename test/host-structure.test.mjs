@@ -43,6 +43,8 @@ import { REPO } from './helpers.mjs'
 import { run } from '../bin/compat-check.mjs'
 import { toJSON, render } from '../lib/report.mjs'
 import { buildVerdicts } from '../lib/verdict.mjs'
+import { nextSteps } from '../lib/finding-guidance.mjs'
+import { renderIssueReport } from '../bin/issue-report.mjs'
 
 // vm 里的沙箱没有 CommonJS 的 `require`，但我们要用它去加载真实的 node: 模块
 // （fs / os / path / url / module），这样替身的行为与真身完全一致。
@@ -75,6 +77,7 @@ function loadHost(env = {}) {
   // 把 ESM 的 import 换成受控替身；导出换成赋值
   const cjs = SRC.replace(/^import.*from '\.\/lib\/host-resources\.js';?$/gm, 'const {privateDiagnostic,loaderObservations}=__hostResources;')
     .replace(/^import.*from '\.\/lib\/report-contract\.js';?$/gm, 'const {assertEnvelope,failureEnvelope}=__reportContract;')
+    .replace(/^import.*from '\.\/lib\/finding-guidance\.js';?$/gm, 'const {nextSteps}=__findingGuidance;')
     .replace(/^import\s+\{([^}]+)\}\s+from\s+'node:([^']+)';?$/gm, (m, names, mod) => {
       const pairs = names.split(',').map((s) => s.trim()).filter(Boolean)
       return pairs.map((p) => {
@@ -98,6 +101,7 @@ function loadHost(env = {}) {
     .replace(/\bexport\s+default\s+/g, 'const __default = ')
   sandbox.__hostResources=hostResources
   sandbox.__reportContract=reportContract
+  sandbox.__findingGuidance={nextSteps}
   sandbox.__importMetaUrl = pathToFileURL(HOST).href
   sandbox.__node = (mod, name) => {
     const m = name === 'default' ? nodeRequire(`node:${mod}`) : nodeRequire(`node:${mod}`)[name]
@@ -127,6 +131,16 @@ test('agent文本与摘要保留无已验证调用，并分开标注静态确定
   const output=sandbox.toolResult(compat,text)
   assert.match(output.summary,/覆盖有限/)
   assert.match(output.summary,/无已验证调用/)
+  assert.equal(JSON.stringify(body),before)
+})
+test('CLI、agent和故障报告从同一发现呈现相同的下一步且保留原判定', () => {
+  const result=run({nm:path.join(REPO,'test/fixtures/labels'),dshVersion:'0.2.1-rc.2',baseline:false,_ignoreAutoProbe:true})
+  result.verdict=buildVerdicts({report:result.extract.report,dshVersion:'0.2.1-rc.2',entryStates:[{id:'observed-entry',packageName:'@label/real-service',state:'PENDING',disabled:false,group:false}]})
+  const body=toJSON(result), before=JSON.stringify(body), {sandbox}=loadHost()
+  const outputs=[render(result,{}),sandbox.renderForModel({ok:true,toolVersion:body.toolVersion,report:{...body,hasRuntimeSurface:false}}),renderIssueReport(body).replaceAll('\\','')]
+  for(const finding of Object.values(body.plugins).flatMap(p=>p.findings))
+    for(const step of nextSteps(finding))
+      for(const output of outputs) assert.ok(output.includes(step), step)
   assert.equal(JSON.stringify(body),before)
 })
 test('注册给agent的工具描述区分证据确定性与影响依据', () => {

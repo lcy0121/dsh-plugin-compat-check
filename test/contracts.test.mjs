@@ -8,12 +8,17 @@ import { spawnSync } from "node:child_process";
 import { packageFixture } from "./fixture-utils.mjs";
 import { run } from "../bin/compat-check.mjs";
 import { toJSON } from "../lib/report.mjs";
+import { renderIssueReport } from "../bin/issue-report.mjs";
 import {
   snapshotForBaseline,
   diffAgainstBaseline,
   badgeFor,
 } from "../lib/baseline.mjs";
-import { validateReportBody, validateBaseline } from "../lib/contracts.mjs";
+import {
+  validateReportBody,
+  validateBaseline,
+  validateEnvelope,
+} from "../lib/contracts.mjs";
 function clientAccept() {
   let registered;
   const sandbox = {
@@ -41,6 +46,27 @@ function envelope(report) {
     report,
   };
 }
+test("optional issueReport accepts only text while existing envelopes remain compatible", () => {
+  const report = toJSON(
+    run({
+      nm: "test/fixtures/labels",
+      dshVersion: "0.2.1-rc.2",
+      baseline: false,
+      _ignoreAutoProbe: true,
+    }),
+  );
+  assert.deepEqual(validateEnvelope(envelope(report)), []);
+  assert.deepEqual(
+    validateEnvelope({ ...envelope(report), issueReport: "share preview" }),
+    [],
+  );
+  for (const issueReport of [null, 42, {}, ["text"]])
+    assert.ok(
+      validateEnvelope({ ...envelope(report), issueReport }).includes(
+        "envelope.issueReport",
+      ),
+    );
+});
 test("actual client rejects corrupt nested ledgers and baseline changes before rendering", () =>
   resultCase((_f, result) => {
     const body = toJSON(result),
@@ -297,6 +323,8 @@ test("HTTP and model consumers carry the same complete report and baseline as th
     );
     assert.deepEqual(data.model.report, data.http.report);
     assert.deepEqual(data.model.baseline, data.http.baseline);
+    assert.equal(data.http.issueReport, renderIssueReport(data.http.report));
+    assert.ok(!data.http.issueReport.includes(home));
     for (const field of ["plugins", "observation", "summary"])
       assert.deepEqual(data.cli[field], data.http.report[field]);
     assert.equal(data.http.report.kind, "plugin-compat-check/result");
@@ -366,8 +394,10 @@ test("staging detects stale host/browser artifacts and updates both from the can
       fs.mkdirSync(path.join(dir, sub), { recursive: true });
     for (const name of [
       "lib/contracts.mjs",
+      "lib/finding-guidance.mjs",
       "plugin/lib/client.js",
       "plugin/lib/report-contract.js",
+      "plugin/lib/finding-guidance.js",
       "plugin/scripts/stage-contract.mjs",
     ])
       fs.copyFileSync(name, path.join(dir, name));

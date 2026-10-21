@@ -372,6 +372,19 @@ try {
       "add",
       "file:" + path.join(root, tgz[0]),
     ]);
+    // Public synthetic packages give the real browser fixed filter/finding cases.
+    // They are scanned from this owned node_modules, never activated as bundles.
+    for (const entry of fs.readdirSync(
+      path.join(repo, "test/fixtures/labels"),
+    )) {
+      const source = path.join(repo, "test/fixtures/labels", entry);
+      const manifest = JSON.parse(
+        fs.readFileSync(path.join(source, "package.json")),
+      );
+      const target = path.join(profile, "node_modules", manifest.name);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.cpSync(source, target, { recursive: true });
+    }
     const host = await boot("rc2-ui");
     requireTrue(
       host.url,
@@ -395,6 +408,12 @@ try {
         initial.body.report.dshVersion === version,
       "Actual candidate report lacks rc.2 identity",
     );
+    requireTrue(
+      initial.body.issueReport.includes("--probe <probe-report.json>") &&
+        initial.body.issueReport.includes("仅静态扫描可能给出不同结论"),
+      "Installed runtime export lost its evidence requirements",
+    );
+    result.runtimeExportContext = true;
     result.httpReport = true;
     const sameOrigin = await fetch(reportUrl, {
       headers: { ...headers, Origin: reportUrl.origin },
@@ -516,6 +535,123 @@ try {
           !explanationText.includes("没有用过任何 DSH 服务"),
         "Actual compatibility DOM lost evidence explanations or coverage",
       );
+      const rowNames = () =>
+        evalx(
+          `Array.from(document.querySelectorAll('[data-compat-plugin]')).map(e=>e.dataset.compatPlugin)`,
+        );
+      const field = (label) =>
+        `document.querySelector('[aria-label="${label}"]')`;
+      const selectFilter = async (label, value) => {
+        await evalx(
+          `(()=>{const e=${field(label)};e.value=${JSON.stringify(value)};e.dispatchEvent(new Event('change',{bubbles:true}));})()`,
+        );
+      };
+      await evalx(`${field("搜索插件")}.focus()`);
+      await chrome.send("Input.insertText", { text: "broken" });
+      await poll(
+        async () => (await rowNames()).length === 2,
+        "Panel search failed",
+      );
+      requireTrue(
+        initial.body.report.plugins["@label/broken-service"].findings.some(
+          (f) =>
+            f.category === "host-service-missing" &&
+            f.evidence?.status === "absent",
+        ),
+        "Real host prerequisite fixture lacks explicit absent evidence",
+      );
+      await selectFilter("按结论筛选", "broken");
+      await poll(
+        async () =>
+          JSON.stringify(await rowNames()) ===
+          JSON.stringify(["@label/broken-client", "@label/broken-service"]),
+        "Panel verdict filter failed",
+      );
+      await selectFilter("按确定性筛选", "suspected");
+      await poll(
+        async () => (await rowNames()).length === 0,
+        "Combined certainty filter failed",
+      );
+      await selectFilter("按确定性筛选", "certain");
+      requireTrue(
+        initial.body.report.plugins["@label/broken-service"].coverage.status ===
+          "complete",
+        "Observed absent service fixture must have complete API evidence, without certifying business behavior",
+      );
+      await selectFilter("按验证状态筛选", "pending");
+      await poll(
+        async () =>
+          JSON.stringify(await rowNames()) ===
+          JSON.stringify(["@label/broken-client"]),
+        "Pending filter failed",
+      );
+      await evalx(
+        `Array.from(document.querySelectorAll('[data-compat-plugin] summary')).find(e=>e.innerText.startsWith('查看')).click()`,
+      );
+      await poll(
+        () =>
+          evalx(
+            `document.body.innerText.includes('下一步核实')&&document.body.innerText.includes('实际安装制品')`,
+          ),
+        "Finding guidance not visible after expansion",
+      );
+      await evalx(
+        `Array.from(document.querySelectorAll('button')).find(e=>e.innerText==='预览故障报告').click()`,
+      );
+      const preview = await poll(
+        () => evalx(`${field("故障报告预览")}?.value`),
+        "Issue preview missing",
+      );
+      requireTrue(
+        preview === initial.body.issueReport &&
+          preview.includes("@label/healthy"),
+        "Panel export differs from the full canonical report",
+      );
+      await chrome.send("Browser.grantPermissions", {
+        origin: new URL(host.url).origin,
+        permissions: ["clipboardReadWrite", "clipboardSanitizedWrite"],
+      });
+      await evalx(
+        `Array.from(document.querySelectorAll('button')).find(e=>e.innerText==='复制报告').click()`,
+      );
+      await poll(
+        () => evalx(`document.body.innerText.includes('已复制')`),
+        "Explicit clipboard copy failed",
+      );
+      const clipboard = await evalx("navigator.clipboard.readText()");
+      requireTrue(clipboard === preview, "Clipboard lost full preview content");
+      await evalx(
+        `Array.from(document.querySelectorAll('button')).find(e=>e.innerText==='关闭报告预览').click()`,
+      );
+      await evalx(
+        `Array.from(document.querySelectorAll('button')).find(e=>e.innerText==='本次新增风险').click()`,
+      );
+      await poll(
+        () =>
+          evalx(
+            `document.body.innerText.includes('尚无可比较基线')&&document.body.innerText.includes('不表示没有风险')`,
+          ),
+        "Absent baseline shown as clean result",
+      );
+      await evalx(
+        `Array.from(document.querySelectorAll('button')).find(e=>e.innerText==='清除筛选').click()`,
+      );
+      await poll(
+        async () => (await rowNames()).length === 5,
+        "Clearing filters did not restore full report",
+      );
+      result.panelExperience = {
+        realBrowser: true,
+        syntheticCases: 4,
+        searchAndCombinedFilters: true,
+        expandedGuidance: true,
+        fullReportPreview: true,
+        explicitClipboardCopy: true,
+        absentBaselineNeutral: true,
+        clearFilters: true,
+        scope:
+          "Actual installed candidate with four scanned, inactive public synthetic packages; comparable baseline branches are covered by component tests. No business certification.",
+      };
       result.explanationPresentation = {
         realBrowser: true,
         certaintyAndImpactSeparated: true,

@@ -1,0 +1,293 @@
+{
+  "schemaVersion": 1,
+  "kind": "plugin-compat-check/real-regression-manifest",
+  "dshVersion": "0.2.1-rc.2",
+  "catalogueFile": "rules/dsh-api-catalog-0.2.1-rc.2.json",
+  "catalogueHash": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+  "budgets": {
+    "defaultRepeats": 2,
+    "maxRepeats": 2,
+    "suiteWallMs": 600000,
+    "cleanupGraceMs": 15000,
+    "commandOutputBytes": 1048576,
+    "modelCalls": 0,
+    "accountCalls": 0,
+    "maxEvidenceFiles": 64,
+    "maxFileBytes": 8388608,
+    "maxJsonBytes": 2097152,
+    "maxCohortBytes": 33554432,
+    "maxIndexBytes": 262144
+  },
+  "expectedSource": "Hand-reviewed published-plugin business contracts: 0.26.1 file-tree HTTP405 natural failure; 0.28.0 exact BOM/encoding/CRLF editor save and recovery; 1.66.37 target-card HTTP/DOM/durable-state faults and recovery. Expectations are fixed independently of measurement.json and do not prescribe predictor warnings.",
+  "suites": [
+    {
+      "suite": "sidebar-ui-previous",
+      "package": "dsh-better-sidebar",
+      "version": "0.26.1",
+      "files": 460,
+      "digest": "a262b6ef39c7bed72e6ebb47ac2d1c0f0f82544eb36966bb69494f2d1f059562",
+      "publishedTarballSha256": "cd2d3d85d3d4a2d54c36b8bf86a24f2ec099f85a2936a72ef83edf7612c7402a",
+      "publishedIntegrity": "sha512-0/BXLEAqFJnd3SI/aryQVFHayrjE+RHcFgWIy57GrCYUeppEFTujfQOkO4U9V4QRd3qTVHFE7DZzNzUyU+kscw==",
+      "suiteId": "dsh-better-sidebar-0.26.1-editor-actions-v1",
+      "observeServices": true,
+      "cases": [
+        {
+          "caseId": "sidebar.editor.utf8-bom.healthy",
+          "featureId": "sidebar.editor.utf8-bom",
+          "control": "none",
+          "outcome": "failed",
+          "boundary": "natural-service-dependency",
+          "observed": {
+            "actionAvailable": false,
+            "persisted": false,
+            "uiAfterReload": false
+          }
+        },
+        {
+          "caseId": "sidebar.editor.utf16le.healthy",
+          "featureId": "sidebar.editor.utf16le",
+          "control": "none",
+          "outcome": "failed",
+          "boundary": "natural-service-dependency",
+          "observed": {
+            "actionAvailable": false,
+            "persisted": false,
+            "uiAfterReload": false
+          }
+        }
+      ]
+    },
+    {
+      "suite": "sidebar-ui",
+      "package": "dsh-better-sidebar",
+      "version": "0.28.0",
+      "files": 471,
+      "digest": "2c3b5619b4a8ee9ab87ea179b0163a1230dbbb63e8cdbea3de8b08f9147d6892",
+      "publishedTarballSha256": "40b7ce32a6d90bff069b3bb4d0e5dd692281e0ac0598163196b816ac12335b6f",
+      "publishedIntegrity": "sha512-x7+/YmH/HrSlXWOBZkhL7qQqcDgZEnDcWrhR5GlizzUZjz+w84FbQ6jo8trJC9tyaQxMaNvXVnXwDxn4I330Ew==",
+      "suiteId": "dsh-better-sidebar-0.28.0-editor-actions-v1",
+      "observeServices": true,
+      "cases": [
+        {
+          "caseId": "sidebar.editor.utf8-bom.healthy",
+          "featureId": "sidebar.editor.utf8-bom",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "sidebar.editor.utf8-bom.blocked",
+          "featureId": "sidebar.editor.utf8-bom",
+          "control": "http-503",
+          "outcome": "failed",
+          "boundary": "controlled-http-business",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": false,
+            "uiAfterReload": false,
+            "requestStatus": 503
+          }
+        },
+        {
+          "caseId": "sidebar.editor.utf8-bom.recovered",
+          "featureId": "sidebar.editor.utf8-bom",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "sidebar.editor.utf16le.healthy",
+          "featureId": "sidebar.editor.utf16le",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "sidebar.editor.utf16le.blocked",
+          "featureId": "sidebar.editor.utf16le",
+          "control": "http-503",
+          "outcome": "failed",
+          "boundary": "controlled-http-business",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": false,
+            "uiAfterReload": false,
+            "requestStatus": 503
+          }
+        },
+        {
+          "caseId": "sidebar.editor.utf16le.recovered",
+          "featureId": "sidebar.editor.utf16le",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        }
+      ]
+    },
+    {
+      "suite": "market",
+      "package": "dshmarket",
+      "version": "1.66.37",
+      "files": 182,
+      "digest": "a26339e13c9adcff506c1d0c00842d0e6cf104226c5a1954a5e091c40dd6f583",
+      "publishedTarballSha256": "8b29d156e3ea45330623b4cd66736992456f5ef4c92c8fb00243ccc3b101f188",
+      "publishedIntegrity": "sha512-6sr+x6W6PppAtygJra/khU1ehK8bmjmfVnFgmPyHixx3GzIXGX/iW04CoeqlExFpsyTWXnM2W/X7JLU78dHJLA==",
+      "suiteId": "dshmarket-1.66.37-actions-v2",
+      "observeServices": false,
+      "cases": [
+        {
+          "caseId": "market.note.healthy",
+          "featureId": "market.note",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "market.note.blocked",
+          "featureId": "market.note",
+          "control": "http-503",
+          "outcome": "failed",
+          "boundary": "controlled-http-business",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": false,
+            "uiAfterReload": false,
+            "requestStatus": 503
+          }
+        },
+        {
+          "caseId": "market.note.missing-after",
+          "featureId": "market.note",
+          "control": "dom-control-missing",
+          "outcome": "failed",
+          "boundary": "controlled-client-dom",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": false,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "market.note.missing-before",
+          "featureId": "market.note",
+          "control": "dom-control-missing",
+          "outcome": "failed",
+          "boundary": "controlled-client-dom",
+          "observed": {
+            "actionAvailable": false,
+            "persisted": false,
+            "uiAfterReload": false
+          }
+        },
+        {
+          "caseId": "market.note.recovered",
+          "featureId": "market.note",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "market.favorite.healthy",
+          "featureId": "market.favorite",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "market.favorite.blocked",
+          "featureId": "market.favorite",
+          "control": "http-503",
+          "outcome": "failed",
+          "boundary": "controlled-http-business",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": false,
+            "uiAfterReload": false,
+            "requestStatus": 503
+          }
+        },
+        {
+          "caseId": "market.favorite.missing-after",
+          "featureId": "market.favorite",
+          "control": "dom-control-missing",
+          "outcome": "failed",
+          "boundary": "controlled-client-dom",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": false,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "market.favorite.missing-before",
+          "featureId": "market.favorite",
+          "control": "dom-control-missing",
+          "outcome": "failed",
+          "boundary": "controlled-client-dom",
+          "observed": {
+            "actionAvailable": false,
+            "persisted": false,
+            "uiAfterReload": false
+          }
+        },
+        {
+          "caseId": "market.favorite.recovered",
+          "featureId": "market.favorite",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        }
+      ]
+    }
+  ]
+}

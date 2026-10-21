@@ -115,3 +115,5 @@ node tools/meta-check.mjs --json
 - [1024 생태계 카탈로그](https://github.com/imsai-sh/awesome-deepseek-harness-plugins) ([1024 Store](https://deepseek1024.com)에 표시)
 
 수록은 호환성 인증을 뜻하지 않습니다. 1024 Store의 npm 설치 방식은 아직 상위 프로젝트의 수정이 필요합니다. 상태는 [Plan](docs/Plan.md)을 참고하세요. [MIT License](LICENSE).
+
+아직 배포되지 않은 소스에는 플러그인 검색, 결론·확실성·미검증 상태의 조합 필터, 접을 수 있는 발견 항목, 전체 보고서 미리보기/복사, 기준선 기반 신규 위험 보기가 추가됩니다. 각 발견에는 근거에 맞는 확인 절차가 제공되며 필터는 내보낼 보고서를 줄이지 않습니다. 실제 플러그인 고정 회귀 도구는 저장소에서만 사용합니다: `node tools/real-regression.mjs --live --out-dir <빈-디렉터리>` 또는 `--replay <증거-루트>`. 통과는 고정 결과 재현을 뜻하며 오탐/누락을 그대로 기록합니다. 범위와 예산은 [Plan](docs/Plan.md)을 참고하세요.

@@ -94,6 +94,21 @@ describe('CLI：解释保留证据边界', () => {
     assert.match(r.out, /无已验证调用/)
     assert.equal(r.code, 2)
   })
+  test('CLI与故障报告为入口缺失和未知必需依赖提供核实步骤，不改变JSON判定', () => {
+    const body = JSON.parse(runCLI([...args, '--json']).out)
+    const text = runCLI(args), md = runCLI([...args, '--issue-report'])
+    for (const raw of [text.out, md.out]) {
+      const out = raw.replaceAll('\\', '')
+      assert.match(out, /下一步.*package\.json/)
+      assert.match(out, /下一步.*待确认.*同一 profile/)
+      assert.match(out, /不会自动安装、升级或修改配置与源码/)
+    }
+    assert.equal(text.code, body.exitCode)
+    assert.equal(md.code, body.exitCode)
+    assert.equal(body.plugins['@label/broken-client'].findings[0].impactBasis, 'inferred')
+    assert.equal(body.plugins['@label/broken-service'].findings[0].certainty, 'suspected')
+    assert.equal(body.plugins['@label/real-service'].vacuous, true)
+  })
 })
 
 describe('CLI：参数解析', () => {

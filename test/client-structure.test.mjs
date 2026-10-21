@@ -51,7 +51,7 @@ function explainClient(body, subject) {
   const data = {schemaVersion:1,kind:'plugin-compat-check/report',ok:true,error:null,exitCode:body.exitCode,toolVersion:body.toolVersion,baseline:null,report:{...body,hasRuntimeSurface:body.observation.usable}}
   const React = {
     createElement: (type, props, ...children) => ({type,props:props||{},children}),
-    useState: () => [{phase:'done',data}, () => {}],
+    useState: initial => [initial && initial.phase ? {phase:'done',data} : initial, () => {}],
     useRef: initial => ({current:initial}), useCallback: fn => fn, useEffect() {},
   }
   let loaded

@@ -34,6 +34,8 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 DSH 0.2.1-rc.2 入口：**更多 → 设置 → 内置插件 → 兼容性**。agent 可调用 `compat_check`。请选择实际 profile，不默认使用 desktop。
 
+当前源码（尚未发布）增加：插件搜索、组合筛选、折叠发现、完整故障报告预览/复制，以及基于既有差分的“本次新增风险”视图。各发现提供“下一步核实”；报告保留确定性、影响依据和覆盖限制，复制前请预览敏感信息。源码构建安装及验收见 [Plan](docs/Plan.md#57-核实步骤与面板体验验收)。
+
 ### 仓库 CLI
 
 ```bash
@@ -115,3 +117,12 @@ node tools/meta-check.mjs --json
 - [1024 生态目录](https://github.com/imsai-sh/awesome-deepseek-harness-plugins)（[1024 Store](https://deepseek1024.com) 展示）
 
 收录不等于兼容性认证；1024 Store 的 npm 安装方式仍待上游修复，状态见 [Plan](docs/Plan.md)。[MIT License](LICENSE)。
+
+固定真实插件故障回归仅用于仓库开发，默认两轮，需真实DSH/Chrome和联网安装：
+
+```bash
+node tools/real-regression.mjs --live --out-dir <空证据目录>
+node tools/real-regression.mjs --replay <证据根目录>
+```
+
+绿色表示固定正常/故障/恢复重现，仍保留分模式FP/FN；范围和资源预算见 [Plan](docs/Plan.md#56-真实插件故障回归验收与复现)。

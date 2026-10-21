@@ -467,6 +467,8 @@ export function validateEnvelope(data) {
   )
     return ["envelope.schemaVersion/kind"];
   const e = validateReportBody(data.report);
+  if (Object.hasOwn(data, "issueReport"))
+    need(e, typeof data.issueReport === "string", "envelope.issueReport");
   need(
     e,
     typeof data.ok === "boolean" && data.ok === data.report?.ok,

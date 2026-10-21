@@ -497,6 +497,8 @@ function validateEnvelope(data) {
   )
     return ["envelope.schemaVersion/kind"];
   const e = validateReportBody(data.report);
+  if (Object.hasOwn(data, "issueReport"))
+    need(e, typeof data.issueReport === "string", "envelope.issueReport");
   need(
     e,
     typeof data.ok === "boolean" && data.ok === data.report?.ok,
@@ -526,6 +528,85 @@ function assertEnvelope(data) {
 return { assertEnvelope: assertEnvelope };
     })();
     // END GENERATED REPORT CONTRACT
+
+    // BEGIN GENERATED FINDING GUIDANCE
+    var FindingGuidance = (function () {
+/** Presentation-only follow-up checks. Never changes a finding or performs work. */
+function nextSteps(finding) {
+  if (!finding || typeof finding !== "object") return [];
+  switch (finding.category) {
+    case "client-entry-missing":
+      return [
+        '检查该插件 package.json 的 dsh.client 与 exports["./client"] 客户端入口声明，并在实际安装制品中核对入口文件是否存在、可读且已随包交付。',
+        "把已装插件的精确版本与制品文件清单对照；如需作者处理，提供缺失入口的包内相对位置，不猜测修复版本。",
+        "补充同一目标的浏览器加载结果，并实际操作客户端功能、核验实际功能结果；静态入口发现不等于业务失败已实测。",
+      ];
+    case "declared-incompatible":
+      return [
+        "复核已装插件 package.json 的 engines.dsh 与官方 peerDependencies、字段格式及目标 DSH 版本；按报告所用声明策略核对生效字段。",
+        "只读核对目标 profile 的 compatibility.json 是否有该插件名、插件精确版本与目标 DSH 精确版本的记录；未观测或未授予不等于可自行添加豁免。",
+        "补充该目标的实际加载与功能结果；声明冲突不证明已经实际加载失败，豁免也不证明业务通过。",
+      ];
+    case "host-entry-inactive": {
+      const state = finding.evidence?.state;
+      const step =
+        state === "FAILED"
+          ? "定位该包对应的 FAILED loader 条目，先在本机查看失败原因与同次启动日志，核对导入、初始化失败发生在哪一步。"
+          : state === "PENDING"
+            ? "定位该包对应的 PENDING loader 条目，核对顶层必需 inject 与各依赖服务的提供者是否在同一宿主实际激活。"
+            : "在同一目标宿主重新读取该包映射的 loader 条目状态，核对条目身份、启用状态与采样时间，不从说明文本猜测状态。";
+      return [
+        step,
+        "补充同一 profile、DSH 版本和时间的服务观测及 loader 状态；LOADING、禁用或无法映射的条目不能代替 FAILED 或 PENDING 证据。",
+        "服务或条目状态恢复后仍需实际操作对应功能并核验结果；激活成功不能代替业务验收。",
+      ];
+    }
+    case "unprovided-dependency": {
+      const absent = finding.evidence?.status === "absent";
+      const steps = [
+        absent
+          ? "核对本次明确 absent 的服务观测是否属于同一 profile、DSH 版本与依赖作用域，并查看该服务的提供者是否实际激活。"
+          : "该依赖仍待确认：补充同一 profile、DSH 版本与有效采样时间的服务观测；省略键或未采样不能确认服务缺失，也不能确认插件挂起。",
+        finding.evidence?.hardInject === true
+          ? "在报告给出的源码位置检查顶层必需 inject 与激活前提，再对照实际 loader 状态；依赖声明本身不能证明已经挂起。"
+          : "在报告给出的源码位置区分可选或子作用域依赖与顶层硬依赖；不推断整个插件挂起，实际操作相关功能核验影响。",
+      ];
+      if (finding.evidence?.status === "unreadable")
+        steps.push(
+          "先在本机核对采样读取失败原因；只补安全的结构观测，不执行 getter 来消除未知。",
+        );
+      steps.push(
+        "核对服务提供者的包声明与实际运行状态；提供声明只是线索，不自动安装依赖或认定某包能提供该服务。",
+      );
+      return steps;
+    }
+    case "host-service-missing":
+      return [
+        "在报告给出的源码位置核对服务读取及必需 inject 的作用域，并确认 absent 观测绑定同一 profile、DSH 版本与采样时间。",
+        "核对该服务的实际提供者及 loader 状态，补充相关功能操作结果；服务缺失的推断影响不等于业务失败已实测。",
+      ];
+    case "host-method-missing":
+      return [
+        "在报告给出的文件与行号核对实际方法调用、Context 绑定及能力守卫，检查是否存在报告尚未识别的兜底。",
+        "补充同一目标服务的完整方法结构观测，区分目录线索、未采样方法与明确缺失；实际操作对应功能核验推断影响。",
+        "需要替代 API 时先查该目标版本的源码或官方契约并保留出处；本报告不猜测替代方法或修复版本。",
+      ];
+    case "declaration-mismatch":
+      return [
+        "对照已装插件的兼容声明、精确目标版本及报告中的具体 API 发现，分别核对声明范围与运行时证据。",
+        "在已有源码位置检查调用与守卫，并补充同一目标的服务观测和实际功能结果；声明放行不证明业务通过。",
+      ];
+    default:
+      return [
+        "先核对该发现的类别、依据、已有包内位置和目标版本；缺少位置或状态时保留待确认，不补造证据。",
+        "补充同一 profile、DSH 版本与采样时间的相关观测，再实际操作对应功能核验影响；不根据未知类别猜测修复。",
+      ];
+  }
+}
+
+return { nextSteps: nextSteps };
+    })();
+    // END GENERATED FINDING GUIDANCE
 
     var React = require("react");
 
@@ -684,9 +765,11 @@ return { assertEnvelope: assertEnvelope };
       if (!c) return null;
       return React.createElement("div", { style: styles.dim },
         "证据覆盖：" + (c.status === "complete" ? "完整" : "有限") + "；已验证调用 " + c.verifiedCalls,
-        (c.limitations || []).map(function (note, i) {
-          return React.createElement("div", { key: i }, "覆盖限制：" + note);
-        }));
+        c.limitations.length ? React.createElement("details", null,
+          React.createElement("summary", { style: { cursor: "pointer" } }, "覆盖限制（" + c.limitations.length + "）"),
+          c.limitations.map(function (note, i) {
+            return React.createElement("div", { key: i }, "覆盖限制：" + note);
+          })) : null);
     }
 
     function EvidenceLegend() {
@@ -699,7 +782,7 @@ return { assertEnvelope: assertEnvelope };
     function Findings(p) {
       var pl = p.plugin;
       if (!pl.findings || pl.findings.length === 0) {
-        var parts = [React.createElement(Coverage, { key: "coverage", plugin: pl })];
+        var parts = [p.hideCoverage ? null : React.createElement(Coverage, { key: "coverage", plugin: pl })];
         if (pl.vacuous) {
           parts.push(React.createElement("div", { key: "v", style: styles.suspect },
             "本轮未发现冲突，但没有已验证调用；插件仍可能依赖 DSH 服务或包含未验证的客户端功能，不能据此确认业务可用。"));
@@ -717,7 +800,7 @@ return { assertEnvelope: assertEnvelope };
         }
         return parts.length ? React.createElement("div", null, parts) : null;
       }
-      return React.createElement("div", null, React.createElement(Coverage, { plugin: pl }), pl.findings.map(function (f, i) {
+      return React.createElement("div", null, p.hideCoverage ? null : React.createElement(Coverage, { plugin: pl }), pl.findings.map(function (f, i) {
         var api = f.service ? (f.method ? f.service + "." + f.method : f.service) : "(包声明)";
         var loc = f.location ? f.location.file + ":" + f.location.line : "—";
         return React.createElement("div", { key: i, style: styles.finding },
@@ -731,7 +814,13 @@ return { assertEnvelope: assertEnvelope };
           }, f.certainty === "certain" ? " [确定]" : " [疑似]"),
           f.impact ? React.createElement("div", { style: styles.dim },
             (f.impactBasis === "measured" ? "影响（实测）：" : f.impactBasis === "inferred" ? "影响（推断，非实测）：" : "影响（依据未提供）：") + f.impact) : null,
-          f.basis ? React.createElement("div", { style: styles.dim }, "依据：" + f.basis) : null);
+          f.basis ? React.createElement("div", { style: styles.dim }, "依据：" + f.basis) : null,
+          React.createElement("div", { style: { marginTop: "6px" } },
+            React.createElement("strong", null, "下一步核实"),
+            React.createElement("ol", { style: { margin: "4px 0", paddingLeft: "22px" } },
+              FindingGuidance.nextSteps(f).map(function (step, j) {
+                return React.createElement("li", { key: j }, step);
+              }))));
       }));
     }
 
@@ -949,9 +1038,44 @@ return { assertEnvelope: assertEnvelope };
       }, v.text);
     }
 
+    function ReportPreview(p) {
+      var shown = React.useState(false), copied = React.useState("");
+      var text = typeof p.data.issueReport === "string" ? p.data.issueReport : null;
+      return React.createElement("div", null,
+        React.createElement("button", { type: "button", style: styles.btn,
+          onClick: function () { shown[1](!shown[0]); copied[1](""); },
+        }, shown[0] ? "关闭报告预览" : "预览故障报告"),
+        shown[0] ? React.createElement("div", { style: { margin: "10px 0" } },
+          React.createElement("p", { style: styles.note }, "这是本次完整报告，筛选不会删减导出内容。保留插件名与包内位置；请预览敏感信息后再分享。"),
+          text === null ? React.createElement("div", { role: "status" }, "当前报告未提供导出文本，请刷新并确认宿主与客户端版本一致。") :
+          React.createElement("div", null,
+            React.createElement("textarea", { "aria-label": "故障报告预览", readOnly: true, value: text, rows: 14,
+              style: mergeStyle(styles.mono, { width: "100%", boxSizing: "border-box", color: "inherit", background: "transparent" }),
+              onFocus: function (event) { event.target.select(); },
+            }),
+            React.createElement("button", { type: "button", style: styles.btn, onClick: async function () {
+              try {
+                if (typeof navigator === "undefined" || !navigator.clipboard || !navigator.clipboard.writeText) throw Error("Clipboard unavailable");
+                await navigator.clipboard.writeText(text); copied[1]("已复制。请确认敏感信息后再分享。");
+              } catch (error) { copied[1]("无法自动复制，请选中预览文本手动复制。"); }
+            } }, "复制报告"),
+            React.createElement("span", { role: "status", style: styles.meta }, copied[0]))) : null);
+    }
+
+    function ReportMeta(p) {
+      var d = p.data, c = d.cache;
+      var cache = c && c.hit ? "缓存报告（约 " + Math.max(0, Math.round(c.ageMs / 1000)) + " 秒前）" : "本次重新计算的报告";
+      if (c && c.refreshing) cache += "；后台正在刷新";
+      return React.createElement("div", { style: styles.note },
+        React.createElement("div", null, "报告时间：" + (d.computedAt || "未提供") + " · " + cache),
+        React.createElement("div", null, "体检对象：" + (d.nodeModules || "未提供") + " · 目标 DSH：" + (d.report.dshVersion || "未知")),
+        c && c.refreshError ? React.createElement("div", { role: "status", style: styles.err }, "最近刷新失败，保留上次成功报告：" + c.refreshError) : null);
+    }
+
     function Table(p) {
       var data = p.data;
       var report = data && data.report;
+      var queryState = React.useState(""), verdictState = React.useState("all"), certaintyState = React.useState("all"), pendingState = React.useState("all"), risksState = React.useState(false);
       if (!report) return null;
       var names = Object.keys(report.plugins);
       names.sort(function (a, b) {
@@ -959,7 +1083,26 @@ return { assertEnvelope: assertEnvelope };
         var d = rank[report.plugins[a].verdict] - rank[report.plugins[b].verdict];
         return d !== 0 ? d : a.localeCompare(b);
       });
+      var diff = data.baseline && data.baseline.diff, comparable = Boolean(diff && diff.comparable), risks = {};
+      if (comparable) {
+        (diff.worsened || []).forEach(function (entry) { risks[entry.name] = true; });
+        (diff.added || []).forEach(function (entry) { if (report.plugins[entry.name] && report.plugins[entry.name].findings.length) risks[entry.name] = true; });
+      }
+      var shown = names.filter(function (name) {
+        var pl = report.plugins[name];
+        var pending = pl.coverage.status !== "complete" || pl.vacuous || (pl.clientSide || []).length > 0;
+        return name.toLowerCase().includes(String(queryState[0]).trim().toLowerCase())
+          && (verdictState[0] === "all" || pl.verdict === verdictState[0])
+          && (certaintyState[0] === "all" || pl.findings.some(function (f) { return f.certainty === certaintyState[0]; }))
+          && (pendingState[0] === "all" || (pendingState[0] === "pending" ? pending : !pending))
+          && (!risksState[0] || (comparable && risks[name]));
+      });
       var s = report.summary || {};
+      function select(label, state, options) {
+        return React.createElement("select", { "aria-label": label, value: state[0], style: styles.btn,
+          onChange: function (event) { state[1](event.target.value); },
+        }, options.map(function (option) { return React.createElement("option", { key: option[0], value: option[0] }, option[1]); }));
+      }
       return React.createElement("div", { style: styles.root },
         React.createElement("div", { style: styles.head },
           React.createElement("span", { style: styles.title }, "兼容性"),
@@ -967,39 +1110,48 @@ return { assertEnvelope: assertEnvelope };
             names.length + " 个插件 · 可用 " + (s.ok || 0) + " · 部分可用 " + (s.partial || 0)
             + " · 不兼容 " + (s.broken || 0)
             + (s.vacuousOk ? " · 其中 " + s.vacuousOk + " 个「可用」没有已验证调用" : "")),
-          React.createElement("button", {
-            style: styles.btn, type: "button",
-            onClick: function () { p.onReload(); },
-          }, "重新检查")),
+          React.createElement("button", { style: styles.btn, type: "button", onClick: function () { p.onReload(); } }, "重新检查")),
+        React.createElement(ReportMeta, { data: data }),
         React.createElement(Badge, { baseline: data.baseline }),
+        React.createElement("div", { style: mergeStyle(styles.head, { marginTop: "12px" }) },
+          React.createElement("input", { "aria-label": "搜索插件", placeholder: "搜索插件名称", value: queryState[0],
+            style: mergeStyle(styles.btn, { minWidth: "150px" }), onChange: function (event) { queryState[1](event.target.value); } }),
+          select("按结论筛选", verdictState, [["all", "全部结论"], ["broken", "不兼容"], ["partial", "部分可用"], ["unknown", "未知"], ["ok", "可用"]]),
+          select("按确定性筛选", certaintyState, [["all", "全部确定性"], ["certain", "含确定发现"], ["suspected", "含疑似发现"]]),
+          select("按验证状态筛选", pendingState, [["all", "全部验证状态"], ["pending", "有待验证部分"], ["complete", "无待验证部分"]]),
+          React.createElement("button", { type: "button", style: styles.btn, "aria-pressed": risksState[0], onClick: function () { risksState[1](!risksState[0]); } }, "本次新增风险"),
+          React.createElement("button", { type: "button", style: styles.btn, onClick: function () { queryState[1](""); verdictState[1]("all"); certaintyState[1]("all"); pendingState[1]("all"); risksState[1](false); } }, "清除筛选")),
+        risksState[0] ? React.createElement("div", { role: "status", style: styles.note }, comparable
+          ? "仅显示基线差分中的新增或变重风险；无变化不表示业务通过。"
+          : "尚无可比较基线；本视图不能判断新增风险，不表示没有风险。") : null,
+        React.createElement("div", { style: styles.meta }, "显示 " + shown.length + " / " + names.length + " 个插件；筛选仅改变呈现。"),
+        React.createElement(ReportPreview, { data: data }),
+        !shown.length ? React.createElement("div", { role: "status", style: styles.note }, "没有符合筛选条件的插件。清除筛选可查看完整报告。") : null,
+        React.createElement("div", { style: { overflowX: "auto" } },
         React.createElement("table", { style: styles.table },
           React.createElement("thead", null, React.createElement("tr", null,
             React.createElement("th", { style: styles.th }, "插件"),
             React.createElement("th", { style: styles.th }, "结论"),
-            React.createElement("th", { style: styles.th }, "发现"))),
-          React.createElement("tbody", null, names.map(function (n) {
-            var pl = report.plugins[n];
-            var v = VERDICT[pl.verdict] || VERDICT.unknown;
-            return React.createElement("tr", { key: n },
+            React.createElement("th", { style: styles.th }, "发现与核实"))),
+          React.createElement("tbody", null, shown.map(function (n) {
+            var pl = report.plugins[n], v = VERDICT[pl.verdict] || VERDICT.unknown;
+            return React.createElement("tr", { key: n, "data-compat-plugin": n },
               React.createElement("td", { style: styles.td },
                 React.createElement("div", null, n),
-                React.createElement("div", { style: styles.mono },
-                  "@" + (pl.version || "?") + (pl.vacuous ? " · 无已验证调用" : ""))),
+                React.createElement("div", { style: styles.mono }, "@" + (pl.version || "?") + (pl.vacuous ? " · 无已验证调用" : ""))),
+              React.createElement("td", { style: styles.td }, React.createElement("span", { style: Object.assign({}, styles.pill, { background: v.color }) }, v.text)),
               React.createElement("td", { style: styles.td },
-                React.createElement("span", { style: Object.assign({}, styles.pill, { background: v.color }) }, v.text)),
-              React.createElement("td", { style: styles.td }, React.createElement(Findings, { plugin: pl })));
-          }))),
+                React.createElement(Coverage, { plugin: pl }),
+                React.createElement("details", null,
+                  React.createElement("summary", { style: { cursor: "pointer", marginTop: "6px" } }, "查看 " + pl.findings.length + " 条发现与未验证项"),
+                  React.createElement(Findings, { plugin: pl, hideCoverage: true }))));
+          })))),
         React.createElement(EvidenceLegend),
-        React.createElement("div", { style: styles.note },
-          "工具版本：" + (data.toolVersion || "未知") + " · " + (report.summary.limited ? "部分证据尚未验证。 " : "") + (report.hasRuntimeSurface
-            ? "方法级判定依据：宿主运行时面；确定性以每条证据为准。"
-            : "方法级判定依据：官方 API 目录（契约目录，不是运行时面）—— 因此方法级结论标为「疑似」。"
-              + "「疑似」不是缺陷，是诚实：判不准时降级标注，而不是升格成确定。")),
-        React.createElement("div", { style: styles.note }, (report.observation && report.observation.notes || []).join("；")),
-        React.createElement("div", { style: styles.note },
-          "判定内核：" + (data.kernelDir || "?")
-          + " · 体检对象：" + (data.nodeModules || "?") + "（" + (data.nodeModulesWhy || "?") + "）"
-          + (data.elapsedMs !== undefined ? " · 耗时 " + data.elapsedMs + "ms" : "")));
+        React.createElement("div", { style: styles.note }, "工具版本：" + (data.toolVersion || "未知") + " · " + (report.hasRuntimeSurface ? "方法级证据含宿主运行时观测；以每条发现为准。" : "方法级证据来自官方 API 契约目录，静态事实单独判定。")),
+        React.createElement("details", null,
+          React.createElement("summary", { style: styles.meta }, "查看采样与检查信息"),
+          React.createElement("div", { style: styles.note }, (report.observation && report.observation.notes || []).join("；")),
+          React.createElement("div", { style: styles.note }, "对象来源：" + (data.nodeModulesWhy || "未提供") + (data.elapsedMs !== undefined ? " · 耗时 " + data.elapsedMs + "ms" : ""))));
     }
 
     function Panel() {

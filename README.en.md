@@ -115,3 +115,5 @@ Listed in:
 - [1024 ecosystem catalog](https://github.com/imsai-sh/awesome-deepseek-harness-plugins) (displayed in [1024 Store](https://deepseek1024.com))
 
 Listing is not compatibility certification. The npm installation method in 1024 Store still awaits an upstream fix; see [Plan](docs/Plan.md). [MIT License](LICENSE).
+
+Unreleased source changes add plugin search, combined verdict/certainty/pending filters, collapsible findings, full report preview/copy and a baseline risk view. Findings include evidence-matched follow-up checks; filters do not trim exported reports. The fixed real-plugin regression runner is repository-only: `node tools/real-regression.mjs --live --out-dir <empty-directory>` or `--replay <evidence-root>`. A green run reproduces fixed outcomes while retaining false positives/negatives; see [Plan](docs/Plan.md).
