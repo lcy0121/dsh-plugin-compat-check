@@ -38,6 +38,8 @@ DSH 0.2.1-rc.2 navigation: **More → Settings → Built-in plugins → Compatib
 
 Unreleased source rejects ambiguous duplicate plugin identities without advancing the baseline. Ordinary reports show the target DSH, reference catalogue version/hash and reviewed scope; future/unknown versions and custom catalogues remain uncertified. See the [catalogue governance workflow](docs/catalog-governance.md). The repository YAML tooling dependency is also patched; it is not a plugin runtime dependency.
 
+Unreleased source also rejects bound probes more than five minutes ahead of the checking clock and explains why their evidence was ignored. CI adds a separate dependency security gate; developers can run `npm run security:dependencies`. See [dependency security](docs/dependency-security.md).
+
 ### Repository CLI
 
 ```bash

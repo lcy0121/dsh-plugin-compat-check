@@ -197,3 +197,5 @@ CI 里可以直接用：`0` 过，`1`/`2` 按你的策略处理，`3` 是**工�
 普通体检中，CLI的`--dsh-version`及probe-boot采集值、宿主自己的DSH版本用于目录选择：DSH≥0.2.1-rc.2使用独立rc.2目录，其余/未知使用旧0.2.0-rc.2目录，显式`--catalog`优先。未知版本不猜声明，未来DSH未经认证。单独文件probe不自动补目标版本，需给`--dsh-version`。目录不等于运行时面。当前契约/验收/后续见仓库docs/Plan.md，统计见docs/current-state.json；公开安装以npm registry为准。
 
 当前源码（尚未发布）的普通报告另有 `catalog`：目标版本、参考目录版本、SHA-256、selection、verified、certifiedVersions及warning。转述时同时给出目标与目录身份；fallback/override、未知身份和未认证提示不得省略，verified仅表示内置目录与已验收精确版本匹配，不是业务认证。内置目录摘要不符、同名插件重复安装（含alias及不同版本）会明确无法判定，不允许转述为无冲突；普通报告失败不推进基线。仓库YAML修复仅涉及锁文件等工具依赖，不属于npm插件运行时依赖。新目录治理流程见仓库 `docs/catalog-governance.md`。
+
+当前源码（尚未发布）对observationVersion=1探针始终校验采样时间：未来偏差最多5分钟（含边界），缺失/非法或超限时撤回该文件的服务及loader证据，不推断FAILED/PENDING或确定方法缺失；普通体检另保留24小时有效期及profile/DSH绑定。转述observation.notes中的原因，保留静态发现和待验证项，不修正原采样时间、不把时钟异常当插件不兼容；修复时钟/重采样后再显式刷新。旧未绑定报告仍只使用显式键，不能补造绑定。仓库CI依赖安全工具不属于npm运行时功能。

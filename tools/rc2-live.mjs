@@ -83,12 +83,12 @@ const init = async (name) => {
   disableCredentialOnboarding(profilePath(name));
   return profilePath(name);
 };
-async function boot(name) {
+async function boot(name, overrides = {}) {
   const child = spawn(
     "dsh",
     ["--profile", name, "--", "--port", "0", "--no-open"],
     {
-      env,
+      env: { ...env, ...overrides },
       detached: process.platform !== "win32",
       stdio: ["ignore", "pipe", "pipe"],
     },
@@ -409,7 +409,8 @@ try {
       path.join(upgradeFixture, "index.js"),
       "export function apply(){}\n",
     );
-    const host = await boot("rc2-ui");
+    const futureProbeFile = path.join(root, "future-probe.json");
+    const host = await boot("rc2-ui", { DSC_PROBE_REPORT: futureProbeFile });
     requireTrue(
       host.url,
       "Candidate host failed: " + redact(host.output).slice(-900),
@@ -1030,6 +1031,70 @@ try {
         scope:
           "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification.",
       };
+      // The candidate initially samples the live host. Only this owned file is
+      // then introduced; rejecting it must also reject its fabricated loader row.
+      writeJSON(futureProbeFile, {
+        observationVersion: 1,
+        profileId: path.join(profile, "node_modules"),
+        dshVersion: version,
+        probedAt: "2100-01-01T00:00:00Z",
+        root: { settings: { present: false } },
+        entries: {
+          plugins: [
+            { packageName: "@label/healthy", state: "FAILED", disabled: false },
+          ],
+        },
+      });
+      try {
+        const rejected = await fetchReport();
+        requireTrue(
+          rejected.body.ok &&
+            rejected.body.report.observation.usable === false &&
+            rejected.body.report.observation.mode === "catalogue" &&
+            rejected.body.report.observation.notes.some((n) =>
+              n.includes("未来时钟偏差"),
+            ) &&
+            !rejected.body.report.plugins["@label/healthy"].findings.some(
+              (f) => f.category === "host-entry-inactive",
+            ),
+          "Installed candidate trusted the future probe or its loader failure",
+        );
+        await evalx(
+          `[...document.querySelectorAll('button')].find(b=>b.innerText==='重新检查').click()`,
+        );
+        await poll(
+          () => evalx(`document.body.textContent.includes('未来时钟偏差')`),
+          "Panel lost future rejection reason",
+        );
+        await evalx(
+          `[...document.querySelectorAll('summary')].find(e=>e.innerText==='查看采样与检查信息').parentElement.open=true`,
+        );
+        requireTrue(
+          await evalx(`document.body.innerText.includes('未来时钟偏差')`),
+          "Future reason is not visible in sampling details",
+        );
+        result.futureProbe = {
+          installedArtifact: true,
+          httpRejected: true,
+          probeLoaderEvidenceRejected: true,
+          realBrowserReasonVisible: true,
+        };
+      } finally {
+        fs.rmSync(futureProbeFile, { force: true });
+      }
+      const recovered = await fetchReport();
+      requireTrue(
+        recovered.body.ok && recovered.body.report.observation.usable === true,
+        "Live host sampling did not recover after removing the invalid probe",
+      );
+      await evalx(
+        `[...document.querySelectorAll('button')].find(b=>b.innerText==='重新检查').click()`,
+      );
+      await poll(
+        () => evalx(`!document.body.textContent.includes('未来时钟偏差')`),
+        "Panel retained stale future rejection after a valid refresh",
+      );
+      result.futureProbe.validRefreshRecovered = true;
       if (process.env.DSC_RC2_SCREENSHOT) {
         const s = await chrome.send("Page.captureScreenshot", {
           format: "png",

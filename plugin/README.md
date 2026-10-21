@@ -24,6 +24,8 @@ DSH 0.2.1-rc.2 入口：**更多 → 设置 → 内置插件 → 兼容性**。a
 
 源码普通体检遇到同名重复安装（含alias、不同版本）明确失败且不推进基线。报告、agent和面板同时展示目标DSH、参考目录版本/SHA-256及验收范围；未知/未来版本回退、自定义目录保持未认证警告，内置目录摘要不符则无法判定。[新目录治理](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/catalog-governance.md)须经过来源核验、API差分、规则复核与集成验收，提取不自动认证。仓库YAML依赖修复不涉及npm插件运行时依赖。
 
+源码同时限制绑定探针的未来时钟偏差最多5分钟；超范围或非法/缺失时间时忽略该文件的服务与loader证据，保留静态发现及拒绝原因，时钟异常不等于插件不兼容。仓库独立CI依赖安全门禁及处置见[依赖安全说明](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/dependency-security.md)，检查器不随npm插件运行。
+
 ### 升级前兼容性预检
 
 当前源码在兼容性页提供“目标 DSH 版本”输入和“运行升级预检”按钮。agent 可调用 `compat_check({"upgradeTo":"0.2.1-rc.2"})`，需要时指定实际 `profile`；当前版本由正在运行的宿主解析。结果放在独立的 `upgradePreview`，普通 `report`、缓存和基线不参与，也不被预检覆盖。新目标需要重新运行，不借用先前结论。

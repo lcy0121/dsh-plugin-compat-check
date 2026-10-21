@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.4",
-  "recordedAt": "2026-10-21T18:40:14.344Z",
-  "testFiles": 50,
-  "tests": 701,
+  "recordedAt": "2026-10-21T18:58:35.001Z",
+  "testFiles": 53,
+  "tests": 751,
   "repositoryFiles": {
-    "total": 280,
+    "total": 285,
     "fixtures": 90,
-    "other": 190
+    "other": 195
   },
   "verification": {
     "platform": "darwin",
@@ -8963,6 +8963,253 @@
         "targetedFailures": 0,
         "scope": "Read-only review of all three P1 implementations, generated contracts, tests and documentation; checked full-suite and actual DSH/Chrome evidence. No release authorization."
       }
+    },
+    "probeTimeAndCiSecurity20261022": {
+      "verifiedAt": "2026-10-22",
+      "sourceOnly": true,
+      "baseCommit": "94e85f3",
+      "platform": "darwin",
+      "arch": "arm64",
+      "nodeVersion": "26.12.0",
+      "publicVersionUnchanged": "0.1.4",
+      "defaultSuite": {
+        "tests": 751,
+        "passed": 748,
+        "failed": 0,
+        "skipped": 3,
+        "testFiles": 53
+      },
+      "targetedSuite": {
+        "tests": 50,
+        "passed": 50,
+        "failed": 0,
+        "skipped": 0,
+        "files": [
+          "test/observation-time.test.mjs",
+          "test/observation-time-integration.test.mjs",
+          "test/dependency-security.test.mjs"
+        ]
+      },
+      "probeTime": {
+        "maximumFutureSkewMs": 300000,
+        "boundaryInclusive": true,
+        "boundTimestampRequiredWithoutMaxAge": true,
+        "callerMaxAgePreserved": true,
+        "ordinaryCliAndHostMaxAgeMs": 86400000,
+        "legacyExplicitKeyContractPreserved": true,
+        "red": "Bound year-2100 file probes were usable in CLI and host; core RED 12 of 29 failed, and quiet/boot omitted the clock reason.",
+        "rejectedFileServicesAndLoaderEvidenceWithdrawn": true,
+        "staticFindingsRetained": true,
+        "acceptedTimestampNotRewritten": true,
+        "invalidTimestampNotGuessed": true,
+        "identityAndExpiryRegressions": true,
+        "cliJsonTextQuietAndIssueCovered": true,
+        "probeBootReasonAndOwnedCleanup": true,
+        "httpAgentAndClientFactoryRecovery": true
+      },
+      "ciSupplyChain": {
+        "workflowSha256": {
+          "test.yml": "1d2458fe5884ee778ccc1f75035c2f01b0f1688e9417a281b0d93cf7f93119e7",
+          "static-batch.yml": "3411ae8994a6fed52b1d469aefbeeffcb31beed2e246570ef31e2702dfdb7e78"
+        },
+        "actionPins": {
+          "actions/checkout": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "actions/setup-node": "949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "actions/upload-artifact": "cf430e030ddbb5b0abf93d22962f4752f3646cd9"
+        },
+        "actionRuntime": "node24",
+        "officialSourcesAndCompatibility": "docs/dependency-security.md",
+        "workflowPermissions": {
+          "contents": "read"
+        },
+        "checkoutPersistCredentials": false,
+        "allJobsHaveTimeout": true,
+        "artifactRetentionDays": 7,
+        "independentSecurityJob": true,
+        "pinnedActionSteps": 12,
+        "localPolicyCheckPassed": true,
+        "actionlint": {
+          "version": "1.7.12",
+          "downloadSha256": "aba9ced2dee8d27fecca3dc7feb1a7f9a52caefa1eb46f3271ea66b6e0e6953f",
+          "officialRelease": "https://github.com/rhysd/actionlint/releases/tag/v1.7.12",
+          "passed": true
+        },
+        "remoteRun": {
+          "performed": false,
+          "reason": "No push or workflow dispatch in this task; local checks do not certify remote Actions execution."
+        }
+      },
+      "dependencySecurity": {
+        "actualPublicRegistryAudit": {
+          "schemaVersion": 1,
+          "status": "clean",
+          "targets": [
+            {
+              "target": "workspace-lock",
+              "graph": "frozen-root-lock-including-dev",
+              "manifestSha256": "db79569c9678609d25edf9056892649fe7d86b632124ad8e1832ae9290bc16a3",
+              "lockSha256": "9fae5da30fe51c718efa0093c6b87af170e564d6399246f585dcbd42963429aa",
+              "status": "clean",
+              "vulnerabilities": 0,
+              "findings": [],
+              "truncated": false
+            },
+            {
+              "target": "plugin-runtime",
+              "graph": "current-registry-runtime-resolution",
+              "manifestSha256": "49b079aab1654e495630af79f74f11d5c974badcbd3c9c9bf4a9ee7831c851f0",
+              "lockSha256": "5e449374a7d63299316d1b6ccc656b38f5677438fbb74902435cd6a2bdb31c14",
+              "status": "clean",
+              "vulnerabilities": 0,
+              "findings": [],
+              "truncated": false
+            }
+          ]
+        },
+        "allAdvisorySeveritiesBlock": true,
+        "registrySchemaProcessAndTimeoutFailClosed": true,
+        "staleRootAndPluginLocksRejected": true,
+        "noAuditFixOrExceptions": true,
+        "temporaryPluginResolutionCleaned": true,
+        "scope": "Frozen repository lock including dev; independently resolved current plugin runtime graph. No installation scripts or source lock mutations."
+      },
+      "liveIntegration": {
+        "ok": true,
+        "applicable": true,
+        "dshVersion": "0.2.1-rc.2",
+        "artifactVersion": "0.1.4",
+        "declarationCases": [
+          {
+            "id": "engines-allow",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "engines-reject",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "exact-exemption",
+            "expectedAccepted": true,
+            "checkerAccepted": true,
+            "actualAccepted": true,
+            "actualRejected": false,
+            "matched": true
+          },
+          {
+            "id": "wrong-exemption",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          },
+          {
+            "id": "peer-fallback",
+            "expectedAccepted": false,
+            "checkerAccepted": false,
+            "actualAccepted": false,
+            "actualRejected": true,
+            "matched": true
+          }
+        ],
+        "ui": {
+          "available": true,
+          "navigation": "More > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+        },
+        "scope": "Controlled declaration gates and unprivileged local browser UI only; no model call, real plugin business-function or Windows certification.",
+        "subpathMetadata": true,
+        "artifactSha256": "6b580d379ad17a78d1ae0db7c50e9801e7e9af943d2e93d37523ccf9e218ebdd",
+        "runtimeExportContext": true,
+        "httpReport": true,
+        "catalogIdentity": true,
+        "originFence": {
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403
+        },
+        "upgradePreview": {
+          "installedArtifact": true,
+          "positiveNewRisk": true,
+          "staticEvidenceOnly": true,
+          "inputAndCatalogIdentities": true,
+          "ordinaryStateUnchanged": true,
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403,
+          "wrongMethodStatus": 405,
+          "unknownTargetUncertified": true,
+          "artifactSha256": "2f69eb41aedf803e7ed4345da5dcb26737901e57f9bc1be12ee5de43da52939e",
+          "catalogSha256": {
+            "current": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+            "target": "1331bf3220c1e06cfe087237077118d002dc04c32d027ce01da74c6a0d1dc9ad"
+          },
+          "ui": {
+            "realBrowser": true,
+            "positiveNewRisk": true,
+            "sourceIdentitiesVisible": true,
+            "staticLimitationsVisible": true,
+            "unknownTargetUncertified": true,
+            "ordinaryRowsAndFiltersUnchanged": true
+          },
+          "routeRemovedAndRestored": true
+        },
+        "catalogUiIdentity": true,
+        "panelExperience": {
+          "realBrowser": true,
+          "syntheticCases": 5,
+          "searchAndCombinedFilters": true,
+          "expandedGuidance": true,
+          "fullReportPreview": true,
+          "explicitClipboardCopy": true,
+          "absentBaselineNeutral": true,
+          "clearFilters": true,
+          "scope": "Actual installed candidate with five scanned, inactive public synthetic packages; comparable baseline branches are covered by component tests. No business certification."
+        },
+        "explanationPresentation": {
+          "realBrowser": true,
+          "certaintyAndImpactSeparated": true,
+          "perPluginCoverageVisible": true,
+          "noServiceUseClaimRemoved": true,
+          "scope": "Actual installed artifact overview; fixed-case overview/details are also exercised by component tests. Not business certification."
+        },
+        "disabledDiagnostic": {
+          "status": 404,
+          "type": null
+        },
+        "futureProbe": {
+          "installedArtifact": true,
+          "httpRejected": true,
+          "probeLoaderEvidenceRejected": true,
+          "realBrowserReasonVisible": true,
+          "validRefreshRecovered": true
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        }
+      },
+      "checks": {
+        "format": true,
+        "docCheckWithSuccessfulTap": true,
+        "prepublishCheck": true,
+        "noticesCheck": true
+      },
+      "independentReview": {
+        "importantFindings": 0,
+        "independentlyExecutedTests": 50,
+        "failed": 0,
+        "scope": "Read-only implementation and workflow review plus focused tests; reviewer did not rerun real DSH or remote Actions."
+      },
+      "scope": "Two scoped P1 implementations and local acceptance only; no Git push, remote CI dispatch, npm publication, model calls, future-version business or Windows certification."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

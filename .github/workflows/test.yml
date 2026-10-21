@@ -5,12 +5,15 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       matrix:
-        node: ['22.19.0', '24']
+        node: ["22.19.0", "24"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -18,13 +21,14 @@ jobs:
       - run: npm run format:check
       - run: node plugin/scripts/prepublish-check.mjs
         env:
-          DSC_QUIET_SKIP_NOTICE: '1'
+          DSC_QUIET_SKIP_NOTICE: "1"
       - run: node tools/engineering-check.mjs > engineering.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: engineering-node-${{ matrix.node }}
           path: engineering.json
+          retention-days: 7
   linux-live:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -32,12 +36,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dsh: ['0.2.0-rc.2', '0.2.1-rc.2']
+        dsh: ["0.2.0-rc.2", "0.2.1-rc.2"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version: '24'
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Install pinned official DSH and pnpm in a private runner prefix
@@ -83,7 +89,7 @@ jobs:
       - name: Real Linux Chrome startup and failure evidence
         shell: bash
         env:
-          DSC_SLOW: '1'
+          DSC_SLOW: "1"
           DSC_EXECUTION_DIAGNOSTICS: linux-execution-diagnostics
         run: |
           chrome_path="$(command -v google-chrome || command -v chromium)"
@@ -97,9 +103,9 @@ jobs:
       - name: Real private Linux DSH, loader labels and artifact responsiveness
         shell: bash
         env:
-          DSC_SLOW: '1'
+          DSC_SLOW: "1"
           DSC_EXECUTION_DIAGNOSTICS: linux-execution-diagnostics
-          DSC_REQUIRE_RC2_UI: '1'
+          DSC_REQUIRE_RC2_UI: "1"
           DSC_RC2_LIVE_LOG: linux-rc2.json
           DSC_ENGINEERING_LIVE_LOG: linux-engineering.json
           DSC_BUSINESS_LIVE_DIR: linux-business
@@ -110,10 +116,11 @@ jobs:
           node --test --test-reporter=tap test/probe-boot.test.mjs test/labels.test.mjs test/engineering-live.test.mjs test/profile-lock.test.mjs test/rc2-live.test.mjs test/business-labels.test.mjs > linux-live.tap 2>&1 || test_status=$?
           cat linux-live.tap
           exit "$test_status"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: linux-live-evidence-${{ matrix.dsh }}
+          retention-days: 7
           path: |
             linux-execution-diagnostics/
             linux-chrome-preparation.json
@@ -125,3 +132,24 @@ jobs:
             linux-business/
             linux-sidebar/
             linux-editors/
+  dependency-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Audit the frozen workspace and independent plugin runtime graph
+        run: npm run security:dependencies
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: dependency-security
+          path: dependency-security.json
+          if-no-files-found: error
+          retention-days: 7
