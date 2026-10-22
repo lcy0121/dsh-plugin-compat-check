@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { writePackageFixture } from "./fixture-utils.mjs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -10,10 +11,9 @@ function execute(body) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-upgrade-host-")),
     nm = path.join(root, "home/profiles/upgrade/node_modules"),
     pkg = path.join(nm, "upgrade-demo");
-  fs.mkdirSync(pkg, { recursive: true });
-  fs.writeFileSync(
-    path.join(pkg, "package.json"),
-    JSON.stringify({
+  writePackageFixture(
+    pkg,
+    {
       name: "upgrade-demo",
       version: "1.0.0",
       type: "module",
@@ -21,13 +21,10 @@ function execute(body) {
       dsh: { bundle: { patch: "cordis.patch.yml" } },
       engines: { dsh: "<0.2.1-rc.1" },
       peerDependencies: { "@deepseek-ai/dsh": ">=0.2.0-rc.2 <0.2.1-rc.1" },
-    }),
-  );
-  fs.writeFileSync(
-    path.join(pkg, "index.js"),
+    },
     'export function apply(){throw Error("never execute")}',
+    "- name: ./index.js\n",
   );
-  fs.writeFileSync(path.join(pkg, "cordis.patch.yml"), "- name: ./index.js\n");
   fs.writeFileSync(path.join(nm, "../probe-report.json"), "{corrupt");
   fs.writeFileSync(
     path.join(nm, "../compatibility.json"),

@@ -2,17 +2,21 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
+export function writePackageFixture(dir, manifest, source, patch = null) {
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify(manifest));
+  fs.writeFileSync(path.join(dir, 'index.js'), source);
+  if (patch !== null) fs.writeFileSync(path.join(dir, 'cordis.patch.yml'), patch);
+}
+
 export function packageFixture(source, { meta = {}, files = {} } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-case-'));
   const nm = path.join(root, 'node_modules');
   const pkg = path.join(nm, 'sample');
-  fs.mkdirSync(pkg, { recursive: true });
-  fs.writeFileSync(path.join(pkg, 'package.json'), JSON.stringify({
+  writePackageFixture(pkg, {
     name: 'sample', version: '1.0.0', main: 'index.js',
     dsh: { bundle: { patch: 'cordis.patch.yml' } }, ...meta,
-  }));
-  fs.writeFileSync(path.join(pkg, 'cordis.patch.yml'), '- name: ./index.js\n');
-  fs.writeFileSync(path.join(pkg, 'index.js'), source);
+  }, source, '- name: ./index.js\n');
   for (const [file, text] of Object.entries(files)) {
     fs.mkdirSync(path.dirname(path.join(pkg, file)), { recursive: true });
     fs.writeFileSync(path.join(pkg, file), text);

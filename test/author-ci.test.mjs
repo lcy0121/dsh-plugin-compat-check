@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { writePackageFixture } from "./fixture-utils.mjs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -9,19 +10,15 @@ function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-author-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const source = path.join(root, "package");
-  fs.mkdirSync(source);
-  fs.writeFileSync(
-    path.join(source, "package.json"),
-    JSON.stringify({
+  writePackageFixture(
+    source,
+    {
       name: "author-fixture",
       version: "1.0.0",
       type: "module",
       main: "index.js",
       dsh: {},
-    }),
-  );
-  fs.writeFileSync(
-    path.join(source, "index.js"),
+    },
     'throw Error("target code must never execute");export function apply(ctx){ctx.noSuchService.missing();}',
   );
   return { root, source };

@@ -312,7 +312,7 @@ test("optional graph validation rejects fabricated paths and unbounded nested pa
 
 // Catches a dependency view hiding disabled alternative candidates or presenting potential paths as measured failures.
 test("dependency panel renders candidate states, requirements and potential paths while rejecting corrupt extension data", async () => {
-  const module = await import("../lib/dependency-panel.mjs").catch((error) => {
+  const module = await import("../lib/workflow-panels.mjs").catch((error) => {
     if (error.code === "ERR_MODULE_NOT_FOUND")
       assert.fail("依赖关系视图尚无可渲染组件");
     throw error;

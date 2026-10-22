@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { writePackageFixture } from "./fixture-utils.mjs";
 import os from "node:os";
 import path from "node:path";
 import {
@@ -29,18 +30,17 @@ function fixture(
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const nm = path.join(root, "node_modules"),
     pkg = path.join(nm, name);
-  fs.mkdirSync(pkg, { recursive: true });
-  fs.writeFileSync(
-    path.join(pkg, "package.json"),
-    JSON.stringify({
+  writePackageFixture(
+    pkg,
+    {
       name,
       version: "1.0.0",
       main: "index.js",
       dsh: {},
       engines: { dsh: range },
-    }),
+    },
+    code,
   );
-  fs.writeFileSync(path.join(pkg, "index.js"), code);
   return { root, nm, pkg };
 }
 test("known versions compare one frozen artifact with canonical static evidence, without executing plugin code", async (t) => {

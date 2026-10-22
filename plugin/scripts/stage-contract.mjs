@@ -18,26 +18,12 @@ for (const item of [
       "buildDependencyGraph:buildDependencyGraph, validateDependencyGraph:validateDependencyGraph",
   },
   {
-    source: "dependency-panel",
-    host: "dependency-panel",
-    label: "DEPENDENCY PANEL",
-    global: "DependencyPanelFactory",
-    exports: "createDependencyPanel:createDependencyPanel",
-  },
-  {
     source: "finding-review",
     host: "finding-review",
     label: "FINDING REVIEW",
     global: "FindingReviewContract",
     exports:
       "REVIEW_STATUS_LABELS:REVIEW_STATUS_LABELS, REVIEW_LIMITS:REVIEW_LIMITS, validateReviewInput:validateReviewInput, validateReviewEnvelope:validateReviewEnvelope",
-  },
-  {
-    source: "finding-review-panel",
-    host: "finding-review-panel",
-    label: "FINDING REVIEW PANEL",
-    global: "FindingReviewPanelFactory",
-    exports: "createFindingReviewPanel:createFindingReviewPanel",
   },
   {
     source: "functional-health-contract",
@@ -48,11 +34,12 @@ for (const item of [
       "validateFunctionalHealthResult:validateFunctionalHealthResult, canonicalFunctionalManifest:canonicalFunctionalManifest",
   },
   {
-    source: "functional-health-panel",
-    host: "functional-health-panel",
-    label: "FUNCTIONAL HEALTH PANEL",
-    global: "FunctionalHealthPanelFactory",
-    exports: "createFunctionalHealthPanel:createFunctionalHealthPanel",
+    source: "workflow-panels",
+    host: "workflow-panels",
+    label: "WORKFLOW PANELS",
+    global: "WorkflowPanelFactory",
+    exports:
+      "createDependencyPanel:createDependencyPanel, createFindingReviewPanel:createFindingReviewPanel, createFunctionalHealthPanel:createFunctionalHealthPanel",
   },
   {
     source: "contracts",

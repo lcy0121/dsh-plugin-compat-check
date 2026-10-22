@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { writePackageFixture } from "./fixture-utils.mjs";
 import os from "node:os";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
@@ -14,18 +15,14 @@ function fixture(t, count = 8000) {
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const nm = path.join(root, "node_modules"),
     pkg = path.join(nm, "capture-fixture");
-  fs.mkdirSync(pkg, { recursive: true });
-  fs.writeFileSync(
-    path.join(pkg, "package.json"),
-    JSON.stringify({
+  writePackageFixture(
+    pkg,
+    {
       name: "capture-fixture",
       version: "1.0.0",
       main: "index.js",
       dsh: {},
-    }),
-  );
-  fs.writeFileSync(
-    path.join(pkg, "index.js"),
+    },
     "export default ctx => ctx.settings.get('x');",
   );
   for (let i = 0; i < count; i++)

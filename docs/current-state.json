@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.4",
-  "recordedAt": "2026-10-22T17:45:27.312Z",
+  "recordedAt": "2026-10-22T18:10:50.078Z",
   "testFiles": 64,
   "tests": 875,
   "repositoryFiles": {
-    "total": 320,
+    "total": 316,
     "fixtures": 90,
-    "other": 230
+    "other": 226
   },
   "verification": {
     "platform": "darwin",
@@ -168,6 +168,90 @@
         "junit": "Four real CLI outputs parsed by Python ElementTree; tests/failures/errors match actual nodes.",
         "independentReview": "22/22 focused tests passed; no confirmed remaining blockers."
       }
+    },
+    "ciFailureReview20261023": {
+      "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39739339996",
+      "commit": "ad826965571c997557f9e25a5808d13afca6732a",
+      "runCreatedAt": "2026-10-22T07:16:18Z",
+      "dependencySecurity": {
+        "job": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39739339996/job/119692499896",
+        "workspaceLock": "clean",
+        "pluginRuntime": "error: npm-registry-error",
+        "interpretation": "Audit did not complete; no advisory was reported in these logs. Underlying network/service cause was not retained in fixed safe diagnostics."
+      },
+      "linuxRc2": {
+        "job": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39739339996/job/119692878737",
+        "failure": "Actual upgrade result did not render",
+        "step": "Real private Linux DSH, loader labels and artifact responsiveness",
+        "scope": "Upgrade result DOM wait exceeded 40000ms after declaration/HTTP/preceding panel checks passed. Logs lack the UI/request detail needed to distinguish rendering, request or scheduling causes; not proved fixed."
+      },
+      "currentLocalAudit": {
+        "workspaceLock": "clean",
+        "pluginRuntime": "clean"
+      },
+      "remoteStatus": "Historical run remains failed. No rerun, push or remote CI pass claimed.",
+      "currentLocalCandidate": {
+        "platform": "macOS arm64",
+        "artifactSha256": "16bb818ae27c3d37af9af10d0b2621447a3005272105c027d2a63a217c781ed3",
+        "ui": {
+          "available": true,
+          "navigation": "More > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+        },
+        "upgradePreview": {
+          "realBrowser": true,
+          "positiveNewRisk": true,
+          "sourceIdentitiesVisible": true,
+          "staticLimitationsVisible": true,
+          "unknownTargetUncertified": true,
+          "ordinaryRowsAndFiltersUnchanged": true
+        },
+        "workflowPanels": {
+          "realBrowser": true,
+          "dependencyView": true,
+          "manualReviewPersisted": true,
+          "ordinaryReportUnchanged": true,
+          "baselineUnchanged": true,
+          "healthImportAvailable": true
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        },
+        "scope": "Post-consolidation installed tgz in owned real DSH/Chrome; does not reproduce or certify Linux runner behavior."
+      }
+    },
+    "sourceConsolidation20261023": {
+      "planBytes": {
+        "before": 18857,
+        "after": 15689
+      },
+      "panels": {
+        "canonicalModulesBefore": 3,
+        "canonicalModulesAfter": 1,
+        "generatedHostModulesBefore": 3,
+        "generatedHostModulesAfter": 1,
+        "factoryBodies": "byte-identical to ed757a6; three exports in shared delivery module"
+      },
+      "testFixtures": {
+        "helper": "existing test/fixture-utils.mjs",
+        "netLinesRemoved": 17,
+        "fixtureEquivalence": "Seven caller trees plus default, metadata and nested-file variants preserve paths and bytes."
+      },
+      "quality": {
+        "tests": 875,
+        "passed": 872,
+        "skipped": 3,
+        "failed": 0,
+        "assertionsOrCasesRemoved": false,
+        "publicCLIPathsRemoved": false,
+        "format": "passed",
+        "notices": "passed",
+        "generatedContracts": "passed"
+      },
+      "scope": "Consolidate cohesive UI delivery and repeated fixture writes; retain distinct author/engineering/business tool contracts and behavior regressions."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."

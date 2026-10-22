@@ -7,7 +7,7 @@ import path from "node:path";
 // Removing record persistence, stale identity checks, or input limits must break these tests.
 import * as Store from "../lib/finding-review-store.mjs";
 import * as Pure from "../lib/finding-review.mjs";
-import * as Panel from "../lib/finding-review-panel.mjs";
+import * as Panel from "../lib/workflow-panels.mjs";
 const fixtureReport = () => ({
   toolVersion: "0.1.4",
   dshVersion: "0.2.1-rc.2",

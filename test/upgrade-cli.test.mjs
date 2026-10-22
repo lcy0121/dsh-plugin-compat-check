@@ -2,6 +2,7 @@ import { after, test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import { writePackageFixture } from "./fixture-utils.mjs";
 import os from "node:os";
 import path from "node:path";
 
@@ -13,24 +14,20 @@ const nm = path.join(temp, "profile", "node_modules");
 const plugin = path.join(nm, "upgrade-fixture");
 const marker = path.join(temp, "executed");
 fs.mkdirSync(home);
-fs.mkdirSync(plugin, { recursive: true });
-fs.writeFileSync(
-  path.join(plugin, "package.json"),
-  JSON.stringify({
+writePackageFixture(
+  plugin,
+  {
     name: "upgrade-fixture",
     version: "1.0.0",
     type: "module",
     engines: { dsh: "0.2.0-rc.2" },
     dsh: { bundle: { patch: "./cordis.patch.yml" } },
-  }),
-);
-fs.writeFileSync(path.join(plugin, "cordis.patch.yml"), "- name: ./index.js\n");
-fs.writeFileSync(
-  path.join(plugin, "index.js"),
+  },
   `import fs from 'node:fs';
 fs.writeFileSync(${JSON.stringify(marker)}, 'executed');
 export function apply(ctx) { ctx.logger.info('fixture'); }
 `,
+  "- name: ./index.js\n",
 );
 // A normal check attempts to read this adjacent probe. Upgrade mode must ignore it.
 fs.writeFileSync(path.join(temp, "profile", "probe-report.json"), "{not-json");

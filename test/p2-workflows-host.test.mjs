@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { writePackageFixture } from "./fixture-utils.mjs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -10,20 +11,16 @@ function host(body) {
     home = path.join(root, "home"),
     nm = path.join(home, "profiles/P/node_modules"),
     pkg = path.join(nm, "demo");
-  fs.mkdirSync(pkg, { recursive: true });
-  fs.writeFileSync(
-    path.join(pkg, "package.json"),
-    JSON.stringify({
+  writePackageFixture(
+    pkg,
+    {
       name: "demo",
       version: "1.0.0",
       type: "module",
       main: "index.js",
       exports: { ".": "./index.js", "./client": "./missing.js" },
       dsh: { client: { platform: "web" } },
-    }),
-  );
-  fs.writeFileSync(
-    path.join(pkg, "index.js"),
+    },
     'export function apply(){throw Error("must not execute")}',
   );
   const script = `import assert from 'node:assert/strict';import fs from 'node:fs';import {Readable} from 'node:stream';import {apply} from ${JSON.stringify(new URL("../plugin/index.js", import.meta.url).href)};

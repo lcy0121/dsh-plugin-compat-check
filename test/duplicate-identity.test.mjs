@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { writePackageFixture } from "./fixture-utils.mjs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -23,10 +24,9 @@ function fixture(t) {
     { name = pluginName, version = "1.0.0", broken = false, dsh = true } = {},
   ) {
     const pkg = path.join(nm, alias);
-    fs.mkdirSync(pkg, { recursive: true });
-    fs.writeFileSync(
-      path.join(pkg, "package.json"),
-      JSON.stringify({
+    writePackageFixture(
+      pkg,
+      {
         name,
         version,
         type: "module",
@@ -39,15 +39,9 @@ function fixture(t) {
               },
             }
           : {}),
-      }),
-    );
-    fs.writeFileSync(
-      path.join(pkg, "cordis.patch.yml"),
-      "- name: ./index.js\n",
-    );
-    fs.writeFileSync(
-      path.join(pkg, "index.js"),
+      },
       'export function apply(){throw Error("static scans must not execute plugins")}',
+      "- name: ./index.js\n",
     );
     return pkg;
   }
