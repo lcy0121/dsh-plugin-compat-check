@@ -24,7 +24,7 @@ export function maintainedDocuments(root) {
     { cwd: root, encoding: "utf8" },
   )
     .split("\0")
-    .filter(Boolean);
+    .filter((rel) => rel && fs.existsSync(path.join(root, rel)));
   return [
     ...new Set([...ROOT_READMES, "THIRD_PARTY_NOTICES.md", ...tracked]),
   ].sort();

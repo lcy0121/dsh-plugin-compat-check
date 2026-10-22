@@ -36,11 +36,11 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 DSH 0.2.1-rc.2 navigation: **More → Settings → Built-in plugins → Compatibility**. Agents can call `compat_check`. Select the actual profile; do not assume desktop.
 
-Unreleased source rejects ambiguous duplicate plugin identities without advancing the baseline. Ordinary reports show the target DSH, reference catalogue version/hash and reviewed scope; future/unknown versions and custom catalogues remain uncertified. See the [catalogue governance workflow](docs/catalog-governance.md). The repository YAML tooling dependency is also patched; it is not a plugin runtime dependency.
+Unreleased source rejects ambiguous duplicate plugin identities without advancing the baseline. Ordinary reports show the target DSH, reference catalogue version/hash and reviewed scope; future/unknown versions and custom catalogues remain uncertified. See the [catalogue governance workflow](docs/maintaining.md#api目录候选审查). The repository YAML tooling dependency is also patched; it is not a plugin runtime dependency.
 
-Unreleased source also rejects bound probes more than five minutes ahead of the checking clock and explains why their evidence was ignored. CI adds a separate dependency security gate; developers can run `npm run security:dependencies`. See [dependency security](docs/dependency-security.md).
+Unreleased source also rejects bound probes more than five minutes ahead of the checking clock and explains why their evidence was ignored. CI adds a separate dependency security gate; developers can run `npm run security:dependencies`. See [dependency security](docs/maintaining.md#依赖公告与ci供应链).
 
-Unreleased source adds dependency relationships, manual finding reviews and offline health-record import. Dependency paths show potential impact across required, optional and scoped relationships on each side; declared providers remain candidates, and cycles do not establish failures. Pending/reviewed/false-positive/fixed records stay separate; source, version or rule changes require review again, without hiding findings or changing baselines/exemptions. Health execution is repository-only and requires explicit `--run`; the default reviews declarations. The panel only imports historical evidence, which does not certify the current installed artifact. See the [workflows, limits and orphan-lock recovery](docs/feature-workflows.md).
+Unreleased source adds dependency relationships, manual finding reviews and offline health-record import. Dependency paths show potential impact across required, optional and scoped relationships on each side; declared providers remain candidates, and cycles do not establish failures. Pending/reviewed/false-positive/fixed records stay separate; source, version or rule changes require review again, without hiding findings or changing baselines/exemptions. Health execution is repository-only and requires explicit `--run`; the default reviews declarations. The panel only imports historical evidence, which does not certify the current installed artifact. See the [workflows, limits and orphan-lock recovery](docs/guide.md).
 
 ### Repository CLI
 
@@ -127,7 +127,9 @@ node tools/meta-check.mjs --json
 
 Default tests do not start real DSH or call models. Artifact tests install with a private empty cache and require npm registry access. `doc-check` never recursively runs tests. Metadata checks need gh/npm and network; unpublished README differences are notices, unavailable sources are not passes. The prepublish check itself publishes nothing.
 
-[Plan: contracts, verification and next steps](docs/Plan.md) · [current-state.json: counts and evidence](docs/current-state.json) · [Rules](rules/README.md) · [Skill](skill/README.md). Commands and authorization boundaries for engineering diagnostics, independent business measurements and explicit model tests are in the [reproduction guide](docs/Plan.md#5-验证记录与复现); these development tools are not shipped in the npm plugin.
+[Plan: contracts, verification and next steps](docs/Plan.md) · [current-state.json: counts and evidence](docs/current-state.json) · [Rules](rules/README.md) · [Skill](skill/README.md). Commands and authorization boundaries for engineering diagnostics, independent business measurements and explicit model tests are in the [reproduction guide](docs/guide.md#日常检查与源码交付); these development tools are not shipped in the npm plugin.
+
+Plugin authors can use the unreleased [author CI tool](docs/author-ci.md) for new-risk/coverage gates, JSON/SARIF/JUnit output and a certified-version matrix.
 
 Listed in:
 
@@ -139,7 +141,7 @@ Listed in:
 
 Listing is not compatibility certification. The npm installation method in 1024 Store still awaits an upstream fix; see [Plan](docs/Plan.md).
 
-Unreleased source changes add plugin search, combined verdict/certainty/pending filters, collapsible findings, full report preview/copy and a baseline risk view. Ordinary reports refresh after plugin or observation identities change, using event hints and a bounded five-second watchdog; background updates retain filters and the previous report on failure. Upgrade capture, hashing and cleanup run in supervised workers and cancel on unload. Findings include evidence-matched follow-up checks; filters do not trim exported reports. The fixed real-plugin regression runner is repository-only: `node tools/real-regression.mjs --live --out-dir <empty-directory>` or `--replay <evidence-root>`. The queue now covers five artifacts and 24 cases per round, including two untuned families; see [sample provenance](docs/real-regression-samples.md). A green run reproduces fixed outcomes while retaining false positives/negatives; see [Plan](docs/Plan.md).
+Unreleased source changes add plugin search, combined verdict/certainty/pending filters, collapsible findings, full report preview/copy and a baseline risk view. Ordinary reports refresh after plugin or observation identities change, using event hints and a bounded five-second watchdog; background updates retain filters and the previous report on failure. Upgrade capture, hashing and cleanup run in supervised workers and cancel on unload. Findings include evidence-matched follow-up checks; filters do not trim exported reports. The fixed real-plugin regression runner is repository-only: `node tools/real-regression.mjs --live --out-dir <empty-directory>` or `--replay <evidence-root>`. The queue now covers five artifacts and 24 cases per round, including two untuned families; see [sample provenance](docs/maintaining.md#真实插件回归). A green run reproduces fixed outcomes while retaining false positives/negatives; see [Plan](docs/Plan.md).
 
 ## License
 

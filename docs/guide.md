@@ -1,4 +1,4 @@
-# 健康检查、依赖关系与人工处置
+# 使用与验证指南
 
 以下为当前未发布源码的工作流；公开0.1.4不因此获得这些能力。先按[源码打包说明](../plugin/README.md#从源码构建安装)构建完整tgz。三项能力共用普通报告的身份与证据边界，均不能把声明放行、激活或无发现改称业务验收通过。
 
@@ -66,10 +66,55 @@ $DSH_HOME/dsh-plugin-compat-check/reviews.<canonical-node_modules路径SHA256>.j
 
 进程崩溃可能遗留`reviews.<hash>.json.lock`或`.reviews-<uuid>.tmp`；刷新不会自动回收，保存可能持续提示忙。先确认没有任何进程正在向该目录保存人工记录，备份并保留对应JSON，再只清理已确认孤立的lock/tmp。不要按通配符清空目录，不删除JSON、baseline或其它进程资源；仍有保存任务时不得清锁。损坏JSON需保留原件并人工核实或恢复可信备份，不能靠清空文件把状态伪装成首次待确认。
 
-## 复现入口
+## 功能回归
 
 ```bash
 node --test test/functional-health.test.mjs test/dependency-graph.test.mjs test/finding-review.test.mjs test/p2-workflows-host.test.mjs test/p2-workflows-panel.test.mjs
 ```
 
-定向回归使用受控输入；可用Chrome的病例会启动自有空浏览器。真实DSH/制品执行仍按上述显式授权入口进行，不以测试fixture代替真实业务证据。本轮最终计数、真实集成与平台范围以[current-state.json](current-state.json)的归档为准；历史记录不认证新源码或新制品。[Plan](Plan.md)维护合同、复现索引及后续工作。
+定向回归使用受控输入；可用Chrome的病例会启动自有空浏览器。真实DSH/制品执行仍按上述显式授权入口进行，不以测试fixture代替真实业务证据。当前计数、真实集成与平台范围以[current-state.json](current-state.json)为准；历史记录不认证新源码或新制品。[Plan](Plan.md)维护合同、复现索引及后续工作。
+
+## 日常检查与源码交付
+
+仓库CLI的快速开始及参数见[README](../README.md)，npm插件的完整tgz构建见[plugin README](../plugin/README.md#从源码构建安装)。安装依赖时使用冻结lock且禁用lifecycle脚本：
+
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
+npm test -- --test-reporter=tap > /tmp/dsc-tests.tap
+npm run format:check
+node tools/update-current-state.mjs --test-summary /tmp/dsc-tests.tap
+node tools/doc-check.mjs --test-summary /tmp/dsc-tests.tap
+npm run notices:check
+node plugin/scripts/prepublish-check.mjs
+node tools/meta-check.mjs --json
+```
+
+只有测试成功的TAP才用于更新统计；不要用重建快照消除失败。`prepublish-check`只检查，不发布。skill和契约副本分别用`node plugin/scripts/stage-skill.mjs`、`node plugin/scripts/stage-contract.mjs`同步，依赖变化后同步第三方说明。默认suite不启动真实DSH或模型，独立安装测试需要registry。源码推送、npm发布和外部发帖分别按当次授权执行。
+
+## 升级预检与有限批量
+
+```sh
+node bin/compat-check.mjs --nm <profile或node_modules> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json
+node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.json
+node tools/static-batch.mjs --manifest test/fixtures/static-batch.json --previous batch.json
+```
+
+预检仅比较同组制品的两个精确支持版本，退出0/1/2只描述新增/变重风险，已有问题可能仍在；3表示无法预检。回归见`test/upgrade-{preview,cli,host,panel,capture-worker}.test.mjs`。固定合成批量清单预期exit2；`--hash <本地包目录>`计算指纹。批量无网络、执行目标、probe或基线，退出3表示至少一项工具错误。完整身份、预算与覆盖边界见[Plan](Plan.md#2-现行判定与集成契约)，作者门禁与标准报告见[作者CI](author-ci.md)。
+
+## 面板与报告核实
+
+发现的“下一步核实”由结构化类别/状态生成，不猜测替代API或修复版本。搜索、组合筛选和折叠不改变原报告或完整导出；无可比基线时中性提示。后台报告按输入身份变化重算，失败保留旧成功报告及错误；卸载后的旧任务不得发布或推进基线。回归见`test/cache-invalidation.test.mjs`及host/client结构测试。
+
+复制故障报告前预览敏感信息；它保留包内位置与证据边界，不含原始源码、日志、probe或baseline，但任意文本不保证完全脱敏。导出不自动发帖。
+
+## 工程与真实集成
+
+```sh
+node tools/engineering-check.mjs
+DSC_SLOW=1 node --test test/engineering-live.test.mjs test/profile-lock.test.mjs test/owned-process.test.mjs test/debugger.test.mjs
+DSC_REQUIRE_RC2_UI=1 node tools/rc2-live.mjs
+```
+
+真实集成需要DSH/pnpm、Chrome（可设`DSC_CHROME`）及网络，会执行所选私有宿主/插件；先确认当次执行授权。仅清理自有目录/PID组，不能按进程名清场。私有profile不是OS沙箱。Darwin受控负例缺编译器时跳过，跳过不算验收。显式boot诊断可设`DSC_EXECUTION_DIAGNOSTICS=<私有目录>`，不导出argv/env或stderr正文，诊断分享前仍须预览。预算不承诺硬实时、RSS或任意脱离进程组隔离。
+
+真实业务队列及模型测试的独立授权边界见[回归维护](maintaining.md#真实插件回归)；已验证版本与平台见[current-state](current-state.json)。

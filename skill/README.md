@@ -23,7 +23,7 @@ provider name与skill name均为dsh-plugin-compat-check，source=bundled、rank=
 
 公开0.1.4正文明确必需inject、未知服务与方法缺失的边界。当前源码进一步分开解释确定性与影响依据，并按“无已验证调用”说明vacuous；并从同一模块呈现每条发现的核实步骤，保留未知依赖“待确认”。这些源码修订尚未发布，不追改历史npm包。
 
-当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为 **12251 字符**，由docs测试核对。不要把历史探针的contentLength手工替换成新正文长度：那会篡改历史实测。
+当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为 **12242 字符**，由docs测试核对。不要把历史探针的contentLength手工替换成新正文长度：那会篡改历史实测。
 
 升级前对比优先调用已注册的`compat_check({"upgradeTo":"0.2.1-rc.2"})`，当前版本由运行宿主解析；无工具时使用仓库CLI：`node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json`，当前版本必须显式提供。仅使用已认证精确版本目录，对同一安装制品静态比较，不读取探针、profile豁免或基线，不执行插件或升级宿主。此预测不等于业务验收通过，完整输入/输出边界见正文及CLI帮助。
 
@@ -31,7 +31,7 @@ provider name与skill name均为dsh-plugin-compat-check，source=bundled、rank=
 
 DSH0.2.0-rc.2/macOS的历史机制实验确认：静态inject或子fiber inject均能注册provider；包内未注册文件不被自动发现；扁平markdown和name/SKILL.md两种扫描形态可被发现。旧实验只说明当时的机制，不代替后续版本的真实启动验收。
 
-默认测试在受控上下文中检查apply、注册、正文、隔离安装及独立tarball工具执行，不启动真实DSH。2026-10-15另从实际tgz在私有profile启动真实DSH0.2.0-rc.2（macOS arm64，宿主Node24.18.1）：skills.list包含本skill，skills.get返回provider=dsh-plugin-compat-check，当时contentLength=6548且SHA-256与当时源码一致。实际调用compat_check亦成功；这验证宿主目录和工具，不表示已经发送模型对话或覆盖其它DSH版本。环境、清理与后续见 [Plan](../docs/Plan.md#51-已验证范围)。
+默认测试在受控上下文中检查apply、注册、正文、隔离安装及独立tarball工具执行，不启动真实DSH。2026-10-15另从实际tgz在私有profile启动真实DSH0.2.0-rc.2（macOS arm64，宿主Node24.18.1）：skills.list包含本skill，skills.get返回provider=dsh-plugin-compat-check，当时contentLength=6548且SHA-256与当时源码一致。实际调用compat_check亦成功；这验证宿主目录和工具，不表示已经发送模型对话或覆盖其它DSH版本。环境、清理与后续见 [Plan](../docs/Plan.md#4-验收范围)。
 
 历史npm0.1.1正文contentLength=6551，末段误留发布前的“本地0.1.1未发布”。0.1.2改为版本中立的事实源说明，并补充新版DSH声明规则未适配的限制；是否已公开安装以Plan和registry的最新记录为准，不追改旧包或旧实测。
 

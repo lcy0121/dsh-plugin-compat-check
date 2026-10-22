@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Regenerate current facts. Historical narrative counts are left untouched. */
+/** Regenerate current facts. Keep current counts and concise acceptance summaries; detailed history stays in Git. */
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -18,6 +18,6 @@ const previous=JSON.parse(fs.readFileSync(path.join(root,'docs/current-state.jso
 const state={toolVersion:TOOL_VERSION,recordedAt:new Date().toISOString(),testFiles:fs.readdirSync(path.join(root,'test')).filter(f=>f.endsWith('.test.mjs')).length,tests,
  repositoryFiles:{total:files.length,fixtures:fixtures.length,other:files.length-fixtures.length},
  verification:{...previous.verification,platform:process.platform,arch:process.arch,optionalProfiles:{parityfix:fs.existsSync(path.join(os.homedir(),'.dsh/profiles/parityfix/node_modules')),desktop:fs.existsSync(path.join(os.homedir(),'.dsh/profiles/desktop/node_modules'))}},
- scope:'Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script.'};
+ scope:'Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git.'};
 fs.writeFileSync(path.join(root,'docs/current-state.json'),JSON.stringify(state,null,2)+'\n');
 console.log(`Recorded ${tests} tests / ${state.testFiles} test files / ${files.length} repository files`);

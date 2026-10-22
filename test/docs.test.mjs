@@ -1,45 +1,10 @@
-/**
- * 「文档信息」的自检 —— 把会腐烂的数字变成会变红的断言。
- *
- * ## 这一层要防的事，已经真实发生过两次
- *
- * 用户的原话是「文档信息」指这 7 份：`docs/extraction-findings.md`、`docs/Plan.md`、
- * 三份 README、`skill/SKILL.md`、`skill/README.md`。
- *
- * 而实测发现它们**同时**写着互相矛盾的东西：
- *
- * | 声称 | 实际 |
- * |---|---|
- * | 「221 条断言」（三份 README） | 230 |
- * | 「9 个测试文件」 | 11 |
- * | 「分七层」（README） vs 「分三层」（Plan §0） | 是两件不同的事被混为一谈 |
- * | 「66 个是夹具数据」（而同一句里 57 + 66 = 123 ≠ 132） | 75 |
- * | 「21 个合成插件」 | 22 |
- * | 「228 条断言」 | 230 |
- *
- * 全部是**同一种错误**：文档里写着一个**当时对、后来变了的数**。
- * 手工修一遍只能让它对一次 —— 下一轮改代码，它又会错，而**没有任何东西会变红**。
- *
- * 所以这一层的价值不在"这次修好了"，而在**下次会自动发现**：
- * 凡是能从仓库里**复算出来**的数，都不该靠人抄。
- *
- * ## 为什么不直接消除数字、改成「见 --help」
- *
- * 数字本身是有信息量的（"230 条断言"能让读者判断这个仓库的自检密度）。
- * 所以做法不是删掉它们，而是**让它们可校验**。
- *
- * ## 只查能机械复算的东西
- *
- * 语义判断（"这个说法准不准"）留给人和 review。这里只做**算术**：
- * 数一数、比一比。凡是需要"读懂了才知道对不对"的，不要放进来 ——
- * 那种断言会变成第二个会腐烂的东西。
- */
+/** Current document structure, links and mechanically reproducible facts. */
 
 import { optionalProfiles } from './support/profile-snapshot.mjs'
 
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
-import { execFileSync, spawnSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -65,9 +30,8 @@ test('文档核验能发现迁移后断开的相对链接，忽略代码块里�
   } finally { fs.rmSync(root, { recursive: true, force: true }) }
 })
 
-/** 原始七份入口加上目前维护的docs/npm文档。 */
+/** Public entry documents and the maintained docs directory. */
 const DOCS = [
-  'docs/extraction-findings.md',
   'docs/Plan.md',
   'README.md',
   'README.en.md',
@@ -83,21 +47,11 @@ function realTestFileCount() {
     .filter((f) => f.endsWith('.test.mjs')).length
 }
 
-function realGitFileCounts() {
-  const files = execFileSync('git', ['ls-files'], { cwd: REPO, encoding: 'utf8' })
-    .trim().split('\n').filter(Boolean)
-  const fixture = files.filter((f) => f.includes('node_modules/')
-    || f === 'test/fixtures/micro/host-surface.json')
-  return { total: files.length, fixture: fixture.length, manual: files.length - fixture.length }
-}
-
 describe('文档信息：可复算的数字必须与仓库一致', () => {
   // ⚠️ **不要在这里 spawn 整个测试套件去数条数** —— 子进程会把本文件也再跑一遍，
   // 于是自己调自己、无限递归。实测踩到过（一跑就挂）。
   // 断言条数那一项因此放在 `tools/doc-check.mjs`：那是**独立进程**，
   // 跑一次套件、比一次文档，不在测试内部套娃。
-  const testFiles = realTestFileCount()
-  const counts = realGitFileCounts()
 
   test('current facts are generated and linked by all maintained entry documents',()=>{
     const metrics=JSON.parse(read('docs/current-state.json'));
@@ -121,17 +75,30 @@ describe('文档信息：可复算的数字必须与仓库一致', () => {
     assert.deepEqual(bad, [], `合成插件数不符：\n  ${bad.join('\n  ')}`)
   })
 
-  test('extraction-findings 的缺陷编号连续、且与速查表一一对应', () => {
-    const s = read('docs/extraction-findings.md')
-    const quick = [...s.matchAll(/^\| (\d+) \|/gm)].map((m) => Number(m[1]))
-    // 速查表 + 分组小节里的表都会命中，所以取**并集**再查连续性
-    const uniq = [...new Set(quick)].sort((a, b) => a - b)
-    assert.ok(uniq.length > 0, '一条缺陷都没数到 —— 表格格式变了？')
-    const missing = []
-    for (let i = 1; i <= uniq[uniq.length - 1]; i++) if (!uniq.includes(i)) missing.push(i)
-    assert.deepEqual(missing, [],
-      `缺陷编号缺号：${missing.join(', ')}。实测这已经烂过一次 —— 原文是 7 之后直接跳到 9–14，`
-      + `而标题写 9–14、表里其实到 18。`)
+  test('public documentation has a compact structure and valid current links', async () => {
+    const { checkDocumentLinks } = await import('../tools/doc-check.mjs')
+    assert.deepEqual(fs.readdirSync(path.join(REPO, 'docs')).sort(),
+      ['Plan.md', 'author-ci.md', 'current-state.json', 'guide.md', 'maintaining.md'])
+    assert.deepEqual(checkDocumentLinks(REPO, [...new Set(DOCS)]), [])
+    for (const rel of ['docs/Plan.md', 'docs/guide.md', 'docs/maintaining.md']) {
+      assert.match(read(rel), /current-state(?:\.json)?/, rel)
+    }
+    for (const rel of ['README.md', 'README.en.md', 'README.ko.md', 'plugin/README.md']) {
+      for (const document of ['Plan.md', 'guide.md', 'maintaining.md']) {
+        assert.ok(read(rel).includes(`docs/${document}`), `${rel}: missing ${document} entry`)
+      }
+      assert.doesNotMatch(read(rel), /docs\/(?:extraction-findings|catalog-governance|real-regression-samples|dependency-security|feature-workflows)\.md/)
+    }
+  })
+
+  test('current facts and the docs directory stay small enough to review', () => {
+    const docsRoot = path.join(REPO, 'docs')
+    assert.ok(fs.statSync(path.join(docsRoot, 'current-state.json')).size < 16 * 1024,
+      'current-state.json must remain a compact current summary; retain detailed history in Git')
+    const bytes = fs.readdirSync(docsRoot)
+      .reduce((sum, file) => sum + fs.statSync(path.join(docsRoot, file)).size, 0)
+    assert.ok(bytes < 80 * 1024,
+      `docs uses ${bytes} bytes; keep public guidance concise and move historical logs to Git`)
   })
 
   test('docs/Plan.md 里的 §N 交叉引用都能落到真实小节上', () => {

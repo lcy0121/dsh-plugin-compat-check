@@ -22,11 +22,11 @@ DSH 0.2.1-rc.2 入口：**更多 → 设置 → 内置插件 → 兼容性**。a
 
 仓库的固定真实插件故障回归单独运行，不随npm包提供；历史公开0.1.4及其验收范围见前述发布记录。
 
-源码普通体检遇到同名重复安装（含alias、不同版本）明确失败且不推进基线。报告、agent和面板同时展示目标DSH、参考目录版本/SHA-256及验收范围；未知/未来版本回退、自定义目录保持未认证警告，内置目录摘要不符则无法判定。[新目录治理](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/catalog-governance.md)须经过来源核验、API差分、规则复核与集成验收，提取不自动认证。仓库YAML依赖修复不涉及npm插件运行时依赖。
+源码普通体检遇到同名重复安装（含alias、不同版本）明确失败且不推进基线。报告、agent和面板同时展示目标DSH、参考目录版本/SHA-256及验收范围；未知/未来版本回退、自定义目录保持未认证警告，内置目录摘要不符则无法判定。[新目录治理](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md#api目录候选审查)须经过来源核验、API差分、规则复核与集成验收，提取不自动认证。仓库YAML依赖修复不涉及npm插件运行时依赖。
 
-源码同时限制绑定探针的未来时钟偏差最多5分钟；超范围或非法/缺失时间时忽略该文件的服务与loader证据，保留静态发现及拒绝原因，时钟异常不等于插件不兼容。仓库独立CI依赖安全门禁及处置见[依赖安全说明](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/dependency-security.md)，检查器不随npm插件运行。
+源码同时限制绑定探针的未来时钟偏差最多5分钟；超范围或非法/缺失时间时忽略该文件的服务与loader证据，保留静态发现及拒绝原因，时钟异常不等于插件不兼容。仓库独立CI依赖安全门禁及处置见[依赖安全说明](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md#依赖公告与ci供应链)，检查器不随npm插件运行。
 
-源码另增加“依赖关系与潜在影响”、发现的人工处置和离线健康记录导入。依赖图区分host/client、必需/可选/子作用域，提供声明仅为候选，路径/环不证明实际故障。待确认/已复核/误报/已修复及依据单独保存，源码、版本或规则等变化后待重审，不隐藏finding或改变基线/兼容豁免。面板只导入历史健康记录，不运行检查，不能证明当前安装制品；健康执行器仅属仓库，默认review，须显式`--run`及当次授权。步骤、限额和崩溃后的孤立锁恢复见[三项工作流](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/feature-workflows.md)。
+源码另增加“依赖关系与潜在影响”、发现的人工处置和离线健康记录导入。依赖图区分host/client、必需/可选/子作用域，提供声明仅为候选，路径/环不证明实际故障。待确认/已复核/误报/已修复及依据单独保存，源码、版本或规则等变化后待重审，不隐藏finding或改变基线/兼容豁免。面板只导入历史健康记录，不运行检查，不能证明当前安装制品；健康执行器仅属仓库，默认review，须显式`--run`及当次授权。步骤、限额和崩溃后的孤立锁恢复见[三项工作流](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/guide.md)。
 
 ### 升级前兼容性预检
 
@@ -65,6 +65,8 @@ npm 产物**没有 CLI bin、安装检查 shell 或 probe 入口**，不支持 `
 限定 macOS/Linux、真实 DSH/Chrome、独立 tgz 和工程验收的逐次版本及证据见 [current-state.json](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。Windows 待真实验收。独立业务/模型度量属于仓库开发工具，不随 npm 分发、不进入产品判定，默认测试/CI不调用模型；固定样本不是生态准确率或完整模型质量认证。
 
 [完整契约与复现](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md#2-现行判定与集成契约) · [源码及问题反馈](https://github.com/lcy0121/dsh-plugin-compat-check)
+
+插件作者的新增风险/覆盖门禁、JSON/SARIF/JUnit输出及版本矩阵见[作者CI](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/author-ci.md)；工具仅在未发布仓库源码提供。
 
 ## License
 

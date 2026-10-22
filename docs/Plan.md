@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-更新于2026-10-22。**已发布0.1.4，后续源码增量未发布。** 用法见[README](../README.md)；计数、制品与按日期封存的验收统一见[docs/current-state.json](current-state.json)。本文仅保留现行契约、交付索引、复现入口和待办，[旧提取器反例](extraction-findings.md)仅作历史参考。
+**已发布0.1.4，后续源码增量未发布。** 用法见[README](../README.md)；计数、制品与验收范围见[docs/current-state.json](current-state.json)。本文维护现行契约和待办；操作见[使用与验证指南](guide.md)，目录、依赖和回归维护见[维护指南](maintaining.md)。历史施工记录可从 Git 历史查阅。
 
 ## 1. 项目定位与交付状态
 
@@ -15,7 +15,7 @@
 
 单仓库、单Node内核、单版本真源`lib/version.mjs`。根目录是private工作区，npm仅打包`plugin/`，无CLI bin、安装shell或probe入口，不支持`npx dsh-plugin-compat-check`。prepack同步skill/契约并暂存kernel、LICENSE及第三方说明，postpack清理kernel；裸子目录不是完整tgz。市场截图由`plugin/screenshots.json`声明，不随npm files打包。
 
-0.1.4于2026-10-20发布，源提交7bb5e6a；确切制品、公开安装及历史0.1.3/0.1.4证据查`release013 / release014`。后续解释、故障回归、面板、升级预检、可选健康检查、依赖关系、人工处置及P1修复见§4，尚未进入npm。
+公开0.1.4与当前源码增量分开记录。发布身份、平台范围及真实验收摘要见 current-state；源码能力不能追写为公开制品已支持。
 
 ## 2. 现行判定与集成契约
 
@@ -46,7 +46,7 @@
 
 UI槽位为`settings.plugins.tab`、`plugins.detail.section / .badge`；`plugins.item`缺可靠身份。预构建客户端用`window.__ModuleLoader__.load({id,factory})`，inject为其它客户端包名，宿主不代构建；宿主空inject，tool required为顶层数组，skill注册provider，profile按实际启动参数解析。rc.2导航：更多 → 设置 → 内置插件 → 兼容性。
 
-普通体检对DSH≥0.2.1-rc.2选rc.2目录，其余/未知选旧0.2.0-rc.2目录，CLI覆盖优先。`catalog`分别展示目标版本、参考版本/SHA-256、selection和验收范围；未知/未来、自定义或缺身份均提示未认证。`CATALOG_REFERENCES`固定已验收精确版本/目录字节，摘要漂移明确失败；提取或自报版本不扩大范围。新目录须经[来源核验、API差分、规则复核与真实验收](catalog-governance.md)后人工登记；升级预检不采用普通回退。ASAR按8+headerSize定位并核验边界、字节及摘要。
+普通体检对DSH≥0.2.1-rc.2选rc.2目录，其余/未知选旧0.2.0-rc.2目录，CLI覆盖优先。`catalog`分别展示目标版本、参考版本/SHA-256、selection和验收范围；未知/未来、自定义或缺身份均提示未认证。`CATALOG_REFERENCES`固定已验收精确版本/目录字节，摘要漂移明确失败；提取或自报版本不扩大范围。新目录须经[来源核验、API差分、规则复核与真实验收](maintaining.md#api目录候选审查)后人工登记；升级预检不采用普通回退。ASAR按8+headerSize定位并核验边界、字节及摘要。
 
 HMR撤销route/tool/skill、计时器及诊断handle；卸载后在途任务不写基线、不返回新成功，worker仍按预算回收。HTTP Origin须协议、主机和有效端口完全同源；允许本机无Origin请求。
 
@@ -60,11 +60,11 @@ HMR撤销route/tool/skill、计时器及诊断handle；卸载后在途任务不�
 
 结果为`kind:plugin-compat-check/batch-result`，保留身份、发现、coverage/vacuous、弃权、诊断及`reviewStatus=pending-author-review`。无运行时、跨样本服务、probe、豁免或基线；部分扫描不升级完整。`--previous`仍重扫，仅制品及分析源码/依赖锁、Node/依赖、规则/目录、目标、策略、预算均相符才比较同id；身份变化中性，坏旧输入明确失败。
 
-[手动Action](../.github/workflows/static-batch.yml)仅扫固定公开合成样本；Node24、只读权限、固定Actions、无schedule/用户URL/目标脚本/模型/持久缓存，制品7天。未部署远程端点或结果缓存，成本为手动CI及短期存储，不承诺免费；Perch未获调用授权，评估见`semanticRuleAssessment20261020`。
+[手动Action](../.github/workflows/static-batch.yml)仅扫固定公开合成样本；Node24、只读权限、固定Actions、无schedule/用户URL/目标脚本/模型/持久缓存，制品7天。未部署远程端点或结果缓存，成本为手动CI及短期存储，不承诺免费。
 
 ### 2.6 真实故障回归与呈现
 
-`tools/real-regression.mjs`用固定manifest锁定DSH/API目录、五个真实npm制品及每轮24项业务期望：原sidebar/market三制品18项，另加未参与规则调优的pomodoro0.5.5与global-todo0.13.2两独立family各3项正常/故障/恢复。来源、声明形态及限制见[样本说明](real-regression-samples.md)。默认及最多两轮，全新私有profile与缓存，不复制账户、不调用模型，不随npm分发。
+`tools/real-regression.mjs`用固定manifest锁定DSH/API目录、五个真实npm制品及每轮24项业务期望：原sidebar/market三制品18项，另加未参与规则调优的pomodoro0.5.5与global-todo0.13.2两独立family各3项正常/故障/恢复。来源、声明形态及限制见[样本说明](maintaining.md#真实插件回归)。默认及最多两轮，全新私有profile与缓存，不复制账户、不调用模型，不随npm分发。
 
 动作前封存预测，真值来自请求/DOM/磁盘；静态与service-only、自然与受控病例分开记录FP/FN，驱动错误另列，不锁死旧告警。回放核对身份、摘要、病例、时序、截图和清理；旧driver缺逐动作时间戳，哈希不是防篡改签名。每队列10分钟，SIGTERM后留15秒清理再强停；清理未证实即失败，不盲删在用目录。
 
@@ -88,99 +88,29 @@ CLI用`--nm <profile或node_modules> --dsh-version <当前精确版本> --upgrad
 
 `dependencyGraph`展示同端服务依赖、候选提供者、loader条目和潜在传播路径/环，区分host/client、必需/可选/子作用域/未知；client包级inject另列。提供声明不证明实际提供或激活，loader状态不等于服务状态，多提供者不擅自选定。节点/关系/遍历及嵌套输入有预算，超限明确有限/截断，不能视为完整受影响集合或实测故障，不自动装包或改变发现。
 
-人工记录位于HTTP/tool envelope的`reviews`，以独立sidecar保存待确认/已复核/误报/已修复及依据；不进入canonical report判定。绑定canonical目标、原观察路径/模式、分析输入源码身份、插件/DSH精确版本、工具/规则/目录及发现类别/API/span/证据；变化后旧记录保留并标记待重审，新风险不继承误报或修复。显式保存核对当前contextToken，锁内合并、原子替换并拒绝陈旧/卸载任务；损坏、超限、链接或非普通数据报错且不覆盖。记录不得隐藏finding、改变总结论/退出码/基线或授予compatibility豁免。路径、限额及崩溃后孤立锁/临时文件的人工恢复见[工作流](feature-workflows.md)。
+人工记录位于HTTP/tool envelope的`reviews`，以独立sidecar保存待确认/已复核/误报/已修复及依据；不进入canonical report判定。绑定canonical目标、原观察路径/模式、分析输入源码身份、插件/DSH精确版本、工具/规则/目录及发现类别/API/span/证据；变化后旧记录保留并标记待重审，新风险不继承误报或修复。显式保存核对当前contextToken，锁内合并、原子替换并拒绝陈旧/卸载任务；损坏、超限、链接或非普通数据报错且不覆盖。记录不得隐藏finding、改变总结论/退出码/基线或授予compatibility豁免。路径、限额及崩溃后孤立锁/临时文件的人工恢复见[工作流](guide.md)。
+
+### 2.9 插件作者CI
+
+仓库`tools/author-ci.mjs`对同一已构建插件目录取只读快照，用现有内核比较已认证精确版本矩阵；默认`0.2.0-rc.2 / 0.2.1-rc.2`，未知版本阻断、不回退。默认策略阻断所有发现、未知、覆盖不足和无已验证调用；可显式声明严重度/确定性及覆盖策略，`all`检查全部，`new`须提供身份相容的已审查JSON，旧风险仍保留。工具/身份错误始终阻断，不因策略或旧结果变绿。
+
+JSON为完整证据源，SARIF 2.1.0与JUnit XML保留逐版本门禁及身份/限制；真实包内位置与内核一致，无位置不编造。策略退出码0/1/2/3与每cell的内核退出码分别保留；0只表示符合策略，不证明启动或业务通过。无依赖安装、目标执行、宿主启动、网络、模型或profile状态；用法、预算、基线信任边界及复现见[作者CI](author-ci.md)。当前仅为未发布源码能力。
 
 ## 3. 开发与文档维护约定
 
 1. 先复现再修改，不编造实测或重建快照消除失败；版本漂移审查`test/__baseline-versions.json`并单独提交。默认suite用只读profile副本，提取/回读同字节。
 2. 仅清理自有目录/PID组。克隆排除node_modules，重定位manifest/pnpm9单importer本地锁路径并保留远程pins，拒绝不支持格式/不安全链接，不改源profile。
 3. 私有副本打tgz、空缓存实装并调用；日志不替代行为验收，默认预算与受控工程负例分开，Python parity仅作旧参考。
-4. README写用法、Plan写契约/交付/待办、current-state封存日期/版本/制品证据。完成项移出§6，契约归§2、索引归§4、复现归§5；不逐轮追加总结或改写历史认证。同步skill/契约副本；依赖变化后生成第三方说明，由doc-check校验元数据、末尾License及Markdown链接/锚点。
+4. README写入口用法，Plan写契约/待办，guide写操作，maintaining写维护流程，current-state保存当前事实与有限验收摘要。完成项移出§6，不逐轮追加总结或改写历史认证。同步skill/契约副本；依赖变化后生成第三方说明，由doc-check校验元数据、末尾License及Markdown链接/锚点。
 5. 本地提交限任务路径；push、合并、npm发布及外部发帖分别按当次授权执行，源码推送不等于npm发布。
 
-## 4. 已完成的关键工作
+## 4. 验收范围
 
-历史证据键见`current-state.json.verification`，只认证记录中的输入、版本与范围；未归档源码项链接实现及复现入口，不借用旧证据认证。
+源码与公开制品分开记录；macOS arm64、Linux arm64 VM/x64 CI仅在已记录版本和输入上有证据，Windows未真实验收。真实业务、受控故障和静态预测分别计分，有限样本不代表生态准确率。历史成功不认证新源码、制品或未来版本；远端状态以对应提交的Actions记录为准。
 
-| 工作 | 证据索引 |
-|---|---|
-| 原始审计 / P0–P2 | `auditArchive20261019` |
-| 安全、回收与Chrome工程 | `engineeringDiagnostics20261019`、`linuxChromeCiAcceptance20261020`、`linuxChromeInputPreparation20261020` |
-| rc.2适配 / 发布 | `rc2TargetedAdaptation`、`release013 / release014` |
-| 有限批量 | `staticBatch20261020` |
-| 产品解释 / 真实故障 | `productExplanations20261021`、`realPluginRegression20261021`、`independentHoldout20261022` |
-| 核实步骤 / 面板 / 缓存 | `actionableFindings20261021`、`panelExperience20261021`、`ordinaryCacheInvalidation20261022` |
-| 升级预检 / 捕获worker | `upgradePreview20261021`、`upgradeCaptureWorker20261022` |
-| 重复身份 / YAML / 目录治理 | `identityYamlCatalog20261022` |
-| 探针时间 / CI安全 | `probeTimeAndCiSecurity20261022`、`baselineCiFollowup20261022` |
-| 可选健康 / 依赖关系 / 人工处置 | [合同与工作流](feature-workflows.md)、§5.11；`functionalWorkflows20261023`；源码已验收，未发布 |
+## 5. 验证入口
 
-独立业务历史与残留FN见`independentBusinessTruth / businessSampleExpansion / marketUiAndBusinessExpansion / naturalFailureBoundaries20261019`；模型usage不等于账单认证。分发及上游历史见`upstreamAcceptance20261021`，收录不等于兼容认证；私有采集故障根因仍未知。
-
-## 5. 验证记录与复现
-
-### 5.1 已验证范围
-
-macOS arm64有DSH0.2.0-rc.2/0.2.1-rc.2、独立tgz、tool/skill、HTTP/Chrome的限定证据；Linux有arm64 VM/x64 CI，Windows未验收。当前计数只在current-state顶层维护；各次慢测、业务、发布和CI查对应证据键，旧成功不认证新版本，CI重打包不证明确切发布tgz一致。远端状态以具体提交的Actions记录为准。
-
-### 5.2 日常检查与真实集成
-
-```bash
-npm test -- --test-reporter=tap > <成功TAP文件>
-npm run format:check
-node tools/update-current-state.mjs --test-summary <成功TAP文件>
-node tools/doc-check.mjs --test-summary <成功TAP文件>
-npm run notices:check
-node plugin/scripts/prepublish-check.mjs
-node tools/meta-check.mjs --json
-npm run security:dependencies -- --output <依赖安全证据.json>
-DSC_REQUIRE_RC2_UI=1 node tools/rc2-live.mjs
-```
-
-默认suite不启动真实DSH/模型，私有空缓存安装测试需registry；prepublish只检查不发布。同步真源用`stage-skill.mjs / stage-contract.mjs`。真实集成另需DSH/pnpm、Chrome（可设DSC_CHROME）及网络，会执行私有宿主/插件。
-
-### 5.3 P2工程验收
-
-`node tools/engineering-check.mjs`检查预算/堆耗尽、超时恢复、single-flight及基线争用；慢测用`DSC_SLOW=1 node --test test/engineering-live.test.mjs test/profile-lock.test.mjs test/owned-process.test.mjs test/debugger.test.mjs`。Darwin负例缺编译器时跳过。显式boot诊断用`DSC_EXECUTION_DIAGNOSTICS=<私有目录>`；不导出argv/env或stderr正文，私有诊断仍须预览。保留主错误与清理失败/workDir/PID身份，不按进程名清场，不承诺任意脱离进程组隔离、生产性能或RSS。
-
-### 5.4 有限静态批量验收与复现
-
-运行`node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.json`，固定四项合成队列预期exit2；`--previous batch.json`比较，`--hash <本地包目录>`计算指纹。历史手动Action/CI及制品证据查§4，绿色仅表示固定执行符合期望。
-
-### 5.5 产品解释口径验收与复现
-
-`node bin/compat-check.mjs --nm test/fixtures/labels --dsh-version 0.2.1-rc.2 --no-baseline`预期exit2，覆盖依赖但无已验证调用、入口静态certain与影响inferred等区别；相关测试为`cli / client-structure / host-structure / skill`。独立tgz/UI与组件病例分开，不追改公开0.1.4的输出。
-
-### 5.6 真实插件故障回归验收与复现
-
-```bash
-node tools/real-regression.mjs --live --out-dir <空证据目录>
-node tools/real-regression.mjs --replay <证据根或单队列目录>
-node tools/business-labels.mjs --live --suite market --out-dir <空目录> --json
-node tools/business-labels.mjs --predictions <预测.json> --labels <标签.json> --json
-```
-
-回放单队列可加`--suite sidebar-ui-previous`。业务suite另有sidebar/sidebar-ui/sidebar-ui-previous/holdout-pomodoro/holdout-todo；编辑器和新增独立样本可加observe-services。固定回归退出0期望重现、1业务/证据不符、3驱动错误；业务度量0无错配、1有FP/FN或不计分项、3驱动/输入错误。预测在动作前封存，不用旧告警锁死新预测。sidebar-model须另获当次账户/模型授权，限工具关闭、两次首步、无重试/标题、每步256token，不属默认测试/CI；全部私有profile、凭据副本和自有进程须清理。
-
-### 5.7 核实步骤与面板体验验收
-
-多条件筛选、折叠、可比/不可比基线、完整导出与剪贴板失败由组件测试和独立tgz的真实DSH/Chrome验收覆盖。`test/cache-invalidation.test.mjs`另验收主动失效、同目标single-flight、旧任务基线保护、跨目标/DSH隔离、事件合并及失败恢复；真实tgz/UI在安装清单变化后无需刷新按钮即更新并保留筛选。UI合成包仅扫描不激活，真实业务另见§5.6；分享报告保留运行时复现条件。
-
-### 5.8 升级前预检验收与复现
-
-`node bin/compat-check.mjs --nm <profile或node_modules> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json`按§2.7返回0/1/2/3。回归为`test/upgrade-{preview,cli,host,panel,capture-worker}.test.mjs`；同字节身份、delta、证据隔离、超时/清理及真实HTTP/DOM记录见§4。真实新增风险为合成声明样本，不认证未来业务。
-
-### 5.9 重复身份、YAML与目录治理验收
-
-回归为`test/duplicate-identity.test.mjs`、`profile-lock.test.mjs`及`catalog-{governance,review}.test.mjs`。仓库yaml2.9.1修复[GHSA-48c2-rrv3-qjmp](https://github.com/eemeli/yaml/security/advisories/GHSA-48c2-rrv3-qjmp)，不属npm插件运行时依赖；锁重定位、畸形输入、失败清理、同名基线保护和目录身份均有记录。候选来源命令与人工验收见[目录治理](catalog-governance.md)，来源通过不自动认证。
-
-### 5.10 探针时钟与CI依赖安全验收
-
-回归为`test/observation-time.test.mjs`、`observation-time-integration.test.mjs`及`dependency-security.test.mjs`；涵盖时钟/身份边界、证据撤回、各消费者说明、boot清理和真实候选拒绝/恢复。[Test工作流](../.github/workflows/test.yml)与静态批量统一固定Actions提交、无持久checkout凭据、contents只读、任务时限、制品7天。独立安全任务审计含dev的根锁与插件runtime图；任何公告或registry/解析/工具异常均阻断，不自动audit fix/豁免。来源、范围及处置见[依赖安全说明](dependency-security.md)，本地与远端验收分开记录。
-
-### 5.11 健康、依赖关系与人工处置复现
-
-定向回归：`node --test test/functional-health.test.mjs test/dependency-graph.test.mjs test/finding-review.test.mjs test/p2-workflows-host.test.mjs test/p2-workflows-panel.test.mjs`。前者包含正常/503/缺控件/恢复、声明与身份拒绝及自有资源清理；图覆盖端侧、必需性、候选/未知/禁用、环与预算；人工记录覆盖同版本源码变化、规则/版本重审、损坏保留、并发及坏API/UI负载。真实Chrome需要可用浏览器，真实DSH安装须另获当次执行授权；本轮默认852项（849通过、3跳过）及真实DSH0.2.1-rc.2/Chrome四阶段健康检查、候选包面板保存/导入与基线隔离验收见`functionalWorkflows20261023`；不认证其它业务。用户步骤、声明示例、默认review/显式run及孤立锁恢复见[工作流](feature-workflows.md)。
+日常检查、升级预检、健康检查、依赖视图、人工处置和工程诊断见[指南](guide.md)。目录候选、依赖公告、真实样本与提取器维护见[维护指南](maintaining.md)。作者CI的策略、SARIF/JUnit与版本矩阵见[作者CI](author-ci.md)，交付状态以§6和实际验证记录为准。
 
 ## 6. 后续工作
 
@@ -188,6 +118,5 @@ node tools/business-labels.mjs --predictions <预测.json> --labels <标签.json
 
 1. **P1：修复关键问题后交付下一版。** 完成确认缺陷及本版阻断检查后，整理变更、迁移/限制、确切tgz和公开安装验收；不以可选功能全做完为前提。源码、候选、公开版本分开记录，npm/Release发布另获授权。
 2. **P1：小规模真实用户试用。** 观察作者/普通用户完成安装→理解→定位，记录误读、定位失败、误报和分享障碍；下载/star不代替效果。联系、收集和公开现场资料分别获授权，不默认增加遥测。
-3. **P2：提供作者CI策略、标准输出与兼容矩阵。** 支持新增风险/确定性/覆盖门禁，评估SARIF/JUnit和已知DSH版本矩阵。位置、身份、退出码与内核一致；未知、工具错误、覆盖不足不伪装通过，不扩大目录支持范围。
-4. **P2：跟进上游验收。** 依`upstreamAcceptance20261021`跟进：dsh-market#932虽已关闭，双端查询失败且无显式版本时仍可能裸名安装，待告警/安全失败后复验；1024#22待回复及v2 npm方式后全新实装；0xsline#717待采纳。有外部变化才复验，不重复发帖，补充另取授权。
-5. **P2：Windows真实验收（依环境条件暂缓）。** 环境具备后实跑路径、安装器、回收、打包、诊断及自有资源清理。按用户选择暂缓，完成前保留未验收边界。
+3. **P2：跟进上游验收。** 依据[current-state历史摘要](current-state.json)的`upstreamAcceptance20261021`跟进：2026-10-21记录中，dsh-market#932已关闭，但双端查询失败且无显式版本时仍可能裸名安装，待告警/安全失败后复验；1024#22待回复及v2 npm方式后全新实装；0xsline#717待采纳。这些是历史检查状态，本轮未刷新上游。有外部变化才复验，不重复发帖，补充另取授权。
+4. **P2：Windows真实验收（依环境条件暂缓）。** 环境具备后实跑路径、安装器、回收、打包、诊断及自有资源清理。按用户选择暂缓，完成前保留未验收边界。
