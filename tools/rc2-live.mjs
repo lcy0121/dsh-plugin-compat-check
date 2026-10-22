@@ -14,6 +14,9 @@ import {
   configureChineseBrowser,
   disableCredentialOnboarding,
   loadedNavigation,
+  submitUpgradeTarget,
+  upgradeRequestReceipts,
+  upgradeFormSnapshot,
 } from "./browser-session.mjs";
 import { run as check } from "../bin/compat-check.mjs";
 import { TOOL_VERSION } from "../lib/version.mjs";
@@ -37,7 +40,11 @@ for (const k of [
 ])
   delete env[k];
 const children = new Set();
-let chrome, chromeStarting, result, commandCleanupFailure;
+let chrome,
+  chromeStarting,
+  result,
+  commandCleanupFailure,
+  upgradeFailureSnapshot;
 const cancellation = new AbortController(),
   commands = new Set();
 const redact = (text) =>
@@ -626,6 +633,7 @@ try {
         mobile: false,
       });
       await chrome.send("Runtime.enable");
+      await chrome.send("Network.enable");
       await chrome.send("Page.enable");
       await chrome.send("Page.setLifecycleEventsEnabled", { enabled: true });
       const navigation = await chrome.send("Page.navigate", { url: host.url });
@@ -839,13 +847,13 @@ try {
         "Upgrade target input missing",
       );
       const enterTarget = async (target) => {
-        await evalx(
-          `${field("目标 DSH 版本")}.focus();${field("目标 DSH 版本")}.select()`,
-        );
-        await chrome.send("Input.insertText", { text: target });
-        await evalx(
-          `Array.from(document.querySelectorAll('button')).find(e=>e.innerText==='运行升级预检').click()`,
-        );
+        const cursor = chrome.events.length;
+        upgradeFailureSnapshot = async () => ({
+          target,
+          form: await evalx(upgradeFormSnapshot),
+          requests: upgradeRequestReceipts(chrome.events, cursor),
+        });
+        await submitUpgradeTarget(chrome, evalx, poll, target);
       };
       await enterTarget("0.2.0-rc.2");
       await poll(
@@ -856,6 +864,7 @@ try {
         "Actual upgrade result did not render",
         40000,
       );
+      const comparedRequests = (await upgradeFailureSnapshot()).requests;
       const upgradeDom = await evalx(
         `document.querySelector('[data-upgrade-result="compared"]').innerText`,
       );
@@ -913,7 +922,12 @@ try {
         staticLimitationsVisible: true,
         unknownTargetUncertified: true,
         ordinaryRowsAndFiltersUnchanged: true,
+        requests: [
+          ...comparedRequests,
+          ...(await upgradeFailureSnapshot()).requests,
+        ],
       };
+      upgradeFailureSnapshot = undefined;
       await evalx(
         `Array.from(document.querySelectorAll('button')).find(e=>e.innerText==='清除筛选').click()`,
       );
@@ -1281,8 +1295,12 @@ try {
     result.ok = true;
   }
 } catch (error) {
+  const upgradeUI = await upgradeFailureSnapshot?.().catch(() => ({
+    unavailable: true,
+  }));
   result = {
     ...result,
+    ...(upgradeUI ? { upgradeUI } : {}),
     ok: false,
     error: redact(error.stack || error.message),
     diagnostics: failureDiagnostic(error),

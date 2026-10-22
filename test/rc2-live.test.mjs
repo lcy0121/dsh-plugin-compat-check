@@ -76,6 +76,15 @@ describe(
           "ordinaryRowsAndFiltersUnchanged",
         ])
           assert.equal(value.upgradePreview.ui[key], true, key);
+        assert.deepEqual(
+          value.upgradePreview.ui.requests.map((r) => r.targetVersion),
+          ["0.2.0-rc.2", "9.9.9"],
+        );
+        assert.ok(
+          value.upgradePreview.ui.requests.every(
+            (r) => r.status === 200 && r.finished && !r.failed,
+          ),
+        );
         assert.equal(value.upgradePreview.routeRemovedAndRestored, true);
         for (const key of [
           "realBrowser",
@@ -88,5 +97,182 @@ describe(
           assert.equal(value.p2Workflows[key], true, key);
       }
     });
+  },
+);
+
+import fs from "node:fs";
+import { createServer } from "node:http";
+import { launchChromePipe } from "../lib/debugger.mjs";
+import {
+  submitUpgradeTarget,
+  upgradeRequestReceipts,
+} from "../tools/browser-session.mjs";
+
+test("upgrade request evidence tracks completion and failure without retaining private URLs or headers", () => {
+  const events = [
+    {
+      method: "Network.requestWillBeSent",
+      params: {
+        requestId: "1",
+        request: {
+          url: "http://127.0.0.1:12/plugin-compat-check/upgrade-preview?targetVersion=0.2.0-rc.2&currentVersion=0.2.1-rc.2&token=secret",
+          headers: { Authorization: "secret" },
+        },
+      },
+    },
+    {
+      method: "Network.responseReceived",
+      params: {
+        requestId: "1",
+        response: { status: 503, headers: { private: "secret" } },
+      },
+    },
+    { method: "Network.loadingFinished", params: { requestId: "1" } },
+    {
+      method: "Network.requestWillBeSent",
+      params: {
+        requestId: "2",
+        request: {
+          url: "http://127.0.0.1:12/plugin-compat-check/upgrade-preview?targetVersion=9.9.9",
+        },
+      },
+    },
+    {
+      method: "Network.loadingFailed",
+      params: { requestId: "2", errorText: "secret" },
+    },
+  ];
+  const receipts = upgradeRequestReceipts(events);
+  assert.deepEqual(receipts, [
+    {
+      targetVersion: "0.2.0-rc.2",
+      currentVersion: "0.2.1-rc.2",
+      status: 503,
+      finished: true,
+      failed: false,
+    },
+    {
+      targetVersion: "9.9.9",
+      currentVersion: null,
+      status: null,
+      finished: false,
+      failed: true,
+    },
+  ]);
+  assert.doesNotMatch(
+    JSON.stringify(receipts),
+    /secret|127\.0\.0\.1|Authorization/,
+  );
+  assert.deepEqual(upgradeRequestReceipts(events, events.length), []);
+});
+
+test(
+  "real Chrome delayed form commit reproduces the ignored old click and starts exactly one synchronized request",
+  {
+    skip: process.env.DSC_SLOW !== "1",
+    timeout: 30000,
+  },
+  async () => {
+    const executable =
+      process.env.DSC_CHROME ||
+      [
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "/usr/bin/google-chrome",
+        "/usr/bin/chromium",
+      ].find((p) => fs.existsSync(p));
+    assert.ok(
+      executable,
+      "Real Chrome is required for controlled upgrade submission acceptance",
+    );
+    let browser,
+      requestCount = 0;
+    const server = createServer((req, res) => {
+      if (req.url.startsWith("/plugin-compat-check/upgrade-preview")) {
+        requestCount++;
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end("{}");
+        return;
+      }
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      res.end(`<div data-upgrade-preview><input aria-label="目标 DSH 版本"><button disabled>运行升级预检</button></div>
+      <script>
+      const input = document.querySelector('input'), button = document.querySelector('button');
+      let pending = '', committed = '';
+      input.oninput = () => { pending = input.value; button.disabled = true; };
+      window.commit = () => { committed = pending; button.disabled = !committed; };
+      button.onclick = () => fetch('/plugin-compat-check/upgrade-preview?targetVersion=' + committed + '&currentVersion=0.2.1-rc.2');
+      </script>`);
+    });
+    await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+    try {
+      browser = await launchChromePipe(executable);
+      await browser.send("Network.enable");
+      await browser.send("Page.navigate", {
+        url: `http://127.0.0.1:${server.address().port}`,
+      });
+      const evaluate = async (expression) =>
+        (
+          await browser.send("Runtime.evaluate", {
+            expression,
+            returnByValue: true,
+            awaitPromise: true,
+          })
+        ).result?.value;
+      const poll = async (fn, message, timeout = 5000) => {
+        const end = Date.now() + timeout;
+        do {
+          if (await fn()) return;
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        } while (Date.now() < end);
+        throw Error(message);
+      };
+      await poll(
+        () => evaluate("Boolean(window.commit)"),
+        "Control page did not load",
+      );
+      await evaluate("document.querySelector('input').focus()");
+      await browser.send("Input.insertText", { text: "0.2.0-rc.2" });
+      assert.equal(
+        await evaluate("document.querySelector('button').disabled"),
+        true,
+      );
+      // RED control: the old immediate click returns successfully but cannot submit.
+      await evaluate("document.querySelector('button').click()");
+      assert.equal(requestCount, 0);
+      assert.deepEqual(upgradeRequestReceipts(browser.events), []);
+      let readinessPolls = 0;
+      const delayedCommitPoll = (fn, message, timeout) =>
+        poll(
+          async () => {
+            const ready = await fn();
+            if (message.includes("form did not commit")) {
+              readinessPolls++;
+              if (readinessPolls === 3) await evaluate("window.commit()");
+            }
+            return ready;
+          },
+          message,
+          timeout,
+        );
+      await submitUpgradeTarget(
+        browser,
+        evaluate,
+        delayedCommitPoll,
+        "0.2.0-rc.2",
+      );
+      assert.ok(
+        readinessPolls >= 4,
+        "Must wait for the delayed controlled state commit",
+      );
+      await poll(
+        () => upgradeRequestReceipts(browser.events).some((r) => r.finished),
+        "Request did not finish",
+      );
+      assert.equal(requestCount, 1);
+      assert.equal(upgradeRequestReceipts(browser.events)[0].status, 200);
+    } finally {
+      await browser?.close();
+      await new Promise((resolve) => server.close(resolve));
+    }
   },
 );

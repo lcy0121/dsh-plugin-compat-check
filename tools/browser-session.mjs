@@ -77,3 +77,81 @@ export async function navigateOwnedDocument(
   );
   return { discardedBeforeUnload };
 }
+
+/** Request receipts deliberately omit URLs, headers and bodies (including host tokens). */
+export function upgradeRequestReceipts(events, cursor = 0) {
+  const requests = new Map();
+  const version = (value) =>
+    /^[0-9A-Za-z.+-]{1,80}$/.test(value || "") ? value : null;
+  for (const event of events.slice(cursor)) {
+    const p = event.params || {};
+    if (event.method === "Network.requestWillBeSent") {
+      let url;
+      try {
+        url = new URL(p.request.url);
+      } catch {
+        continue;
+      }
+      if (url.pathname !== "/plugin-compat-check/upgrade-preview") continue;
+      requests.set(p.requestId, {
+        targetVersion: version(url.searchParams.get("targetVersion")),
+        currentVersion: version(url.searchParams.get("currentVersion")),
+        status: null,
+        finished: false,
+        failed: false,
+      });
+    }
+    const request = requests.get(p.requestId);
+    if (!request) continue;
+    if (event.method === "Network.responseReceived")
+      request.status = p.response.status;
+    if (event.method === "Network.loadingFinished") request.finished = true;
+    if (event.method === "Network.loadingFailed") request.failed = true;
+  }
+  return [...requests.values()].slice(-8);
+}
+
+export const upgradeFormSnapshot = `(() => {
+  const form = document.querySelector('[data-upgrade-preview]');
+  const input = form?.querySelector('input[aria-label="目标 DSH 版本"]');
+  const button = [...(form?.querySelectorAll('button') || [])].find(e => e.innerText === '运行升级预检');
+  const status = form?.querySelector('[role="status"]')?.innerText || '';
+  return {
+    present: Boolean(form), target: /^[0-9A-Za-z.+-]{0,80}$/.test(input?.value || '') ? input?.value || '' : '[invalid]',
+    buttonPresent: Boolean(button), buttonDisabled: button?.disabled ?? null,
+    result: form?.querySelector('[data-upgrade-result]')?.getAttribute('data-upgrade-result') || null,
+    status: status.replace(/([?&]token=)[^\\s&]+/gi, '$1[redacted]').slice(0, 240)
+  };
+})()`;
+
+/** Wait for the controlled form to commit, then prove this single click started its request. */
+export async function submitUpgradeTarget(chrome, evaluate, poll, target) {
+  const input = `document.querySelector('[data-upgrade-preview] input[aria-label="目标 DSH 版本"]')`;
+  await evaluate(`${input}.focus();${input}.select()`);
+  await chrome.send("Input.insertText", { text: target });
+  await poll(
+    async () => {
+      const state = await evaluate(upgradeFormSnapshot);
+      return (
+        state.target === target &&
+        state.buttonPresent &&
+        state.buttonDisabled === false
+      );
+    },
+    "Upgrade target form did not commit an enabled submit button",
+    5000,
+  );
+  const cursor = chrome.events.length;
+  await evaluate(
+    `Array.from(document.querySelector('[data-upgrade-preview]').querySelectorAll('button')).find(e=>e.innerText==='运行升级预检').click()`,
+  );
+  await poll(
+    () =>
+      upgradeRequestReceipts(chrome.events, cursor).some(
+        (r) => r.targetVersion === target,
+      ),
+    "Upgrade UI click did not start the requested preview",
+    5000,
+  );
+  return cursor;
+}

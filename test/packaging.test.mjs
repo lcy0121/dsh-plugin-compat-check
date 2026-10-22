@@ -39,13 +39,17 @@ test('发布闸门保留TAP失败详情和文档校验错误', () => {
     fs.writeFileSync(path.join(dir,'lib/version.mjs'), 'export const TOOL_VERSION="0.1.1";');
     fs.writeFileSync(path.join(dir,'plugin/package.json'), JSON.stringify({version:'0.1.1'}));
     for (const mode of ['test', 'docs']) {
-      fs.writeFileSync(path.join(dir,'tools/run-tests.mjs'), mode === 'test'
-        ? 'console.log("TAP version 13\\nnot ok 1 - controlled failing case\\n  error: controlled assertion\\n# tests 1\\n# fail 1");process.exitCode=1;'
-        : 'console.log("TAP version 13\\nok 1 - sample\\n# tests 1\\n# fail 0");');
+      const tap = path.join(dir, `${mode}.tap`);
+      const padding = '# diagnostic padding\n'.repeat(32768);
+      const transcript = mode === 'test'
+        ? `TAP version 13\n${padding}not ok 1 - controlled failing case\n  error: controlled assertion\n# tests 1\n# fail 1\nCOMPLETE-TAP-END\n`
+        : 'TAP version 13\nok 1 - sample\n# tests 1\n# fail 0\n';
+      fs.writeFileSync(path.join(dir,'tools/run-tests.mjs'), `process.stdout.write(${JSON.stringify(transcript)});process.exitCode=${mode === 'test' ? 1 : 0};`);
       fs.writeFileSync(path.join(dir,'tools/doc-check.mjs'), 'console.error("controlled document mismatch");process.exitCode=1;');
-      const out = spawnSync(process.execPath,[path.join(dir,'plugin/scripts/prepublish-check.mjs')],{encoding:'utf8'});
+      const out = spawnSync(process.execPath,[path.join(dir,'plugin/scripts/prepublish-check.mjs')],{encoding:'utf8',env:{...process.env,DSC_TEST_TAP:tap},maxBuffer:2*1024*1024});
       assert.equal(out.status,1);
-      assert.match(out.stderr, mode === 'test' ? /controlled failing case[\s\S]*controlled assertion/ : /controlled document mismatch/);
+      assert.match(out.stderr, mode === 'test' ? /controlled failing case[\s\S]*controlled assertion[\s\S]*COMPLETE-TAP-END/ : /controlled document mismatch/);
+      assert.equal(fs.readFileSync(tap,'utf8'),transcript,'full TAP survives either test or documentation failure');
     }
   } finally { fs.rmSync(dir,{recursive:true,force:true}); }
 });

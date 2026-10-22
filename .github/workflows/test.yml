@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
         node: ["22.19.0", "24"]
     steps:
@@ -22,12 +23,16 @@ jobs:
       - run: node plugin/scripts/prepublish-check.mjs
         env:
           DSC_QUIET_SKIP_NOTICE: "1"
+          DSC_TEST_TAP: prepublish.tap
       - run: node tools/engineering-check.mjs > engineering.json
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: engineering-node-${{ matrix.node }}
-          path: engineering.json
+          path: |
+            engineering.json
+            prepublish.tap
+            prepublish.tap.stderr
           retention-days: 7
   linux-live:
     runs-on: ubuntu-latest
