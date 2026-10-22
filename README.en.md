@@ -8,7 +8,7 @@ Check **installed DSH plugins** against a target DSH version, with source locati
 
 ## Version and entry points
 
-npm `latest` is **0.1.4**, supporting Node `^22.19.0 || >=24`. This patch includes activation-prerequisite explanations, effective-port Origin checks, npm subdirectory metadata and repository engineering diagnostics. See [Plan](docs/Plan.md) for delivery, verification and next steps.
+npm `latest` is **0.1.4**, supporting Node `^22.19.0 || >=24`. That published version includes activation-prerequisite explanations, effective-port Origin checks, npm subdirectory metadata and repository engineering diagnostics. See [Plan](docs/Plan.md) for delivery, verification and next steps.
 
 | Entry | Purpose |
 |---|---|

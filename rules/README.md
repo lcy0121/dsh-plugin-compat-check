@@ -30,11 +30,11 @@
 
 0.1.4补强：必需inject未观测保持degraded/suspected，仅提示激活前提未确认；同profile明确absent才推断激活障碍，optional/scoped依赖与方法缺失分别处理，不借业务答案调严重度。`--observe-services`另记服务预测身份/摘要，不覆盖静态FN，也不改变生产certainty或impactBasis。
 
-仓库独立业务队列将手审的功能调用区间内API风险与真实市场操作、侧栏HTTP/编辑器及有限模型回复结果对照，保持业务、loader标签及预测隔离；不把整个插件的其它发现挪给本功能。正常/自然失败与HTTP503/控件缺失故障组分别计分，限定样本不能改变生产报告中的certainty或impactBasis，也不是新增严重度规则的充分证据。复现见[Plan](../docs/guide.md#工程与真实集成)。
+仓库独立业务队列将手审的功能调用区间内API风险与真实市场操作、侧栏HTTP/编辑器及有限模型回复结果对照，保持业务、loader标签及预测隔离；不把整个插件的其它发现挪给本功能。正常/自然失败与HTTP503/控件缺失故障组分别计分，限定样本不能改变生产报告中的certainty或impactBasis，也不是新增严重度规则的充分证据。复现见[使用指南](../docs/guide.md#工程与真实集成)。
 
 ## 如何更新
 
-ASAR读取器已修正数据起点为8+headerSize，并校验头长、边界、完整读取、UTF-8/JSON及归档SHA256。2026-10-18与Electron原生ASAR读取逐字节及首尾交叉校验后生成独立rc.2目录，旧目录未改。新host增加8项、移除invariants；subagents移除start/startContinuable/drainContinuableChildren/drainContinuableDescendants，增加startActivation/drainChildren/drainDescendants/waitForChildren；其它方法差异和源摘要见current-state。client方法集合未变。旧方法规则保留其原调用语义；不把新方法当同义重命名，也不只凭目录变化新增严重度，未知影响继续回退。
+ASAR读取器已修正数据起点为8+headerSize，并校验头长、边界、完整读取、UTF-8/JSON及归档SHA256。2026-10-18与Electron原生ASAR读取逐字节及首尾交叉校验后生成独立rc.2目录，旧目录未改。新host增加8项、移除invariants；subagents移除start/startContinuable/drainContinuableChildren/drainContinuableDescendants，增加startActivation/drainChildren/drainDescendants/waitForChildren；其它方法差异和源摘要保留在提交`10eaeba`的`docs/current-state.json`历史记录；当前认证字节见`lib/contracts.mjs`的`CATALOG_REFERENCES`，新候选按[维护流程](../docs/maintaining.md#api目录候选审查)核对。client方法集合未变。旧方法规则保留其原调用语义；不把新方法当同义重命名，也不只凭目录变化新增严重度，未知影响继续回退。
 
 先读调用点和目标版本的真实描述符/官方源码，再修改规则，添加行为回归并审查快照差异。原needsReview已在2026-10-15逐条复核，决定与证据保留于severity.json的needsReview.reviewed/evidence及 [Plan](../docs/Plan.md)。
 

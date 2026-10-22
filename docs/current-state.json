@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.1.4",
-  "recordedAt": "2026-10-22T18:10:50.078Z",
+  "recordedAt": "2026-10-22T18:21:26.887Z",
   "testFiles": 64,
   "tests": 875,
   "repositoryFiles": {
@@ -112,7 +112,7 @@
       "Windows real-host acceptance remains unverified.",
       "Optional health executor is not an OS sandbox and imported results are historical.",
       "Crashed manual-review writers may require confirmed-orphan lock cleanup.",
-      "No new public npm/GitHub release or remote CI verification in this change."
+      "Source changes are newer than public npm 0.1.4; release and remote CI evidence must be tied to their exact artifact or commit."
     ],
     "history": {
       "commit": "10eaeba",
@@ -189,7 +189,7 @@
         "workspaceLock": "clean",
         "pluginRuntime": "clean"
       },
-      "remoteStatus": "Historical run remains failed. No rerun, push or remote CI pass claimed.",
+      "remoteStatus": "This historical run failed. Its local macOS follow-up does not certify Linux or later remote commits.",
       "currentLocalCandidate": {
         "platform": "macOS arm64",
         "artifactSha256": "16bb818ae27c3d37af9af10d0b2621447a3005272105c027d2a63a217c781ed3",
