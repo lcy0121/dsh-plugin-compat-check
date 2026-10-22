@@ -1249,44 +1249,51 @@ return { assertUpgradePreview: assertUpgradePreview, SUPPORTED_PREVIEW_VERSIONS:
 
     function useCompatibility() {
       var state = React.useState({ phase: "loading", data: null, error: null });
-      var value = state[0];
+      var alive = React.useRef(true), latest = React.useRef(null), pending = React.useRef(null), queuedForce = React.useRef(false);
       var set = state[1];
-      var alive = React.useRef(true);
-
-      var load = React.useCallback(function (refresh) {
-        set({ phase: "loading", data: null, error: null });
-        try {
-          fetch(refresh ? ROUTE + "?refresh=1" : ROUTE, {
-            headers: { accept: "application/json" },
-            credentials: "same-origin",
-          })
-            .then(function (res) {
-              if (!res.ok) throw new Error("HTTP " + res.status);
-              return res.json();
-            })
-            .then(function (data) {
-              data = acceptPayload(data);
-              if (!alive.current) return;
-              set({ phase: "done", data: data, error: null });
-            })
-            .catch(function (error) {
-              if (!alive.current) return;
-              // 取不到数据**也要说清楚是什么问题**。一个永远转圈的加载状态
-              // 与一个永远空白的表格，用户无法区分"工具坏了"与"没问题"。
-              set({ phase: "error", data: null, error: String((error && error.message) || error) });
-            });
-        } catch (error) {
-          set({ phase: "error", data: null, error: String((error && error.message) || error) });
+      var load = React.useCallback(function (refresh, background) {
+        if (pending.current) {if(refresh)queuedForce.current=true;return pending.current;}
+        function read(url) {
+          return fetch(url, {headers:{accept:"application/json"},credentials:"same-origin"}).then(function(res){
+            if(!res.ok)throw new Error("HTTP " + res.status);
+            return res.json();
+          });
         }
+        var request = Promise.resolve().then(function(){
+          return read(refresh ? ROUTE + "?refresh=1" : background ? ROUTE + "?metadata=1" : ROUTE);
+        }).then(function(data){
+          if(background && data.kind === "plugin-compat-check/report-metadata" && data.ok && latest.current
+            && data.computedAt === latest.current.computedAt && data.nodeModules === latest.current.nodeModules
+            && data.dshVersion === latest.current.report.dshVersion) {
+            return Object.assign({},latest.current,{cache:data.cache});
+          }
+          return background ? read(ROUTE) : data;
+        }).then(function(data){
+          data = acceptPayload(data);
+          if(!data.ok && latest.current)throw new Error(data.error || "后台刷新失败");
+          if(!alive.current)return;
+          latest.current=data;
+          set({phase:"done",data:data,error:null});
+        }).catch(function(error){
+          if(!alive.current)return;
+          var message=String(error && error.message || error);
+          if(latest.current && latest.current.ok){
+            var previous=latest.current;
+            var kept=Object.assign({},previous,{cache:Object.assign({},previous.cache,{hit:true,stale:true,refreshing:false,refreshError:message})});
+            set({phase:"done",data:kept,error:message});
+          }else set({phase:"error",data:null,error:message});
+        }).then(function(){pending.current=null;if(queuedForce.current && alive.current){queuedForce.current=false;return load(true,false);}});
+        pending.current=request;
+        return request;
       }, []);
-
       React.useEffect(function () {
         alive.current = true;
-        load(false);
-        return function () { alive.current = false; };
+        var timer;
+        function schedule(){if(alive.current)timer=setTimeout(function(){return load(false,true).then(schedule);},2000);}
+        load(false).then(schedule);
+        return function () {alive.current=false;clearTimeout(timer);};
       }, [load]);
-
-      return { value: value, reload: load };
+      return {value:state[0],reload:load};
     }
 
     var styles = {
@@ -1706,6 +1713,7 @@ return { assertUpgradePreview: assertUpgradePreview, SUPPORTED_PREVIEW_VERSIONS:
     function ReportMeta(p) {
       var d = p.data, c = d.cache;
       var cache = c && c.hit ? "缓存报告（约 " + Math.max(0, Math.round(c.ageMs / 1000)) + " 秒前）" : "本次重新计算的报告";
+      if (c && c.stale) cache += "；输入已变化，报告待刷新";
       if (c && c.refreshing) cache += "；后台正在刷新";
       return React.createElement("div", { style: styles.note },
         React.createElement("div", null, "报告时间：" + (d.computedAt || "未提供") + " · " + cache),

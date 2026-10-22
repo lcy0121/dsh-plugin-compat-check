@@ -8,6 +8,7 @@ import { spawn } from "node:child_process";
 import { isDeepStrictEqual } from "node:util";
 import { fileURLToPath } from "node:url";
 import { scoreBusiness } from "./business-metrics.mjs";
+import { holdoutPostconditions } from "./business-holdout.mjs";
 import { stopOwnedChild } from "../lib/owned-process.mjs";
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const manifestPath = path.join(repo, "tools/real-regression-manifest.json");
@@ -290,6 +291,25 @@ export function validateCohort(dir, suite) {
           "Natural failure precondition request evidence differs",
         );
     }
+    if (pin.holdout) {
+      equal(
+        row.observed,
+        holdoutPostconditions(row.holdoutEvidence),
+        "Independent holdout evidence differs",
+      );
+      check(
+        time(predictions.predictedAt) <= time(row.actionStartedAt) &&
+          time(row.actionStartedAt) <= time(row.actionCompletedAt) &&
+          time(row.actionCompletedAt) <= time(labels.collectedAt),
+        "Holdout action time order differs",
+      );
+      if (row.holdoutEvidence.family === "todo")
+        check(
+          /^[a-f0-9]{64}$/.test(row.holdoutEvidence.diskSha256) &&
+            row.holdoutEvidence.diskPath === "global-todo/todos.json",
+          "Holdout durable disk identity missing",
+        );
+    }
     const shot = evidence.bytes(expected.caseId + ".png");
     check(
       shot.length > 16 &&
@@ -354,6 +374,12 @@ export function validateCohort(dir, suite) {
         obs.root.webRuntime?.status === "absent",
         "Natural failure required webRuntime absence evidence missing",
       );
+    if (pin.holdout)
+      for (const row of labels.rows)
+        check(
+          time(sp.predictedAt) <= time(row.actionStartedAt),
+          "Service prediction seal must precede holdout actions",
+        );
     modes.serviceObserved = scoreBusiness(sp, sl);
   } else check(!measurement.serviceObserved, "Unexpected service mode");
   return {
@@ -378,7 +404,9 @@ export function validateCohort(dir, suite) {
     })),
     limitations: [
       "Evidence limits bound file counts and input/read bytes, not process RSS; matching metadata before/after reads does not create an atomic snapshot.",
-      "Saved prediction seal and timestamp partial order are verified; individual action timestamps are not recorded by the existing driver.",
+      pin.holdout
+        ? "Saved prediction seals precede each recorded holdout action start/completion; receipts determine outcomes."
+        : "Saved prediction seal and timestamp partial order are verified; individual action timestamps are not recorded by the existing driver.",
       "Hashes detect inconsistent bytes, not coordinated malicious rewriting. Offline replay is historical validation, not current runtime certification.",
       "Installed package tree excludes nested node_modules, matching the existing live driver; published tarball hashes identify the pinned release, while installed tree verification is performed by that driver.",
     ],
@@ -389,7 +417,23 @@ function inventory(dir) {
 }
 function report(entries, mode) {
   const boundaries = entries.flatMap((entry) => entry.boundaries || []);
+  const knownSuites = [...new Set(entries.map((e) => e.suite))]
+    .map((s) => manifest.suites.find((p) => p.suite === s))
+    .filter(Boolean);
   const summary = {
+    independentPackageFamilies: new Set(knownSuites.map((p) => p.package)).size,
+    pinnedArtifacts: new Set(
+      knownSuites.map((p) => p.package + "@" + p.version),
+    ).size,
+    holdoutPackageFamilies: new Set(
+      knownSuites.filter((p) => p.holdout).map((p) => p.package),
+    ).size,
+    holdoutPinnedArtifacts: new Set(
+      knownSuites
+        .filter((p) => p.holdout)
+        .map((p) => p.package + "@" + p.version),
+    ).size,
+    distinctPlannedCases: knownSuites.reduce((n, p) => n + p.cases.length, 0),
     knownOutcomeCases: boundaries.length,
     staticIdentifiedFailures: boundaries.filter(
       (row) => row.staticClassification === "truePositive",
@@ -450,26 +494,38 @@ function validateRecordedCohort(dir, item, samples) {
 export function replayRegression(root) {
   directory(root);
   const index = read(root, "regression-index.json");
+  const currentManifest =
+    index.manifestSha256 === sha(fs.readFileSync(manifestPath));
+  const historicalSuites = manifest.historicalManifests?.[index.manifestSha256];
+  const replaySuites = currentManifest
+    ? manifest.suites
+    : manifest.suites.filter((p) => historicalSuites?.includes(p.suite));
   check(
     index.schemaVersion === 1 &&
-      index.manifestSha256 === sha(fs.readFileSync(manifestPath)),
+      (currentManifest ||
+        (Array.isArray(historicalSuites) &&
+          replaySuites.length === historicalSuites.length)),
     "Regression manifest/index mismatch",
   );
   check(
     Number.isInteger(index.repeats) &&
       index.repeats >= 1 &&
       index.repeats <= manifest.budgets.maxRepeats &&
-      index.entries?.length === index.repeats * manifest.suites.length,
+      index.entries?.length === index.repeats * replaySuites.length,
     "Incomplete regression run index",
   );
   const entries = [],
     samples = new Set();
   for (let repeat = 1; repeat <= index.repeats; repeat++)
-    for (const pin of manifest.suites) {
+    for (const pin of replaySuites) {
       const relative = "run-" + repeat + "/" + pin.suite;
       const item = index.entries.find((e) => e.relative === relative);
       check(item, "Missing indexed regression cohort");
       try {
+        check(
+          item.suite === pin.suite && item.repeat === repeat,
+          "Indexed suite/repeat identity differs",
+        );
         if (item.driverError) {
           entries.push({ ...item, status: "driver-error" });
           continue;

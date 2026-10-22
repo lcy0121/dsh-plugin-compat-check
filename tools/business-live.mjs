@@ -105,13 +105,26 @@ export async function runBusiness({
       "sidebar-ui",
       "sidebar-ui-previous",
       "sidebar-model",
+      "holdout-pomodoro",
+      "holdout-todo",
     ].includes(suite)
   )
     throw Error("Unknown business suite: " + suite);
   if (Boolean(modelProfile) !== (suite === "sidebar-model"))
     throw Error("--model-profile is required only for sidebar-model");
-  if (observeServices && !["sidebar-ui", "sidebar-ui-previous"].includes(suite))
-    throw Error("Service observation requires live editor suite");
+  if (
+    observeServices &&
+    ![
+      "sidebar-ui",
+      "sidebar-ui-previous",
+      "holdout-pomodoro",
+      "holdout-todo",
+    ].includes(suite)
+  )
+    throw Error("Service observation requires a supported live suite");
+  const holdout = suite.startsWith("holdout-")
+    ? await import("./business-holdout.mjs")
+    : null;
   const observer = observeServices
     ? await import("./business-observation.mjs")
     : null;
@@ -123,22 +136,26 @@ export async function runBusiness({
   const editor = suite.startsWith("sidebar-ui")
     ? await import("./business-sidebar-ui.mjs")
     : null;
-  const features = model
-    ? model.modelFeatures
-    : editor
-      ? suite === "sidebar-ui-previous"
-        ? editor.previousEditorFeatures
-        : editor.editorFeatures
-      : sidebar
-        ? sidebar.sidebarFeatures
-        : marketFeatures;
-  const pin = (model
-    ? model.modelPin
-    : editor
-      ? suite === "sidebar-ui-previous"
-        ? editor.previousSidebarPin
-        : editor.editorPin
-      : sidebar?.sidebarPin) || {
+  const features = holdout
+    ? holdout.holdoutFeatures(suite)
+    : model
+      ? model.modelFeatures
+      : editor
+        ? suite === "sidebar-ui-previous"
+          ? editor.previousEditorFeatures
+          : editor.editorFeatures
+        : sidebar
+          ? sidebar.sidebarFeatures
+          : marketFeatures;
+  const pin = (holdout
+    ? holdout.holdoutPin(suite)
+    : model
+      ? model.modelPin
+      : editor
+        ? suite === "sidebar-ui-previous"
+          ? editor.previousSidebarPin
+          : editor.editorPin
+        : sidebar?.sidebarPin) || {
     package: "dshmarket",
     version: "1.66.37",
     files: 182,
@@ -292,10 +309,10 @@ export async function runBusiness({
       "business",
       "add",
       pin.package + "@" + pin.version,
-      ...(sidebar ? [] : ["dsh-plugin-compat-check@0.1.2"]),
+      ...(sidebar || holdout ? [] : ["dsh-plugin-compat-check@0.1.2"]),
     ]);
     const workspace = path.join(profile, "business-workspace");
-    if (sidebar) fs.mkdirSync(workspace, { recursive: true });
+    if (sidebar || holdout) fs.mkdirSync(workspace, { recursive: true });
     const fixtureSource = sidebar
       ? sidebar.installSidebarFixture(
           profile,
@@ -326,16 +343,22 @@ export async function runBusiness({
       packageFingerprint: fingerprint,
       publishedTarballSha256: pin.publishedTarballSha256,
       publishedIntegrity: pin.publishedIntegrity,
-      ...(sidebar
-        ? { fixtureSourceHash: hash(fixtureSource) }
-        : {
-            seedPackage: "dsh-plugin-compat-check@0.1.2",
-            seedManifestHash: hash(
-              fs.readFileSync(
-                path.join(nm, "dsh-plugin-compat-check/package.json"),
+      ...(holdout
+        ? {
+            holdoutSelection:
+              "Previously untuned family; fixed actions and expectations before first live run",
+            ruleTuning: false,
+          }
+        : sidebar
+          ? { fixtureSourceHash: hash(fixtureSource) }
+          : {
+              seedPackage: "dsh-plugin-compat-check@0.1.2",
+              seedManifestHash: hash(
+                fs.readFileSync(
+                  path.join(nm, "dsh-plugin-compat-check/package.json"),
+                ),
               ),
-            ),
-          }),
+            }),
       predictorSources: Object.fromEntries(
         [
           ...fs
@@ -351,14 +374,16 @@ export async function runBusiness({
         [
           "tools/business-live.mjs",
           "tools/browser-session.mjs",
-          ...(sidebar
-            ? [
-                "tools/business-sidebar.mjs",
-                ...(editor || model ? ["tools/business-sidebar-ui.mjs"] : []),
-                ...(model ? ["tools/business-model.mjs"] : []),
-                ...(observer ? ["tools/business-observation.mjs"] : []),
-              ]
-            : ["tools/business-market.mjs"]),
+          ...(holdout
+            ? ["tools/business-holdout.mjs", "tools/business-observation.mjs"]
+            : sidebar
+              ? [
+                  "tools/business-sidebar.mjs",
+                  ...(editor || model ? ["tools/business-sidebar-ui.mjs"] : []),
+                  ...(model ? ["tools/business-model.mjs"] : []),
+                  ...(observer ? ["tools/business-observation.mjs"] : []),
+                ]
+              : ["tools/business-market.mjs"]),
         ].map((f) => [f, hash(fs.readFileSync(path.join(REPO, f)))]),
       ),
       rulesHash: hash(fs.readFileSync(path.join(REPO, "rules/severity.json"))),
@@ -387,24 +412,30 @@ export async function runBusiness({
     const canonical = toJSON(predicted),
       identity = {
         sampleId: crypto.randomUUID(),
-        suiteId:
-          pin.package +
-          "-" +
-          pin.version +
-          (model
-            ? "-sidechat-actions-v1"
-            : editor
-              ? "-editor-actions-v1"
-              : sidebar
-                ? "-actions-v1"
-                : "-actions-v2"),
+        suiteId: holdout
+          ? pin.suiteId
+          : pin.package +
+            "-" +
+            pin.version +
+            (model
+              ? "-sidechat-actions-v1"
+              : editor
+                ? "-editor-actions-v1"
+                : sidebar
+                  ? "-actions-v1"
+                  : "-actions-v2"),
         artifactDigest: hash(JSON.stringify(artifact)),
         dshVersion: version,
         toolVersion: canonical.toolVersion,
       };
     predictions = featurePredictions(canonical, features, identity);
-    predictions.casePlan =
-      suite === "sidebar-ui-previous"
+    predictions.casePlan = holdout
+      ? pin.cases.map(({ caseId, featureId, control }) => ({
+          caseId,
+          featureId,
+          control,
+        }))
+      : suite === "sidebar-ui-previous"
         ? features.map((f) => ({
             caseId: f.id + ".healthy",
             featureId: f.id,
@@ -458,7 +489,7 @@ export async function runBusiness({
       added: "2026-10-17",
       install: "dsh plugin --profile web add dsh-plugin-compat-check",
     };
-    if (!sidebar) {
+    if (!sidebar && !holdout) {
       server = http.createServer((req, res) => {
         if (req.url !== "/plugins.json") {
           res.writeHead(404).end();
@@ -483,6 +514,7 @@ export async function runBusiness({
       ["--profile", "business", "--", "--port", "0", "--no-open"],
       {
         env,
+        ...(holdout ? { cwd: workspace } : {}),
         detached: process.platform !== "win32",
         stdio: ["ignore", "pipe", "pipe"],
       },
@@ -784,13 +816,15 @@ export async function runBusiness({
         return receipt;
       },
     };
-    labels.rows = model
-      ? await model.modelCases(driver)
-      : editor
-        ? await editor.editorCases(driver)
-        : sidebar
-          ? await sidebar.sidebarCases(driver)
-          : await marketCases(driver, features);
+    labels.rows = holdout
+      ? await holdout.holdoutCases(driver)
+      : model
+        ? await model.modelCases(driver)
+        : editor
+          ? await editor.editorCases(driver)
+          : sidebar
+            ? await sidebar.sidebarCases(driver)
+            : await marketCases(driver, features);
     labels.collectedAt = new Date().toISOString();
     if (
       JSON.stringify(predictions) !== sealed ||
@@ -833,36 +867,46 @@ export async function runBusiness({
         sealedBeforeActions: true,
         sha256: hash(sealed),
       },
-      controls: model
+      controls: holdout
         ? {
-            model: modelContext,
-            fixture:
-              "Owned workspace and official agent with an explicit closed empty fixture turn; no inherited assistant reply",
             scope:
-              "Two real side-chat composer prompts; independent v4 JSONL assistant content and actual reloaded plugin assistant DOM; no broader model/task quality claim",
+              "Public holdout package, private owned home/profile/browser; manual timer start or todo creation only; no model/account calls",
+            faults:
+              "DOM main-button removal for timer; HTTP503 POST/create for todo; installed plugin source unchanged",
+            timerRequest:
+              "GET config is readiness evidence; local timer action truth is actual DOM plus restored browser storage",
+            rulesAdjustedForSamples: false,
           }
-        : sidebar
+        : model
           ? {
-              credentialOnboarding:
-                "Disabled through official private-profile config; no model readiness or credential claim",
-              catalogue:
-                "No market catalog; published sidebar + owned empty official session and two disposable workspace files",
-              faults:
-                "Browser intercepts only POST /sidebar/write with HTTP503; installed plugin bytes unchanged",
-              scope: editor
-                ? "Native CodeMirror input and visible Save button, exact BOM/encoding/CRLF bytes, fresh editor reload; fixed published version comparison, not a pre-established natural regression."
-                : "Save/preview HTTP path for UTF8 BOM/UTF16LE + CRLF: healthy, blocked and recovery. Not editor widget UI, natural version regression, or original-plugin defect certification.",
-            }
-          : {
-              credentialOnboarding:
-                "Disabled through official private-profile config; no model readiness or credential claim",
-              catalogue:
-                "Single real public entry as a controlled local catalog; not a public-market installation test",
-              faults:
-                "Browser intercepts selected POST with HTTP503, or removes only target-card action controls before action/after completed save; installed plugin bytes unchanged",
+              model: modelContext,
+              fixture:
+                "Owned workspace and official agent with an explicit closed empty fixture turn; no inherited assistant reply",
               scope:
-                "Target-card notes/favorites: healthy, HTTP503, missing controls before/after action, recovery. Controlled failures expose blind spots, not natural regressions or original-plugin defects.",
-            },
+                "Two real side-chat composer prompts; independent v4 JSONL assistant content and actual reloaded plugin assistant DOM; no broader model/task quality claim",
+            }
+          : sidebar
+            ? {
+                credentialOnboarding:
+                  "Disabled through official private-profile config; no model readiness or credential claim",
+                catalogue:
+                  "No market catalog; published sidebar + owned empty official session and two disposable workspace files",
+                faults:
+                  "Browser intercepts only POST /sidebar/write with HTTP503; installed plugin bytes unchanged",
+                scope: editor
+                  ? "Native CodeMirror input and visible Save button, exact BOM/encoding/CRLF bytes, fresh editor reload; fixed published version comparison, not a pre-established natural regression."
+                  : "Save/preview HTTP path for UTF8 BOM/UTF16LE + CRLF: healthy, blocked and recovery. Not editor widget UI, natural version regression, or original-plugin defect certification.",
+              }
+            : {
+                credentialOnboarding:
+                  "Disabled through official private-profile config; no model readiness or credential claim",
+                catalogue:
+                  "Single real public entry as a controlled local catalog; not a public-market installation test",
+                faults:
+                  "Browser intercepts selected POST with HTTP503, or removes only target-card action controls before action/after completed save; installed plugin bytes unchanged",
+                scope:
+                  "Target-card notes/favorites: healthy, HTTP503, missing controls before/after action, recovery. Controlled failures expose blind spots, not natural regressions or original-plugin defects.",
+              },
     };
   } catch (error) {
     primaryFailure = error;

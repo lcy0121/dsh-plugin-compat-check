@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.4",
-  "recordedAt": "2026-10-21T18:58:35.001Z",
-  "testFiles": 53,
-  "tests": 751,
+  "recordedAt": "2026-10-22T06:06:54.617Z",
+  "testFiles": 56,
+  "tests": 789,
   "repositoryFiles": {
-    "total": 285,
+    "total": 294,
     "fixtures": 90,
-    "other": 195
+    "other": 204
   },
   "verification": {
     "platform": "darwin",
@@ -9210,6 +9210,298 @@
         "scope": "Read-only implementation and workflow review plus focused tests; reviewer did not rerun real DSH or remote Actions."
       },
       "scope": "Two scoped P1 implementations and local acceptance only; no Git push, remote CI dispatch, npm publication, model calls, future-version business or Windows certification."
+    },
+    "baselineCiFollowup20261022": {
+      "verifiedAt": "2026-10-22",
+      "run": {
+        "conclusion": "success",
+        "head_sha": "b4d9f095a1f4a5edb65b38d0ec7e1553238aaf36",
+        "html_url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39659609660",
+        "id": 39659609660,
+        "status": "completed",
+        "updated_at": "2026-10-21T19:16:30Z"
+      },
+      "scope": "Confirms previously pushed b4d9f09 only. Current task branch has not been pushed and has no remote CI certification."
+    },
+    "independentHoldout20261022": {
+      "verifiedAt": "2026-10-22",
+      "dshVersion": "0.2.1-rc.2",
+      "manifestSha256": "a53dd5bcc3992503ae04b78b525656df39a6080a125dd5e7d506bcde9fdb7d5e",
+      "status": "passed",
+      "summary": {
+        "independentPackageFamilies": 4,
+        "pinnedArtifacts": 5,
+        "holdoutPackageFamilies": 2,
+        "holdoutPinnedArtifacts": 2,
+        "distinctPlannedCases": 24,
+        "knownOutcomeCases": 48,
+        "staticIdentifiedFailures": 0,
+        "serviceOnlyIdentifiedFailures": 4,
+        "unflaggedNaturalFailures": 4,
+        "unflaggedBusinessOrClientFailures": 20,
+        "driverErrors": 0,
+        "validationErrors": 0
+      },
+      "newArtifacts": [
+        {
+          "package": "dsh-pomodoro",
+          "version": "0.5.5",
+          "files": 9,
+          "digest": "8946b1a6dbd69aec2a860240e6b10f1bc5218e324358efa58ed7d8a623f0f2a0",
+          "publishedTarballSha256": "7331ead0d7a850f91cd20d687bcd8b689ce70e0a46822d319da3647c233956a1",
+          "publishedIntegrity": "sha512-YkyxlkSNTrfOmD1ecYtVzqeowT+0ybYWNjLAf5kBt2pZI7OYSmccj9rvDlcQawnEW6pCaQCgHhDnhLQDzAg7Wg=="
+        },
+        {
+          "package": "dsh-global-todo",
+          "version": "0.13.2",
+          "files": 55,
+          "digest": "7c86460b51b9080e674205ebb7c6ff516534f28200d48e840d4abcf12cea461e",
+          "publishedTarballSha256": "f872d67d7ba27f073e444f88cd00facf6825320b67f22fc68a4ef1f4c201eda7",
+          "publishedIntegrity": "sha512-iN3gTYqruAF4lXoX/EIzqCHot/tWmi45a1EVC4H8/amord0tvhXXxkkV3UQCbBfOAHsYDDoW1a7haWnTWmNoyw=="
+        }
+      ],
+      "newSampleMetricsAcrossTwoRounds": {
+        "static": {
+          "baseline": {
+            "truePositive": 0,
+            "falsePositive": 0,
+            "falseNegative": 0,
+            "trueNegative": 8
+          },
+          "faultInjected": {
+            "truePositive": 0,
+            "falsePositive": 0,
+            "falseNegative": 4,
+            "trueNegative": 0
+          }
+        },
+        "serviceObserved": {
+          "baseline": {
+            "truePositive": 0,
+            "falsePositive": 0,
+            "falseNegative": 0,
+            "trueNegative": 8
+          },
+          "faultInjected": {
+            "truePositive": 0,
+            "falsePositive": 0,
+            "falseNegative": 4,
+            "trueNegative": 0
+          }
+        }
+      },
+      "predictionSealedBeforeActions": true,
+      "requestDomStoragePostconditions": true,
+      "exactHistoricalManifestSubsetReplay": true,
+      "replayStatus": "passed",
+      "cleanupVerifiedForAllCohorts": true,
+      "evidenceIndexSha256": "f9d2ed388e0fd07a005b54569cb438db4335cb22edd9872f6a523afc92a3413e",
+      "evidenceRoot": "/private/tmp/dsc-plan-three-real-final",
+      "notes": [
+        "Five artifacts in four families, including two previously untuned independent families. 24 distinct cases repeated twice are 48 exposures, not 48 independent samples.",
+        "New holdouts retain four controlled failures as false negatives in each of static and service-only modes; normal/recovery TN=8 in each. No ecosystem accuracy claim.",
+        "Each cohort records its own predictor/harness hashes. Cache implementation continued during the queue; host-cache modules are unused by the static/service-only predictor. Rules, catalogue and verdict analysis were unchanged.",
+        "Selectors/first-launch storage/folded DOM encountered during driver development were driver issues, not plugin failures. Final queue driverErrors=0."
+      ],
+      "scope": "Current private DSH/Chrome business acceptance and independent historical replay only; no npm publication, account/model calls or Windows certification."
+    },
+    "upgradeCaptureWorker20261022": {
+      "verifiedAt": "2026-10-22",
+      "sourceOnly": true,
+      "offMainThread": [
+        "path selection and bounded double reads",
+        "copy, hash, freeze",
+        "owned snapshot chmod and deletion"
+      ],
+      "supervision": {
+        "captureMs": 10000,
+        "analysisMs": 10000,
+        "cleanupMs": 10000,
+        "oldGenerationMiB": 512,
+        "youngGenerationMiB": 64,
+        "captureBytes": 268435456,
+        "fileBytes": 8388608,
+        "entries": 50000,
+        "depth": 32,
+        "callerBudgetsOnlyLower": true,
+        "unloadAbort": true,
+        "terminateBeforeCleanup": true
+      },
+      "privateOwnership": "Parent allocates an async mkdtemp root and fixes device/inode identity; cleanup authority stays in its closure and rejects replacement files/directories.",
+      "regressions": [
+        "8000 real-file input leaves calling-thread heartbeat responsive",
+        "observed running CPU/capture cancellation and worker recovery",
+        "observed partial-copy timeout and cleanup",
+        "concurrent independent frozen snapshots",
+        "failed capture and cleanup retain both reasons in canonical result",
+        "host remains responsive during observed copy, cancels shared requests on unload, then recovers",
+        "host unload retains cleanup-refusal diagnostic"
+      ],
+      "independentReview": {
+        "remainingActionableFindings": 0,
+        "cleanupFailureOnUnloadFixed": true
+      },
+      "installedCandidate": {
+        "sha256": "3e08a59651830c4e309f79cd9e9a90a6b804ffde598f5067decf5738b08a8a40",
+        "dshVersion": "0.2.1-rc.2",
+        "upgradePreview": {
+          "installedArtifact": true,
+          "positiveNewRisk": true,
+          "staticEvidenceOnly": true,
+          "inputAndCatalogIdentities": true,
+          "ordinaryStateUnchanged": true,
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403,
+          "wrongMethodStatus": 405,
+          "unknownTargetUncertified": true,
+          "artifactSha256": "17fda6db0f4580822744c779d4b203835f9d6429397aa48bccebe2799019fd01",
+          "catalogSha256": {
+            "current": "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+            "target": "1331bf3220c1e06cfe087237077118d002dc04c32d027ce01da74c6a0d1dc9ad"
+          },
+          "ui": {
+            "realBrowser": true,
+            "positiveNewRisk": true,
+            "sourceIdentitiesVisible": true,
+            "staticLimitationsVisible": true,
+            "unknownTargetUncertified": true,
+            "ordinaryRowsAndFiltersUnchanged": true
+          },
+          "routeRemovedAndRestored": true
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        }
+      },
+      "scope": "Private macOS arm64 acceptance; same-byte observations are not an OS atomic snapshot and budgets do not promise hard realtime or RSS. No target plugin execution by upgrade preview."
+    },
+    "ordinaryCacheInvalidation20261022": {
+      "verifiedAt": "2026-10-22",
+      "sourceOnly": true,
+      "events": [
+        "plugin-manager/changed",
+        "plugin-manager/install-state",
+        "loader/entry-init",
+        "loader/partial-dispose",
+        "loader/volatile-update"
+      ],
+      "eventSource": "Read emit sites in the installed DSH plugin-manager and cordis loader before subscribing; events are hints, not runtime verdicts.",
+      "watchdog": {
+        "intervalMs": 5000,
+        "clientMetadataPollMs": 2000,
+        "timeMs": 5000,
+        "oldGenerationMiB": 128,
+        "youngGenerationMiB": 16,
+        "metadataEntries": 50000,
+        "directories": 10000,
+        "liveIntervalOverrideMs": 200
+      },
+      "identity": [
+        "canonical node_modules + original observation binding path",
+        "DSH/kernel/probe context",
+        "community plugin source metadata and install manifests",
+        "rules, catalogue, actual requested-profile compatibility file, bound probe bytes",
+        "mapped loader entries, declaration and extracted-source services"
+      ],
+      "behavior": [
+        "coalesced events and single-flight per target",
+        "single watchdog loop during slow checks",
+        "post-compute fresh identity check before publish and synchronous baseline commit",
+        "same-canonical aliases retain distinct probe bindings",
+        "stale/error metadata and previous success retained on refresh failure",
+        "metadata polling preserves filters; manual force queues behind polling",
+        "dispose removes timers/events and suppresses late reports/baseline writes"
+      ],
+      "regressions": {
+        "cacheTests": 18,
+        "realHostBaselineStaleGenerationRejected": true,
+        "FIFOAndLinkedFIFOInputsRejectPromptly": true,
+        "invalidDependencyManifestsKeepExtractionDiagnostics": true,
+        "canonicalAndRawTargetBindingRegressionFixed": true,
+        "symlinkPolicyInputMatchesActualConsumption": true
+      },
+      "independentReview": {
+        "resolvedActionableFindings": 7,
+        "remainingActionableFindings": 0,
+        "finalAliasHostTestPassed": true
+      },
+      "installedCandidate": {
+        "sha256": "3e08a59651830c4e309f79cd9e9a90a6b804ffde598f5067decf5738b08a8a40",
+        "dshVersion": "0.2.1-rc.2",
+        "ui": {
+          "available": true,
+          "navigation": "More > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+        },
+        "cacheInvalidation": {
+          "installedArtifact": true,
+          "realBrowser": true,
+          "manifestChangeObserved": true,
+          "backgroundReportUpdated": true,
+          "filtersPreserved": true,
+          "validChangeRecovered": true
+        },
+        "futureProbe": {
+          "installedArtifact": true,
+          "httpRejected": true,
+          "probeLoaderEvidenceRejected": true,
+          "realBrowserReasonVisible": true,
+          "validRefreshRecovered": true
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        }
+      },
+      "checks": {
+        "defaultSuite": {
+          "tests": 789,
+          "pass": 786,
+          "fail": 0,
+          "skipped": 3
+        },
+        "testFiles": 56,
+        "format": true,
+        "notices": true,
+        "contracts": true,
+        "dependencySecurity": {
+          "schemaVersion": 1,
+          "status": "clean",
+          "targets": [
+            {
+              "target": "workspace-lock",
+              "graph": "frozen-root-lock-including-dev",
+              "manifestSha256": "f5752957ed98ca64db434be883eb0f2943f45fd076a6ef17335b331ef1aebcc5",
+              "lockSha256": "9fae5da30fe51c718efa0093c6b87af170e564d6399246f585dcbd42963429aa",
+              "status": "clean",
+              "vulnerabilities": 0,
+              "findings": [],
+              "truncated": false
+            },
+            {
+              "target": "plugin-runtime",
+              "graph": "current-registry-runtime-resolution",
+              "manifestSha256": "49b079aab1654e495630af79f74f11d5c974badcbd3c9c9bf4a9ee7831c851f0",
+              "lockSha256": "5e449374a7d63299316d1b6ccc656b38f5677438fbb74902435cd6a2bdb31c14",
+              "status": "clean",
+              "vulnerabilities": 0,
+              "findings": [],
+              "truncated": false
+            }
+          ]
+        },
+        "publicMetadata": {
+          "errors": 0,
+          "notice": "Published npm README differs from unreleased source; expected until next release."
+        },
+        "prepublishCheck": true,
+        "docCheckWithSuccessfulTap": true,
+        "branch": "codex/plan-worker-regressions-cache",
+        "baseCommit": "b4d9f095a1f4a5edb65b38d0ec7e1553238aaf36"
+      },
+      "scope": "Source branch and private local candidate only. Filesystem metadata is a bounded change detector, not adversarial timestamp authenticity. TTL remains a fallback for time-dependent evidence. No Git push, remote CI for this branch, npm publication, accounts, model calls or Windows certification."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

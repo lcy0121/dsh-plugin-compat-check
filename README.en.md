@@ -137,7 +137,7 @@ Listed in:
 
 Listing is not compatibility certification. The npm installation method in 1024 Store still awaits an upstream fix; see [Plan](docs/Plan.md).
 
-Unreleased source changes add plugin search, combined verdict/certainty/pending filters, collapsible findings, full report preview/copy and a baseline risk view. Findings include evidence-matched follow-up checks; filters do not trim exported reports. The fixed real-plugin regression runner is repository-only: `node tools/real-regression.mjs --live --out-dir <empty-directory>` or `--replay <evidence-root>`. A green run reproduces fixed outcomes while retaining false positives/negatives; see [Plan](docs/Plan.md).
+Unreleased source changes add plugin search, combined verdict/certainty/pending filters, collapsible findings, full report preview/copy and a baseline risk view. Ordinary reports refresh after plugin or observation identities change, using event hints and a bounded five-second watchdog; background updates retain filters and the previous report on failure. Upgrade capture, hashing and cleanup run in supervised workers and cancel on unload. Findings include evidence-matched follow-up checks; filters do not trim exported reports. The fixed real-plugin regression runner is repository-only: `node tools/real-regression.mjs --live --out-dir <empty-directory>` or `--replay <evidence-root>`. The queue now covers five artifacts and 24 cases per round, including two untuned families; see [sample provenance](docs/real-regression-samples.md). A green run reproduces fixed outcomes while retaining false positives/negatives; see [Plan](docs/Plan.md).
 
 ## License
 

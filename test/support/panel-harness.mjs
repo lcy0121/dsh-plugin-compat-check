@@ -1,9 +1,13 @@
 /** Run the shipped client factory and its event handlers with persistent hooks. */
 import fs from "node:fs";
 import vm from "node:vm";
-export async function panelHarness(data, { clipboard, subject, fetcher } = {}) {
+export async function panelHarness(
+  data,
+  { clipboard, subject, fetcher, timers } = {},
+) {
   const stores = new Map(),
-    effects = [];
+    effects = [],
+    cleanups = [];
   let frame, loaded, tree;
   const React = {
     createElement: (type, props, ...children) => ({
@@ -64,8 +68,14 @@ export async function panelHarness(data, { clipboard, subject, fetcher } = {}) {
           ok: true,
           json: async () => JSON.parse(JSON.stringify(data)),
         })),
-      setTimeout,
-      clearTimeout,
+      setTimeout:
+        timers?.setTimeout ||
+        ((fn, ms) => {
+          const timer = setTimeout(fn, ms);
+          timer.unref?.();
+          return timer;
+        }),
+      clearTimeout: timers?.clearTimeout || clearTimeout,
     },
   );
   const components = {};
@@ -104,7 +114,10 @@ export async function panelHarness(data, { clipboard, subject, fetcher } = {}) {
       ),
     );
     const pending = effects.splice(0);
-    for (const fn of pending) fn();
+    for (const fn of pending) {
+      const off = fn();
+      if (typeof off === "function") cleanups.push(off);
+    }
     return tree;
   }
   function nodes(el = tree) {
@@ -131,6 +144,9 @@ export async function panelHarness(data, { clipboard, subject, fetcher } = {}) {
   return {
     render,
     settle,
+    dispose: () => {
+      for (const off of cleanups.splice(0)) off();
+    },
     text,
     nodes,
     find: (predicate) => nodes().find(predicate),

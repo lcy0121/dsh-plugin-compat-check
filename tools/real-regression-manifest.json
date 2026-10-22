@@ -288,6 +288,152 @@
           }
         }
       ]
+    },
+    {
+      "suite": "holdout-pomodoro",
+      "package": "dsh-pomodoro",
+      "version": "0.5.5",
+      "files": 9,
+      "digest": "8946b1a6dbd69aec2a860240e6b10f1bc5218e324358efa58ed7d8a623f0f2a0",
+      "publishedTarballSha256": "7331ead0d7a850f91cd20d687bcd8b689ce70e0a46822d319da3647c233956a1",
+      "publishedIntegrity": "sha512-YkyxlkSNTrfOmD1ecYtVzqeowT+0ybYWNjLAf5kBt2pZI7OYSmccj9rvDlcQawnEW6pCaQCgHhDnhLQDzAg7Wg==",
+      "sourceHashes": {
+        "lib/client.js": "d5a64d83b7c46c9f8f49fef175bed8379f0a37ce78a168a004c7bb8697414662",
+        "lib/index.js": "2165dcd7850f37768014fc04e68278aa57507bce9e679a5d29dcd153d79465fd",
+        "lib/migrate-settings.js": "345c2f4a7f63d852d669316ceb432cdcd164606b6f377b423a77f3438dee0233"
+      },
+      "suiteId": "dsh-pomodoro-0.5.5-holdout-actions-v1",
+      "observeServices": true,
+      "holdout": true,
+      "cases": [
+        {
+          "caseId": "pomodoro.timer.start.healthy",
+          "featureId": "pomodoro.timer.start",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "pomodoro.timer.start.blocked",
+          "featureId": "pomodoro.timer.start",
+          "control": "dom-control-missing",
+          "outcome": "failed",
+          "boundary": "controlled-client-dom",
+          "observed": {
+            "actionAvailable": false,
+            "persisted": false,
+            "uiAfterReload": false
+          }
+        },
+        {
+          "caseId": "pomodoro.timer.start.recovered",
+          "featureId": "pomodoro.timer.start",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        }
+      ]
+    },
+    {
+      "suite": "holdout-todo",
+      "package": "dsh-global-todo",
+      "version": "0.13.2",
+      "files": 55,
+      "digest": "7c86460b51b9080e674205ebb7c6ff516534f28200d48e840d4abcf12cea461e",
+      "publishedTarballSha256": "f872d67d7ba27f073e444f88cd00facf6825320b67f22fc68a4ef1f4c201eda7",
+      "publishedIntegrity": "sha512-iN3gTYqruAF4lXoX/EIzqCHot/tWmi45a1EVC4H8/amord0tvhXXxkkV3UQCbBfOAHsYDDoW1a7haWnTWmNoyw==",
+      "sourceHashes": {
+        "lib/atomic.js": "c03a11845cf4ae7e550c6636cc13bdf63db3abb8a1c2f5f1ccdb0a9384febcd8",
+        "lib/capture.js": "12ffa900b64c887864b963f499e5cbc7896aa4231fac9d2f9cbd2435c0d2ebde",
+        "lib/client.js": "74de128226d15cd80aa4eb1b7830d72e1c7ad4527f9a2e44dba49603f62382e5",
+        "lib/completion.js": "74083fe39470448d1fb94f9a08931c93006aad8197ea5f3cee9526ef0ea8e567",
+        "lib/diagnostics.js": "4db3f9bfccd73807672f9d7991592f76e00f1e8add707afa82b5622b43486921",
+        "lib/dispatch.js": "652d9fd97fe3962daba955a92352cd0243f67c85fe382d5946206baa1392e00b",
+        "lib/errors.js": "1c38df0559b239760147f606b751a82298887834b931ce9637a1e7982e398e31",
+        "lib/index.js": "fa30dea3419aa32aa86fb7619ba5b0fb2f7ffaa8fcbe56ed4b841a53160ea82d",
+        "lib/ingest.js": "7d6d35e25c5456c6cd9de48495a31530a63aa3b8784498d97bc2cfe70611e03c",
+        "lib/links.js": "e5003e793726aa04e733449de6c0d637b10eaf840a1f719ba4b9152de9149195",
+        "lib/markdown.js": "553186994edcbc00ad61ab9d42d4515f4d2a6b2221af94c56d3e893a8a61e9d3",
+        "lib/metrics.js": "25aecea6072fabd4807125592d49218c34bd317b2514fea38da03f555eff40ad",
+        "lib/model.js": "5372896c31ef8dab75848ce69f136c9ba5fd6793133763b6870096c15fcff39c",
+        "lib/reminders.js": "e3547bc1e1fb8332354201e1d989295870e6d5e05ba0273dfae1d104f46fcb4f",
+        "lib/report.js": "c2fc2b353e89c0fd14d5032084e8b086659b0d5ee31f1510870ae6c91c979d14",
+        "lib/routes.js": "35b2c675868b023eebd2ad0cbbb4d4361467ff44181f6f77571280004eb39ee5",
+        "lib/service.js": "3440ac6f8a805475aed893ec1d8d01c6f0ac387a360444ead1ec10e4fe20d44a",
+        "lib/settings.js": "7b3b8ce315b6eb95eeeeb6007c65b884f8a6c4c6c8722be5b4c19bd8d1ac3ac7",
+        "lib/store.js": "0804eb1872dabba67d9b1990295868319a71f0f394828f68c32b3eaa29721e4a",
+        "lib/tools.js": "6cbaeda5e0c168b623c69e0557228f89d1f04289ad389a68e5c93bb22aa65493",
+        "lib/weight.js": "abbbd4ce8cd64f70c421863159e2ca89f2aef7d340acba8c712fdc13b228bce9"
+      },
+      "suiteId": "dsh-global-todo-0.13.2-holdout-actions-v1",
+      "observeServices": true,
+      "holdout": true,
+      "cases": [
+        {
+          "caseId": "todo.create.healthy",
+          "featureId": "todo.create",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "todo.create.blocked",
+          "featureId": "todo.create",
+          "control": "http-503",
+          "outcome": "failed",
+          "boundary": "controlled-http-business",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": false,
+            "uiAfterReload": false,
+            "requestStatus": 503
+          }
+        },
+        {
+          "caseId": "todo.create.recovered",
+          "featureId": "todo.create",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        }
+      ]
     }
-  ]
+  ],
+  "historicalManifests": {
+    "895a4d41d981049a2788c2d6fe979d07406f85e94280fab16252b81c255a1718": [
+      "sidebar-ui-previous",
+      "sidebar-ui",
+      "market"
+    ]
+  },
+  "holdoutSelection": {
+    "selectedAt": "2026-10-22",
+    "source": "https://cdn.jsdelivr.net/npm/dsh-plugin-catalog/index.json",
+    "basis": "Two public third-party families not used in prior rule tuning; bounded manual productivity actions without accounts or model calls. Selection based on auditable behavior and contrasting declaration/source shapes, before predictions or live outcomes.",
+    "rulesAdjustedForSamples": false
+  }
 }

@@ -323,15 +323,15 @@ test("owned snapshots clean up after timeout and concurrent mutation never publi
   assert.equal(timed.status, "error");
   assert.deepEqual(prefixes(), original);
 });
-test("a captured snapshot owns its bytes and cleanup cannot delete the original plugin", (t) => {
+test("a captured snapshot owns its bytes and cleanup cannot delete the original plugin", async (t) => {
   const f = fixture(t);
-  const snapshot = captureUpgradeInput(f.nm);
+  const snapshot = await captureUpgradeInput(f.nm);
   const file = path.join(snapshot.nm, "preview-fixture", "index.js");
   const copied = fs.readFileSync(file, "utf8");
   fs.writeFileSync(path.join(f.pkg, "index.js"), "changed");
   assert.equal(fs.readFileSync(file, "utf8"), copied);
-  snapshot.dispose();
-  snapshot.dispose();
+  await snapshot.dispose();
+  await snapshot.dispose();
   assert.equal(fs.existsSync(snapshot.nm), false);
   assert.equal(
     fs.readFileSync(path.join(f.pkg, "index.js"), "utf8"),

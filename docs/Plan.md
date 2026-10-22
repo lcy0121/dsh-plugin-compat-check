@@ -38,7 +38,7 @@
 
 `lib/contracts.mjs`为普通契约真源：CLI为`schemaVersion:1 / kind:plugin-compat-check/result`，HTTP envelope为`kind:plugin-compat-check/report`；普通tool保留summary/text及report/baseline/cache。身份、发现、计数和退出码须自洽；面板拒绝坏负载。新增字段兼容，不兼容变更升schema，生成副本由`stage-contract.mjs --check`核验。
 
-普通CLI退出码：**0无冲突、1部分可用或未知、2不兼容、3无法判定**。安装检查另有gate-rejected等状态；工具错误不是插件结论。普通报告同目标single-flight，刷新失败保留旧成功报告及错误；升级预检使用§2.7的独立契约。
+普通CLI退出码：**0无冲突、1部分可用或未知、2不兼容、3无法判定**。安装检查另有gate-rejected等状态；工具错误不是插件结论。普通报告按canonical目标、原始探针绑定路径及内核/DSH/probe上下文隔离并single-flight；已核实的安装/loader事件合并触发身份检查，5秒有界worker元数据巡检兜底。插件源码/清单、规则/目录、豁免/探针及进程内服务/loader身份变化后后台重算；面板2秒轻量轮询并保留筛选。失败保留旧成功报告及错误，失效/卸载中的旧任务不发布或推进基线；5分钟TTL保留为兜底，不承诺防恶意元数据伪装。升级预检使用§2.7的独立契约。
 
 `--issue-report`共用`lib/issue-report.mjs`导出Markdown，不读写基线，与json/quiet互斥。筛选不裁剪导出，显式复制才写剪贴板，失败可手动复制。保留插件名、包内位置及证据边界；隐藏不安全位置/说明，不导出原始源码、日志、probe、baseline或evidence。任意文本不保证完全脱敏，分享前预览，不自动发帖。
 
@@ -64,7 +64,7 @@ HMR撤销route/tool/skill、计时器及诊断handle；卸载后在途任务不�
 
 ### 2.6 真实故障回归与呈现
 
-`tools/real-regression.mjs`用固定manifest锁定DSH/API目录、三个真实npm制品及18项业务期望：sidebar0.26.1自然失败、0.28.0编辑/恢复、market1.66.37正常/503/客户端控件缺失/恢复。默认及最多两轮，全新私有profile与缓存，不复制账户、不调用模型，不随npm分发。
+`tools/real-regression.mjs`用固定manifest锁定DSH/API目录、五个真实npm制品及每轮24项业务期望：原sidebar/market三制品18项，另加未参与规则调优的pomodoro0.5.5与global-todo0.13.2两独立family各3项正常/故障/恢复。来源、声明形态及限制见[样本说明](real-regression-samples.md)。默认及最多两轮，全新私有profile与缓存，不复制账户、不调用模型，不随npm分发。
 
 动作前封存预测，真值来自请求/DOM/磁盘；静态与service-only、自然与受控病例分开记录FP/FN，驱动错误另列，不锁死旧告警。回放核对身份、摘要、病例、时序、截图和清理；旧driver缺逐动作时间戳，哈希不是防篡改签名。每队列10分钟，SIGTERM后留15秒清理再强停；清理未证实即失败，不盲删在用目录。
 
@@ -74,7 +74,7 @@ HMR撤销route/tool/skill、计时器及诊断handle；卸载后在途任务不�
 
 `runUpgradePreview({nm,currentVersion,targetVersion})`对同组私有制品副本联合提取一次，识别名取目录并集，再按两端目录及声明策略独立判定。仅支持精确**0.2.0-rc.2、0.2.1-rc.2**；未知/范围版本在读输入前返回unsupported-version/退出3，不回退或自动升级。
 
-双次观察目录/字节/链接，拒绝重复身份、特殊文件、变化或超限，保留整体/逐插件SHA-256、目录文件/来源/摘要和规则摘要。捕获256MiB/单文件8MiB/50000目录项/32层/10秒，worker另有10秒/512+64MiB预算；终止后清理，不承诺OS原子快照、硬实时或RSS。
+双次观察目录/字节/链接，拒绝重复身份、特殊文件、变化或超限，保留整体/逐插件SHA-256、目录文件/来源/摘要和规则摘要。捕获、双读、哈希、冻结及清理均在受控worker；父进程异步分配自有目录，卸载取消在途捕获/分析，终止后独立清理。捕获256MiB/单文件8MiB/50000目录项/32层/10秒，分析另有10秒/512+64MiB，清理独立10秒；清理失败保留主因并明确未完成，不返回成功。不承诺OS原子快照、硬实时或RSS。
 
 无目标代码执行、网络、运行时/probe/loader、豁免、普通缓存/基线或状态写入；仅合并同目标在途请求，完成后重扫。保留coverage/vacuous、弃权、诊断及客户端待验证信息。
 
@@ -100,11 +100,11 @@ CLI用`--nm <profile或node_modules> --dsh-version <当前精确版本> --upgrad
 | 安全、回收与Chrome工程 | `engineeringDiagnostics20261019`、`linuxChromeCiAcceptance20261020`、`linuxChromeInputPreparation20261020` |
 | rc.2适配 / 发布 | `rc2TargetedAdaptation`、`release013 / release014` |
 | 有限批量 | `staticBatch20261020` |
-| 产品解释 / 真实故障 | `productExplanations20261021`、`realPluginRegression20261021` |
-| 核实步骤 / 面板 | `actionableFindings20261021`、`panelExperience20261021` |
-| 升级预检 | `upgradePreview20261021` |
+| 产品解释 / 真实故障 | `productExplanations20261021`、`realPluginRegression20261021`、`independentHoldout20261022` |
+| 核实步骤 / 面板 / 缓存 | `actionableFindings20261021`、`panelExperience20261021`、`ordinaryCacheInvalidation20261022` |
+| 升级预检 / 捕获worker | `upgradePreview20261021`、`upgradeCaptureWorker20261022` |
 | 重复身份 / YAML / 目录治理 | `identityYamlCatalog20261022` |
-| 探针时间 / CI安全 | `probeTimeAndCiSecurity20261022` |
+| 探针时间 / CI安全 | `probeTimeAndCiSecurity20261022`、`baselineCiFollowup20261022` |
 
 独立业务历史与残留FN见`independentBusinessTruth / businessSampleExpansion / marketUiAndBusinessExpansion / naturalFailureBoundaries20261019`；模型usage不等于账单认证。分发及上游历史见`upstreamAcceptance20261021`，收录不等于兼容认证；私有采集故障根因仍未知。
 
@@ -151,15 +151,15 @@ node tools/business-labels.mjs --live --suite market --out-dir <空目录> --jso
 node tools/business-labels.mjs --predictions <预测.json> --labels <标签.json> --json
 ```
 
-回放单队列可加`--suite sidebar-ui-previous`。业务suite另有sidebar/sidebar-ui/sidebar-ui-previous；编辑器可加observe-services。固定回归退出0期望重现、1业务/证据不符、3驱动错误；业务度量0无错配、1有FP/FN或不计分项、3驱动/输入错误。预测在动作前封存，不用旧告警锁死新预测。sidebar-model须另获当次账户/模型授权，限工具关闭、两次首步、无重试/标题、每步256token，不属默认测试/CI；全部私有profile、凭据副本和自有进程须清理。
+回放单队列可加`--suite sidebar-ui-previous`。业务suite另有sidebar/sidebar-ui/sidebar-ui-previous/holdout-pomodoro/holdout-todo；编辑器和新增独立样本可加observe-services。固定回归退出0期望重现、1业务/证据不符、3驱动错误；业务度量0无错配、1有FP/FN或不计分项、3驱动/输入错误。预测在动作前封存，不用旧告警锁死新预测。sidebar-model须另获当次账户/模型授权，限工具关闭、两次首步、无重试/标题、每步256token，不属默认测试/CI；全部私有profile、凭据副本和自有进程须清理。
 
 ### 5.7 核实步骤与面板体验验收
 
-多条件筛选、折叠、可比/不可比基线、完整导出与剪贴板失败由组件测试和独立tgz的真实DSH/Chrome验收覆盖。UI合成包仅扫描不激活，真实业务另见§5.6；分享报告保留运行时复现条件。
+多条件筛选、折叠、可比/不可比基线、完整导出与剪贴板失败由组件测试和独立tgz的真实DSH/Chrome验收覆盖。`test/cache-invalidation.test.mjs`另验收主动失效、同目标single-flight、旧任务基线保护、跨目标/DSH隔离、事件合并及失败恢复；真实tgz/UI在安装清单变化后无需刷新按钮即更新并保留筛选。UI合成包仅扫描不激活，真实业务另见§5.6；分享报告保留运行时复现条件。
 
 ### 5.8 升级前预检验收与复现
 
-`node bin/compat-check.mjs --nm <profile或node_modules> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json`按§2.7返回0/1/2/3。回归为`test/upgrade-{preview,cli,host,panel}.test.mjs`；同字节身份、delta、证据隔离、超时/清理及真实HTTP/DOM记录见§4。真实新增风险为合成声明样本，不认证未来业务。
+`node bin/compat-check.mjs --nm <profile或node_modules> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json`按§2.7返回0/1/2/3。回归为`test/upgrade-{preview,cli,host,panel,capture-worker}.test.mjs`；同字节身份、delta、证据隔离、超时/清理及真实HTTP/DOM记录见§4。真实新增风险为合成声明样本，不认证未来业务。
 
 ### 5.9 重复身份、YAML与目录治理验收
 
@@ -173,14 +173,11 @@ node tools/business-labels.mjs --predictions <预测.json> --labels <标签.json
 
 按紧迫性、结论可信度、宿主可用性和交付价值排序；优先级不是漏洞评级。已完成项移出本节。所有待办沿用§1的证据边界及§3的授权约定，不能以调整严重度、旧证据或模拟结果替代验收。
 
-1. **P1：将升级预检输入捕获移出宿主主线程。** 将同步捕获、双读、哈希及清理纳入受控worker或等效可中断任务，保留同字节/身份/预算保证。验收大包、慢输入、超时、卸载、并发时的宿主响应、回收与后续恢复，不放大预算消除失败。
-2. **P1：修复关键问题后交付下一版。** 完成确认缺陷及本版阻断检查后，整理变更、迁移/限制、确切tgz和公开安装验收；不以可选功能全做完为前提。源码、候选、公开版本分开记录，npm/Release发布另获授权。
-3. **P1：扩大独立真实插件回归样本。** 加入未参与调优的插件/版本/源码及声明形态，重复运行不算新样本。先封存预测再取请求/DOM/磁盘真值，分模式记录FP/FN、驱动错误和覆盖限制，不锁死旧预测或宣称生态准确率。
-4. **P1：小规模真实用户试用。** 观察作者/普通用户完成安装→理解→定位，记录误读、定位失败、误报和分享障碍；下载/star不代替效果。联系、收集和公开现场资料分别获授权，不默认增加遥测。
-5. **P2：插件变化后主动失效普通报告缓存。** 用安装/更新/启停事件或轻量指纹刷新，保留筛选、旧结果和刷新失败提示。验收插件/DSH/规则/观测身份变化、事件风暴及并发，不跨目标复用或引入升级预检。
-6. **P2：增加可选的功能健康检查。** 评估作者声明式HTTP/DOM检查，仅在明确授权的独立环境执行，静态与实测分栏。用正常/503/控件缺失/恢复病例验证收益；作者声明不自动获信任，不默认执行插件、联网或调用账户/模型，私有profile不是OS沙箱。
-7. **P2：增加依赖关系与故障传播视图。** 展示所需服务、候选提供者、条目状态及受影响插件，区分必需/可选/子作用域、host/client；提供声明仅为线索。验收环、多提供者、禁用和未知状态，不凭连线判定状态或自动装包。
-8. **P2：增加发现的人工处置记录。** 支持待确认/已复核/误报/已修复及依据，绑定插件/规则版本，变化后重审。与内核结论、基线及compatibility豁免分开，不因已处理而隐藏新风险；验收跨版本失效、损坏与呈现。
-9. **P2：提供作者CI策略、标准输出与兼容矩阵。** 支持新增风险/确定性/覆盖门禁，评估SARIF/JUnit和已知DSH版本矩阵。位置、身份、退出码与内核一致；未知、工具错误、覆盖不足不伪装通过，不扩大目录支持范围。
-10. **P2：跟进上游验收。** 依`upstreamAcceptance20261021`跟进：dsh-market#932虽已关闭，双端查询失败且无显式版本时仍可能裸名安装，待告警/安全失败后复验；1024#22待回复及v2 npm方式后全新实装；0xsline#717待采纳。有外部变化才复验，不重复发帖，补充另取授权。
-11. **P2：Windows真实验收（依环境条件暂缓）。** 环境具备后实跑路径、安装器、回收、打包、诊断及自有资源清理。按用户选择暂缓，完成前保留未验收边界。
+1. **P1：修复关键问题后交付下一版。** 完成确认缺陷及本版阻断检查后，整理变更、迁移/限制、确切tgz和公开安装验收；不以可选功能全做完为前提。源码、候选、公开版本分开记录，npm/Release发布另获授权。
+2. **P1：小规模真实用户试用。** 观察作者/普通用户完成安装→理解→定位，记录误读、定位失败、误报和分享障碍；下载/star不代替效果。联系、收集和公开现场资料分别获授权，不默认增加遥测。
+3. **P2：增加可选的功能健康检查。** 评估作者声明式HTTP/DOM检查，仅在明确授权的独立环境执行，静态与实测分栏。用正常/503/控件缺失/恢复病例验证收益；作者声明不自动获信任，不默认执行插件、联网或调用账户/模型，私有profile不是OS沙箱。
+4. **P2：增加依赖关系与故障传播视图。** 展示所需服务、候选提供者、条目状态及受影响插件，区分必需/可选/子作用域、host/client；提供声明仅为线索。验收环、多提供者、禁用和未知状态，不凭连线判定状态或自动装包。
+5. **P2：增加发现的人工处置记录。** 支持待确认/已复核/误报/已修复及依据，绑定插件/规则版本，变化后重审。与内核结论、基线及compatibility豁免分开，不因已处理而隐藏新风险；验收跨版本失效、损坏与呈现。
+6. **P2：提供作者CI策略、标准输出与兼容矩阵。** 支持新增风险/确定性/覆盖门禁，评估SARIF/JUnit和已知DSH版本矩阵。位置、身份、退出码与内核一致；未知、工具错误、覆盖不足不伪装通过，不扩大目录支持范围。
+7. **P2：跟进上游验收。** 依`upstreamAcceptance20261021`跟进：dsh-market#932虽已关闭，双端查询失败且无显式版本时仍可能裸名安装，待告警/安全失败后复验；1024#22待回复及v2 npm方式后全新实装；0xsline#717待采纳。有外部变化才复验，不重复发帖，补充另取授权。
+8. **P2：Windows真实验收（依环境条件暂缓）。** 环境具备后实跑路径、安装器、回收、打包、诊断及自有资源清理。按用户选择暂缓，完成前保留未验收边界。

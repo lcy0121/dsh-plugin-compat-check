@@ -39,6 +39,7 @@ function execute(body) {
  const route=routes.get('/plugin-compat-check/upgrade-preview');assert(route,'Upgrade route not registered');
  const request=async(query,headers={host:'127.0.0.1:8123'},method='GET')=>{let code,text;await route.handler({headers,method,url:'/plugin-compat-check/upgrade-preview?'+query,socket:{encrypted:false}},{writeHead:c=>code=c,setHeader(){},end:t=>text=t});return {status:code,body:JSON.parse(text)};};
  try{${body};console.log('UPGRADE_HOST_OK')}finally{for(const off of effects)off();}process.exit(0);`;
+  fs.mkdirSync(path.join(root, "temporary"));
   try {
     const r = spawnSync(
       process.execPath,
@@ -48,6 +49,7 @@ function execute(body) {
         timeout: 20000,
         env: {
           ...process.env,
+          TMPDIR: path.join(root, "temporary"),
           DSH_HOME: path.join(root, "home"),
           DSC_KERNEL: repo,
           DSC_PROFILE: "upgrade",
@@ -86,4 +88,40 @@ test("same-target requests can share an in-flight preflight while a different ta
 test("invalid upgrade tool arguments retain the preview failure identity rather than ordinary report output", () =>
   execute(
     `const out=await tool.execute({upgradeTo:42});assert.equal(out.ok,false);assert.equal(out.report,null);assert.equal(out.upgradePreview.kind,'plugin-compat-check/upgrade-preview');assert.equal(out.upgradePreview.exitCode,3);assert.equal(out.baseline,null);assert.equal(out.cache,null);`,
+  ));
+
+// Cancel an observed copying task, rather than unloading before capture starts.
+test("host remains responsive during real capture, unloads shared requests and a new generation recovers", () =>
+  execute(
+    `for(let i=0;i<4500;i++)fs.writeFileSync(pkg+'/data-'+i+'.txt','owned capture data');
+     const first=request('targetVersion=0.2.1-rc.2'),same=request('targetVersion=0.2.1-rc.2');
+     const end=Date.now()+5000;let copied=false;
+     while(Date.now()<end&&!copied){copied=fs.readdirSync(root+'/temporary').some(n=>fs.existsSync(root+'/temporary/'+n+'/node_modules/upgrade-demo/data-0.txt'));if(!copied)await new Promise(r=>setTimeout(r,5));}
+     assert(copied,'must observe real capture before host disposal');
+     const busy=await request('targetVersion=0.2.0-rc.2');assert.equal(busy.body.ok,false);assert.match(busy.body.error,/正在运行/);
+     const unsupported=await request('targetVersion=9.9.9');assert.equal(unsupported.body.status,'unsupported-version');
+     for(const off of effects.splice(0))off();
+     for(const out of await Promise.all([first,same])){assert.equal(out.body.ok,false);assert.match(out.body.error,/取消|卸载|disposed/);}
+     assert.deepEqual(fs.readdirSync(root+'/temporary'),[]);assert(fs.existsSync(pkg+'/data-0.txt'));
+     apply(ctx);const recovered=await tool.execute({upgradeTo:'0.2.1-rc.2'});assert.equal(recovered.upgradePreview.ok,true,recovered.upgradePreview.error);assert.deepEqual(fs.readdirSync(root+'/temporary'),[]);assert(!fs.existsSync(root+'/home/dsh-plugin-compat-check'));`,
+  ));
+
+test("host unload preserves primary cancellation and cleanup refusal diagnostics", () =>
+  execute(
+    `for(let i=0;i<1000;i++)fs.writeFileSync(pkg+'/data-'+i+'.txt','owned capture data');
+     fs.writeFileSync(pkg+'/index.js',Array.from({length:20000},(_,i)=>'const x'+i+'='+i+';').join('\\n'));
+     const pending=request('targetVersion=0.2.1-rc.2');
+     let snapshot;const end=Date.now()+5000;
+     while(Date.now()<end&&!snapshot){for(const name of fs.readdirSync(root+'/temporary')){const candidate=root+'/temporary/'+name;try{if((fs.statSync(candidate).mode&0o777)===0o500){snapshot=candidate;break;}}catch{}}if(!snapshot)await new Promise(r=>setTimeout(r,2));}
+     assert(snapshot,'must observe frozen real snapshot before disposal');
+     const backup=snapshot+'-saved';fs.renameSync(snapshot,backup);fs.writeFileSync(snapshot,'unrelated replacement');
+     try {
+       for(const off of effects.splice(0))off();const out=await pending;
+       assert.equal(out.body.ok,false);assert.equal(out.body.artifact,null);
+       assert.match(out.body.error,/取消/);assert.match(out.body.error,/清理.*未完成/);assert.match(out.body.error,/目录身份变化/);
+       assert.equal(out.body.error.includes(root+'/temporary'),false);
+       assert.equal(fs.readFileSync(snapshot,'utf8'),'unrelated replacement');assert(fs.existsSync(backup));
+     } finally {
+       fs.unlinkSync(snapshot);const writable=d=>{fs.chmodSync(d,0o700);for(const e of fs.readdirSync(d,{withFileTypes:true}))if(e.isDirectory())writable(d+'/'+e.name);};writable(backup);fs.rmSync(backup,{recursive:true});
+     }`,
   ));

@@ -349,7 +349,9 @@ function indexedFixture() {
       durationMs: 240000,
       files,
     });
-    for (const suite of ["sidebar-ui", "market"])
+    for (const suite of api.manifest.suites
+      .map((p) => p.suite)
+      .filter((s) => s !== "sidebar-ui-previous"))
       entries.push({
         relative: "run-" + repeat + "/" + suite,
         suite,
@@ -543,6 +545,207 @@ test("rejects oversized run index before JSON parsing", () => {
     assert.throws(
       () => api.replayRegression(f.root),
       /budget|index|bytes|limit/i,
+    );
+  } finally {
+    f.remove();
+  }
+});
+
+test("historical three-suite index keeps replaying after independent holdout expansion", () => {
+  const f = indexedFixture();
+  try {
+    write(f.root, "regression-index.json", {
+      schemaVersion: 1,
+      repeats: 2,
+      manifestSha256:
+        "895a4d41d981049a2788c2d6fe979d07406f85e94280fab16252b81c255a1718",
+      entries: f.entries.filter((e) =>
+        ["sidebar-ui-previous", "sidebar-ui", "market"].includes(e.suite),
+      ),
+    });
+    const report = api.replayRegression(f.root);
+    assert.equal(report.entries.length, 6);
+    assert.equal(report.entries[0].status, "passed");
+    assert.match(report.entries[3].error, /duplicate|identity/i);
+  } finally {
+    f.remove();
+  }
+});
+
+function holdoutFixture() {
+  const f = fixture(),
+    pin = api.manifest.suites.find((p) => p.suite === "holdout-todo");
+  const artifact = {
+    ...f.files["measurement.json"].artifacts,
+    suite: pin.suite,
+    package: pin.package,
+    version: pin.version,
+    packageFingerprint: { files: pin.files, digest: pin.digest },
+    publishedTarballSha256: pin.publishedTarballSha256,
+    publishedIntegrity: pin.publishedIntegrity,
+  };
+  const id = {
+    sampleId: "artificial-holdout-audit-only",
+    suiteId: pin.suiteId,
+    artifactDigest: hash(JSON.stringify(artifact)),
+    dshVersion: "0.2.1-rc.2",
+    toolVersion: "test",
+  };
+  const prediction = {
+    ...f.files["predictions.json"],
+    ...id,
+    rows: [
+      {
+        featureId: "todo.create",
+        flagged: false,
+        coverageLimited: true,
+        clientVerified: false,
+      },
+    ],
+    casePlan: pin.cases.map(({ caseId, featureId, control }) => ({
+      caseId,
+      featureId,
+      control,
+    })),
+  };
+  const rows = pin.cases.map((c) => ({
+    caseId: c.caseId,
+    featureId: c.featureId,
+    control: c.control,
+    outcome: c.outcome,
+    observed: c.observed,
+    actionStartedAt: "2026-10-19T01:01:10Z",
+    actionCompletedAt: "2026-10-19T01:01:20Z",
+    holdoutEvidence: {
+      family: "todo",
+      actionAvailable: true,
+      title: c.caseId,
+      request: {
+        method: "POST",
+        path: "/api/global-todo/create",
+        status: c.observed.requestStatus,
+        completed: true,
+      },
+      diskTitles: c.outcome === "passed" ? [c.caseId] : [],
+      domTitles: c.outcome === "passed" ? [c.caseId] : [],
+      diskPath: "global-todo/todos.json",
+      diskSha256: "d".repeat(64),
+    },
+  }));
+  const labels = { ...f.files["labels.json"], ...id, rows };
+  const obs = f.files["service-observation.json"];
+  const sa = {
+    staticArtifactDigest: id.artifactDigest,
+    rootServiceInputSha256: hash(JSON.stringify(obs)),
+  };
+  const sid = {
+    ...id,
+    sampleId: id.sampleId + "-services",
+    suiteId: id.suiteId + "-service-observed-v1",
+    artifactDigest: hash(JSON.stringify(sa)),
+  };
+  const sp = {
+    ...f.files["service-predictions.json"],
+    ...sid,
+    rows: prediction.rows,
+    casePlan: prediction.casePlan,
+  };
+  f.files["predictions.json"] = prediction;
+  f.files["labels.json"] = labels;
+  f.files["service-predictions.json"] = sp;
+  f.files["service-labels.json"] = { ...labels, ...sid };
+  Object.assign(f.files["measurement.json"], id, {
+    artifacts: artifact,
+    prediction: {
+      ...f.files["measurement.json"].prediction,
+      sha256: hash(JSON.stringify(prediction)),
+    },
+    serviceObserved: {
+      ...sid,
+      artifacts: sa,
+      prediction: {
+        ...f.files["measurement.json"].serviceObserved.prediction,
+        sha256: hash(JSON.stringify(sp)),
+      },
+    },
+  });
+  for (const c of pin.cases)
+    fs.writeFileSync(
+      path.join(f.dir, c.caseId + ".png"),
+      Buffer.from("89504e470d0a1a0a0000000049454e44ae426082", "hex"),
+    );
+  f.save();
+  return f;
+}
+test("holdout replay scores healthy/recovery separately from injected failure", () => {
+  const f = holdoutFixture();
+  try {
+    const r = api.validateCohort(f.dir, "holdout-todo");
+    assert.equal(r.modes.static.metrics.baseline.trueNegative, 2);
+    assert.equal(r.modes.static.metrics.faultInjected.falseNegative, 1);
+  } finally {
+    f.remove();
+  }
+});
+test("holdout replay rejects success booleans contradicted by durable evidence", () => {
+  const f = holdoutFixture();
+  try {
+    f.files["labels.json"].rows[0].holdoutEvidence.diskTitles = [];
+    f.files["service-labels.json"].rows = f.files["labels.json"].rows;
+    f.save();
+    assert.throws(
+      () => api.validateCohort(f.dir, "holdout-todo"),
+      /holdout evidence/i,
+    );
+  } finally {
+    f.remove();
+  }
+});
+test("holdout replay rejects actions collected before either prediction seal", () => {
+  const f = holdoutFixture();
+  try {
+    f.files["labels.json"].rows[0].actionStartedAt = "2026-10-19T00:59:00Z";
+    f.save();
+    assert.throws(
+      () => api.validateCohort(f.dir, "holdout-todo"),
+      /time|order/i,
+    );
+  } finally {
+    f.remove();
+  }
+});
+test("historical manifest cannot substitute a new holdout suite under an old relative path", () => {
+  const f = indexedFixture();
+  try {
+    const entries = f.entries.filter((e) =>
+      ["sidebar-ui-previous", "sidebar-ui", "market"].includes(e.suite),
+    );
+    entries.find((e) => e.suite === "market").suite = "holdout-todo";
+    write(f.root, "regression-index.json", {
+      schemaVersion: 1,
+      repeats: 2,
+      manifestSha256:
+        "895a4d41d981049a2788c2d6fe979d07406f85e94280fab16252b81c255a1718",
+      entries,
+    });
+    const report = api.replayRegression(f.root);
+    const substituted = report.entries.find(
+      (e) => e.relative === "run-1/market",
+    );
+    assert.equal(substituted.status, "failed");
+    assert.match(substituted.error, /suite|identity/i);
+  } finally {
+    f.remove();
+  }
+});
+test("holdout actions cannot precede the independent service-only prediction seal", () => {
+  const f = holdoutFixture();
+  try {
+    f.files["labels.json"].rows[0].actionStartedAt = "2026-10-19T01:00:45Z";
+    f.save();
+    assert.throws(
+      () => api.validateCohort(f.dir, "holdout-todo"),
+      /service prediction seal/i,
     );
   } finally {
     f.remove();

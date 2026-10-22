@@ -21,7 +21,7 @@
 //   ${DSC_OUT_DIR}/loader-introspect.json (explicit owned private directory only)
 // plus structured console lines prefixed with [dsh-plugin-compat-check].
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync, realpathSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, realpathSync, promises as fsPromises } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import path, { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -788,33 +788,66 @@ function resolveNodeModules(requestedProfile = null) {
 }
 
 /**
- * 把结论交给面板 —— **F2 的缓存策略集中在这里**。
- *
- * ## 策略：stale-while-revalidate（先给旧的，后台再刷）
- *
- * 为什么不是"到点就重算"：一次体检 0.5–1.5 秒（desktop profile 21 个插件）。
- * 让面板的请求**等**这 1.5 秒，用户看到的是转圈；而结论晚 1.5 秒到完全无所谓 ——
- * 这份数据说的是"你装的插件跟这版 DSH 兼不兼容"，它不是秒级指标。
- * 所以：有缓存就先给，同时在后台刷新的。**响应速度与正确性都不牺牲**。
- *
- * 三种情况：
- *   - `?refresh=1` 或没有缓存 → **同步算**（用户明确要新的，或者根本没有旧的）
- *   - 缓存在有效期内         → 直接给
- *   - 缓存过期               → 先给旧的，并触发一次后台刷新（同一时刻只跑一个）
- *
- * 并发安全：`state.computing` 保存"正在跑的那一个 promise"，所以十个面板请求
- * 同时到达也只会算一次 —— 否则它们会各自算一遍，白烧 1.5 秒 × 10。
+ * Ordinary report cache is scoped to the canonical profile and DSH context.
+ * Verified loader/manager events trigger coalesced identity checks; a bounded
+ * worker watchdog also notices same-path source and judgment-input changes.
+ * Valid reports remain visible while a replacement generation runs. Cold and
+ * forced requests await a current generation; failed refreshes retain the
+ * previous report with explicit stale/error metadata. The TTL still refreshes
+ * time-dependent observations even when the sampled identity is unchanged.
  */
 async function serveReport(state, ctx, force, options = {}) {
   if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
-  if(!state.reportService){
-    const kernel=resolveKernelDir();
-    if(!kernel)return failureEnvelope('找不到判定内核');
-    const {ReportService}=await import(pathToFileURL(join(kernel,'lib','report-service.mjs')).href);
-    if(!state.reportService)state.reportService=new ReportService(async options=>{const out=await computeReport(state,ctx,options);return out.ok?assertEnvelope(out):failureEnvelope(out.error,out);},{ttlMs:state.cacheTtlMs});
+  const kernel=resolveKernelDir(),nm=resolveNodeModules(options.profile || null);
+  if(!kernel)return failureEnvelope('找不到判定内核');
+  if(!nm.dir){
+    // Keep computeReport's version identity on target-resolution failures.
+    const out=await computeReport(state,ctx,options);
+    return failureEnvelope(out.error,out);
   }
-  const key=options.profile?`profile:${options.profile}`:'current';
-  const out=await state.reportService.get(key,options,force);if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');return out?.ok?assertEnvelope(out):failureEnvelope(out?.error,out||{});
+  const canonical=await fsPromises.realpath(nm.dir),version=resolveDshVersion();
+  const context={nodeModules:canonical,observationProfile:path.resolve(nm.dir),kernel:await fsPromises.realpath(kernel),dshVersion:version,probe:process.env.DSC_PROBE_REPORT || null};
+  if(!state.reportService){
+    const [{ReportService},{reportIdentity},{catalogPathFor},{sampleServices}]=await Promise.all([
+      import(pathToFileURL(join(kernel,'lib','report-service.mjs')).href),
+      import(pathToFileURL(join(kernel,'lib','report-identity.mjs')).href),
+      import(pathToFileURL(join(kernel,'lib','catalog.mjs')).href),
+      import(pathToFileURL(join(kernel,'lib','observation.mjs')).href),
+    ]);
+    if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
+    if(!state.reportService)state.reportService=new ReportService(async (options,guard)=>{
+      const out=await computeReport(state,ctx,{...options,_cacheGuard:guard});
+      return out.ok?assertEnvelope(out):failureEnvelope(out.error,out);
+    },{ttlMs:state.cacheTtlMs,watchMs:state.cacheWatchMs,identity:async options=>{
+      const scope=options._cacheContext,current=resolveNodeModules(),currentVersion=resolveDshVersion();
+      const active=current.dir?await fsPromises.realpath(current.dir):null;
+      const requestedTarget=await fsPromises.realpath(options._nodeModules.dir);
+      const identity=await reportIdentity({nodeModules:scope.nodeModules,context:{...scope,currentVersion,active,requestedTarget,probe:process.env.DSC_PROBE_REPORT || null},files:[join(scope.kernel,'rules','severity.json'),catalogPathFor(scope.kernel,currentVersion),process.env.DSC_PROBE_REPORT,join(path.dirname(options._nodeModules.dir),'compatibility.json')]});
+      const sameHost=active===scope.nodeModules;
+      const itemListing=sameHost?await (async()=>{try{const listing=await ctx.get?.('pluginManager',false)?.list?.();return (Array.isArray(listing)?listing:listing?.items||listing?.plugins||[]).map(i=>({id:i.id??i.entryId??i.slotId,packageName:i.packageName??i.package??i.name}));}catch{return [];}})():[];
+      const loader=sameHost?loaderObservations(ctx,identity.manifests,itemListing):null;
+      const observation=sameHost?sampleServices(ctx,[...identity.services,...(options._cacheInputs.services || [])],{profileId:scope.nodeModules,dshVersion:currentVersion}):null;
+      // Sampling timestamps are evidence, not a changing service identity.
+      return JSON.stringify([identity.digest,loader,observation?.root || null]);
+    }});
+  }
+  if(!state.cacheEventDisposers && typeof ctx.on==='function'){
+    state.cacheEventDisposers=[];
+    // Verified in the bundled loader and plugin-manager emit sites; the
+    // bounded watchdog also catches source edits and hosts without ctx.on.
+    for(const event of ['plugin-manager/changed','plugin-manager/install-state','loader/entry-init','loader/partial-dispose','loader/volatile-update']){
+      try{const off=ctx.on(event,()=>state.reportService?.notify());if(typeof off==='function')state.cacheEventDisposers.push(off);}catch{}
+    }
+  }
+  const key=JSON.stringify(context);
+  state.reportInputs ||= new Map();
+  if(!state.reportInputs.has(key))state.reportInputs.set(key,{services:[]});
+  const inputs=state.reportInputs.get(key);
+  // Canonicalize cache identity only: preserve the requested path for the
+  // existing exact probe/profile binding and the report's business target.
+  const out=await state.reportService.get(key,{...options,_cacheContext:context,_cacheInputs:inputs,_nodeModules:{dir:nm.dir,why:nm.why}},force);
+  if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
+  return out?.ok?assertEnvelope(out):failureEnvelope(out?.error,out||{});
 }
 
 /**
@@ -862,6 +895,7 @@ async function computeReport(state, ctx, options = {}) {
   };
   try {
     const kernel = resolveKernelDir();
+    if(options._cacheContext && (options._cacheContext.dshVersion!==resolveDshVersion() || options._cacheContext.probe!==(process.env.DSC_PROBE_REPORT || null) || options._cacheContext.nodeModules!==(await fsPromises.realpath(options._nodeModules.dir)) || options._cacheContext.kernel!==(kernel && await fsPromises.realpath(kernel))))return failureEnvelope('报告上下文已变化，等待目标报告刷新');
     out.kernelDir = kernel;
     // 版本要**尽早**拿到：连"找不到内核"这条错误路径上，用户也需要知道
     // 是哪一版工具报的这个错。`version.mjs` 只在有内核时才读得到 ——
@@ -879,7 +913,7 @@ async function computeReport(state, ctx, options = {}) {
         + '插件形态下它们是同仓库的相邻目录；发布形态请设 DSC_KERNEL。';
       return out;
     }
-    const nm = resolveNodeModules(options.profile || null);
+    const nm = options._nodeModules || resolveNodeModules(options.profile || null);
     out.nodeModules = nm.dir;
     out.nodeModulesWhy = nm.why;
     if (!nm.dir) {
@@ -912,9 +946,10 @@ async function computeReport(state, ctx, options = {}) {
 
     const extracted = await extractInWorker(nm.dir, { catalog });
     if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
+    if(options._cacheInputs)options._cacheInputs.services=extracted.report.services;
     const { sampleServices } = await import(pathToFileURL(join(kernel,'lib','observation.mjs')).href);
     const currentTarget=resolveNodeModules();
-    const sameHost=currentTarget.dir&&path.resolve(currentTarget.dir)===path.resolve(nm.dir);
+    const sameHost=currentTarget.dir&&(await fsPromises.realpath(currentTarget.dir))===(await fsPromises.realpath(nm.dir));
     if(!hostSurface && sameHost){
       hostSurface=sampleServices(ctx,extracted.report.services,{profileId:nm.dir,dshVersion:resolveDshVersion()});
       surfaceWhy='当前宿主进程内采集的服务结构；未采集或读取失败不等于缺失';
@@ -941,7 +976,7 @@ async function computeReport(state, ctx, options = {}) {
     // ── C4：基线差分 ──
     // 用**与 CLI 完全相同**的 lib/baseline.mjs。面板说"变差了"而命令行说"没变"
     // 这种分叉在结构上就不可能发生。
-    let baseline = null;
+    let baseline = null, finalizeBaseline = null;
     try {
       const { snapshotForBaseline, diffAgainstBaseline, badgeFor } =
         await import(pathToFileURL(join(kernel, 'lib', 'baseline.mjs')).href);
@@ -950,7 +985,8 @@ async function computeReport(state, ctx, options = {}) {
       const snap = snapshotForBaseline(verdict, resolveDshVersion(),identity);
       const bfile = store.baselinePath(nm.dir,verdict.observation.mode);
       if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
-      baseline=store.baselineTransaction(bfile,snap,{advance:extracted.report.scanComplete});
+      finalizeBaseline=()=>store.baselineTransaction(bfile,snap,{advance:extracted.report.scanComplete});
+      if(!options._cacheGuard)baseline=finalizeBaseline();
     } catch (error) {
       baseline = { error: errText(error), note: '基线差分没算成（不影响本次结论）' };
     }
@@ -984,6 +1020,13 @@ async function computeReport(state, ctx, options = {}) {
     const {renderIssueReport}=await import(pathToFileURL(join(kernel,'lib','issue-report.mjs')).href);
     if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
     const canonical=toJSON({error:null,extract:extracted,verdict,baseline,catalog:catalogEvidence,inputs:{nodeModules:nm.dir,hasRuntimeSurface:verdict.observation.usable,catalog:catalogPath,rules:rulesPath}});
+    if(options._cacheGuard && finalizeBaseline)options._cacheGuard.commit(()=>{
+      baseline=finalizeBaseline();
+      canonical.baseline=baseline;
+      out.baseline=baseline;
+      out.report.baseline=baseline;
+      out.issueReport=renderIssueReport(canonical);
+    });
     out.issueReport=renderIssueReport(canonical);
     out.baseline = canonical.baseline;
     out.dshVersion = canonical.dshVersion;
@@ -1118,17 +1161,21 @@ async function serveUpgradePreview(state, options = {}) {
     const engine = await import(pathToFileURL(join(kernel, 'lib/upgrade-preview.mjs')).href);
     if (state.disposed) return failure('Plugin generation disposed / 已卸载');
     const nm = resolveNodeModules(options.profile || null);
-    const key = JSON.stringify([nm.dir && realpathSync(nm.dir), currentVersion, targetVersion]);
+    const canonical = nm.dir && await fsPromises.realpath(nm.dir);
+    if (state.disposed) return failure('Plugin generation disposed / 已卸载');
+    const key = JSON.stringify([canonical, currentVersion, targetVersion]);
     if (state.upgradeFlight && state.upgradeFlight.key !== key)
       return failure('另一目标的升级预检正在运行，请稍后重试');
     let flight = state.upgradeFlight;
     if (!flight) {
-      flight = {key, promise: engine.runUpgradePreview({nm:nm.dir, currentVersion, targetVersion})};
+      const controller = new AbortController();
+      flight = {key, controller, promise: engine.runUpgradePreview({nm:nm.dir, currentVersion, targetVersion},{signal:controller.signal})};
       state.upgradeFlight = flight;
     }
     try {
       const result = await flight.promise;
-      return state.disposed ? failure('Plugin generation disposed / 已卸载') : result;
+      if (!state.disposed) return result;
+      return failure([result.ok ? null : result.error, 'Plugin generation disposed / 已卸载'].filter(Boolean).join('；'));
     } finally {
       if (state.upgradeFlight === flight) state.upgradeFlight = null;
     }
@@ -1429,9 +1476,10 @@ export function apply(ctx) {
       // 更重要的是**启动时就先跑一次**（见下面的预热），这样用户点开面板是即时的。
       lastReport: null,
       lastReportAt: 0,
-      computing: null,
       /** 缓存有效期。到点不清空，而是**先返回旧的、后台再刷新** —— 见下面的 stale-while-revalidate。 */
       cacheTtlMs: toPositiveInt(process.env.DSC_CACHE_TTL_MS, 5 * 60 * 1000),
+      // A caller may shorten the observation interval; never enlarge its default.
+      cacheWatchMs: Math.min(5000,toPositiveInt(process.env.DSC_CACHE_WATCH_MS,5000)),
       /** 启动后多久自动跑第一次（默认落在最后一次 loader 扫描之后） */
       autoRunDelayMs: toPositiveInt(process.env.DSC_AUTORUN_MS, (SCAN_DELAYS[SCAN_DELAYS.length - 1] || 4000) + 2000),
       autoRunTimer: null,
@@ -1489,7 +1537,9 @@ export function apply(ctx) {
                     'content-type': 'application/json; charset=utf-8',
                     'cache-control': 'no-store',
                   });
-                  res.end(JSON.stringify(out));
+                  res.end(JSON.stringify(url.searchParams.get('metadata')==='1' && out.ok ? {
+                    kind:'plugin-compat-check/report-metadata',ok:true,computedAt:out.computedAt,nodeModules:out.nodeModules,dshVersion:out.report.dshVersion,cache:out.cache || null,
+                  } : out));
                 } catch (error) {
                   // 连处理器里都不抛：把错误变成一条可读的 JSON，而不是 500 空响应。
                   res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
@@ -1647,6 +1697,10 @@ export function apply(ctx) {
       globalThis.__DSH_COMPAT_CHECK__ = handle;
       if(typeof ctx.effect==='function')ctx.effect(()=>()=>{
         state.disposed=true;
+        state.reportService?.dispose();
+        for(const off of state.cacheEventDisposers || []){try{off();}catch{}}
+        state.cacheEventDisposers=[];
+        state.upgradeFlight?.controller?.abort();
         for(const timer of state.scanTimers)clearTimeout(timer);
         state.scanTimers.clear();
         clearTimeout(state.fallbackTimer);

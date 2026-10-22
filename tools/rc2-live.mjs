@@ -1095,6 +1095,60 @@ try {
         "Panel retained stale future rejection after a valid refresh",
       );
       result.futureProbe.validRefreshRecovered = true;
+      // Mutate an inactive synthetic installed package, then rely only on the
+      // ordinary background cache/watch and client polling, never force refresh.
+      await selectFilter("按结论筛选", "broken");
+      await evalx(`${field("搜索插件")}.focus();${field("搜索插件")}.select()`);
+      await chrome.send("Input.insertText", { text: "healthy" });
+      await poll(
+        async () => (await rowNames()).length === 0,
+        "Initial healthy package unexpectedly matches broken filter",
+      );
+      const cacheFixtureMeta = path.join(
+        profile,
+        "node_modules/@label/healthy/package.json",
+      );
+      const originalCacheFixture = fs.readFileSync(cacheFixtureMeta);
+      try {
+        const modified = JSON.parse(originalCacheFixture);
+        modified.dsh = { ...modified.dsh, client: { platform: "web" } };
+        modified.exports = {
+          ...modified.exports,
+          "./client": "./lib/cache-missing.js",
+        };
+        writeJSON(cacheFixtureMeta, modified);
+        await poll(
+          async () =>
+            JSON.stringify(await rowNames()) ===
+            JSON.stringify(["@label/healthy"]),
+          "Installed manifest change did not invalidate ordinary cache and update the panel",
+          40000,
+        );
+        requireTrue(
+          await evalx(
+            `${field("搜索插件")}.value==='healthy'&&${field("按结论筛选")}.value==='broken'`,
+          ),
+          "Background report update reset the user's filters",
+        );
+        result.cacheInvalidation = {
+          installedArtifact: true,
+          realBrowser: true,
+          manifestChangeObserved: true,
+          backgroundReportUpdated: true,
+          filtersPreserved: true,
+        };
+      } finally {
+        fs.writeFileSync(cacheFixtureMeta, originalCacheFixture);
+      }
+      await poll(
+        async () => (await rowNames()).length === 0,
+        "Restored installed package did not clear the stale broken row",
+        40000,
+      );
+      result.cacheInvalidation.validChangeRecovered = true;
+      await evalx(
+        `[...document.querySelectorAll('button')].find(b=>b.innerText==='清除筛选').click()`,
+      );
       if (process.env.DSC_RC2_SCREENSHOT) {
         const s = await chrome.send("Page.captureScreenshot", {
           format: "png",
