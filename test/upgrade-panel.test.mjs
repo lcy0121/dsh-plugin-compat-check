@@ -227,3 +227,87 @@ test("a response for a different target is rejected instead of labeling it as th
     fs.rmSync(f.root, { recursive: true, force: true });
   }
 });
+
+test("metadata-only polling preserves a pending and completed upgrade preview, while a changed report invalidates it", async () => {
+  const data = ordinary(),
+    f = fixture(),
+    timers = [];
+  let release,
+    report = data,
+    metadataPolls = 0;
+  try {
+    const { runUpgradePreview } = await import("../lib/upgrade-preview.mjs");
+    const preview = await runUpgradePreview({
+      nm: f.nm,
+      currentVersion: "0.2.0-rc.2",
+      targetVersion: "0.2.1-rc.2",
+    });
+    const h = await panelHarness(data, {
+      timers: {
+        setTimeout: (fn, ms) => {
+          assert.equal(ms, 2000);
+          timers.push(fn);
+          return fn;
+        },
+        clearTimeout: () => {},
+      },
+      fetcher: async (url) => {
+        if (String(url).includes("/upgrade-preview"))
+          return await new Promise((resolve) => {
+            release = resolve;
+          });
+        if (String(url).includes("metadata=1")) {
+          metadataPolls++;
+          return {
+            ok: true,
+            json: async () => ({
+              kind: "plugin-compat-check/report-metadata",
+              ok: true,
+              computedAt: report.computedAt,
+              nodeModules: report.nodeModules,
+              dshVersion: report.report.dshVersion,
+              cache: { hit: true },
+            }),
+          };
+        }
+        return { ok: true, json: async () => structuredClone(report) };
+      },
+    });
+    enter(h, "0.2.1-rc.2");
+    const pending = click(h);
+    h.render();
+    assert.match(h.text(), /正在捕获/);
+    // Drive the real background metadata handler while the server comparison is pending.
+    await timers.shift()();
+    await h.settle();
+    assert.equal(metadataPolls, 1);
+    assert.match(
+      h.text(),
+      /正在捕获/,
+      "Unchanged report metadata must not cancel the in-flight preview",
+    );
+    release({ ok: true, json: async () => structuredClone(preview) });
+    await pending;
+    await h.settle();
+    assert.ok(h.find((n) => n.props["data-upgrade-result"] === "compared"));
+    await timers.shift()();
+    await h.settle();
+    assert.ok(
+      h.find((n) => n.props["data-upgrade-result"] === "compared"),
+      "Cache metadata must not erase a completed comparison",
+    );
+    // A genuinely recomputed ordinary report still cancels stale comparison evidence.
+    report = { ...data, computedAt: "2026-10-23T00:00:00.000Z" };
+    await timers.shift()();
+    await h.settle();
+    assert.equal(
+      h.find((n) => n.props["data-upgrade-result"] === "compared"),
+      undefined,
+    );
+    assert.equal(h.field("目标 DSH 版本").props.value, "0.2.1-rc.2");
+    assert.equal(h.rows().length, 4);
+    h.dispose();
+  } finally {
+    fs.rmSync(f.root, { recursive: true, force: true });
+  }
+});

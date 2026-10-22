@@ -3720,11 +3720,13 @@ return { createDependencyPanel:createDependencyPanel, createFindingReviewPanel:c
     function UpgradePreview(p) {
       var target = React.useState(""), state = React.useState({ phase: "idle" }), generation = React.useRef(0);
       var currentVersion = p.data.report.dshVersion;
+      // Unchanged-report metadata polls replace only the envelope.
+      // Only a new report or scan target invalidates static comparison evidence.
       React.useEffect(function () {
         generation.current++;
         state[1]({ phase: "idle" });
         return function () { generation.current++; };
-      }, [currentVersion, p.data]);
+      }, [currentVersion, p.data.nodeModules, p.data.report]);
       async function run() {
         var requested = String(target[0]).trim(), ticket = ++generation.current;
         state[1]({ phase: "loading" });

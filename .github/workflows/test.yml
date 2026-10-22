@@ -102,7 +102,7 @@ jobs:
           node -e 'const os=require("node:os"); console.log(JSON.stringify({node:process.versions.node,kernel:os.release(),arch:process.arch,parallelism:os.availableParallelism()}))' >> linux-chrome-environment.txt
           cat linux-chrome-environment.txt
           startup_status=0
-          node --test --test-reporter=tap test/debugger.test.mjs > linux-chrome-startup.tap 2>&1 || startup_status=$?
+          node --test --test-reporter=tap test/debugger.test.mjs test/functional-health.test.mjs > linux-chrome-startup.tap 2>&1 || startup_status=$?
           cat linux-chrome-startup.tap
           exit "$startup_status"
       - name: Real private Linux DSH, loader labels and artifact responsiveness

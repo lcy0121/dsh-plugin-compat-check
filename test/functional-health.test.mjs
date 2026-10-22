@@ -408,6 +408,67 @@ test("SIGTERM cancels owned startup and records cancellation after cleanup", asy
   }
 });
 
+test("real DOM acceptance launches Chrome only in the explicit browser suite and requires its executable", () => {
+  const root = fs.mkdtempSync(
+    path.join(os.tmpdir(), "dsc-health-browser-gate-"),
+  );
+  const executable = path.join(root, "chrome");
+  const marker = path.join(root, "launched");
+  fs.writeFileSync(
+    executable,
+    `#!${process.execPath}\nrequire('node:fs').writeFileSync(${JSON.stringify(marker)}, 'launched');process.exit(1);`,
+    { mode: 0o700 },
+  );
+  try {
+    for (const mode of ["default", "explicit", "missing"]) {
+      fs.rmSync(marker, { force: true });
+      const env = { ...process.env };
+      delete env.NODE_TEST_CONTEXT;
+      const out = spawnSync(
+        process.execPath,
+        [
+          "--test",
+          "--test-reporter=tap",
+          "--test-name-pattern=^(real empty Chrome profile|owned Chrome authenticates)",
+          new URL(import.meta.url).pathname,
+        ],
+        {
+          encoding: "utf8",
+          timeout: 20000,
+          env: {
+            ...env,
+            DSC_SLOW: mode === "default" ? "" : "1",
+            DSC_CHROME:
+              mode === "missing" ? path.join(root, "missing") : executable,
+          },
+        },
+      );
+      assert.equal(
+        out.status,
+        mode === "default" ? 0 : 1,
+        out.stdout + out.stderr,
+      );
+      assert.equal(
+        fs.existsSync(marker),
+        mode === "explicit",
+        out.stdout + out.stderr,
+      );
+      if (mode === "default") assert.match(out.stdout, /# skipped 2/);
+      else {
+        assert.match(out.stdout, /not ok/);
+        assert.match(out.stdout, /# skipped 0/);
+      }
+      if (mode === "missing")
+        assert.match(
+          out.stdout,
+          /Real Chrome is required for functional health DOM acceptance/,
+        );
+    }
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 const chromePath =
   process.env.DSC_CHROME ||
   [
@@ -417,8 +478,12 @@ const chromePath =
   ].find((p) => fs.existsSync(p));
 test(
   "real empty Chrome profile observes missing DOM control and recovery, and blocks redirect navigation",
-  { skip: !chromePath },
+  { skip: process.env.DSC_SLOW !== "1" },
   async () => {
+    assert.ok(
+      chromePath && fs.existsSync(chromePath),
+      "Real Chrome is required for functional health DOM acceptance",
+    );
     assert.equal(typeof runtime.createFunctionalDom, "function");
     let present = true,
       outsideHits = 0;
@@ -836,8 +901,12 @@ test("actual DSH version early failure emits valid importable error evidence", (
 
 test(
   "owned Chrome authenticates with same-origin bearer headers while query-login and external redirects remain unused",
-  { skip: !chromePath },
+  { skip: process.env.DSC_SLOW !== "1" },
   async () => {
+    assert.ok(
+      chromePath && fs.existsSync(chromePath),
+      "Real Chrome is required for functional health DOM acceptance",
+    );
     let queryLogins = 0,
       externalHits = 0;
     const external = http.createServer((req, res) => {

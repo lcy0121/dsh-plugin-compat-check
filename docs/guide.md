@@ -72,7 +72,7 @@ $DSH_HOME/dsh-plugin-compat-check/reviews.<canonical-node_modules路径SHA256>.j
 node --test test/functional-health.test.mjs test/dependency-graph.test.mjs test/finding-review.test.mjs test/p2-workflows-host.test.mjs test/p2-workflows-panel.test.mjs
 ```
 
-定向回归使用受控输入；可用Chrome的病例会启动自有空浏览器。真实DSH/制品执行仍按上述显式授权入口进行，不以测试fixture代替真实业务证据。当前计数、真实集成与平台范围以[current-state.json](current-state.json)为准；历史记录不认证新源码或新制品。[Plan](Plan.md)维护合同、复现索引及后续工作。
+定向回归使用受控输入；真实Chrome病例仅在`DSC_SLOW=1`的显式浏览器套件启动自有空浏览器；该模式缺少浏览器会失败，不静默略过。真实DSH/制品执行仍按上述显式授权入口进行，不以测试fixture代替真实业务证据。当前计数、真实集成与平台范围以[current-state.json](current-state.json)为准；历史记录不认证新源码或新制品。[Plan](Plan.md)维护合同、复现索引及后续工作。
 
 ## 日常检查与源码交付
 
