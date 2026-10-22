@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.4",
-  "recordedAt": "2026-10-22T06:06:54.617Z",
-  "testFiles": 56,
-  "tests": 789,
+  "recordedAt": "2026-10-22T17:28:47.094Z",
+  "testFiles": 61,
+  "tests": 852,
   "repositoryFiles": {
-    "total": 294,
+    "total": 315,
     "fixtures": 90,
-    "other": 204
+    "other": 225
   },
   "verification": {
     "platform": "darwin",
@@ -9502,6 +9502,223 @@
         "baseCommit": "b4d9f095a1f4a5edb65b38d0ec7e1553238aaf36"
       },
       "scope": "Source branch and private local candidate only. Filesystem metadata is a bounded change detector, not adversarial timestamp authenticity. TTL remains a fallback for time-dependent evidence. No Git push, remote CI for this branch, npm publication, accounts, model calls or Windows certification."
+    },
+    "functionalWorkflows20261023": {
+      "recordedAt": "2026-10-22T17:29:23.578068+00:00",
+      "sourceOnly": true,
+      "publishedVersionUnchanged": "0.1.4",
+      "nodeVersion": "26.12.1",
+      "dshVersion": "0.2.1-rc.2",
+      "platform": "darwin-arm64",
+      "defaultSuite": {
+        "tests": 852,
+        "pass": 849,
+        "fail": 0,
+        "skipped": 3,
+        "testFiles": 61
+      },
+      "health": {
+        "fixtureArtifact": {
+          "name": "dsh-plugin-health-acceptance-fixture",
+          "version": "1.0.0",
+          "sha256": "8cc1f5b4aaf233c53996c9cb74b438eef3c46aa1d868fb4d80162f1aed19ca1b"
+        },
+        "manifestSha256": "265ae3d2575d6ed6ff7f4d2e527c5d31cb3e6d3ad420dcd1f466ba42e7934e34",
+        "phases": [
+          {
+            "phase": "normal",
+            "status": "tested-pass",
+            "checks": [
+              {
+                "id": "api-ready",
+                "type": "http",
+                "status": "pass",
+                "evidence": {
+                  "httpStatus": 200,
+                  "responseBytes": 14,
+                  "jsonMatched": true,
+                  "elapsedMs": 9
+                }
+              },
+              {
+                "id": "control-present",
+                "type": "dom",
+                "status": "pass",
+                "evidence": {
+                  "count": 1,
+                  "elapsedMs": 35
+                }
+              }
+            ],
+            "startedAt": "2026-10-22T11:15:09.037Z",
+            "completedAt": "2026-10-22T11:15:11.136Z",
+            "cleanup": {
+              "stopped": true,
+              "removed": true
+            },
+            "resultSha256": "3ae2cd323070bfded95fb80cd689c6215650fb73167a1c958a87735a64d1707b"
+          },
+          {
+            "phase": "http503",
+            "status": "tested-failed",
+            "checks": [
+              {
+                "id": "api-ready",
+                "type": "http",
+                "status": "failed",
+                "evidence": {
+                  "httpStatus": 503,
+                  "responseBytes": 14,
+                  "jsonMatched": true,
+                  "elapsedMs": 6
+                }
+              },
+              {
+                "id": "control-present",
+                "type": "dom",
+                "status": "pass",
+                "evidence": {
+                  "count": 1,
+                  "elapsedMs": 34
+                }
+              }
+            ],
+            "startedAt": "2026-10-22T17:25:59.476Z",
+            "completedAt": "2026-10-22T17:26:02.578Z",
+            "cleanup": {
+              "stopped": true,
+              "removed": true
+            },
+            "resultSha256": "6259c565939b7d0ff957ed45d4c9f4579aa54818b7896b137a0b9bb8ac42e2b8"
+          },
+          {
+            "phase": "missing-control",
+            "status": "tested-failed",
+            "checks": [
+              {
+                "id": "api-ready",
+                "type": "http",
+                "status": "pass",
+                "evidence": {
+                  "httpStatus": 200,
+                  "responseBytes": 14,
+                  "jsonMatched": true,
+                  "elapsedMs": 6
+                }
+              },
+              {
+                "id": "control-present",
+                "type": "dom",
+                "status": "failed",
+                "evidence": {
+                  "count": 0,
+                  "elapsedMs": 29
+                }
+              }
+            ],
+            "startedAt": "2026-10-22T17:26:02.643Z",
+            "completedAt": "2026-10-22T17:26:04.908Z",
+            "cleanup": {
+              "stopped": true,
+              "removed": true
+            },
+            "resultSha256": "7ce4d4f8e383afd5ca96d2b6e90e7898dbff4652a3811cf2e2479e28acbd9299"
+          },
+          {
+            "phase": "recovered",
+            "status": "tested-pass",
+            "checks": [
+              {
+                "id": "api-ready",
+                "type": "http",
+                "status": "pass",
+                "evidence": {
+                  "httpStatus": 200,
+                  "responseBytes": 14,
+                  "jsonMatched": true,
+                  "elapsedMs": 9
+                }
+              },
+              {
+                "id": "control-present",
+                "type": "dom",
+                "status": "pass",
+                "evidence": {
+                  "count": 1,
+                  "elapsedMs": 24
+                }
+              }
+            ],
+            "startedAt": "2026-10-22T17:26:04.974Z",
+            "completedAt": "2026-10-22T17:26:07.334Z",
+            "cleanup": {
+              "stopped": true,
+              "removed": true
+            },
+            "resultSha256": "64f13ec5d107d8f3d38a7231638d3c3090a7a7fc0e805292a2e26accfef24d35"
+          }
+        ],
+        "scope": "Same owned synthetic artifact and declaration; controlled external fixture phase chooses 200/503 and present/missing DOM. Fresh private DSH/Chrome per run, no accounts/models. Selected checks only; private profile is not an OS sandbox."
+      },
+      "installedCandidate": {
+        "artifactSha256": "843e050260158bc9c94b72f0393126fbc6a0b67fced8658b2fcff6d7d5945b9e",
+        "p2Workflows": {
+          "realBrowser": true,
+          "dependencyView": true,
+          "manualReviewPersisted": true,
+          "ordinaryReportUnchanged": true,
+          "baselineUnchanged": true,
+          "healthImportAvailable": true,
+          "importedHealth": {
+            "artifact": {
+              "name": "dsh-plugin-health-acceptance-fixture",
+              "version": "1.0.0",
+              "sha256": "8cc1f5b4aaf233c53996c9cb74b438eef3c46aa1d868fb4d80162f1aed19ca1b"
+            },
+            "manifestSha256": "265ae3d2575d6ed6ff7f4d2e527c5d31cb3e6d3ad420dcd1f466ba42e7934e34",
+            "historicalOnly": true,
+            "ordinaryReportUnchanged": true
+          }
+        },
+        "ui": {
+          "available": true,
+          "navigation": "More > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        }
+      },
+      "review": {
+        "resolved": [
+          "Same-version source changes reused review identity",
+          "Unsupported tar semantics could bypass package identity",
+          "Early runtime errors were rejected by result contract",
+          "Manifest FIFO or oversized read was not bounded",
+          "CLI accepted probe loader rows were omitted from graph",
+          "Graph requirement contradictions were accepted",
+          "DSH query-token login redirect blocked all real DOM checks",
+          "Sidecar corruption/recovery did not invalidate metadata polling",
+          "Large CLI JSON was truncated by immediate exit"
+        ],
+        "remainingKnownBlockers": 0,
+        "limitations": [
+          "Crashed review writers retain lock and temp files; confirmed orphan cleanup is manual and must preserve JSON",
+          "Health evidence imports remain historical; equal versions do not identify installed bytes",
+          "Dependency graph shows bounded potential relationships, not measured failure propagation",
+          "Windows not live-tested"
+        ]
+      },
+      "checks": {
+        "format": true,
+        "notices": true,
+        "dependencySecurity": "workspace-lock and plugin-runtime clean",
+        "documentContracts": true
+      },
+      "scope": "Local source and exact candidate acceptance; no GitHub push, npm publish, new DSH catalogue certification or general business-health certification."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Separate dated liveIntegration evidence is preserved, not rerun by this script."

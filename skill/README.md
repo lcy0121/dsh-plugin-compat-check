@@ -23,7 +23,7 @@ provider name与skill name均为dsh-plugin-compat-check，source=bundled、rank=
 
 公开0.1.4正文明确必需inject、未知服务与方法缺失的边界。当前源码进一步分开解释确定性与影响依据，并按“无已验证调用”说明vacuous；并从同一模块呈现每条发现的核实步骤，保留未知依赖“待确认”。这些源码修订尚未发布，不追改历史npm包。
 
-当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为 **10961 字符**，由docs测试核对。不要把历史探针的contentLength手工替换成新正文长度：那会篡改历史实测。
+当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为 **12251 字符**，由docs测试核对。不要把历史探针的contentLength手工替换成新正文长度：那会篡改历史实测。
 
 升级前对比优先调用已注册的`compat_check({"upgradeTo":"0.2.1-rc.2"})`，当前版本由运行宿主解析；无工具时使用仓库CLI：`node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json`，当前版本必须显式提供。仅使用已认证精确版本目录，对同一安装制品静态比较，不读取探针、profile豁免或基线，不执行插件或升级宿主。此预测不等于业务验收通过，完整输入/输出边界见正文及CLI帮助。
 

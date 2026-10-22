@@ -192,7 +192,7 @@ describe('宿主半边：结构完整性（功能全灭的回归）', () => {
     apply(ctx)
 
     assert.equal(registered.tools.length, 1, 'compat_check 工具没注册（apply 可能是空壳）')
-    assert.equal(registered.routes.length, 2, 'C2 路由没注册')
+    assert.deepEqual(registered.routes.map(r=>r.path).sort(), ['/plugin-compat-check/report','/plugin-compat-check/reviews','/plugin-compat-check/upgrade-preview'], '报告、处置及预检路由必须注册')
     assert.equal(registered.providers.length, 1, 'E1 skill provider 没注册')
     assert.ok(logs.some((l) => /F2 启动自检|runAutoCheck/.test(l)) || SRC.includes('state.runAutoCheck = ()'),
       'F2 启动自检的挂载点不见了')
@@ -296,7 +296,7 @@ test('host subscriptions return route/tool/provider disposers to their owner',()
   const off=cb({get:()=>undefined,webServer:{register},tools:{register},skills:{registerProvider:register}});
   if(typeof off==='function')cleanup.push(off);return()=>{};
  }};
- apply(ctx);assert.equal(active,4);for(const off of cleanup)off();assert.equal(active,0,'no owned registrations may survive unload');
+ apply(ctx);assert.equal(active,5);for(const off of cleanup)off();assert.equal(active,0,'no owned registrations may survive unload');
 });
 
 

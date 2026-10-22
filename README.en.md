@@ -40,6 +40,8 @@ Unreleased source rejects ambiguous duplicate plugin identities without advancin
 
 Unreleased source also rejects bound probes more than five minutes ahead of the checking clock and explains why their evidence was ignored. CI adds a separate dependency security gate; developers can run `npm run security:dependencies`. See [dependency security](docs/dependency-security.md).
 
+Unreleased source adds dependency relationships, manual finding reviews and offline health-record import. Dependency paths show potential impact across required, optional and scoped relationships on each side; declared providers remain candidates, and cycles do not establish failures. Pending/reviewed/false-positive/fixed records stay separate; source, version or rule changes require review again, without hiding findings or changing baselines/exemptions. Health execution is repository-only and requires explicit `--run`; the default reviews declarations. The panel only imports historical evidence, which does not certify the current installed artifact. See the [workflows, limits and orphan-lock recovery](docs/feature-workflows.md).
+
 ### Repository CLI
 
 ```bash

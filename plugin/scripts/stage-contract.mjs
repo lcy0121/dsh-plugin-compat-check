@@ -10,6 +10,51 @@ let next = fs.readFileSync(client, "utf8");
 const outputs = [];
 for (const item of [
   {
+    source: "dependency-graph",
+    host: "dependency-graph",
+    label: "DEPENDENCY GRAPH",
+    global: "DependencyGraphContract",
+    exports:
+      "buildDependencyGraph:buildDependencyGraph, validateDependencyGraph:validateDependencyGraph",
+  },
+  {
+    source: "dependency-panel",
+    host: "dependency-panel",
+    label: "DEPENDENCY PANEL",
+    global: "DependencyPanelFactory",
+    exports: "createDependencyPanel:createDependencyPanel",
+  },
+  {
+    source: "finding-review",
+    host: "finding-review",
+    label: "FINDING REVIEW",
+    global: "FindingReviewContract",
+    exports:
+      "REVIEW_STATUS_LABELS:REVIEW_STATUS_LABELS, REVIEW_LIMITS:REVIEW_LIMITS, validateReviewInput:validateReviewInput, validateReviewEnvelope:validateReviewEnvelope",
+  },
+  {
+    source: "finding-review-panel",
+    host: "finding-review-panel",
+    label: "FINDING REVIEW PANEL",
+    global: "FindingReviewPanelFactory",
+    exports: "createFindingReviewPanel:createFindingReviewPanel",
+  },
+  {
+    source: "functional-health-contract",
+    host: "functional-health-contract",
+    label: "FUNCTIONAL HEALTH CONTRACT",
+    global: "FunctionalHealthContract",
+    exports:
+      "validateFunctionalHealthResult:validateFunctionalHealthResult, canonicalFunctionalManifest:canonicalFunctionalManifest",
+  },
+  {
+    source: "functional-health-panel",
+    host: "functional-health-panel",
+    label: "FUNCTIONAL HEALTH PANEL",
+    global: "FunctionalHealthPanelFactory",
+    exports: "createFunctionalHealthPanel:createFunctionalHealthPanel",
+  },
+  {
     source: "contracts",
     host: "report-contract",
     label: "REPORT CONTRACT",

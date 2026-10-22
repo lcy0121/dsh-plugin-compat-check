@@ -393,10 +393,10 @@ test("staging detects stale host/browser artifacts and updates both from the can
   try {
     for (const sub of ["lib", "plugin/lib", "plugin/scripts"])
       fs.mkdirSync(path.join(dir, sub), { recursive: true });
+    // The real stager now consumes several pure contracts and views. Copy the
+    // source directory so this fixture exercises its complete production input.
+    fs.cpSync("lib", path.join(dir, "lib"), { recursive: true });
     for (const name of [
-      "lib/contracts.mjs",
-      "lib/finding-guidance.mjs",
-      "lib/upgrade-contract.mjs",
       "plugin/lib/upgrade-contract.js",
       "plugin/lib/client.js",
       "plugin/lib/report-contract.js",

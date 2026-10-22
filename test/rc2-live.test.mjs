@@ -77,6 +77,15 @@ describe(
         ])
           assert.equal(value.upgradePreview.ui[key], true, key);
         assert.equal(value.upgradePreview.routeRemovedAndRestored, true);
+        for (const key of [
+          "realBrowser",
+          "dependencyView",
+          "manualReviewPersisted",
+          "ordinaryReportUnchanged",
+          "baselineUnchanged",
+          "healthImportAvailable",
+        ])
+          assert.equal(value.p2Workflows[key], true, key);
       }
     });
   },

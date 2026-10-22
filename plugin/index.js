@@ -26,6 +26,7 @@ import { homedir, tmpdir } from 'node:os';
 import path, { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire as __createRequire } from 'node:module';
+import { createHash } from 'node:crypto';
 
 import {loaderObservations,privateDiagnostic} from './lib/host-resources.js';
 import {assertEnvelope,failureEnvelope,catalogLines} from './lib/report-contract.js';
@@ -847,7 +848,8 @@ async function serveReport(state, ctx, force, options = {}) {
   // existing exact probe/profile binding and the report's business target.
   const out=await state.reportService.get(key,{...options,_cacheContext:context,_cacheInputs:inputs,_nodeModules:{dir:nm.dir,why:nm.why}},force);
   if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
-  return out?.ok?assertEnvelope(out):failureEnvelope(out?.error,out||{});
+  if (!out?.ok) return failureEnvelope(out?.error,out||{});
+  return attachFindingReviews(state,assertEnvelope(out),key,kernel);
 }
 
 /**
@@ -927,7 +929,9 @@ async function computeReport(state, ctx, options = {}) {
     const {loadCatalog}=await import(pathToFileURL(join(kernel,'lib','catalog.mjs')).href);
     const {file:catalogPath,catalog,evidence:catalogEvidence} = loadCatalog(kernel,resolveDshVersion());
     const rulesPath = join(kernel, 'rules', 'severity.json');
-    const rules = JSON.parse(readFileSync(rulesPath, 'utf8'));
+    const rulesBytes = readFileSync(rulesPath);
+    const rules = JSON.parse(rulesBytes);
+    out.analysisIdentity={rulesSha256:createHash('sha256').update(rulesBytes).digest('hex'),catalogSha256:catalogEvidence.sha256};
 
     // 运行时面：宿主半边**自己就在进程里**，所以它能拿到比探针更准的东西。
     // 第一版先读探针报告（如果外层给了路径），没有就退回目录 —— 并如实标注。
@@ -1019,7 +1023,7 @@ async function computeReport(state, ctx, options = {}) {
     const {toJSON}=await import(pathToFileURL(join(kernel,'lib','report.mjs')).href);
     const {renderIssueReport}=await import(pathToFileURL(join(kernel,'lib','issue-report.mjs')).href);
     if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
-    const canonical=toJSON({error:null,extract:extracted,verdict,baseline,catalog:catalogEvidence,inputs:{nodeModules:nm.dir,hasRuntimeSurface:verdict.observation.usable,catalog:catalogPath,rules:rulesPath}});
+    const canonical=toJSON({error:null,extract:extracted,verdict,entryStates:loaderState.rows,baseline,catalog:catalogEvidence,inputs:{nodeModules:nm.dir,hasRuntimeSurface:verdict.observation.usable,catalog:catalogPath,rules:rulesPath}});
     if(options._cacheGuard && finalizeBaseline)options._cacheGuard.commit(()=>{
       baseline=finalizeBaseline();
       canonical.baseline=baseline;
@@ -1219,11 +1223,82 @@ function registerUpgradeRoute(ctx, state) {
   });
 }
 
+/** Human review is an independently loaded sidecar, never a verdict override. */
+async function attachFindingReviews(state,out,key,kernel) {
+  try {
+    const store=await import(pathToFileURL(join(kernel,'lib','finding-review-store.mjs')).href);
+    const inputIdentity=state.reportService.identityForReport(key,out.report);
+    if(typeof inputIdentity!=='string')throw new Error('当前报告缺少可绑定的分析输入身份');
+    const sourceIdentity=createHash('sha256').update(inputIdentity).digest('hex');
+    const context=await store.reviewContext(out.report,{nodeModules:out.nodeModules,sourceIdentity,rulesIdentity:out.analysisIdentity?.rulesSha256,catalogIdentity:out.report.catalog?.sha256,toolVersion:out.toolVersion});
+    const reviews=await store.readReviews(context);
+    if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载',out);
+    state.reviewTargets ||= new Map();
+    state.reviewTargets.set(context.contextToken,{context,key,report:out.report,nodeModules:out.nodeModules,store});
+    while(state.reviewTargets.size>32)state.reviewTargets.delete(state.reviewTargets.keys().next().value);
+    return {...out,reviews};
+  } catch(error) {
+    return {...out,reviews:{schemaVersion:1,contextToken:null,revision:null,items:[],history:[],error:'人工处置记录不可用：'+errText(error)}};
+  }
+}
+
+function readReviewRequest(req,signal) {
+  return new Promise((resolve,reject)=>{
+    const maxBytes=16384,chunks=[];let bytes=0,settled=false;
+    const finish=(error,value)=>{
+      if(settled)return;settled=true;clearTimeout(timer);
+      req.removeListener('data',data);req.removeListener('end',end);req.removeListener('error',errorEvent);req.removeListener('aborted',abort);
+      signal.removeEventListener('abort',abort);
+      if(error){req.pause?.();reject(error);}else resolve(value);
+    };
+    const invalid=(message,status)=>Object.assign(new Error(message),{status});
+    const data=chunk=>{const buffer=Buffer.from(chunk);bytes+=buffer.length;if(bytes>maxBytes)return finish(invalid('人工处置请求超过大小限制',413));chunks.push(buffer);};
+    const end=()=>{try{finish(null,JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(Buffer.concat(chunks))));}catch{finish(invalid('人工处置请求不是有效JSON',400));}};
+    const errorEvent=()=>finish(invalid('人工处置请求读取失败',400));
+    const abort=()=>finish(invalid('人工处置请求已取消或插件已卸载',409));
+    const timer=setTimeout(()=>finish(invalid('人工处置请求读取超时',408)),5000);timer.unref?.();
+    req.on('data',data);req.once('end',end);req.once('error',errorEvent);req.once('aborted',abort);signal.addEventListener('abort',abort,{once:true});
+    if(signal.aborted)abort();
+    const length=req.headers?.['content-length'];
+    if(length!==undefined&&(!/^\d+$/.test(String(length))||Number(length)>maxBytes))finish(invalid('人工处置请求超过大小限制',413));
+  });
+}
+function registerFindingReviewRoute(ctx,state) {
+  if(typeof ctx.inject!=='function')return;
+  ctx.inject(['webServer'],scope=>{
+    try{return scope.webServer.register({name:'dsh-plugin-compat-check/reviews',kind:'exact',path:'/plugin-compat-check/reviews',handler:async(req,res)=>{
+      const send=(status,body)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(body));};
+      if(!isTrustedRequest(req))return send(403,{ok:false,error:'refused: untrusted request'});
+      if(req.method!=='POST')return send(405,{ok:false,error:'人工处置仅支持POST'});
+      if(!/^application\/json(?:\s*;|$)/i.test(req.headers?.['content-type']||''))return send(415,{ok:false,error:'人工处置需要application/json'});
+      if(state.disposed)return send(409,{ok:false,error:'Plugin generation disposed / 已卸载'});
+      const controller=new AbortController();state.reviewRequests ||= new Set();state.reviewRequests.add(controller);
+      try {
+        const body=await readReviewRequest(req,controller.signal);
+        const target=state.reviewTargets?.get(body?.contextToken);
+        if(!target) return send(409,{ok:false,error:'报告已变化，请重新检查后核实此发现'});
+        const canCommit=async()=>{
+          if(state.disposed||controller.signal.aborted)return false;
+          const current=resolveNodeModules();
+          if(!current.dir||path.resolve(current.dir)!==path.resolve(target.nodeModules))return false;
+          return state.reportService.isCurrent(target.key,target.report);
+        };
+        if(!await canCommit())return send(409,{ok:false,error:'体检输入已变化，请重新检查后核实此发现'});
+        const reviews=await target.store.saveReview(target.context,body,{canCommit});
+        send(200,{ok:true,reviews});
+      } catch(error) {
+        const status=error.status||(error.code==='REVIEW_STALE'||error.code==='REVIEW_BUSY'?409:error.code==='REVIEW_STORAGE'?422:400);
+        send(status,{ok:false,error:errText(error)});
+      } finally {state.reviewRequests.delete(controller);}
+    }});}catch(error){log('Review route registration failed: '+errText(error));}
+  });
+}
+
 const TOOL_SERVICES = ['tools', 'agents'];
 
 function toolResult(compat,text){
  const s=compat.report?.summary||{};
- return {schemaVersion:1,kind:'plugin-compat-check/tool-result',ok:compat.ok,error:compat.error,toolVersion:compat.toolVersion,exitCode:compat.exitCode,report:compat.report,baseline:compat.baseline,cache:compat.cache||null,
+ return {schemaVersion:1,kind:'plugin-compat-check/tool-result',ok:compat.ok,error:compat.error,toolVersion:compat.toolVersion,exitCode:compat.exitCode,report:compat.report,baseline:compat.baseline,cache:compat.cache||null,reviews:compat.reviews||null,
  summary:compat.ok?`可用 ${s.ok||0} / 部分可用 ${s.partial||0} / 不兼容 ${s.broken||0}；覆盖有限 ${s.limited||0}；无已验证调用 ${s.vacuousOk||0}`:'无法判定',nodeModules:compat.nodeModules||'',hasRuntimeSurface:!!compat.report?.hasRuntimeSurface,text};
 }
 
@@ -1285,6 +1360,7 @@ function registerTool(ctx, state) {
               upgradePreview: {type:'object',additionalProperties:true},
               baseline: {oneOf:[{type:'object',additionalProperties:true},{type:'null'}]},
               cache: {oneOf:[{type:'object',additionalProperties:true},{type:'null'}]},
+              reviews: {oneOf:[{type:'object',additionalProperties:true},{type:'null'}]},
               summary: { type: 'string' },
               nodeModules: { type: 'string' },
               hasRuntimeSurface: { type: 'boolean' },
@@ -1538,7 +1614,7 @@ export function apply(ctx) {
                     'cache-control': 'no-store',
                   });
                   res.end(JSON.stringify(url.searchParams.get('metadata')==='1' && out.ok ? {
-                    kind:'plugin-compat-check/report-metadata',ok:true,computedAt:out.computedAt,nodeModules:out.nodeModules,dshVersion:out.report.dshVersion,cache:out.cache || null,
+                    kind:'plugin-compat-check/report-metadata',ok:true,computedAt:out.computedAt,nodeModules:out.nodeModules,dshVersion:out.report.dshVersion,cache:out.cache || null,reviewsRevision:out.reviews?.revision || null,reviewsError:out.reviews?.error || null,reviewsContextToken:out.reviews?.contextToken || null,
                   } : out));
                 } catch (error) {
                   // 连处理器里都不抛：把错误变成一条可读的 JSON，而不是 500 空响应。
@@ -1562,6 +1638,7 @@ export function apply(ctx) {
 
     // E1：注册随包的 skill。**失败只留日志，绝不抛** —— 见文件顶部硬规矩。
     try {
+      registerFindingReviewRoute(ctx, state);
       registerUpgradeRoute(ctx, state);
     registerSkill(ctx);
     } catch (error) {
@@ -1697,6 +1774,8 @@ export function apply(ctx) {
       globalThis.__DSH_COMPAT_CHECK__ = handle;
       if(typeof ctx.effect==='function')ctx.effect(()=>()=>{
         state.disposed=true;
+        for (const request of state.reviewRequests || []) request.abort();
+        state.reviewTargets?.clear();
         state.reportService?.dispose();
         for(const off of state.cacheEventDisposers || []){try{off();}catch{}}
         state.cacheEventDisposers=[];

@@ -25,6 +25,16 @@ node <repo>/bin/compat-check.mjs --nm <profile或node_modules目录> --dsh-versi
 
 JSON 使用独立的 `schemaVersion=1 / kind=plugin-compat-check/upgrade-preview`；读取 `currentReport`、`targetReport`、带插件身份的 `changes`、`summary` 与 `limitations`。它对**同一份已安装制品**做静态版本对比：不执行插件、不启动或升级宿主，不读取旁置/环境探针、profile豁免、基线或缓存，也不写状态。新增/恶化风险含致命项时退出2，其余新增/恶化风险退出1，无新增/恶化风险退出0；输入/扫描失败或未认证版本为3。保留提取不完整、coverage/vacuous和客户端未验证限制；0仍可能有未变化的旧问题。差异是目录与声明策略下的预测，不能据此认定升级后业务通过，也不能代替目标宿主的运行时与业务验收。
 
+## 依赖、人工处置与功能健康记录（未发布源码）
+
+普通报告的`dependencyGraph`只解释依赖和潜在传播：保留host/client/未知端、必需/可选/子作用域、候选提供者、loader禁用/未知状态及覆盖预算。提供声明不是实际提供证明，环或路径不是实测故障；不跨端补造提供者，不因未找到候选就说宿主缺服务，也不据此自动装包。
+
+HTTP/tool envelope的`reviews`是独立人工记录，四种状态为pending/reviewed/false-positive/fixed。已复核、误报或已修复不消除内核发现、不隐藏新风险、不改变退出码/基线，也不授予compatibility豁免。记录绑定报告发布时的源码身份、目标/观察路径/模式、插件/DSH精确版本、工具/规则/目录及finding证据；变化后的needs-review必须重新核实，不能沿用旧误报/修复。只能按用户明确处置意图保存状态与依据，不因读到发现就自动标记已处理。坏文件/超限或busy须转述，不能覆盖或清空记录；进程崩溃可能留下.lock/.reviews-*.tmp，刷新不自动回收，确认没有任何保存任务后才可清理已核实孤立的lock/tmp，保留JSON和基线。
+
+可选功能健康执行器仅在仓库`tools/functional-health.mjs`；默认review只审阅声明。普通兼容检查、健康记录导入及作者提供清单均不构成执行授权；不得自动添加执行开关。仅在用户已明确授权所选制品的安装、宿主/插件执行及HTTP/DOM测量后运行，必要时使用Chrome。声明与本地USTAR制品须校验SHA-256、包名/精确版本及DSH精确版本，预算为32项、请求/导航3秒、HTTP响应64KiB、整轮180秒；不接受作者脚本或跳过身份检查。私有profile不是OS沙箱，安装可能联网，不能借用用户账户/模型配置。
+
+面板只离线导入用户选择的历史健康JSON；摘要不是签名，版本相符也不证明当前安装制品一致。保留制品/声明身份、时间、检查范围、失败/取消及清理证据，不能把历史通过改写成当前业务通过，也不改变静态报告。完整操作及声明格式见仓库`docs/feature-workflows.md`；这些源码增量未进入公开0.1.4。
+
 ## 怎么跑
 
 CLI 只随仓库提供，npm 插件包没有 CLI bin。定位仓库检出，根依赖尚未就绪时需在授权范围内执行 `npm ci --ignore-scripts`；仓库必须同时有 `bin/compat-check.mjs`、`lib/`、`rules/`。先定位它，再跑：
@@ -116,6 +126,14 @@ report_status=$?
      证据覆盖: 有限；已验证调用 0
        覆盖限制: settings 未采样
      无证据可判（只出现名字，没有调用点）: settings
+
+依赖关系: 服务依赖 2；潜在声明环 0
+  @label/broken-service → noSuchServiceAnywhere [host/必需]；候选提供者：未定位（不等于宿主缺失）
+  @label/real-service → settings [host/必需]；候选提供者：未定位（不等于宿主缺失）
+  提供声明仅为候选；同端路径及环只表示潜在影响，不证明实际挂起或失败；client 包 inject 不当作 host 服务。
+  关系覆盖限制: 静态提取覆盖不完整或未声明，关系可能缺失
+  关系覆盖限制: 部分插件未提供可映射 loader 条目，状态为未知
+  关系覆盖限制: 部分源码存在提取诊断，关系可能缺失
 
 说明: 确定（certain）表示当前证据足以支持该条发现，可来自明确静态事实或合格运行时观测；疑似（suspected）表示当前证据不足以确定该条发现。
       impactBasis=measured/inferred 分别表示影响有对应实测依据/影响由证据推断；确定发现不等于影响已实测。官方目录不是运行时面，未观测不等于缺失。

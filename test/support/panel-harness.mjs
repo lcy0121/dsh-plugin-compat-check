@@ -1,6 +1,7 @@
 /** Run the shipped client factory and its event handlers with persistent hooks. */
 import fs from "node:fs";
 import vm from "node:vm";
+import { webcrypto } from "node:crypto";
 export async function panelHarness(
   data,
   { clipboard, subject, fetcher, timers } = {},
@@ -61,6 +62,8 @@ export async function panelHarness(
     {
       window: win,
       navigator: { clipboard },
+      crypto: webcrypto,
+      TextEncoder,
       console,
       fetch:
         fetcher ||

@@ -239,6 +239,10 @@ export function run(options = {}) {
     });
 
     result.inputs.hasRuntimeSurface=result.verdict.observation.usable;
+    // Only loader rows from an accepted observation may inform the explanatory graph.
+    result.entryStates=result.verdict.observation.usable && Array.isArray(hostSurface?.entries?.plugins)
+      ? hostSurface.entries.plugins.filter(row=>row && typeof row==='object' && !Array.isArray(row))
+      : [];
     // ── 基线差分 ──
     // `--no-baseline` 关掉它（CI 里跑一次性检查时不该读写本机状态）。
     result.baseline = null;
@@ -288,13 +292,13 @@ async function main() {
     if(upgradeMode)outputUpgrade(upgradeFailure(error.message));
     else if(process.argv.includes('--issue-report'))process.stdout.write(renderIssueReport(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');
     else if(process.argv.includes('--json'))process.stdout.write(JSON.stringify(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');else process.stderr.write(`${error.message}\n\n${USAGE}`);
-    process.exit(3);
+    process.exitCode=3; return;
   }
   // `--version` 先于一切：它不该需要 --nm，也不该碰任何状态。
   // 结论的可追溯性靠它 —— 用户拿着一条结论来问，第一句就得知道是哪一版给的。
   if (opts.version) {
     process.stdout.write(`${versionLine()}\n`);
-    process.exit(0);
+    process.exitCode=0; return;
   }
   if (upgradeMode && !opts.help) {
     try {
@@ -305,16 +309,16 @@ async function main() {
       if (!opts.dshVersion) throw new Error('--upgrade-to 需要 --dsh-version 当前精确版本');
       const result = await runUpgradePreview({ nm: opts.nm, currentVersion: opts.dshVersion, targetVersion: opts.upgradeTo });
       outputUpgrade(result);
-      process.exit(result.exitCode);
+      process.exitCode=result.exitCode; return;
     } catch (error) {
       outputUpgrade(upgradeFailure(error.message));
-      process.exit(3);
+      process.exitCode=3; return;
     }
   }
   if (opts.help || !opts.nm) {
     if(!opts.help && opts.issueReport)process.stdout.write(renderIssueReport(createFailure('需要 --nm',{toolVersion:TOOL_VERSION}),opts)+'\n');
     else if(!opts.help && opts.json)process.stdout.write(JSON.stringify(createFailure('需要 --nm',{toolVersion:TOOL_VERSION}))+'\n');else process.stdout.write(USAGE);
-    process.exit(opts.help ? 0 : 3);
+    process.exitCode=opts.help ? 0 : 3; return;
   }
 
   // **整个主体都在 try 里**，这是被实测逼出来的。
@@ -337,14 +341,14 @@ async function main() {
       process.stdout.write(`${render(result, opts)}\n`);
     }
 
-    if (result.error) process.exit(3);
+    if (result.error) { process.exitCode=3; return; }
     // 退出码：不兼容给 2，部分可用给 1，可用给 0 —— 让 CI 能直接用。
     const s = result.verdict.summary;
-    process.exit(exitCodeForSummary(s));
+    process.exitCode=exitCodeForSummary(s); return;
   } catch (error) {
     if(opts.issueReport)process.stdout.write(renderIssueReport(createFailure(error.message,{toolVersion:TOOL_VERSION}),opts)+'\n');
     else if(opts.json)process.stdout.write(JSON.stringify(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');else process.stderr.write(`✗ 体检工具自身出错（不是插件的问题）：${error && error.stack ? error.stack : error}\n`);
-    process.exit(3);
+    process.exitCode=3; return;
   }
 }
 

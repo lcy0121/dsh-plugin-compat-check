@@ -1149,6 +1149,113 @@ try {
       await evalx(
         `[...document.querySelectorAll('button')].find(b=>b.innerText==='清除筛选').click()`,
       );
+      // Exercise the installed candidate's additive workflows through real Chrome.
+      const ordinaryUrl = new URL("/plugin-compat-check/report", host.url);
+      const ordinary = async () =>
+        (
+          await fetch(ordinaryUrl, {
+            headers,
+            signal: AbortSignal.timeout(15000),
+          })
+        ).json();
+      const beforeReview = await ordinary();
+      requireTrue(
+        beforeReview.report.dependencyGraph?.kind ===
+          "plugin-compat-check/dependency-graph",
+        "Installed report lacks dependency graph",
+      );
+      requireTrue(
+        await evalx(
+          `Boolean(document.querySelector('[aria-label="依赖关系与潜在影响"] table'))`,
+        ),
+        "Dependency view did not render in actual Chrome",
+      );
+      await poll(
+        () =>
+          evalx(
+            `Boolean(document.querySelector('[data-review-finding] textarea'))`,
+          ),
+        "Manual review editor unavailable",
+      );
+      const baselineBeforeReview = stateFiles().filter(
+        ([name]) => !name.startsWith("reviews."),
+      );
+      const reviewNote =
+        "Owned real Chrome review; ordinary findings remain unchanged.";
+      await evalx(
+        `(()=>{const row=document.querySelector('[data-review-finding]'); const select=row.querySelector('select'); select.value='reviewed'; select.dispatchEvent(new Event('change',{bubbles:true}));row.querySelector('textarea').focus();})()`,
+      );
+      await chrome.send("Input.insertText", { text: reviewNote });
+      await evalx(
+        `document.querySelector('[data-review-finding] button').click()`,
+      );
+      await poll(
+        async () =>
+          (await ordinary()).reviews?.items.some(
+            (x) => x.status === "reviewed" && x.note === reviewNote,
+          ),
+        "Manual review did not persist from actual UI",
+      );
+      const afterReview = await ordinary();
+      requireTrue(
+        JSON.stringify(beforeReview.report) ===
+          JSON.stringify(afterReview.report),
+        "Manual action changed ordinary report",
+      );
+      requireTrue(
+        JSON.stringify(baselineBeforeReview) ===
+          JSON.stringify(
+            stateFiles().filter(([name]) => !name.startsWith("reviews.")),
+          ),
+        "Manual action changed baseline state",
+      );
+      result.p2Workflows = {
+        realBrowser: true,
+        dependencyView: true,
+        manualReviewPersisted: true,
+        ordinaryReportUnchanged: true,
+        baselineUnchanged: true,
+        healthImportAvailable: await evalx(
+          `Boolean(document.querySelector('[aria-label="导入功能健康检查记录"]'))`,
+        ),
+      };
+      if (process.env.DSC_HEALTH_IMPORT_RECORD) {
+        const importPath = path.resolve(process.env.DSC_HEALTH_IMPORT_RECORD),
+          record = JSON.parse(fs.readFileSync(importPath, "utf8"));
+        const doc = await chrome.send("DOM.getDocument", { depth: -1 });
+        const input = await chrome.send("DOM.querySelector", {
+          nodeId: doc.root.nodeId,
+          selector: '[aria-label="导入功能健康检查记录"]',
+        });
+        await chrome.send("DOM.setFileInputFiles", {
+          nodeId: input.nodeId,
+          files: [importPath],
+        });
+        await poll(
+          () =>
+            evalx(
+              `Boolean(document.querySelector('[data-functional-health="tested-pass"]'))`,
+            ),
+          "Real health evidence did not import",
+        );
+        requireTrue(
+          await evalx(
+            `document.body.innerText.includes(${JSON.stringify(record.identity.artifact.sha256)}) && document.body.innerText.includes('不用于认证当前目标')`,
+          ),
+          "Imported evidence lost historical/artifact boundary",
+        );
+        requireTrue(
+          JSON.stringify(afterReview.report) ===
+            JSON.stringify((await ordinary()).report),
+          "Health import changed compatibility report",
+        );
+        result.p2Workflows.importedHealth = {
+          artifact: record.identity.artifact,
+          manifestSha256: record.identity.manifestSha256,
+          historicalOnly: true,
+          ordinaryReportUnchanged: true,
+        };
+      }
       if (process.env.DSC_RC2_SCREENSHOT) {
         const s = await chrome.send("Page.captureScreenshot", {
           format: "png",

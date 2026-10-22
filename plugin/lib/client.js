@@ -1172,7 +1172,2083 @@ return { assertUpgradePreview: assertUpgradePreview, SUPPORTED_PREVIEW_VERSIONS:
     })();
     // END GENERATED UPGRADE CONTRACT
 
+    // BEGIN GENERATED DEPENDENCY GRAPH
+    var DependencyGraphContract = (function () {
+/** Browser-safe explanatory graph. Declarations never establish activation or failure. */
+const GRAPH_KIND = "plugin-compat-check/dependency-graph";
+const GRAPH_LIMITS = Object.freeze({
+  nodes: 1000,
+  edges: 4000,
+  traversal: 20000,
+  items: 20000,
+});
+const graphRecord = (value) =>
+  value !== null && typeof value === "object" && !Array.isArray(value);
+const graphText = (value) => typeof value === "string" && value.length > 0;
+const graphArray = (value) => (Array.isArray(value) ? value : []);
+const graphSides = (value) => {
+  const sides = graphArray(value).filter(
+    (side) => side === "host" || side === "client",
+  );
+  return sides.length ? [...new Set(sides)] : ["unknown"];
+};
+const graphId = (...parts) => JSON.stringify(parts);
+const graphSource = (value) => ({
+  file: typeof value?.file === "string" ? value.file : null,
+  line: Number.isSafeInteger(value?.line) ? value.line : null,
+  start: Number.isSafeInteger(value?.start) ? value.start : null,
+  end: Number.isSafeInteger(value?.end) ? value.end : null,
+});
+const graphRequirement = (kind) =>
+  kind === "required-inject"
+    ? "required"
+    : kind === "scoped-inject"
+      ? "subcontext"
+      : ["optional-read", "read"].includes(kind)
+        ? "optional"
+        : "unknown";
+
+function buildDependencyGraph({
+  extraction,
+  verdict,
+  entries,
+  limits = {},
+} = {}) {
+  const report = extraction?.report || extraction || {};
+  const budget = Object.fromEntries(
+    Object.entries(GRAPH_LIMITS).map(([key, max]) => [
+      key,
+      Number.isSafeInteger(limits[key]) && limits[key] >= 0
+        ? Math.min(limits[key], max)
+        : max,
+    ]),
+  );
+  const nodes = [],
+    edges = [],
+    impacts = [],
+    cycles = [],
+    reasons = new Set();
+  const nodeMap = new Map(),
+    edgeKeys = new Set(),
+    plugins = new Map();
+  let truncated = false,
+    items = 0,
+    steps = 0,
+    pathItems = 0;
+  const limit = (reason) => {
+    truncated = true;
+    reasons.add(reason);
+  };
+  const consume = () => {
+    if (items >= budget.items) {
+      limit("输入条目达到预算，关系及来源未完整读取");
+      return false;
+    }
+    items++;
+    return true;
+  };
+  const addNode = (node) => {
+    if (nodeMap.has(node.id)) return nodeMap.get(node.id);
+    if (nodes.length >= budget.nodes) {
+      limit("节点达到预算，关系图已截断");
+      return null;
+    }
+    nodes.push(node);
+    nodeMap.set(node.id, node);
+    return node;
+  };
+  const addEdge = (edge) => {
+    if (!nodeMap.has(edge.from) || !nodeMap.has(edge.to)) return;
+    const key = JSON.stringify(edge);
+    if (edgeKeys.has(key)) return;
+    if (edges.length >= budget.edges) {
+      limit("关系达到预算，关系图已截断");
+      return;
+    }
+    edgeKeys.add(key);
+    edges.push({ id: `edge:${edges.length}`, ...edge });
+  };
+  const service = (name, side) =>
+    addNode({
+      id: graphId("service", side, name),
+      kind: "service",
+      name,
+      side,
+      state: "unknown",
+    });
+  const entryMap = new Map();
+  const rows = Array.isArray(entries)
+    ? entries
+    : graphArray(verdict?.observation?.entries?.plugins);
+  for (const row of rows) {
+    if (!consume()) break;
+    if (!graphRecord(row) || !graphText(row.packageName) || row.group) continue;
+    if (!entryMap.has(row.packageName)) entryMap.set(row.packageName, []);
+    entryMap.get(row.packageName).push({
+      id: typeof row.id === "string" ? row.id : null,
+      state: typeof row.state === "string" ? row.state : "unknown",
+      disabled: row.disabled === true,
+    });
+  }
+  if (report.scanComplete !== true)
+    reasons.add("静态提取覆盖不完整或未声明，关系可能缺失");
+  for (const [name, p] of Object.entries(report.perPlugin || {})) {
+    if (!consume()) break;
+    if (!graphRecord(p)) continue;
+    const entryRows = entryMap.get(name) || [];
+    const enabled = entryRows.filter((row) => !row.disabled);
+    const states = [...new Set(enabled.map((row) => row.state))];
+    const loaderState =
+      entryRows.length && !enabled.length
+        ? "disabled"
+        : states.length === 1
+          ? states[0]
+          : states.length > 1
+            ? "mixed"
+            : "unknown";
+    if (loaderState === "unknown")
+      reasons.add("部分插件未提供可映射 loader 条目，状态为未知");
+    const node = addNode({
+      id: graphId("plugin", name),
+      kind: "plugin",
+      name,
+      entries: entryRows,
+      loaderState,
+      subContexts: [],
+    });
+    if (!node) break;
+    plugins.set(name, { node, plugin: p });
+    if (graphArray(p.diagnostics).length)
+      reasons.add("部分源码存在提取诊断，关系可能缺失");
+    for (const context of graphArray(p.subContexts)) {
+      if (!consume()) break;
+      if (!graphRecord(context)) continue;
+      const names = [];
+      for (const name of graphArray(context.names)) {
+        if (!consume()) break;
+        if (graphText(name)) names.push(name);
+      }
+      node.subContexts.push({
+        file: typeof context.file === "string" ? context.file : null,
+        names,
+      });
+    }
+  }
+  for (const { node, plugin: p } of plugins.values()) {
+    const declaredRelations = new Set();
+    for (const dependency of graphArray(p.dependencies)) {
+      if (!consume()) break;
+      if (!graphText(dependency?.service)) continue;
+      const sides = graphSides(dependency.sides);
+      if (sides.includes("unknown"))
+        reasons.add("部分依赖端归属未知，不用于传播推导");
+      if (graphRequirement(dependency.kind) === "unknown")
+        reasons.add("部分依赖必需性未证实，保留未知标记");
+      for (const side of sides) {
+        declaredRelations.add(graphId(dependency.service, side));
+        const target = service(dependency.service, side);
+        if (target)
+          addEdge({
+            kind: "dependency",
+            from: node.id,
+            to: target.id,
+            service: dependency.service,
+            side,
+            requirement: graphRequirement(dependency.kind),
+            declarationKind:
+              typeof dependency.kind === "string" ? dependency.kind : "unknown",
+            source: graphSource(dependency),
+            potential: true,
+          });
+      }
+    }
+    for (const site of graphArray(p.callSites)) {
+      if (!consume()) break;
+      if (!graphText(site?.service)) continue;
+      for (const side of graphSides(site.sides)) {
+        const key = graphId(site.service, side);
+        if (declaredRelations.has(key)) continue;
+        declaredRelations.add(key);
+        reasons.add("部分服务只见调用点，依赖必需性未知");
+        const target = service(site.service, side);
+        if (target)
+          addEdge({
+            kind: "dependency",
+            from: node.id,
+            to: target.id,
+            service: site.service,
+            side,
+            requirement: "unknown",
+            declarationKind: "call",
+            source: graphSource(site),
+            potential: true,
+          });
+      }
+    }
+    const provided = new Set();
+    for (const site of graphArray(p.provideSites)) {
+      if (!consume()) break;
+      if (!graphText(site?.service)) continue;
+      provided.add(site.service);
+      for (const side of graphSides(site.sides)) {
+        if (side === "unknown")
+          reasons.add("部分提供声明缺少端归属，只列候选，不用于传播推导");
+        const target = service(site.service, side);
+        if (target)
+          addEdge({
+            kind: "candidate-provider",
+            from: node.id,
+            to: target.id,
+            service: site.service,
+            side,
+            source: graphSource(site),
+            sideMatch: side === "unknown" ? "unverified" : "source",
+            potential: true,
+          });
+      }
+    }
+    for (const name of graphArray(p.providedServices)) {
+      if (!consume()) break;
+      if (!graphText(name) || provided.has(name)) continue;
+      reasons.add("部分提供声明缺少端归属，只列候选，不用于传播推导");
+      const target = service(name, "unknown");
+      if (target)
+        addEdge({
+          kind: "candidate-provider",
+          from: node.id,
+          to: target.id,
+          service: name,
+          side: "unknown",
+          source: graphSource(null),
+          sideMatch: "unverified",
+          potential: true,
+        });
+    }
+    if (
+      p.clientInject !== undefined &&
+      p.clientInject !== null &&
+      !Array.isArray(p.clientInject)
+    )
+      reasons.add("客户端包 inject 声明格式未识别，未猜测服务关系");
+    for (const name of graphArray(p.clientInject)) {
+      if (!consume()) break;
+      if (!graphText(name)) {
+        reasons.add("客户端包 inject 含未识别条目");
+        continue;
+      }
+      const target = addNode({
+        id: graphId("client-package", name),
+        kind: "client-package",
+        name,
+        side: "client",
+      });
+      if (target)
+        addEdge({
+          kind: "client-package-inject",
+          from: node.id,
+          to: target.id,
+          side: "client",
+          potential: true,
+        });
+    }
+  }
+  const provisions = new Map(),
+    consumers = new Map(),
+    cycleKeys = new Set();
+  for (const edge of edges) {
+    if (edge.side === "unknown") continue;
+    const map =
+      edge.kind === "candidate-provider"
+        ? provisions
+        : edge.kind === "dependency"
+          ? consumers
+          : null;
+    const key = edge.kind === "candidate-provider" ? edge.from : edge.to;
+    if (map) {
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(edge);
+    }
+  }
+  const step = () => {
+    if (steps >= budget.traversal) {
+      limit("传播遍历达到预算，潜在影响及环未完整枚举");
+      return false;
+    }
+    steps++;
+    return true;
+  };
+  for (const { node } of plugins.values()) {
+    const affected = [],
+      queue = [
+        {
+          plugin: node.id,
+          side: null,
+          path: [],
+          requirements: [],
+          plugins: [node.id],
+        },
+      ],
+      seen = new Set();
+    for (let head = 0; head < queue.length; head++) {
+      if (!step()) break;
+      const current = queue[head];
+      for (const provision of provisions.get(current.plugin) || []) {
+        if (!step()) break;
+        if (current.side && provision.side !== current.side) continue;
+        for (const dependency of consumers.get(provision.to) || []) {
+          if (!step()) break;
+          const path = [...current.path, provision.id, dependency.id];
+          const requirement = [...current.requirements, dependency.requirement];
+          const pluginPath = [...current.plugins, dependency.from];
+          if (pathItems + path.length > budget.traversal) {
+            limit("关系路径达到预算，潜在影响及环未完整列出");
+            continue;
+          }
+          if (dependency.from === node.id) {
+            const ring = pluginPath.slice(0, -1);
+            const key = JSON.stringify([
+              provision.side,
+              [
+                ...ring.map((_, i) =>
+                  JSON.stringify([...ring.slice(i), ...ring.slice(0, i)]),
+                ),
+              ].sort()[0],
+            ]);
+            if (!cycleKeys.has(key)) {
+              pathItems += path.length;
+              cycleKeys.add(key);
+              cycles.push({
+                plugins: pluginPath,
+                side: provision.side,
+                path,
+                potential: true,
+              });
+            }
+            continue;
+          }
+          const key = graphId(dependency.from, provision.side);
+          if (seen.has(key)) continue;
+          seen.add(key);
+          pathItems += path.length;
+          affected.push({
+            plugin: dependency.from,
+            side: provision.side,
+            path,
+            requirements: requirement,
+            potential: true,
+          });
+          queue.push({
+            plugin: dependency.from,
+            side: provision.side,
+            path,
+            requirements: requirement,
+            plugins: pluginPath,
+          });
+        }
+      }
+    }
+    impacts.push({ plugin: node.id, potential: true, affected });
+  }
+  return {
+    schemaVersion: 1,
+    kind: GRAPH_KIND,
+    nodes,
+    edges,
+    impacts,
+    cycles,
+    coverage: {
+      status: reasons.size ? "limited" : "complete",
+      truncated,
+      reasons: [...reasons],
+      limits: budget,
+    },
+    notes: [
+      "提供声明仅为候选线索；loader 条目状态不证明服务已注册。",
+      "多个候选不表示实际选择了其中之一；替代提供者、禁用条目及可选依赖均需在真实宿主复核。",
+      "受影响者及环仅表示同端声明关系的潜在影响，不表示实际挂起或失败；可选及子作用域依赖不等于根插件阻断。",
+      "host/client 独立；client 包 inject 不当作 host 服务依赖；端未知的声明不用于传播推导。",
+    ],
+  };
+}
+
+/** Reject malformed optional views before rendering without changing the core report. */
+function validateDependencyGraph(graph) {
+  if (
+    !graphRecord(graph) ||
+    graph.kind !== GRAPH_KIND ||
+    graph.schemaVersion !== 1
+  )
+    return false;
+  const coverage = graph.coverage;
+  if (
+    !graphRecord(coverage) ||
+    !["limited", "complete"].includes(coverage.status) ||
+    typeof coverage.truncated !== "boolean" ||
+    !Array.isArray(coverage.reasons) ||
+    coverage.reasons.length > 100 ||
+    !coverage.reasons.every(graphText) ||
+    !graphRecord(coverage.limits)
+  )
+    return false;
+  if (
+    (coverage.truncated && coverage.status !== "limited") ||
+    (coverage.status === "complete" && coverage.reasons.length) ||
+    (coverage.status === "limited" && !coverage.reasons.length)
+  )
+    return false;
+  for (const [key, max] of Object.entries(GRAPH_LIMITS))
+    if (
+      !Number.isSafeInteger(coverage.limits[key]) ||
+      coverage.limits[key] < 0 ||
+      coverage.limits[key] > max
+    )
+      return false;
+  if (
+    !Array.isArray(graph.nodes) ||
+    graph.nodes.length > coverage.limits.nodes ||
+    !Array.isArray(graph.edges) ||
+    graph.edges.length > coverage.limits.edges ||
+    !Array.isArray(graph.impacts) ||
+    !Array.isArray(graph.cycles) ||
+    !Array.isArray(graph.notes) ||
+    graph.notes.length > 100 ||
+    !graph.notes.every(graphText)
+  )
+    return false;
+  const nodes = new Map(),
+    edges = new Map();
+  const validSide = (side) => ["host", "client", "unknown"].includes(side);
+  const nonnegative = (value) =>
+    value === null || (Number.isSafeInteger(value) && value >= 0);
+  const source = (value) =>
+    graphRecord(value) &&
+    (value.file === null || typeof value.file === "string") &&
+    nonnegative(value.line) &&
+    nonnegative(value.start) &&
+    nonnegative(value.end) &&
+    (value.start === null || value.end === null || value.end >= value.start);
+  let nestedItems = 0,
+    pathItems = 0;
+  for (const node of graph.nodes) {
+    if (
+      !graphRecord(node) ||
+      !graphText(node.id) ||
+      nodes.has(node.id) ||
+      !graphText(node.name) ||
+      !["plugin", "service", "client-package"].includes(node.kind)
+    )
+      return false;
+    if (node.kind === "plugin") {
+      if (
+        !graphText(node.loaderState) ||
+        !Array.isArray(node.entries) ||
+        !Array.isArray(node.subContexts)
+      )
+        return false;
+      nestedItems += node.entries.length + node.subContexts.length;
+      if (nestedItems > coverage.limits.items) return false;
+      if (
+        !node.entries.every(
+          (row) =>
+            graphRecord(row) &&
+            (row.id === null || typeof row.id === "string") &&
+            graphText(row.state) &&
+            typeof row.disabled === "boolean",
+        )
+      )
+        return false;
+      for (const context of node.subContexts) {
+        if (
+          !graphRecord(context) ||
+          (context.file !== null && typeof context.file !== "string") ||
+          !Array.isArray(context.names)
+        )
+          return false;
+        nestedItems += context.names.length;
+        if (
+          nestedItems > coverage.limits.items ||
+          !context.names.every(graphText)
+        )
+          return false;
+      }
+    } else if (
+      !validSide(node.side) ||
+      (node.kind === "service" && node.state !== "unknown") ||
+      (node.kind === "client-package" && node.side !== "client")
+    )
+      return false;
+    nodes.set(node.id, node);
+  }
+  for (const edge of graph.edges) {
+    if (
+      !graphRecord(edge) ||
+      !graphText(edge.id) ||
+      edges.has(edge.id) ||
+      !nodes.has(edge.from) ||
+      !nodes.has(edge.to) ||
+      nodes.get(edge.from).kind !== "plugin" ||
+      !validSide(edge.side) ||
+      edge.potential !== true
+    )
+      return false;
+    if (edge.kind === "client-package-inject") {
+      if (
+        nodes.get(edge.to).kind !== "client-package" ||
+        edge.side !== "client"
+      )
+        return false;
+    } else if (["dependency", "candidate-provider"].includes(edge.kind)) {
+      if (
+        nodes.get(edge.to).kind !== "service" ||
+        !graphText(edge.service) ||
+        nodes.get(edge.to).name !== edge.service ||
+        nodes.get(edge.to).side !== edge.side ||
+        !source(edge.source)
+      )
+        return false;
+      if (
+        edge.kind === "dependency" &&
+        (!["required", "optional", "subcontext", "unknown"].includes(
+          edge.requirement,
+        ) ||
+          !graphText(edge.declarationKind) ||
+          edge.requirement !== graphRequirement(edge.declarationKind))
+      )
+        return false;
+      if (
+        edge.kind === "candidate-provider" &&
+        edge.sideMatch !== (edge.side === "unknown" ? "unverified" : "source")
+      )
+        return false;
+    } else return false;
+    edges.set(edge.id, edge);
+  }
+  const validPath = (path, from, to, side, requirements, pluginPath) => {
+    if (!Array.isArray(path) || path.length < 2 || path.length % 2)
+      return false;
+    pathItems += path.length;
+    if (pathItems > coverage.limits.traversal) return false;
+    if (
+      requirements &&
+      (!Array.isArray(requirements) || requirements.length * 2 !== path.length)
+    )
+      return false;
+    if (
+      pluginPath &&
+      (!Array.isArray(pluginPath) ||
+        pluginPath.length !== path.length / 2 + 1 ||
+        pluginPath[0] !== from)
+    )
+      return false;
+    let current = from;
+    for (let i = 0; i < path.length; i += 2) {
+      const provider = edges.get(path[i]),
+        consumer = edges.get(path[i + 1]);
+      if (
+        provider?.kind !== "candidate-provider" ||
+        consumer?.kind !== "dependency" ||
+        provider.side !== side ||
+        consumer.side !== side ||
+        provider.from !== current ||
+        provider.to !== consumer.to
+      )
+        return false;
+      if (requirements && requirements[i / 2] !== consumer.requirement)
+        return false;
+      current = consumer.from;
+      if (pluginPath && pluginPath[i / 2 + 1] !== current) return false;
+    }
+    return current === to;
+  };
+  if (
+    graph.impacts.length > graph.nodes.length ||
+    graph.cycles.length > coverage.limits.traversal
+  )
+    return false;
+  const roots = new Set();
+  let relationships = 0;
+  for (const impact of graph.impacts) {
+    if (
+      !graphRecord(impact) ||
+      nodes.get(impact.plugin)?.kind !== "plugin" ||
+      roots.has(impact.plugin) ||
+      impact.potential !== true ||
+      !Array.isArray(impact.affected) ||
+      impact.affected.length > coverage.limits.traversal
+    )
+      return false;
+    roots.add(impact.plugin);
+    const affected = new Set();
+    for (const row of impact.affected) {
+      if (
+        ++relationships > coverage.limits.traversal ||
+        !graphRecord(row) ||
+        nodes.get(row.plugin)?.kind !== "plugin" ||
+        row.plugin === impact.plugin ||
+        row.potential !== true ||
+        !["host", "client"].includes(row.side) ||
+        !Array.isArray(row.requirements) ||
+        !validPath(
+          row.path,
+          impact.plugin,
+          row.plugin,
+          row.side,
+          row.requirements,
+        )
+      )
+        return false;
+      const key = graphId(row.plugin, row.side);
+      if (affected.has(key)) return false;
+      affected.add(key);
+    }
+  }
+  for (const cycle of graph.cycles) {
+    if (
+      !graphRecord(cycle) ||
+      cycle.potential !== true ||
+      !["host", "client"].includes(cycle.side) ||
+      !Array.isArray(cycle.plugins) ||
+      cycle.plugins.length < 2 ||
+      cycle.plugins[0] !== cycle.plugins.at(-1) ||
+      !cycle.plugins.every((id) => nodes.get(id)?.kind === "plugin") ||
+      !validPath(
+        cycle.path,
+        cycle.plugins[0],
+        cycle.plugins[0],
+        cycle.side,
+        null,
+        cycle.plugins,
+      )
+    )
+      return false;
+  }
+  return true;
+}
+
+return { buildDependencyGraph:buildDependencyGraph, validateDependencyGraph:validateDependencyGraph };
+    })();
+    // END GENERATED DEPENDENCY GRAPH
+
+    // BEGIN GENERATED DEPENDENCY PANEL
+    var DependencyPanelFactory = (function () {
+/** Stateless React factory; staged verbatim into the shipped client. */
+function createDependencyPanel(React, GraphContract = {}) {
+  const h = React.createElement;
+  const requirement = {
+    required: "必需",
+    optional: "可选 / 软读取",
+    subcontext: "子作用域",
+    unknown: "必需性未知",
+  };
+  const table = (caption, headers, rows) =>
+    h(
+      "div",
+      { style: { overflowX: "auto", marginBottom: 16 } },
+      h(
+        "table",
+        { style: { borderCollapse: "collapse", width: "100%", fontSize: 13 } },
+        h(
+          "caption",
+          { style: { textAlign: "left", fontWeight: 600, padding: "8px 0" } },
+          caption,
+        ),
+        h(
+          "thead",
+          null,
+          h(
+            "tr",
+            null,
+            ...headers.map((label, i) =>
+              h(
+                "th",
+                {
+                  key: i,
+                  scope: "col",
+                  style: {
+                    textAlign: "left",
+                    padding: 6,
+                    borderBottom: "1px solid #777",
+                  },
+                },
+                label,
+              ),
+            ),
+          ),
+        ),
+        h(
+          "tbody",
+          null,
+          ...rows.map((row, i) =>
+            h(
+              "tr",
+              { key: i },
+              ...row.map((cell, j) =>
+                h(
+                  "td",
+                  {
+                    key: j,
+                    style: {
+                      verticalAlign: "top",
+                      padding: 6,
+                      borderBottom: "1px solid #9995",
+                      overflowWrap: "anywhere",
+                    },
+                  },
+                  cell,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  return function DependencyPanel({ graph } = {}) {
+    if (graph === undefined || graph === null)
+      return h(
+        "section",
+        { "aria-label": "依赖关系与潜在影响" },
+        h("h3", null, "依赖关系与潜在影响"),
+        h("p", null, "本报告未提供依赖关系视图；请重新体检。"),
+      );
+    let valid = false;
+    try {
+      valid =
+        typeof GraphContract.validateDependencyGraph === "function" &&
+        GraphContract.validateDependencyGraph(graph);
+    } catch {}
+    if (!valid)
+      return h(
+        "section",
+        { "aria-label": "依赖关系与潜在影响" },
+        h("h3", null, "依赖关系与潜在影响"),
+        h(
+          "p",
+          { role: "status" },
+          "依赖关系视图不可用：扩展数据格式或引用无效，请重新体检。兼容结论仍按原始证据显示。",
+        ),
+      );
+    const nodes = new Map(graph.nodes.map((node) => [node.id, node]));
+    const name = (id) => nodes.get(id)?.name || id;
+    const entries = (node) =>
+      node.entries.length
+        ? node.entries
+            .map(
+              (row) =>
+                `${row.id || "未命名条目"}: ${row.disabled ? "disabled / 已禁用" : row.state}`,
+            )
+            .join("；")
+        : "unknown / 未提供 loader 条目";
+    const candidates = new Map(),
+      consumers = new Map();
+    for (const edge of graph.edges) {
+      const map =
+        edge.kind === "candidate-provider"
+          ? candidates
+          : edge.kind === "dependency"
+            ? consumers
+            : null;
+      if (map) {
+        if (!map.has(edge.to)) map.set(edge.to, []);
+        map.get(edge.to).push(edge);
+      }
+    }
+    const candidateLabel = (edge) =>
+      `${name(edge.from)} [${edge.side}; ${entries(nodes.get(edge.from))}]${edge.side === "unknown" ? "（端未知；不参与传播推导）" : ""}`;
+    const source = (edge) =>
+      edge.source?.file
+        ? `${edge.source.file}${edge.source.line === null ? "" : ":" + edge.source.line}`
+        : "来源位置未知";
+    const relationshipRows = graph.edges
+      .filter((edge) => edge.kind === "dependency")
+      .map((edge) => {
+        const known = candidates.get(edge.to) || [];
+        const unknown =
+          candidates.get(
+            JSON.stringify(["service", "unknown", edge.service]),
+          ) || [];
+        const choices = [...known, ...(edge.side === "unknown" ? [] : unknown)];
+        return [
+          name(edge.from),
+          edge.service,
+          edge.side,
+          requirement[edge.requirement],
+          choices.length
+            ? choices.map(candidateLabel).join("；")
+            : "未找到可定位的候选提供者（不等于宿主缺失）",
+          source(edge),
+        ];
+      });
+    const providerRows = graph.edges
+      .filter((edge) => edge.kind === "candidate-provider")
+      .map((edge) => [
+        candidateLabel(edge),
+        edge.service,
+        edge.side,
+        (consumers.get(edge.to) || [])
+          .map((c) => `${name(c.from)}（${requirement[c.requirement]}）`)
+          .join("；") || "没有同端消费者证据",
+        source(edge),
+      ]);
+    const packageRows = graph.edges
+      .filter((edge) => edge.kind === "client-package-inject")
+      .map((edge) => [
+        name(edge.from),
+        name(edge.to),
+        "client 包级 inject；不作为 host 服务关系或传播依据",
+      ]);
+    const edgeMap = new Map(graph.edges.map((edge) => [edge.id, edge]));
+    const pathLabel = (origin, path) => {
+      const parts = [name(origin)];
+      for (let i = 0; i < path.length; i += 2) {
+        const provider = edgeMap.get(path[i]),
+          consumer = edgeMap.get(path[i + 1]);
+        parts.push(
+          `${provider.service} [${provider.side}]`,
+          `${name(consumer.from)}（${requirement[consumer.requirement]}）`,
+        );
+      }
+      return parts.join(" → ");
+    };
+    const impactRows = graph.impacts.flatMap((impact) =>
+      impact.affected.map((row) => [
+        name(impact.plugin),
+        name(row.plugin),
+        row.side,
+        "潜在影响；非实测故障",
+        pathLabel(impact.plugin, row.path),
+      ]),
+    );
+    const cycleRows = graph.cycles.map((cycle) => [
+      cycle.side,
+      pathLabel(cycle.plugins[0], cycle.path),
+      "潜在声明环；不据此认定挂起或失败",
+    ]);
+    return h(
+      "section",
+      { "aria-label": "依赖关系与潜在影响" },
+      h("h3", null, "依赖关系与潜在影响"),
+      ...graph.notes.map((note, i) => h("p", { key: `note:${i}` }, note)),
+      h(
+        "p",
+        null,
+        `关系覆盖：${graph.coverage.status === "complete" ? "已覆盖本次提取输入（不等于运行时完整）" : "有限"}${graph.coverage.truncated ? "；已截断，不能当作全量关系或全量受影响者" : ""}。节点 ${graph.nodes.length}，关系 ${graph.edges.length}。`,
+      ),
+      ...graph.coverage.reasons.map((reason, i) =>
+        h("p", { key: `reason:${i}`, role: "note" }, `覆盖限制：${reason}`),
+      ),
+      table(
+        "插件及 loader 条目",
+        [
+          "插件",
+          "宿主条目状态（不代表服务状态）",
+          "Context 名称线索（非子作用域证明）",
+        ],
+        graph.nodes
+          .filter((node) => node.kind === "plugin")
+          .map((node) => [
+            node.name,
+            entries(node),
+            node.subContexts
+              .filter((context) => context.names.length)
+              .map(
+                (context) =>
+                  `${context.file || "位置未知"}: ${context.names.join(", ")}`,
+              )
+              .join("；") || "未提取到命名线索",
+          ]),
+      ),
+      relationshipRows.length
+        ? table(
+            "服务依赖及候选提供者",
+            [
+              "消费者",
+              "服务",
+              "端",
+              "依赖方式",
+              "候选提供者 / loader 状态",
+              "依赖来源",
+            ],
+            relationshipRows,
+          )
+        : h("p", null, "本次未提取到服务依赖；不等于没有运行时依赖。"),
+      providerRows.length
+        ? table(
+            "提供声明（仅候选）",
+            [
+              "候选插件 / loader 状态",
+              "服务",
+              "端",
+              "同端潜在消费者",
+              "提供来源",
+            ],
+            providerRows,
+          )
+        : null,
+      packageRows.length
+        ? table("客户端包依赖", ["消费者", "客户端包", "语义"], packageRows)
+        : null,
+      impactRows.length
+        ? table(
+            "潜在受影响插件及关系路径",
+            ["候选起点", "潜在受影响者", "端", "证据边界", "路径"],
+            impactRows,
+          )
+        : h("p", null, "未枚举到可证明同端的传播路径；不等于没有潜在影响。"),
+      cycleRows.length
+        ? table("潜在声明环", ["端", "关系路径", "说明"], cycleRows)
+        : h("p", null, "本次覆盖内未枚举到声明环。"),
+      h(
+        "p",
+        null,
+        `预算：节点 ${graph.coverage.limits.nodes}；关系 ${graph.coverage.limits.edges}；传播遍历及路径 ${graph.coverage.limits.traversal}；输入条目 ${graph.coverage.limits.items}。`,
+      ),
+    );
+  };
+}
+
+return { createDependencyPanel:createDependencyPanel };
+    })();
+    // END GENERATED DEPENDENCY PANEL
+
+    // BEGIN GENERATED FINDING REVIEW
+    var FindingReviewContract = (function () {
+/** Browser-safe manual-review contract. Reviews never modify canonical findings. */
+const REVIEW_STATUS_LABELS = Object.freeze({
+  pending: "待确认",
+  reviewed: "已复核",
+  "false-positive": "误报",
+  fixed: "已修复",
+  "needs-review": "待重审",
+});
+const REVIEW_LIMITS = Object.freeze({
+  fileBytes: 1024 * 1024,
+  records: 1000,
+  note: 4000,
+  findings: 5000,
+  identityBytes: 128 * 1024,
+});
+const object = (x) => x !== null && typeof x === "object" && !Array.isArray(x);
+const hash = (x) => typeof x === "string" && /^[a-f0-9]{64}$/.test(x);
+const safe = (x) =>
+  typeof x === "string" &&
+  !/[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/u.test(
+    x,
+  );
+function fail(message) {
+  throw Object.assign(new Error(message), { code: "REVIEW_INVALID" });
+}
+function stableIdentity(value) {
+  const seen = new Set();
+  let nodes = 0;
+  function visit(x, depth = 0) {
+    if (++nodes > 50000 || depth > 30) fail("Review identity exceeds limits");
+    if (x === null || typeof x === "string" || typeof x === "boolean") return x;
+    if (typeof x === "number" && Number.isFinite(x)) return x;
+    if (typeof x !== "object" || seen.has(x)) fail("Invalid review identity");
+    seen.add(x);
+    const out = Array.isArray(x)
+      ? x.map((v) => visit(v, depth + 1))
+      : Object.fromEntries(
+          Object.keys(x)
+            .sort()
+            .filter((k) => x[k] !== undefined)
+            .map((k) => [k, visit(x[k], depth + 1)]),
+        );
+    seen.delete(x);
+    return out;
+  }
+  const result = JSON.stringify(visit(value));
+  if (result.length > REVIEW_LIMITS.identityBytes)
+    fail("Review identity exceeds limits");
+  return result;
+}
+function validateReviewInput(input) {
+  if (
+    !object(input) ||
+    Object.keys(input).sort().join(",") !== "contextToken,findingId,note,status"
+  )
+    fail("Invalid review fields");
+  if (!hash(input.contextToken) || !hash(input.findingId))
+    fail("Invalid review context or finding ID");
+  if (
+    !Object.hasOwn(REVIEW_STATUS_LABELS, input.status) ||
+    input.status === "needs-review"
+  )
+    fail("Invalid manual review status");
+  if (!safe(input.note) || input.note.length > REVIEW_LIMITS.note)
+    fail("Invalid review note");
+  if (input.status !== "pending" && !input.note.trim())
+    fail("Review note is required");
+  return {
+    contextToken: input.contextToken,
+    findingId: input.findingId,
+    status: input.status,
+    note: input.note.trim(),
+  };
+}
+function validateReviewDocument(doc) {
+  if (
+    !object(doc) ||
+    Object.keys(doc).sort().join(",") !== "records,revision,schemaVersion" ||
+    doc.schemaVersion !== 1 ||
+    !hash(doc.revision) ||
+    !Array.isArray(doc.records) ||
+    doc.records.length > REVIEW_LIMITS.records
+  )
+    fail("Invalid review storage");
+  const seen = new Set();
+  for (const record of doc.records) {
+    if (
+      !object(record) ||
+      Object.keys(record).sort().join(",") !==
+        "findingId,identity,lineage,note,pluginName,pluginVersion,status,updatedAt"
+    )
+      fail("Invalid review record");
+    validateReviewInput({
+      contextToken: doc.revision,
+      findingId: record.findingId,
+      status: record.status,
+      note: record.note,
+    });
+    if (
+      !safe(record.pluginName) ||
+      !record.pluginName ||
+      record.pluginName.length > 500 ||
+      !safe(record.pluginVersion) ||
+      !record.pluginVersion ||
+      record.pluginVersion.length > 200 ||
+      typeof record.identity !== "string" ||
+      record.identity.length > REVIEW_LIMITS.identityBytes ||
+      typeof record.lineage !== "string" ||
+      record.lineage.length > 2000 ||
+      !Number.isFinite(Date.parse(record.updatedAt)) ||
+      seen.has(record.findingId)
+    )
+      fail("Invalid review record identity");
+    const binding = JSON.parse(record.identity);
+    if (
+      !object(binding) ||
+      !object(binding.scope) ||
+      !object(binding.finding) ||
+      binding.pluginName !== record.pluginName ||
+      binding.pluginVersion !== record.pluginVersion ||
+      !safe(binding.finding.category) ||
+      !binding.finding.category ||
+      [
+        "profileId",
+        "originalPath",
+        "mode",
+        "toolVersion",
+        "dshVersion",
+        "rulesIdentity",
+        "catalogIdentity",
+        "sourceIdentity",
+      ].some((key) => !safe(binding.scope[key]) || !binding.scope[key]) ||
+      stableIdentity(binding) !== record.identity ||
+      stableIdentity([
+        record.pluginName,
+        binding.finding.category,
+        binding.finding.service ?? null,
+        binding.finding.method ?? null,
+      ]) !== record.lineage
+    )
+      fail("Invalid review binding");
+    seen.add(record.findingId);
+  }
+  return doc;
+}
+/** Validate an optional API sidecar without trusting it to be a renderable review. */
+function validateReviewEnvelope(value, report) {
+  try {
+    const keys = (x, want) =>
+      object(x) && Object.keys(x).sort().join(",") === want;
+    const text = (x, max) => safe(x) && x.length > 0 && x.length <= max;
+    const note = (x) => safe(x) && x.length <= REVIEW_LIMITS.note;
+    const manual = (x) =>
+      Object.hasOwn(REVIEW_STATUS_LABELS, x) && x !== "needs-review";
+    const record = (r, summary = false) =>
+      keys(
+        r,
+        summary
+          ? "findingId,note,noteTruncated,pluginName,pluginVersion,status,updatedAt"
+          : "findingId,note,pluginName,pluginVersion,status,updatedAt",
+      ) &&
+      hash(r.findingId) &&
+      text(r.pluginName, 500) &&
+      text(r.pluginVersion, 200) &&
+      manual(r.status) &&
+      note(r.note) &&
+      (r.status === "pending" ||
+        r.note.trim().length > 0 ||
+        (summary && r.noteTruncated)) &&
+      text(r.updatedAt, 40) &&
+      Number.isFinite(Date.parse(r.updatedAt)) &&
+      (!summary ||
+        (typeof r.noteTruncated === "boolean" && r.note.length <= 200));
+    if (
+      !keys(value, "contextToken,error,history,items,revision,schemaVersion") ||
+      value.schemaVersion !== 1 ||
+      !Array.isArray(value.items) ||
+      value.items.length > REVIEW_LIMITS.findings ||
+      !Array.isArray(value.history) ||
+      value.history.length > REVIEW_LIMITS.records ||
+      !(value.error === null || text(value.error, 4000))
+    )
+      return false;
+    if (value.error && value.contextToken === null && value.revision === null)
+      return value.items.length === 0 && value.history.length === 0;
+    if (!hash(value.contextToken) || !hash(value.revision)) return false;
+    const seenSlots = new Set(),
+      seenHistory = new Set();
+    for (const item of value.items) {
+      if (
+        !keys(
+          item,
+          "findingId,findingIndex,history,historyCount,note,pluginName,pluginVersion,record,reviewReason,status",
+        ) ||
+        !hash(item.findingId) ||
+        !text(item.pluginName, 500) ||
+        !text(item.pluginVersion, 200) ||
+        !Number.isSafeInteger(item.findingIndex) ||
+        item.findingIndex < 0 ||
+        !Object.hasOwn(REVIEW_STATUS_LABELS, item.status) ||
+        !note(item.note) ||
+        !Array.isArray(item.history) ||
+        item.history.length > 3 ||
+        !Number.isSafeInteger(item.historyCount) ||
+        item.historyCount < item.history.length ||
+        item.historyCount > REVIEW_LIMITS.records ||
+        !(item.reviewReason === null || text(item.reviewReason, 4000))
+      )
+        return false;
+      const slot = JSON.stringify([item.pluginName, item.findingIndex]);
+      if (seenSlots.has(slot)) return false;
+      seenSlots.add(slot);
+      if (report) {
+        const plugin = report.plugins?.[item.pluginName];
+        if (
+          !plugin ||
+          plugin.version !== item.pluginVersion ||
+          !Array.isArray(plugin.findings) ||
+          item.findingIndex >= plugin.findings.length
+        )
+          return false;
+      }
+      if (item.record !== null) {
+        if (
+          !record(item.record) ||
+          item.record.findingId !== item.findingId ||
+          item.record.pluginName !== item.pluginName ||
+          item.record.pluginVersion !== item.pluginVersion ||
+          item.record.status !== item.status ||
+          item.record.note !== item.note
+        )
+          return false;
+      } else if (
+        item.note !== "" ||
+        !["pending", "needs-review"].includes(item.status)
+      )
+        return false;
+      if (
+        item.status === "needs-review" &&
+        (!item.historyCount || !item.reviewReason)
+      )
+        return false;
+      if (item.historyCount > 0 && !item.reviewReason) return false;
+      const local = new Set();
+      for (const previous of item.history) {
+        if (
+          !record(previous, true) ||
+          previous.findingId === item.findingId ||
+          previous.pluginName !== item.pluginName ||
+          local.has(previous.findingId)
+        )
+          return false;
+        local.add(previous.findingId);
+      }
+    }
+    for (const previous of value.history) {
+      if (!record(previous) || seenHistory.has(previous.findingId))
+        return false;
+      seenHistory.add(previous.findingId);
+    }
+    if (report) {
+      let count = 0;
+      for (const plugin of Object.values(report.plugins || {})) {
+        if (!Array.isArray(plugin.findings)) return false;
+        count += plugin.findings.length;
+      }
+      if (count !== value.items.length) return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+/** Exact identity includes evidence; lineage only offers old records as review history. */
+function combineReviews(
+  context,
+  records,
+  { revision = "0".repeat(64), error = null } = {},
+) {
+  const byId = new Map(),
+    byLineage = new Map(),
+    currentIds = new Set(context.findings.map((f) => f.findingId));
+  const publicRecord = (r) => ({
+    findingId: r.findingId,
+    pluginName: r.pluginName,
+    pluginVersion: r.pluginVersion,
+    status: r.status,
+    note: r.note,
+    updatedAt: r.updatedAt,
+  });
+  for (const record of records) {
+    byId.set(record.findingId, record);
+    if (!byLineage.has(record.lineage)) byLineage.set(record.lineage, []);
+    byLineage.get(record.lineage).push(record);
+  }
+  const items = context.findings.map((entry) => {
+    const exact = byId.get(entry.findingId);
+    const record =
+      exact?.identity === entry.identity ? publicRecord(exact) : null;
+    const previous = byLineage.get(entry.lineage) || [];
+    const historyCount = previous.length - (exact ? 1 : 0);
+    // Keep row summaries bounded; the independent history retains each full note once.
+    const history = [];
+    for (let i = previous.length - 1; i >= 0 && history.length < 3; i--) {
+      if (previous[i].findingId === entry.findingId) continue;
+      const old = publicRecord(previous[i]);
+      history.push({
+        ...old,
+        note: old.note.slice(0, 200),
+        noteTruncated: old.note.length > 200,
+      });
+    }
+    return {
+      findingId: entry.findingId,
+      pluginName: entry.pluginName,
+      pluginVersion: entry.pluginVersion,
+      findingIndex: entry.findingIndex,
+      status: record?.status || (historyCount ? "needs-review" : "pending"),
+      note: record?.note || "",
+      record,
+      history,
+      historyCount,
+      reviewReason: historyCount
+        ? "插件源码或版本、规则、目录、工具、观察目标或发现证据已变化；旧处置仅供参考，需要重新核实。"
+        : null,
+    };
+  });
+  return {
+    schemaVersion: 1,
+    contextToken: context.contextToken,
+    revision,
+    error,
+    items,
+    history: records
+      .filter((r) => !currentIds.has(r.findingId))
+      .map(publicRecord),
+  };
+}
+
+return { REVIEW_STATUS_LABELS:REVIEW_STATUS_LABELS, REVIEW_LIMITS:REVIEW_LIMITS, validateReviewInput:validateReviewInput, validateReviewEnvelope:validateReviewEnvelope };
+    })();
+    // END GENERATED FINDING REVIEW
+
+    // BEGIN GENERATED FINDING REVIEW PANEL
+    var FindingReviewPanelFactory = (function () {
+/** Browser-safe React factory. Manual actions stay separate from kernel results. */
+function createFindingReviewPanel(React, ReviewContract) {
+  const h = React.createElement,
+    labels = ReviewContract.REVIEW_STATUS_LABELS;
+  function ReviewRow({ item, contextToken, onSave, disabled }) {
+    const [status, setStatus] = React.useState(
+      item.record?.status || "pending",
+    );
+    const [note, setNote] = React.useState(item.note || "");
+    const [busy, setBusy] = React.useState(false);
+    const [error, setError] = React.useState("");
+    const [message, setMessage] = React.useState("");
+    const current = React.useRef({ contextToken, findingId: item.findingId });
+    current.current = { contextToken, findingId: item.findingId };
+    React.useEffect(() => {
+      setStatus(item.record?.status || "pending");
+      setNote(item.note || "");
+      setError("");
+      setMessage("");
+    }, [contextToken, item.findingId, item.record?.updatedAt]);
+    const save = async () => {
+      if (busy || disabled) return;
+      const target = { contextToken, findingId: item.findingId };
+      try {
+        const input = ReviewContract.validateReviewInput({
+          ...target,
+          status,
+          note,
+        });
+        setBusy(true);
+        setError("");
+        setMessage("");
+        await onSave(input);
+        if (
+          current.current.contextToken === target.contextToken &&
+          current.current.findingId === target.findingId
+        )
+          setMessage("人工处置已保存");
+      } catch (reason) {
+        if (
+          current.current.contextToken === target.contextToken &&
+          current.current.findingId === target.findingId
+        )
+          setError(reason?.message || "保存人工处置失败");
+      } finally {
+        setBusy(false);
+      }
+    };
+    return h(
+      "article",
+      {
+        "data-review-finding": item.findingId,
+        style: {
+          border: "1px solid #d0d5dd",
+          padding: "12px",
+          marginBottom: "10px",
+          borderRadius: "6px",
+        },
+      },
+      h(
+        "strong",
+        null,
+        `${item.pluginName}@${item.pluginVersion} · 发现 ${item.findingIndex + 1} · ${labels[item.status] || item.status}`,
+      ),
+      item.reviewReason ? h("p", { role: "status" }, item.reviewReason) : null,
+      item.record
+        ? h(
+            "p",
+            null,
+            `原记录：${labels[item.record.status]} · ${item.record.updatedAt} · ${item.record.note}`,
+          )
+        : null,
+      item.history?.length
+        ? h(
+            "details",
+            null,
+            h(
+              "summary",
+              null,
+              `旧处置摘要（${item.historyCount || item.history.length}；完整依据见历史处置）`,
+            ),
+            item.history.map((record) =>
+              h(
+                "p",
+                { key: record.findingId },
+                `${record.pluginName}@${record.pluginVersion} · ${labels[record.status]} · ${record.updatedAt} · ${record.note}${record.noteTruncated ? "…" : ""}`,
+              ),
+            ),
+          )
+        : null,
+      h(
+        "label",
+        null,
+        "人工状态 ",
+        h(
+          "select",
+          {
+            "aria-label": `${item.pluginName} 发现 ${item.findingIndex + 1} 人工状态`,
+            value: status,
+            disabled: busy || disabled,
+            onChange: (e) => {
+              setStatus(e.target.value);
+              setMessage("");
+            },
+          },
+          Object.keys(labels)
+            .filter((x) => x !== "needs-review")
+            .map((value) => h("option", { key: value, value }, labels[value])),
+        ),
+      ),
+      h(
+        "label",
+        { style: { display: "block", marginTop: "8px" } },
+        "核实依据 ",
+        h("textarea", {
+          "aria-label": `${item.pluginName} 发现 ${item.findingIndex + 1} 核实依据`,
+          value: note,
+          maxLength: ReviewContract.REVIEW_LIMITS.note,
+          disabled: busy || disabled,
+          rows: 3,
+          style: { display: "block", width: "100%" },
+          onChange: (e) => {
+            setNote(e.target.value);
+            setMessage("");
+          },
+        }),
+      ),
+      h(
+        "button",
+        { type: "button", disabled: busy || disabled, onClick: save },
+        busy ? "保存中…" : "保存人工处置",
+      ),
+      error ? h("p", { role: "alert" }, error) : null,
+      message ? h("p", { role: "status" }, message) : null,
+    );
+  }
+  return function FindingReviewPanel({ report, reviews, onSave }) {
+    const [saved, setSaved] = React.useState(null);
+    const [limit, setLimit] = React.useState(20);
+    const [historyOpen, setHistoryOpen] = React.useState(false);
+    const [historyLimit, setHistoryLimit] = React.useState(20);
+    const current = React.useRef(reviews?.contextToken);
+    current.current = reviews?.contextToken;
+    React.useEffect(() => {
+      setSaved(null);
+      setLimit(20);
+      setHistoryOpen(false);
+      setHistoryLimit(20);
+    }, [reviews?.contextToken, reviews?.revision]);
+    const active =
+      saved && saved.contextToken === reviews?.contextToken ? saved : reviews;
+    if (active == null) return null;
+    if (!ReviewContract.validateReviewEnvelope(active, report))
+      return h(
+        "section",
+        { "aria-label": "发现的人工处置", style: { marginTop: "16px" } },
+        h("h3", null, "发现的人工处置"),
+        h(
+          "p",
+          { role: "alert" },
+          "人工处置数据无效，本节暂不可用；请刷新后重试。",
+        ),
+      );
+    const save = async (input) => {
+      const result = await onSave(input),
+        next = result?.reviews || result;
+      if (!ReviewContract.validateReviewEnvelope(next, report))
+        throw new Error("保存响应无效");
+      if (next.error) throw new Error(next.error);
+      if (
+        current.current !== input.contextToken ||
+        next.contextToken !== input.contextToken
+      )
+        throw new Error("报告已变化，请重新核实");
+      setSaved(next);
+      return next;
+    };
+    const items = (active.items || []).filter(
+      (item) =>
+        !report?.plugins || Object.hasOwn(report.plugins, item.pluginName),
+    );
+    return h(
+      "section",
+      { "aria-label": "发现的人工处置", style: { marginTop: "16px" } },
+      h("h3", null, "发现的人工处置"),
+      h(
+        "p",
+        null,
+        "人工记录仅供核实追踪，不改变内核发现、总结论、退出码、基线或兼容性豁免；新风险仍完整显示。",
+      ),
+      active.error ? h("p", { role: "alert" }, active.error) : null,
+      items.length
+        ? items.slice(0, limit).map((item) =>
+            h(ReviewRow, {
+              key: item.findingId,
+              item,
+              contextToken: active.contextToken,
+              onSave: save,
+              disabled: !!active.error || typeof onSave !== "function",
+            }),
+          )
+        : h("p", null, "当前没有可处置的发现。"),
+      items.length > limit
+        ? h(
+            "button",
+            { type: "button", onClick: () => setLimit((n) => n + 20) },
+            `显示更多处置（已显示 ${Math.min(limit, items.length)} / ${items.length}）`,
+          )
+        : null,
+      active.history?.length
+        ? h(
+            "details",
+            {
+              open: historyOpen,
+              onToggle: (e) => setHistoryOpen(e.target.open),
+            },
+            h("summary", null, `历史处置完整依据（${active.history.length}）`),
+            historyOpen
+              ? active.history
+                  .slice(0, historyLimit)
+                  .map((record) =>
+                    h(
+                      "p",
+                      { key: record.findingId },
+                      `${record.pluginName}@${record.pluginVersion} · ${labels[record.status]} · ${record.updatedAt} · ${record.note}`,
+                    ),
+                  )
+              : null,
+            historyOpen && active.history.length > historyLimit
+              ? h(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => setHistoryLimit((n) => n + 20),
+                  },
+                  "显示更多历史处置",
+                )
+              : null,
+          )
+        : null,
+    );
+  };
+}
+
+return { createFindingReviewPanel:createFindingReviewPanel };
+    })();
+    // END GENERATED FINDING REVIEW PANEL
+
+    // BEGIN GENERATED FUNCTIONAL HEALTH CONTRACT
+    var FunctionalHealthContract = (function () {
+/** Pure declarations/results contract. Author declarations never imply execution or compatibility. */
+const FUNCTIONAL_HEALTH_KIND = "plugin-compat-check/functional-health";
+const FUNCTIONAL_HEALTH_LIMITS = Object.freeze({
+  checks: 32,
+  path: 256,
+  selector: 160,
+  responseBytes: 65536,
+  requestMs: 3000,
+  totalMs: 180000,
+});
+const object = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+const keys = (v, allowed) =>
+  object(v) && Object.keys(v).every((k) => allowed.includes(k));
+const exactVersion = (v) =>
+  typeof v === "string" &&
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?$/.test(
+    v,
+  );
+const digest = (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
+const bounded = (v, n) =>
+  typeof v === "string" && v.length > 0 && v.length <= n;
+const artifactValid = (a) =>
+  keys(a, ["name", "version", "sha256"]) &&
+  typeof a.name === "string" &&
+  /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/.test(a.name) &&
+  a.name.length <= 214 &&
+  exactVersion(a.version) &&
+  digest(a.sha256);
+function validFunctionalPath(v) {
+  return (
+    bounded(v, FUNCTIONAL_HEALTH_LIMITS.path) &&
+    /^\/(?!\/)[A-Za-z0-9/_.,~-]*$/.test(v) &&
+    !v.split("/").some((p) => p === ".." || p === ".")
+  );
+}
+function validateFunctionalManifest(value) {
+  const errors = [];
+  if (
+    !keys(value, ["schemaVersion", "artifact", "dshVersion", "checks"]) ||
+    value.schemaVersion !== 1 ||
+    !artifactValid(value.artifact) ||
+    !exactVersion(value.dshVersion)
+  )
+    errors.push("Invalid manifest schema or exact artifact/DSH identity");
+  if (
+    !Array.isArray(value?.checks) ||
+    value.checks.length < 1 ||
+    value.checks.length > FUNCTIONAL_HEALTH_LIMITS.checks
+  )
+    errors.push("Expected 1..32 bounded checks");
+  else {
+    const seen = new Set();
+    for (const c of value.checks) {
+      if (
+        !object(c) ||
+        !bounded(c.id, 64) ||
+        !/^[A-Za-z0-9_-]+$/.test(c.id) ||
+        seen.has(c.id) ||
+        !validFunctionalPath(c.path)
+      ) {
+        errors.push("Invalid check id/path or duplicate id");
+        continue;
+      }
+      seen.add(c.id);
+      if (c.type === "http") {
+        if (
+          !keys(c, ["id", "type", "path", "status", "json"]) ||
+          !Number.isInteger(c.status) ||
+          c.status < 200 ||
+          c.status > 599 ||
+          (c.status >= 300 && c.status < 400)
+        )
+          errors.push("Invalid HTTP check");
+        if (
+          c.json !== undefined &&
+          (!keys(c.json, ["pointer", "equals"]) ||
+            typeof c.json.pointer !== "string" ||
+            c.json.pointer.length > 256 ||
+            !/^(?:\/(?:[^~\u0000-\u001f]|~[01])*)*$/.test(c.json.pointer) ||
+            !Object.hasOwn(c.json, "equals") ||
+            ![null, "string", "boolean", "number"].includes(
+              c.json.equals === null ? null : typeof c.json.equals,
+            ) ||
+            (typeof c.json.equals === "string" && c.json.equals.length > 256) ||
+            (typeof c.json.equals === "number" &&
+              !Number.isFinite(c.json.equals)))
+        )
+          errors.push(
+            "JSON assertion must be a bounded JSON pointer and scalar value",
+          );
+      } else if (c.type === "dom") {
+        if (
+          !keys(c, [
+            "id",
+            "type",
+            "path",
+            "selector",
+            "minCount",
+            "maxCount",
+          ]) ||
+          !bounded(c.selector, FUNCTIONAL_HEALTH_LIMITS.selector) ||
+          !/^[A-Za-z0-9_#.*\[\]="'\- >]+$/.test(c.selector) ||
+          !Number.isInteger(c.minCount) ||
+          !Number.isInteger(c.maxCount) ||
+          c.minCount < 0 ||
+          c.maxCount < c.minCount ||
+          c.maxCount > 1000
+        )
+          errors.push("Invalid bounded DOM selector/count check");
+      } else errors.push("Only HTTP GET and DOM selector counts are supported");
+    }
+  }
+  return errors.length ? { valid: false, errors } : { valid: true, value };
+}
+
+/** Imported evidence is an offline assertion, not a signature or compatibility verdict. */
+function validateFunctionalHealthResult(value, expectedIdentity = {}) {
+  const errors = [];
+  const iso = (v) =>
+    typeof v === "string" &&
+    Number.isFinite(Date.parse(v)) &&
+    new Date(v).toISOString() === v;
+  if (
+    !keys(value, [
+      "schemaVersion",
+      "kind",
+      "status",
+      "identity",
+      "startedAt",
+      "completedAt",
+      "checks",
+      "cleanup",
+      "limitations",
+      "error",
+      "declaration",
+    ]) ||
+    value.schemaVersion !== 1 ||
+    value.kind !== FUNCTIONAL_HEALTH_KIND ||
+    !["tested-pass", "tested-failed", "error"].includes(value.status)
+  )
+    errors.push("Invalid functional health result schema/status");
+  const declarationValidation = validateFunctionalManifest(value?.declaration);
+  if (!declarationValidation.valid)
+    errors.push("Missing or invalid executed declaration");
+  const id = value?.identity;
+  if (
+    declarationValidation.valid &&
+    (value.declaration.dshVersion !== id?.dshVersion ||
+      ["name", "version", "sha256"].some(
+        (k) => value.declaration.artifact[k] !== id?.artifact?.[k],
+      ))
+  )
+    errors.push("Executed declaration identity differs from result");
+  if (
+    !keys(id, ["artifact", "dshVersion", "manifestSha256"]) ||
+    !artifactValid(id.artifact) ||
+    !exactVersion(id.dshVersion) ||
+    !digest(id.manifestSha256)
+  )
+    errors.push("Invalid exact evidence identity");
+  if (
+    !iso(value?.startedAt) ||
+    !iso(value?.completedAt) ||
+    value.completedAt < value.startedAt ||
+    Date.parse(value.completedAt) - Date.parse(value.startedAt) >
+      FUNCTIONAL_HEALTH_LIMITS.totalMs + 30000
+  )
+    errors.push("Invalid bounded measurement times");
+  if (
+    !keys(value?.cleanup, ["stopped", "removed", "errors"]) ||
+    typeof value.cleanup.stopped !== "boolean" ||
+    typeof value.cleanup.removed !== "boolean" ||
+    (value.cleanup.errors !== undefined &&
+      (!Array.isArray(value.cleanup.errors) ||
+        value.cleanup.errors.length > 8 ||
+        value.cleanup.errors.some((x) => !bounded(x, 512))))
+  )
+    errors.push("Invalid cleanup evidence");
+  if (
+    !Array.isArray(value?.limitations) ||
+    value.limitations.length < 1 ||
+    value.limitations.length > 8 ||
+    value.limitations.some((x) => !bounded(x, 512)) ||
+    (value.error !== undefined && !bounded(value.error, 1024))
+  )
+    errors.push("Invalid limitations/error summary");
+  const seen = new Set();
+  if (!Array.isArray(value?.checks) || value.checks.length > 32)
+    errors.push("Invalid check evidence");
+  else
+    for (const c of value.checks) {
+      const e = c?.evidence;
+      if (
+        !keys(c, ["id", "type", "status", "evidence"]) ||
+        !bounded(c.id, 64) ||
+        !/^[A-Za-z0-9_-]+$/.test(c.id) ||
+        seen.has(c.id) ||
+        !["http", "dom"].includes(c.type) ||
+        !["pass", "failed", "error"].includes(c.status) ||
+        !keys(e, [
+          "httpStatus",
+          "responseBytes",
+          "jsonMatched",
+          "count",
+          "elapsedMs",
+          "error",
+        ]) ||
+        !Number.isFinite(e.elapsedMs) ||
+        e.elapsedMs < 0 ||
+        e.elapsedMs > FUNCTIONAL_HEALTH_LIMITS.totalMs
+      ) {
+        errors.push("Invalid check row");
+        continue;
+      }
+      seen.add(c.id);
+      if (c.status === "error") {
+        if (!bounded(e.error, 256)) errors.push("Missing check error");
+      } else if (c.type === "http") {
+        if (
+          !Number.isInteger(e.httpStatus) ||
+          e.httpStatus < 200 ||
+          e.httpStatus > 599 ||
+          !Number.isInteger(e.responseBytes) ||
+          e.responseBytes < 0 ||
+          e.responseBytes > 65536 ||
+          (e.jsonMatched !== undefined && typeof e.jsonMatched !== "boolean") ||
+          e.count !== undefined ||
+          e.error !== undefined
+        )
+          errors.push("Invalid HTTP evidence");
+      } else if (
+        !Number.isInteger(e.count) ||
+        e.count < 0 ||
+        e.httpStatus !== undefined ||
+        e.responseBytes !== undefined ||
+        e.jsonMatched !== undefined ||
+        e.error !== undefined
+      )
+        errors.push("Invalid DOM evidence");
+    }
+  if (errors.length) return { valid: false, errors };
+  if (declarationValidation.valid && Array.isArray(value?.checks)) {
+    const expected = value.declaration.checks;
+    if (
+      (value.status !== "error" && value.checks.length !== expected.length) ||
+      value.checks.length > expected.length
+    )
+      errors.push("Evidence must cover every declared check in order");
+    for (let i = 0; i < value.checks.length; i++) {
+      const row = value.checks[i],
+        check = expected[i];
+      if (!row || !check || row.id !== check.id || row.type !== check.type) {
+        errors.push("Evidence check identity/order differs from declaration");
+        continue;
+      }
+      if (row.status === "error") continue;
+      const e = row.evidence;
+      if (!object(e)) continue;
+      const passed =
+        check.type === "http"
+          ? e.httpStatus === check.status &&
+            (!check.json || e.jsonMatched === true)
+          : e.count >= check.minCount && e.count <= check.maxCount;
+      if (
+        row.status !== (passed ? "pass" : "failed") ||
+        (check.type === "http" &&
+          Boolean(check.json) !== (e.jsonMatched !== undefined))
+      )
+        errors.push("Evidence outcome conflicts with executed expectation");
+    }
+  }
+  if (
+    value?.status === "tested-pass" &&
+    (!value.checks?.length ||
+      value.checks.some((c) => c?.status !== "pass") ||
+      value.cleanup?.stopped !== true ||
+      value.cleanup?.removed !== true ||
+      value.cleanup?.errors?.length ||
+      value.error !== undefined)
+  )
+    errors.push("Pass conflicts with checks or cleanup");
+  if (
+    value?.status === "tested-failed" &&
+    (!value.checks?.some((c) => c?.status === "failed") ||
+      value.checks.some((c) => c?.status === "error") ||
+      value.cleanup?.stopped !== true ||
+      value.cleanup?.removed !== true ||
+      value.error !== undefined)
+  )
+    errors.push("Failed measurement conflicts with checks/cleanup");
+  if (value?.status === "error" && !bounded(value.error, 1024))
+    errors.push("Missing run error");
+  if (errors.length) return { valid: false, errors };
+  const staleReasons = [];
+  if (
+    !expectedIdentity.artifact ||
+    !["name", "version", "sha256"].every(
+      (k) => typeof expectedIdentity.artifact[k] === "string",
+    )
+  )
+    staleReasons.push("Current artifact identity unavailable");
+  else
+    for (const key of ["name", "version", "sha256"])
+      if (id.artifact[key] !== expectedIdentity.artifact[key])
+        staleReasons.push("Artifact " + key + " changed");
+  if (!expectedIdentity.dshVersion)
+    staleReasons.push("Current DSH version unavailable");
+  else if (id.dshVersion !== expectedIdentity.dshVersion)
+    staleReasons.push("DSH version changed");
+  if (!expectedIdentity.manifestSha256)
+    staleReasons.push("Current declaration identity unavailable");
+  else if (id.manifestSha256 !== expectedIdentity.manifestSha256)
+    staleReasons.push("Declaration changed");
+  return {
+    valid: true,
+    value,
+    current: staleReasons.length === 0,
+    staleReasons,
+  };
+}
+
+/** SHA256 identity rule: UTF-8 of JSON with recursively sorted object keys and preserved array order, no whitespace. */
+function canonicalFunctionalManifest(value) {
+  const validation = validateFunctionalManifest(value);
+  if (!validation.valid) throw Error(validation.errors.join("; "));
+  const ordered = (v) =>
+    Array.isArray(v)
+      ? v.map(ordered)
+      : object(v)
+        ? Object.fromEntries(
+            Object.keys(v)
+              .sort()
+              .map((k) => [k, ordered(v[k])]),
+          )
+        : v;
+  return JSON.stringify(ordered(value));
+}
+
+return { validateFunctionalHealthResult:validateFunctionalHealthResult, canonicalFunctionalManifest:canonicalFunctionalManifest };
+    })();
+    // END GENERATED FUNCTIONAL HEALTH CONTRACT
+
+    // BEGIN GENERATED FUNCTIONAL HEALTH PANEL
+    var FunctionalHealthPanelFactory = (function () {
+/** Offline UI for explicitly imported health evidence. Never starts a runner. */
+function createFunctionalHealthPanel(React, HealthContract) {
+  const h = React.createElement;
+  const statusLabels = {
+    "tested-pass": "所选检查通过",
+    "tested-failed": "所选检查失败",
+    error: "检查未完成",
+    pass: "通过",
+    failed: "失败",
+  };
+  return function FunctionalHealthPanel({ report }) {
+    const [result, setResult] = React.useState(null);
+    const [error, setError] = React.useState("");
+    const [busy, setBusy] = React.useState(false);
+    const request = React.useRef(0);
+    React.useEffect(
+      () => () => {
+        request.current++;
+      },
+      [],
+    );
+    const load = async (event) => {
+      const file = event.target.files?.[0],
+        id = ++request.current;
+      if (!file) return;
+      setBusy(true);
+      setError("");
+      try {
+        if (
+          !Number.isSafeInteger(file.size) ||
+          file.size < 1 ||
+          file.size > 512 * 1024
+        )
+          throw new Error("记录超过大小限制（512 KiB）");
+        const parsed = JSON.parse(await file.text());
+        const checked = HealthContract.validateFunctionalHealthResult(parsed);
+        if (!checked.valid) throw new Error(checked.errors.join("；"));
+        if (!globalThis.crypto?.subtle || typeof TextEncoder === "undefined")
+          throw new Error("当前浏览器无法核验记录摘要");
+        const bytes = new TextEncoder().encode(
+          HealthContract.canonicalFunctionalManifest(parsed.declaration),
+        );
+        const digest = Array.from(
+          new Uint8Array(
+            await globalThis.crypto.subtle.digest("SHA-256", bytes),
+          ),
+          (n) => n.toString(16).padStart(2, "0"),
+        ).join("");
+        if (digest !== parsed.identity.manifestSha256)
+          throw new Error("检查声明与记录摘要不一致");
+        if (request.current === id) setResult(parsed);
+      } catch (reason) {
+        if (request.current === id)
+          setError("导入失败：" + (reason?.message || reason));
+      } finally {
+        if (request.current === id) setBusy(false);
+      }
+    };
+    const artifact = result?.identity.artifact,
+      current = artifact && report?.plugins?.[artifact.name];
+    const versionsMatch =
+      current?.version === artifact?.version &&
+      report?.dshVersion === result?.identity.dshVersion;
+    return h(
+      "section",
+      { "aria-label": "功能健康检查", style: { marginTop: "16px" } },
+      h("h3", null, "功能健康检查（独立实测记录）"),
+      h(
+        "p",
+        null,
+        "在仓库CLI中显式运行所选HTTP/DOM检查后，可导入JSON记录。本面板只读取所选文件，不执行检查、安装插件或访问目标服务。",
+      ),
+      h("input", {
+        type: "file",
+        accept: ".json,application/json",
+        "aria-label": "导入功能健康检查记录",
+        disabled: busy,
+        onChange: load,
+      }),
+      busy ? h("p", { role: "status" }, "正在核验记录…") : null,
+      error ? h("p", { role: "alert" }, error) : null,
+      !result
+        ? h(
+            "p",
+            null,
+            "尚未导入功能实测记录。静态发现、宿主状态和业务健康是不同证据。",
+          )
+        : h(
+            "div",
+            { "data-functional-health": result.status },
+            h(
+              "p",
+              null,
+              `${artifact.name}@${artifact.version} · DSH ${result.identity.dshVersion} · ${statusLabels[result.status]}`,
+            ),
+            h(
+              "p",
+              { role: "status" },
+              versionsMatch
+                ? "插件与DSH版本相符；当前安装制品尚未核验，此处保留所选制品的历史记录。"
+                : "记录与当前报告目标不一致或插件未安装；不用于认证当前目标。",
+            ),
+            h(
+              "p",
+              null,
+              "测量时间：" + result.startedAt + " → " + result.completedAt,
+            ),
+            h("p", null, "制品 SHA-256：" + artifact.sha256),
+            h(
+              "p",
+              null,
+              "声明 SHA-256：" +
+                result.identity.manifestSha256 +
+                "；摘要校验不是作者签名或业务认证。",
+            ),
+            h(
+              "table",
+              { "aria-label": "功能健康检查结果" },
+              h(
+                "thead",
+                null,
+                h(
+                  "tr",
+                  null,
+                  h("th", null, "检查与声明"),
+                  h("th", null, "独立实测"),
+                ),
+              ),
+              h(
+                "tbody",
+                null,
+                result.checks.map((check, i) => {
+                  const declaration = result.declaration.checks[i],
+                    expected =
+                      declaration.type === "http"
+                        ? `GET ${declaration.path}，HTTP ${declaration.status}` +
+                          (declaration.json
+                            ? `，JSON ${declaration.json.pointer} = ${JSON.stringify(declaration.json.equals)}`
+                            : "")
+                        : `${declaration.path} · ${declaration.selector} · 数量 ${declaration.minCount}–${declaration.maxCount}`;
+                  return h(
+                    "tr",
+                    { key: check.id },
+                    h("td", null, `${check.id} · ${expected}`),
+                    h(
+                      "td",
+                      null,
+                      `${statusLabels[check.status] || check.status} · ${JSON.stringify(check.evidence)}`,
+                    ),
+                  );
+                }),
+              ),
+            ),
+            result.error ? h("p", { role: "alert" }, result.error) : null,
+            h(
+              "p",
+              null,
+              "资源清理：" +
+                (result.cleanup.stopped && result.cleanup.removed
+                  ? "已停止并清理自有环境"
+                  : "未确认完整清理"),
+            ),
+            h(
+              "ul",
+              null,
+              result.limitations.map((text, i) => h("li", { key: i }, text)),
+            ),
+            h(
+              "p",
+              null,
+              "仅证明记录中的所选检查结果，不改普通兼容性结论、风险计数、基线或人工处置；不认证全部业务。",
+            ),
+            h(
+              "button",
+              {
+                type: "button",
+                onClick: () => {
+                  request.current++;
+                  setResult(null);
+                  setError("");
+                  setBusy(false);
+                },
+              },
+              "清除健康检查记录",
+            ),
+          ),
+    );
+  };
+}
+
+return { createFunctionalHealthPanel:createFunctionalHealthPanel };
+    })();
+    // END GENERATED FUNCTIONAL HEALTH PANEL
+
     var React = require("react");
+    var DependencyPanel = DependencyPanelFactory.createDependencyPanel(React, DependencyGraphContract);
+    var FindingReviewPanel = FindingReviewPanelFactory.createFindingReviewPanel(React, FindingReviewContract);
+    var FunctionalHealthPanel = FunctionalHealthPanelFactory.createFunctionalHealthPanel(React, FunctionalHealthContract);
 
     var SLOT = "settings.plugins.tab";
     var LABEL = "兼容性";
@@ -1264,7 +3340,10 @@ return { assertUpgradePreview: assertUpgradePreview, SUPPORTED_PREVIEW_VERSIONS:
         }).then(function(data){
           if(background && data.kind === "plugin-compat-check/report-metadata" && data.ok && latest.current
             && data.computedAt === latest.current.computedAt && data.nodeModules === latest.current.nodeModules
-            && data.dshVersion === latest.current.report.dshVersion) {
+            && data.dshVersion === latest.current.report.dshVersion
+            && (data.reviewsRevision || null) === (latest.current.reviews && latest.current.reviews.revision || null)
+            && (data.reviewsError || null) === (latest.current.reviews && latest.current.reviews.error || null)
+            && (data.reviewsContextToken || null) === (latest.current.reviews && latest.current.reviews.contextToken || null)) {
             return Object.assign({},latest.current,{cache:data.cache});
           }
           return background ? read(ROUTE) : data;
@@ -1723,6 +3802,13 @@ return { assertUpgradePreview: assertUpgradePreview, SUPPORTED_PREVIEW_VERSIONS:
         c && c.refreshError ? React.createElement("div", { role: "status", style: styles.err }, "最近刷新失败，保留上次成功报告：" + c.refreshError) : null);
     }
 
+    async function saveFindingReview(body) {
+      var response=await fetch('/plugin-compat-check/reviews',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(body)});
+      var result=await response.json();
+      if(!response.ok||!result.ok||result.reviews?.error)throw new Error(result.error||result.reviews?.error||'人工处置保存失败');
+      return result.reviews;
+    }
+
     function Table(p) {
       var data = p.data;
       var report = data && data.report;
@@ -1778,6 +3864,9 @@ return { assertUpgradePreview: assertUpgradePreview, SUPPORTED_PREVIEW_VERSIONS:
         React.createElement("div", { style: styles.meta }, "显示 " + shown.length + " / " + names.length + " 个插件；筛选仅改变呈现。"),
         React.createElement(ReportPreview, { data: data }),
         React.createElement(UpgradePreview, { data: data }),
+        React.createElement(DependencyPanel, {graph: report.dependencyGraph}),
+        React.createElement(FindingReviewPanel, {report:report,reviews:data.reviews,onSave:saveFindingReview}),
+        React.createElement(FunctionalHealthPanel, {report:report}),
         !shown.length ? React.createElement("div", { role: "status", style: styles.note }, "没有符合筛选条件的插件。清除筛选可查看完整报告。") : null,
         React.createElement("div", { style: { overflowX: "auto" } },
         React.createElement("table", { style: styles.table },
