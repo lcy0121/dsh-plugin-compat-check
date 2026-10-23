@@ -45,7 +45,7 @@ node --test test/dependency-security.test.mjs
 
 每npm进程默认/最多120秒（`--timeout-ms`可降低），网络45秒无自动重试，stdout/stderr缓冲各4MiB；成功失败都清理自有临时目录。证据仅存白名单字段，去除控制字符和URL查询/凭据，不存原始响应或stderr；每图最多1000项、每字段256字符，截断不改变阻断，分享前仍须预览。测试替换联网npm子进程并验证实际wrapper、证据与清理，不能代替远端Actions或未来registry状态。
 
-[Test](../.github/workflows/test.yml)和[静态批量](../.github/workflows/static-batch.yml)固定Actions的完整40位commit，checkout关闭`persist-credentials`，最小权限、job超时、制品7天；审计在独立Node24 job执行一次，不重复到Node矩阵。静态批量保持手动触发。Node矩阵独立报告结果；发布前检查通过`DSC_TEST_TAP`保留完整TAP及stderr，失败时从对应制品定位末尾真实错误，不能只看截断摘要。更新Action pin时核对官方release、commit和该commit的`action.yml`运行时及实际inputs；Action运行时与被测Node版本分开。当前使用GitHub托管Ubuntu；其它runner另验收，不能靠版本注释认证。npm语义见[官方audit文档](https://docs.npmjs.com/cli/v11/commands/npm-audit/)。
+[Test](../.github/workflows/test.yml)和[静态批量](../.github/workflows/static-batch.yml)固定Actions的完整40位commit，checkout关闭`persist-credentials`，最小权限、job超时、制品7天；审计在独立Node24 job执行一次，不重复到Node矩阵。静态批量保持手动触发。所有job显式禁用npm缓存恢复，直接按锁文件执行npm ci，避免可选缓存服务阻塞环境准备。Node矩阵独立报告结果；发布前检查通过`DSC_TEST_TAP`保留完整TAP及stderr，失败时从对应制品定位末尾真实错误，不能只看截断摘要。更新Action pin时核对官方release、commit和该commit的`action.yml`运行时及实际inputs；Action运行时与被测Node版本分开。当前使用GitHub托管Ubuntu；其它runner另验收，不能靠版本注释认证。npm语义见[官方audit文档](https://docs.npmjs.com/cli/v11/commands/npm-audit/)。
 
 升级面板实机验收须同时等到最终loader扫描与F2启动自检完成，设置页加载后还须显式“重新检查”并等待该报告渲染，再提交预检；启动扫描或首次客户端连接触发服务懒初始化时，新报告会合法撤销旧比较。失败制品保留有界的报告时间和内容摘要以区分真实失效与无内容变化的重读，不保留私有报告正文或鉴权信息。
 
