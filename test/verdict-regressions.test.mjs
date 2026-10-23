@@ -103,3 +103,108 @@ test('an unsupported official peer range remains visible even when APIs exist',(
  assert.ok(p.findings.some(f=>f.category==='declared-incompatible'&&f.certainty==='certain'&&f.impactBasis==='inferred'));
  assert.ok(!p.findings.some(f=>f.severity==='fatal'));
 });
+
+test('a helper with a returning alternate cannot suppress a missing method',()=>{
+ for(const helper of [
+  `function has(s){if(typeof s.absent==='function')return true;else return true;return false;}`,
+  `function has(s){if(typeof s.absent==='function')return true;else {return true;}return false;}`,
+ ]){
+  const p=result(helper+'export function apply(ctx){if(has(ctx.settings))ctx.settings.absent();}',present);
+  assert.ok(p.findings.some(f=>f.method==='absent'&&f.certainty==='certain'),helper);
+ }
+});
+
+test('a proved boolean capability helper still protects the missing method',()=>{
+ for(const helper of [
+  `function has(s){return typeof s.absent==='function';}`,
+  `function has(s){if(typeof s.absent==='function')return true;console.log('unavailable');return false;}`,
+ ]){
+  const p=result(helper+'export function apply(ctx){if(has(ctx.settings))ctx.settings.absent();}',present);
+  assert.equal(p.findings.some(f=>f.method==='absent'),false,helper);
+ }
+});
+
+test('entry CommonJS exports preserve hard injection without promoting ordinary descriptors',()=>{
+ const surface={root:{...present.root,missingSvc:{present:false}}};
+ for(const source of [
+  `exports.inject=['missingSvc'];exports.apply=function(ctx){ctx.settings.known()}`,
+  `module.exports.inject=['missingSvc'];module.exports.apply=function(ctx){ctx.settings.known()}`,
+  `exports['inject']=['missingSvc'];exports.apply=function(ctx){ctx.settings.known()}`,
+  `module.exports={inject:['missingSvc'],apply(ctx){ctx.settings.known()}}`,
+  `const deps=['missingSvc'];const plugin={inject:deps,apply(ctx){ctx.settings.known()}};module.exports=plugin;`,
+ ]){
+  const p=result(source,surface);
+  assert.equal(p.verdict,'broken',source);
+  assert.ok(p.findings.some(f=>f.category==='host-service-missing'&&f.certainty==='certain'),source);
+ }
+ for(const source of [
+  `const descriptor={inject:['missingSvc']};export function apply(ctx){ctx.settings.known()}`,
+  `function make(exports){exports.inject=['missingSvc']}make({});export function apply(ctx){ctx.settings.known()}`,
+  `exports.inject=['missingSvc'];module.exports={apply(ctx){ctx.settings.known()}}`,
+  `const plugin={inject:['missingSvc']};module.exports={...plugin,apply(ctx){ctx.settings.known()}}`,
+ ]){
+  const p=result(source,surface);
+  assert.equal(p.findings.some(f=>f.severity==='fatal'),false,source);
+ }
+});
+
+test('non-entry CommonJS metadata cannot create a hard dependency for its importer',()=>{
+ const p=result(`require('./helper.cjs');export function apply(ctx){ctx.settings.known()}`,{root:{...present.root,missingSvc:{present:false}}},{files:{'helper.cjs':`exports.inject=['missingSvc'];exports.apply=function(){};`}});
+ assert.ok(!p.findings.some(f=>f.severity==='fatal'));
+ assert.equal(p.coverage.status,'limited');
+});
+
+test('dynamic entry injection cannot silently count as complete coverage',()=>{
+ for(const source of [
+  `exports.inject=getDependencies();exports.apply=function(ctx){ctx.settings.known()}`,
+  `const extra=getDependencies();export const inject={...extra};export function apply(ctx){ctx.settings.known()}`,
+  `export const inject=[unknownService];export function apply(ctx){ctx.settings.known()}`,
+  `exports.inject=[...getDependencies()];exports.apply=function(ctx){ctx.settings.known()}`,
+ ]){
+  const f=packageFixture(source);
+  try{
+   const {report}=extractWithProvenance(f.nm,{catalog});
+   assert.equal(report.scanComplete,false,source);
+   assert.ok(report.perPlugin.sample.diagnostics.some(d=>d.kind==='inject-unresolved'),source);
+   const p=buildVerdicts({report,hostSurface:present,catalog}).plugins.sample;
+   assert.equal(p.coverage.status,'limited',source);
+  }finally{f.cleanup();}
+ }
+});
+
+test('mutated or escaped injection metadata retracts hard dependency proof',()=>{
+ for(const source of [
+  `const deps=['missingSvc'];exports.inject=deps;deps.pop();exports.apply=function(){}`,
+  `exports.inject=['missingSvc'];exports.inject.length=0;exports.apply=function(){}`,
+  `const map={missingSvc:null};exports.inject=map;delete map.missingSvc;exports.apply=function(){}`,
+  `const map={};exports.inject=map;map.missingSvc=null;exports.apply=function(){}`,
+  `const map={missingSvc:null};exports.inject=map;mutate(map);exports.apply=function(){}`,
+  `const deps=['missingSvc'];exports.inject=deps;mutate(deps);exports.apply=function(){}`,
+  `export const inject=['missingSvc'];inject.pop();export function apply(){}`,
+  `export const inject={missingSvc:null};delete inject.missingSvc;export function apply(){}`,
+  `const deps=['missingSvc'];deps.pop();exports.inject=deps;exports.apply=function(){}`,
+  `const deps=['missingSvc'];deps.length=0;exports.inject=deps;exports.apply=function(){}`,
+ ]){
+  const p=result(source,{root:{missingSvc:{present:false}}});
+  assert.ok(!p.findings.some(f=>f.severity==='fatal'),source);
+  assert.equal(p.coverage.status,'limited',source);
+ }
+});
+
+test('service map keys deleted before export are not injected',()=>{
+ const p=result(`const map={missingSvc:null};delete map.missingSvc;exports.inject=map;exports.apply=function(ctx){ctx.settings.known()}`,{root:{...present.root,missingSvc:{present:false}}});
+ assert.ok(!p.findings.some(f=>f.service==='missingSvc'));
+});
+
+test('entry inject objects use Cordis service-map keys rather than required/optional lists',()=>{
+ for(const source of [
+  `export const inject={missingSvc:null};export function apply(){}`,
+  `exports.inject={missingSvc:null};exports.apply=function(){};`,
+ ]){
+  const p=result(source,{root:{missingSvc:{present:false}}});
+  assert.equal(p.verdict,'broken',source);
+ }
+ const p=result(`export const inject={required:['missingSvc'],optional:['other']};export function apply(){}`,{root:{required:{present:false},optional:{present:false},missingSvc:{present:false}}});
+ assert.ok(p.findings.some(f=>f.service==='required'&&f.severity==='fatal'));
+ assert.ok(!p.findings.some(f=>f.service==='missingSvc'));
+});

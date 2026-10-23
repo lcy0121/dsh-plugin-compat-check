@@ -1,8 +1,8 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-23T12:34:58.487Z",
+  "recordedAt": "2026-10-23T17:11:44.164Z",
   "testFiles": 64,
-  "tests": 882,
+  "tests": 893,
   "repositoryFiles": {
     "total": 316,
     "fixtures": 90,
@@ -335,6 +335,19 @@
         "publicMetadataProblems": 0,
         "publicMetadataSkipped": 0
       }
+    },
+    "staticAnalysisFix20261024": {
+      "scope": "0.1.7-dev source only; no version bump, remote CI or release.",
+      "regressions": "Helper alternates, ordered conditional exports, CommonJS ownership and mutable/dynamic inject metadata; 11 added tests.",
+      "defaultSuite": {
+        "tests": 893,
+        "passed": 887,
+        "skipped": 6,
+        "failed": 0
+      },
+      "nodeVersion": "26.12.1",
+      "contractSource": "Local DSH 0.2.1-rc.2 ASAR: cordis 4.0.5 Inject.resolve and loader 1.0.6 Node import.",
+      "limits": "Custom export conditions and unsupported URL targets abstain; source inspection is not new host or business acceptance."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."

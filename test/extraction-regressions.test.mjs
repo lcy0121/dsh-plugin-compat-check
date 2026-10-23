@@ -113,3 +113,56 @@ test('unreadable scoped inventory is an error rather than an empty successful sc
   assert.throws(()=>extractWithProvenance(f.nm,{catalog}),/EACCES/);
  }finally{fs.readdirSync=original;f.cleanup();}
 });
+
+test('host conditional exports follow Node import conditions and object order',()=>{
+ for(const exports of [
+  {node:'./actual.js',default:'./index.js'},
+  {'.':{node:'./actual.js',import:'./index.js'}},
+  {'.':{node:{types:'./types.d.ts',import:'./actual.js'},default:'./index.js'}},
+  {'.':['./actual.js','./index.js']},
+  {'.':{require:'./index.js',import:'./actual.js'}},
+  {'.':{node:{'module-sync':'./actual.js',default:'./index.js'}}},
+  {'.':['../invalid.js','./actual.js']},
+ ]){
+  const f=packageFixture('export function apply(ctx){ctx.settings.known()}',{meta:{exports},files:{'actual.js':'export function apply(ctx){ctx.settings.absent()}','types.d.ts':'export declare function apply(ctx:unknown):void;'}});
+  try{
+   fs.writeFileSync(path.join(f.pkg,'cordis.patch.yml'),'- name: sample\n');
+   const {report}=extractWithProvenance(f.nm,{catalog});
+   const resolved=spawnSync(process.execPath,['--input-type=module','-e',`process.stdout.write(import.meta.resolve('sample'))`],{cwd:f.root,encoding:'utf8',timeout:5000});
+   assert.equal(resolved.status,0,resolved.stderr);
+   assert.equal(fs.realpathSync(new URL(resolved.stdout)),fs.realpathSync(path.join(f.pkg,'actual.js')));
+   assert.deepEqual(report.perPlugin.sample.files['host-entry'],['actual.js'],JSON.stringify(exports));
+   assert.deepEqual(report.perPlugin.sample.calls.settings,['absent']);
+   assert.equal(report.scanComplete,true);
+  }finally{f.cleanup();}
+ }
+});
+
+test('unresolved package exports abstain instead of certifying a legacy fallback',()=>{
+ for(const exports of [
+  {'.':{node:null,default:'./index.js'}},
+  {'./other':'./index.js'},
+  {'.':{development:'./actual.js',default:'./index.js'}},
+  {'.':[{development:'./actual.js'},'./index.js']},
+  {'.':['./actual%20file.js','./index.js']},
+  {'.':['./actual.js?variant','./index.js']},
+  {'.':{node:{types:'./types.d.ts'}}},
+  {'.':'../outside.js'},
+ ]){
+  const f=packageFixture('export function apply(ctx){ctx.settings.known()}',{meta:{exports},files:{'actual.js':'export function apply(ctx){ctx.settings.absent()}'}});
+  try{
+   fs.writeFileSync(path.join(f.pkg,'cordis.patch.yml'),'- name: sample\n');
+   const {report}=extractWithProvenance(f.nm,{catalog});
+   assert.equal(report.scanComplete,false,JSON.stringify(exports));
+   assert.ok(report.perPlugin.sample.diagnostics.some(d=>d.kind==='entry-resolution-uncertain'));
+   assert.deepEqual(report.perPlugin.sample.entryFiles,[]);
+  }finally{f.cleanup();}
+ }
+});
+
+test('a relative patch entry takes precedence over uncertain package exports',()=>{
+ scan('export function apply(ctx){ctx.settings.absent()}',{meta:{exports:{'.':{custom:'./other.js'}}}},p=>{
+  assert.deepEqual(p.files['host-entry'],['index.js']);
+  assert.equal(p.diagnostics.some(d=>d.kind==='entry-resolution-uncertain'),false);
+ });
+});
