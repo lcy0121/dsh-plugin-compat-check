@@ -1,7 +1,7 @@
 {
   "name": "dsh-plugin-compat-check",
-  "version": "0.1.5",
-  "description": "Checks installed DSH plugins against the current DSH version, with source locations, runtime evidence and coverage limits. Includes a compatibility panel and agent tool.",
+  "version": "0.1.6",
+  "description": "Checks installed DSH plugins and previews upgrade risks, with source locations, dependency views, review records and evidence limits. Includes a panel and agent tool.",
   "license": "MIT",
   "type": "module",
   "main": "index.js",
@@ -34,7 +34,7 @@
   ],
   "engines": {
     "node": "^22.19.0 || >=24",
-    "dsh": ">=0.2.0-rc.2 <0.3.0-0"
+    "dsh": ">=0.2.0-rc.2"
   },
   "scripts": {
     "prepack": "node scripts/stage-skill.mjs && node scripts/stage-contract.mjs && node scripts/stage-kernel.mjs",
@@ -51,7 +51,10 @@
     "compatibility",
     "health-check",
     "cordis",
-    "agent-skills"
+    "agent-skills",
+    "static-analysis",
+    "dependency-analysis",
+    "upgrade"
   ],
   "repository": {
     "type": "git",

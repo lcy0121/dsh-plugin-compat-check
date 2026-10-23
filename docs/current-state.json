@@ -1,6 +1,6 @@
 {
-  "toolVersion": "0.1.5",
-  "recordedAt": "2026-10-23T07:55:36.839Z",
+  "toolVersion": "0.1.6",
+  "recordedAt": "2026-10-23T12:18:52.016Z",
   "testFiles": 64,
   "tests": 882,
   "repositoryFiles": {
@@ -44,7 +44,7 @@
       "Windows real-host acceptance remains unverified.",
       "Optional health executor is not an OS sandbox and imported results are historical.",
       "Crashed manual-review writers may require confirmed-orphan lock cleanup.",
-      "Release 0.1.5 evidence is scoped to the exact archive, commit and supported DSH versions; future hosts are not certified."
+      "Release evidence applies only to its exact archive, commit and checked DSH versions; a minimum host declaration does not certify future hosts."
     ],
     "history": {
       "commit": "10eaeba",
@@ -336,6 +336,41 @@
         },
         "publicMetadataProblems": 0
       }
+    },
+    "release016": {
+      "tag": "v0.1.6",
+      "kind": "metadata patch; no analysis or UI behavior changes",
+      "hostMinimum": ">=0.2.0-rc.2",
+      "artifact": {
+        "file": "dsh-plugin-compat-check-0.1.6.tgz",
+        "sha256": "d29786552d60d783d419dcb9db367d6c76f341d3b8ed0e3f181980dfd2b8ebba",
+        "integrity": "sha512-1LyGGS9KWPpXkJzEeBXPFUEdQuD1ng+cVD61UUOxAAz3m2Nw4prNu8ft1LcG/jLTlwwtPoB7ADK6OynvHTLGoA==",
+        "files": 62,
+        "bytes": 249713
+      },
+      "localAcceptance": {
+        "verifiedAt": "2026-10-23T12:20:26.737480+00:00",
+        "platform": "macOS arm64",
+        "dshVersion": "0.2.1-rc.2",
+        "tests": 882,
+        "passed": 876,
+        "skipped": 6,
+        "failed": 0,
+        "sameArchiveInstalled": true,
+        "realChromePanel": true,
+        "upgradePreview": true,
+        "dependencyView": true,
+        "manualReviewPersisted": true,
+        "historicalHealthImport": true,
+        "originFence": {
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403
+        },
+        "privateRootRemoved": true,
+        "dependencyAudit": "workspace-lock and plugin-runtime clean"
+      },
+      "source": "https://github.com/lcy0121/dsh-plugin-compat-check/tree/v0.1.6",
+      "scope": "Acceptance is limited to the exact archive and recorded scenarios. Public distribution and tagged-commit CI are verified separately during release; minimum host declaration is not future-version or business certification."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."

@@ -1,10 +1,12 @@
 # 开发计划与维护约定
 
-**0.1.5交付版。** [README](../README.md)提供入口，[使用指南](guide.md)提供操作，[维护指南](maintaining.md)提供目录/依赖/回归流程，[docs/current-state.json](current-state.json)保存当前计数及限定验收摘要。本文只维护核心契约与待办；历史证据留在Git，不追写为当前认证。
+**0.1.6元数据补丁版。** [README](../README.md)提供入口，[使用指南](guide.md)提供操作，[维护指南](maintaining.md)提供目录/依赖/回归流程，[docs/current-state.json](current-state.json)保存当前计数及限定验收摘要。本文只维护核心契约与待办；历史证据留在Git，不追写为当前认证。
 
 ## 1. 项目定位与交付状态
 
 检查已安装DSH插件与目标版本的兼容性，提供证据、真实位置和覆盖限制。**声明放行、激活、客户端到货、无发现和覆盖完整均不等于业务验收**；该边界适用于所有入口及差分。
+
+0.1.6补充本插件`engines.dsh: ">=0.2.0-rc.2"`及公开简介/关键词，保留0.1.5功能；最低版本声明不扩大精确目录与集成验收范围。
 
 单仓库、单Node判定内核，版本真源`lib/version.mjs`。根目录是private工作区；npm仅发布`plugin/`，无CLI bin、安装shell或probe入口，不支持`npx dsh-plugin-compat-check`。prepack同步skill/契约并暂存kernel、License和第三方说明，postpack清理kernel；裸子目录不是完整tgz。市场截图由`plugin/screenshots.json`声明，不随npm files打包。
 
@@ -85,7 +87,7 @@ JSON为完整证据源，SARIF 2.1.0/JUnit保留逐版本结果、身份/限制�
 
 先复现再修，保留独立行为测试，不伪造实测或重建快照消除失败；版本漂移审查`test/__baseline-versions.json`并单独提交。默认suite仅用只读profile副本；真实安装/执行仅在自有副本，私有profile不是OS沙箱，仅清理自有目录/PID组。克隆排除node_modules，安全重定位manifest和支持的pnpm9单importer锁路径，保留远程pins，不改源profile。
 
-0.1.5交付升级前静态预检、依赖视图、人工处置、历史健康记录导入和面板改进；作者CI、健康执行器及固定回归队列仅随仓库提供。交付核对同一tgz及行为，日志不代替验收；默认预算与受控工程负例分开，Python parity仅为旧参考。README写入口，Plan写契约/待办，指南写操作，维护指南写流程，current-state留当前事实及有限摘要；完成项移出§6，不逐轮追加流水。同步skill/契约和第三方说明，由doc-check核对元数据、末尾License、链接/锚点。本地提交限任务路径；push、合并、发布与外部发帖按授权分别处理。
+0.1.5已交付升级前静态预检、依赖视图、人工处置、历史健康记录导入和面板改进；作者CI、健康执行器及固定回归队列仅随仓库提供。交付核对同一tgz及行为，日志不代替验收；默认预算与受控工程负例分开，Python parity仅为旧参考。README写入口，Plan写契约/待办，指南写操作，维护指南写流程，current-state留当前事实及有限摘要；完成项移出§6，不逐轮追加流水。同步skill/契约和第三方说明，由doc-check核对元数据、末尾License、链接/锚点。本地提交限任务路径；push、合并、发布与外部发帖按授权分别处理。
 
 ## 4. 验收范围
 

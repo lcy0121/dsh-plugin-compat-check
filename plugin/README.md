@@ -6,7 +6,9 @@
 
 [简体中文](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/README.md) | [English](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/README.en.md) | [한국어](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/README.ko.md)
 
-**0.1.5** · Node `^22.19.0 || >=24`。提供兼容性标签、插件详情发现/角标、`compat_check` 对话工具和 skill provider。发布与验收记录见 [Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)。
+**0.1.6** · Node `^22.19.0 || >=24`。提供兼容性标签、插件详情发现/角标、`compat_check` 对话工具和 skill provider。发布与验收记录见 [Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)。
+
+0.1.6 为元数据补丁：补充 DSH `>=0.2.0-rc.2` 宿主要求及包信息，保留0.1.5功能。最低版本声明不认证未来宿主；已审查目录与集成验收范围仍为 DSH **0.2.0-rc.2、0.2.1-rc.2**。
 
 ![插件详情：部分可用、源码位置、影响与依据](https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/main/plugin/assets/compat-detail-partial.png)
 
@@ -18,7 +20,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 DSH 0.2.1-rc.2：**更多 → 设置 → 内置插件 → 兼容性**。请选择实际 profile，不默认使用 desktop；agent 可调用 `compat_check`。
 
-0.1.5 提供搜索/组合筛选、折叠发现、完整报告预览/显式复制、基线新增风险及“下一步核实”。安装/loader 事件和5秒巡检触发后台刷新，保留筛选与旧报告，失败显示原因。报告显示目标、参考目录版本/摘要和验收范围；重复插件身份无法判定且不推进基线。绑定探针超过5分钟的未来时钟偏差会被拒绝，保留静态发现及原因。分享前须预览敏感信息，筛选不会删减完整报告。
+面板提供搜索/组合筛选、折叠发现、完整报告预览/显式复制、基线新增风险及“下一步核实”。安装/loader 事件和5秒巡检触发后台刷新，保留筛选与旧报告，失败显示原因。报告显示目标、参考目录版本/摘要和验收范围；重复插件身份无法判定且不推进基线。绑定探针超过5分钟的未来时钟偏差会被拒绝，保留静态发现及原因。分享前须预览敏感信息，筛选不会删减完整报告。
 
 依赖关系区分host/client、必需/可选/子作用域；提供声明仅为候选，路径/环不证明实际故障。人工复核记录单独保存，身份变化后待重审，不隐藏发现或覆盖判定、基线及豁免。健康面板**只导入历史 JSON**，不运行检查，历史通过不证明当前制品正常。步骤见 [使用指南](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/guide.md)。
 

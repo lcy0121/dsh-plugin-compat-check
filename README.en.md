@@ -8,7 +8,9 @@ Check **installed DSH plugins** against a target DSH version, with source locati
 
 ## Version and entry points
 
-**0.1.5** · Node `^22.19.0 || >=24`. The npm plugin provides a compatibility tab, per-plugin findings/badge, `compat_check` and a skill provider. The repository provides a CLI, installation runner and development tools sharing the verdict kernel. The npm package has **no CLI bin**; `npx dsh-plugin-compat-check` is unavailable. Delivery, verification and follow-up work: [Plan](docs/Plan.md).
+**0.1.6** · Node `^22.19.0 || >=24`. The npm plugin provides a compatibility tab, per-plugin findings/badge, `compat_check` and a skill provider. The repository provides a CLI, installation runner and development tools sharing the verdict kernel. The npm package has **no CLI bin**; `npx dsh-plugin-compat-check` is unavailable. Delivery, verification and follow-up work: [Plan](docs/Plan.md).
+
+0.1.6 is a metadata patch: it declares DSH `>=0.2.0-rc.2` and refreshes package information, retaining 0.1.5 functionality. The minimum requirement does not certify future hosts; reviewed catalogs and integration acceptance cover only DSH **0.2.0-rc.2 and 0.2.1-rc.2**.
 
 ## Screenshots
 
@@ -27,7 +29,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 DSH 0.2.1-rc.2: **More → Settings → Built-in plugins → Compatibility**. Select your actual profile; desktop is not assumed. Agents can call `compat_check`.
 
-0.1.5 includes search/combined filters, collapsible findings, complete report preview/copy, baseline new-risk views and next verification steps. Installation/loader events and five-second polling refresh cached reports, retaining filters and previous results; failures show a reason. Reports show the target, catalog version/digest and acceptance scope. Duplicate plugin identities fail explicitly without advancing the baseline. Bound probes more than five minutes ahead are rejected while static findings and the reason remain visible.
+The panel includes search/combined filters, collapsible findings, complete report preview/copy, baseline new-risk views and next verification steps. Installation/loader events and five-second polling refresh cached reports, retaining filters and previous results; failures show a reason. Reports show the target, catalog version/digest and acceptance scope. Duplicate plugin identities fail explicitly without advancing the baseline. Bound probes more than five minutes ahead are rejected while static findings and the reason remain visible.
 
 Dependency views distinguish host/client, required/optional and subscopes. Provider declarations are **candidates**; paths and cycles do not prove actual failures. Review records are separate, require review again after identity changes, and never hide findings or override verdicts, baselines or waivers. The health panel **imports historical JSON only** and executes no checks; historical success does not prove the current artifact works. See the [guide](docs/guide.md).
 
