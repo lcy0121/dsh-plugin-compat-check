@@ -1,6 +1,7 @@
 /** Deterministic locale and document identity for owned browser acceptance. */
 import fs from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 export function disableCredentialOnboarding(profile) {
   // Fresh owned profiles only. Official public config, not credentials or a model-readiness fake.
   fs.writeFileSync(
@@ -109,6 +110,66 @@ export function upgradeRequestReceipts(events, cursor = 0) {
     if (event.method === "Network.loadingFailed") request.failed = true;
   }
   return [...requests.values()].slice(-8);
+}
+
+/** Bounded report identities distinguish a real recomputation from sidecar/full-read churn. */
+export async function reportResponseReceipts(chrome) {
+  const requests = new Map();
+  for (const event of chrome.events) {
+    const p = event.params || {};
+    if (event.method === "Network.requestWillBeSent") {
+      try {
+        const url = new URL(p.request.url);
+        if (url.pathname === "/plugin-compat-check/report")
+          requests.set(p.requestId, {
+            metadata: url.searchParams.get("metadata") === "1",
+            finished: false,
+          });
+      } catch {
+        /* Ignore unrelated/malformed requests. */
+      }
+    }
+    if (event.method === "Network.loadingFinished" && requests.has(p.requestId))
+      requests.get(p.requestId).finished = true;
+  }
+  const digest = (value) =>
+    createHash("sha256")
+      .update(JSON.stringify(value ?? null))
+      .digest("hex");
+  return await Promise.all(
+    [...requests]
+      .filter(([, r]) => r.finished)
+      .slice(-24)
+      .map(async ([requestId, receipt]) => {
+        try {
+          const body = await chrome.send("Network.getResponseBody", {
+            requestId,
+          });
+          const data = JSON.parse(
+            body.base64Encoded
+              ? Buffer.from(body.body, "base64").toString()
+              : body.body,
+          );
+          return {
+            ...receipt,
+            computedAt: /^\d{4}-\d\d-\d\dT[\d:.]+Z$/.test(data.computedAt || "")
+              ? data.computedAt
+              : null,
+            targetSha256: digest(data.nodeModules),
+            reportSha256: data.report ? digest(data.report) : null,
+            reviewsSha256: digest(
+              data.reviews || [
+                data.reviewsRevision,
+                data.reviewsError,
+                data.reviewsContextToken,
+              ],
+            ),
+          };
+        } catch {
+          return { ...receipt, unavailable: true };
+        }
+      }),
+  );
 }
 
 export const upgradeFormSnapshot = `(() => {

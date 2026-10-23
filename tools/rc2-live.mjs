@@ -16,6 +16,7 @@ import {
   loadedNavigation,
   submitUpgradeTarget,
   upgradeRequestReceipts,
+  reportResponseReceipts,
   upgradeFormSnapshot,
 } from "./browser-session.mjs";
 import { run as check } from "../bin/compat-check.mjs";
@@ -852,6 +853,7 @@ try {
           target,
           form: await evalx(upgradeFormSnapshot),
           requests: upgradeRequestReceipts(chrome.events, cursor),
+          reports: await reportResponseReceipts(chrome),
         });
         await submitUpgradeTarget(chrome, evalx, poll, target);
       };

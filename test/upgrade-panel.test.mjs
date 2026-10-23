@@ -229,7 +229,11 @@ test("a response for a different target is rejected instead of labeling it as th
 });
 
 test("metadata-only polling preserves a pending and completed upgrade preview, while a changed report invalidates it", async () => {
-  const data = ordinary(),
+  const data = {
+      ...ordinary(),
+      computedAt: "2026-10-22T00:00:00.000Z",
+      nodeModules: path.resolve("test/fixtures/labels"),
+    },
     f = fixture(),
     timers = [];
   let release,
@@ -303,6 +307,149 @@ test("metadata-only polling preserves a pending and completed upgrade preview, w
     assert.equal(
       h.find((n) => n.props["data-upgrade-result"] === "compared"),
       undefined,
+    );
+    assert.equal(h.field("目标 DSH 版本").props.value, "0.2.1-rc.2");
+    assert.equal(h.rows().length, 4);
+    h.dispose();
+  } finally {
+    fs.rmSync(f.root, { recursive: true, force: true });
+  }
+});
+
+test("review metadata full-reads keep the same report preview but invalidate changed report identities", async () => {
+  const f = fixture(),
+    timers = [];
+  const data = {
+    ...ordinary(),
+    computedAt: "2026-10-22T00:00:00.000Z",
+    nodeModules: f.nm,
+    reviews: {
+      schemaVersion: 1,
+      contextToken: "a".repeat(64),
+      revision: "0".repeat(64),
+      error: null,
+      items: [],
+      history: [],
+    },
+  };
+  let envelope = data,
+    release,
+    fullReads = 0;
+  try {
+    const { runUpgradePreview } = await import("../lib/upgrade-preview.mjs");
+    const preview = await runUpgradePreview({
+      nm: f.nm,
+      currentVersion: "0.2.0-rc.2",
+      targetVersion: "0.2.1-rc.2",
+    });
+    const h = await panelHarness(data, {
+      timers: {
+        setTimeout: (fn, ms) => {
+          assert.equal(ms, 2000);
+          timers.push(fn);
+          return fn;
+        },
+        clearTimeout: () => {},
+      },
+      fetcher: async (url) => {
+        if (String(url).includes("/upgrade-preview"))
+          return await new Promise((resolve) => {
+            release = resolve;
+          });
+        if (String(url).includes("metadata=1"))
+          return {
+            ok: true,
+            json: async () => ({
+              kind: "plugin-compat-check/report-metadata",
+              ok: true,
+              computedAt: envelope.computedAt,
+              nodeModules: envelope.nodeModules,
+              dshVersion: envelope.report.dshVersion,
+              reviewsRevision: envelope.reviews.revision,
+              reviewsContextToken: envelope.reviews.contextToken,
+              reviewsError: envelope.reviews.error,
+              cache: { hit: true },
+            }),
+          };
+        fullReads++;
+        return { ok: true, json: async () => structuredClone(envelope) };
+      },
+    });
+    const tick = async () => {
+      await timers.shift()();
+      await h.settle();
+    };
+    enter(h, "0.2.1-rc.2");
+    const pending = click(h);
+    h.render();
+    envelope = {
+      ...data,
+      reviews: { ...data.reviews, revision: "1".repeat(64) },
+    };
+    await tick();
+    assert.equal(
+      fullReads,
+      2,
+      "Changed review revision must take the actual metadata fallback full-read path",
+    );
+    assert.match(
+      h.text(),
+      /正在捕获/,
+      "A deserialized copy of the same report must not cancel the comparison",
+    );
+    release({ ok: true, json: async () => structuredClone(preview) });
+    await pending;
+    await h.settle();
+    assert.ok(h.find((n) => n.props["data-upgrade-result"] === "compared"));
+    envelope = {
+      ...envelope,
+      reviews: { ...envelope.reviews, revision: "2".repeat(64) },
+    };
+    await tick();
+    assert.equal(fullReads, 3);
+    assert.ok(
+      h.find((n) => n.props["data-upgrade-result"] === "compared"),
+      "Review-only full reads must also preserve completed evidence",
+    );
+    envelope = { ...envelope, computedAt: "2026-10-22T00:05:00.000Z" };
+    await tick();
+    assert.equal(
+      h.find((n) => n.props["data-upgrade-result"] === "compared"),
+      undefined,
+      "A new computation identity must invalidate comparison evidence even with unchanged report bytes",
+    );
+    // A report-content change must also cancel an in-flight preview, even if a producer reuses its timestamp.
+    const stale = click(h);
+    h.render();
+    envelope = structuredClone(envelope);
+    envelope.report.plugins["@label/healthy"].version = "1.0.1";
+    envelope.reviews.revision = "3".repeat(64);
+    await tick();
+    assert.doesNotMatch(h.text(), /正在捕获/);
+    release({ ok: true, json: async () => structuredClone(preview) });
+    await stale;
+    await h.settle();
+    assert.equal(
+      h.find((n) => n.props["data-upgrade-result"] === "compared"),
+      undefined,
+      "A late response for the old report must remain discarded",
+    );
+    // The context token binds source/rules/catalog identities, unlike a review revision.
+    const changedSource = click(h);
+    h.render();
+    envelope = {
+      ...envelope,
+      reviews: { ...envelope.reviews, contextToken: "b".repeat(64) },
+    };
+    await tick();
+    assert.doesNotMatch(h.text(), /正在捕获/);
+    release({ ok: true, json: async () => structuredClone(preview) });
+    await changedSource;
+    await h.settle();
+    assert.equal(
+      h.find((n) => n.props["data-upgrade-result"] === "compared"),
+      undefined,
+      "Source-bound context changes must discard the previous request",
     );
     assert.equal(h.field("目标 DSH 版本").props.value, "0.2.1-rc.2");
     assert.equal(h.rows().length, 4);

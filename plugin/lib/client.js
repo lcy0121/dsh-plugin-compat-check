@@ -3720,13 +3720,17 @@ return { createDependencyPanel:createDependencyPanel, createFindingReviewPanel:c
     function UpgradePreview(p) {
       var target = React.useState(""), state = React.useState({ phase: "idle" }), generation = React.useRef(0);
       var currentVersion = p.data.report.dshVersion;
-      // Unchanged-report metadata polls replace only the envelope.
-      // Only a new report or scan target invalidates static comparison evidence.
+      // A review revision update may fetch a fresh JSON object for the same report.
+      // Cache serialization by object reference; local form renders do not repeat it.
+      var reportIdentity = React.useRef(null);
+      if (!reportIdentity.current || reportIdentity.current.report !== p.data.report) {
+        reportIdentity.current = { report: p.data.report, content: JSON.stringify(p.data.report) };
+      }
       React.useEffect(function () {
         generation.current++;
         state[1]({ phase: "idle" });
         return function () { generation.current++; };
-      }, [currentVersion, p.data.nodeModules, p.data.report]);
+      }, [currentVersion, p.data.nodeModules, p.data.computedAt, p.data.reviews && p.data.reviews.contextToken, reportIdentity.current.content]);
       async function run() {
         var requested = String(target[0]).trim(), ticket = ++generation.current;
         state[1]({ phase: "loading" });

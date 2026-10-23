@@ -106,9 +106,10 @@ import { launchChromePipe } from "../lib/debugger.mjs";
 import {
   submitUpgradeTarget,
   upgradeRequestReceipts,
+  reportResponseReceipts,
 } from "../tools/browser-session.mjs";
 
-test("upgrade request evidence tracks completion and failure without retaining private URLs or headers", () => {
+test("upgrade request evidence tracks completion and failure without retaining private URLs or headers", async () => {
   const events = [
     {
       method: "Network.requestWillBeSent",
@@ -164,6 +165,67 @@ test("upgrade request evidence tracks completion and failure without retaining p
     /secret|127\.0\.0\.1|Authorization/,
   );
   assert.deepEqual(upgradeRequestReceipts(events, events.length), []);
+  const body = {
+    computedAt: "2026-10-23T01:02:03.000Z",
+    nodeModules: "/private/secret",
+    report: { secret: "private source" },
+    reviews: { contextToken: "secret" },
+  };
+  const chrome = {
+    events: [
+      {
+        method: "Network.requestWillBeSent",
+        params: {
+          requestId: "report",
+          request: {
+            url: "http://127.0.0.1:12/plugin-compat-check/report?token=secret",
+          },
+        },
+      },
+      { method: "Network.loadingFinished", params: { requestId: "report" } },
+    ],
+    send: async (method, { requestId }) => {
+      assert.equal(method, "Network.getResponseBody");
+      assert.equal(requestId, "report");
+      return { body: JSON.stringify(body) };
+    },
+  };
+  const reports = await reportResponseReceipts(chrome);
+  assert.equal(reports.length, 1);
+  assert.equal(reports[0].computedAt, body.computedAt);
+  assert.match(reports[0].reportSha256, /^[a-f0-9]{64}$/);
+  assert.doesNotMatch(
+    JSON.stringify(reports),
+    /secret|127\.0\.0\.1|private source/,
+  );
+  body.report.secret = "changed source";
+  assert.notEqual(
+    (await reportResponseReceipts(chrome))[0].reportSha256,
+    reports[0].reportSha256,
+  );
+  chrome.events.push(
+    ...Array.from({ length: 30 }, (_, i) => [
+      {
+        method: "Network.requestWillBeSent",
+        params: {
+          requestId: String(i),
+          request: {
+            url: "http://localhost/plugin-compat-check/report?metadata=1",
+          },
+        },
+      },
+      { method: "Network.loadingFinished", params: { requestId: String(i) } },
+    ]).flat(),
+  );
+  chrome.send = async () => {
+    throw Error("secret transport failure");
+  };
+  assert.equal((await reportResponseReceipts(chrome)).length, 24);
+  assert.ok(
+    (await reportResponseReceipts(chrome)).every(
+      (r) => r.unavailable && r.metadata,
+    ),
+  );
 });
 
 test(

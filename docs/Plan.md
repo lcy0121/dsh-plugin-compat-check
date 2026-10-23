@@ -67,7 +67,7 @@ HMR撤销route/tool/skill、计时器及诊断handle，卸载取消在途任务�
 
 独立真源`lib/upgrade-contract.mjs`：schema1、`kind:plugin-compat-check/upgrade-preview / mode:static-version-comparison`，状态compared/unsupported-version/error；两份report对应同一输入身份，changes按插件/类别/API/span分added/worsened/resolved/unchanged/improved。顶层退出码只计新增/变重：**0无、1非fatal、2含fatal、3无法预检**；严重度/确定性升高视为变重，旧风险仍保留。ok仅表示比较完成，失败证据为空，baseline/cache为null；coverage/vacuous等限制不可省略。
 
-CLI显式给nm、当前dsh-version、upgrade-to，仅文本/JSON及无操作no-baseline；拒绝probe/boot、规则/目录覆盖、baseline-file、dry-run、quiet、issue-report、profile。agent当前版本取宿主，返回upgradePreview而普通report为null；面板显式同源GET预检，拒绝过时当前版本、不同目标并发及坏负载，不替换普通报告。纯缓存轮询不撤销预检，真实报告身份或目标变化仍使旧结果失效。
+CLI显式给nm、当前dsh-version、upgrade-to，仅文本/JSON及无操作no-baseline；拒绝probe/boot、规则/目录覆盖、baseline-file、dry-run、quiet、issue-report、profile。agent当前版本取宿主，返回upgradePreview而普通report为null；面板显式同源GET预检，拒绝过时当前版本、不同目标并发及坏负载，不替换普通报告。纯缓存及仅人工处置修订的完整报告重读不撤销预检；重新计算时间、报告正文、输入身份令牌或目标变化仍使旧结果失效。
 
 ### 2.8 健康检查、依赖关系与人工处置
 
