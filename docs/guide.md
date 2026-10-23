@@ -1,6 +1,6 @@
 # 使用与验证指南
 
-以下为当前未发布源码的工作流；公开0.1.4不因此获得这些能力。先按[源码打包说明](../plugin/README.md#从源码构建安装)构建完整tgz。三项能力共用普通报告的身份与证据边界，均不能把声明放行、激活或无发现改称业务验收通过。
+本指南对应0.1.5。面板能力可安装npm插件使用，CLI、健康执行器与作者CI从仓库运行；本地构建见[源码打包说明](../plugin/README.md#从源码构建安装)。三项能力共用普通报告的身份与证据边界，均不能把声明放行、激活或无发现改称业务验收通过。
 
 ## 可选功能健康检查
 
@@ -76,7 +76,7 @@ node --test test/functional-health.test.mjs test/dependency-graph.test.mjs test/
 
 ## 日常检查与源码交付
 
-仓库CLI的快速开始及参数见[README](../README.md)，npm插件的完整tgz构建见[plugin README](../plugin/README.md#从源码构建安装)。安装依赖时使用冻结lock且禁用lifecycle脚本：
+仓库CLI快速开始见[README](../README.md)，完整参数运行`node bin/compat-check.mjs --help`；npm插件的完整tgz构建见[plugin README](../plugin/README.md#从源码构建安装)。安装依赖时使用冻结lock且禁用lifecycle脚本：
 
 ```sh
 npm ci --ignore-scripts --no-audit --no-fund

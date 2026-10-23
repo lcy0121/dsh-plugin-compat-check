@@ -356,26 +356,77 @@ try {
       "Actual subpath metadata check failed",
     );
     result.subpathMetadata = true;
-    // Build and install the exact local candidate independently of the checkout.
-    const profile = await init("rc2-ui"),
-      source = path.join(root, "source");
-    fs.mkdirSync(source);
-    for (const d of ["lib", "rules", "plugin", "skill"])
-      fs.cpSync(path.join(repo, d), path.join(source, d), {
-        recursive: true,
-        filter: (f) =>
-          path.basename(f) !== "node_modules" &&
-          f !== path.join(repo, "plugin", "kernel"),
-      });
-    for (const file of ["LICENSE", "THIRD_PARTY_NOTICES.md"])
-      fs.copyFileSync(path.join(repo, file), path.join(source, file));
-    await exec("npm", [
-      "pack",
-      path.join(source, "plugin"),
-      "--silent",
-      "--pack-destination",
-      root,
-    ]);
+    // Install either the selected release bytes or an independently packed checkout.
+    const profile = await init("rc2-ui");
+    if (process.env.DSC_RC2_ARTIFACT) {
+      const artifact = path.resolve(process.env.DSC_RC2_ARTIFACT);
+      const before = fs.lstatSync(artifact);
+      requireTrue(
+        artifact.endsWith(".tgz") &&
+          before.isFile() &&
+          before.size > 0 &&
+          before.size <= 32 * 1024 * 1024,
+        "Expected a regular non-symlink release tgz of at most 32 MiB",
+      );
+      const same = (a, b) =>
+        ["dev", "ino", "size", "mtimeMs", "ctimeMs"].every(
+          (key) => a[key] === b[key],
+        );
+      const fd = fs.openSync(
+        artifact,
+        fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW,
+      );
+      try {
+        requireTrue(
+          same(before, fs.fstatSync(fd)),
+          "Release tgz changed before copy",
+        );
+        const bytes = Buffer.alloc(before.size + 1);
+        let length = 0;
+        while (length < bytes.length) {
+          const n = fs.readSync(fd, bytes, length, bytes.length - length, null);
+          if (!n) break;
+          length += n;
+        }
+        const after = fs.lstatSync(artifact);
+        requireTrue(
+          length === before.size &&
+            after.isFile() &&
+            same(before, after) &&
+            same(before, fs.fstatSync(fd)),
+          "Release tgz changed during copy",
+        );
+        fs.writeFileSync(
+          path.join(root, "candidate.tgz"),
+          bytes.subarray(0, length),
+          {
+            flag: "wx",
+            mode: 0o600,
+          },
+        );
+      } finally {
+        fs.closeSync(fd);
+      }
+    } else {
+      const source = path.join(root, "source");
+      fs.mkdirSync(source);
+      for (const d of ["lib", "rules", "plugin", "skill"])
+        fs.cpSync(path.join(repo, d), path.join(source, d), {
+          recursive: true,
+          filter: (f) =>
+            path.basename(f) !== "node_modules" &&
+            f !== path.join(repo, "plugin", "kernel"),
+        });
+      for (const file of ["LICENSE", "THIRD_PARTY_NOTICES.md"])
+        fs.copyFileSync(path.join(repo, file), path.join(source, file));
+      await exec("npm", [
+        "pack",
+        path.join(source, "plugin"),
+        "--silent",
+        "--pack-destination",
+        root,
+      ]);
+    }
     const tgz = fs.readdirSync(root).filter((f) => f.endsWith(".tgz"));
     requireTrue(tgz.length === 1, "Expected one candidate tgz");
     result.artifactSha256 = crypto

@@ -1,6 +1,6 @@
 # 插件作者 CI
 
-这是未发布源码中的仓库工具。它对**同一已构建插件目录**建立只读快照，使用现有内核逐个比较已认证精确版本的 API 目录；不安装依赖、执行插件、启动 DSH、联网、调用模型或读取用户 profile 的探针、豁免、基线。请先在自己的构建流程生成实际要交付的代码。目录的`package.json`需有第三方npm包名、精确版本及对象形式的`dsh`声明；不要把已安装的`node_modules`打入选定目录，符号链接会被拒绝。
+这是0.1.5仓库提供的作者工具，不作为npm插件CLI分发。它对**同一已构建插件目录**建立只读快照，使用现有内核逐个比较已认证精确版本的 API 目录；不安装依赖、执行插件、启动 DSH、联网、调用模型或读取用户 profile 的探针、豁免、基线。请先在自己的构建流程生成实际要交付的代码。目录的`package.json`需有第三方npm包名、精确版本及对象形式的`dsh`声明；不要把已安装的`node_modules`打入选定目录，符号链接会被拒绝。
 
 ```bash
 node tools/author-ci.mjs --package ./dist-plugin > compatibility.json
@@ -48,4 +48,4 @@ node tools/author-ci.mjs --package ./dist-plugin --policy ./policy.json > compat
 exit "$code"
 ```
 
-工具目前随本仓库提供，不能假定公开 npm 0.1.4 包含它。使用固定仓库提交及已审查锁文件，`npm ci --ignore-scripts`，遵守项目Node版本要求；不要在拉取请求中使用高权限工作流或运行来自不可信报告的命令。参照仓库[固定样本工作流](../.github/workflows/static-batch.yml)的只读权限、固定Actions提交和有限制品保留时间。静态样本工作流不是作者业务验收。
+工具仅随本仓库提供，npm 0.1.5插件包不提供此CLI。使用固定仓库提交及已审查锁文件，`npm ci --ignore-scripts`，遵守项目Node版本要求；不要在拉取请求中使用高权限工作流或运行来自不可信报告的命令。参照仓库[固定样本工作流](../.github/workflows/static-batch.yml)的只读权限、固定Actions提交和有限制品保留时间。静态样本工作流不是作者业务验收。

@@ -8,23 +8,14 @@
 
 ## 버전과 진입점
 
-npm `latest`는 **0.1.4**이며 Node `^22.19.0 || >=24`를 지원합니다. 해당 공개 버전에는 활성화 전제 설명, Origin 유효 포트 검사, npm 하위 디렉터리 메타데이터와 저장소 엔지니어링 진단이 포함됩니다. 전달 상태·검증·후속 작업은 [Plan](docs/Plan.md)을 참고하세요.
+**0.1.5** · Node `^22.19.0 || >=24`. npm 플러그인은 호환성 탭, 플러그인별 발견·배지, `compat_check`, skill provider를 제공합니다. 저장소의 CLI, 설치 검사와 개발 도구는 같은 판정 커널을 사용합니다. npm 패키지에는 **CLI bin이 없으며** `npx dsh-plugin-compat-check`를 지원하지 않습니다. 배포·검증·후속 작업은 [Plan](docs/Plan.md)을 참고하세요.
 
-| 진입점 | 역할 |
-|---|---|
-| npm 플러그인 | 호환성 탭, 플러그인별 발견·배지, `compat_check`, skill provider |
-| 저장소 CLI | 설치된 플러그인 검사, 관측 파일 읽기 또는 명시적 임시 호스트 시작 |
-| 저장소 설치 검사 | 임시 profile에 spec을 설치·시작하고 검사 |
-| skill | 같은 도구 또는 CLI 사용 안내; [전달 설명](skill/README.md) |
+## 화면 예시
 
-하나의 판정 커널을 공유하며 입력과 관측 증거가 같을 때만 동일한 결과를 기대할 수 있습니다. npm 패키지에는 **CLI bin이 없어** `npx dsh-plugin-compat-check`를 사용할 수 없습니다.
+기록된 상세 화면은 보고서 표현을 보여 주며 완전한 호환 인증이 아닙니다.
 
-## UI 예시
-
-기록된 상세 페이지는 보고서 표시 예시이며 전체 호환성 인증이 아닙니다:
-
-![부분 사용 가능: 소스 위치·영향·근거](plugin/assets/compat-detail-partial.png)
-![선언 충돌: 도구 추론과 호스트 경고 구분](plugin/assets/compat-detail-declared.png)
+![부분 사용 가능: 위치, 영향과 근거](plugin/assets/compat-detail-partial.png)
+![선언 충돌: 추론된 위험과 호스트 안내](plugin/assets/compat-detail-declared.png)
 
 ## 빠른 시작
 
@@ -34,13 +25,11 @@ npm `latest`는 **0.1.4**이며 Node `^22.19.0 || >=24`를 지원합니다. 해�
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
-DSH 0.2.1-rc.2 경로: **더 보기 → 설정 → 내장 플러그인 → 호환성**. agent는 `compat_check`를 호출할 수 있습니다. 실제 profile을 선택하고 desktop을 기본으로 가정하지 마세요.
+DSH 0.2.1-rc.2: **더 보기 → 설정 → 내장 플러그인 → 호환성**. 실제 profile을 선택하세요. desktop을 기본으로 가정하지 않습니다. agent는 `compat_check`를 호출할 수 있습니다.
 
-미출시 소스는 같은 플러그인 이름의 중복 설치를 명확히 거부하며 기준선을 갱신하지 않습니다. 일반 보고서는 대상 DSH, 참조 카탈로그 버전·해시와 검증 범위를 구분하고, 미지·미래 버전 및 사용자 카탈로그는 미인증으로 표시합니다. [카탈로그 관리 절차](docs/maintaining.md#api目录候选审查)를 참고하세요. 저장소 도구의 YAML 의존성도 수정했으며 npm 플러그인 런타임 의존성에는 해당하지 않습니다.
+0.1.5는 검색·조합 필터, 발견 접기, 전체 보고서 미리 보기·복사, 기준선 대비 새 위험과 다음 확인 단계를 제공합니다. 설치/loader 이벤트와 5초 주기 확인으로 캐시를 갱신하며 필터와 이전 결과를 유지하고 실패 원인을 표시합니다. 보고서에는 대상, 카탈로그 버전·해시와 검증 범위가 표시됩니다. 중복 플러그인 식별자는 판정 불가로 처리하며 기준선을 갱신하지 않습니다. 연결된 probe의 미래 시각 오차가 5분을 넘으면 해당 증거를 거부하고 정적 발견과 이유를 유지합니다.
 
-미출시 소스는 검사 시계보다 5분 넘게 앞선 바인딩된 probe의 증거를 무시하고 이유를 표시합니다. CI에 독립 의존성 보안 검사를 추가했으며 개발자는 `npm run security:dependencies`로 실행할 수 있습니다. [의존성 보안 안내](docs/maintaining.md#依赖公告与ci供应链)를 참고하세요.
-
-미출시 소스에는 의존 관계·잠재적 영향, 발견별 수동 검토, 오프라인 건강 검사 기록 가져오기가 추가됩니다. 의존 관계는 host/client와 필수·선택·하위 범위를 구분하며, 제공 선언은 후보일 뿐이고 경로나 순환이 실제 장애를 증명하지 않습니다. 대기·검토 완료·오탐·수정 완료와 근거는 별도로 저장하며, 소스·버전·규칙 등이 바뀌면 재검토합니다. 기록은 발견을 숨기거나 기준선·호환성 예외를 바꾸지 않습니다. 건강 검사는 저장소 CLI의 명시적 `--run`에서만 실행하고 기본 동작은 선언 검토입니다. 패널은 과거 기록만 가져오므로 현재 설치 산출물을 인증하지 않습니다. [작업 흐름·한도·고아 잠금 복구](docs/guide.md)를 참고하세요.
+의존 관계는 host/client, 필수/선택과 하위 범위를 구분합니다. 제공 선언은 **후보**이며 경로나 순환은 실제 장애를 입증하지 않습니다. 수동 검토 기록은 별도로 저장하고 식별 정보가 바뀌면 재검토하며 발견·판정·기준선·면제를 덮어쓰지 않습니다. 건강 패널은 **과거 JSON만 가져오며** 검사를 실행하지 않습니다. 과거 통과는 현재 산출물의 정상 동작을 증명하지 않습니다. [사용 안내](docs/guide.md)를 참고하세요.
 
 ### 저장소 CLI
 
@@ -52,67 +41,54 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 node bin/compat-check.mjs --help
 ```
 
-| 옵션 | 기능 |
+| 옵션 | 역할 |
 |---|---|
-| `--nm <dir>` | 필수; profile 또는 node_modules 디렉터리 |
-| `--probe <json>` / `--probe-boot` | 관측 파일 읽기 / 명시적 임시 호스트 시작; 함께 주면 파일 우선 |
-| `--dsh-version <v>` | 선언·카탈로그 선택 대상 버전, 명시 값 우선 |
-| `--json` / `--quiet` | 전체 JSON / 요약만 출력 |
-| `--no-baseline` / `--dry-run` | 기준선 읽기·쓰기 금지 / 쓰지 않고 비교 |
-| `--baseline-file <path>` | 기준선 파일 지정 |
-| `--issue-report` | 기본 비식별 Markdown; 기준선 읽기·쓰기 없음; json/quiet와 상호 배타적 |
-| `--rules <json>` / `--catalog <json>` | 규칙 / API 카탈로그 지정 |
-| `--probe-timeout <초>` / `--probe-keep-dir <dir>` | 시작 대기 기본40초 / 명시적 비공개 디렉터리에 probe 증거 보존 |
-| `--help` / `--version` | 전체 도움말 / 도구 버전, 대상 불필요 |
+| `--nm <dir>` | 필수 profile 또는 node_modules 경로 |
+| `--dsh-version <v>` | 일반 검사의 명시적 대상 버전 |
+| `--probe <json>` / `--probe-boot` | 관측 읽기 / 명시적 임시 호스트 시작; 파일 우선 |
+| `--json` / `--quiet` | 전체 JSON / 요약 행 |
+| `--no-baseline` / `--dry-run` | 기준선 읽기·쓰기 금지 / 비교만 수행 |
+| `--baseline-file <path>` | 기준선 파일 선택 |
+| `--issue-report` | 기본 익명화 Markdown; 기준선 접근 없음; json/quiet과 배타적 |
+| `--rules <json>` / `--catalog <json>` | 규칙 / API 카탈로그 재정의 |
+| `--help` / `--version` | 전체 도움말 / 도구 버전; 대상 불필요 |
 
-`--issue-report`에는 패키지 이름과 패키지 상대 경로가 남으므로 공유 전 확인하세요. 원시 로그·probe·기준선은 제외하며 자동 게시하지 않습니다. 비공개 작업 디렉터리와 엔지니어링 진단도 그대로 공유할 보고서가 아닙니다.
+공유 전 보고서를 확인하세요. 익명화 후에도 플러그인 이름과 패키지 상대 경로가 남습니다. 원본 로그·probe·기준선은 제외하며 자동 게시하지 않습니다. probe 예산과 추가 옵션은 `--help`에 있습니다.
 
-### 업그레이드 전 호환성 미리 검사（미출시 소스）
+### 업그레이드 전 호환성 미리 보기
 
-```bash
-node bin/compat-check.mjs --nm <profile-or-node_modules> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json
-```
-
-이 모드의 `--dsh-version`은 명시적인 **현재 정확한 버전**, `--upgrade-to`는 대상 버전입니다. 양쪽 모두 알려진 카탈로그가 있는 **0.2.0-rc.2 또는 0.2.1-rc.2**만 지원합니다. 알 수 없는 버전이나 범위는 카탈로그 대체 없이 `status=unsupported-version`, 종료3과 미인증 안내를 반환합니다. 일반 텍스트는 `--json`을 생략하세요. npm 패키지에는 CLI bin이 없습니다.
-
-미출시 플러그인 소스의 호환성 페이지에서 대상 DSH 버전을 입력하고 미리 검사 버튼을 명시적으로 누를 수 있습니다. agent는 `compat_check({"upgradeTo":"0.2.1-rc.2"})`를 호출하고 필요하면 실제 `profile`을 지정합니다. 현재 버전은 실행 중인 호스트에서 가져옵니다. 이 기능은 소스에서 완전한 tgz를 빌드하여 사용하세요.
-
-설치된 플러그인의 동일한 비공개 바이트 복사본을 두 카탈로그와 선언 정책으로 정적 비교합니다. 결과는 설치 산출물 SHA-256, 카탈로그 파일·출처·해시, 양쪽 보고서, 변경 사항과 증거 범위를 보존합니다. 대상 코드를 실행하거나 호스트를 시작·업그레이드하지 않으며 런타임 관측, probe, profile 예외, 보고서 캐시와 기준선을 사용하지 않습니다. 제한된 복사와 일관성 검사는 OS 원자적 스냅샷이 아닙니다.
-
-최상위 종료 코드는 **신규·악화 위험**만 뜻합니다: 0=없음, 1=비치명적 위험, 2=치명적 위험 포함, 3=검사 불가. 기존 위험은 `targetReport`에 남을 수 있으므로 0이 대상 호환성이나 업무 성공을 인증하지 않습니다. certainty/impactBasis, coverage/vacuous, 불완전 스캔과 미검증 클라이언트 정보를 유지하세요. probe/boot, 규칙·카탈로그 지정, baseline-file, dry-run, quiet, issue-report 옵션은 거부하며 `--no-baseline`은 선택적인 무동작 옵션입니다. 독립 계약은 [Plan §2.7](docs/Plan.md#27-升级前静态预检契约)을 참고하세요.
-
-### 고정 표본 정적 일괄 검사（저장소 도구）
+패널에 대상 버전을 입력하거나 `compat_check({"upgradeTo":"0.2.1-rc.2"})`를 호출하면 현재 버전은 실행 중인 호스트에서 읽습니다. 저장소 CLI에는 현재·대상 정밀 버전을 모두 지정해야 합니다.
 
 ```bash
-node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.json
-node tools/static-batch.mjs --manifest test/fixtures/static-batch.json --previous batch.json > next.json
-node tools/static-batch.mjs --hash <로컬-패키지-디렉터리>
+node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json
 ```
 
-매니페스트에 패키지 이름·정확한 버전·전체 파일 트리 SHA-256을 고정합니다. 비공개 복사본을 검증한 뒤 같은 커널로 각각 분석합니다. 최대16개, 항목당10초, 전체60초이며 대상 설치·실행, probe·기준선 읽기는 하지 않습니다. 종료0/1/2는 정적 판정, 3은 입력·해시·예산·도구 오류입니다. 합성 예제는 의도적으로2를 반환합니다. 모든 결과는 **작성자 검토 대기**이며 제한된 범위·공허한 판정·불완전 스캔 정보를 유지합니다. 업무 기능 인증이 아닙니다. 증분 비교도 매번 다시 분석하며 분석 대상·분석기 소스·규칙·카탈로그·대상 버전·예산이 바뀌면 비교하지 않습니다. JSON 공유 전에 확인하세요.
+양쪽 모두 **0.2.0-rc.2, 0.2.1-rc.2**만 지원합니다. 알 수 없는 버전·범위는 카탈로그 대체 없이 `status=unsupported-version`, 종료3을 반환합니다. 동일 플러그인의 비공개 바이트 사본을 한 번 정적으로 추출한 뒤 양쪽 카탈로그·선언으로 독립 판정합니다. 산출물 해시, 카탈로그 출처·해시, 양쪽 보고서, 차이와 증거 한계를 유지합니다. worker 예산·정리가 적용되며 OS 원자적 스냅샷은 아닙니다.
 
-형식·해시 알고리즘·권한과 비용 결정은 [Plan §2.5](docs/Plan.md#25-有限静态批量契约)를 참고하세요. 수동 [static-batch.yml](.github/workflows/static-batch.yml) Action은 저장소의 고정 공개 표본만 읽기 전용 권한으로 분석합니다. 원격 엔드포인트나 결과 캐시는 배포하지 않았으며 npm 플러그인에는 포함되지 않습니다.
+플러그인 실행이나 호스트 설치·업그레이드를 하지 않고 runtime, probe, profile 면제, 일반 캐시·기준선을 사용하거나 제품 상태를 쓰지 않습니다. 종료 **0/1/2**는 각각 새로 생기거나 악화된 위험 없음/비치명적 위험/치명적 위험이며 **3**은 실행 불가입니다. 대상의 기존 문제는 `targetReport`에 남습니다. **종료0은 대상 사용 가능이나 업그레이드 후 업무 성공을 보장하지 않습니다.** 옵션 제한은 [계약](docs/Plan.md#27-升级前静态预检契约)을 참고하세요.
 
-### 설치 검사와 독립 skill
+### 저장소 작업 흐름
 
 ```bash
 node bin/check-install.mjs <spec> --json
-./dsh-plugin-compat-check.sh <spec> --json
 ./dsh-plugin-compat-check.sh --install-skill
+node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.json
 ```
 
-설치 검사에는 Node·DSH·pnpm이 필요하며 DSH의 npm/GitHub/git/file spec을 지원합니다. `--keep`, `--timeout`(기본30초)을 사용할 수 있습니다. 설치 중 네트워크를 사용할 수 있고 호스트를 시작해 대상 플러그인을 실행하므로 **임시 profile은 OS 샌드박스가 아닙니다**. 기존 독립 skill 덮어쓰기는 `--force`가 필요하며 위치는 [skill 설명](skill/README.md)을 참고하세요.
+설치 검사는 Node, DSH, pnpm이 필요하며 npm/GitHub/git/file spec, `--keep`, `--timeout`(기본30초)을 지원합니다. 네트워크에 접속하고 호스트를 시작하며 플러그인을 실행할 수 있습니다. **임시 profile은 OS 샌드박스가 아닙니다.** 기존 독립 skill을 덮어쓰려면 `--force`가 필요합니다. [skill 안내](skill/README.md)를 참고하세요.
 
-저장소 루트는 private 개발 워크스페이스이며 설치 가능한 플러그인이 아닙니다. 소스는 완전한 tgz로 pack한 뒤 DSH로 설치하세요. 루트 GitHub spec이나 준비되지 않은 `plugin/` 복사본은 완전한 산출물과 같지 않습니다. [소스 패키징](plugin/README.md#从源码构建安装)을 참고하세요.
+정적 배치 목록은 버전·파일 트리 해시를 고정하며 최대16개, 항목당10초, 전체60초입니다. 대상 설치·실행이나 probe·기준선 접근은 하지 않습니다. 결과는 작성자 검토 대상이며 업무 인증이 아닙니다. 예제는 종료2를 기대합니다. 작성자 CI는 위험·증거 범위 게이트, JSON/SARIF/JUnit과 버전 행렬을 제공합니다. 건강 실행기는 기본 검토 모드이며 대상 명령 실행에 명시적 `--run`과 해당 실행의 승인이 필요합니다. **OS 샌드박스가 아닙니다.** 이 도구들과 실제 플러그인·브라우저·모델 회귀 검사는 저장소 전용으로 npm에 포함되지 않습니다. [안내](docs/guide.md), [작성자 CI](docs/author-ci.md), [유지 관리](docs/maintaining.md)를 참고하세요.
+
+private 저장소 루트는 활성화 가능한 플러그인이 아닙니다. 소스 설치에는 완전한 tgz가 필요하며 루트 GitHub spec이나 `plugin/` 단순 복사로 대체할 수 없습니다. [소스 패키징](plugin/README.md#从源码构建安装)을 참고하세요.
 
 ## 결과와 한계
 
-일반 CLI/Node 설치 검사 종료 코드: **0** 보고된 문제 없음, **1** 부분 사용 가능 또는 미확정, **2** 비호환 또는 설치 peer 차단, **3** 입력·실행 오류로 판정 불가. 업그레이드 미리 검사는 위의 별도 차이 종료 코드를 사용합니다. shell은 Node 진입 전 사용법·커널 오류 코드를 유지하므로 자동화에는 Node 진입점과 `status`를 사용하세요.
+일반 CLI/Node 설치 검사 종료 코드: **0** 발견 없음, **1** 부분 사용 가능·알 수 없음, **2** 비호환·peer 게이트 거부, **3** 입력·실행 오류. 업그레이드 미리 보기는 앞의 차이 코드를 사용합니다. 자동화에서는 Node 진입점과 `status`를 확인하세요.
 
-- `certainty`, `impactBasis`, `coverage`, `vacuous`를 함께 전달하세요. 미확인·미관측·누락된 키는 부재가 아니며 카탈로그는 런타임 관측이 아닙니다. 클라이언트 기능은 별도 검증이 필요합니다.
-- 기본 정적 CLI는 DSH를 시작하거나 대상을 설치하지 않습니다. 호스트 검사는 외부 명령·네트워크 없이 예산이 있는 분석 worker를 사용합니다. 기준선은 기본 기록하므로 일회성 검사에는 `--no-baseline`을 쓰세요.
-- 메서드 분석은 유한한 Babel AST·패키지 내부 값 흐름을 사용하며 동적 동작은 제한됩니다. 선언·API 위험은 업무 동작을 보장하지 않습니다. 현대 관측은 profile·버전·시간이 맞아야 하며 다른 profile의 증거를 빌리지 않습니다.
-- 0.1.3부터 새 DSH 선언 규칙, 정확한 버전 예외와 rc.2 카탈로그를 지원합니다. 미래 DSH는 미검증입니다. macOS/Linux의 한정된 증거가 있으며 Windows는 실제 검증 대기 중입니다. [계약과 한계](docs/Plan.md#2-现行判定与集成契约)를 참고하세요.
+- `certainty`, `impactBasis`, `coverage`, `vacuous`를 유지하세요. 알 수 없음·미관측·생략된 키는 API 부재가 아닙니다. 카탈로그는 runtime 표면이 아니며 client 업무 기능은 별도 검증해야 합니다.
+- 기본 정적 CLI는 DSH를 시작하거나 대상을 설치하지 않습니다. 호스트 내 검사는 외부 명령·네트워크 없이 제한된 worker를 사용합니다. 일반 검사는 기본적으로 자체 기준선을 쓰며 일회성 검사에는 `--no-baseline`을 사용하세요. 불완전한 스캔은 기준선을 갱신하지 않습니다.
+- 제한된 Babel AST·패키지 내 값 흐름은 소스를 실행하지 않으며 동적 동작의 증거 범위는 제한적입니다. 현대 관측은 profile·버전·시효가 일치해야 하며 다른 profile의 증거를 빌리지 않습니다.
+- 일반 검사는 DSH 선언 정책과 정확한 호환 면제를 지원합니다. 알 수 없는·미래 버전과 사용자 카탈로그는 미인증입니다. macOS/Linux는 제한적으로 검증했으며 Windows는 실제 검증 대기입니다. [전체 계약](docs/Plan.md#2-现行判定与集成契约)을 참고하세요.
 
 ## 개발과 문서
 
@@ -125,26 +101,10 @@ node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-기본 테스트는 실제 DSH나 모델을 실행하지 않습니다. 패키징 회귀는 비공개 빈 캐시로 설치하므로 npm registry 접속이 필요합니다. `doc-check`는 테스트를 재귀 실행하지 않습니다. 메타데이터 검사는 gh/npm·네트워크가 필요하며 미배포 README 차이는 notice, 조회 불가는 미검증입니다. 배포 전 검사 자체는 버전을 배포하지 않습니다.
+기본 테스트는 실제 DSH·모델을 시작하지 않으며 패키징 회귀에는 npm registry가 필요합니다. `doc-check`는 테스트를 재귀 실행하지 않습니다. 메타데이터 검증에는 gh/npm과 네트워크가 필요하며 조회 실패는 통과가 아닙니다. 사전 검사는 버전을 게시하지 않습니다.
 
-[Plan: 계약·검증·후속 작업](docs/Plan.md) · [current-state.json: 통계·증거](docs/current-state.json) · [규칙](rules/README.md) · [skill](skill/README.md). 엔지니어링 진단, 독립 업무 측정과 명시적 모델 테스트의 명령·권한 경계는 [재현 안내](docs/guide.md#日常检查与源码交付)에 있으며 이 개발 도구들은 npm 플러그인에 포함되지 않습니다.
-
-플러그인 작성자는 미출시 [작성자 CI 도구](docs/author-ci.md)로 신규 위험·범위 게이트, JSON/SARIF/JUnit 출력과 인증된 버전 행렬을 사용할 수 있습니다.
-
-다음 목록에 수록되어 있습니다:
-
-- [Awesome DSH Plugin (주요 카탈로그)](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)
-- [Awesome DeepSeek Harness](https://github.com/0xsline/awesome-deepseek-harness)
-- [dsh.works 플러그인 카탈로그](https://github.com/dshworks/awesome-dsh-plugins)
-- [Bruce의 Awesome DSH Plugins](https://github.com/bruc3van/awesome-dsh-plugin)
-- [1024 생태계 카탈로그](https://github.com/imsai-sh/awesome-deepseek-harness-plugins) ([1024 Store](https://deepseek1024.com)에 표시)
-
-수록은 호환성 인증을 뜻하지 않습니다. 1024 Store의 npm 설치 방식은 아직 상위 프로젝트의 수정이 필요합니다. 상태는 [Plan](docs/Plan.md)을 참고하세요.
-
-아직 배포되지 않은 소스에는 플러그인 검색, 결론·확실성·미검증 상태의 조합 필터, 접을 수 있는 발견 항목, 전체 보고서 미리보기/복사, 기준선 기반 신규 위험 보기가 추가됩니다. 일반 보고서는 플러그인·관측 정보가 바뀌면 이벤트와 5초 주기 점검으로 갱신되며 필터와 이전 결과를 유지합니다. 업그레이드 입력 캡처·해시·정리는 제한된 worker에서 실행되고 플러그인 해제 시 취소됩니다. 각 발견에는 근거에 맞는 확인 절차가 제공되며 필터는 내보낼 보고서를 줄이지 않습니다. 실제 플러그인 고정 회귀 도구는 저장소에서만 사용합니다: `node tools/real-regression.mjs --live --out-dir <빈-디렉터리>` 또는 `--replay <증거-루트>`. 현재 큐는 조정에 사용하지 않은 두 계열을 포함한 버전과 해시를 고정한 패키지 5개와 회차당 24개 사례를 다룹니다. [샘플 출처](docs/maintaining.md#真实插件回归)를 참고하세요. 통과는 고정 결과 재현을 뜻하며 오탐/누락을 그대로 기록합니다. 범위와 예산은 [Plan](docs/Plan.md)을 참고하세요.
+[Plan](docs/Plan.md) · [계수와 증거](docs/current-state.json) · [규칙](rules/README.md) · [사용 안내](docs/guide.md) · [유지 관리·카탈로그 관리](docs/maintaining.md). 생태계 등재와 상위 프로젝트 후속 작업은 Plan에서 추적하며 등재가 호환 인증을 의미하지 않습니다.
 
 ## License
 
-[MIT](LICENSE)
-
-서드파티 의존성과 해당 라이선스는 다음 문서에 공개되어 있습니다: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE) · 제삼자 의존성과 라이선스: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

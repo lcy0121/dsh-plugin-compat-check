@@ -1,5 +1,6 @@
 import { after, test } from "node:test";
 import assert from "node:assert/strict";
+import { TOOL_VERSION } from "../lib/version.mjs";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import { writePackageFixture } from "./fixture-utils.mjs";
@@ -232,6 +233,11 @@ test("help and version remain independent of upgrade inputs and nm", () => {
     const result = cli(["--upgrade-to", "0.2.1-rc.2", flag]);
     assert.equal(result.code, 0, result.out + result.err);
     assert.equal(result.err, "");
-    assert.match(result.out, flag === "--help" ? /--upgrade-to/ : /0\.1\.4/);
+    if (flag === "--help") assert.match(result.out, /--upgrade-to/);
+    else
+      assert.equal(
+        result.out.trim(),
+        `dsh-plugin-compat-check ${TOOL_VERSION}`,
+      );
   }
 });

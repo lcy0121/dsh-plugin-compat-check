@@ -1,6 +1,6 @@
 {
-  "toolVersion": "0.1.4",
-  "recordedAt": "2026-10-23T07:02:48.599Z",
+  "toolVersion": "0.1.5",
+  "recordedAt": "2026-10-23T07:55:36.839Z",
   "testFiles": 64,
   "tests": 882,
   "repositoryFiles": {
@@ -21,74 +21,6 @@
         "0.2.1-rc.2"
       ],
       "scope": "Reviewed catalogue bytes and version-specific integration only; not business-health certification."
-    },
-    "latestLocalAcceptance": {
-      "recordedAt": "2026-10-22T17:29:23.578068+00:00",
-      "commit": "10eaeba",
-      "nodeVersion": "26.12.1",
-      "dshVersion": "0.2.1-rc.2",
-      "candidateSha256": "843e050260158bc9c94b72f0393126fbc6a0b67fced8658b2fcff6d7d5945b9e",
-      "healthFixtureSha256": "8cc1f5b4aaf233c53996c9cb74b438eef3c46aa1d868fb4d80162f1aed19ca1b",
-      "healthPhases": [
-        {
-          "phase": "normal",
-          "status": "tested-pass",
-          "resultSha256": "3ae2cd323070bfded95fb80cd689c6215650fb73167a1c958a87735a64d1707b",
-          "cleanup": {
-            "stopped": true,
-            "removed": true
-          }
-        },
-        {
-          "phase": "http503",
-          "status": "tested-failed",
-          "resultSha256": "6259c565939b7d0ff957ed45d4c9f4579aa54818b7896b137a0b9bb8ac42e2b8",
-          "cleanup": {
-            "stopped": true,
-            "removed": true
-          }
-        },
-        {
-          "phase": "missing-control",
-          "status": "tested-failed",
-          "resultSha256": "7ce4d4f8e383afd5ca96d2b6e90e7898dbff4652a3811cf2e2479e28acbd9299",
-          "cleanup": {
-            "stopped": true,
-            "removed": true
-          }
-        },
-        {
-          "phase": "recovered",
-          "status": "tested-pass",
-          "resultSha256": "64f13ec5d107d8f3d38a7231638d3c3090a7a7fc0e805292a2e26accfef24d35",
-          "cleanup": {
-            "stopped": true,
-            "removed": true
-          }
-        }
-      ],
-      "candidateUI": {
-        "realBrowser": true,
-        "dependencyView": true,
-        "manualReviewPersisted": true,
-        "ordinaryReportUnchanged": true,
-        "baselineUnchanged": true,
-        "healthImportAvailable": true,
-        "importedHealth": {
-          "artifact": {
-            "name": "dsh-plugin-health-acceptance-fixture",
-            "version": "1.0.0",
-            "sha256": "8cc1f5b4aaf233c53996c9cb74b438eef3c46aa1d868fb4d80162f1aed19ca1b"
-          },
-          "manifestSha256": "265ae3d2575d6ed6ff7f4d2e527c5d31cb3e6d3ad420dcd1f466ba42e7934e34",
-          "historicalOnly": true,
-          "ordinaryReportUnchanged": true
-        }
-      },
-      "cleanup": {
-        "privateRootRemoved": true
-      },
-      "scope": "Historical local macOS arm64 candidate acceptance; no claim for later source, other platforms or public npm contents."
     },
     "upstreamAcceptance20261021": {
       "checkedAt": "2026-10-21T07:11:03.384Z",
@@ -112,7 +44,7 @@
       "Windows real-host acceptance remains unverified.",
       "Optional health executor is not an OS sandbox and imported results are historical.",
       "Crashed manual-review writers may require confirmed-orphan lock cleanup.",
-      "Source changes are newer than public npm 0.1.4; release and remote CI evidence must be tied to their exact artifact or commit."
+      "Release 0.1.5 evidence is scoped to the exact archive, commit and supported DSH versions; future hosts are not certified."
     ],
     "history": {
       "commit": "10eaeba",
@@ -252,6 +184,141 @@
         "generatedContracts": "passed"
       },
       "scope": "Consolidate cohesive UI delivery and repeated fixture writes; retain distinct author/engineering/business tool contracts and behavior regressions."
+    },
+    "historicalLocalAcceptance20261022": {
+      "recordedAt": "2026-10-22T17:29:23.578068+00:00",
+      "commit": "10eaeba",
+      "nodeVersion": "26.12.1",
+      "dshVersion": "0.2.1-rc.2",
+      "candidateSha256": "843e050260158bc9c94b72f0393126fbc6a0b67fced8658b2fcff6d7d5945b9e",
+      "healthFixtureSha256": "8cc1f5b4aaf233c53996c9cb74b438eef3c46aa1d868fb4d80162f1aed19ca1b",
+      "healthPhases": [
+        {
+          "phase": "normal",
+          "status": "tested-pass",
+          "resultSha256": "3ae2cd323070bfded95fb80cd689c6215650fb73167a1c958a87735a64d1707b",
+          "cleanup": {
+            "stopped": true,
+            "removed": true
+          }
+        },
+        {
+          "phase": "http503",
+          "status": "tested-failed",
+          "resultSha256": "6259c565939b7d0ff957ed45d4c9f4579aa54818b7896b137a0b9bb8ac42e2b8",
+          "cleanup": {
+            "stopped": true,
+            "removed": true
+          }
+        },
+        {
+          "phase": "missing-control",
+          "status": "tested-failed",
+          "resultSha256": "7ce4d4f8e383afd5ca96d2b6e90e7898dbff4652a3811cf2e2479e28acbd9299",
+          "cleanup": {
+            "stopped": true,
+            "removed": true
+          }
+        },
+        {
+          "phase": "recovered",
+          "status": "tested-pass",
+          "resultSha256": "64f13ec5d107d8f3d38a7231638d3c3090a7a7fc0e805292a2e26accfef24d35",
+          "cleanup": {
+            "stopped": true,
+            "removed": true
+          }
+        }
+      ],
+      "candidateUI": {
+        "realBrowser": true,
+        "dependencyView": true,
+        "manualReviewPersisted": true,
+        "ordinaryReportUnchanged": true,
+        "baselineUnchanged": true,
+        "healthImportAvailable": true,
+        "importedHealth": {
+          "artifact": {
+            "name": "dsh-plugin-health-acceptance-fixture",
+            "version": "1.0.0",
+            "sha256": "8cc1f5b4aaf233c53996c9cb74b438eef3c46aa1d868fb4d80162f1aed19ca1b"
+          },
+          "manifestSha256": "265ae3d2575d6ed6ff7f4d2e527c5d31cb3e6d3ad420dcd1f466ba42e7934e34",
+          "historicalOnly": true,
+          "ordinaryReportUnchanged": true
+        }
+      },
+      "cleanup": {
+        "privateRootRemoved": true
+      },
+      "scope": "Historical local macOS arm64 candidate acceptance; no claim for later source, other platforms or public npm contents."
+    },
+    "upstreamStatus20261023": {
+      "checkedAt": "2026-10-23T07:52:02.076Z",
+      "scope": "GitHub issue and pull-request status only; no new source-handler or real-install acceptance.",
+      "market932": {
+        "state": "closed",
+        "updatedAt": "2026-10-19T16:56:25Z",
+        "remaining": "Maintainer confirmed 1.66.43 adds full-packument fallback; warning or safe failure when both lookups fail remains a separate change."
+      },
+      "store22": {
+        "state": "open",
+        "updatedAt": "2026-10-19T06:14:20Z",
+        "remaining": "Await a usable npm installation method, then verify a fresh install."
+      },
+      "awesome717": {
+        "state": "open",
+        "merged": false,
+        "updatedAt": "2026-10-17T12:54:55Z"
+      }
+    },
+    "release015": {
+      "tag": "v0.1.5",
+      "artifact": {
+        "file": "dsh-plugin-compat-check-0.1.5.tgz",
+        "sha256": "22b73b3231dff81a7db4df185dbaab43dfc1a215a18e1ec23c65a7247cf97c5d",
+        "integrity": "sha512-ryXtUdB/hE+IzXvYoGpm+hvlG7+l9uzawi712huHJlXI4WRCBJe7C2+8wjrlJMry+KcqFueQp/AAOtDv38n50Q==",
+        "files": 62,
+        "bytes": 249559
+      },
+      "localAcceptance": {
+        "recordedAt": "2026-10-23T08:00:19.057Z",
+        "platform": "macOS arm64",
+        "nodeVersion": "26.12.1",
+        "dshVersion": "0.2.1-rc.2",
+        "defaultSuite": {
+          "tests": 882,
+          "passed": 876,
+          "skipped": 6,
+          "failed": 0
+        },
+        "originFence": {
+          "sameOriginStatus": 200,
+          "crossPortStatus": 403
+        },
+        "ui": {
+          "rendered": true,
+          "tabCount": 1,
+          "disableReenable": true,
+          "upgradePreview": true,
+          "manualReviewPersisted": true,
+          "dependencyView": true,
+          "historicalHealthImport": true
+        },
+        "cleanup": {
+          "privateRootRemoved": true
+        },
+        "dependencyAudit": {
+          "workspaceLock": "clean",
+          "pluginRuntime": "clean"
+        }
+      },
+      "source": "https://github.com/lcy0121/dsh-plugin-compat-check/tree/v0.1.5",
+      "distribution": {
+        "github": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.1.5",
+        "npm": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.1.5"
+      },
+      "scope": "Local acceptance uses these exact archive bytes. Tagged-commit CI and public archive identity are verified during release; Windows, future hosts and full plugin business behavior are not certified."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."

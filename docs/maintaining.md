@@ -49,6 +49,8 @@ node --test test/dependency-security.test.mjs
 
 升级面板实机验收须同时等到最终loader扫描与F2启动自检完成，设置页加载后还须显式“重新检查”并等待该报告渲染，再提交预检；启动扫描或首次客户端连接触发服务懒初始化时，新报告会合法撤销旧比较。失败制品保留有界的报告时间和内容摘要以区分真实失效与无内容变化的重读，不保留私有报告正文或鉴权信息。
 
+发布验收可设置`DSC_RC2_ARTIFACT=<确切tgz绝对路径>`、`DSC_REQUIRE_RC2_UI=1`后运行`node tools/rc2-live.mjs`，直接验收选定归档，不重新打包源码。未设置制品路径时仍按源码打包；最终发布必须使用已验收的同一文件。
+
 ## 真实插件回归
 
 [固定manifest](../tools/real-regression-manifest.json)锁定DSH/API目录、五个真实npm制品、摘要及每轮24项业务期望。独立holdout为[causebefore/dsh-pomodoro](https://github.com/causebefore/dsh-pomodoro)的`dsh-pomodoro@0.5.5`和[LUgABeEEE/dsh-global-todo](https://github.com/LUgABeEEE/dsh-global-todo)的`dsh-global-todo@0.13.2`；选自公开市场中可审阅、无需账户/模型且声明形态不同的有界操作，在查看预测前确定，不据其结果调规则或严重度。tarball对照registry integrity，安装树指纹及所审源码字节另外固定；二次重复不增加独立样本数。

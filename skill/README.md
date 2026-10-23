@@ -1,6 +1,6 @@
 # skill 交付与注册
 
-当前说明面向0.1.4；是否公开发布及npm latest以registry和Plan记录为准。源码、版本与验证索引见 [Plan](../docs/Plan.md) 与 [自动统计](../docs/current-state.json)。
+当前说明面向0.1.5；是否公开发布及npm latest以registry和Plan记录为准。源码、版本与验证索引见 [Plan](../docs/Plan.md) 与 [自动统计](../docs/current-state.json)。
 
 ## 真源与安装
 
@@ -21,9 +21,9 @@ node --test test/skill.test.mjs test/docs.test.mjs
 
 provider name与skill name均为dsh-plugin-compat-check，source=bundled、rank=600；提供list/get、description、invocation和正文。frontmatter保持单行name/description，name为kebab-case。不支持的旧键可能使文件系统发现失效；不要添加disableModelInvocation等旧字段。
 
-公开0.1.4正文明确必需inject、未知服务与方法缺失的边界。当前源码进一步分开解释确定性与影响依据，并按“无已验证调用”说明vacuous；并从同一模块呈现每条发现的核实步骤，保留未知依赖“待确认”。这些源码修订尚未发布，不追改历史npm包。
+0.1.5正文区分必需inject、未知服务与方法缺失、确定性与影响依据，并按“无已验证调用”说明vacuous；从同一模块呈现核实步骤，保留未知依赖“待确认”。历史npm包及现场证据保持原记录。
 
-当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为 **12248 字符**，由docs测试核对。不要把历史探针的contentLength手工替换成新正文长度：那会篡改历史实测。
+当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为 **12227 字符**，由docs测试核对。不要把历史探针的contentLength手工替换成新正文长度：那会篡改历史实测。
 
 升级前对比优先调用已注册的`compat_check({"upgradeTo":"0.2.1-rc.2"})`，当前版本由运行宿主解析；无工具时使用仓库CLI：`node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json`，当前版本必须显式提供。仅使用已认证精确版本目录，对同一安装制品静态比较，不读取探针、profile豁免或基线，不执行插件或升级宿主。此预测不等于业务验收通过，完整输入/输出边界见正文及CLI帮助。
 
