@@ -172,6 +172,64 @@ export async function reportResponseReceipts(chrome) {
   );
 }
 
+/** Refresh through the actual UI after first-client lazy services have initialized. */
+export async function refreshVisibleReport(chrome, evaluate, poll) {
+  const cursor = chrome.events.length;
+  await evaluate(
+    `Array.from(document.querySelectorAll('button')).find(e => e.innerText === '重新检查').click()`,
+  );
+  let requestId;
+  await poll(() => {
+    for (const event of chrome.events.slice(cursor)) {
+      const p = event.params || {};
+      if (event.method === "Network.requestWillBeSent") {
+        const url = new URL(p.request.url);
+        if (
+          url.pathname === "/plugin-compat-check/report" &&
+          url.searchParams.get("refresh") === "1"
+        )
+          requestId = p.requestId;
+      }
+      if (
+        requestId &&
+        p.requestId === requestId &&
+        event.method === "Network.loadingFinished"
+      )
+        return true;
+      if (
+        requestId &&
+        p.requestId === requestId &&
+        event.method === "Network.loadingFailed"
+      )
+        throw Error("Visible report refresh transport failed");
+    }
+    return false;
+  }, "Visible report refresh did not complete");
+  const response = await chrome.send("Network.getResponseBody", { requestId });
+  const data = JSON.parse(
+    response.base64Encoded
+      ? Buffer.from(response.body, "base64").toString()
+      : response.body,
+  );
+  if (
+    !data.ok ||
+    !data.computedAt ||
+    data.cache?.stale ||
+    data.cache?.refreshing
+  )
+    throw Error(
+      "Visible report refresh did not return current successful evidence",
+    );
+  await poll(
+    () =>
+      evaluate(
+        `document.body.innerText.includes(${JSON.stringify("报告时间：" + data.computedAt)})`,
+      ),
+    "Refreshed report did not render",
+  );
+  return data;
+}
+
 export const upgradeFormSnapshot = `(() => {
   const form = document.querySelector('[data-upgrade-preview]');
   const input = form?.querySelector('input[aria-label="目标 DSH 版本"]');

@@ -17,6 +17,7 @@ import {
   submitUpgradeTarget,
   upgradeRequestReceipts,
   reportResponseReceipts,
+  refreshVisibleReport,
   upgradeFormSnapshot,
 } from "./browser-session.mjs";
 import { run as check } from "../bin/compat-check.mjs";
@@ -449,7 +450,7 @@ try {
       });
       return { status: r.status, body: await r.json() };
     };
-    const initial = await fetchReport();
+    let initial = await fetchReport();
     requireTrue(
       initial.status === 200 &&
         initial.body.ok &&
@@ -713,6 +714,12 @@ try {
         );
       };
       await settings();
+      // The first browser connection lazily initializes host service fields.
+      // Capture those inputs through the real refresh button before comparison.
+      initial = {
+        status: 200,
+        body: await refreshVisibleReport(chrome, evalx, poll),
+      };
       requireTrue(
         await evalx(
           `document.querySelector('[data-catalog-status="verified"]')?.innerText.includes('90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743') && document.body.innerText.includes('目录认证范围：0.2.1-rc.2')`,

@@ -107,6 +107,7 @@ import {
   submitUpgradeTarget,
   upgradeRequestReceipts,
   reportResponseReceipts,
+  refreshVisibleReport,
 } from "../tools/browser-session.mjs";
 
 test("upgrade request evidence tracks completion and failure without retaining private URLs or headers", async () => {
@@ -225,6 +226,59 @@ test("upgrade request evidence tracks completion and failure without retaining p
     (await reportResponseReceipts(chrome)).every(
       (r) => r.unavailable && r.metadata,
     ),
+  );
+});
+
+test("visible report readiness waits for refresh completion and the matching rendered report", async () => {
+  const events = [],
+    order = [];
+  const data = { ok: true, computedAt: "2026-10-23T06:00:00.000Z" };
+  const chrome = {
+    events,
+    send: async () => {
+      order.push("body");
+      return { body: JSON.stringify(data) };
+    },
+  };
+  const evaluate = async (expression) => {
+    if (expression.endsWith(".click()")) {
+      order.push("click");
+      events.push({
+        method: "Network.requestWillBeSent",
+        params: {
+          requestId: "refresh",
+          request: {
+            url: "http://localhost/plugin-compat-check/report?refresh=1",
+          },
+        },
+      });
+      return;
+    }
+    assert.ok(expression.includes(data.computedAt));
+    order.push("rendered");
+    return true;
+  };
+  const poll = async (fn) => {
+    if (!(await fn())) {
+      assert.deepEqual(order, ["click"]);
+      order.push("finished");
+      events.push({
+        method: "Network.loadingFinished",
+        params: { requestId: "refresh" },
+      });
+      assert.equal(await fn(), true);
+    }
+  };
+  assert.deepEqual(await refreshVisibleReport(chrome, evaluate, poll), data);
+  assert.deepEqual(order, ["click", "finished", "body", "rendered"]);
+  events.length = 0;
+  order.length = 0;
+  chrome.send = async () => ({
+    body: JSON.stringify({ ...data, cache: { stale: true } }),
+  });
+  await assert.rejects(
+    refreshVisibleReport(chrome, evaluate, poll),
+    /current successful evidence/,
   );
 });
 

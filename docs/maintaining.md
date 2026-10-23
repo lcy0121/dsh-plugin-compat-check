@@ -47,7 +47,7 @@ node --test test/dependency-security.test.mjs
 
 [Test](../.github/workflows/test.yml)和[静态批量](../.github/workflows/static-batch.yml)固定Actions的完整40位commit，checkout关闭`persist-credentials`，最小权限、job超时、制品7天；审计在独立Node24 job执行一次，不重复到Node矩阵。静态批量保持手动触发。Node矩阵独立报告结果；发布前检查通过`DSC_TEST_TAP`保留完整TAP及stderr，失败时从对应制品定位末尾真实错误，不能只看截断摘要。更新Action pin时核对官方release、commit和该commit的`action.yml`运行时及实际inputs；Action运行时与被测Node版本分开。当前使用GitHub托管Ubuntu；其它runner另验收，不能靠版本注释认证。npm语义见[官方audit文档](https://docs.npmjs.com/cli/v11/commands/npm-audit/)。
 
-升级面板实机验收须同时等到最终loader扫描与F2启动自检完成，再强制读取当前报告并提交预检；启动期生成新报告会合法撤销旧比较。失败制品保留有界的报告时间和内容摘要以区分真实失效与无内容变化的重读，不保留私有报告正文或鉴权信息。
+升级面板实机验收须同时等到最终loader扫描与F2启动自检完成，设置页加载后还须显式“重新检查”并等待该报告渲染，再提交预检；启动扫描或首次客户端连接触发服务懒初始化时，新报告会合法撤销旧比较。失败制品保留有界的报告时间和内容摘要以区分真实失效与无内容变化的重读，不保留私有报告正文或鉴权信息。
 
 ## 真实插件回归
 
