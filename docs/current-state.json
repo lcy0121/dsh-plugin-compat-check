@@ -276,10 +276,10 @@
       "tag": "v0.1.5",
       "artifact": {
         "file": "dsh-plugin-compat-check-0.1.5.tgz",
-        "sha256": "22b73b3231dff81a7db4df185dbaab43dfc1a215a18e1ec23c65a7247cf97c5d",
-        "integrity": "sha512-ryXtUdB/hE+IzXvYoGpm+hvlG7+l9uzawi712huHJlXI4WRCBJe7C2+8wjrlJMry+KcqFueQp/AAOtDv38n50Q==",
+        "sha256": "1a133da4f33afafb37dc560d9eeb3a64c283420c7c85fd73532a28de850ab42d",
+        "integrity": "sha512-MB7Q9t4JHmGFUatGiIL7BTsdVbZvKzvjJ5yxM03MSo+PuSTf2mpZgOJW+PAIRJU3GkpdSD5cELVsTfRtV30HaQ==",
         "files": 62,
-        "bytes": 249559
+        "bytes": 249595
       },
       "localAcceptance": {
         "recordedAt": "2026-10-23T08:00:19.057Z",

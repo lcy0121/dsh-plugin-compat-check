@@ -60,4 +60,4 @@ npm 包**没有 CLI bin、安装检查 shell 或 probe 入口**，不支持 `npx
 
 ## License
 
-[MIT](LICENSE) · 第三方依赖及许可证见包内 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+[MIT](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/LICENSE) · 第三方依赖及许可证见 [THIRD_PARTY_NOTICES.md](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/THIRD_PARTY_NOTICES.md)，两份文件也随 npm 包提供。
