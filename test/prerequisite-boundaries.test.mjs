@@ -313,3 +313,98 @@ test("service-only serialization reconstructs method shapes without copying nest
     assert.equal(JSON.stringify(clean).includes("secret"), false);
   });
 });
+
+test("service observer seals once at official application readiness, preserving missing services and disposal", async () => {
+  const fs = await import("node:fs"),
+    path = await import("node:path"),
+    os = await import("node:os"),
+    vm = await import("node:vm");
+  const { installServiceObserver } = await import(
+    "../tools/business-observation.mjs"
+  );
+  const { sampleServices } = await import("../lib/observation.mjs");
+  const profile = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-observer-ready-"));
+  try {
+    fs.mkdirSync(path.join(profile, "business-workspace"));
+    fs.writeFileSync(
+      path.join(profile, "package.json"),
+      JSON.stringify({ dependencies: {}, dsh: { profile: { bundles: [] } } }),
+    );
+    const observer = installServiceObserver(profile, [
+      "connection",
+      "intentionallyMissing",
+    ]);
+    const callbacks = new Set(),
+      timers = [],
+      cleanups = [];
+    const services = {
+      appReady: {
+        onReady(fn) {
+          callbacks.add(fn);
+          return () => callbacks.delete(fn);
+        },
+      },
+    };
+    const ctx = {
+      get: (name) => services[name],
+      effect: (fn) => cleanups.push(fn()),
+    };
+    const sandbox = {
+      fs,
+      sampleServices,
+      setTimeout: (fn) => {
+        timers.push(fn);
+        return { unref() {} };
+      },
+      clearTimeout() {},
+      ctx,
+    };
+    vm.createContext(sandbox);
+    vm.runInContext(
+      observer.source
+        .replace(/import fs from 'node:fs';/, "")
+        .replace(/import \{sampleServices\} from [^;]+;/, "")
+        .replace(/export /g, "") + ";globalThis.start=apply;",
+      sandbox,
+    );
+    sandbox.start(ctx);
+    // Expiring the former fixed-delay timer before the provider is ready must never seal absence.
+    for (const fn of timers) fn();
+    assert.equal(
+      fs.existsSync(observer.output),
+      false,
+      "No service prediction may be sealed before the official readiness event",
+    );
+    services.connection = { admitConnection() {} };
+    assert.equal(callbacks.size, 1);
+    for (const fn of [...callbacks]) fn();
+    callbacks.clear();
+    const surface = JSON.parse(fs.readFileSync(observer.output));
+    assert.equal(surface.root.connection.status, "present");
+    assert.equal(surface.root.connection.methods.admitConnection, "function");
+    assert.equal(
+      surface.root.intentionallyMissing.status,
+      "absent",
+      "Readiness must not require every observed service to exist",
+    );
+    fs.unlinkSync(observer.output);
+    sandbox.start(ctx);
+    const dispose = cleanups.pop();
+    dispose();
+    assert.equal(callbacks.size, 0);
+    assert.equal(
+      fs.existsSync(observer.output),
+      false,
+      "A disposed observer must not publish a late sample",
+    );
+    delete services.appReady;
+    assert.throws(() => sandbox.start(ctx), /application readiness/i);
+    assert.equal(
+      fs.existsSync(observer.output),
+      false,
+      "Missing readiness contract must not manufacture service evidence",
+    );
+  } finally {
+    fs.rmSync(profile, { recursive: true, force: true });
+  }
+});

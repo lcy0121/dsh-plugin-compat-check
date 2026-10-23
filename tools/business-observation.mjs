@@ -50,7 +50,18 @@ export function installServiceObserver(profile, services) {
       "../lib/observation.mjs",
     ),
   ).href;
-  const source = `import fs from 'node:fs';import {sampleServices} from ${JSON.stringify(observation)};export const inject=[];export function apply(ctx){const timer=setTimeout(()=>{const file=${JSON.stringify(output)};const value=sampleServices(ctx,${JSON.stringify(services)},{profileId:${JSON.stringify(path.join(profile, "node_modules"))},dshVersion:'0.2.1-rc.2'});fs.writeFileSync(file+'.tmp',JSON.stringify(value),{mode:0o600});fs.renameSync(file+'.tmp',file);},1500);timer.unref?.();ctx.effect(()=>()=>clearTimeout(timer));}`;
+  const source = `import fs from 'node:fs';import {sampleServices} from ${JSON.stringify(observation)};
+export const inject=['appReady'];
+export function apply(ctx){
+  const ready=ctx.get('appReady',false);
+  if(typeof ready?.onReady!=='function')throw Error('Owned service observer requires official application readiness');
+  ctx.effect(()=>ready.onReady(()=>{
+    const file=${JSON.stringify(output)};
+    const value=sampleServices(ctx,${JSON.stringify(services)},{profileId:${JSON.stringify(path.join(profile, "node_modules"))},dshVersion:'0.2.1-rc.2'});
+    fs.writeFileSync(file+'.tmp',JSON.stringify(value),{mode:0o600});
+    fs.renameSync(file+'.tmp',file);
+  }));
+}`;
   fs.writeFileSync(path.join(dir, "index.js"), source);
   fs.writeFileSync(
     path.join(dir, "package.json"),

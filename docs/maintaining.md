@@ -55,7 +55,7 @@ node --test test/dependency-security.test.mjs
 
 Pomodoro覆盖必需connection/client注入和schema配置，真值是实际Start后localStorage revision/deadline及新文档恢复；GET config仅说明配置就绪，driver不种植存储。受控故障删除实际主操作按钮，重载恢复。Todo覆盖可选服务/webServer及原始JSON Schema，真值是完成POST/create、私有JSON精确标题及重载DOM成员；故障只对该POST返回503，磁盘和DOM必须均无标题，恢复另建标题。两者均有正常→受控失败→恢复，不调用通知/模型/外部采集功能。
 
-静态预测在启动前封存，service-only从独立root观测生成并在Chrome/动作前封存；记录动作起止及取标签时间，回放从HTTP/DOM/磁盘receipt重算后置条件，不信任保存的布尔值。自然与受控、静态与service-only分别保留FP/FN、覆盖限制及`clientVerified:false`。浏览器/selector/启动异常是driver错误，不能当插件业务失败。绿色只证明固定结果重现，受控故障仍可为诚实FN，不是生态准确率或未来兼容认证。
+静态预测在启动前封存，service-only等待官方appReady就绪事件后采样原始root（不要求所有被测服务存在），并在Chrome/动作前封存；记录动作起止及取标签时间，回放从HTTP/DOM/磁盘receipt重算后置条件，不信任保存的布尔值。自然与受控、静态与service-only分别保留FP/FN、覆盖限制及`clientVerified:false`。浏览器/selector/启动异常是driver错误，不能当插件业务失败。绿色只证明固定结果重现，受控故障仍可为诚实FN，不是生态准确率或未来兼容认证。
 
 ```sh
 node tools/real-regression.mjs --live --out-dir <新空目录> --repeat 2

@@ -554,7 +554,9 @@ export async function runBusiness({
       while (!fs.existsSync(serviceObserver.output) && Date.now() < until)
         await wait(50);
       if (!fs.existsSync(serviceObserver.output))
-        throw Error("Owned service observer did not finish");
+        throw Error(
+          "Owned service observer did not finish application readiness",
+        );
       serviceSurface = observer.servicePredictionInput(
         JSON.parse(fs.readFileSync(serviceObserver.output)),
         { nm, dshVersion: version },
