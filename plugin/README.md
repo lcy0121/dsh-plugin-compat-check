@@ -47,7 +47,7 @@ prepack 同步权威 skill/报告契约，暂存共享 kernel、LICENSE 和第�
 
 npm 包**没有 CLI bin、安装检查 shell 或 probe 入口**，不支持 `npx dsh-plugin-compat-check`。CLI、安装检查、静态批量、作者CI、健康执行器及真实插件/浏览器/模型回归仅在[仓库](https://github.com/lcy0121/dsh-plugin-compat-check#readme)使用，不随 npm 分发。
 
-安装检查会联网、启动宿主并执行目标；临时 profile 不是 OS 沙箱。健康执行器默认审阅，须显式 `--run` 及当次授权才执行目标命令，也不是 OS 沙箱。风险/覆盖门禁、JSON/SARIF/JUnit和版本矩阵见[作者CI](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/author-ci.md)。
+安装检查会联网、启动宿主并执行目标；临时 profile 不是 OS 沙箱。健康执行器默认审阅，须显式 `--run` 及当次授权才执行目标命令，也不是 OS 沙箱。风险/覆盖门禁、JSON/SARIF/JUnit/HTML和版本矩阵见[作者CI](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/author-ci.md)。
 
 ## 判定与边界
 

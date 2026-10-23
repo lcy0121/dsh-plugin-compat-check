@@ -408,6 +408,12 @@ test("staging detects stale host/browser artifacts and updates both from the can
       path.join(dir, "plugin/package.json"),
       JSON.stringify({ type: "module" }),
     );
+    // Source prepack tooling resolves the workspace dev dependencies.
+    fs.symlinkSync(
+      path.resolve("node_modules"),
+      path.join(dir, "node_modules"),
+      "dir",
+    );
     const canonical = path.join(dir, "lib/contracts.mjs");
     fs.writeFileSync(
       canonical,
@@ -422,7 +428,9 @@ test("staging detects stale host/browser artifacts and updates both from the can
         { encoding: "utf8" },
       );
     assert.equal(cli(["--check"]).status, 1);
-    assert.equal(cli([]).status, 0);
+    const staged = cli([]);
+    assert.equal(staged.status, 0, staged.stdout + staged.stderr);
+    assert.equal(cli(["--check"]).status, 0);
     assert.equal(cli(["--check"]).status, 0);
     const updated = await import(
       "file://" + path.join(dir, "plugin/lib/report-contract.js")

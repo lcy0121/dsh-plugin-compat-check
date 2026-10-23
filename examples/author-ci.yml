@@ -1,0 +1,75 @@
+# Copy into the plugin author's .github/workflows/ after reviewing this file.
+# Required: publish/review a tool commit containing --report/HTML; supply its full SHA.
+# Adapt npm run build and SELECTED_PACKAGE to the SAME built directory you distribute.
+name: Plugin author static compatibility
+on:
+  workflow_dispatch:
+    inputs:
+      tool_ref:
+        description: Reviewed published lcy0121/dsh-plugin-compat-check commit (40 hex, contains HTML/report support)
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: author-compatibility-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TOOL_DIR: ${{ github.workspace }}/.compat-tool
+      SELECTED_PACKAGE: ${{ github.workspace }}/dist-plugin
+      RESULTS_DIR: ${{ github.workspace }}/compatibility-results
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Validate reviewed tool commit
+        shell: bash
+        env:
+          TOOL_REF: ${{ inputs.tool_ref }}
+        run: |
+          [[ "$TOOL_REF" =~ ^[0-9a-fA-F]{40}$ ]] || { echo 'tool_ref must be a reviewed full commit SHA' >&2; exit 3; }
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: lcy0121/dsh-plugin-compat-check
+          ref: ${{ inputs.tool_ref }}
+          path: .compat-tool
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Prepare reviewed tool dependencies
+        shell: bash
+        run: npm ci --prefix "$TOOL_DIR" --ignore-scripts --no-audit --no-fund
+      - name: Build the author's deliverable
+        shell: bash
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run build
+          test -f "$SELECTED_PACKAGE/package.json"
+      - name: Scan once and render the same evidence
+        id: scan
+        shell: bash
+        run: |
+          mkdir -p "$RESULTS_DIR"
+          code=0
+          node "$TOOL_DIR/tools/author-ci.mjs" --package "$SELECTED_PACKAGE" > "$RESULTS_DIR/compatibility.json" 2> "$RESULTS_DIR/scan.stderr.log" || code=$?
+          printf '%s\n' "$code" > "$RESULTS_DIR/gate-exit-code.txt"
+          render_code=0
+          node "$TOOL_DIR/tools/author-ci.mjs" --report "$RESULTS_DIR/compatibility.json" --format html > "$RESULTS_DIR/compatibility.html" 2> "$RESULTS_DIR/render.stderr.log" || render_code=$?
+          # Rendering returns the stored gate code. Divergence is a report/tool error.
+          if [ "$render_code" -ne "$code" ]; then exit 3; fi
+          exit "$code"
+      - name: Archive evidence even when the gate fails
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: plugin-author-compatibility
+          path: compatibility-results/
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 7

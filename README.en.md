@@ -79,7 +79,7 @@ node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.j
 
 Installation checks require Node, DSH and pnpm; accept npm/GitHub/git/file specs and support `--keep` and `--timeout` (30 seconds by default). They may access the network, start the host and execute the plugin. **A temporary profile is not an OS sandbox.** Replacing an existing standalone skill requires `--force`; see [skill delivery](skill/README.md).
 
-Static batch manifests pin versions/tree hashes, with up to 16 items, 10 seconds each and 60 seconds total. No target installation/execution or probe/baseline access occurs. Results need author review, not business certification; the fixture expects exit 2. Author CI provides risk/coverage gates, JSON/SARIF/JUnit and version matrices. The health executor defaults to review and requires explicit `--run` plus authorization for that invocation to execute target commands; **it is not an OS sandbox**. These tools and real-plugin/browser/model regressions belong to the repository and are not shipped in npm. See the [guide](docs/guide.md), [author CI](docs/author-ci.md) and [maintenance notes](docs/maintaining.md).
+Static batch manifests pin versions/tree hashes, with up to 16 items, 10 seconds each and 60 seconds total. No target installation/execution or probe/baseline access occurs. Results need author review, not business certification; the fixture expects exit 2. Author CI provides risk/coverage gates, JSON/SARIF/JUnit/HTML and version matrices. The health executor defaults to review and requires explicit `--run` plus authorization for that invocation to execute target commands; **it is not an OS sandbox**. These tools and real-plugin/browser/model regressions belong to the repository and are not shipped in npm. See the [guide](docs/guide.md), [author CI](docs/author-ci.md) and [maintenance notes](docs/maintaining.md).
 
 The private repository root is not an activatable plugin. Build a complete tgz for source installation; a root GitHub spec or bare `plugin/` copy is not equivalent. See [source packaging](plugin/README.md#从源码构建安装).
 
@@ -96,9 +96,7 @@ Ordinary CLI/Node installation checks: **0** no findings, **1** partial/unknown,
 
 ```bash
 npm test
-npm run format:check
-node tools/doc-check.mjs
-npm run notices:check
+npm run check
 node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```

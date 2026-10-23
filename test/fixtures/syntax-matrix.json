@@ -1,0 +1,439 @@
+{
+  "schemaVersion": 1,
+  "rows": [
+    {
+      "id": "direct",
+      "title": "Context member",
+      "source": "export function apply(ctx){ctx.settings.absent()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "alias",
+      "title": "Local service alias",
+      "source": "export function apply(ctx){const service=ctx.settings;service.absent()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "destructure",
+      "title": "Context destructuring",
+      "source": "export function apply(ctx){const {settings: service}=ctx;service.absent()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "sync-forward",
+      "title": "Synchronous helper parameter",
+      "source": "function wire(service){service.absent()}export function apply(ctx){wire(ctx.settings)}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "closure",
+      "title": "Returned closure",
+      "source": "const make=scope=>()=>scope.settings.absent();export function apply(ctx){make(ctx)()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "esm-reexport",
+      "title": "ESM reexport alias",
+      "source": "import {connect} from './bridge.js';export function apply(ctx){connect(ctx)}",
+      "files": {
+        "bridge.js": "export {wire as connect} from './worker.js'",
+        "worker.js": "export function wire(scope){scope.settings.absent()}"
+      },
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "worker.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "cjs-apply",
+      "title": "CommonJS apply export",
+      "source": "exports.apply=function(ctx){ctx.settings.absent()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "conditional-export",
+      "title": "Ordered Node import condition",
+      "source": "export function apply(ctx){ctx.tools.register()}",
+      "files": {
+        "actual.js": "export function apply(ctx){ctx.settings.absent()}"
+      },
+      "meta": {
+        "exports": {
+          ".": {
+            "node": {
+              "import": "./actual.js"
+            },
+            "default": "./index.js"
+          }
+        }
+      },
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "actual.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "constant-computed",
+      "title": "Constant computed keys",
+      "source": "export function apply(ctx){const key='set'+'tings';ctx[key]['absent']()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "capability-guard",
+      "title": "Controlling method guard",
+      "source": "export function apply(ctx){if(typeof ctx.settings.absent==='function')ctx.settings.absent()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, true, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "known-method",
+      "title": "Catalogue and observed known method",
+      "source": "export function apply(ctx){ctx.settings.known()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.known", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "local-object",
+      "title": "Same name local object excluded",
+      "source": "export function apply(ctx){const settings={absent(){}};settings.absent()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "limited",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "bare-inferred",
+      "title": "Unbound ctx has weak receiver evidence",
+      "source": "ctx.settings.absent()",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "inferred",
+        "calls": [["settings.absent", "index.js", true, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "limited",
+        "findings": [["host-method-missing", "settings.absent", "suspected"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "cjs-inject",
+      "title": "Literal CommonJS inject",
+      "source": "exports.inject=[\"settings\"];exports.apply=function(ctx){ctx.settings.absent()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [["settings", "required-inject", false]],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "cjs-inject-mutation",
+      "title": "Mutated inject declaration is not proved",
+      "source": "const deps=[\"settings\"];exports.inject=deps;deps.pop();exports.apply=function(){}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "abstained",
+        "calls": [],
+        "dependencies": [["settings", "descriptor-inject", true]],
+        "diagnostics": ["inject-unresolved"],
+        "coverage": "limited",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "dynamic-computed",
+      "title": "Unknown computed method abstains",
+      "source": "export function apply(ctx){ctx.settings[readName()]()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "abstained",
+        "calls": [],
+        "dependencies": [],
+        "diagnostics": ["flow-dynamic-access"],
+        "coverage": "limited",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "async-return",
+      "title": "Promise return abstains while proved call survives",
+      "source": "async function select(scope){return scope.settings}export function apply(ctx){ctx.tools.register();select(ctx).absent()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "abstained",
+        "calls": [["tools.register", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": ["flow-async-return"],
+        "coverage": "limited",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "escaped-object",
+      "title": "Escaped object loses ownership",
+      "source": "export function apply(ctx){const o={s:ctx.settings};configure(o);const {s}=o;s.absent()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "abstained",
+        "calls": [],
+        "dependencies": [],
+        "diagnostics": ["flow-opaque-object", "flow-unknown-target"],
+        "coverage": "limited",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "ambiguous-key",
+      "title": "Different conditional keys abstain",
+      "source": "export function apply(ctx){const key=flag?'settings':'tools';ctx[key].absent()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "abstained",
+        "calls": [],
+        "dependencies": [],
+        "diagnostics": ["flow-dynamic-access"],
+        "coverage": "limited",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "unsupported-condition",
+      "title": "Unsupported condition retains only fallback suspicion",
+      "source": "export function apply(ctx){ctx.settings.absent()}",
+      "files": {},
+      "meta": {
+        "exports": {
+          ".": {
+            "browser": "./index.js"
+          }
+        }
+      },
+      "expected": {
+        "classification": "abstained",
+        "calls": [["settings.absent", "index.js", true, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": ["entry-fallback", "entry-resolution-uncertain"],
+        "coverage": "limited",
+        "findings": [["host-method-missing", "settings.absent", "suspected"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "parse-failure",
+      "title": "Parse failure is explicit",
+      "source": "export function apply(ctx){ @@@",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "abstained",
+        "calls": [],
+        "dependencies": [],
+        "diagnostics": ["parse-error"],
+        "coverage": "limited",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "rebound-helper",
+      "title": "Rebound imported function excluded",
+      "source": "import {wire} from './worker.js';export function apply(ctx){let call=wire;call=()=>{};call(ctx)}",
+      "files": {
+        "worker.js": "export function wire(scope){scope.settings.absent()}"
+      },
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "limited",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "deferred-guard",
+      "title": "Deferred callback does not inherit method guard",
+      "source": "export function apply(ctx){if(typeof ctx.settings.absent==='function')setTimeout(()=>ctx.settings.absent(),100)}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "scoped-inject",
+      "title": "Scoped inject callback preserves Context",
+      "source": "export function apply(ctx){ctx.inject(['settings'],scope=>scope.settings.absent())}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [["settings", "scoped-inject", false]],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    }
+  ]
+}

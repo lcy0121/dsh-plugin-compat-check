@@ -7,6 +7,9 @@ import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import semver from "semver";
+import { CATALOG_REFERENCES } from "../lib/contracts.mjs";
+import { SUPPORTED_PREVIEW_VERSIONS } from "../lib/upgrade-contract.mjs";
+import { loadCatalog } from "../lib/catalog.mjs";
 
 const SOURCES = {
   host: "dsh/node_modules/@deepseek-ai/dsh-tool-cordis/lib/types/api-catalog.js",
@@ -17,11 +20,47 @@ const BOOT = "dsh/node_modules/@deepseek-ai/dsh-app-boot/package.json";
 const JSON_LIMIT = 2 * 1024 * 1024;
 const HEADER_LIMIT = 8 * 1024 * 1024;
 const ENTRY_LIMIT = 8 * 1024 * 1024;
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sha = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const record = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const requireThat = (condition, message) => {
   if (!condition) throw new Error(message);
 };
+
+/** Check existing registration/selection wiring only; never admit a candidate. */
+export function checkCatalogRegistry(root = ROOT) {
+  const versions = CATALOG_REFERENCES.map((entry) => entry.version);
+  requireThat(
+    versions.length > 0 &&
+      new Set(versions).size === versions.length &&
+      JSON.stringify([...versions].sort()) ===
+        JSON.stringify([...SUPPORTED_PREVIEW_VERSIONS].sort()),
+    "Catalogue registry and upgrade version lists differ",
+  );
+  const entries = CATALOG_REFERENCES.map((entry) => {
+    const loaded = loadCatalog(root, entry.version);
+    requireThat(
+      loaded.evidence.verified &&
+        path.basename(loaded.file) === entry.file &&
+        loaded.evidence.sha256 === entry.sha256,
+      "Registered catalogue selection or digest mismatch: " + entry.version,
+    );
+    return {
+      version: entry.version,
+      file: entry.file,
+      sha256: entry.sha256,
+      verified: true,
+    };
+  });
+  return {
+    kind: "plugin-compat-check/catalog-registry-check",
+    schemaVersion: 1,
+    entries,
+    certification: "unchanged",
+    scope:
+      "Existing pinned bytes and selection wiring only. No new provenance, rule review, host execution or business certification; unregistered candidates remain uncertified.",
+  };
+}
 const sameStat = (a, b) =>
   ["dev", "ino", "size", "mtimeMs", "ctimeMs"].every(
     (key) => a[key] === b[key],
@@ -292,6 +331,21 @@ function main() {
     options = {},
     json = args.includes("--json");
   try {
+    if (args.includes("--check-registry")) {
+      requireThat(
+        args.length === (json ? 2 : 1) &&
+          args.every((flag) => ["--check-registry", "--json"].includes(flag)) &&
+          new Set(args).size === args.length,
+        "Usage: node tools/catalog-review.mjs --check-registry [--json]",
+      );
+      const result = checkCatalogRegistry();
+      console.log(
+        json
+          ? JSON.stringify(result, null, 2)
+          : `Checked ${result.entries.length} registered exact catalogues; certification unchanged. New versions still require source, rule and real-host acceptance.`,
+      );
+      return;
+    }
     for (let i = 0; i < args.length; i++) {
       const flag = args[i];
       if (flag === "--json") {
@@ -338,4 +392,8 @@ function main() {
     process.exitCode = 3;
   }
 }
-main();
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+)
+  main();

@@ -79,7 +79,7 @@ node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.j
 
 安装检查需要 Node、DSH、pnpm，支持 npm/GitHub/git/file spec、`--keep` 和 `--timeout`（默认30秒）；会联网、启动宿主并执行插件，**临时 profile 不是 OS 沙箱**。独立 skill 已存在时用 `--force` 覆盖，见 [skill](skill/README.md)。
 
-静态批量清单锁定版本/文件树哈希，最多16项、每项10秒、整批60秒；不安装或执行目标，不读探针/基线。结果待作者复核，不是业务认证；样例预期退出2。作者 CI 提供风险/覆盖门禁、JSON/SARIF/JUnit 和版本矩阵；健康执行器默认审阅，必须显式 `--run` 及当次授权才执行目标命令，**不是 OS 沙箱**。这些工具及真实插件/浏览器/模型回归仅属仓库，不随 npm 分发。步骤与限额见 [指南](docs/guide.md)、[作者 CI](docs/author-ci.md)、[维护说明](docs/maintaining.md)。
+静态批量清单锁定版本/文件树哈希，最多16项、每项10秒、整批60秒；不安装或执行目标，不读探针/基线。结果待作者复核，不是业务认证；样例预期退出2。作者 CI 提供风险/覆盖门禁、JSON/SARIF/JUnit/HTML 和版本矩阵；健康执行器默认审阅，必须显式 `--run` 及当次授权才执行目标命令，**不是 OS 沙箱**。这些工具及真实插件/浏览器/模型回归仅属仓库，不随 npm 分发。步骤与限额见 [指南](docs/guide.md)、[作者 CI](docs/author-ci.md)、[维护说明](docs/maintaining.md)。
 
 仓库根是 private 开发工作区，不是可激活的插件包。源码安装须打完整 tgz，不能用根 GitHub spec 或裸 `plugin/` 复制代替；见 [源码打包](plugin/README.md#从源码构建安装)。
 
@@ -96,9 +96,7 @@ node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.j
 
 ```bash
 npm test
-npm run format:check
-node tools/doc-check.mjs
-npm run notices:check
+npm run check
 node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```

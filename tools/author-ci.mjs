@@ -13,7 +13,11 @@ import {
   validatePolicy,
   evaluateMatrix,
 } from "../lib/author-ci-policy.mjs";
-import { renderSarif, renderJUnit } from "../lib/author-ci-output.mjs";
+import {
+  renderSarif,
+  renderJUnit,
+  renderHTML,
+} from "../lib/author-ci-output.mjs";
 export const AUTHOR_CI_LIMITS = Object.freeze({
   versions: 4,
   timeoutMs: 30000,
@@ -30,6 +34,7 @@ export async function authorCI(args) {
       if (
         ![
           "--package",
+          "--report",
           "--versions",
           "--policy",
           "--previous",
@@ -42,9 +47,28 @@ export async function authorCI(args) {
         throw Error("Unknown, missing or duplicate option: " + k);
       opts[k] = args[++i];
     }
+    if (opts["--report"]) {
+      if (
+        opts["--format"] !== "html" ||
+        Object.keys(opts).some((k) => !["--report", "--format"].includes(k))
+      )
+        throw Error(
+          "--report requires --format html and cannot be combined with scan options",
+        );
+      const saved = JSON.parse(
+        readRegular(
+          path.resolve(opts["--report"]),
+          AUTHOR_CI_LIMITS.previousBytes,
+        ),
+      );
+      validateSavedReport(saved);
+      return saved;
+    }
     if (!opts["--package"])
       throw Error("Required: --package <built-package-directory>");
-    if (!["json", "sarif", "junit"].includes(opts["--format"] || "json"))
+    if (
+      !["json", "sarif", "junit", "html"].includes(opts["--format"] || "json")
+    )
       throw Error("Unknown output format");
     const versions = opts["--versions"]
       ? opts["--versions"].split(",")
@@ -138,12 +162,97 @@ export async function authorCI(args) {
     if (workDir) fs.rmSync(workDir, { recursive: true, force: true });
   }
 }
+// Structural validation is not authentication and does not re-run or rewrite a saved gate.
+function validateSavedReport(m) {
+  const record = (v) =>
+    v !== null && typeof v === "object" && !Array.isArray(v);
+  const need = (ok) => {
+    if (!ok) throw Error("Invalid saved author CI evidence");
+  };
+  need(
+    record(m) &&
+      m.schemaVersion === 1 &&
+      m.kind === "plugin-compat-check/author-ci" &&
+      typeof m.toolVersion === "string",
+  );
+  validatePolicy(m.policy);
+  need(Array.isArray(m.cells) && m.cells.length <= AUTHOR_CI_LIMITS.versions);
+  need(
+    record(m.gate) &&
+      [0, 1, 2, 3].includes(m.gate.exitCode) &&
+      m.gate.status ===
+        (m.gate.exitCode === 0
+          ? "pass"
+          : m.gate.exitCode === 3
+            ? "error"
+            : "blocked"),
+  );
+  need(
+    Array.isArray(m.gate.reasons) &&
+      m.gate.reasons.every(
+        (r) =>
+          record(r) &&
+          typeof r.code === "string" &&
+          typeof r.message === "string",
+      ),
+  );
+  need(
+    record(m.gate.counts) &&
+      Object.values(m.gate.counts).every(
+        (n) => Number.isSafeInteger(n) && n >= 0,
+      ),
+  );
+  need(
+    Array.isArray(m.limitations) &&
+      m.limitations.every((s) => typeof s === "string"),
+  );
+  if (!m.cells.length) {
+    need(
+      m.identity === null && m.gate.exitCode === 3 && m.gate.reasons.length > 0,
+    );
+    return;
+  }
+  const checked = evaluateMatrix(m.cells, { ...m.policy, mode: "all" });
+  need(!checked.reasons.some((r) => r.code === "invalid-evidence"));
+  const first = m.cells[0].identity;
+  need(
+    record(m.identity) &&
+      record(first) &&
+      m.identity.rulesSha256 === first.rulesSha256 &&
+      ["name", "version", "sha256"].every(
+        (k) => m.identity.package?.[k] === first.package?.[k],
+      ),
+  );
+  need(
+    m.cells.every((c) => {
+      const i = c.identity;
+      return (
+        record(i) &&
+        record(i.package) &&
+        typeof i.package.name === "string" &&
+        typeof i.package.version === "string" &&
+        /^[a-f0-9]{64}$/.test(i.package.sha256 || "") &&
+        /^[a-f0-9]{64}$/.test(i.rulesSha256 || "") &&
+        i.toolVersion === m.toolVersion &&
+        ["name", "version", "sha256"].every(
+          (k) => i.package[k] === m.identity.package?.[k],
+        ) &&
+        i.rulesSha256 === m.identity.rulesSha256 &&
+        (c.status === "analyzed" || c.kernelExitCode === 3)
+      );
+    }),
+  );
+  // Even a stored relaxed/new gate cannot claim a pass over unknown versions/tool errors.
+  need(checked.exitCode !== 3 || m.gate.exitCode === 3);
+}
 export function renderAuthorCI(matrix, format = "json") {
-  return format === "sarif"
-    ? JSON.stringify(renderSarif(matrix), null, 2)
-    : format === "junit"
-      ? renderJUnit(matrix)
-      : JSON.stringify(matrix, null, 2);
+  return format === "html"
+    ? renderHTML(matrix)
+    : format === "sarif"
+      ? JSON.stringify(renderSarif(matrix), null, 2)
+      : format === "junit"
+        ? renderJUnit(matrix)
+        : JSON.stringify(matrix, null, 2);
 }
 if (
   process.argv[1] &&

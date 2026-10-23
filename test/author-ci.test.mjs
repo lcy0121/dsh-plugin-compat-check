@@ -180,3 +180,96 @@ test("previous evidence is reusable only with exact comparable identities and de
     3,
   );
 });
+
+test("HTML displays one saved snapshot after source removal and preserves its gate", (t) => {
+  const f = fixture(t),
+    scanned = run(["--package", f.source]);
+  const report = path.join(f.root, "report.json");
+  fs.writeFileSync(report, scanned.stdout);
+  fs.rmSync(f.source, { recursive: true });
+  const r = run(["--report", report, "--format", "html"]);
+  assert.equal(r.status, scanned.status, r.stdout + r.stderr);
+  assert.match(r.stdout, /^<!doctype html>/i);
+  assert.match(r.stdout, /Policy gate/);
+  assert.match(r.stdout, /Kernel exit code/);
+  assert.match(r.stdout, /Coverage/);
+  assert.match(r.stdout, /Vacuous/);
+  assert.match(r.stdout, /not business acceptance/);
+  const evidence = r.stdout
+    .match(/<pre id="evidence">([\s\S]*?)<\/pre>/)[1]
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+  assert.deepEqual(JSON.parse(evidence), JSON.parse(scanned.stdout));
+});
+
+test("HTML CLI renders input errors and unknown versions as readable failing evidence", (t) => {
+  const f = fixture(t);
+  for (const more of [
+    ["--versions", "99.0.0"],
+    ["--typo", "bad"],
+  ]) {
+    const r = run(["--package", f.source, "--format", "html", ...more]);
+    assert.equal(r.status, 3);
+    assert.match(r.stdout, /^<!doctype html>/i);
+    assert.match(r.stdout, /Policy gate: error/);
+    assert.match(r.stdout, /unsupported|Unknown, missing or duplicate option/);
+  }
+});
+
+test("HTML saved report rejects invalid evidence, conflicting options, links and oversized inputs", (t) => {
+  const f = fixture(t),
+    report = path.join(f.root, "report.json");
+  const m = JSON.parse(run(["--package", f.source]).stdout);
+  m.cells[0].kernelExitCode = 99;
+  fs.writeFileSync(report, JSON.stringify(m));
+  assert.equal(run(["--report", report, "--format", "html"]).status, 3);
+  for (const args of [
+    ["--package", f.source],
+    ["--versions", "0.2.1-rc.2"],
+    ["--format", "json"],
+  ]) {
+    assert.equal(run(["--report", report, ...args]).status, 3);
+  }
+  fs.writeFileSync(report, " ".repeat(8 * 1024 * 1024 + 1));
+  assert.equal(run(["--report", report, "--format", "html"]).status, 3);
+});
+
+test("HTML renders untrusted saved messages as inert text with no executable elements or links", (t) => {
+  const f = fixture(t),
+    report = path.join(f.root, "report.json");
+  const m = JSON.parse(run(["--package", f.source]).stdout);
+  const payload =
+    '</pre><script>alert(1)</script><img src="https://evil.invalid/x" onerror="x">';
+  m.limitations.push(payload);
+  m.gate.reasons[0].message = payload;
+  fs.writeFileSync(report, JSON.stringify(m));
+  const r = run(["--report", report, "--format", "html"]);
+  assert.equal(r.status, m.gate.exitCode);
+  assert.doesNotMatch(r.stdout, /<script|<img|<a\s|<iframe/i);
+  assert.match(r.stdout, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+});
+
+test("saved unsupported and tool-error reports remain readable, contradictory failure metadata is rejected", (t) => {
+  const f = fixture(t),
+    report = path.join(f.root, "saved.json");
+  for (const args of [["--package", f.source, "--versions", "99.0.0"], []]) {
+    const m = JSON.parse(run(args).stdout);
+    fs.writeFileSync(report, JSON.stringify(m));
+    const r = run(["--report", report, "--format", "html"]);
+    assert.equal(r.status, 3);
+    assert.match(r.stdout, /Target has no certified exact catalogue|Required:/);
+    assert.doesNotMatch(r.stdout, /Invalid saved author CI evidence/);
+  }
+  const m = JSON.parse(
+    run(["--package", f.source, "--versions", "99.0.0"]).stdout,
+  );
+  m.cells[0].kernelExitCode = 0;
+  fs.writeFileSync(report, JSON.stringify(m));
+  assert.match(
+    run(["--report", report, "--format", "html"]).stdout,
+    /Invalid saved author CI evidence/,
+  );
+});

@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-23T17:51:39.066Z",
-  "testFiles": 67,
-  "tests": 920,
+  "recordedAt": "2026-10-23T18:45:02.967Z",
+  "testFiles": 69,
+  "tests": 960,
   "repositoryFiles": {
-    "total": 325,
+    "total": 333,
     "fixtures": 90,
-    "other": 235
+    "other": 243
   },
   "verification": {
     "platform": "darwin",
@@ -52,54 +52,10 @@
       "scope": "Detailed past test, release, upstream and live-acceptance records are retained in Git history; historical evidence is not current certification."
     },
     "authorCi20261023": {
-      "recordedAt": "2026-10-22T17:45:27.332859+00:00",
-      "defaultSuite": {
-        "tests": 875,
-        "passed": 872,
-        "skipped": 3,
-        "failed": 0
-      },
-      "formats": [
-        "JSON schemaVersion 1",
-        "SARIF 2.1.0",
-        "JUnit XML"
-      ],
-      "localCandidate": {
-        "tgzSha256": "fcd52906d9b0a3f8fa9eb547f3a57a77ea7cb02dec1aa2f4b7198f4720306249",
-        "sourceTreeSha256": "585b2601d2b94f0173a8b239f65e828688a73a0478a3513820d5588eda0dd597",
-        "versions": [
-          {
-            "dshVersion": "0.2.0-rc.2",
-            "status": "analyzed",
-            "kernelExitCode": 0
-          },
-          {
-            "dshVersion": "0.2.1-rc.2",
-            "status": "analyzed",
-            "kernelExitCode": 0
-          }
-        ],
-        "gateExitCode": 1,
-        "gateStatus": "blocked"
-      },
-      "scope": "Offline static author gate; same copied built package and certified exact catalogues. JSON/SARIF/JUnit and all/new policy regressions. Local full suite and format/notices/doc checks; no remote CI, push, public release or DSH startup for this feature. Gate pass would mean selected policy only.",
-      "publicDocs": {
-        "files": 5,
-        "historyCommit": "10eaeba",
-        "historyPath": "docs/current-state.json",
-        "scope": "Current guide, maintenance, author CI, Plan and concise current state; detailed historical records remain in Git."
-      },
-      "standardValidation": {
-        "cases": [
-          "blocked",
-          "new-policy-pass",
-          "mixed-unsupported",
-          "input-error"
-        ],
-        "sarif": "Four real CLI outputs validated against official OASIS SARIF 2.1.0 schema with Draft4Validator; zero schema errors.",
-        "junit": "Four real CLI outputs parsed by Python ElementTree; tests/failures/errors match actual nodes.",
-        "independentReview": "22/22 focused tests passed; no confirmed remaining blockers."
-      }
+      "historyCommit": "93a0ffb",
+      "historyPath": "docs/current-state.json",
+      "key": "verification.authorCi20261023",
+      "scope": "Historical author CI artifact/output validation retained in local Git; not current certification."
     },
     "ciFailureReview20261023": {
       "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39739339996",
@@ -349,6 +305,25 @@
       "environment": "Private env/config verified in actual probe/installer children, failure cleanup and retry; copied profile config remains readable.",
       "locks": "Tool/path-bound holder metadata; explicit token + ESRCH-only orphan recovery. Crash, contention, replacement and live/reused PID refusal verified.",
       "limits": "Repository-only recovery CLI. Legacy/unknown/guard locks fail closed; Windows unverified. No OS sandbox or native-local authentication guarantee."
+    },
+    "maintenanceAuthorEntry20261024": {
+      "scope": "0.1.7-dev local source; existing certified versions retained by explicit user choice. No push, release or remote Actions.",
+      "defaultSuite": {
+        "tests": 960,
+        "passed": 953,
+        "skipped": 7,
+        "failed": 0
+      },
+      "syntaxMatrix": {
+        "rows": 24,
+        "supported": 16,
+        "inferred": 1,
+        "abstained": 7,
+        "scope": "Literal expectations against real extraction/verdicts; host evidence is synthetic, not business acceptance."
+      },
+      "maintenance": "npm run check covers format, docs/generated copies/notices, syntax and registered catalogue wiring. Formatted host/client/CLI, shared request fence and behavior-based startup regression.",
+      "authorCI": "One scan JSON -> static HTML retains gate code and full evidence. Workflow shell verified locally; owned Chrome verified escaped text, no scripts/images/external resources and same saved JSON.",
+      "limits": "Saved reports are not authenticated or re-evaluated against a new baseline. Workflow needs a reviewed published tool SHA; no new DSH certification."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."

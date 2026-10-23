@@ -19,7 +19,8 @@ jobs:
           node-version: ${{ matrix.node }}
           package-manager-cache: false
       - run: npm ci --ignore-scripts --no-audit --no-fund
-      - run: npm run format:check
+      - name: Check maintained sources, generated copies, syntax matrix and catalogue registry
+        run: npm run check
       - run: node plugin/scripts/prepublish-check.mjs
         env:
           DSC_QUIET_SKIP_NOTICE: "1"

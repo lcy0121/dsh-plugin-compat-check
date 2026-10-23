@@ -23,28 +23,43 @@
  *   方法级结论一律降为「疑似」—— 这是 docs/Plan.md §2.1、§2.2 的证据与确定性约束，不是可选项。
  */
 
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import { spawn, spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { spawn, spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
-import { extractWithProvenance } from '../lib/extract.mjs';
-import { buildVerdicts } from '../lib/verdict.mjs';
-import { render, toJSON } from '../lib/report.mjs';
-import { renderIssueReport } from './issue-report.mjs';
-import { readProfileCompatibility } from '../lib/profile-compatibility.mjs';
-import { loadCatalog } from '../lib/catalog.mjs';
-import { snapshotForBaseline, diffAgainstBaseline, badgeFor, BASELINE_SCHEMA } from '../lib/baseline.mjs';
-import {baselinePath,baselineIdentity,baselineTransaction,readBaseline as readStoredBaseline,writeBaseline as writeStoredBaseline} from '../lib/state-store.mjs';
-import {probeProfile} from '../lib/probe-runner.mjs';
-import { TOOL_VERSION, versionLine } from '../lib/version.mjs';
-import {createFailure,exitCodeForSummary} from '../lib/contracts.mjs';
-import { runUpgradePreview, renderUpgradePreview, createUpgradeFailure } from '../lib/upgrade-preview.mjs';
-import {runWorkerTask} from '../lib/worker-analysis.mjs';
-import {readStaticFile} from '../lib/static-input.mjs';
+import { extractWithProvenance } from "../lib/extract.mjs";
+import { buildVerdicts } from "../lib/verdict.mjs";
+import { render, toJSON } from "../lib/report.mjs";
+import { renderIssueReport } from "./issue-report.mjs";
+import { readProfileCompatibility } from "../lib/profile-compatibility.mjs";
+import { loadCatalog } from "../lib/catalog.mjs";
+import {
+  snapshotForBaseline,
+  diffAgainstBaseline,
+  badgeFor,
+  BASELINE_SCHEMA,
+} from "../lib/baseline.mjs";
+import {
+  baselinePath,
+  baselineIdentity,
+  baselineTransaction,
+  readBaseline as readStoredBaseline,
+  writeBaseline as writeStoredBaseline,
+} from "../lib/state-store.mjs";
+import { probeProfile } from "../lib/probe-runner.mjs";
+import { TOOL_VERSION, versionLine } from "../lib/version.mjs";
+import { createFailure, exitCodeForSummary } from "../lib/contracts.mjs";
+import {
+  runUpgradePreview,
+  renderUpgradePreview,
+  createUpgradeFailure,
+} from "../lib/upgrade-preview.mjs";
+import { runWorkerTask } from "../lib/worker-analysis.mjs";
+import { readStaticFile } from "../lib/static-input.mjs";
 
-const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const USAGE = `用法: node bin/compat-check.mjs --nm <node_modules 目录> [选项]
 
@@ -88,40 +103,76 @@ ${versionLine()}
 
 /* ── 参数解析：手写，零依赖；未知参数一律报错而不是忽略 ────────────── */
 
-
-
 function parseArgs(argv) {
   const out = { json: false, quiet: false };
-  const upgradeMode = argv.includes('--upgrade-to');
-  const takesValue = new Set(['--nm', '--probe', '--dsh-version', '--upgrade-to', '--rules', '--catalog', '--baseline-file', '--profile', '--probe-timeout', '--probe-keep-dir']);
+  const upgradeMode = argv.includes("--upgrade-to");
+  const takesValue = new Set([
+    "--nm",
+    "--probe",
+    "--dsh-version",
+    "--upgrade-to",
+    "--rules",
+    "--catalog",
+    "--baseline-file",
+    "--profile",
+    "--probe-timeout",
+    "--probe-keep-dir",
+  ]);
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--json') { out.json = true; continue; }
-    if (a === '--issue-report') { out.issueReport = true; continue; }
-    if (a === '--no-baseline') { out.baseline = false; continue; }
-    if (a === '--dry-run') { out.dryRun = true; continue; }
-    if (a === '--probe-boot') { out.probeBoot = true; continue; }
-    if (a === '--quiet') { out.quiet = true; continue; }
-    if (a === '--help' || a === '-h') { out.help = true; continue; }
-    if (a === '--version' || a === '-V') { out.version = true; continue; }
+    if (a === "--json") {
+      out.json = true;
+      continue;
+    }
+    if (a === "--issue-report") {
+      out.issueReport = true;
+      continue;
+    }
+    if (a === "--no-baseline") {
+      out.baseline = false;
+      continue;
+    }
+    if (a === "--dry-run") {
+      out.dryRun = true;
+      continue;
+    }
+    if (a === "--probe-boot") {
+      out.probeBoot = true;
+      continue;
+    }
+    if (a === "--quiet") {
+      out.quiet = true;
+      continue;
+    }
+    if (a === "--help" || a === "-h") {
+      out.help = true;
+      continue;
+    }
+    if (a === "--version" || a === "-V") {
+      out.version = true;
+      continue;
+    }
     if (takesValue.has(a)) {
       const v = argv[++i];
-      if (v === undefined || (upgradeMode && v.startsWith('--'))) throw new Error(`${a} 需要一个值`);
-      out[a.replace(/^--/, '').replace(/-(\w)/g, (_, c) => c.toUpperCase())] = v;
+      if (v === undefined || (upgradeMode && v.startsWith("--")))
+        throw new Error(`${a} 需要一个值`);
+      out[a.replace(/^--/, "").replace(/-(\w)/g, (_, c) => c.toUpperCase())] =
+        v;
       continue;
     }
     // 未知参数**必须**报错。静默忽略会让 `--jsom` 这类拼写错误变成
     // 「跑完了但没有 JSON 输出」，而用户会以为工具不支持 JSON。
     throw new Error(`无法识别的参数: ${a}`);
   }
-  if(!upgradeMode && out.issueReport && (out.json || out.quiet))throw new Error('--issue-report 与 --json/--quiet 互斥');
-  if(out.issueReport)out.baseline=false;
+  if (!upgradeMode && out.issueReport && (out.json || out.quiet))
+    throw new Error("--issue-report 与 --json/--quiet 互斥");
+  if (out.issueReport) out.baseline = false;
   return out;
 }
 
 function readJSON(file, what) {
   try {
-    return JSON.parse(readStaticFile(file,8*1024*1024).toString('utf8'));
+    return JSON.parse(readStaticFile(file, 8 * 1024 * 1024).toString("utf8"));
   } catch (error) {
     throw new Error(`读不到${what} ${file}: ${error.message}`);
   }
@@ -131,16 +182,16 @@ function readJSON(file, what) {
 function resolveNodeModules(p) {
   const abs = path.resolve(p);
   if (!fs.existsSync(abs)) throw new Error(`目录不存在: ${abs}`);
-  if (path.basename(abs) === 'node_modules') return abs;
-  const nm = path.join(abs, 'node_modules');
+  if (path.basename(abs) === "node_modules") return abs;
+  const nm = path.join(abs, "node_modules");
   return fs.existsSync(nm) ? nm : abs;
 }
 
 /** 在 node_modules 旁边找探针报告 —— 脚本形态下它就在 workdir 里 */
 function findProbeReport(nm) {
   const candidates = [
-    path.join(path.dirname(nm), 'probe-report.json'),
-    path.join(nm, '..', 'probe-report.json'),
+    path.join(path.dirname(nm), "probe-report.json"),
+    path.join(nm, "..", "probe-report.json"),
   ];
   for (const c of candidates) if (fs.existsSync(c)) return c;
   return null;
@@ -158,9 +209,10 @@ function findProbeReport(nm) {
  * **按 profile 分文件**：桌面 profile 与临时 profile 的插件集合不同，
  * 混在一起会让差分变成噪音（"移除了 18 个插件"）。这正是要避免的。
  */
-const baselineFileFor=(nm,profile,mode='catalogue')=>baselinePath(nm,mode,profile);
-const readBaseline=readStoredBaseline;
-const writeBaseline=writeStoredBaseline;
+const baselineFileFor = (nm, profile, mode = "catalogue") =>
+  baselinePath(nm, mode, profile);
+const readBaseline = readStoredBaseline;
+const writeBaseline = writeStoredBaseline;
 
 /* ── 拿到运行时面：自己起一次宿主（--probe-boot） ───────────────────── */
 
@@ -205,14 +257,20 @@ const writeBaseline=writeStoredBaseline;
 export function run(options = {}) {
   const result = { extract: null, verdict: null, error: null, inputs: {} };
   try {
-    if(options.probeBoot&&!options.probe)throw new Error('--probe-boot requires the asynchronous runAsync() API');
+    if (options.probeBoot && !options.probe)
+      throw new Error("--probe-boot requires the asynchronous runAsync() API");
     const nm = resolveNodeModules(options.nm);
     result.inputs.nodeModules = nm;
 
-    const {file:catalogPath,catalog,evidence} = loadCatalog(REPO, options.dshVersion, options.catalog);
-    const rulesPath = options.rules || path.join(REPO, 'rules', 'severity.json');
+    const {
+      file: catalogPath,
+      catalog,
+      evidence,
+    } = loadCatalog(REPO, options.dshVersion, options.catalog);
+    const rulesPath =
+      options.rules || path.join(REPO, "rules", "severity.json");
     result.catalog = evidence;
-    const rules = readJSON(rulesPath, 'severity 规则表');
+    const rules = readJSON(rulesPath, "severity 规则表");
     result.inputs.catalog = catalogPath;
     result.inputs.rules = rulesPath;
 
@@ -222,12 +280,19 @@ export function run(options = {}) {
     const extracted = extractWithProvenance(nm, { catalog });
     result.extract = extracted;
 
-    const probePath = options.probe || (!options._ignoreAutoProbe ? findProbeReport(nm) : null);
+    const probePath =
+      options.probe || (!options._ignoreAutoProbe ? findProbeReport(nm) : null);
     let hostSurface = options._hostSurface || null;
-    if(probePath && !hostSurface){hostSurface=readJSON(probePath,'探针报告');result.inputs.probe=probePath;}
-    if(options._probeBootInfo){result.inputs.probeBoot=options._probeBootInfo;result.inputs.probe='(--probe-boot 实时采集)';}
+    if (probePath && !hostSurface) {
+      hostSurface = readJSON(probePath, "探针报告");
+      result.inputs.probe = probePath;
+    }
+    if (options._probeBootInfo) {
+      result.inputs.probeBoot = options._probeBootInfo;
+      result.inputs.probe = "(--probe-boot 实时采集)";
+    }
     result.inputs.hasRuntimeSurface = Boolean(hostSurface);
-    const compatibility=readProfileCompatibility(nm);
+    const compatibility = readProfileCompatibility(nm);
 
     result.verdict = buildVerdicts({
       report: extracted.report,
@@ -235,26 +300,37 @@ export function run(options = {}) {
       rules,
       catalog,
       dshVersion: options.dshVersion || null,
-      observationTarget:{profileId:nm,maxAgeMs:24*60*60*1000},
+      observationTarget: { profileId: nm, maxAgeMs: 24 * 60 * 60 * 1000 },
       compatibilityExemptions: compatibility.exemptions,
       compatibilityNotes: compatibility.notes,
     });
 
-    result.inputs.hasRuntimeSurface=result.verdict.observation.usable;
+    result.inputs.hasRuntimeSurface = result.verdict.observation.usable;
     // Only loader rows from an accepted observation may inform the explanatory graph.
-    result.entryStates=result.verdict.observation.usable && Array.isArray(hostSurface?.entries?.plugins)
-      ? hostSurface.entries.plugins.filter(row=>row && typeof row==='object' && !Array.isArray(row))
-      : [];
+    result.entryStates =
+      result.verdict.observation.usable &&
+      Array.isArray(hostSurface?.entries?.plugins)
+        ? hostSurface.entries.plugins.filter(
+            (row) => row && typeof row === "object" && !Array.isArray(row),
+          )
+        : [];
     // ── 基线差分 ──
     // `--no-baseline` 关掉它（CI 里跑一次性检查时不该读写本机状态）。
     result.baseline = null;
     if (options.baseline !== false) {
-      const file = options.baselineFile || baselineFileFor(nm, options.profile,result.verdict.observation.mode);
+      const file =
+        options.baselineFile ||
+        baselineFileFor(nm, options.profile, result.verdict.observation.mode);
       result.inputs.baselineFile = file;
-      const snap=snapshotForBaseline(result.verdict,options.dshVersion||null,baselineIdentity(nm,result.verdict.observation.mode,rules,catalog));
-      const advance=!options.dryRun&&extracted.report.scanComplete;
-      if(options._deferBaseline)result._pendingBaseline={file,snapshot:snap,advance};
-      else result.baseline=baselineTransaction(file,snap,{advance});
+      const snap = snapshotForBaseline(
+        result.verdict,
+        options.dshVersion || null,
+        baselineIdentity(nm, result.verdict.observation.mode, rules, catalog),
+      );
+      const advance = !options.dryRun && extracted.report.scanComplete;
+      if (options._deferBaseline)
+        result._pendingBaseline = { file, snapshot: snap, advance };
+      else result.baseline = baselineTransaction(file, snap, { advance });
     }
   } catch (error) {
     result.error = error && error.message ? error.message : String(error);
@@ -262,25 +338,75 @@ export function run(options = {}) {
   return result;
 }
 
-export async function runAsync(options={},supervision={}) {
-  const analyze=async opts=>{
-    try{
-      const {timeoutMs=10000,signal}=supervision;
-      if(!Number.isSafeInteger(timeoutMs)||timeoutMs<=0||timeoutMs>10000)throw new Error('CLI worker时间预算无效');
-      const result=await runWorkerTask(new URL('./compat-check-worker.mjs',import.meta.url),{options:opts},{timeoutMs,signal});
-      const pending=result._pendingBaseline;delete result._pendingBaseline;
-      if(signal?.aborted)throw new Error('CLI分析已取消');
-      if(!result.error&&pending)result.baseline=baselineTransaction(pending.file,pending.snapshot,{advance:pending.advance});
+export async function runAsync(options = {}, supervision = {}) {
+  const analyze = async (opts) => {
+    try {
+      const { timeoutMs = 10000, signal } = supervision;
+      if (
+        !Number.isSafeInteger(timeoutMs) ||
+        timeoutMs <= 0 ||
+        timeoutMs > 10000
+      )
+        throw new Error("CLI worker时间预算无效");
+      const result = await runWorkerTask(
+        new URL("./compat-check-worker.mjs", import.meta.url),
+        { options: opts },
+        { timeoutMs, signal },
+      );
+      const pending = result._pendingBaseline;
+      delete result._pendingBaseline;
+      if (signal?.aborted) throw new Error("CLI分析已取消");
+      if (!result.error && pending)
+        result.baseline = baselineTransaction(pending.file, pending.snapshot, {
+          advance: pending.advance,
+        });
       return result;
-    }catch(error){return {extract:null,verdict:null,error:error.message,inputs:{},baseline:null};}
+    } catch (error) {
+      return {
+        extract: null,
+        verdict: null,
+        error: error.message,
+        inputs: {},
+        baseline: null,
+      };
+    }
   };
-  if(!options.probeBoot || options.probe)return analyze(options);
-  const before=await analyze({...options,probeBoot:false,baseline:false,_ignoreAutoProbe:true});
-  if(before.error)return before;
-  const boot=await probeProfile(before.inputs.nodeModules,{timeoutSec:options.probeTimeout||40,keepDir:options.probeKeepDir,services:before.extract.report.services,manifests:before.extract.report.manifests});
-  const info={notes:boot.notes,error:boot.error,tempProfile:boot.tempProfile,tempProfileRemoved:boot.tempProfileRemoved,...(boot.diagnostics?.length?{diagnostics:boot.diagnostics}:{}),...(boot.workDir?{workDir:boot.workDir}:{})};
-  if(boot.error)return {...before,error:boot.error,inputs:{...before.inputs,probeBoot:info}};
-  return analyze({...options,dshVersion:options.dshVersion||boot.surface?.dshVersion||null,probeBoot:false,_hostSurface:boot.surface,_ignoreAutoProbe:true,_probeBootInfo:info});
+  if (!options.probeBoot || options.probe) return analyze(options);
+  const before = await analyze({
+    ...options,
+    probeBoot: false,
+    baseline: false,
+    _ignoreAutoProbe: true,
+  });
+  if (before.error) return before;
+  const boot = await probeProfile(before.inputs.nodeModules, {
+    timeoutSec: options.probeTimeout || 40,
+    keepDir: options.probeKeepDir,
+    services: before.extract.report.services,
+    manifests: before.extract.report.manifests,
+  });
+  const info = {
+    notes: boot.notes,
+    error: boot.error,
+    tempProfile: boot.tempProfile,
+    tempProfileRemoved: boot.tempProfileRemoved,
+    ...(boot.diagnostics?.length ? { diagnostics: boot.diagnostics } : {}),
+    ...(boot.workDir ? { workDir: boot.workDir } : {}),
+  };
+  if (boot.error)
+    return {
+      ...before,
+      error: boot.error,
+      inputs: { ...before.inputs, probeBoot: info },
+    };
+  return analyze({
+    ...options,
+    dshVersion: options.dshVersion || boot.surface?.dshVersion || null,
+    probeBoot: false,
+    _hostSurface: boot.surface,
+    _ignoreAutoProbe: true,
+    _probeBootInfo: info,
+  });
 }
 
 /* ── 给人看的渲染 ──────────────────────────────────────────────────── */
@@ -290,50 +416,99 @@ export async function runAsync(options={},supervision={}) {
 async function main() {
   let opts;
   const argv = process.argv.slice(2);
-  const upgradeMode = argv.includes('--upgrade-to');
-  const rawValue = flag => {
+  const upgradeMode = argv.includes("--upgrade-to");
+  const rawValue = (flag) => {
     const index = argv.indexOf(flag);
     const value = index < 0 ? null : argv[index + 1];
-    return typeof value === 'string' && !value.startsWith('--') ? value : null;
+    return typeof value === "string" && !value.startsWith("--") ? value : null;
   };
-  const upgradeFailure = error => createUpgradeFailure(error, {
-    currentVersion: opts?.dshVersion ?? rawValue('--dsh-version'),
-    targetVersion: opts?.upgradeTo ?? rawValue('--upgrade-to'),
-  });
-  const outputUpgrade = result => process.stdout.write(`${opts?.json || argv.includes('--json') ? JSON.stringify(result, null, 2) : renderUpgradePreview(result)}\n`);
+  const upgradeFailure = (error) =>
+    createUpgradeFailure(error, {
+      currentVersion: opts?.dshVersion ?? rawValue("--dsh-version"),
+      targetVersion: opts?.upgradeTo ?? rawValue("--upgrade-to"),
+    });
+  const outputUpgrade = (result) =>
+    process.stdout.write(
+      `${opts?.json || argv.includes("--json") ? JSON.stringify(result, null, 2) : renderUpgradePreview(result)}\n`,
+    );
   try {
     opts = parseArgs(argv);
   } catch (error) {
-    if(upgradeMode)outputUpgrade(upgradeFailure(error.message));
-    else if(process.argv.includes('--issue-report'))process.stdout.write(renderIssueReport(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');
-    else if(process.argv.includes('--json'))process.stdout.write(JSON.stringify(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');else process.stderr.write(`${error.message}\n\n${USAGE}`);
-    process.exitCode=3; return;
+    if (upgradeMode) outputUpgrade(upgradeFailure(error.message));
+    else if (process.argv.includes("--issue-report"))
+      process.stdout.write(
+        renderIssueReport(
+          createFailure(error.message, { toolVersion: TOOL_VERSION }),
+        ) + "\n",
+      );
+    else if (process.argv.includes("--json"))
+      process.stdout.write(
+        JSON.stringify(
+          createFailure(error.message, { toolVersion: TOOL_VERSION }),
+        ) + "\n",
+      );
+    else process.stderr.write(`${error.message}\n\n${USAGE}`);
+    process.exitCode = 3;
+    return;
   }
   // `--version` 先于一切：它不该需要 --nm，也不该碰任何状态。
   // 结论的可追溯性靠它 —— 用户拿着一条结论来问，第一句就得知道是哪一版给的。
   if (opts.version) {
     process.stdout.write(`${versionLine()}\n`);
-    process.exitCode=0; return;
+    process.exitCode = 0;
+    return;
   }
   if (upgradeMode && !opts.help) {
     try {
-      const forbidden = ['--probe', '--probe-boot', '--probe-timeout', '--probe-keep-dir', '--baseline-file', '--dry-run', '--rules', '--catalog', '--issue-report', '--quiet', '--profile'];
-      const conflict = forbidden.find(flag => argv.includes(flag));
+      const forbidden = [
+        "--probe",
+        "--probe-boot",
+        "--probe-timeout",
+        "--probe-keep-dir",
+        "--baseline-file",
+        "--dry-run",
+        "--rules",
+        "--catalog",
+        "--issue-report",
+        "--quiet",
+        "--profile",
+      ];
+      const conflict = forbidden.find((flag) => argv.includes(flag));
       if (conflict) throw new Error(`--upgrade-to 不接受 ${conflict}`);
-      if (!opts.nm) throw new Error('--upgrade-to 需要 --nm');
-      if (!opts.dshVersion) throw new Error('--upgrade-to 需要 --dsh-version 当前精确版本');
-      const result = await runUpgradePreview({ nm: opts.nm, currentVersion: opts.dshVersion, targetVersion: opts.upgradeTo });
+      if (!opts.nm) throw new Error("--upgrade-to 需要 --nm");
+      if (!opts.dshVersion)
+        throw new Error("--upgrade-to 需要 --dsh-version 当前精确版本");
+      const result = await runUpgradePreview({
+        nm: opts.nm,
+        currentVersion: opts.dshVersion,
+        targetVersion: opts.upgradeTo,
+      });
       outputUpgrade(result);
-      process.exitCode=result.exitCode; return;
+      process.exitCode = result.exitCode;
+      return;
     } catch (error) {
       outputUpgrade(upgradeFailure(error.message));
-      process.exitCode=3; return;
+      process.exitCode = 3;
+      return;
     }
   }
   if (opts.help || !opts.nm) {
-    if(!opts.help && opts.issueReport)process.stdout.write(renderIssueReport(createFailure('需要 --nm',{toolVersion:TOOL_VERSION}),opts)+'\n');
-    else if(!opts.help && opts.json)process.stdout.write(JSON.stringify(createFailure('需要 --nm',{toolVersion:TOOL_VERSION}))+'\n');else process.stdout.write(USAGE);
-    process.exitCode=opts.help ? 0 : 3; return;
+    if (!opts.help && opts.issueReport)
+      process.stdout.write(
+        renderIssueReport(
+          createFailure("需要 --nm", { toolVersion: TOOL_VERSION }),
+          opts,
+        ) + "\n",
+      );
+    else if (!opts.help && opts.json)
+      process.stdout.write(
+        JSON.stringify(
+          createFailure("需要 --nm", { toolVersion: TOOL_VERSION }),
+        ) + "\n",
+      );
+    else process.stdout.write(USAGE);
+    process.exitCode = opts.help ? 0 : 3;
+    return;
   }
 
   // **整个主体都在 try 里**，这是被实测逼出来的。
@@ -349,25 +524,50 @@ async function main() {
   try {
     const result = await runAsync(opts);
     if (opts.issueReport) {
-      process.stdout.write(`${renderIssueReport(toJSON(result),opts)}\n`);
+      process.stdout.write(`${renderIssueReport(toJSON(result), opts)}\n`);
     } else if (opts.json) {
       process.stdout.write(`${JSON.stringify(toJSON(result), null, 2)}\n`);
     } else {
       process.stdout.write(`${render(result, opts)}\n`);
     }
 
-    if (result.error) { process.exitCode=3; return; }
+    if (result.error) {
+      process.exitCode = 3;
+      return;
+    }
     // 退出码：不兼容给 2，部分可用给 1，可用给 0 —— 让 CI 能直接用。
     const s = result.verdict.summary;
-    process.exitCode=exitCodeForSummary(s); return;
+    process.exitCode = exitCodeForSummary(s);
+    return;
   } catch (error) {
-    if(opts.issueReport)process.stdout.write(renderIssueReport(createFailure(error.message,{toolVersion:TOOL_VERSION}),opts)+'\n');
-    else if(opts.json)process.stdout.write(JSON.stringify(createFailure(error.message,{toolVersion:TOOL_VERSION}))+'\n');else process.stderr.write(`✗ 体检工具自身出错（不是插件的问题）：${error && error.stack ? error.stack : error}\n`);
-    process.exitCode=3; return;
+    if (opts.issueReport)
+      process.stdout.write(
+        renderIssueReport(
+          createFailure(error.message, { toolVersion: TOOL_VERSION }),
+          opts,
+        ) + "\n",
+      );
+    else if (opts.json)
+      process.stdout.write(
+        JSON.stringify(
+          createFailure(error.message, { toolVersion: TOOL_VERSION }),
+        ) + "\n",
+      );
+    else
+      process.stderr.write(
+        `✗ 体检工具自身出错（不是插件的问题）：${error && error.stack ? error.stack : error}\n`,
+      );
+    process.exitCode = 3;
+    return;
   }
 }
 
 // 只有被当作主脚本时才跑 CLI；被 import 时什么都不做。
-if (process.argv[1] && fs.existsSync(process.argv[1]) && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url))) {
+if (
+  process.argv[1] &&
+  fs.existsSync(process.argv[1]) &&
+  fs.realpathSync(process.argv[1]) ===
+    fs.realpathSync(fileURLToPath(import.meta.url))
+) {
   main();
 }

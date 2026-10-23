@@ -79,7 +79,7 @@ node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.j
 
 설치 검사는 Node, DSH, pnpm이 필요하며 npm/GitHub/git/file spec, `--keep`, `--timeout`(기본30초)을 지원합니다. 네트워크에 접속하고 호스트를 시작하며 플러그인을 실행할 수 있습니다. **임시 profile은 OS 샌드박스가 아닙니다.** 기존 독립 skill을 덮어쓰려면 `--force`가 필요합니다. [skill 안내](skill/README.md)를 참고하세요.
 
-정적 배치 목록은 버전·파일 트리 해시를 고정하며 최대16개, 항목당10초, 전체60초입니다. 대상 설치·실행이나 probe·기준선 접근은 하지 않습니다. 결과는 작성자 검토 대상이며 업무 인증이 아닙니다. 예제는 종료2를 기대합니다. 작성자 CI는 위험·증거 범위 게이트, JSON/SARIF/JUnit과 버전 행렬을 제공합니다. 건강 실행기는 기본 검토 모드이며 대상 명령 실행에 명시적 `--run`과 해당 실행의 승인이 필요합니다. **OS 샌드박스가 아닙니다.** 이 도구들과 실제 플러그인·브라우저·모델 회귀 검사는 저장소 전용으로 npm에 포함되지 않습니다. [안내](docs/guide.md), [작성자 CI](docs/author-ci.md), [유지 관리](docs/maintaining.md)를 참고하세요.
+정적 배치 목록은 버전·파일 트리 해시를 고정하며 최대16개, 항목당10초, 전체60초입니다. 대상 설치·실행이나 probe·기준선 접근은 하지 않습니다. 결과는 작성자 검토 대상이며 업무 인증이 아닙니다. 예제는 종료2를 기대합니다. 작성자 CI는 위험·증거 범위 게이트, JSON/SARIF/JUnit/HTML과 버전 행렬을 제공합니다. 건강 실행기는 기본 검토 모드이며 대상 명령 실행에 명시적 `--run`과 해당 실행의 승인이 필요합니다. **OS 샌드박스가 아닙니다.** 이 도구들과 실제 플러그인·브라우저·모델 회귀 검사는 저장소 전용으로 npm에 포함되지 않습니다. [안내](docs/guide.md), [작성자 CI](docs/author-ci.md), [유지 관리](docs/maintaining.md)를 참고하세요.
 
 private 저장소 루트는 활성화 가능한 플러그인이 아닙니다. 소스 설치에는 완전한 tgz가 필요하며 루트 GitHub spec이나 `plugin/` 단순 복사로 대체할 수 없습니다. [소스 패키징](plugin/README.md#从源码构建安装)을 참고하세요.
 
@@ -96,9 +96,7 @@ private 저장소 루트는 활성화 가능한 플러그인이 아닙니다. �
 
 ```bash
 npm test
-npm run format:check
-node tools/doc-check.mjs
-npm run notices:check
+npm run check
 node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```

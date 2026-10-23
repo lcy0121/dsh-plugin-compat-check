@@ -13,6 +13,55 @@ const clientPath =
 const bootPath = "dsh/node_modules/@deepseek-ai/dsh-app-boot/package.json";
 const sha = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
+test("registry maintenance checks exact pinned catalogues without granting new certification", () => {
+  const r = spawnSync(
+    process.execPath,
+    ["tools/catalog-review.mjs", "--check-registry", "--json"],
+    { encoding: "utf8", timeout: 5000 },
+  );
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const result = JSON.parse(r.stdout);
+  assert.equal(result.kind, "plugin-compat-check/catalog-registry-check");
+  assert.deepEqual(
+    result.entries.map((entry) => entry.version),
+    ["0.2.0-rc.2", "0.2.1-rc.2"],
+  );
+  assert.ok(result.entries.every((entry) => entry.verified === true));
+  assert.equal(result.certification, "unchanged");
+  const invalid = spawnSync(
+    process.execPath,
+    [
+      "tools/catalog-review.mjs",
+      "--check-registry",
+      "--candidate",
+      "unused",
+      "--json",
+    ],
+    { encoding: "utf8", timeout: 5000 },
+  );
+  assert.equal(invalid.status, 3);
+});
+
+test("registry maintenance rejects changed pinned bytes and ignores unregistered candidates", async (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "catalog-registry-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(root, "rules"));
+  for (const file of [
+    "dsh-api-catalog.json",
+    "dsh-api-catalog-0.2.1-rc.2.json",
+  ])
+    fs.copyFileSync(path.join("rules", file), path.join(root, "rules", file));
+  const mod = await import("../tools/catalog-review.mjs");
+  const first = mod.checkCatalogRegistry(root);
+  fs.writeFileSync(path.join(root, "rules/dsh-api-catalog-9.9.9.json"), "{}");
+  assert.deepEqual(mod.checkCatalogRegistry(root), first);
+  fs.appendFileSync(
+    path.join(root, "rules/dsh-api-catalog-0.2.1-rc.2.json"),
+    " ",
+  );
+  assert.throws(() => mod.checkCatalogRegistry(root), /摘要|digest/);
+});
+
 // Real packed ASAR plus hand-authored generated API text: the test never uses
 // the extractor to calculate its candidate or expected diff.
 function fixture() {

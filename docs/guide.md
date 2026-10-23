@@ -107,15 +107,14 @@ node --test test/functional-health.test.mjs test/dependency-graph.test.mjs test/
 
 清单单文件64KiB、整体清单50000目录项/32MiB/5秒；每包源码2000文件、10000目录及目录项、单文件2MiB/总32MiB/5秒，patch共用文件/字节预算。目录逐项枚举并检查预算，文件用非阻塞描述符检查普通类型、大小及读取前后身份；拒绝清单叶子链接，包根pnpm链接仍可解析，patch/源码链接须留在包内。超限、不可读或变化保留诊断；清单枚举无法完成则报工具错误。规则、目录、probe及已有基线JSON最多8MiB，拒绝非普通文件和叶子链接；损坏基线保留中性说明。预算只可降低，不承诺硬实时、RSS、文件系统原子快照或OS沙箱。
 
-仓库CLI快速开始见[README](../README.md)，完整参数运行`node bin/compat-check.mjs --help`；npm插件的完整tgz构建见[plugin README](../plugin/README.md#从源码构建安装)。安装依赖时使用冻结lock且禁用lifecycle脚本：
+仓库CLI快速开始见[README](../README.md)，完整参数运行`node bin/compat-check.mjs --help`；维护统一入口及可执行语法边界见[维护指南](maintaining.md#维护入口与语法覆盖)；npm插件的完整tgz构建见[plugin README](../plugin/README.md#从源码构建安装)。安装依赖时使用冻结lock且禁用lifecycle脚本：
 
 ```sh
 npm ci --ignore-scripts --no-audit --no-fund
 npm test -- --test-reporter=tap > /tmp/dsc-tests.tap
-npm run format:check
+npm run check
 node tools/update-current-state.mjs --test-summary /tmp/dsc-tests.tap
 node tools/doc-check.mjs --test-summary /tmp/dsc-tests.tap
-npm run notices:check
 node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```

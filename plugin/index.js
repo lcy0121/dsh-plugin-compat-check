@@ -21,19 +21,32 @@
 //   ${DSC_OUT_DIR}/loader-introspect.json (explicit owned private directory only)
 // plus structured console lines prefixed with [dsh-plugin-compat-check].
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync, realpathSync, promises as fsPromises } from 'node:fs';
-import { homedir, tmpdir } from 'node:os';
-import path, { join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import { createRequire as __createRequire } from 'node:module';
-import { createHash } from 'node:crypto';
+import {
+  existsSync,
+  readFileSync,
+  realpathSync,
+  promises as fsPromises,
+} from "node:fs";
+import { homedir } from "node:os";
+import path, { join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { createRequire as __createRequire } from "node:module";
+import { createHash } from "node:crypto";
 
-import {loaderObservations,privateDiagnostic} from './lib/host-resources.js';
-import {assertEnvelope,failureEnvelope,catalogLines} from './lib/report-contract.js';
-import {nextSteps} from './lib/finding-guidance.js';
-import {createUpgradeFailure as upgradeFailure, SUPPORTED_PREVIEW_VERSIONS} from './lib/upgrade-contract.js';
+import { isTrustedRequest } from "./lib/local-request.js";
+import { loaderObservations, privateDiagnostic } from "./lib/host-resources.js";
+import {
+  assertEnvelope,
+  failureEnvelope,
+  catalogLines,
+} from "./lib/report-contract.js";
+import { nextSteps } from "./lib/finding-guidance.js";
+import {
+  createUpgradeFailure as upgradeFailure,
+  SUPPORTED_PREVIEW_VERSIONS,
+} from "./lib/upgrade-contract.js";
 
-export const name = 'dsh-plugin-compat-check';
+export const name = "dsh-plugin-compat-check";
 
 /**
  * Deliberately empty: every service this plugin reads is read through
@@ -51,16 +64,16 @@ const SCHEMA_VERSION = 1;
 
 /** Cordis FiberState (const enum in the host, so mirrored here as data). */
 const FIBER_STATES = {
-  0: 'PENDING',
-  1: 'LOADING',
-  2: 'ACTIVE',
-  3: 'FAILED',
-  4: 'DISPOSED',
-  5: 'UNLOADING',
+  0: "PENDING",
+  1: "LOADING",
+  2: "ACTIVE",
+  3: "FAILED",
+  4: "DISPOSED",
+  5: "UNLOADING",
 };
 
 const OUT_DIR = process.env.DSC_OUT_DIR || null;
-const OUT_JSON = OUT_DIR ? join(OUT_DIR, 'loader-introspect.json') : null;
+const OUT_JSON = OUT_DIR ? join(OUT_DIR, "loader-introspect.json") : null;
 
 /** Defensive cap: a pathological iterable must not exhaust the host's heap. */
 const MAX_ENTRIES = 20000;
@@ -76,17 +89,12 @@ function toPositiveInt(value, fallback) {
 }
 
 function parseDelays(value, fallback) {
-  if (typeof value !== 'string' || value.trim() === '') return fallback;
+  if (typeof value !== "string" || value.trim() === "") return fallback;
   const parsed = value
-    .split(',')
+    .split(",")
     .map((part) => toPositiveInt(part.trim(), 0))
     .filter((n) => n > 0);
   return parsed.length > 0 ? parsed : fallback;
-}
-
-/** `createRequire` 的小包装：同步可用，不要用 await import（apply 不是 async）。 */
-function reqNode() {
-  return { createRequire: __createRequire };
 }
 
 function log(message) {
@@ -101,15 +109,15 @@ function log(message) {
 function errText(error) {
   try {
     if (error === null || error === undefined) return String(error);
-    if (typeof error === 'string') return error;
+    if (typeof error === "string") return error;
     if (error instanceof Error) {
-      const stack = typeof error.stack === 'string' ? error.stack : '';
+      const stack = typeof error.stack === "string" ? error.stack : "";
       return stack || `${error.name}: ${error.message}`;
     }
     const text = String(error);
-    return text === '[object Object]' ? safeJson(error) : text;
+    return text === "[object Object]" ? safeJson(error) : text;
   } catch {
-    return '<unprintable error>';
+    return "<unprintable error>";
   }
 }
 
@@ -117,21 +125,23 @@ function safeJson(value) {
   try {
     return JSON.stringify(value);
   } catch {
-    return '<unserializable>';
+    return "<unserializable>";
   }
 }
 
 function describe(value) {
   try {
-    if (value === undefined) return 'undefined';
-    if (value === null) return 'null';
+    if (value === undefined) return "undefined";
+    if (value === null) return "null";
     return typeof value;
   } catch {
-    return '<unreadable>';
+    return "<unreadable>";
   }
 }
 
-function writeReport(report) { return privateDiagnostic(OUT_JSON, report); }
+function writeReport(report) {
+  return privateDiagnostic(OUT_JSON, report);
+}
 
 // ---------------------------------------------------------------------------
 // B1: loader access
@@ -152,10 +162,13 @@ function resolveLoader(ctx) {
   let loader;
   let via;
 
-  const looksLikeLoader = (value) => value !== undefined && value !== null && typeof value.entries === 'function';
+  const looksLikeLoader = (value) =>
+    value !== undefined &&
+    value !== null &&
+    typeof value.entries === "function";
 
   try {
-    const value = ctx.get('loader');
+    const value = ctx.get("loader");
     attempts.push(`ctx.get('loader') -> ${describe(value)}`);
     if (looksLikeLoader(value)) {
       loader = value;
@@ -167,7 +180,7 @@ function resolveLoader(ctx) {
 
   if (loader === undefined) {
     try {
-      const value = ctx.get('loader', false);
+      const value = ctx.get("loader", false);
       attempts.push(`ctx.get('loader', false) -> ${describe(value)}`);
       if (looksLikeLoader(value)) {
         loader = value;
@@ -185,7 +198,7 @@ function resolveLoader(ctx) {
     attempts.push(`ctx.loader -> ${describe(direct)}`);
     if (loader === undefined && looksLikeLoader(direct)) {
       loader = direct;
-      via = 'ctx.loader';
+      via = "ctx.loader";
     }
   } catch (error) {
     directError = errText(error);
@@ -223,23 +236,23 @@ function startInjectProbe(ctx, record) {
   const startedAt = Date.now();
   record.startedAt = new Date(startedAt).toISOString();
   try {
-    if (typeof ctx.inject !== 'function') {
-      record.outcome = 'ctx.inject is not a function';
+    if (typeof ctx.inject !== "function") {
+      record.outcome = "ctx.inject is not a function";
       return null;
     }
     record.registered = true;
-    const dispose = ctx.inject(['loader'], (scoped) => {
+    const dispose = ctx.inject(["loader"], (scoped) => {
       try {
-        record.outcome = 'fired (child fiber activated)';
+        record.outcome = "fired (child fiber activated)";
         record.firedAfterMs = Date.now() - startedAt;
-        const value = scoped?.loader ?? scoped?.get?.('loader');
+        const value = scoped?.loader ?? scoped?.get?.("loader");
         record.scopedLoader = describe(value);
-        record.scopedLoaderHasEntries = typeof value?.entries === 'function';
+        record.scopedLoaderHasEntries = typeof value?.entries === "function";
       } catch (error) {
         record.outcome = `callback threw: ${errText(error)}`;
       }
     });
-    return typeof dispose === 'function' ? dispose : null;
+    return typeof dispose === "function" ? dispose : null;
   } catch (error) {
     record.outcome = `ctx.inject threw: ${errText(error)}`;
     return null;
@@ -265,7 +278,11 @@ async function awaitFiber(fiber, timeoutMs) {
   } catch (error) {
     return { ok: false, reason: errText(error), timedOut: false };
   }
-  if (promise === undefined || promise === null || typeof promise.then !== 'function') {
+  if (
+    promise === undefined ||
+    promise === null ||
+    typeof promise.then !== "function"
+  ) {
     return { ok: true, reason: null, timedOut: false };
   }
 
@@ -277,8 +294,11 @@ async function awaitFiber(fiber, timeoutMs) {
   let timer;
   try {
     const timeout = new Promise((resolve) => {
-      timer = setTimeout(() => resolve({ ok: false, reason: null, timedOut: true }), timeoutMs);
-      if (timer && typeof timer.unref === 'function') timer.unref();
+      timer = setTimeout(
+        () => resolve({ ok: false, reason: null, timedOut: true }),
+        timeoutMs,
+      );
+      if (timer && typeof timer.unref === "function") timer.unref();
     });
     return await Promise.race([settled, timeout]);
   } catch (error) {
@@ -301,7 +321,7 @@ function declaredInjectKeys(fiber) {
     const inject = fiber?.inject;
     if (inject === undefined || inject === null) return [];
     if (Array.isArray(inject)) return inject.map(String);
-    if (typeof inject === 'object') return Object.keys(inject);
+    if (typeof inject === "object") return Object.keys(inject);
     if (inject instanceof Set) return [...inject].map(String);
     return [];
   } catch (error) {
@@ -329,7 +349,11 @@ function missingServices(fiber, keys) {
 function optionsOf(entry) {
   try {
     const options = entry?.options;
-    return options !== undefined && options !== null && typeof options === 'object' ? options : {};
+    return options !== undefined &&
+      options !== null &&
+      typeof options === "object"
+      ? options
+      : {};
   } catch (error) {
     return { __unreadable: errText(error) };
   }
@@ -343,7 +367,7 @@ async function introspectEntry(entry) {
     group: options.group === true,
     disabled: null,
     disabledError: null,
-    fiberState: 'NO_FIBER',
+    fiberState: "NO_FIBER",
     fiberStateCode: null,
     declaredInject: [],
     declaredInjectCount: 0,
@@ -367,7 +391,7 @@ async function introspectEntry(entry) {
     row.disabled = Boolean(entry.disabled);
   } catch (error) {
     row.disabledError = errText(error);
-    row.notes.push('disabled expression threw');
+    row.notes.push("disabled expression threw");
   }
 
   let fiber;
@@ -378,25 +402,28 @@ async function introspectEntry(entry) {
   }
 
   if (fiber === undefined || fiber === null) {
-    row.fiberState = 'NO_FIBER';
-    row.notes.push('no fiber (loader did not import this entry)');
-    if (row.group) row.notes.push('options.group is true');
+    row.fiberState = "NO_FIBER";
+    row.notes.push("no fiber (loader did not import this entry)");
+    if (row.group) row.notes.push("options.group is true");
     return row;
   }
 
   try {
     const code = fiber.state;
-    row.fiberStateCode = typeof code === 'number' ? code : null;
+    row.fiberStateCode = typeof code === "number" ? code : null;
     row.fiberState = FIBER_STATES[code] ?? `UNKNOWN(${String(code)})`;
   } catch (error) {
-    row.fiberState = 'UNREADABLE';
+    row.fiberState = "UNREADABLE";
     row.notes.push(`fiber.state threw: ${errText(error)}`);
   }
 
   try {
     row.declaredInject = declaredInjectKeys(fiber);
     row.declaredInjectCount = row.declaredInject.length;
-    const { missing, present, unreadable } = missingServices(fiber, row.declaredInject);
+    const { missing, present, unreadable } = missingServices(
+      fiber,
+      row.declaredInject,
+    );
     row.missingServices = missing;
     row.presentServices = present;
     row.unreadableServices = unreadable;
@@ -405,19 +432,21 @@ async function introspectEntry(entry) {
   }
 
   // Only a fiber that is not ACTIVE can carry an unobserved rejection.
-  if (row.fiberState !== 'ACTIVE' && row.fiberState !== 'DISPOSED') {
+  if (row.fiberState !== "ACTIVE" && row.fiberState !== "DISPOSED") {
     const awaited = await awaitFiber(fiber, AWAIT_TIMEOUT_MS);
     if (awaited.timedOut) {
       row.awaitTimedOut = true;
       row.notes.push(`fiber.await() exceeded ${AWAIT_TIMEOUT_MS}ms`);
     } else if (!awaited.ok) {
       row.failureReason = awaited.reason;
-    } else if (row.fiberState === 'PENDING') {
-      row.notes.push('fiber.await() resolved without error (PENDING: waiting for services)');
+    } else if (row.fiberState === "PENDING") {
+      row.notes.push(
+        "fiber.await() resolved without error (PENDING: waiting for services)",
+      );
     }
   }
 
-  if (row.disabled === true) row.notes.push('entry is disabled');
+  if (row.disabled === true) row.notes.push("entry is disabled");
   return row;
 }
 
@@ -431,12 +460,14 @@ async function introspectEntry(entry) {
  */
 function toEntryArray(value) {
   const fail = (error) => ({ entries: null, truncated: false, error });
-  if (value === null || value === undefined) return fail(`entries() returned ${describe(value)}`);
-  if (Array.isArray(value)) return { entries: value, truncated: false, error: null };
+  if (value === null || value === undefined)
+    return fail(`entries() returned ${describe(value)}`);
+  if (Array.isArray(value))
+    return { entries: value, truncated: false, error: null };
 
   let iterable = false;
   try {
-    iterable = typeof value[Symbol.iterator] === 'function';
+    iterable = typeof value[Symbol.iterator] === "function";
   } catch (error) {
     return fail(`probing Symbol.iterator threw: ${errText(error)}`);
   }
@@ -445,18 +476,27 @@ function toEntryArray(value) {
     try {
       for (const item of value) {
         out.push(item);
-        if (out.length >= MAX_ENTRIES) return { entries: out, truncated: true, error: null };
+        if (out.length >= MAX_ENTRIES)
+          return { entries: out, truncated: true, error: null };
       }
       return { entries: out, truncated: false, error: null };
     } catch (error) {
-      return { entries: out, truncated: false, error: `iterating entries threw: ${errText(error)}` };
+      return {
+        entries: out,
+        truncated: false,
+        error: `iterating entries threw: ${errText(error)}`,
+      };
     }
   }
 
   try {
-    if (typeof value.length === 'number') {
+    if (typeof value.length === "number") {
       const length = Math.min(value.length, MAX_ENTRIES);
-      return { entries: Array.prototype.slice.call(value, 0, length), truncated: value.length > length, error: null };
+      return {
+        entries: Array.prototype.slice.call(value, 0, length),
+        truncated: value.length > length,
+        error: null,
+      };
     }
   } catch (error) {
     return fail(`reading array-like entries threw: ${errText(error)}`);
@@ -465,7 +505,7 @@ function toEntryArray(value) {
 }
 
 async function scan(ctx, state, pass) {
-  if(state.disposed)return;
+  if (state.disposed) return;
   const report = {
     schemaVersion: SCHEMA_VERSION,
     plugin: name,
@@ -494,12 +534,17 @@ async function scan(ctx, state, pass) {
     via = resolved.via;
     state.loader = loader;
     state.loaderVia = via;
-    report.loaderAccess = { ...state.loaderAccess, ...publicLoaderAccess(resolved) };
+    report.loaderAccess = {
+      ...state.loaderAccess,
+      ...publicLoaderAccess(resolved),
+    };
   }
 
   if (loader === undefined) {
-    report.errors.push('loader service not reachable from this plugin context');
-    log(`ERROR loader not reachable (${JSON.stringify(state.loaderAccess.attempts ?? [])})`);
+    report.errors.push("loader service not reachable from this plugin context");
+    log(
+      `ERROR loader not reachable (${JSON.stringify(state.loaderAccess.attempts ?? [])})`,
+    );
     writeReport(report);
     return report;
   }
@@ -513,11 +558,12 @@ async function scan(ctx, state, pass) {
       typeof: describe(rawEntries),
       isArray: Array.isArray(rawEntries),
       constructorName: safeJson(rawEntries?.constructor?.name ?? null),
-      iterable: typeof rawEntries?.[Symbol.iterator] === 'function',
+      iterable: typeof rawEntries?.[Symbol.iterator] === "function",
       truncated: walked.truncated,
     };
     entries = walked.entries;
-    if (walked.error !== null) report.errors.push(`loader.entries(): ${walked.error}`);
+    if (walked.error !== null)
+      report.errors.push(`loader.entries(): ${walked.error}`);
   } catch (error) {
     report.errors.push(`loader.entries() threw: ${errText(error)}`);
     log(`ERROR scan#${pass}: loader.entries() threw: ${errText(error)}`);
@@ -525,7 +571,8 @@ async function scan(ctx, state, pass) {
     return report;
   }
   if (entries === null) {
-    const detail = report.errors.length > 0 ? report.errors.join('; ') : 'unknown reason';
+    const detail =
+      report.errors.length > 0 ? report.errors.join("; ") : "unknown reason";
     log(`ERROR scan#${pass}: could not read entries (${detail})`);
     writeReport(report);
     return report;
@@ -538,33 +585,34 @@ async function scan(ctx, state, pass) {
       row = await introspectEntry(entry);
     } catch (error) {
       row = {
-        id: '<unreadable entry>',
-        fiberState: 'UNREADABLE',
+        id: "<unreadable entry>",
+        fiberState: "UNREADABLE",
         notes: [`entry introspection threw: ${errText(error)}`],
       };
       report.errors.push(`entry introspection threw: ${errText(error)}`);
     }
     report.entries.push(row);
-    report.stateHistogram[row.fiberState] = (report.stateHistogram[row.fiberState] ?? 0) + 1;
+    report.stateHistogram[row.fiberState] =
+      (report.stateHistogram[row.fiberState] ?? 0) + 1;
   }
 
   report.problems = report.entries.filter((row) => {
     if (row.disabled === true) return false;
-    if (row.fiberState === 'ACTIVE') return false;
+    if (row.fiberState === "ACTIVE") return false;
     return true;
   });
 
-  if(state.disposed)return report;
+  if (state.disposed) return report;
   const written = writeReport(report);
   log(
-    `scan#${pass}/${SCAN_DELAYS.length} loader-via=${via} entries=${report.entryCount} states=${safeJson(report.stateHistogram)} problems=${report.problems.length} report=${OUT_JSON}${written ? '' : ' (WRITE FAILED)'}`,
+    `scan#${pass}/${SCAN_DELAYS.length} loader-via=${via} entries=${report.entryCount} states=${safeJson(report.stateHistogram)} problems=${report.problems.length} report=${OUT_JSON}${written ? "" : " (WRITE FAILED)"}`,
   );
   for (const row of report.problems) {
     log(
       `  PROBLEM id=${safeJson(row.id)} name=${safeJson(row.name)} state=${row.fiberState}` +
-        ` missing=[${row.missingServices.join(', ')}]` +
-        (row.failureReason ? ` reason=${firstLine(row.failureReason)}` : '') +
-        (row.awaitTimedOut ? ' (await timed out)' : ''),
+        ` missing=[${row.missingServices.join(", ")}]` +
+        (row.failureReason ? ` reason=${firstLine(row.failureReason)}` : "") +
+        (row.awaitTimedOut ? " (await timed out)" : ""),
     );
   }
   return report;
@@ -572,10 +620,10 @@ async function scan(ctx, state, pass) {
 
 function firstLine(text) {
   try {
-    const line = String(text).split('\n')[0];
+    const line = String(text).split("\n")[0];
     return line.length > 300 ? `${line.slice(0, 300)}…` : line;
   } catch {
-    return '<unprintable>';
+    return "<unprintable>";
   }
 }
 
@@ -615,16 +663,21 @@ function resolveKernelDir() {
   const here = dir(fileURLToPath(import.meta.url));
   const candidates = [
     process.env.DSC_KERNEL,
-    path.join(here, 'kernel'), // npm 自足包形态（`npm pack` 时由 prepack 暂存到此）
+    path.join(here, "kernel"), // npm 自足包形态（`npm pack` 时由 prepack 暂存到此）
     here, // 另一种自足布局：内核与 index.js 同级
-    path.resolve(here, '..'), // 仓库形态：plugin/ → 仓库根
+    path.resolve(here, ".."), // 仓库形态：plugin/ → 仓库根
   ].filter(Boolean);
   for (const c of candidates) {
     try {
-      if (existsSync(path.join(c, 'lib', 'extract.mjs')) && existsSync(path.join(c, 'lib', 'verdict.mjs'))) {
+      if (
+        existsSync(path.join(c, "lib", "extract.mjs")) &&
+        existsSync(path.join(c, "lib", "verdict.mjs"))
+      ) {
         return c;
       }
-    } catch { /* 下一个候选 */ }
+    } catch {
+      /* 下一个候选 */
+    }
   }
   return null;
 }
@@ -691,32 +744,52 @@ function resolveDshVersion() {
       const m = /^(.*[\\/]dsh)[\\/]node_modules[\\/]/.exec(sep);
       if (m && m[1]) {
         const dshRoot = m[1];
-        const req = __createRequire(join(dshRoot, 'probe.js'));
+        const req = __createRequire(join(dshRoot, "probe.js"));
         // 两个包实测都能解析；都试一遍是为了不依赖某一个包的存在
-        for (const spec of ['@deepseek-ai/dsh-desktop-host/package.json', '@deepseek-ai/dsh/package.json']) {
+        for (const spec of [
+          "@deepseek-ai/dsh-desktop-host/package.json",
+          "@deepseek-ai/dsh/package.json",
+        ]) {
           try {
             const meta = req(req.resolve(spec));
-            if (meta && typeof meta.version === 'string' && meta.version) {
+            if (meta && typeof meta.version === "string" && meta.version) {
               return meta.version;
             }
-          } catch { /* 试下一个 */ }
+          } catch {
+            /* 试下一个 */
+          }
         }
       }
     }
-  } catch { /* 继续 */ }
+  } catch {
+    /* 继续 */
+  }
 
   // npm prefixes need not end in /dsh/. Read only an official runtime's own
   // manifest above the real entry; package.json need not be an exported subpath.
   try {
-    let dir=path.dirname(path.resolve(realpathSync(process.argv[1])));
-    for(let depth=0;depth<32;depth++){
-      try{
-        const meta=JSON.parse(readFileSync(join(dir,'package.json'),'utf8'));
-        if(['@deepseek-ai/dsh','@deepseek-ai/dsh-desktop-host','@deepseek-ai/dsh-app-boot'].includes(meta.name)&&typeof meta.version==='string'&&meta.version)return meta.version;
-      }catch{}
-      const parent=path.dirname(dir);if(parent===dir)break;dir=parent;
+    let dir = path.dirname(path.resolve(realpathSync(process.argv[1])));
+    for (let depth = 0; depth < 32; depth++) {
+      try {
+        const meta = JSON.parse(
+          readFileSync(join(dir, "package.json"), "utf8"),
+        );
+        if (
+          [
+            "@deepseek-ai/dsh",
+            "@deepseek-ai/dsh-desktop-host",
+            "@deepseek-ai/dsh-app-boot",
+          ].includes(meta.name) &&
+          typeof meta.version === "string" &&
+          meta.version
+        )
+          return meta.version;
+      } catch {}
+      const parent = path.dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
     }
-  }catch{}
+  } catch {}
   // ③ 都没有 → **null，不猜**（判定层会据此不产出声明不符的结论）
   return null;
 }
@@ -738,7 +811,8 @@ function resolveDshVersion() {
  * profile 无关。信它们会把 gverify 的结论写进 `baseline.desktop.json`，
  * 于是差分会报出"移除了 17 个插件"这种**完全是编出来的变化**。
  *
- * 所以顺序是：argv（宿主自己声明的）> 显式覆盖 > 环境变量（可能是陈的）> 回退。
+ * 所以顺序是：argv（宿主自己声明的）> 显式覆盖 > 环境变量（可能是陈的）。
+ * 无法确认时要求显式指定，不猜测 profile。
  */
 function resolveActiveProfile() {
   // ① 宿主自己的启动参数 —— 最权威。**两种形态都要认**：
@@ -753,39 +827,74 @@ function resolveActiveProfile() {
     const argv = (process.argv || []).map(String);
     for (let i = argv.length - 1; i >= 0; i--) {
       const inline = /^--profile=(.+)$/.exec(argv[i]);
-      if (inline) return { name: inline[1], why: `process.argv 的 --profile=${inline[1]}` };
-      if (argv[i] === '--profile' && argv[i + 1] && !argv[i + 1].startsWith('-')) {
-        return { name: argv[i + 1], why: `process.argv 的 --profile ${argv[i + 1]}` };
+      if (inline)
+        return {
+          name: inline[1],
+          why: `process.argv 的 --profile=${inline[1]}`,
+        };
+      if (
+        argv[i] === "--profile" &&
+        argv[i + 1] &&
+        !argv[i + 1].startsWith("-")
+      ) {
+        return {
+          name: argv[i + 1],
+          why: `process.argv 的 --profile ${argv[i + 1]}`,
+        };
       }
     }
     // 位置形态：任何指向 `<…>/profiles/<名字>`（或它下面的 node_modules）的绝对路径
     for (const a of argv) {
-      if (!a.startsWith('/')) continue;
+      if (!a.startsWith("/")) continue;
       const m = /\/profiles\/([^/]+)(?:\/|$)/.exec(a);
-      if (m && m[1]) return { name: m[1], why: `process.argv 里的 profile 路径 ${a}` };
+      if (m && m[1])
+        return { name: m[1], why: `process.argv 里的 profile 路径 ${a}` };
     }
-  } catch { /* 继续 */ }
-  // ② 显式覆盖（工具/测试用）
-  if (process.env.DSC_PROFILE) return { name: process.env.DSC_PROFILE, why: `DSC_PROFILE=${process.env.DSC_PROFILE}` };
-  // ③ 环境变量 —— **可能是陈的**，所以带上警示写进 why
-  for (const key of ['DSH_PROFILE', 'DSH_ACTIVE_PROFILE', 'DSH_PROFILE_NAME']) {
-    const v = process.env[key];
-    if (v) return { name: v, why: `${key}=${v}（环境变量可能来自启动 app 的那个 shell，未必是当前加载的 profile）` };
+  } catch {
+    /* 继续 */
   }
-  return { name: null, why: '无法判断' };
+  // ② 显式覆盖（工具/测试用）
+  if (process.env.DSC_PROFILE)
+    return {
+      name: process.env.DSC_PROFILE,
+      why: `DSC_PROFILE=${process.env.DSC_PROFILE}`,
+    };
+  // ③ 环境变量 —— **可能是陈的**，所以带上警示写进 why
+  for (const key of ["DSH_PROFILE", "DSH_ACTIVE_PROFILE", "DSH_PROFILE_NAME"]) {
+    const v = process.env[key];
+    if (v)
+      return {
+        name: v,
+        why: `${key}=${v}（环境变量可能来自启动 app 的那个 shell，未必是当前加载的 profile）`,
+      };
+  }
+  return { name: null, why: "无法判断" };
 }
 
 function resolveNodeModules(requestedProfile = null) {
-  const dshHome=process.env.DSH_HOME || join(homedir(),'.dsh');
-  const inferred=resolveActiveProfile();
-  const selected=requestedProfile || inferred.name;
-  if(selected){
-    if(!/^[\w.-]+$/.test(selected) || selected==='.' || selected==='..')return {dir:null,why:'profile 名称非法'};
-    const dir=join(dshHome,'profiles',selected,'node_modules');
-    return existsSync(dir)?{dir,why:requestedProfile?'请求明确指定的 profile '+selected:inferred.why}:{dir:null,why:'指定 profile 不存在: '+selected};
+  const dshHome = process.env.DSH_HOME || join(homedir(), ".dsh");
+  const inferred = resolveActiveProfile();
+  const selected = requestedProfile || inferred.name;
+  if (selected) {
+    if (!/^[\w.-]+$/.test(selected) || selected === "." || selected === "..")
+      return { dir: null, why: "profile 名称非法" };
+    const dir = join(dshHome, "profiles", selected, "node_modules");
+    return existsSync(dir)
+      ? {
+          dir,
+          why: requestedProfile
+            ? "请求明确指定的 profile " + selected
+            : inferred.why,
+        }
+      : { dir: null, why: "指定 profile 不存在: " + selected };
   }
-  if(process.env.DSH_PROFILE_DIR){const dir=join(process.env.DSH_PROFILE_DIR,'node_modules');return existsSync(dir)?{dir,why:'显式 DSH_PROFILE_DIR'}:{dir:null,why:'DSH_PROFILE_DIR 不存在'};}
-  return {dir:null,why:'无法确认当前 profile；请显式指定'};
+  if (process.env.DSH_PROFILE_DIR) {
+    const dir = join(process.env.DSH_PROFILE_DIR, "node_modules");
+    return existsSync(dir)
+      ? { dir, why: "显式 DSH_PROFILE_DIR" }
+      : { dir: null, why: "DSH_PROFILE_DIR 不存在" };
+  }
+  return { dir: null, why: "无法确认当前 profile；请显式指定" };
 }
 
 /**
@@ -798,74 +907,161 @@ function resolveNodeModules(requestedProfile = null) {
  * time-dependent observations even when the sampled identity is unchanged.
  */
 async function serveReport(state, ctx, force, options = {}) {
-  if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
-  const kernel=resolveKernelDir(),nm=resolveNodeModules(options.profile || null);
-  if(!kernel)return failureEnvelope('找不到判定内核');
-  if(!nm.dir){
+  if (state.disposed)
+    return failureEnvelope("Plugin generation disposed / 已卸载");
+  const kernel = resolveKernelDir(),
+    nm = resolveNodeModules(options.profile || null);
+  if (!kernel) return failureEnvelope("找不到判定内核");
+  if (!nm.dir) {
     // Keep computeReport's version identity on target-resolution failures.
-    const out=await computeReport(state,ctx,options);
-    return failureEnvelope(out.error,out);
+    const out = await computeReport(state, ctx, options);
+    return failureEnvelope(out.error, out);
   }
-  const canonical=await fsPromises.realpath(nm.dir),version=resolveDshVersion();
-  const context={nodeModules:canonical,observationProfile:path.resolve(nm.dir),kernel:await fsPromises.realpath(kernel),dshVersion:version,probe:process.env.DSC_PROBE_REPORT || null};
-  if(!state.reportService){
-    const [{ReportService},{reportIdentity},{catalogPathFor},{sampleServices}]=await Promise.all([
-      import(pathToFileURL(join(kernel,'lib','report-service.mjs')).href),
-      import(pathToFileURL(join(kernel,'lib','report-identity.mjs')).href),
-      import(pathToFileURL(join(kernel,'lib','catalog.mjs')).href),
-      import(pathToFileURL(join(kernel,'lib','observation.mjs')).href),
+  const canonical = await fsPromises.realpath(nm.dir),
+    version = resolveDshVersion();
+  const context = {
+    nodeModules: canonical,
+    observationProfile: path.resolve(nm.dir),
+    kernel: await fsPromises.realpath(kernel),
+    dshVersion: version,
+    probe: process.env.DSC_PROBE_REPORT || null,
+  };
+  if (!state.reportService) {
+    const [
+      { ReportService },
+      { reportIdentity },
+      { catalogPathFor },
+      { sampleServices },
+    ] = await Promise.all([
+      import(pathToFileURL(join(kernel, "lib", "report-service.mjs")).href),
+      import(pathToFileURL(join(kernel, "lib", "report-identity.mjs")).href),
+      import(pathToFileURL(join(kernel, "lib", "catalog.mjs")).href),
+      import(pathToFileURL(join(kernel, "lib", "observation.mjs")).href),
     ]);
-    if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
-    if(!state.reportService)state.reportService=new ReportService(async (options,guard)=>{
-      const out=await computeReport(state,ctx,{...options,_cacheGuard:guard});
-      return out.ok?assertEnvelope(out):failureEnvelope(out.error,out);
-    },{ttlMs:state.cacheTtlMs,watchMs:state.cacheWatchMs,identity:async options=>{
-      const scope=options._cacheContext,current=resolveNodeModules(),currentVersion=resolveDshVersion();
-      const active=current.dir?await fsPromises.realpath(current.dir):null;
-      const requestedTarget=await fsPromises.realpath(options._nodeModules.dir);
-      const identity=await reportIdentity({nodeModules:scope.nodeModules,context:{...scope,currentVersion,active,requestedTarget,probe:process.env.DSC_PROBE_REPORT || null},files:[join(scope.kernel,'rules','severity.json'),catalogPathFor(scope.kernel,currentVersion),process.env.DSC_PROBE_REPORT,join(path.dirname(options._nodeModules.dir),'compatibility.json')]});
-      const sameHost=active===scope.nodeModules;
-      const itemListing=sameHost?await (async()=>{try{const listing=await ctx.get?.('pluginManager',false)?.list?.();return (Array.isArray(listing)?listing:listing?.items||listing?.plugins||[]).map(i=>({id:i.id??i.entryId??i.slotId,packageName:i.packageName??i.package??i.name}));}catch{return [];}})():[];
-      const loader=sameHost?loaderObservations(ctx,identity.manifests,itemListing):null;
-      const observation=sameHost?sampleServices(ctx,[...identity.services,...(options._cacheInputs.services || [])],{profileId:scope.nodeModules,dshVersion:currentVersion}):null;
-      // Sampling timestamps are evidence, not a changing service identity.
-      return JSON.stringify([identity.digest,loader,observation?.root || null]);
-    }});
+    if (state.disposed)
+      return failureEnvelope("Plugin generation disposed / 已卸载");
+    if (!state.reportService)
+      state.reportService = new ReportService(
+        async (options, guard) => {
+          const out = await computeReport(state, ctx, {
+            ...options,
+            _cacheGuard: guard,
+          });
+          return out.ok ? assertEnvelope(out) : failureEnvelope(out.error, out);
+        },
+        {
+          ttlMs: state.cacheTtlMs,
+          watchMs: state.cacheWatchMs,
+          identity: async (options) => {
+            const scope = options._cacheContext,
+              current = resolveNodeModules(),
+              currentVersion = resolveDshVersion();
+            const active = current.dir
+              ? await fsPromises.realpath(current.dir)
+              : null;
+            const requestedTarget = await fsPromises.realpath(
+              options._nodeModules.dir,
+            );
+            const identity = await reportIdentity({
+              nodeModules: scope.nodeModules,
+              context: {
+                ...scope,
+                currentVersion,
+                active,
+                requestedTarget,
+                probe: process.env.DSC_PROBE_REPORT || null,
+              },
+              files: [
+                join(scope.kernel, "rules", "severity.json"),
+                catalogPathFor(scope.kernel, currentVersion),
+                process.env.DSC_PROBE_REPORT,
+                join(
+                  path.dirname(options._nodeModules.dir),
+                  "compatibility.json",
+                ),
+              ],
+            });
+            const sameHost = active === scope.nodeModules;
+            const itemListing = sameHost
+              ? await (async () => {
+                  try {
+                    const listing = await ctx
+                      .get?.("pluginManager", false)
+                      ?.list?.();
+                    return (
+                      Array.isArray(listing)
+                        ? listing
+                        : listing?.items || listing?.plugins || []
+                    ).map((i) => ({
+                      id: i.id ?? i.entryId ?? i.slotId,
+                      packageName: i.packageName ?? i.package ?? i.name,
+                    }));
+                  } catch {
+                    return [];
+                  }
+                })()
+              : [];
+            const loader = sameHost
+              ? loaderObservations(ctx, identity.manifests, itemListing)
+              : null;
+            const observation = sameHost
+              ? sampleServices(
+                  ctx,
+                  [
+                    ...identity.services,
+                    ...(options._cacheInputs.services || []),
+                  ],
+                  { profileId: scope.nodeModules, dshVersion: currentVersion },
+                )
+              : null;
+            // Sampling timestamps are evidence, not a changing service identity.
+            return JSON.stringify([
+              identity.digest,
+              loader,
+              observation?.root || null,
+            ]);
+          },
+        },
+      );
   }
-  if(!state.cacheEventDisposers && typeof ctx.on==='function'){
-    state.cacheEventDisposers=[];
+  if (!state.cacheEventDisposers && typeof ctx.on === "function") {
+    state.cacheEventDisposers = [];
     // Verified in the bundled loader and plugin-manager emit sites; the
     // bounded watchdog also catches source edits and hosts without ctx.on.
-    for(const event of ['plugin-manager/changed','plugin-manager/install-state','loader/entry-init','loader/partial-dispose','loader/volatile-update']){
-      try{const off=ctx.on(event,()=>state.reportService?.notify());if(typeof off==='function')state.cacheEventDisposers.push(off);}catch{}
+    for (const event of [
+      "plugin-manager/changed",
+      "plugin-manager/install-state",
+      "loader/entry-init",
+      "loader/partial-dispose",
+      "loader/volatile-update",
+    ]) {
+      try {
+        const off = ctx.on(event, () => state.reportService?.notify());
+        if (typeof off === "function") state.cacheEventDisposers.push(off);
+      } catch {}
     }
   }
-  const key=JSON.stringify(context);
+  const key = JSON.stringify(context);
   state.reportInputs ||= new Map();
-  if(!state.reportInputs.has(key))state.reportInputs.set(key,{services:[]});
-  const inputs=state.reportInputs.get(key);
+  if (!state.reportInputs.has(key))
+    state.reportInputs.set(key, { services: [] });
+  const inputs = state.reportInputs.get(key);
   // Canonicalize cache identity only: preserve the requested path for the
   // existing exact probe/profile binding and the report's business target.
-  const out=await state.reportService.get(key,{...options,_cacheContext:context,_cacheInputs:inputs,_nodeModules:{dir:nm.dir,why:nm.why}},force);
-  if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
-  if (!out?.ok) return failureEnvelope(out?.error,out||{});
-  return attachFindingReviews(state,assertEnvelope(out),key,kernel);
-}
-
-/**
- * 基线文件的位置。**必须与 CLI 的 `bin/compat-check.mjs` 推导出同一个路径** ——
- * 两份基线会立刻分叉，而用户在面板和命令行看到的"变化"就会是两件事。
- * 按 profile 分文件：不同 profile 的插件集合不同，混在一起会让差分变成噪音。
- */
-function baselineFileFor(nmDir) {
-  const dshHome = process.env.DSH_HOME || join(homedir(), '.dsh');
-  let key = 'unknown';
-  try {
-    const parts = String(nmDir).split(path.sep);
-    const i = parts.lastIndexOf('profiles');
-    if (i >= 0 && parts[i + 1]) key = parts[i + 1];
-  } catch { /* 保持 unknown */ }
-  return join(dshHome, 'dsh-plugin-compat-check', `baseline.${key.replace(/[^\w.-]/g, '_')}.json`);
+  const out = await state.reportService.get(
+    key,
+    {
+      ...options,
+      _cacheContext: context,
+      _cacheInputs: inputs,
+      _nodeModules: { dir: nm.dir, why: nm.why },
+    },
+    force,
+  );
+  if (state.disposed)
+    return failureEnvelope("Plugin generation disposed / 已卸载");
+  if (!out?.ok) return failureEnvelope(out?.error, out || {});
+  return attachFindingReviews(state, assertEnvelope(out), key, kernel);
 }
 
 /**
@@ -876,11 +1072,12 @@ function baselineFileFor(nmDir) {
  *   - 结论（五元组 + 确定性）是内核的产物，算出唯一一份才不会两边漂移。
  */
 async function computeReport(state, ctx, options = {}) {
-  if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
+  if (state.disposed)
+    return failureEnvelope("Plugin generation disposed / 已卸载");
   const started = Date.now();
   const out = {
     schemaVersion: 1,
-    kind: 'plugin-compat-check/report',
+    kind: "plugin-compat-check/report",
     computedAt: new Date().toISOString(),
     ok: false,
     error: null,
@@ -897,25 +1094,39 @@ async function computeReport(state, ctx, options = {}) {
   };
   try {
     const kernel = resolveKernelDir();
-    if(options._cacheContext && (options._cacheContext.dshVersion!==resolveDshVersion() || options._cacheContext.probe!==(process.env.DSC_PROBE_REPORT || null) || options._cacheContext.nodeModules!==(await fsPromises.realpath(options._nodeModules.dir)) || options._cacheContext.kernel!==(kernel && await fsPromises.realpath(kernel))))return failureEnvelope('报告上下文已变化，等待目标报告刷新');
+    if (
+      options._cacheContext &&
+      (options._cacheContext.dshVersion !== resolveDshVersion() ||
+        options._cacheContext.probe !==
+          (process.env.DSC_PROBE_REPORT || null) ||
+        options._cacheContext.nodeModules !==
+          (await fsPromises.realpath(options._nodeModules.dir)) ||
+        options._cacheContext.kernel !==
+          (kernel && (await fsPromises.realpath(kernel))))
+    )
+      return failureEnvelope("报告上下文已变化，等待目标报告刷新");
     out.kernelDir = kernel;
     // 版本要**尽早**拿到：连"找不到内核"这条错误路径上，用户也需要知道
     // 是哪一版工具报的这个错。`version.mjs` 只在有内核时才读得到 ——
     // 读不到就保持 null，**不猜**。
     if (kernel) {
       try {
-        const vmod = await import(pathToFileURL(join(kernel, 'lib', 'version.mjs')).href);
+        const vmod = await import(
+          pathToFileURL(join(kernel, "lib", "version.mjs")).href
+        );
         out.toolVersion = vmod.TOOL_VERSION ?? null;
       } catch (error) {
         log(`版本读不到（${errText(error)}）—— 报告里的 toolVersion 将是 null`);
       }
     }
     if (!kernel) {
-      out.error = '找不到判定内核（lib/extract.mjs + lib/verdict.mjs）。'
-        + '插件形态下它们是同仓库的相邻目录；发布形态请设 DSC_KERNEL。';
+      out.error =
+        "找不到判定内核（lib/extract.mjs + lib/verdict.mjs）。" +
+        "插件形态下它们是同仓库的相邻目录；发布形态请设 DSC_KERNEL。";
       return out;
     }
-    const nm = options._nodeModules || resolveNodeModules(options.profile || null);
+    const nm =
+      options._nodeModules || resolveNodeModules(options.profile || null);
     out.nodeModules = nm.dir;
     out.nodeModulesWhy = nm.why;
     if (!nm.dir) {
@@ -923,24 +1134,37 @@ async function computeReport(state, ctx, options = {}) {
       return out;
     }
 
-    const { extractInWorker } = await import(pathToFileURL(join(kernel, 'lib', 'worker-analysis.mjs')).href);
-    const { buildVerdicts } = await import(pathToFileURL(join(kernel, 'lib', 'verdict.mjs')).href);
+    const { extractInWorker } = await import(
+      pathToFileURL(join(kernel, "lib", "worker-analysis.mjs")).href
+    );
+    const { buildVerdicts } = await import(
+      pathToFileURL(join(kernel, "lib", "verdict.mjs")).href
+    );
 
-    const {loadCatalog}=await import(pathToFileURL(join(kernel,'lib','catalog.mjs')).href);
-    const {file:catalogPath,catalog,evidence:catalogEvidence} = loadCatalog(kernel,resolveDshVersion());
-    const rulesPath = join(kernel, 'rules', 'severity.json');
+    const { loadCatalog } = await import(
+      pathToFileURL(join(kernel, "lib", "catalog.mjs")).href
+    );
+    const {
+      file: catalogPath,
+      catalog,
+      evidence: catalogEvidence,
+    } = loadCatalog(kernel, resolveDshVersion());
+    const rulesPath = join(kernel, "rules", "severity.json");
     const rulesBytes = readFileSync(rulesPath);
     const rules = JSON.parse(rulesBytes);
-    out.analysisIdentity={rulesSha256:createHash('sha256').update(rulesBytes).digest('hex'),catalogSha256:catalogEvidence.sha256};
+    out.analysisIdentity = {
+      rulesSha256: createHash("sha256").update(rulesBytes).digest("hex"),
+      catalogSha256: catalogEvidence.sha256,
+    };
 
     // 运行时面：宿主半边**自己就在进程里**，所以它能拿到比探针更准的东西。
     // 第一版先读探针报告（如果外层给了路径），没有就退回目录 —— 并如实标注。
     let hostSurface = null;
-    let surfaceWhy = '没有运行时面：结论中的方法级判定降为「疑似」';
+    let surfaceWhy = "没有运行时面：结论中的方法级判定降为「疑似」";
     const probePath = process.env.DSC_PROBE_REPORT;
     if (probePath && existsSync(probePath)) {
       try {
-        hostSurface = JSON.parse(readFileSync(probePath, 'utf8'));
+        hostSurface = JSON.parse(readFileSync(probePath, "utf8"));
         surfaceWhy = `运行时面来自探针报告 ${probePath}`;
       } catch (error) {
         surfaceWhy = `探针报告读不动（${errText(error)}），退回目录`;
@@ -949,22 +1173,50 @@ async function computeReport(state, ctx, options = {}) {
     out.surfaceWhy = surfaceWhy;
 
     const extracted = await extractInWorker(nm.dir, { catalog });
-    if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
-    if(options._cacheInputs)options._cacheInputs.services=extracted.report.services;
-    const { sampleServices } = await import(pathToFileURL(join(kernel,'lib','observation.mjs')).href);
-    const currentTarget=resolveNodeModules();
-    const sameHost=currentTarget.dir&&(await fsPromises.realpath(currentTarget.dir))===(await fsPromises.realpath(nm.dir));
-    if(!hostSurface && sameHost){
-      hostSurface=sampleServices(ctx,extracted.report.services,{profileId:nm.dir,dshVersion:resolveDshVersion()});
-      surfaceWhy='当前宿主进程内采集的服务结构；未采集或读取失败不等于缺失';
+    if (state.disposed)
+      return failureEnvelope("Plugin generation disposed / 已卸载");
+    if (options._cacheInputs)
+      options._cacheInputs.services = extracted.report.services;
+    const { sampleServices } = await import(
+      pathToFileURL(join(kernel, "lib", "observation.mjs")).href
+    );
+    const currentTarget = resolveNodeModules();
+    const sameHost =
+      currentTarget.dir &&
+      (await fsPromises.realpath(currentTarget.dir)) ===
+        (await fsPromises.realpath(nm.dir));
+    if (!hostSurface && sameHost) {
+      hostSurface = sampleServices(ctx, extracted.report.services, {
+        profileId: nm.dir,
+        dshVersion: resolveDshVersion(),
+      });
+      surfaceWhy = "当前宿主进程内采集的服务结构；未采集或读取失败不等于缺失";
     }
-    const itemListing=await (async()=>{try{const listing=await ctx.get?.('pluginManager',false)?.list?.();return (Array.isArray(listing)?listing:listing?.items||listing?.plugins||[]).map(i=>({id:i.id??i.entryId??i.slotId,packageName:i.packageName??i.package??i.name}));}catch{return [];}})();
-    const loaderState=sameHost?loaderObservations(ctx,extracted.report.manifests,itemListing):{rows:[],unmapped:[],available:false};
-    out.loaderCoverage=loaderState;
+    const itemListing = await (async () => {
+      try {
+        const listing = await ctx.get?.("pluginManager", false)?.list?.();
+        return (
+          Array.isArray(listing)
+            ? listing
+            : listing?.items || listing?.plugins || []
+        ).map((i) => ({
+          id: i.id ?? i.entryId ?? i.slotId,
+          packageName: i.packageName ?? i.package ?? i.name,
+        }));
+      } catch {
+        return [];
+      }
+    })();
+    const loaderState = sameHost
+      ? loaderObservations(ctx, extracted.report.manifests, itemListing)
+      : { rows: [], unmapped: [], available: false };
+    out.loaderCoverage = loaderState;
 
-    out.surfaceWhy=surfaceWhy;
-    const {readProfileCompatibility}=await import(pathToFileURL(join(kernel,'lib','profile-compatibility.mjs')).href);
-    const compatibility=readProfileCompatibility(nm.dir);
+    out.surfaceWhy = surfaceWhy;
+    const { readProfileCompatibility } = await import(
+      pathToFileURL(join(kernel, "lib", "profile-compatibility.mjs")).href
+    );
+    const compatibility = readProfileCompatibility(nm.dir);
     const verdict = buildVerdicts({
       report: extracted.report,
       hostSurface,
@@ -972,7 +1224,7 @@ async function computeReport(state, ctx, options = {}) {
       catalog,
       dshVersion: resolveDshVersion(),
       entryStates: loaderState.rows,
-      observationTarget: {profileId:nm.dir,maxAgeMs:24*60*60*1000},
+      observationTarget: { profileId: nm.dir, maxAgeMs: 24 * 60 * 60 * 1000 },
       compatibilityExemptions: compatibility.exemptions,
       compatibilityNotes: compatibility.notes,
     });
@@ -980,19 +1232,34 @@ async function computeReport(state, ctx, options = {}) {
     // ── C4：基线差分 ──
     // 用**与 CLI 完全相同**的 lib/baseline.mjs。面板说"变差了"而命令行说"没变"
     // 这种分叉在结构上就不可能发生。
-    let baseline = null, finalizeBaseline = null;
+    let baseline = null,
+      finalizeBaseline = null;
     try {
       const { snapshotForBaseline, diffAgainstBaseline, badgeFor } =
-        await import(pathToFileURL(join(kernel, 'lib', 'baseline.mjs')).href);
-      const store=await import(pathToFileURL(join(kernel,'lib','state-store.mjs')).href);
-      const identity=store.baselineIdentity(nm.dir,verdict.observation.mode,rules,catalog);
-      const snap = snapshotForBaseline(verdict, resolveDshVersion(),identity);
-      const bfile = store.baselinePath(nm.dir,verdict.observation.mode);
-      if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
-      finalizeBaseline=()=>store.baselineTransaction(bfile,snap,{advance:extracted.report.scanComplete});
-      if(!options._cacheGuard)baseline=finalizeBaseline();
+        await import(pathToFileURL(join(kernel, "lib", "baseline.mjs")).href);
+      const store = await import(
+        pathToFileURL(join(kernel, "lib", "state-store.mjs")).href
+      );
+      const identity = store.baselineIdentity(
+        nm.dir,
+        verdict.observation.mode,
+        rules,
+        catalog,
+      );
+      const snap = snapshotForBaseline(verdict, resolveDshVersion(), identity);
+      const bfile = store.baselinePath(nm.dir, verdict.observation.mode);
+      if (state.disposed)
+        return failureEnvelope("Plugin generation disposed / 已卸载");
+      finalizeBaseline = () =>
+        store.baselineTransaction(bfile, snap, {
+          advance: extracted.report.scanComplete,
+        });
+      if (!options._cacheGuard) baseline = finalizeBaseline();
     } catch (error) {
-      baseline = { error: errText(error), note: '基线差分没算成（不影响本次结论）' };
+      baseline = {
+        error: errText(error),
+        note: "基线差分没算成（不影响本次结论）",
+      };
     }
 
     // 只把面板要用的部分送过去：完整 report 在 desktop profile 上是 ~1 MB，
@@ -1003,16 +1270,24 @@ async function computeReport(state, ctx, options = {}) {
     // 自己的只读服务里取这张表，让客户端能解析出"这是哪个插件"。
     // 取不到不算失败：客户端会退回到"id 就是包名"的判断，并如实不渲染角标。
     try {
-      const pm = typeof ctx.get === 'function' ? ctx.get('pluginManager', false) : undefined;
-      const listing = pm && typeof pm.list === 'function' ? await pm.list() : null;
+      const pm =
+        typeof ctx.get === "function"
+          ? ctx.get("pluginManager", false)
+          : undefined;
+      const listing =
+        pm && typeof pm.list === "function" ? await pm.list() : null;
       if (listing) {
-        const arr = Array.isArray(listing) ? listing : (listing.items || listing.plugins || []);
+        const arr = Array.isArray(listing)
+          ? listing
+          : listing.items || listing.plugins || [];
         out.items = arr
           .map((it) => {
-            if (!it || typeof it !== 'object') return null;
+            if (!it || typeof it !== "object") return null;
             const id = it.id ?? it.entryId ?? it.slotId ?? null;
             const pkg = it.packageName ?? it.package ?? it.name ?? null;
-            return (id && pkg) ? { id, packageName: String(pkg), label: it.label ?? null } : null;
+            return id && pkg
+              ? { id, packageName: String(pkg), label: it.label ?? null }
+              : null;
           })
           .filter(Boolean);
       }
@@ -1020,22 +1295,51 @@ async function computeReport(state, ctx, options = {}) {
       out.itemsError = errText(error);
     }
 
-    const {toJSON}=await import(pathToFileURL(join(kernel,'lib','report.mjs')).href);
-    const {renderIssueReport}=await import(pathToFileURL(join(kernel,'lib','issue-report.mjs')).href);
-    if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载');
-    const canonical=toJSON({error:null,extract:extracted,verdict,entryStates:loaderState.rows,baseline,catalog:catalogEvidence,inputs:{nodeModules:nm.dir,hasRuntimeSurface:verdict.observation.usable,catalog:catalogPath,rules:rulesPath}});
-    if(options._cacheGuard && finalizeBaseline)options._cacheGuard.commit(()=>{
-      baseline=finalizeBaseline();
-      canonical.baseline=baseline;
-      out.baseline=baseline;
-      out.report.baseline=baseline;
-      out.issueReport=renderIssueReport(canonical);
+    const { toJSON } = await import(
+      pathToFileURL(join(kernel, "lib", "report.mjs")).href
+    );
+    const { renderIssueReport } = await import(
+      pathToFileURL(join(kernel, "lib", "issue-report.mjs")).href
+    );
+    if (state.disposed)
+      return failureEnvelope("Plugin generation disposed / 已卸载");
+    const canonical = toJSON({
+      error: null,
+      extract: extracted,
+      verdict,
+      entryStates: loaderState.rows,
+      baseline,
+      catalog: catalogEvidence,
+      inputs: {
+        nodeModules: nm.dir,
+        hasRuntimeSurface: verdict.observation.usable,
+        catalog: catalogPath,
+        rules: rulesPath,
+      },
     });
-    out.issueReport=renderIssueReport(canonical);
+    if (options._cacheGuard && finalizeBaseline)
+      options._cacheGuard.commit(() => {
+        baseline = finalizeBaseline();
+        canonical.baseline = baseline;
+        out.baseline = baseline;
+        out.report.baseline = baseline;
+        out.issueReport = renderIssueReport(canonical);
+      });
+    out.issueReport = renderIssueReport(canonical);
     out.baseline = canonical.baseline;
     out.dshVersion = canonical.dshVersion;
     out.exitCode = canonical.exitCode;
-    out.report = {...canonical,hasRuntimeSurface:verdict.observation.usable,loaderCoverage:out.loaderCoverage,surfaceWhy,items:out.items||[],itemsError:out.itemsError||null,manifests:extracted.report.manifests,serviceCount:extracted.report.services.length,siteTotal:(extracted.report.callSites||[]).length};
+    out.report = {
+      ...canonical,
+      hasRuntimeSurface: verdict.observation.usable,
+      loaderCoverage: out.loaderCoverage,
+      surfaceWhy,
+      items: out.items || [],
+      itemsError: out.itemsError || null,
+      manifests: extracted.report.manifests,
+      serviceCount: extracted.report.services.length,
+      siteTotal: (extracted.report.callSites || []).length,
+    };
     out.ok = true;
     out.elapsedMs = Date.now() - started;
   } catch (error) {
@@ -1043,39 +1347,6 @@ async function computeReport(state, ctx, options = {}) {
   }
   return out;
 }
-
-/** 本地信任栅栏：只有本机的 DSH 界面该读到这份数据。 */
-function isTrustedRequest(req) {
-  try {
-    const header = name => {
-      const value = Object.entries(req.headers || {}).find(([key]) => key.toLowerCase() === name)?.[1];
-      if (value !== undefined && typeof value !== 'string') throw new Error('Invalid request header');
-      return value;
-    };
-    // A non-safelisted header also fences legacy browsers that omit both Origin
-    // and Fetch Metadata. It is a CSRF admission marker, never an auth secret.
-    if (header('x-dsh-compat-request') !== '1') return false;
-    const host = header('host') || '';
-    const origin = header('origin');
-    const hostOk = /^(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(host);
-    if (!hostOk) return false;
-    const peer = req.socket?.remoteAddress;
-    if (peer && !['127.0.0.1','::1','::ffff:127.0.0.1'].includes(peer)) return false;
-    const protocol = req.socket?.encrypted === true ? 'https:' : 'http:';
-    const expectedOrigin = new URL(`${protocol}//${host}`).origin;
-    const site = header('sec-fetch-site'), mode = header('sec-fetch-mode'), dest = header('sec-fetch-dest');
-    if (site !== undefined && site !== 'same-origin') return false;
-    if (mode !== undefined && !['cors','same-origin'].includes(mode)) return false;
-    if (dest !== undefined && !['','empty'].includes(dest)) return false;
-    if (origin !== undefined && (!/^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(origin) || new URL(origin).origin !== expectedOrigin)) return false;
-    const referer = header('referer');
-    if (referer !== undefined && new URL(referer).origin !== expectedOrigin) return false;
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 
 // ---------------------------------------------------------------------------
 // D1: 对话工具 —— 让 agent 能直接答「我这插件兼容吗」
@@ -1093,65 +1364,118 @@ function isTrustedRequest(req) {
 function renderForModel(compat) {
   try {
     if (!compat || compat.ok !== true) {
-      return `体检没跑成（这是工具的问题，不是插件的结论）：${(compat && compat.error) || '未知原因'}`;
+      return `体检没跑成（这是工具的问题，不是插件的结论）：${(compat && compat.error) || "未知原因"}`;
     }
     const r = compat.report;
     const L = [];
     const s = r.summary || {};
-    L.push(`结论：可用 ${s.ok || 0}　部分可用 ${s.partial || 0}　不兼容 ${s.broken || 0}`
-      + (s.vacuousOk ? `（其中 ${s.vacuousOk} 个「可用」没有已验证调用，不等于业务通过）` : ''));
-    L.push(`工具版本：${compat.toolVersion || '未知'}`);
+    L.push(
+      `结论：可用 ${s.ok || 0}　部分可用 ${s.partial || 0}　不兼容 ${s.broken || 0}` +
+        (s.vacuousOk
+          ? `（其中 ${s.vacuousOk} 个「可用」没有已验证调用，不等于业务通过）`
+          : ""),
+    );
+    L.push(`工具版本：${compat.toolVersion || "未知"}`);
     L.push(...catalogLines(r.catalog));
-    for(const note of r.observation?.notes||[])L.push(`采样说明：${note}`);
-    if(s.limited)L.push(`证据覆盖有限：${s.limited} 个插件尚有未验证部分`);
+    for (const note of r.observation?.notes || []) L.push(`采样说明：${note}`);
+    if (s.limited) L.push(`证据覆盖有限：${s.limited} 个插件尚有未验证部分`);
     L.push(`体检对象：${compat.nodeModules}（${compat.nodeModulesWhy}）`);
-    L.push(r.hasRuntimeSurface
-      ? '方法级判定依据：宿主运行时面；具体确定性仍以每条发现和覆盖限制为准。'
-      : '方法级判定依据：官方 API 目录（**契约目录，不是运行时面**）—— 因此方法级结论一律标「疑似」。'
-        + '「疑似」不是缺陷，是诚实：判不准时降级标注，而不是升格成确定。');
-    L.push('');
+    L.push(
+      r.hasRuntimeSurface
+        ? "方法级判定依据：宿主运行时面；具体确定性仍以每条发现和覆盖限制为准。"
+        : "方法级判定依据：官方 API 目录（**契约目录，不是运行时面**）—— 因此方法级结论一律标「疑似」。" +
+            "「疑似」不是缺陷，是诚实：判不准时降级标注，而不是升格成确定。",
+    );
+    L.push("");
 
     const rank = { broken: 0, partial: 1, unknown: 2, ok: 3 };
-    const names = Object.keys(r.plugins).sort((a, b) =>
-      (rank[r.plugins[a].verdict] - rank[r.plugins[b].verdict]) || a.localeCompare(b));
+    const names = Object.keys(r.plugins).sort(
+      (a, b) =>
+        rank[r.plugins[a].verdict] - rank[r.plugins[b].verdict] ||
+        a.localeCompare(b),
+    );
 
     for (const name of names) {
       const p = r.plugins[name];
-      const label = { broken: '不兼容', partial: '部分可用', unknown: '未知', ok: '可用' }[p.verdict] || p.verdict;
-      L.push(`${label}  ${name}@${p.version || '?'}${p.vacuous ? '　[无已验证调用]' : ''}`);
-      if(p.coverage){L.push(`    证据覆盖：${p.coverage.status==='complete'?'完整':'有限'}；已验证调用 ${p.coverage.verifiedCalls}`);for(const note of p.coverage.limitations)L.push(`      覆盖限制：${note}`);}
+      const label =
+        { broken: "不兼容", partial: "部分可用", unknown: "未知", ok: "可用" }[
+          p.verdict
+        ] || p.verdict;
+      L.push(
+        `${label}  ${name}@${p.version || "?"}${p.vacuous ? "　[无已验证调用]" : ""}`,
+      );
+      if (p.coverage) {
+        L.push(
+          `    证据覆盖：${p.coverage.status === "complete" ? "完整" : "有限"}；已验证调用 ${p.coverage.verifiedCalls}`,
+        );
+        for (const note of p.coverage.limitations)
+          L.push(`      覆盖限制：${note}`);
+      }
       for (const f of p.findings || []) {
-        const api = f.service ? (f.method ? `${f.service}.${f.method}` : f.service) : '(包声明)';
-        const loc = f.location ? `${f.location.file}:${f.location.line}` : '—';
-        const cat = {
-          'host-service-missing': '服务缺失', 'host-method-missing': '方法缺失',
-          'unprovided-dependency': '依赖服务待确认', 'declaration-mismatch': '声明与实测不符',
-          'client-entry-missing': '客户端入口不可交付', 'host-entry-inactive': '宿主条目未激活',
-      'declared-incompatible':'版本声明不支持',
-        }[f.category] || f.category;
-        const sev = { fatal: '致命', 'feature-dead': '功能失效', degraded: '降级' }[f.severity] || f.severity;
-        L.push(`    ${sev} / ${cat}${f.certainty === 'certain' ? ' [确定]' : ' [疑似]'}  ${api}  @ ${loc}`);
-        if (f.impact) L.push(`      影响${f.impactBasis==='measured'?'（实测）':f.impactBasis==='inferred'?'（推断，非实测）':'（依据未提供）'}：${f.impact}`);
-        if(f.basis)L.push(`      依据：${f.basis}`);
-        for(const step of nextSteps(f))L.push(`      下一步：${step}`);
+        const api = f.service
+          ? f.method
+            ? `${f.service}.${f.method}`
+            : f.service
+          : "(包声明)";
+        const loc = f.location ? `${f.location.file}:${f.location.line}` : "—";
+        const cat =
+          {
+            "host-service-missing": "服务缺失",
+            "host-method-missing": "方法缺失",
+            "unprovided-dependency": "依赖服务待确认",
+            "declaration-mismatch": "声明与实测不符",
+            "client-entry-missing": "客户端入口不可交付",
+            "host-entry-inactive": "宿主条目未激活",
+            "declared-incompatible": "版本声明不支持",
+          }[f.category] || f.category;
+        const sev =
+          { fatal: "致命", "feature-dead": "功能失效", degraded: "降级" }[
+            f.severity
+          ] || f.severity;
+        L.push(
+          `    ${sev} / ${cat}${f.certainty === "certain" ? " [确定]" : " [疑似]"}  ${api}  @ ${loc}`,
+        );
+        if (f.impact)
+          L.push(
+            `      影响${f.impactBasis === "measured" ? "（实测）" : f.impactBasis === "inferred" ? "（推断，非实测）" : "（依据未提供）"}：${f.impact}`,
+          );
+        if (f.basis) L.push(`      依据：${f.basis}`);
+        for (const step of nextSteps(f)) L.push(`      下一步：${step}`);
       }
       const cs = p.clientSide || [];
-      if (cs.length) L.push(`    客户端半边（命令行测不到，需界面验证）：${cs.map((c) => c.service).join('、')}`);
+      if (cs.length)
+        L.push(
+          `    客户端半边（命令行测不到，需界面验证）：${cs.map((c) => c.service).join("、")}`,
+        );
       const noCalls = Object.values(p.resolved || {})
-        .filter((c) => c.disposition === 'no-calls').map((c) => c.service);
-      if (noCalls.length) L.push(`    无证据可判（只出现名字，没有调用点）：${noCalls.join('、')}`);
+        .filter((c) => c.disposition === "no-calls")
+        .map((c) => c.service);
+      if (noCalls.length)
+        L.push(
+          `    无证据可判（只出现名字，没有调用点）：${noCalls.join("、")}`,
+        );
     }
 
-    L.push('');
-    L.push('确定（certain）表示当前证据足以支持该条发现，可来自明确静态事实或合格运行时观测；疑似（suspected）表示当前证据不足以确定该条发现。');
-    L.push('impactBasis=measured/inferred 分别表示影响有对应实测依据/影响由证据推断；确定发现不等于影响已实测。未观测不等于缺失。');
-    L.push('没有已验证调用仍可能存在服务依赖或客户端功能；调用核验和覆盖完整均不等于业务验收通过。');
-    L.push('下一步是核实建议；本工具不会自动安装、升级或修改配置与源码。');
-    L.push('读这个结果时注意：');
-    L.push('  1) 「可用」不等于"功能验证过"。它只说明本轮未发现冲突；请同时看证据覆盖与未验证项。'
-      + '插件仍然可能因为自身逻辑、配置或第三方依赖而出问题。');
-    L.push('  2) 客户端功能需在浏览器实际操作并核验结果；元素出现和没有报错均不等于业务成功。');
-    return L.join('\n');
+    L.push("");
+    L.push(
+      "确定（certain）表示当前证据足以支持该条发现，可来自明确静态事实或合格运行时观测；疑似（suspected）表示当前证据不足以确定该条发现。",
+    );
+    L.push(
+      "impactBasis=measured/inferred 分别表示影响有对应实测依据/影响由证据推断；确定发现不等于影响已实测。未观测不等于缺失。",
+    );
+    L.push(
+      "没有已验证调用仍可能存在服务依赖或客户端功能；调用核验和覆盖完整均不等于业务验收通过。",
+    );
+    L.push("下一步是核实建议；本工具不会自动安装、升级或修改配置与源码。");
+    L.push("读这个结果时注意：");
+    L.push(
+      '  1) 「可用」不等于"功能验证过"。它只说明本轮未发现冲突；请同时看证据覆盖与未验证项。' +
+        "插件仍然可能因为自身逻辑、配置或第三方依赖而出问题。",
+    );
+    L.push(
+      "  2) 客户端功能需在浏览器实际操作并核验结果；元素出现和没有报错均不等于业务成功。",
+    );
+    return L.join("\n");
   } catch (error) {
     return `渲染结论时出错（工具的问题）：${errText(error)}`;
   }
@@ -1160,198 +1484,432 @@ function renderForModel(compat) {
 /** 工具的服务集合：`tools`；`agents` 用来把相对路径解析到会话工作目录。 */
 /** Static version comparisons never enter the ordinary report cache or baseline path. */
 function unavailableUpgrade(error, options = {}) {
-  let toolVersion = 'unknown';
-  try { toolVersion = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version; } catch {}
-  return upgradeFailure(error, {toolVersion, currentVersion:resolveDshVersion(), targetVersion:options.targetVersion, ...options});
+  let toolVersion = "unknown";
+  try {
+    toolVersion = JSON.parse(
+      readFileSync(new URL("./package.json", import.meta.url), "utf8"),
+    ).version;
+  } catch {}
+  return upgradeFailure(error, {
+    toolVersion,
+    currentVersion: resolveDshVersion(),
+    targetVersion: options.targetVersion,
+    ...options,
+  });
 }
 
 async function serveUpgradePreview(state, options = {}) {
-  const currentVersion = resolveDshVersion(), targetVersion = options.targetVersion || null;
-  const failure = error => unavailableUpgrade(error,{currentVersion,targetVersion});
+  const currentVersion = resolveDshVersion(),
+    targetVersion = options.targetVersion || null;
+  const failure = (error) =>
+    unavailableUpgrade(error, { currentVersion, targetVersion });
   try {
-    if (state.disposed) return failure('Plugin generation disposed / 已卸载');
+    if (state.disposed) return failure("Plugin generation disposed / 已卸载");
     if (options.currentVersion && options.currentVersion !== currentVersion)
-      return failure('当前 DSH 版本已变化，请刷新普通报告后重新预检');
+      return failure("当前 DSH 版本已变化，请刷新普通报告后重新预检");
     if (options.invalidRequest) return failure(options.invalidRequest);
-    if (!SUPPORTED_PREVIEW_VERSIONS.includes(currentVersion) || !SUPPORTED_PREVIEW_VERSIONS.includes(targetVersion))
-      return unavailableUpgrade('版本未认证：仅支持有明确 API 目录的精确版本 '+SUPPORTED_PREVIEW_VERSIONS.join('、'),{currentVersion,targetVersion,status:'unsupported-version'});
+    if (
+      !SUPPORTED_PREVIEW_VERSIONS.includes(currentVersion) ||
+      !SUPPORTED_PREVIEW_VERSIONS.includes(targetVersion)
+    )
+      return unavailableUpgrade(
+        "版本未认证：仅支持有明确 API 目录的精确版本 " +
+          SUPPORTED_PREVIEW_VERSIONS.join("、"),
+        { currentVersion, targetVersion, status: "unsupported-version" },
+      );
     const kernel = resolveKernelDir();
-    if (!kernel) return failure('找不到升级预检内核');
-    const engine = await import(pathToFileURL(join(kernel, 'lib/upgrade-preview.mjs')).href);
-    if (state.disposed) return failure('Plugin generation disposed / 已卸载');
+    if (!kernel) return failure("找不到升级预检内核");
+    const engine = await import(
+      pathToFileURL(join(kernel, "lib/upgrade-preview.mjs")).href
+    );
+    if (state.disposed) return failure("Plugin generation disposed / 已卸载");
     const nm = resolveNodeModules(options.profile || null);
-    const canonical = nm.dir && await fsPromises.realpath(nm.dir);
-    if (state.disposed) return failure('Plugin generation disposed / 已卸载');
+    const canonical = nm.dir && (await fsPromises.realpath(nm.dir));
+    if (state.disposed) return failure("Plugin generation disposed / 已卸载");
     const key = JSON.stringify([canonical, currentVersion, targetVersion]);
     if (state.upgradeFlight && state.upgradeFlight.key !== key)
-      return failure('另一目标的升级预检正在运行，请稍后重试');
+      return failure("另一目标的升级预检正在运行，请稍后重试");
     let flight = state.upgradeFlight;
     if (!flight) {
       const controller = new AbortController();
-      flight = {key, controller, promise: engine.runUpgradePreview({nm:nm.dir, currentVersion, targetVersion},{signal:controller.signal})};
+      flight = {
+        key,
+        controller,
+        promise: engine.runUpgradePreview(
+          { nm: nm.dir, currentVersion, targetVersion },
+          { signal: controller.signal },
+        ),
+      };
       state.upgradeFlight = flight;
     }
     try {
       const result = await flight.promise;
       if (!state.disposed) return result;
-      return failure([result.ok ? null : result.error, 'Plugin generation disposed / 已卸载'].filter(Boolean).join('；'));
+      return failure(
+        [result.ok ? null : result.error, "Plugin generation disposed / 已卸载"]
+          .filter(Boolean)
+          .join("；"),
+      );
     } finally {
       if (state.upgradeFlight === flight) state.upgradeFlight = null;
     }
-  } catch (error) {return failure(errText(error));}
+  } catch (error) {
+    return failure(errText(error));
+  }
 }
 
 async function upgradeToolResult(state, options) {
   let preview, text;
   try {
     const kernel = resolveKernelDir();
-    if (!kernel) throw Error('找不到升级预检内核');
-    const {renderUpgradePreview} = await import(pathToFileURL(join(kernel, 'lib/upgrade-preview.mjs')).href);
+    if (!kernel) throw Error("找不到升级预检内核");
+    const { renderUpgradePreview } = await import(
+      pathToFileURL(join(kernel, "lib/upgrade-preview.mjs")).href
+    );
     preview = await serveUpgradePreview(state, options);
     text = renderUpgradePreview(preview);
   } catch (error) {
-    preview = unavailableUpgrade(errText(error),{targetVersion:options.targetVersion});
-    text = '升级预检无法比较：'+preview.error+'；静态预测不等于目标版本业务通过。';
+    preview = unavailableUpgrade(errText(error), {
+      targetVersion: options.targetVersion,
+    });
+    text =
+      "升级预检无法比较：" +
+      preview.error +
+      "；静态预测不等于目标版本业务通过。";
   }
-  return {schemaVersion:1,kind:'plugin-compat-check/tool-result',ok:preview.ok,error:preview.error,exitCode:preview.exitCode,toolVersion:preview.toolVersion,
-    report:null,baseline:null,cache:null,nodeModules:'',hasRuntimeSurface:false,
-    summary:preview.ok?`静态升级预检：新增 ${preview.summary.added} / 变重 ${preview.summary.worsened}；不等于目标版本业务通过`:'升级预检无法比较',
-    text,upgradePreview:preview};
+  return {
+    schemaVersion: 1,
+    kind: "plugin-compat-check/tool-result",
+    ok: preview.ok,
+    error: preview.error,
+    exitCode: preview.exitCode,
+    toolVersion: preview.toolVersion,
+    report: null,
+    baseline: null,
+    cache: null,
+    nodeModules: "",
+    hasRuntimeSurface: false,
+    summary: preview.ok
+      ? `静态升级预检：新增 ${preview.summary.added} / 变重 ${preview.summary.worsened}；不等于目标版本业务通过`
+      : "升级预检无法比较",
+    text,
+    upgradePreview: preview,
+  };
 }
 
 function registerUpgradeRoute(ctx, state) {
-  if (typeof ctx.inject !== 'function') return;
-  ctx.inject(['webServer'], scope => {
+  if (typeof ctx.inject !== "function") return;
+  ctx.inject(["webServer"], (scope) => {
     try {
-      return scope.webServer.register({name:'dsh-plugin-compat-check/upgrade-preview',kind:'exact',path:'/plugin-compat-check/upgrade-preview',handler:async(req,res)=>{
-        const send=(status,body)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(body));};
-        if (!isTrustedRequest(req)) return send(403,{error:'refused: untrusted request'});
-        if (req.method !== 'GET') return send(405,{error:'升级预检仅支持 GET'});
-        try {
-          const url=new URL(req.url||'/', 'http://127.0.0.1');
-          const invalid=(req.url||'').length>2048 || [...url.searchParams.keys()].some(k=>!['targetVersion','currentVersion'].includes(k));
-          const out=await serveUpgradePreview(state,{targetVersion:url.searchParams.get('targetVersion'),currentVersion:url.searchParams.get('currentVersion'),invalidRequest:invalid?'升级预检请求参数无效':null});
-          send(200,out);
-        } catch (error) {send(500,{error:'升级预检无法完成，请在本机核对插件与宿主版本'});}
-      }});
-    } catch (error) {log('Upgrade preview route registration failed: '+errText(error));}
+      return scope.webServer.register({
+        name: "dsh-plugin-compat-check/upgrade-preview",
+        kind: "exact",
+        path: "/plugin-compat-check/upgrade-preview",
+        handler: async (req, res) => {
+          const send = (status, body) => {
+            res.writeHead(status, {
+              "content-type": "application/json; charset=utf-8",
+              "cache-control": "no-store",
+            });
+            res.end(JSON.stringify(body));
+          };
+          if (!isTrustedRequest(req))
+            return send(403, { error: "refused: untrusted request" });
+          if (req.method !== "GET")
+            return send(405, { error: "升级预检仅支持 GET" });
+          try {
+            const url = new URL(req.url || "/", "http://127.0.0.1");
+            const invalid =
+              (req.url || "").length > 2048 ||
+              [...url.searchParams.keys()].some(
+                (k) => !["targetVersion", "currentVersion"].includes(k),
+              );
+            const out = await serveUpgradePreview(state, {
+              targetVersion: url.searchParams.get("targetVersion"),
+              currentVersion: url.searchParams.get("currentVersion"),
+              invalidRequest: invalid ? "升级预检请求参数无效" : null,
+            });
+            send(200, out);
+          } catch (error) {
+            send(500, {
+              error: "升级预检无法完成，请在本机核对插件与宿主版本",
+            });
+          }
+        },
+      });
+    } catch (error) {
+      log("Upgrade preview route registration failed: " + errText(error));
+    }
   });
 }
 
 /** Human review is an independently loaded sidecar, never a verdict override. */
-async function attachFindingReviews(state,out,key,kernel) {
+async function attachFindingReviews(state, out, key, kernel) {
   try {
-    const store=await import(pathToFileURL(join(kernel,'lib','finding-review-store.mjs')).href);
-    const inputIdentity=state.reportService.identityForReport(key,out.report);
-    if(typeof inputIdentity!=='string')throw new Error('当前报告缺少可绑定的分析输入身份');
-    const sourceIdentity=createHash('sha256').update(inputIdentity).digest('hex');
-    const context=await store.reviewContext(out.report,{nodeModules:out.nodeModules,sourceIdentity,rulesIdentity:out.analysisIdentity?.rulesSha256,catalogIdentity:out.report.catalog?.sha256,toolVersion:out.toolVersion});
-    const reviews=await store.readReviews(context);
-    if(state.disposed)return failureEnvelope('Plugin generation disposed / 已卸载',out);
+    const store = await import(
+      pathToFileURL(join(kernel, "lib", "finding-review-store.mjs")).href
+    );
+    const inputIdentity = state.reportService.identityForReport(
+      key,
+      out.report,
+    );
+    if (typeof inputIdentity !== "string")
+      throw new Error("当前报告缺少可绑定的分析输入身份");
+    const sourceIdentity = createHash("sha256")
+      .update(inputIdentity)
+      .digest("hex");
+    const context = await store.reviewContext(out.report, {
+      nodeModules: out.nodeModules,
+      sourceIdentity,
+      rulesIdentity: out.analysisIdentity?.rulesSha256,
+      catalogIdentity: out.report.catalog?.sha256,
+      toolVersion: out.toolVersion,
+    });
+    const reviews = await store.readReviews(context);
+    if (state.disposed)
+      return failureEnvelope("Plugin generation disposed / 已卸载", out);
     state.reviewTargets ||= new Map();
-    state.reviewTargets.set(context.contextToken,{context,key,report:out.report,nodeModules:out.nodeModules,store});
-    while(state.reviewTargets.size>32)state.reviewTargets.delete(state.reviewTargets.keys().next().value);
-    return {...out,reviews};
-  } catch(error) {
-    return {...out,reviews:{schemaVersion:1,contextToken:null,revision:null,items:[],history:[],error:'人工处置记录不可用：'+errText(error)}};
+    state.reviewTargets.set(context.contextToken, {
+      context,
+      key,
+      report: out.report,
+      nodeModules: out.nodeModules,
+      store,
+    });
+    while (state.reviewTargets.size > 32)
+      state.reviewTargets.delete(state.reviewTargets.keys().next().value);
+    return { ...out, reviews };
+  } catch (error) {
+    return {
+      ...out,
+      reviews: {
+        schemaVersion: 1,
+        contextToken: null,
+        revision: null,
+        items: [],
+        history: [],
+        error: "人工处置记录不可用：" + errText(error),
+      },
+    };
   }
 }
 
-function readReviewRequest(req,signal) {
-  return new Promise((resolve,reject)=>{
-    const maxBytes=16384,chunks=[];let bytes=0,settled=false;
-    const finish=(error,value)=>{
-      if(settled)return;settled=true;clearTimeout(timer);
-      req.removeListener('data',data);req.removeListener('end',end);req.removeListener('error',errorEvent);req.removeListener('aborted',abort);
-      signal.removeEventListener('abort',abort);
-      if(error){req.pause?.();reject(error);}else resolve(value);
+function readReviewRequest(req, signal) {
+  return new Promise((resolve, reject) => {
+    const maxBytes = 16384,
+      chunks = [];
+    let bytes = 0,
+      settled = false;
+    const finish = (error, value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      req.removeListener("data", data);
+      req.removeListener("end", end);
+      req.removeListener("error", errorEvent);
+      req.removeListener("aborted", abort);
+      signal.removeEventListener("abort", abort);
+      if (error) {
+        req.pause?.();
+        reject(error);
+      } else resolve(value);
     };
-    const invalid=(message,status)=>Object.assign(new Error(message),{status});
-    const data=chunk=>{const buffer=Buffer.from(chunk);bytes+=buffer.length;if(bytes>maxBytes)return finish(invalid('人工处置请求超过大小限制',413));chunks.push(buffer);};
-    const end=()=>{try{finish(null,JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(Buffer.concat(chunks))));}catch{finish(invalid('人工处置请求不是有效JSON',400));}};
-    const errorEvent=()=>finish(invalid('人工处置请求读取失败',400));
-    const abort=()=>finish(invalid('人工处置请求已取消或插件已卸载',409));
-    const timer=setTimeout(()=>finish(invalid('人工处置请求读取超时',408)),5000);timer.unref?.();
-    req.on('data',data);req.once('end',end);req.once('error',errorEvent);req.once('aborted',abort);signal.addEventListener('abort',abort,{once:true});
-    if(signal.aborted)abort();
-    const length=req.headers?.['content-length'];
-    if(length!==undefined&&(!/^\d+$/.test(String(length))||Number(length)>maxBytes))finish(invalid('人工处置请求超过大小限制',413));
-  });
-}
-function registerFindingReviewRoute(ctx,state) {
-  if(typeof ctx.inject!=='function')return;
-  ctx.inject(['webServer'],scope=>{
-    try{return scope.webServer.register({name:'dsh-plugin-compat-check/reviews',kind:'exact',path:'/plugin-compat-check/reviews',handler:async(req,res)=>{
-      const send=(status,body)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(body));};
-      if(!isTrustedRequest(req))return send(403,{ok:false,error:'refused: untrusted request'});
-      if(req.method!=='POST')return send(405,{ok:false,error:'人工处置仅支持POST'});
-      if(!/^application\/json(?:\s*;|$)/i.test(req.headers?.['content-type']||''))return send(415,{ok:false,error:'人工处置需要application/json'});
-      if(state.disposed)return send(409,{ok:false,error:'Plugin generation disposed / 已卸载'});
-      const controller=new AbortController();state.reviewRequests ||= new Set();state.reviewRequests.add(controller);
+    const invalid = (message, status) =>
+      Object.assign(new Error(message), { status });
+    const data = (chunk) => {
+      const buffer = Buffer.from(chunk);
+      bytes += buffer.length;
+      if (bytes > maxBytes)
+        return finish(invalid("人工处置请求超过大小限制", 413));
+      chunks.push(buffer);
+    };
+    const end = () => {
       try {
-        const body=await readReviewRequest(req,controller.signal);
-        const target=state.reviewTargets?.get(body?.contextToken);
-        if(!target) return send(409,{ok:false,error:'报告已变化，请重新检查后核实此发现'});
-        const canCommit=async()=>{
-          if(state.disposed||controller.signal.aborted)return false;
-          const current=resolveNodeModules();
-          if(!current.dir||path.resolve(current.dir)!==path.resolve(target.nodeModules))return false;
-          return state.reportService.isCurrent(target.key,target.report);
-        };
-        if(!await canCommit())return send(409,{ok:false,error:'体检输入已变化，请重新检查后核实此发现'});
-        const reviews=await target.store.saveReview(target.context,body,{canCommit});
-        send(200,{ok:true,reviews});
-      } catch(error) {
-        const status=error.status||(error.code==='REVIEW_STALE'||error.code==='REVIEW_BUSY'?409:error.code==='REVIEW_STORAGE'?422:400);
-        send(status,{ok:false,error:errText(error)});
-      } finally {state.reviewRequests.delete(controller);}
-    }});}catch(error){log('Review route registration failed: '+errText(error));}
+        finish(
+          null,
+          JSON.parse(
+            new TextDecoder("utf-8", { fatal: true }).decode(
+              Buffer.concat(chunks),
+            ),
+          ),
+        );
+      } catch {
+        finish(invalid("人工处置请求不是有效JSON", 400));
+      }
+    };
+    const errorEvent = () => finish(invalid("人工处置请求读取失败", 400));
+    const abort = () => finish(invalid("人工处置请求已取消或插件已卸载", 409));
+    const timer = setTimeout(
+      () => finish(invalid("人工处置请求读取超时", 408)),
+      5000,
+    );
+    timer.unref?.();
+    req.on("data", data);
+    req.once("end", end);
+    req.once("error", errorEvent);
+    req.once("aborted", abort);
+    signal.addEventListener("abort", abort, { once: true });
+    if (signal.aborted) abort();
+    const length = req.headers?.["content-length"];
+    if (
+      length !== undefined &&
+      (!/^\d+$/.test(String(length)) || Number(length) > maxBytes)
+    )
+      finish(invalid("人工处置请求超过大小限制", 413));
+  });
+}
+function registerFindingReviewRoute(ctx, state) {
+  if (typeof ctx.inject !== "function") return;
+  ctx.inject(["webServer"], (scope) => {
+    try {
+      return scope.webServer.register({
+        name: "dsh-plugin-compat-check/reviews",
+        kind: "exact",
+        path: "/plugin-compat-check/reviews",
+        handler: async (req, res) => {
+          const send = (status, body) => {
+            res.writeHead(status, {
+              "content-type": "application/json; charset=utf-8",
+              "cache-control": "no-store",
+            });
+            res.end(JSON.stringify(body));
+          };
+          if (!isTrustedRequest(req))
+            return send(403, {
+              ok: false,
+              error: "refused: untrusted request",
+            });
+          if (req.method !== "POST")
+            return send(405, { ok: false, error: "人工处置仅支持POST" });
+          if (
+            !/^application\/json(?:\s*;|$)/i.test(
+              req.headers?.["content-type"] || "",
+            )
+          )
+            return send(415, {
+              ok: false,
+              error: "人工处置需要application/json",
+            });
+          if (state.disposed)
+            return send(409, {
+              ok: false,
+              error: "Plugin generation disposed / 已卸载",
+            });
+          const controller = new AbortController();
+          state.reviewRequests ||= new Set();
+          state.reviewRequests.add(controller);
+          try {
+            const body = await readReviewRequest(req, controller.signal);
+            const target = state.reviewTargets?.get(body?.contextToken);
+            if (!target)
+              return send(409, {
+                ok: false,
+                error: "报告已变化，请重新检查后核实此发现",
+              });
+            const canCommit = async () => {
+              if (state.disposed || controller.signal.aborted) return false;
+              const current = resolveNodeModules();
+              if (
+                !current.dir ||
+                path.resolve(current.dir) !== path.resolve(target.nodeModules)
+              )
+                return false;
+              return state.reportService.isCurrent(target.key, target.report);
+            };
+            if (!(await canCommit()))
+              return send(409, {
+                ok: false,
+                error: "体检输入已变化，请重新检查后核实此发现",
+              });
+            const reviews = await target.store.saveReview(
+              target.context,
+              body,
+              { canCommit },
+            );
+            send(200, { ok: true, reviews });
+          } catch (error) {
+            const status =
+              error.status ||
+              (error.code === "REVIEW_STALE" || error.code === "REVIEW_BUSY"
+                ? 409
+                : error.code === "REVIEW_STORAGE"
+                  ? 422
+                  : 400);
+            send(status, { ok: false, error: errText(error) });
+          } finally {
+            state.reviewRequests.delete(controller);
+          }
+        },
+      });
+    } catch (error) {
+      log("Review route registration failed: " + errText(error));
+    }
   });
 }
 
-const TOOL_SERVICES = ['tools', 'agents'];
+const TOOL_SERVICES = ["tools", "agents"];
 
-function toolResult(compat,text){
- const s=compat.report?.summary||{};
- return {schemaVersion:1,kind:'plugin-compat-check/tool-result',ok:compat.ok,error:compat.error,toolVersion:compat.toolVersion,exitCode:compat.exitCode,report:compat.report,baseline:compat.baseline,cache:compat.cache||null,reviews:compat.reviews||null,
- summary:compat.ok?`可用 ${s.ok||0} / 部分可用 ${s.partial||0} / 不兼容 ${s.broken||0}；覆盖有限 ${s.limited||0}；无已验证调用 ${s.vacuousOk||0}`:'无法判定',nodeModules:compat.nodeModules||'',hasRuntimeSurface:!!compat.report?.hasRuntimeSurface,text};
+function toolResult(compat, text) {
+  const s = compat.report?.summary || {};
+  return {
+    schemaVersion: 1,
+    kind: "plugin-compat-check/tool-result",
+    ok: compat.ok,
+    error: compat.error,
+    toolVersion: compat.toolVersion,
+    exitCode: compat.exitCode,
+    report: compat.report,
+    baseline: compat.baseline,
+    cache: compat.cache || null,
+    reviews: compat.reviews || null,
+    summary: compat.ok
+      ? `可用 ${s.ok || 0} / 部分可用 ${s.partial || 0} / 不兼容 ${s.broken || 0}；覆盖有限 ${s.limited || 0}；无已验证调用 ${s.vacuousOk || 0}`
+      : "无法判定",
+    nodeModules: compat.nodeModules || "",
+    hasRuntimeSurface: !!compat.report?.hasRuntimeSurface,
+    text,
+  };
 }
 
 function registerTool(ctx, state) {
   // 与 C2 路由同一个理由：走作用域 ctx.inject，headless/CLI 形态下 `tools` 不在场时
   // 这段根本不注册，本插件的 fiber 也就不会去等一个不存在的服务（`inject` 保持 []）。
-  if (typeof ctx.inject !== 'function') return;
+  if (typeof ctx.inject !== "function") return;
   ctx.inject(TOOL_SERVICES, (scope) => {
     try {
-      if (!scope.tools || typeof scope.tools.register !== 'function') {
-        log('D1 tool skipped: scoped ctx has no tools.register');
+      if (!scope.tools || typeof scope.tools.register !== "function") {
+        log("D1 tool skipped: scoped ctx has no tools.register");
         return;
       }
       const dispose = scope.tools.register({
-        name: 'compat_check',
+        name: "compat_check",
         description:
-          'Assess compatibility risks for the DSH plugins installed in this profile against the '
-          + 'current DSH version, reporting evidence, coverage limits and file:line locations where available. '
-          + 'Use it when the user asks whether a plugin still works, why a feature disappeared after '
-          + 'updating DSH, or what compatibility evidence is available for an installed plugin. It reads the installed '
-          + 'profile; it does not install anything or check a plugin that is not yet installed. '
-          + 'Certainty is separate from impact evidence: certain means supported by explicit static facts or qualified runtime observations; '
-          + 'suspected means insufficient evidence to establish that finding, even when some runtime observations exist. '
-          + 'impactBasis=measured requires corresponding impact/state observations; inferred means an inferred impact, not a measured business outcome. '
-          + 'vacuous means no verified calls in an otherwise ok result; service dependencies or unverified client features may still exist. '
-          + 'Preserve coverage limits: unobserved does not mean absent, and no findings or verified calls do not certify business behavior. '
-          + 'The official API catalogue is a contract catalogue, not a runtime observation. '
-          + 'Provide upgradeTo for a separate static pre-upgrade comparison against an exact supported DSH version. It reuses no live observations, cache or baseline, performs no upgrade and does not certify future business behavior.',
+          "Assess compatibility risks for the DSH plugins installed in this profile against the " +
+          "current DSH version, reporting evidence, coverage limits and file:line locations where available. " +
+          "Use it when the user asks whether a plugin still works, why a feature disappeared after " +
+          "updating DSH, or what compatibility evidence is available for an installed plugin. It reads the installed " +
+          "profile; it does not install anything or check a plugin that is not yet installed. " +
+          "Certainty is separate from impact evidence: certain means supported by explicit static facts or qualified runtime observations; " +
+          "suspected means insufficient evidence to establish that finding, even when some runtime observations exist. " +
+          "impactBasis=measured requires corresponding impact/state observations; inferred means an inferred impact, not a measured business outcome. " +
+          "vacuous means no verified calls in an otherwise ok result; service dependencies or unverified client features may still exist. " +
+          "Preserve coverage limits: unobserved does not mean absent, and no findings or verified calls do not certify business behavior. " +
+          "The official API catalogue is a contract catalogue, not a runtime observation. " +
+          "Provide upgradeTo for a separate static pre-upgrade comparison against an exact supported DSH version. It reuses no live observations, cache or baseline, performs no upgrade and does not certify future business behavior.",
         parameters: {
-          type: 'object',
+          type: "object",
           additionalProperties: false,
           properties: {
-            upgradeTo: {type:'string',description:'Optional exact target DSH version for static upgrade preflight; known catalogues: 0.2.0-rc.2 and 0.2.1-rc.2. Unknown versions are uncertified.'},
-            profile: {
-              type: 'string',
+            upgradeTo: {
+              type: "string",
               description:
-                'Optional profile name to inspect (e.g. "desktop"). Defaults to the profile this '
-                + 'DSH instance is running, or desktop if it cannot be determined.',
+                "Optional exact target DSH version for static upgrade preflight; known catalogues: 0.2.0-rc.2 and 0.2.1-rc.2. Unknown versions are uncertified.",
+            },
+            profile: {
+              type: "string",
+              description:
+                'Optional profile name to inspect (e.g. "desktop"). Defaults to the profile this ' +
+                "DSH instance is running when it can be determined. An explicit profile is required otherwise; no profile is guessed.",
             },
           },
         },
@@ -1362,55 +1920,114 @@ function registerTool(ctx, state) {
           // 实测踩过：注册失败、工具不存在，而**面板与路由照常工作** ——
           // 所以只有真的去调一次工具才发现得了。
           schema: {
-            type: 'object',
+            type: "object",
             additionalProperties: false,
             properties: {
-              schemaVersion: {type:'integer',enum:[1]},
-              kind: {type:'string'},
-              ok: {type:'boolean'},
-              error: {oneOf:[{type:'string'},{type:'null'}]},
-              exitCode: {type:'integer',enum:[0,1,2,3]},
-              toolVersion: {oneOf:[{type:'string'},{type:'null'}]},
-              report: {oneOf:[{type:'object',additionalProperties:true},{type:'null'}]},
-              upgradePreview: {type:'object',additionalProperties:true},
-              baseline: {oneOf:[{type:'object',additionalProperties:true},{type:'null'}]},
-              cache: {oneOf:[{type:'object',additionalProperties:true},{type:'null'}]},
-              reviews: {oneOf:[{type:'object',additionalProperties:true},{type:'null'}]},
-              summary: { type: 'string' },
-              nodeModules: { type: 'string' },
-              hasRuntimeSurface: { type: 'boolean' },
-              text: { type: 'string' },
+              schemaVersion: { type: "integer", enum: [1] },
+              kind: { type: "string" },
+              ok: { type: "boolean" },
+              error: { oneOf: [{ type: "string" }, { type: "null" }] },
+              exitCode: { type: "integer", enum: [0, 1, 2, 3] },
+              toolVersion: { oneOf: [{ type: "string" }, { type: "null" }] },
+              report: {
+                oneOf: [
+                  { type: "object", additionalProperties: true },
+                  { type: "null" },
+                ],
+              },
+              upgradePreview: { type: "object", additionalProperties: true },
+              baseline: {
+                oneOf: [
+                  { type: "object", additionalProperties: true },
+                  { type: "null" },
+                ],
+              },
+              cache: {
+                oneOf: [
+                  { type: "object", additionalProperties: true },
+                  { type: "null" },
+                ],
+              },
+              reviews: {
+                oneOf: [
+                  { type: "object", additionalProperties: true },
+                  { type: "null" },
+                ],
+              },
+              summary: { type: "string" },
+              nodeModules: { type: "string" },
+              hasRuntimeSurface: { type: "boolean" },
+              text: { type: "string" },
             },
-            required: ['schemaVersion','kind','ok','error','exitCode','toolVersion','report','baseline','summary','nodeModules','hasRuntimeSurface','text'],
+            required: [
+              "schemaVersion",
+              "kind",
+              "ok",
+              "error",
+              "exitCode",
+              "toolVersion",
+              "report",
+              "baseline",
+              "summary",
+              "nodeModules",
+              "hasRuntimeSurface",
+              "text",
+            ],
           },
-          render: (_args, value) => [{ type: 'text', text: value && typeof value.text === 'string' ? value.text : '' }],
+          render: (_args, value) => [
+            {
+              type: "text",
+              text: value && typeof value.text === "string" ? value.text : "",
+            },
+          ],
         },
         isConcurrencySafe: () => false,
         presentCall: (args) => ({
-          card: 'generic',
-          title: 'compat_check',
-          kind: 'read',
+          card: "generic",
+          title: "compat_check",
+          kind: "read",
           rawInput: args || {},
         }),
         async execute(args) {
           try {
-            const wanted = args && typeof args.profile === 'string' && args.profile.trim() !== ''
-              ? args.profile.trim()
-              : null;
-            if (args && Object.prototype.hasOwnProperty.call(args,'upgradeTo')) {
-              return await upgradeToolResult(state,{profile:wanted,targetVersion:args.upgradeTo,invalidRequest:typeof args.upgradeTo !== 'string'?'upgradeTo 必须为确切 DSH 版本':null});
+            const wanted =
+              args &&
+              typeof args.profile === "string" &&
+              args.profile.trim() !== ""
+                ? args.profile.trim()
+                : null;
+            if (
+              args &&
+              Object.prototype.hasOwnProperty.call(args, "upgradeTo")
+            ) {
+              return await upgradeToolResult(state, {
+                profile: wanted,
+                targetVersion: args.upgradeTo,
+                invalidRequest:
+                  typeof args.upgradeTo !== "string"
+                    ? "upgradeTo 必须为确切 DSH 版本"
+                    : null,
+              });
             }
-            const compat = await serveReport(state,ctx,false,wanted?{profile:wanted}:{});
+            const compat = await serveReport(
+              state,
+              ctx,
+              false,
+              wanted ? { profile: wanted } : {},
+            );
             const text = renderForModel(compat);
-            return toolResult(compat,text);
+            return toolResult(compat, text);
           } catch (error) {
             // 工具的 execute 抛错会把整轮对话变成错误 —— 而"体检失败"不是用户的错，
             // 也不该让他重来一遍。所以这里**不抛**，把失败也变成一段可读的文本。
-            return toolResult(failureEnvelope(errText(error)),`体检没跑成（这是工具的问题，不是插件的结论）：${errText(error)}`);
+            return toolResult(
+              failureEnvelope(errText(error)),
+              `体检没跑成（这是工具的问题，不是插件的结论）：${errText(error)}`,
+            );
           }
         },
       });
-      log('D1 tool registered: compat_check');
+      log("D1 tool registered: compat_check");
       return dispose;
     } catch (error) {
       log(`WARN D1 tool registration failed: ${errText(error)}`);
@@ -1436,8 +2053,8 @@ function registerTool(ctx, state) {
 //   provider 必须**等于** provider 自己的 name（否则报 returned skill "x" for provider "y"）；
 //   rank 必须是有限数，600 是官方 bundled skill 用的 BUNDLED_SKILL_RANK。
 
-const SKILL_NAME = 'dsh-plugin-compat-check';
-const SKILL_PROVIDER = 'dsh-plugin-compat-check';
+const SKILL_NAME = "dsh-plugin-compat-check";
+const SKILL_PROVIDER = "dsh-plugin-compat-check";
 const SKILL_RANK = 600;
 
 /**
@@ -1464,27 +2081,32 @@ const SKILL_RANK = 600;
 function readPackagedSkill() {
   const here = path.dirname(fileURLToPath(import.meta.url));
   const candidates = [
-    join(here, 'skill', 'SKILL.md'),        // **安装形态**：包内自带（files 里有 skill/）
-    join(here, '..', 'skill', 'SKILL.md'),  // 仓库形态：<repo>/plugin/index.js → <repo>/skill/SKILL.md
-    join(here, 'SKILL.md'),
-    join(here, 'assets', 'SKILL.md'),
+    join(here, "skill", "SKILL.md"), // **安装形态**：包内自带（files 里有 skill/）
+    join(here, "..", "skill", "SKILL.md"), // 仓库形态：<repo>/plugin/index.js → <repo>/skill/SKILL.md
+    join(here, "SKILL.md"),
+    join(here, "assets", "SKILL.md"),
   ];
   for (const file of candidates) {
     try {
       if (!existsSync(file)) continue;
-      const raw = readFileSync(file, 'utf8');
+      const raw = readFileSync(file, "utf8");
       const fm = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/u.exec(raw);
       if (fm === null) continue;
       // 只按**单行标量**读这两个字段。写成多行 YAML 时这里读不到 ——
       // 宁可读不到（打一条日志），也好过猜一个错的 description。
       const field = (key) => {
-        const m = new RegExp(`^${key}:[ \t]*(.+)$`, 'm').exec(fm[1]);
-        return m === null ? null : m[1].trim().replace(/^["']|["']$/g, '');
+        const m = new RegExp(`^${key}:[ \t]*(.+)$`, "m").exec(fm[1]);
+        return m === null ? null : m[1].trim().replace(/^["']|["']$/g, "");
       };
-      const skillName = field('name');
-      const description = field('description');
+      const skillName = field("name");
+      const description = field("description");
       if (skillName === null || description === null) continue;
-      return { file, name: skillName, description, content: raw.slice(fm[0].length).trim() };
+      return {
+        file,
+        name: skillName,
+        description,
+        content: raw.slice(fm[0].length).trim(),
+      };
     } catch {
       /* 读不到就试下一个候选 */
     }
@@ -1494,19 +2116,24 @@ function readPackagedSkill() {
 
 function registerSkill(ctx) {
   try {
-    if (typeof ctx.inject !== 'function') {
-      log('SKILL registration skipped: ctx.inject is not a function');
+    if (typeof ctx.inject !== "function") {
+      log("SKILL registration skipped: ctx.inject is not a function");
       return;
     }
-    ctx.inject(['skills'], (skillCtx) => {
+    ctx.inject(["skills"], (skillCtx) => {
       try {
-        if (!skillCtx.skills || typeof skillCtx.skills.registerProvider !== 'function') {
-          log('SKILL registration skipped: scoped ctx has no skills.registerProvider');
+        if (
+          !skillCtx.skills ||
+          typeof skillCtx.skills.registerProvider !== "function"
+        ) {
+          log(
+            "SKILL registration skipped: scoped ctx has no skills.registerProvider",
+          );
           return;
         }
         const skill = readPackagedSkill();
         if (skill === null) {
-          log('SKILL registration skipped: 找不到随包的 skill/SKILL.md');
+          log("SKILL registration skipped: 找不到随包的 skill/SKILL.md");
           return;
         }
         // 正文在注册时读进内存：包内文件运行时不会变，这样 get() 永不抛。
@@ -1516,24 +2143,25 @@ function registerSkill(ctx) {
           description: skill.description,
           invocation,
           provider: SKILL_PROVIDER,
-          source: 'bundled',
+          source: "bundled",
           rank: SKILL_RANK,
           locator: skill.file,
           path: skill.file,
-          resourceBase: { kind: 'directory', path: path.dirname(skill.file) },
+          resourceBase: { kind: "directory", path: path.dirname(skill.file) },
         };
         const dispose = skillCtx.skills.registerProvider(() => ({
           name: SKILL_PROVIDER,
           list: () => Promise.resolve([summary]),
-          get: () => Promise.resolve({
-            name: SKILL_NAME,
-            description: skill.description,
-            invocation,
-            provider: SKILL_PROVIDER,
-            source: summary.source,
-            path: skill.file,
-            content: skill.content,
-          }),
+          get: () =>
+            Promise.resolve({
+              name: SKILL_NAME,
+              description: skill.description,
+              invocation,
+              provider: SKILL_PROVIDER,
+              source: summary.source,
+              path: skill.file,
+              content: skill.content,
+            }),
         }));
         log(`SKILL registered: ${SKILL_NAME} <- ${skill.file}`);
         return dispose;
@@ -1559,7 +2187,7 @@ export function apply(ctx) {
       loaderVia: null,
       loaderAccess: {
         attempts: [],
-        injectProbe: { registered: false, outcome: 'not run' },
+        injectProbe: { registered: false, outcome: "not run" },
       },
       disposeInjectProbe: null,
       // ── F2：结果缓存 ──
@@ -1570,9 +2198,15 @@ export function apply(ctx) {
       /** 缓存有效期。到点不清空，而是**先返回旧的、后台再刷新** —— 见下面的 stale-while-revalidate。 */
       cacheTtlMs: toPositiveInt(process.env.DSC_CACHE_TTL_MS, 5 * 60 * 1000),
       // A caller may shorten the observation interval; never enlarge its default.
-      cacheWatchMs: Math.min(5000,toPositiveInt(process.env.DSC_CACHE_WATCH_MS,5000)),
+      cacheWatchMs: Math.min(
+        5000,
+        toPositiveInt(process.env.DSC_CACHE_WATCH_MS, 5000),
+      ),
       /** 启动后多久自动跑第一次（默认落在最后一次 loader 扫描之后） */
-      autoRunDelayMs: toPositiveInt(process.env.DSC_AUTORUN_MS, (SCAN_DELAYS[SCAN_DELAYS.length - 1] || 4000) + 2000),
+      autoRunDelayMs: toPositiveInt(
+        process.env.DSC_AUTORUN_MS,
+        (SCAN_DELAYS[SCAN_DELAYS.length - 1] || 4000) + 2000,
+      ),
       autoRunTimer: null,
     };
 
@@ -1582,18 +2216,26 @@ export function apply(ctx) {
       const resolved = resolveLoader(ctx);
       state.loader = resolved.loader;
       state.loaderVia = resolved.via;
-      state.loaderAccess = { ...state.loaderAccess, ...publicLoaderAccess(resolved) };
+      state.loaderAccess = {
+        ...state.loaderAccess,
+        ...publicLoaderAccess(resolved),
+      };
       log(
-        `loader access: via=${resolved.via ?? 'UNREACHABLE'} attempts=${JSON.stringify(resolved.attempts)}`,
+        `loader access: via=${resolved.via ?? "UNREACHABLE"} attempts=${JSON.stringify(resolved.attempts)}`,
       );
     } catch (error) {
-      state.loaderAccess.attempts.push(`resolveLoader threw: ${errText(error)}`);
+      state.loaderAccess.attempts.push(
+        `resolveLoader threw: ${errText(error)}`,
+      );
       log(`ERROR resolving loader: ${errText(error)}`);
     }
 
     // The `inject: ["loader"]` safety experiment (see startInjectProbe).
     try {
-      state.disposeInjectProbe = startInjectProbe(ctx, state.loaderAccess.injectProbe);
+      state.disposeInjectProbe = startInjectProbe(
+        ctx,
+        state.loaderAccess.injectProbe,
+      );
     } catch (error) {
       state.loaderAccess.injectProbe.outcome = `probe setup threw: ${errText(error)}`;
     }
@@ -1605,52 +2247,76 @@ export function apply(ctx) {
     // 本插件的 fiber 也不会去等一个不存在的服务 —— `inject` 保持 []，
     // 与本文件的整体设计一致（见文件头）。
     try {
-      if (typeof ctx.inject === 'function') {
-        ctx.inject(['webServer'], (scope) => {
+      if (typeof ctx.inject === "function") {
+        ctx.inject(["webServer"], (scope) => {
           try {
             const dispose = scope.webServer.register({
-              name: 'dsh-plugin-compat-check',
-              kind: 'exact',
-              path: '/plugin-compat-check/report',
+              name: "dsh-plugin-compat-check",
+              kind: "exact",
+              path: "/plugin-compat-check/report",
               handler: async (req, res) => {
                 // 体检结论是本机信息（装了哪些插件、用了哪些 API），
                 // 不该被这台机器上的任意页面读到。
                 if (!isTrustedRequest(req)) {
-                  res.writeHead(403, { 'content-type': 'application/json; charset=utf-8' });
-                  res.end(JSON.stringify({ error: 'refused: untrusted request' }));
+                  res.writeHead(403, {
+                    "content-type": "application/json; charset=utf-8",
+                  });
+                  res.end(
+                    JSON.stringify({ error: "refused: untrusted request" }),
+                  );
                   return;
                 }
-                if (req.method !== 'GET') {
-                  res.writeHead(405, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
-                  res.end(JSON.stringify({ error: '体检报告仅支持 GET' }));
+                if (req.method !== "GET") {
+                  res.writeHead(405, {
+                    "content-type": "application/json; charset=utf-8",
+                    "cache-control": "no-store",
+                  });
+                  res.end(JSON.stringify({ error: "体检报告仅支持 GET" }));
                   return;
                 }
                 try {
-                  const url = new URL(req.url || '/', 'http://127.0.0.1');
-                  const force = url.searchParams.get('refresh') === '1';
+                  const url = new URL(req.url || "/", "http://127.0.0.1");
+                  const force = url.searchParams.get("refresh") === "1";
                   const out = await serveReport(state, ctx, force);
                   res.writeHead(200, {
-                    'content-type': 'application/json; charset=utf-8',
-                    'cache-control': 'no-store',
+                    "content-type": "application/json; charset=utf-8",
+                    "cache-control": "no-store",
                   });
-                  res.end(JSON.stringify(url.searchParams.get('metadata')==='1' && out.ok ? {
-                    kind:'plugin-compat-check/report-metadata',ok:true,computedAt:out.computedAt,nodeModules:out.nodeModules,dshVersion:out.report.dshVersion,cache:out.cache || null,reviewsRevision:out.reviews?.revision || null,reviewsError:out.reviews?.error || null,reviewsContextToken:out.reviews?.contextToken || null,
-                  } : out));
+                  res.end(
+                    JSON.stringify(
+                      url.searchParams.get("metadata") === "1" && out.ok
+                        ? {
+                            kind: "plugin-compat-check/report-metadata",
+                            ok: true,
+                            computedAt: out.computedAt,
+                            nodeModules: out.nodeModules,
+                            dshVersion: out.report.dshVersion,
+                            cache: out.cache || null,
+                            reviewsRevision: out.reviews?.revision || null,
+                            reviewsError: out.reviews?.error || null,
+                            reviewsContextToken:
+                              out.reviews?.contextToken || null,
+                          }
+                        : out,
+                    ),
+                  );
                 } catch (error) {
                   // 连处理器里都不抛：把错误变成一条可读的 JSON，而不是 500 空响应。
-                  res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+                  res.writeHead(200, {
+                    "content-type": "application/json; charset=utf-8",
+                  });
                   res.end(JSON.stringify(failureEnvelope(errText(error))));
                 }
               },
             });
-            log('C2 route registered: GET /plugin-compat-check/report');
+            log("C2 route registered: GET /plugin-compat-check/report");
             return dispose;
           } catch (error) {
             log(`WARN C2 route registration failed: ${errText(error)}`);
           }
         });
       } else {
-        log('C2 route skipped: ctx.inject is not a function');
+        log("C2 route skipped: ctx.inject is not a function");
       }
     } catch (error) {
       log(`WARN C2 route setup threw: ${errText(error)}`);
@@ -1660,7 +2326,7 @@ export function apply(ctx) {
     try {
       registerFindingReviewRoute(ctx, state);
       registerUpgradeRoute(ctx, state);
-    registerSkill(ctx);
+      registerSkill(ctx);
     } catch (error) {
       log(`WARN SKILL registration threw: ${errText(error)}`);
     }
@@ -1674,12 +2340,19 @@ export function apply(ctx) {
 
     const finish = () => {
       const probe = state.loaderAccess.injectProbe;
-      if (probe.registered && probe.firedAfterMs === undefined && probe.outcome === 'not run') {
-        probe.outcome = 'did not fire before the final scan (would have stayed PENDING)';
+      if (
+        probe.registered &&
+        probe.firedAfterMs === undefined &&
+        probe.outcome === "not run"
+      ) {
+        probe.outcome =
+          "did not fire before the final scan (would have stayed PENDING)";
       }
       log(
         `inject-probe: registered=${probe.registered} outcome=${probe.outcome}${
-          probe.firedAfterMs !== undefined ? ` firedAfterMs=${probe.firedAfterMs}` : ''
+          probe.firedAfterMs !== undefined
+            ? ` firedAfterMs=${probe.firedAfterMs}`
+            : ""
         }`,
       );
       // ⚠️ 这里**不要**动 `state.autoRunTimer`。它是 F2 的启动自检，与 loader 扫描
@@ -1689,12 +2362,12 @@ export function apply(ctx) {
       // 教训：清理定时器必须由创建它的那一方负责。
       // F2：最后一次扫描之后跑启动自检 —— 这时候条目状态才是稳的。
       try {
-        if (typeof state.runAutoCheck === 'function') state.runAutoCheck();
+        if (typeof state.runAutoCheck === "function") state.runAutoCheck();
       } catch (error) {
         log(`WARN F2 启动自检触发失败: ${errText(error)}`);
       }
       try {
-        if (typeof state.disposeInjectProbe === 'function') {
+        if (typeof state.disposeInjectProbe === "function") {
           state.disposeInjectProbe();
           state.disposeInjectProbe = null;
         }
@@ -1707,18 +2380,20 @@ export function apply(ctx) {
     // one can safely wait for it and the report file is never written twice
     // concurrently.
     const schedulePass = (index) => {
-      if(state.disposed)return;
+      if (state.disposed) return;
       const previous = index === 0 ? 0 : SCAN_DELAYS[index - 1];
       const delay = Math.max(0, SCAN_DELAYS[index] - previous);
       const timer = setTimeout(() => {
         state.scanTimers.delete(timer);
-        if(state.disposed)return;
+        if (state.disposed) return;
         const pass = index + 1;
         try {
           scan(ctx, state, pass)
-            .catch((error) => log(`ERROR scan#${pass} failed: ${errText(error)}`))
+            .catch((error) =>
+              log(`ERROR scan#${pass} failed: ${errText(error)}`),
+            )
             .finally(() => {
-              if(state.disposed)return;
+              if (state.disposed) return;
               if (pass < SCAN_DELAYS.length) schedulePass(index + 1);
               else finish();
             });
@@ -1727,7 +2402,7 @@ export function apply(ctx) {
         }
       }, delay);
       // unref: a scan timer must never keep the host process alive.
-      if (timer && typeof timer.unref === 'function') timer.unref();
+      if (timer && typeof timer.unref === "function") timer.unref();
       state.scanTimers.add(timer);
     };
     schedulePass(0);
@@ -1746,8 +2421,8 @@ export function apply(ctx) {
     //      的清理顺手取消掉了 —— 启动自检从未运行、且**没有任何报错**。
     //      一个"看起来做了其实没做"的定时器，比没有更糟。
     state.runAutoCheck = () => {
-      if(state.disposed)return;
-      if (state.autoCheckStarted) return;   // 幂等：只跑一次
+      if (state.disposed) return;
+      if (state.autoCheckStarted) return; // 幂等：只跑一次
       state.autoCheckStarted = true;
       try {
         serveReport(state, ctx, false)
@@ -1758,14 +2433,20 @@ export function apply(ctx) {
               const sum = out.report.summary || {};
               const b = out.baseline || {};
               const badge = b.badge || {};
-              log(`F2 启动自检: 可用 ${sum.ok || 0} 部分可用 ${sum.partial || 0} 不兼容 ${sum.broken || 0}`
-                + (sum.vacuousOk ? ` (${sum.vacuousOk} 个为空洞的可用)` : ''));
+              log(
+                `F2 启动自检: 可用 ${sum.ok || 0} 部分可用 ${sum.partial || 0} 不兼容 ${sum.broken || 0}` +
+                  (sum.vacuousOk ? ` (${sum.vacuousOk} 个为空洞的可用)` : ""),
+              );
               // 有变化就打成一条显眼的日志；没变化也要有一条。
               // 「没有变化」必须说出来 —— 沉默会被读成"没检查"或"坏消息被藏起来了"。
-              if (badge.show) log(`F2 与上次相比: ${badge.text} —— ${badge.detail || ''}`);
-              else log(`F2 与上次相比: ${badge.detail || b.note || '没有可比基线'}`);
+              if (badge.show)
+                log(`F2 与上次相比: ${badge.text} —— ${badge.detail || ""}`);
+              else
+                log(
+                  `F2 与上次相比: ${badge.detail || b.note || "没有可比基线"}`,
+                );
             } else if (out) {
-              log(`WARN F2 启动自检没跑成: ${out.error || '未知原因'}`);
+              log(`WARN F2 启动自检没跑成: ${out.error || "未知原因"}`);
             }
           })
           .catch((error) => log(`WARN F2 启动自检失败: ${errText(error)}`));
@@ -1778,8 +2459,14 @@ export function apply(ctx) {
     // `scan` 会提前 return），启动自检也必须跑。两条路都调 `runAutoCheck`，
     // 由它自己保证幂等 —— 谁先到都算数。
     {
-      const timer = setTimeout(() => { try { state.runAutoCheck(); } catch { /* 忽略 */ } }, state.autoRunDelayMs);
-      if (timer && typeof timer.unref === 'function') timer.unref();
+      const timer = setTimeout(() => {
+        try {
+          state.runAutoCheck();
+        } catch {
+          /* 忽略 */
+        }
+      }, state.autoRunDelayMs);
+      if (timer && typeof timer.unref === "function") timer.unref();
       state.fallbackTimer = timer;
     }
 
@@ -1792,20 +2479,30 @@ export function apply(ctx) {
         compatReport: (c) => computeReport(state, c || ctx),
       };
       globalThis.__DSH_COMPAT_CHECK__ = handle;
-      if(typeof ctx.effect==='function')ctx.effect(()=>()=>{
-        state.disposed=true;
-        for (const request of state.reviewRequests || []) request.abort();
-        state.reviewTargets?.clear();
-        state.reportService?.dispose();
-        for(const off of state.cacheEventDisposers || []){try{off();}catch{}}
-        state.cacheEventDisposers=[];
-        state.upgradeFlight?.controller?.abort();
-        for(const timer of state.scanTimers)clearTimeout(timer);
-        state.scanTimers.clear();
-        clearTimeout(state.fallbackTimer);
-        state.disposeInjectProbe?.();state.disposeInjectProbe=null;
-        if(globalThis.__DSH_COMPAT_CHECK__===handle)delete globalThis.__DSH_COMPAT_CHECK__;
-      },'compat-check: generation cleanup');
+      if (typeof ctx.effect === "function")
+        ctx.effect(
+          () => () => {
+            state.disposed = true;
+            for (const request of state.reviewRequests || []) request.abort();
+            state.reviewTargets?.clear();
+            state.reportService?.dispose();
+            for (const off of state.cacheEventDisposers || []) {
+              try {
+                off();
+              } catch {}
+            }
+            state.cacheEventDisposers = [];
+            state.upgradeFlight?.controller?.abort();
+            for (const timer of state.scanTimers) clearTimeout(timer);
+            state.scanTimers.clear();
+            clearTimeout(state.fallbackTimer);
+            state.disposeInjectProbe?.();
+            state.disposeInjectProbe = null;
+            if (globalThis.__DSH_COMPAT_CHECK__ === handle)
+              delete globalThis.__DSH_COMPAT_CHECK__;
+          },
+          "compat-check: generation cleanup",
+        );
     } catch {
       /* 忽略 */
     }

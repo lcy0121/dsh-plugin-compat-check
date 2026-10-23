@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /** Keep host/browser presentation artifacts byte-reproducible from pure sources. */
 import fs from "node:fs";
+import { format, resolveConfig } from "prettier";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 const plugin = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."),
@@ -94,6 +95,12 @@ for (const item of [
       source,
   ]);
 }
+// Format the complete generated artifact at its canonical generation boundary.
+// A formatted client must remain byte-identical on every subsequent check.
+next = await format(next, {
+  ...(await resolveConfig(client)),
+  filepath: client,
+});
 outputs.unshift([client, next]);
 for (const [file, value] of outputs) {
   if (fs.existsSync(file) && fs.readFileSync(file, "utf8") === value) continue;
