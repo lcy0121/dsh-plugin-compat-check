@@ -109,7 +109,13 @@ async function boot(name, overrides = {}) {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
-      resolve({ child, url, output });
+      resolve({
+        child,
+        url,
+        get output() {
+          return output;
+        },
+      });
     };
     const timer = setTimeout(() => {
       if (settled) return;
@@ -422,6 +428,15 @@ try {
     requireTrue(
       host.url,
       "Candidate host failed: " + redact(host.output).slice(-900),
+    );
+    // Startup scans update compatibility.json, which deliberately invalidates an
+    // older ordinary report. Wait for their actual completion before testing a
+    // user comparison; the forced read below then captures the settled inputs.
+    await poll(
+      () =>
+        host.output.includes("inject-probe: registered=") &&
+        host.output.includes("F2 启动自检:"),
+      "Candidate startup scans and initial report did not complete",
     );
     const headers = {
         Authorization: "Bearer " + new URL(host.url).searchParams.get("token"),
