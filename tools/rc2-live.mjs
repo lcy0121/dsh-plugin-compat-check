@@ -491,6 +491,7 @@ try {
       "Candidate startup scans and initial report did not complete",
     );
     const headers = {
+        "X-DSH-Compat-Request": "1",
         Authorization: "Bearer " + new URL(host.url).searchParams.get("token"),
       },
       reportUrl = new URL("/plugin-compat-check/report?refresh=1", host.url);

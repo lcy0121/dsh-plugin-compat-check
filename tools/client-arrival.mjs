@@ -526,7 +526,7 @@ async function main() {
       const target = new URL("/plugin-compat-check/report?refresh=1", url);
       const token = new URL(url).searchParams.get("token");
       const response = await fetch(target, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`, "X-DSH-Compat-Request": "1" },
         signal: AbortSignal.timeout(15000),
       });
       if (!response.ok)

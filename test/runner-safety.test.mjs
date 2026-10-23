@@ -122,7 +122,7 @@ test('owned runner passes inventory to the actual probe and reports mapped loade
 test('owned runners reject failed, empty or invalid version queries without inheriting a stale version',()=>{
  const fake=`const fs=require('node:fs'),path=require('node:path');
  (async()=>{const a=process.argv.slice(2),name=a[a.indexOf('--profile')+1],profile=path.join(process.env.DSH_HOME,'profiles',name);
- if(a.includes('--version')){fs.writeFileSync(process.env.DSC_VERSION_TRACE,JSON.stringify({inherited:Object.hasOwn(process.env,'DSC_DSH_VERSION')}));if(process.env.DSC_VERSION_MODE==='failed')process.exit(7);if(process.env.DSC_VERSION_MODE==='invalid')console.log('not-a-dsh-version');return;}
+ if(a.includes('--version')){fs.writeFileSync('__TRACE__',JSON.stringify({inherited:Object.hasOwn(process.env,'DSC_DSH_VERSION')}));if('__MODE__'==='failed')process.exit(7);if('__MODE__'==='invalid')console.log('not-a-dsh-version');return;}
  if(a.includes('--dump-config')){fs.mkdirSync(profile,{recursive:true});return;}
  if(a.includes('plugin'))return;
  global.setTimeout=fn=>{queueMicrotask(fn);return {unref(){}}};
@@ -135,7 +135,8 @@ test('owned runners reject failed, empty or invalid version queries without inhe
    const expr=api==='probeProfile'?`probeProfile(${JSON.stringify(path.join(source,'node_modules'))},{timeoutSec:5})`:`installAndProbe('file:/fake-plugin',{timeoutSec:5,servicesFor:()=>({services:[],manifests:[]})})`;
    const code=`import {probeProfile,installAndProbe} from ${JSON.stringify(new URL('../lib/probe-runner.mjs',import.meta.url).href)};console.log(JSON.stringify(await ${expr}));`;
    const trace=path.join(dir,'version-trace.json');
-   const child=spawnSync(process.execPath,['--input-type=module','-e',code],{env:{...env,DSC_VERSION_MODE:mode,DSC_VERSION_TRACE:trace,DSC_DSH_VERSION:'inherited-not-observed'},encoding:'utf8',timeout:15000});
+   fs.writeFileSync(path.join(dir,'bin','dsh'),'#!/usr/bin/env node\n'+fake.replace("'__TRACE__'",JSON.stringify(trace)).replaceAll('__MODE__',mode),{mode:0o755});
+   const child=spawnSync(process.execPath,['--input-type=module','-e',code],{env:{...env,DSC_DSH_VERSION:'inherited-not-observed'},encoding:'utf8',timeout:15000});
    assert.equal(child.status,0,child.stderr);const out=JSON.parse(child.stdout);
    assert.match(out.error||'',/DSH version/i,JSON.stringify({api,mode,out}));
    if(api==='probeProfile'){assert.equal(out.surface,null);assert.equal(out.tempProfileRemoved,true);}

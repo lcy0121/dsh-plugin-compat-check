@@ -202,7 +202,7 @@ function hostReport(f, dshVersion = "0.2.1-rc.2") {
     apply(ctx);
     try {
       let status,text;
-      await routes.get('/plugin-compat-check/report').handler({headers:{host:'127.0.0.1:8123'},method:'GET',url:'/plugin-compat-check/report?refresh=1',socket:{encrypted:false}},
+      await routes.get('/plugin-compat-check/report').handler({headers:{'x-dsh-compat-request':'1',host:'127.0.0.1:8123'},method:'GET',url:'/plugin-compat-check/report?refresh=1',socket:{encrypted:false}},
         {writeHead:c=>status=c,setHeader(){},end:t=>text=t});
       const agent=await tool.execute({});
       console.log('DUPLICATE_RESULT '+JSON.stringify({status,host:JSON.parse(text),agent,unchanged:fs.readFileSync(baseline,'utf8')===before,files:fs.readdirSync(${JSON.stringify(path.join(f.home, "dsh-plugin-compat-check"))})}));

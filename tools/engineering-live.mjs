@@ -162,6 +162,7 @@ try {
     });
   });
   const headers = {
+    "X-DSH-Compat-Request": "1",
     Authorization: "Bearer " + new URL(url).searchParams.get("token"),
   };
   const reportUrl = new URL("/plugin-compat-check/report?refresh=1", url);

@@ -40,7 +40,11 @@ test("overview exposes separate dependency, manual review and imported health se
     before = JSON.stringify(data),
     urls = [];
   const h = await panelHarness(data, {
-    fetcher: async (url) => {
+    fetcher: async (url, options) => {
+      assert.equal(
+        new Headers(options.headers).get("X-DSH-Compat-Request"),
+        "1",
+      );
       urls.push(url);
       return { ok: true, json: async () => data };
     },

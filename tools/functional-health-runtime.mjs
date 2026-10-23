@@ -6,6 +6,7 @@ import { createHash } from "node:crypto";
 import { gunzipSync } from "node:zlib";
 import { spawn } from "node:child_process";
 import { command, stopOwnedChild } from "../lib/probe-runner.mjs";
+import { isolatedEnvironment } from "../lib/execution-environment.mjs";
 import { launchChromePipe } from "../lib/debugger.mjs";
 import {
   navigateOwnedDocument,
@@ -228,35 +229,6 @@ export async function createFunctionalDom(
   }
 }
 
-function isolatedEnvironment(root) {
-  const env = {};
-  for (const key of [
-    "PATH",
-    "SystemRoot",
-    "COMSPEC",
-    "PATHEXT",
-    "LANG",
-    "LC_ALL",
-    "TMPDIR",
-    "TEMP",
-    "TMP",
-  ])
-    if (process.env[key]) env[key] = process.env[key];
-  Object.assign(env, {
-    HOME: path.join(root, "user"),
-    USERPROFILE: path.join(root, "user"),
-    XDG_CONFIG_HOME: path.join(root, "config"),
-    XDG_CACHE_HOME: path.join(root, "cache"),
-    DSH_HOME: path.join(root, "home"),
-    DSH_AGENTS_HOME: path.join(root, "agents"),
-    npm_config_cache: path.join(root, "npm-cache"),
-    npm_config_store_dir: path.join(root, "pnpm-store"),
-    npm_config_ignore_scripts: "true",
-  });
-  fs.mkdirSync(env.HOME, { mode: 0o700 });
-  fs.mkdirSync(env.DSH_HOME, { mode: 0o700 });
-  return env;
-}
 async function bootHost(child, signal) {
   return new Promise((resolve, reject) => {
     let output = "",

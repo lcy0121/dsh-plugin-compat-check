@@ -339,6 +339,14 @@ describe('report route enforces the complete local origin authority',()=>{
    [{host:'127.0.0.1:8123',origin:'http://127.0.0.1:8123/path'},false],
    [{host:'127.0.0.1:65536',origin:'http://127.0.0.1:65536'},false],
   ];
-  for(const [headers,allowed] of cases){let status,body;await route.handler({headers,url:'/plugin-compat-check/report',socket:{encrypted:false}},{writeHead:code=>{status=code;},setHeader:()=>{},end:text=>{body=text;}});assert.equal(status===403,!allowed,JSON.stringify(headers));if(!allowed)assert.ok(!body.includes('nodeModules'));}
+  for(const [headers,allowed] of cases){let status,body;await route.handler({method:'GET',headers:{'x-dsh-compat-request':'1',...headers},url:'/plugin-compat-check/report',socket:{encrypted:false}},{writeHead:code=>{status=code;},setHeader:()=>{},end:text=>{body=text;}});assert.equal(status===403,!allowed,JSON.stringify(headers));if(!allowed)assert.ok(!body.includes('nodeModules'));}
  });
+});
+
+
+test('a forged loopback Host cannot admit a remote socket',async()=>{
+ const {apply}=loadHost({DSC_KERNEL:'/nonexistent-owned-kernel',DSC_OUT_DIR:''});let route;
+ apply({get:()=>undefined,inject:(deps,fn)=>fn(deps.includes('webServer')?{webServer:{register:r=>{if(r.path==='/plugin-compat-check/report')route=r;}}}:{}),effect:()=>{}});
+ let status;await route.handler({method:'GET',headers:{host:'127.0.0.1:8123','x-dsh-compat-request':'1'},url:'/plugin-compat-check/report?refresh=1',socket:{remoteAddress:'192.0.2.10'}},{writeHead:code=>status=code,end(){}});
+ assert.equal(status,403);
 });

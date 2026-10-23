@@ -26,7 +26,7 @@ function host(body) {
   const script = `import assert from 'node:assert/strict';import fs from 'node:fs';import {Readable} from 'node:stream';import {apply} from ${JSON.stringify(new URL("../plugin/index.js", import.meta.url).href)};
  const root=${JSON.stringify(root)},home=${JSON.stringify(home)},nm=${JSON.stringify(nm)},pkg=${JSON.stringify(pkg)},routes=new Map(),effects=[];let tool;
  const ctx={get:()=>undefined,inject:(deps,cb)=>{const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path)}},tools:{register:t=>{tool=t;return()=>{}}}});if(typeof off==='function')effects.push(off);return off;},effect:fn=>{const off=fn();if(typeof off==='function')effects.push(off);}};apply(ctx);
- const request=async(pathname='/plugin-compat-check/report',body,headers={},method=body===undefined?'GET':'POST')=>{const route=routes.get(pathname.split('?')[0]);assert(route,'Requested workflow route is not registered: '+pathname);const req=Readable.from(body===undefined?[]:[Buffer.from(typeof body==='string'?body:JSON.stringify(body))]);Object.assign(req,{method,url:pathname,headers:{host:'127.0.0.1:8123',origin:'http://127.0.0.1:8123','content-type':'application/json',...headers},socket:{encrypted:false}});let text,status;await route.handler(req,{writeHead:c=>status=c,setHeader(){},end:t=>text=t});return {status,body:JSON.parse(text)};};
+ const request=async(pathname='/plugin-compat-check/report',body,headers={},method=body===undefined?'GET':'POST')=>{const route=routes.get(pathname.split('?')[0]);assert(route,'Requested workflow route is not registered: '+pathname);const req=Readable.from(body===undefined?[]:[Buffer.from(typeof body==='string'?body:JSON.stringify(body))]);Object.assign(req,{method,url:pathname,headers:{'x-dsh-compat-request':'1',host:'127.0.0.1:8123',origin:'http://127.0.0.1:8123','content-type':'application/json',...headers},socket:{encrypted:false}});let text,status;await route.handler(req,{writeHead:c=>status=c,setHeader(){},end:t=>text=t});return {status,body:JSON.parse(text)};};
  try{${body};console.log('WORKFLOWS_OK')}finally{for(const off of effects)off();}process.exit(0);`;
   try {
     const out = spawnSync(
@@ -92,7 +92,7 @@ test("same-version source changes require review again and reject the previous t
 test("unloading a host cancels an incomplete manual-review request without writing records", () =>
   host(`
  const first=await request();assert(first.body.reviews);
- const route=routes.get('/plugin-compat-check/reviews'),req=new Readable({read(){}});Object.assign(req,{method:'POST',url:'/plugin-compat-check/reviews',headers:{host:'127.0.0.1:8123',origin:'http://127.0.0.1:8123','content-type':'application/json'},socket:{}});
+ const route=routes.get('/plugin-compat-check/reviews'),req=new Readable({read(){}});Object.assign(req,{method:'POST',url:'/plugin-compat-check/reviews',headers:{'x-dsh-compat-request':'1',host:'127.0.0.1:8123',origin:'http://127.0.0.1:8123','content-type':'application/json'},socket:{}});
  let status,text;const pending=route.handler(req,{writeHead:s=>status=s,end:t=>text=t});req.push('{');for(const off of effects.splice(0))off();await pending;
  assert.equal(status,409);assert.equal(JSON.parse(text).ok,false);assert.equal(routes.has('/plugin-compat-check/reviews'),false);
  assert(!fs.readdirSync(home+'/dsh-plugin-compat-check').some(f=>f.startsWith('reviews.')));

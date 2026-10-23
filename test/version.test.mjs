@@ -158,7 +158,7 @@ describe('面板报告也带版本', () => {
 
     let body = ''
     await route.handler(
-      { headers: { host: '127.0.0.1:1' }, url: '/plugin-compat-check/report' },
+      { method: 'GET', headers: { 'x-dsh-compat-request':'1', host: '127.0.0.1:1' }, url: '/plugin-compat-check/report' },
       { writeHead: () => {}, setHeader: () => {}, end: (s) => { body = s } },
     )
     const payload = JSON.parse(body)

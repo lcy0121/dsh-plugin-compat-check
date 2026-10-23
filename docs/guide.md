@@ -64,7 +64,22 @@ $DSH_HOME/dsh-plugin-compat-check/reviews.<canonical-node_modules路径SHA256>.j
 
 保存只接受当前contextToken、findingId、status和note，不接受HTTP指定文件路径。文件1MiB、记录1000条、单项依据4000字符；身份/当前发现不明、陈旧或跨目标请求、卸载中的任务、控制字符、超限及坏数据均不能保存。锁内重读合并、临时文件同步后原子替换；损坏、非普通文件、symlink或超限文件报错并保留，不用刷新覆盖。已处理记录不能隐藏finding或新风险、改变总结论/退出码/基线，也不构成`compatibility.json`豁免。
 
-进程崩溃可能遗留`reviews.<hash>.json.lock`或`.reviews-<uuid>.tmp`；刷新不会自动回收，保存可能持续提示忙。先确认没有任何进程正在向该目录保存人工记录，备份并保留对应JSON，再只清理已确认孤立的lock/tmp。不要按通配符清空目录，不删除JSON、baseline或其它进程资源；仍有保存任务时不得清锁。损坏JSON需保留原件并人工核实或恢复可信备份，不能靠清空文件把状态伪装成首次待确认。
+基线与人工处置进程崩溃后的锁，按[本地恢复流程](#本地状态锁恢复)处理；刷新不自动清锁。损坏JSON需保留原件并人工核实或恢复可信备份，不能靠清空文件伪装成首次待确认。
+
+## 本地状态锁恢复
+
+基线与人工处置使用`<原JSON文件>.lock`，记录工具类型/确切锁路径、PID、用户/主机、进程起始估计及实例随机标识、创建时间和每锁随机标识。起始估计不是OS进程出生时间证明；不按年龄或PID复用推断孤立状态。正常释放只移除自己持有的同一inode/内容，恢复与写入相互排斥。
+
+恢复CLI仅随仓库提供；仅安装npm插件的用户需要对应版本的源码检出，在仓库运行以下命令。它可处理默认文件及显式指定的自定义基线路径。先检查一个确切路径；仅当记录的工具类型/锁路径相符、同主机、同用户、完整元数据且系统返回持有PID不存在（`ESRCH`）时，输出孤锁状态和确认token：
+
+```sh
+node bin/recover-lock.mjs /绝对路径/baseline.example.json.lock
+node bin/recover-lock.mjs /绝对路径/baseline.example.json.lock --confirm <刚检查得到的token>
+```
+
+人工处置的`reviews.<64位目标hash>.json.lock`使用同一命令。第二步重新检查存活状态、inode与内容，token陈旧、活动或复用PID、权限错误、异主机/用户、旧空锁、损坏/非普通/链接锁均拒绝。恢复只删除该孤锁，不推进基线、不修改人工记录/判定、不清理任何JSON、临时文件或其它任务资源；需要后续正常检查/保存才产生新状态。
+
+恢复期间使用`.lock.recovery-lock`互斥保护；若恢复进程被杀死而遗留保护锁，工具保守拒绝并要求人工诊断。不要递归强清、按通配符删目录或仅凭时间/PID复用清锁。无法证明安全的旧锁/保护锁应保留，停用相关写入者并人工核实持有者及文件身份后再处理；Windows真实恢复尚未验收。
 
 ## 功能回归
 
@@ -73,6 +88,18 @@ node --test test/functional-health.test.mjs test/dependency-graph.test.mjs test/
 ```
 
 定向回归使用受控输入；真实Chrome病例仅在`DSC_SLOW=1`的显式浏览器套件启动自有空浏览器；该模式缺少浏览器会失败，不静默略过。真实DSH/制品执行仍按上述显式授权入口进行，不以测试fixture代替真实业务证据。当前计数、真实集成与平台范围以[current-state.json](current-state.json)为准；历史记录不认证新源码或新制品。[Plan](Plan.md)维护合同、复现索引及后续工作。
+
+## 安装与probe执行环境
+
+只有显式请求安装检查或`--probe-boot`才安装/启动目标。它们与健康执行器的DSH子进程仅继承`PATH / SystemRoot / COMSPEC / PATHEXT / LANG / LC_ALL / TMPDIR / TEMP / TMP`；使用自有0700 HOME、USERPROFILE、XDG配置/缓存、DSH_HOME、DSH_AGENTS_HOME、npm缓存与pnpm store，以及独立空白0600 npm用户/全局配置文件。设置`npm_config_ignore_scripts=true`限制包管理器lifecycle脚本；DSH及插件启动代码仍会执行。
+
+不继承父环境API key、Node预加载/模块路径、动态库注入、代理、证书及npm配置，也不自动转发私有registry凭据；需要这些条件的安装可能明确失败。只保留本次生成的probe路径、目标身份及实测DSH版本。probe按原逻辑复制所选profile配置并重定位本地依赖，配置可能含秘密；profile内npm配置、插件文件访问或网络行为不由环境白名单隔离。PATH仍选择可信可执行文件；这不是OS沙箱，也不能阻止插件读取用户可访问的其它文件。通用命令工具接受调用方显式环境，不属于这个默认隔离承诺。
+
+## 本地HTTP边界
+
+面板和本地HTTP工具请求报告、升级预检、人工处置时均携带`X-DSH-Compat-Request: 1`。缺少/错误标记、非本地Host/对端、不同Origin/Referer（协议、主机和有效端口均须一致）或跨来源Fetch Metadata均返回403；仅接受同源fetch的mode/destination，拒绝图片、导航等子资源入口。报告/预检只支持GET，人工保存只支持JSON POST；OPTIONS预检不会执行检查。标记是防浏览器简单请求的入口约束，不是密码；受信本机无Origin工具调用也须显式携带。
+
+2026-10-24在自有两端口与空Chrome复现：跨端口图片GET没有Origin，旧入口会计算并创建基线；修复后403且无基线，同源fetch仍成功。只读核对本机DSH 0.2.1-rc.2 ASAR：`dsh-host-webserver`按配置具体IP监听，exact路由直接调用handler；`dsh-client-connection`的cookie/连接认证属于其自身入口，不能假设自动覆盖本插件路由。本地原生进程可自行携带请求头；保留宿主监听/访问控制，不承诺跨用户鉴权、反向代理部署或其它DSH版本已验收。该复现不是任意公网可利用性证明。
 
 ## 日常检查与源码交付
 

@@ -3316,7 +3316,7 @@ return { createDependencyPanel:createDependencyPanel, createFindingReviewPanel:c
       var load = React.useCallback(function (refresh, background) {
         if (pending.current) {if(refresh)queuedForce.current=true;return pending.current;}
         function read(url) {
-          return fetch(url, {headers:{accept:"application/json"},credentials:"same-origin"}).then(function(res){
+          return fetch(url, {headers:{accept:"application/json","X-DSH-Compat-Request":"1"},credentials:"same-origin"}).then(function(res){
             if(!res.ok)throw new Error("HTTP " + res.status);
             return res.json();
           });
@@ -3735,7 +3735,7 @@ return { createDependencyPanel:createDependencyPanel, createFindingReviewPanel:c
         var requested = String(target[0]).trim(), ticket = ++generation.current;
         state[1]({ phase: "loading" });
         try {
-          var response = await fetch("/plugin-compat-check/upgrade-preview?targetVersion=" + encodeURIComponent(requested) + "&currentVersion=" + encodeURIComponent(currentVersion || ""), { credentials: "same-origin", headers: { Accept: "application/json" } });
+          var response = await fetch("/plugin-compat-check/upgrade-preview?targetVersion=" + encodeURIComponent(requested) + "&currentVersion=" + encodeURIComponent(currentVersion || ""), { credentials: "same-origin", headers: { Accept: "application/json", "X-DSH-Compat-Request": "1" } });
           if (!response.ok) throw Error("HTTP " + response.status);
           var result;
           try { result = UpgradeContract.assertUpgradePreview(await response.json()); }
@@ -3795,7 +3795,7 @@ return { createDependencyPanel:createDependencyPanel, createFindingReviewPanel:c
     }
 
     async function saveFindingReview(body) {
-      var response=await fetch('/plugin-compat-check/reviews',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(body)});
+      var response=await fetch('/plugin-compat-check/reviews',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json',Accept:'application/json','X-DSH-Compat-Request':'1'},body:JSON.stringify(body)});
       var result=await response.json();
       if(!response.ok||!result.ok||result.reviews?.error)throw new Error(result.error||result.reviews?.error||'人工处置保存失败');
       return result.reviews;

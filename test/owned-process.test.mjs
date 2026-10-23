@@ -275,7 +275,7 @@ test(
       const fake = path.join(root, "dsh");
       fs.writeFileSync(
         fake,
-        `#!${process.execPath}\nconst fs=require('fs'),path=require('path');if(process.argv.includes('--version'))console.log('0.2.1-rc.2');else if(process.argv.includes('--dump-config')){const dir=path.join(process.env.DSH_HOME,'profiles',process.argv[process.argv.indexOf('--profile')+1]);fs.mkdirSync(path.join(dir,'node_modules'),{recursive:true});fs.writeFileSync(path.join(dir,'package.json'),JSON.stringify({dependencies:{},dsh:{profile:{bundles:[]}}}));}else if(process.argv.includes('--no-open')||process.env.DSC_SETUP_STALL==='1'){fs.writeFileSync(${JSON.stringify(marker)},JSON.stringify({pid:process.pid,work:process.env.DSC_OUT_DIR}));fs.writeFileSync(path.join(process.env.DSC_OUT_DIR,'probe-report.json'),JSON.stringify({observationVersion:1,profileId:'wrong-profile',dshVersion:'0.2.1-rc.2',probedAt:new Date().toISOString(),root:{}}));setInterval(()=>{},1000);}`,
+        `#!${process.execPath}\nconst fs=require('fs'),path=require('path');if(process.argv.includes('--version'))console.log('0.2.1-rc.2');else if(process.argv.includes('--dump-config')){const dir=path.join(process.env.DSH_HOME,'profiles',process.argv[process.argv.indexOf('--profile')+1]);fs.mkdirSync(path.join(dir,'node_modules'),{recursive:true});fs.writeFileSync(path.join(dir,'package.json'),JSON.stringify({dependencies:{},dsh:{profile:{bundles:[]}}}));}else if(process.argv.includes('--no-open')||fs.existsSync(${JSON.stringify(path.join(root, "stall"))})){fs.writeFileSync(${JSON.stringify(marker)},JSON.stringify({pid:process.pid,work:process.env.DSC_OUT_DIR}));fs.writeFileSync(path.join(process.env.DSC_OUT_DIR,'probe-report.json'),JSON.stringify({observationVersion:1,profileId:'wrong-profile',dshVersion:'0.2.1-rc.2',probedAt:new Date().toISOString(),root:{}}));setInterval(()=>{},1000);}`,
         { mode: 0o700 },
       );
       const preload = path.join(root, "deny.mjs");
@@ -330,6 +330,7 @@ test(
         owned = null;
         fs.rmSync(marker);
       }
+      fs.writeFileSync(path.join(root, "stall"), "");
       const stalled = spawnSync(
         process.execPath,
         [

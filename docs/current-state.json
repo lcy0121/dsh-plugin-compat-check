@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-23T17:35:03.960Z",
-  "testFiles": 64,
-  "tests": 904,
+  "recordedAt": "2026-10-23T17:51:39.066Z",
+  "testFiles": 67,
+  "tests": 920,
   "repositoryFiles": {
-    "total": 318,
+    "total": 325,
     "fixtures": 90,
-    "other": 228
+    "other": 235
   },
   "verification": {
     "platform": "darwin",
@@ -156,34 +156,10 @@
       }
     },
     "sourceConsolidation20261023": {
-      "planBytes": {
-        "before": 18857,
-        "after": 15689
-      },
-      "panels": {
-        "canonicalModulesBefore": 3,
-        "canonicalModulesAfter": 1,
-        "generatedHostModulesBefore": 3,
-        "generatedHostModulesAfter": 1,
-        "factoryBodies": "byte-identical to ed757a6; three exports in shared delivery module"
-      },
-      "testFixtures": {
-        "helper": "existing test/fixture-utils.mjs",
-        "netLinesRemoved": 17,
-        "fixtureEquivalence": "Seven caller trees plus default, metadata and nested-file variants preserve paths and bytes."
-      },
-      "quality": {
-        "tests": 875,
-        "passed": 872,
-        "skipped": 3,
-        "failed": 0,
-        "assertionsOrCasesRemoved": false,
-        "publicCLIPathsRemoved": false,
-        "format": "passed",
-        "notices": "passed",
-        "generatedContracts": "passed"
-      },
-      "scope": "Consolidate cohesive UI delivery and repeated fixture writes; retain distinct author/engineering/business tool contracts and behavior regressions."
+      "historyCommit": "7cde4d3",
+      "historyPath": "docs/current-state.json",
+      "key": "verification.sourceConsolidation20261023",
+      "scope": "Historical consolidation evidence retained in local Git history; not rerun or current certification."
     },
     "historicalLocalAcceptance20261022": {
       "source": "https://github.com/lcy0121/dsh-plugin-compat-check/blob/c82b1e680e0f12a424f946c8bd153fad602d48ba/docs/current-state.json",
@@ -360,6 +336,19 @@
       },
       "checks": "Full suite includes fresh packed installation; format, notices, generated copies and document checks passed.",
       "limits": "CLI worker 10s, V8 512+64MiB; synchronous run needs caller supervision. No hard realtime, RSS cap or atomic filesystem snapshot."
+    },
+    "localBoundaries20261024": {
+      "scope": "0.1.7-dev local source only; no release, push or remote CI.",
+      "defaultSuite": {
+        "tests": 920,
+        "passed": 913,
+        "skipped": 7,
+        "failed": 0
+      },
+      "browser": "HTTP cases 3/3: owned Chrome cross-port image omitted Origin; old entry wrote baseline, fixed entry 403/no baseline, same-origin fetch recovers.",
+      "environment": "Private env/config verified in actual probe/installer children, failure cleanup and retry; copied profile config remains readable.",
+      "locks": "Tool/path-bound holder metadata; explicit token + ESRCH-only orphan recovery. Crash, contention, replacement and live/reused PID refusal verified.",
+      "limits": "Repository-only recovery CLI. Legacy/unknown/guard locks fail closed; Windows unverified. No OS sandbox or native-local authentication guarantee."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."

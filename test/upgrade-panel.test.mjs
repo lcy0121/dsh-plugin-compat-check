@@ -94,6 +94,10 @@ test("preflight is explicit and sends only version context to a separate same-or
   assert.equal(query.searchParams.get("currentVersion"), "0.2.0-rc.2");
   assert.equal(query.searchParams.has("probe"), false);
   assert.equal(requests[1].options.credentials, "same-origin");
+  assert.equal(
+    new Headers(requests[1].options.headers).get("X-DSH-Compat-Request"),
+    "1",
+  );
   assert.match(h.text(), /HTTP 503/);
   assert.equal(h.rows().length, 4);
   assert.equal(JSON.stringify(data), before);
