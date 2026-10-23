@@ -318,7 +318,24 @@
         "github": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.1.5",
         "npm": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.1.5"
       },
-      "scope": "Local acceptance uses these exact archive bytes. Tagged-commit CI and public archive identity are verified during release; Windows, future hosts and full plugin business behavior are not certified."
+      "scope": "Local acceptance uses these exact archive bytes. Tagged-commit CI and public archive identity are verified during release; Windows, future hosts and full plugin business behavior are not certified.",
+      "publicVerification": {
+        "verifiedAt": "2026-10-23T12:08:42.748Z",
+        "sourceCommit": "d798e8b3de3a6c3199ca31a266c1f991462566d2",
+        "ci": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39923064732",
+        "ciPassed": 5,
+        "fixedBatch": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39923342555",
+        "npmLatest": "0.1.5",
+        "npmArchiveMatchesAccepted": true,
+        "githubArchiveMatchesAccepted": true,
+        "publicInstall": {
+          "status": "checked",
+          "toolVersion": "0.1.5",
+          "exitCode": 0,
+          "tempProfileRemoved": true
+        },
+        "publicMetadataProblems": 0
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."

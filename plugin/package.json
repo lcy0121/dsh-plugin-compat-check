@@ -33,7 +33,8 @@
     "THIRD_PARTY_NOTICES.md"
   ],
   "engines": {
-    "node": "^22.19.0 || >=24"
+    "node": "^22.19.0 || >=24",
+    "dsh": ">=0.2.0-rc.2 <0.3.0-0"
   },
   "scripts": {
     "prepack": "node scripts/stage-skill.mjs && node scripts/stage-contract.mjs && node scripts/stage-kernel.mjs",
