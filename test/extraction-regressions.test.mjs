@@ -106,12 +106,12 @@ test('an uncalled nested function cannot change the caller service binding',()=>
 });
 test('unreadable scoped inventory is an error rather than an empty successful scan',()=>{
  const f=packageFixture('export function apply(){}'),scope=path.join(f.nm,'@scope');
- const original=fs.readdirSync;
+ const original=fs.opendirSync;
  try{
   fs.mkdirSync(scope);fs.renameSync(f.pkg,path.join(scope,'sample'));
-  fs.readdirSync=function(file,...args){if(path.resolve(String(file))===scope){const error=new Error('EACCES');error.code='EACCES';throw error;}return original.call(fs,file,...args);};
+  fs.opendirSync=function(file,...args){if(path.resolve(String(file))===scope){const error=new Error('EACCES');error.code='EACCES';throw error;}return original.call(fs,file,...args);};
   assert.throws(()=>extractWithProvenance(f.nm,{catalog}),/EACCES/);
- }finally{fs.readdirSync=original;f.cleanup();}
+ }finally{fs.opendirSync=original;f.cleanup();}
 });
 
 test('host conditional exports follow Node import conditions and object order',()=>{

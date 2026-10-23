@@ -7,6 +7,11 @@ import * as workers from "../lib/worker-analysis.mjs";
 import { packageFixture, fixtureCatalog as catalog } from "./fixture-utils.mjs";
 import { buildVerdicts } from "../lib/verdict.mjs";
 import { ReportService } from "../lib/report-service.mjs";
+import { spawnSync } from "node:child_process";
+import { extractWithProvenance } from "../lib/extract.mjs";
+import { collectPackageSources } from "../lib/source-graph.mjs";
+import { runAsync } from "../bin/compat-check.mjs";
+import { readStaticFile, readStaticDirectory } from "../lib/static-input.mjs";
 const job = new URL("./support/resource-worker.mjs", import.meta.url);
 const record = (name, metrics) => {
   if (process.env.DSC_ENGINEERING_LOG)
@@ -292,4 +297,329 @@ test("concurrent forced report requests share a worker and failed refresh preser
     milliseconds: performance.now() - start,
     failedRefreshRetainedReport: true,
   });
+});
+
+test(
+  "FIFO manifests and links to them cannot block the ordinary CLI",
+  { skip: process.platform === "win32" },
+  () => {
+    for (const linked of [false, true]) {
+      const f = packageFixture('throw Error("target executed")');
+      try {
+        const manifest = path.join(f.pkg, "package.json"),
+          fifo = path.join(f.root, "manifest-fifo");
+        fs.unlinkSync(manifest);
+        assert.equal(spawnSync("mkfifo", [linked ? fifo : manifest]).status, 0);
+        if (linked) fs.symlinkSync(fifo, manifest);
+        const out = spawnSync(
+          process.execPath,
+          ["bin/compat-check.mjs", "--nm", f.nm, "--json", "--no-baseline"],
+          { encoding: "utf8", timeout: 3000 },
+        );
+        assert.equal(
+          out.error,
+          undefined,
+          "CLI must reject the nonregular input before the external deadline",
+        );
+        const body = JSON.parse(out.stdout);
+        assert.equal(body.extraction.scanComplete, false);
+        assert.ok(
+          body.extraction.diagnostics.some(
+            (d) => d.kind === "invalid-package-metadata",
+          ),
+        );
+      } finally {
+        f.cleanup();
+      }
+    }
+  },
+);
+
+test("oversized manifests are diagnosed before their plugin enters the inventory", () => {
+  const f = packageFixture('throw Error("target executed")');
+  try {
+    const manifest = path.join(f.pkg, "package.json");
+    const meta = JSON.parse(fs.readFileSync(manifest));
+    meta.padding = "x".repeat(65536);
+    fs.writeFileSync(manifest, JSON.stringify(meta));
+    const out = extractWithProvenance(f.nm, { catalog });
+    assert.equal(out.report.scanComplete, false);
+    assert.deepEqual(Object.keys(out.report.perPlugin), []);
+    assert.ok(
+      out.report.diagnostics.some(
+        (d) =>
+          d.kind === "invalid-package-metadata" &&
+          d.code === "STATIC_INPUT_BUDGET",
+      ),
+    );
+  } finally {
+    f.cleanup();
+  }
+});
+
+test("patch bytes share the per-file and total source budgets", () => {
+  for (const limits of [{ fileBytes: 128 }, { bytes: 128 }]) {
+    const f = packageFixture(
+      "export function apply(ctx){ctx.settings.known()}",
+    );
+    try {
+      fs.writeFileSync(
+        path.join(f.pkg, "cordis.patch.yml"),
+        "#" + "x".repeat(256) + "\n- name: ./index.js\n",
+      );
+      const out = extractWithProvenance(f.nm, { catalog, limits });
+      assert.equal(out.report.scanComplete, false);
+      assert.ok(
+        out.report.perPlugin.sample.diagnostics.some(
+          (d) => d.kind === "scan-budget-exceeded",
+        ),
+      );
+    } finally {
+      f.cleanup();
+    }
+  }
+});
+
+test(
+  "FIFO patches and links to them retain an unreadable-input diagnostic",
+  { skip: process.platform === "win32" },
+  () => {
+    for (const linked of [false, true]) {
+      const f = packageFixture(
+        "export function apply(ctx){ctx.settings.known()}",
+      );
+      try {
+        const patch = path.join(f.pkg, "cordis.patch.yml"),
+          fifo = path.join(f.pkg, "patch-fifo");
+        fs.unlinkSync(patch);
+        assert.equal(spawnSync("mkfifo", [linked ? fifo : patch]).status, 0);
+        if (linked) fs.symlinkSync(fifo, patch);
+        const out = extractWithProvenance(f.nm, { catalog });
+        assert.equal(out.report.scanComplete, false);
+        assert.ok(
+          out.report.perPlugin.sample.diagnostics.some(
+            (d) => d.kind === "patch-unreadable",
+          ),
+        );
+      } finally {
+        f.cleanup();
+      }
+    }
+  },
+);
+
+test("a wide directory stops enumeration within its entry budget", () => {
+  const f = packageFixture("export function apply(ctx){ctx.settings.known()}");
+  const original = fs.realpathSync;
+  let resolved = 0;
+  try {
+    for (let i = 0; i < 256; i++)
+      fs.writeFileSync(path.join(f.pkg, "part-" + i + ".txt"), "data");
+    fs.realpathSync = function (...args) {
+      resolved++;
+      return original.apply(fs, args);
+    };
+    const out = extractWithProvenance(f.nm, {
+      catalog,
+      limits: { entries: 16 },
+    });
+    assert.equal(out.report.scanComplete, false);
+    assert.ok(
+      out.report.perPlugin.sample.diagnostics.some(
+        (d) => d.kind === "scan-budget-exceeded",
+      ),
+    );
+    assert.ok(
+      resolved < 80,
+      `must stop inspecting entries, got ${resolved} path resolutions`,
+    );
+  } finally {
+    fs.realpathSync = original;
+    f.cleanup();
+  }
+});
+
+test("directory enumeration checks time inside a single wide directory", () => {
+  const f = packageFixture("export function apply(ctx){ctx.settings.known()}");
+  const original = fs.realpathSync,
+    clock = Date.now;
+  let elapsed = 0,
+    resolved = 0;
+  try {
+    for (let i = 0; i < 256; i++)
+      fs.writeFileSync(path.join(f.pkg, "part-" + i + ".txt"), "data");
+    Date.now = () => elapsed;
+    fs.realpathSync = function (...args) {
+      resolved++;
+      elapsed++;
+      return original.apply(fs, args);
+    };
+    const meta = JSON.parse(fs.readFileSync(path.join(f.pkg, "package.json")));
+    const out = collectPackageSources(f.pkg, meta, { limits: { timeMs: 20 } });
+    assert.ok(out[4].some((d) => d.kind === "scan-budget-exceeded"));
+    assert.ok(
+      resolved < 80,
+      `deadline must stop the inner loop, got ${resolved}`,
+    );
+  } finally {
+    fs.realpathSync = original;
+    Date.now = clock;
+    f.cleanup();
+  }
+});
+
+test("ordinary asynchronous CLI analysis is supervised and cannot advance a timed-out baseline", async () => {
+  const f = packageFixture("export function apply(ctx){ctx.settings.known()}");
+  const baseline = path.join(f.root, "state", "baseline.json");
+  try {
+    fs.mkdirSync(path.dirname(baseline));
+    fs.writeFileSync(baseline, "old baseline");
+    const out = await runAsync(
+      { nm: f.nm, baselineFile: baseline },
+      { timeoutMs: 1 },
+    );
+    assert.match(out.error || "", /时间预算/);
+    assert.equal(fs.readFileSync(baseline, "utf8"), "old baseline");
+    assert.deepEqual(fs.readdirSync(path.dirname(baseline)), ["baseline.json"]);
+    const recovered = await runAsync({ nm: f.nm, baseline: false });
+    assert.equal(recovered.error, null);
+    assert.deepEqual(recovered.extract.report.perPlugin.sample.calls.settings, [
+      "known",
+    ]);
+  } finally {
+    f.cleanup();
+  }
+});
+
+test("static input budgets reject invalid values and cannot raise production limits", () => {
+  const f = packageFixture("export function apply(){}");
+  try {
+    for (const inventoryLimits of [
+      { manifestBytes: NaN },
+      { entries: Infinity },
+      { timeMs: 5001 },
+      { unknown: 1 },
+    ])
+      assert.throws(
+        () => extractWithProvenance(f.nm, { inventoryLimits }),
+        /budget/i,
+      );
+    for (const limits of [
+      { fileBytes: NaN },
+      { entries: Infinity },
+      { timeMs: 5001 },
+      { files: 2001 },
+    ])
+      assert.throws(() => extractWithProvenance(f.nm, { limits }), /budget/i);
+    for (const max of [NaN, -1, Infinity])
+      assert.throws(
+        () => readStaticFile(path.join(f.pkg, "package.json"), max),
+        /budget/i,
+      );
+  } finally {
+    f.cleanup();
+  }
+});
+
+test("patch accounting can exhaust the budget before otherwise small source files", () => {
+  const f = packageFixture(
+    "export function apply(ctx){ctx.settings.known()} // padding",
+  );
+  try {
+    fs.writeFileSync(
+      path.join(f.pkg, "cordis.patch.yml"),
+      "#" + "x".repeat(80) + "\n- name: ./index.js\n",
+    );
+    const out = extractWithProvenance(f.nm, {
+      catalog,
+      limits: { bytes: 128, fileBytes: 128 },
+    });
+    assert.ok(
+      out.report.perPlugin.sample.diagnostics.some(
+        (d) => d.kind === "scan-budget-exceeded" && d.file === "index.js",
+      ),
+    );
+    assert.equal(out.report.scanComplete, false);
+  } finally {
+    f.cleanup();
+  }
+});
+
+test("bounded input failures close both file and directory descriptors", () => {
+  const f = packageFixture("export function apply(){}");
+  const open = fs.openSync,
+    opendir = fs.opendirSync;
+  let fd, handle;
+  try {
+    fs.openSync = function (...args) {
+      fd = open.apply(fs, args);
+      return fd;
+    };
+    let checks = 0;
+    assert.throws(
+      () =>
+        readStaticFile(path.join(f.pkg, "package.json"), 65536, () => {
+          if (++checks === 2) throw new Error("controlled read deadline");
+        }),
+      /controlled read deadline/,
+    );
+    assert.throws(
+      () => fs.fstatSync(fd),
+      (e) => e.code === "EBADF",
+    );
+    fs.opendirSync = function (...args) {
+      handle = opendir.apply(fs, args);
+      return handle;
+    };
+    assert.throws(() => readStaticDirectory(f.pkg, 1), /entry budget/);
+    assert.throws(
+      () => handle.readSync(),
+      (e) => e.code === "ERR_DIR_CLOSED",
+    );
+    assert.ok(
+      readStaticFile(path.join(f.pkg, "package.json"), 65536).length > 0,
+    );
+  } finally {
+    fs.openSync = open;
+    fs.opendirSync = opendir;
+    f.cleanup();
+  }
+});
+
+test("a manifest disappearing after its bounded read is incomplete input, not an absent package", () => {
+  for (const action of ["unlink", "rename-parent"]) {
+    const f = packageFixture("export function apply(){}");
+    const open = fs.openSync,
+      read = fs.readSync;
+    const manifest = path.join(f.pkg, "package.json");
+    let descriptor;
+    try {
+      fs.openSync = function (file, ...args) {
+        const fd = open.call(fs, file, ...args);
+        if (String(file) === manifest) descriptor = fd;
+        return fd;
+      };
+      fs.readSync = function (fd, ...args) {
+        const n = read.call(fs, fd, ...args);
+        if (fd === descriptor && n > 0) {
+          if (action === "unlink") fs.unlinkSync(manifest);
+          else fs.renameSync(f.pkg, f.pkg + "-moved");
+        }
+        return n;
+      };
+      const out = extractWithProvenance(f.nm, { catalog });
+      assert.equal(out.report.scanComplete, false);
+      assert.ok(
+        out.report.diagnostics.some((d) => d.code === "STATIC_INPUT_CHANGED"),
+      );
+      assert.throws(
+        () => fs.fstatSync(descriptor),
+        (e) => e.code === "EBADF",
+      );
+    } finally {
+      fs.openSync = open;
+      fs.readSync = read;
+      f.cleanup();
+    }
+  }
 });

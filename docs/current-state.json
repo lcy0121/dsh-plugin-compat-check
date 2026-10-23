@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-23T17:11:44.164Z",
+  "recordedAt": "2026-10-23T17:35:03.960Z",
   "testFiles": 64,
-  "tests": 893,
+  "tests": 904,
   "repositoryFiles": {
-    "total": 316,
+    "total": 318,
     "fixtures": 90,
-    "other": 226
+    "other": 228
   },
   "verification": {
     "platform": "darwin",
@@ -348,6 +348,18 @@
       "nodeVersion": "26.12.1",
       "contractSource": "Local DSH 0.2.1-rc.2 ASAR: cordis 4.0.5 Inject.resolve and loader 1.0.6 Node import.",
       "limits": "Custom export conditions and unsupported URL targets abstain; source inspection is not new host or business acceptance."
+    },
+    "staticInputBoundaries20261024": {
+      "scope": "0.1.7-dev local source; no version bump, remote CI or release.",
+      "regressions": "11 added cases: FIFO/link inputs, byte/entry/time budgets, patch accounting, descriptor cleanup, disappearing paths and CLI timeout/baseline recovery.",
+      "defaultSuite": {
+        "tests": 904,
+        "passed": 898,
+        "skipped": 6,
+        "failed": 0
+      },
+      "checks": "Full suite includes fresh packed installation; format, notices, generated copies and document checks passed.",
+      "limits": "CLI worker 10s, V8 512+64MiB; synchronous run needs caller supervision. No hard realtime, RSS cap or atomic filesystem snapshot."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."

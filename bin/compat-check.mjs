@@ -41,6 +41,8 @@ import {probeProfile} from '../lib/probe-runner.mjs';
 import { TOOL_VERSION, versionLine } from '../lib/version.mjs';
 import {createFailure,exitCodeForSummary} from '../lib/contracts.mjs';
 import { runUpgradePreview, renderUpgradePreview, createUpgradeFailure } from '../lib/upgrade-preview.mjs';
+import {runWorkerTask} from '../lib/worker-analysis.mjs';
+import {readStaticFile} from '../lib/static-input.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -119,7 +121,7 @@ function parseArgs(argv) {
 
 function readJSON(file, what) {
   try {
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
+    return JSON.parse(readStaticFile(file,8*1024*1024).toString('utf8'));
   } catch (error) {
     throw new Error(`读不到${what} ${file}: ${error.message}`);
   }
@@ -250,7 +252,9 @@ export function run(options = {}) {
       const file = options.baselineFile || baselineFileFor(nm, options.profile,result.verdict.observation.mode);
       result.inputs.baselineFile = file;
       const snap=snapshotForBaseline(result.verdict,options.dshVersion||null,baselineIdentity(nm,result.verdict.observation.mode,rules,catalog));
-      result.baseline=baselineTransaction(file,snap,{advance:!options.dryRun&&extracted.report.scanComplete});
+      const advance=!options.dryRun&&extracted.report.scanComplete;
+      if(options._deferBaseline)result._pendingBaseline={file,snapshot:snap,advance};
+      else result.baseline=baselineTransaction(file,snap,{advance});
     }
   } catch (error) {
     result.error = error && error.message ? error.message : String(error);
@@ -258,14 +262,25 @@ export function run(options = {}) {
   return result;
 }
 
-export async function runAsync(options={}) {
-  if(!options.probeBoot || options.probe)return run(options);
-  const before=run({...options,probeBoot:false,baseline:false,_ignoreAutoProbe:true});
+export async function runAsync(options={},supervision={}) {
+  const analyze=async opts=>{
+    try{
+      const {timeoutMs=10000,signal}=supervision;
+      if(!Number.isSafeInteger(timeoutMs)||timeoutMs<=0||timeoutMs>10000)throw new Error('CLI worker时间预算无效');
+      const result=await runWorkerTask(new URL('./compat-check-worker.mjs',import.meta.url),{options:opts},{timeoutMs,signal});
+      const pending=result._pendingBaseline;delete result._pendingBaseline;
+      if(signal?.aborted)throw new Error('CLI分析已取消');
+      if(!result.error&&pending)result.baseline=baselineTransaction(pending.file,pending.snapshot,{advance:pending.advance});
+      return result;
+    }catch(error){return {extract:null,verdict:null,error:error.message,inputs:{},baseline:null};}
+  };
+  if(!options.probeBoot || options.probe)return analyze(options);
+  const before=await analyze({...options,probeBoot:false,baseline:false,_ignoreAutoProbe:true});
   if(before.error)return before;
   const boot=await probeProfile(before.inputs.nodeModules,{timeoutSec:options.probeTimeout||40,keepDir:options.probeKeepDir,services:before.extract.report.services,manifests:before.extract.report.manifests});
   const info={notes:boot.notes,error:boot.error,tempProfile:boot.tempProfile,tempProfileRemoved:boot.tempProfileRemoved,...(boot.diagnostics?.length?{diagnostics:boot.diagnostics}:{}),...(boot.workDir?{workDir:boot.workDir}:{})};
   if(boot.error)return {...before,error:boot.error,inputs:{...before.inputs,probeBoot:info}};
-  return run({...options,dshVersion:options.dshVersion||boot.surface?.dshVersion||null,probeBoot:false,_hostSurface:boot.surface,_ignoreAutoProbe:true,_probeBootInfo:info});
+  return analyze({...options,dshVersion:options.dshVersion||boot.surface?.dshVersion||null,probeBoot:false,_hostSurface:boot.surface,_ignoreAutoProbe:true,_probeBootInfo:info});
 }
 
 /* ── 给人看的渲染 ──────────────────────────────────────────────────── */

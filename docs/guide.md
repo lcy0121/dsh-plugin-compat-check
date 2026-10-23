@@ -76,6 +76,10 @@ node --test test/functional-health.test.mjs test/dependency-graph.test.mjs test/
 
 ## 日常检查与源码交付
 
+普通CLI的分析阶段由worker监督，默认10秒、512MiB老生代及64MiB新生代；退出前回收worker，再由父线程比较/提交基线。超时、取消或计算错误不写基线，不完整提取不推进；`--no-baseline`仍禁读写。`runAsync`提供同样监督，同步库`run`须由调用方监督；显式probe安装/启动及其前后分析分开计时，不是整个探测流程只有10秒。
+
+清单单文件64KiB、整体清单50000目录项/32MiB/5秒；每包源码2000文件、10000目录及目录项、单文件2MiB/总32MiB/5秒，patch共用文件/字节预算。目录逐项枚举并检查预算，文件用非阻塞描述符检查普通类型、大小及读取前后身份；拒绝清单叶子链接，包根pnpm链接仍可解析，patch/源码链接须留在包内。超限、不可读或变化保留诊断；清单枚举无法完成则报工具错误。规则、目录、probe及已有基线JSON最多8MiB，拒绝非普通文件和叶子链接；损坏基线保留中性说明。预算只可降低，不承诺硬实时、RSS、文件系统原子快照或OS沙箱。
+
 仓库CLI快速开始见[README](../README.md)，完整参数运行`node bin/compat-check.mjs --help`；npm插件的完整tgz构建见[plugin README](../plugin/README.md#从源码构建安装)。安装依赖时使用冻结lock且禁用lifecycle脚本：
 
 ```sh
