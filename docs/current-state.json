@@ -307,13 +307,33 @@
         "dependencyAudit": "workspace-lock and plugin-runtime clean"
       },
       "source": "https://github.com/lcy0121/dsh-plugin-compat-check/tree/v0.1.6",
-      "scope": "Acceptance is limited to the exact archive and recorded scenarios. Public distribution and tagged-commit CI are verified separately during release; minimum host declaration is not future-version or business certification.",
+      "scope": "Exact accepted archive and recorded scenarios only. Public distribution and tagged-commit CI verified below; minimum host declaration is not future-version or business certification.",
       "repositoryDriver": {
         "initialCi": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39952635359",
         "failure": "Pinned market favorite recovery: POST and disk passed, first UI read did not. The old driver admitted a card without waiting for the independent installed-state request; a delayed-response Chrome case reproduces this readiness gap.",
         "regression": "Delayed real HTTP response in Chrome rejects old card-only admission; new response/render wait passes without requiring healthy values or controls, and rejects HTTP503.",
         "localRealCohort": "All ten note/favorite healthy, transport fault, missing-control and recovery outcomes reproduced; three focused live tests passed.",
-        "scope": "Repository acceptance driver only; npm archive bytes remain unchanged. Remote follow-up required."
+        "scope": "Repository acceptance driver only; npm archive bytes unchanged. Final tagged-commit CI passed, including all ten fixed market action/fault/recovery outcomes."
+      },
+      "publicVerification": {
+        "verifiedAt": "2026-10-23T12:51:50.331549+00:00",
+        "sourceCommit": "a72f8d39ec5615956733254749a59e4c69f48191",
+        "ci": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39954441848",
+        "ciPassed": 5,
+        "fixedBatch": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39954505854",
+        "github": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.1.6",
+        "npm": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.1.6",
+        "npmLatest": "0.1.6",
+        "npmArchiveMatchesAccepted": true,
+        "githubArchiveMatchesAccepted": true,
+        "publicInstall": {
+          "status": "checked",
+          "toolVersion": "0.1.6",
+          "exitCode": 0,
+          "tempProfileRemoved": true
+        },
+        "publicMetadataProblems": 0,
+        "publicMetadataSkipped": 0
       }
     }
   },
