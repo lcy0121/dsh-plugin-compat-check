@@ -47,6 +47,8 @@ node --test test/dependency-security.test.mjs
 
 [Test](../.github/workflows/test.yml)和[静态批量](../.github/workflows/static-batch.yml)固定Actions的完整40位commit，checkout关闭`persist-credentials`，最小权限、job超时、制品7天；审计在独立Node24 job执行一次，不重复到Node矩阵。静态批量保持手动触发。所有job显式禁用npm缓存恢复，直接按锁文件执行npm ci，避免可选缓存服务阻塞环境准备。Node矩阵独立报告结果；发布前检查通过`DSC_TEST_TAP`保留完整TAP及stderr，失败时从对应制品定位末尾真实错误，不能只看截断摘要。更新Action pin时核对官方release、commit和该commit的`action.yml`运行时及实际inputs；Action运行时与被测Node版本分开。当前使用GitHub托管Ubuntu；其它runner另验收，不能靠版本注释认证。npm语义见[官方audit文档](https://docs.npmjs.com/cli/v11/commands/npm-audit/)。
 
+市场业务回归重载后须等待本次导航的`GET /dsh-market/installed`完成并让界面提交渲染；卡片先出现不代表备注/收藏已载入。该就绪条件不依赖业务值或控件存在，503、值不符和控件缺失仍保留失败。
+
 升级面板实机验收须同时等到最终loader扫描与F2启动自检完成，设置页加载后还须显式“重新检查”并等待该报告渲染，再提交预检；启动扫描或首次客户端连接触发服务懒初始化时，新报告会合法撤销旧比较。失败制品保留有界的报告时间和内容摘要以区分真实失效与无内容变化的重读，不保留私有报告正文或鉴权信息。
 
 发布验收可设置`DSC_RC2_ARTIFACT=<确切tgz绝对路径>`、`DSC_REQUIRE_RC2_UI=1`后运行`node tools/rc2-live.mjs`，直接验收选定归档，不重新打包源码。未设置制品路径时仍按源码打包；最终发布必须使用已验收的同一文件。

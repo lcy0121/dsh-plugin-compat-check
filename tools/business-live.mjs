@@ -22,7 +22,7 @@ import { featurePredictions, scoreBusiness } from "./business-metrics.mjs";
 import {
   marketCases,
   marketPhases,
-  marketNavigationStep,
+  openMarketDocument,
 } from "./business-market.mjs";
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourceHashes = {
@@ -668,11 +668,7 @@ export async function runBusiness({
     const click = (t) =>
       clickElement(textButton(t), "Missing business control: " + t);
     async function openMarket(tab) {
-      await navigate(url);
-      await poll(
-        () => evalx(`(${marketNavigationStep})(${JSON.stringify(tab)})`),
-        "Market target card did not become ready",
-      );
+      await openMarketDocument({ chrome, navigate, evalx, poll }, url, tab);
     }
     async function drain() {
       for (; eventCursor < chrome.events.length; eventCursor++) {

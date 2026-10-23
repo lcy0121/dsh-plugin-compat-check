@@ -57,6 +57,49 @@ export function marketNavigationStep(tab) {
     account.click();
   return false;
 }
+/** A card can mount before the independent notes/favorites read and React commit. */
+export async function openMarketDocument(driver, url, tab) {
+  const { chrome, navigate, evalx, poll } = driver;
+  let cursor = chrome.events.length;
+  const reads = new Map();
+  await navigate(url);
+  await poll(
+    () => evalx(`(${marketNavigationStep})(${JSON.stringify(tab)})`),
+    "Market target card did not become ready",
+  );
+  await poll(() => {
+    for (; cursor < chrome.events.length; cursor++) {
+      const event = chrome.events[cursor],
+        p = event.params;
+      if (event.method === "Network.requestWillBeSent") {
+        if (
+          p.request.method === "GET" &&
+          new URL(p.request.url).pathname === "/dsh-market/installed"
+        )
+          reads.set(p.requestId, {});
+      }
+      const read = reads.get(p.requestId);
+      if (!read) continue;
+      if (event.method === "Network.responseReceived")
+        read.status = p.response.status;
+      if (event.method === "Network.loadingFinished") read.finished = true;
+      if (event.method === "Network.loadingFailed") read.failed = true;
+    }
+    for (const read of reads.values()) {
+      if (read.failed || (read.status !== undefined && read.status !== 200))
+        throw Error(
+          `Market installed-state read failed: ${read.status ?? "transport"}`,
+        );
+    }
+    return [...reads.values()].some(
+      (read) => read.status === 200 && read.finished,
+    );
+  }, "Market installed-state request did not complete");
+  // Yield through rendering without waiting for a desired value or inventing controls.
+  await evalx(
+    "new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))",
+  );
+}
 export function marketControl(feature, action = "observe", desired) {
   const visible = (e) =>
     e &&

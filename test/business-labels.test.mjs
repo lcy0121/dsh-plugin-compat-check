@@ -1137,6 +1137,123 @@ describe(
         await new Promise((r) => server.close(r));
       }
     });
+    test("market navigation waits for the new installed-state response without requiring a healthy business value", async () => {
+      const m = await import("../tools/business-market.mjs");
+      const helpers = await import("../tools/browser-session.mjs");
+      const { launchChromePipe } = await import("../lib/debugger.mjs");
+      const { createServer } = await import("node:http");
+      const fs = await import("node:fs");
+      let pending;
+      const server = createServer((req, res) => {
+        if (req.url === "/dsh-market/installed") {
+          pending = res;
+          return;
+        }
+        res.setHeader("content-type", "text/html; charset=utf-8");
+        res.end(`<div data-dsh-market-root data-dsh-market-tab="discover"><div class="x_card"><a title="dsh-plugin-compat-check">target</a><button aria-label="加入收藏">favorite</button></div></div><script>
+          fetch('/dsh-market/installed').then(r=>r.json()).then(v=>requestAnimationFrame(()=>{
+            const button=document.querySelector('button');
+            if(v.mode==='saved') button.setAttribute('aria-label','取消收藏');
+            if(v.mode==='missing-control') button.remove();
+          }));
+        </script>`);
+      });
+      await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+      const browser = await launchChromePipe(
+        process.env.DSC_CHROME ||
+          [
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            "/usr/bin/google-chrome",
+            "/usr/bin/chromium",
+          ].find((p) => fs.existsSync(p)),
+      );
+      try {
+        await browser.send("Page.enable");
+        await browser.send("Page.setLifecycleEventsEnabled", { enabled: true });
+        await browser.send("Network.enable");
+        const evalx = async (expression) => {
+          const r = await browser.send("Runtime.evaluate", {
+            expression,
+            returnByValue: true,
+            awaitPromise: true,
+          });
+          assert.equal(r.exceptionDetails, undefined);
+          return r.result?.value;
+        };
+        const poll = async (fn, message) => {
+          const until = Date.now() + 5000;
+          do {
+            if (await fn()) return true;
+            await new Promise((resolve) => setTimeout(resolve, 20));
+          } while (Date.now() < until);
+          throw Error(message);
+        };
+        assert.equal(typeof m.openMarketDocument, "function");
+        for (const mode of [
+          "saved",
+          "missing-value",
+          "missing-control",
+          "request-failed",
+        ]) {
+          pending = null;
+          let settled = false;
+          const opening = m.openMarketDocument(
+            {
+              chrome: browser,
+              evalx,
+              poll,
+              navigate: (url) =>
+                helpers.navigateOwnedDocument(browser, url, poll),
+            },
+            `http://127.0.0.1:${server.address().port}/${mode}`,
+            "discover",
+          );
+          opening.then(
+            () => {
+              settled = true;
+            },
+            () => {
+              settled = true;
+            },
+          );
+          await poll(
+            async () =>
+              pending &&
+              (await evalx(`(${m.marketNavigationStep})('discover')`)),
+            "Card/state request did not start",
+          );
+          assert.equal(
+            await evalx(`(${m.marketControl})('market.favorite','value',true)`),
+            false,
+          );
+          assert.equal(
+            settled,
+            false,
+            "Card presence must not admit an unfinished state read or an old document's receipt",
+          );
+          pending.writeHead(mode === "request-failed" ? 503 : 200, {
+            "content-type": "application/json",
+          });
+          pending.end(JSON.stringify({ mode }));
+          if (mode === "request-failed")
+            await assert.rejects(opening, /installed-state.*503/i);
+          else {
+            await opening;
+            assert.equal(
+              await evalx(
+                `(${m.marketControl})('market.favorite','value',true)`,
+              ),
+              mode === "saved",
+            );
+          }
+        }
+      } finally {
+        pending?.end();
+        await browser.close();
+        server.closeAllConnections();
+        await new Promise((resolve) => server.close(resolve));
+      }
+    });
     test("market navigation accepts a loaded target card without controls and never borrows another card's action", async () => {
       const m = await import("../tools/business-market.mjs").catch(() => ({}));
       assert.equal(typeof m.marketNavigationStep, "function");

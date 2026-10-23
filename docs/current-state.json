@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-23T12:18:52.016Z",
+  "recordedAt": "2026-10-23T12:34:58.487Z",
   "testFiles": 64,
   "tests": 882,
   "repositoryFiles": {
@@ -186,72 +186,9 @@
       "scope": "Consolidate cohesive UI delivery and repeated fixture writes; retain distinct author/engineering/business tool contracts and behavior regressions."
     },
     "historicalLocalAcceptance20261022": {
-      "recordedAt": "2026-10-22T17:29:23.578068+00:00",
-      "commit": "10eaeba",
-      "nodeVersion": "26.12.1",
-      "dshVersion": "0.2.1-rc.2",
-      "candidateSha256": "843e050260158bc9c94b72f0393126fbc6a0b67fced8658b2fcff6d7d5945b9e",
-      "healthFixtureSha256": "8cc1f5b4aaf233c53996c9cb74b438eef3c46aa1d868fb4d80162f1aed19ca1b",
-      "healthPhases": [
-        {
-          "phase": "normal",
-          "status": "tested-pass",
-          "resultSha256": "3ae2cd323070bfded95fb80cd689c6215650fb73167a1c958a87735a64d1707b",
-          "cleanup": {
-            "stopped": true,
-            "removed": true
-          }
-        },
-        {
-          "phase": "http503",
-          "status": "tested-failed",
-          "resultSha256": "6259c565939b7d0ff957ed45d4c9f4579aa54818b7896b137a0b9bb8ac42e2b8",
-          "cleanup": {
-            "stopped": true,
-            "removed": true
-          }
-        },
-        {
-          "phase": "missing-control",
-          "status": "tested-failed",
-          "resultSha256": "7ce4d4f8e383afd5ca96d2b6e90e7898dbff4652a3811cf2e2479e28acbd9299",
-          "cleanup": {
-            "stopped": true,
-            "removed": true
-          }
-        },
-        {
-          "phase": "recovered",
-          "status": "tested-pass",
-          "resultSha256": "64f13ec5d107d8f3d38a7231638d3c3090a7a7fc0e805292a2e26accfef24d35",
-          "cleanup": {
-            "stopped": true,
-            "removed": true
-          }
-        }
-      ],
-      "candidateUI": {
-        "realBrowser": true,
-        "dependencyView": true,
-        "manualReviewPersisted": true,
-        "ordinaryReportUnchanged": true,
-        "baselineUnchanged": true,
-        "healthImportAvailable": true,
-        "importedHealth": {
-          "artifact": {
-            "name": "dsh-plugin-health-acceptance-fixture",
-            "version": "1.0.0",
-            "sha256": "8cc1f5b4aaf233c53996c9cb74b438eef3c46aa1d868fb4d80162f1aed19ca1b"
-          },
-          "manifestSha256": "265ae3d2575d6ed6ff7f4d2e527c5d31cb3e6d3ad420dcd1f466ba42e7934e34",
-          "historicalOnly": true,
-          "ordinaryReportUnchanged": true
-        }
-      },
-      "cleanup": {
-        "privateRootRemoved": true
-      },
-      "scope": "Historical local macOS arm64 candidate acceptance; no claim for later source, other platforms or public npm contents."
+      "source": "https://github.com/lcy0121/dsh-plugin-compat-check/blob/c82b1e680e0f12a424f946c8bd153fad602d48ba/docs/current-state.json",
+      "key": "verification.historicalLocalAcceptance20261022",
+      "scope": "Historical local macOS candidate and health fault/recovery receipts retained in this immutable Git snapshot; not current certification."
     },
     "upstreamStatus20261023": {
       "checkedAt": "2026-10-23T07:52:02.076Z",
@@ -370,7 +307,14 @@
         "dependencyAudit": "workspace-lock and plugin-runtime clean"
       },
       "source": "https://github.com/lcy0121/dsh-plugin-compat-check/tree/v0.1.6",
-      "scope": "Acceptance is limited to the exact archive and recorded scenarios. Public distribution and tagged-commit CI are verified separately during release; minimum host declaration is not future-version or business certification."
+      "scope": "Acceptance is limited to the exact archive and recorded scenarios. Public distribution and tagged-commit CI are verified separately during release; minimum host declaration is not future-version or business certification.",
+      "repositoryDriver": {
+        "initialCi": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39952635359",
+        "failure": "Pinned market favorite recovery: POST and disk passed, first UI read did not. The old driver admitted a card without waiting for the independent installed-state request; a delayed-response Chrome case reproduces this readiness gap.",
+        "regression": "Delayed real HTTP response in Chrome rejects old card-only admission; new response/render wait passes without requiring healthy values or controls, and rejects HTTP503.",
+        "localRealCohort": "All ten note/favorite healthy, transport fault, missing-control and recovery outcomes reproduced; three focused live tests passed.",
+        "scope": "Repository acceptance driver only; npm archive bytes remain unchanged. Remote follow-up required."
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."
