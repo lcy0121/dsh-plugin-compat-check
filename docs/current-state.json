@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-24T04:20:32.522Z",
+  "recordedAt": "2026-10-24T08:47:47.287Z",
   "testFiles": 71,
   "tests": 1081,
   "repositoryFiles": {
@@ -22,189 +22,16 @@
       ],
       "scope": "Reviewed catalogue bytes and version-specific integration only; not business-health certification."
     },
-    "upstreamAcceptance20261021": {
-      "checkedAt": "2026-10-21T07:11:03.384Z",
-      "scope": "Historical status only; recheck public state before action. No new upstream queries in this change.",
-      "pending": [
-        {
-          "url": "https://github.com/dsh-market/dsh-market/issues/932",
-          "remaining": "On both lookups failing and no explicit version, bare-name install still lacked a warning in the checked handler."
-        },
-        {
-          "url": "https://github.com/imsai-sh/dsh-1024store/issues/22",
-          "remaining": "Await reply and npm v2 method, then verify a fresh real install."
-        },
-        {
-          "url": "https://github.com/0xsline/awesome-deepseek-harness/pull/717",
-          "remaining": "Await adoption."
-        }
-      ]
-    },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
       "Optional health executor is not an OS sandbox and imported results are historical.",
-      "Crashed manual-review writers may require confirmed-orphan lock cleanup.",
+      "Crashed state writers require explicit token-bound recovery of proven orphan locks; unsafe or legacy locks fail closed.",
       "Release evidence applies only to its exact archive, commit and checked DSH versions; a minimum host declaration does not certify future hosts."
     ],
     "history": {
       "commit": "10eaeba",
       "path": "docs/current-state.json",
       "scope": "Detailed past test, release, upstream and live-acceptance records are retained in Git history; historical evidence is not current certification."
-    },
-    "authorCi20261023": {
-      "historyCommit": "93a0ffb",
-      "historyPath": "docs/current-state.json",
-      "key": "verification.authorCi20261023",
-      "scope": "Historical author CI artifact/output validation retained in local Git; not current certification."
-    },
-    "ciFailureReview20261023": {
-      "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39739339996",
-      "commit": "ad826965571c997557f9e25a5808d13afca6732a",
-      "runCreatedAt": "2026-10-22T07:16:18Z",
-      "dependencySecurity": {
-        "job": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39739339996/job/119692499896",
-        "workspaceLock": "clean",
-        "pluginRuntime": "error: npm-registry-error",
-        "interpretation": "Audit did not complete; no advisory was reported in these logs. Underlying network/service cause was not retained in fixed safe diagnostics."
-      },
-      "linuxRc2": {
-        "job": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39739339996/job/119692878737",
-        "failure": "Actual upgrade result did not render",
-        "step": "Real private Linux DSH, loader labels and artifact responsiveness",
-        "scope": "Upgrade result DOM wait exceeded 40000ms after declaration/HTTP/preceding panel checks passed. Logs lack the UI/request detail needed to distinguish rendering, request or scheduling causes; not proved fixed."
-      },
-      "currentLocalAudit": {
-        "workspaceLock": "clean",
-        "pluginRuntime": "clean"
-      },
-      "remoteStatus": "This historical run failed. Its local macOS follow-up does not certify Linux or later remote commits.",
-      "currentLocalCandidate": {
-        "platform": "macOS arm64",
-        "artifactSha256": "16bb818ae27c3d37af9af10d0b2621447a3005272105c027d2a63a217c781ed3",
-        "ui": {
-          "available": true,
-          "navigation": "More > Settings > Built-in plugins > Compatibility",
-          "tabCount": 1,
-          "reenabled": true,
-          "httpRestored": true,
-          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
-        },
-        "upgradePreview": {
-          "realBrowser": true,
-          "positiveNewRisk": true,
-          "sourceIdentitiesVisible": true,
-          "staticLimitationsVisible": true,
-          "unknownTargetUncertified": true,
-          "ordinaryRowsAndFiltersUnchanged": true
-        },
-        "workflowPanels": {
-          "realBrowser": true,
-          "dependencyView": true,
-          "manualReviewPersisted": true,
-          "ordinaryReportUnchanged": true,
-          "baselineUnchanged": true,
-          "healthImportAvailable": true
-        },
-        "cleanup": {
-          "privateRootRemoved": true
-        },
-        "scope": "Post-consolidation installed tgz in owned real DSH/Chrome; does not reproduce or certify Linux runner behavior."
-      }
-    },
-    "sourceConsolidation20261023": {
-      "historyCommit": "7cde4d3",
-      "historyPath": "docs/current-state.json",
-      "key": "verification.sourceConsolidation20261023",
-      "scope": "Historical consolidation evidence retained in local Git history; not rerun or current certification."
-    },
-    "historicalLocalAcceptance20261022": {
-      "source": "https://github.com/lcy0121/dsh-plugin-compat-check/blob/c82b1e680e0f12a424f946c8bd153fad602d48ba/docs/current-state.json",
-      "key": "verification.historicalLocalAcceptance20261022",
-      "scope": "Historical local macOS candidate and health fault/recovery receipts retained in this immutable Git snapshot; not current certification."
-    },
-    "upstreamStatus20261023": {
-      "checkedAt": "2026-10-23T07:52:02.076Z",
-      "scope": "GitHub issue and pull-request status only; no new source-handler or real-install acceptance.",
-      "market932": {
-        "state": "closed",
-        "updatedAt": "2026-10-19T16:56:25Z",
-        "remaining": "Maintainer confirmed 1.66.43 adds full-packument fallback; warning or safe failure when both lookups fail remains a separate change."
-      },
-      "store22": {
-        "state": "open",
-        "updatedAt": "2026-10-19T06:14:20Z",
-        "remaining": "Await a usable npm installation method, then verify a fresh install."
-      },
-      "awesome717": {
-        "state": "open",
-        "merged": false,
-        "updatedAt": "2026-10-17T12:54:55Z"
-      }
-    },
-    "release015": {
-      "tag": "v0.1.5",
-      "artifact": {
-        "file": "dsh-plugin-compat-check-0.1.5.tgz",
-        "sha256": "1a133da4f33afafb37dc560d9eeb3a64c283420c7c85fd73532a28de850ab42d",
-        "integrity": "sha512-MB7Q9t4JHmGFUatGiIL7BTsdVbZvKzvjJ5yxM03MSo+PuSTf2mpZgOJW+PAIRJU3GkpdSD5cELVsTfRtV30HaQ==",
-        "files": 62,
-        "bytes": 249595
-      },
-      "localAcceptance": {
-        "recordedAt": "2026-10-23T08:00:19.057Z",
-        "platform": "macOS arm64",
-        "nodeVersion": "26.12.1",
-        "dshVersion": "0.2.1-rc.2",
-        "defaultSuite": {
-          "tests": 882,
-          "passed": 876,
-          "skipped": 6,
-          "failed": 0
-        },
-        "originFence": {
-          "sameOriginStatus": 200,
-          "crossPortStatus": 403
-        },
-        "ui": {
-          "rendered": true,
-          "tabCount": 1,
-          "disableReenable": true,
-          "upgradePreview": true,
-          "manualReviewPersisted": true,
-          "dependencyView": true,
-          "historicalHealthImport": true
-        },
-        "cleanup": {
-          "privateRootRemoved": true
-        },
-        "dependencyAudit": {
-          "workspaceLock": "clean",
-          "pluginRuntime": "clean"
-        }
-      },
-      "source": "https://github.com/lcy0121/dsh-plugin-compat-check/tree/v0.1.5",
-      "distribution": {
-        "github": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.1.5",
-        "npm": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.1.5"
-      },
-      "scope": "Local acceptance uses these exact archive bytes. Tagged-commit CI and public archive identity are verified during release; Windows, future hosts and full plugin business behavior are not certified.",
-      "publicVerification": {
-        "verifiedAt": "2026-10-23T12:08:42.748Z",
-        "sourceCommit": "d798e8b3de3a6c3199ca31a266c1f991462566d2",
-        "ci": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39923064732",
-        "ciPassed": 5,
-        "fixedBatch": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39923342555",
-        "npmLatest": "0.1.5",
-        "npmArchiveMatchesAccepted": true,
-        "githubArchiveMatchesAccepted": true,
-        "publicInstall": {
-          "status": "checked",
-          "toolVersion": "0.1.5",
-          "exitCode": 0,
-          "tempProfileRemoved": true
-        },
-        "publicMetadataProblems": 0
-      }
     },
     "release016": {
       "tag": "v0.1.6",
@@ -268,62 +95,8 @@
         "publicMetadataSkipped": 0
       }
     },
-    "staticAnalysisFix20261024": {
-      "historyCommit": "3e7b2b5",
-      "historyPath": "docs/current-state.json",
-      "key": "verification.staticAnalysisFix20261024",
-      "scope": "Historical helper/export/inject regressions and 893-test result in local Git; not current certification."
-    },
-    "staticInputBoundaries20261024": {
-      "scope": "0.1.7-dev local source; no version bump, remote CI or release.",
-      "regressions": "11 added cases: FIFO/link inputs, byte/entry/time budgets, patch accounting, descriptor cleanup, disappearing paths and CLI timeout/baseline recovery.",
-      "defaultSuite": {
-        "tests": 904,
-        "passed": 898,
-        "skipped": 6,
-        "failed": 0
-      },
-      "checks": "Full suite includes fresh packed installation; format, notices, generated copies and document checks passed.",
-      "limits": "CLI worker 10s, V8 512+64MiB; synchronous run needs caller supervision. No hard realtime, RSS cap or atomic filesystem snapshot."
-    },
-    "localBoundaries20261024": {
-      "scope": "0.1.7-dev local source only; no release, push or remote CI.",
-      "defaultSuite": {
-        "tests": 920,
-        "passed": 913,
-        "skipped": 7,
-        "failed": 0
-      },
-      "browser": "HTTP cases 3/3: owned Chrome cross-port image omitted Origin; old entry wrote baseline, fixed entry 403/no baseline, same-origin fetch recovers.",
-      "environment": "Private env/config verified in actual probe/installer children, failure cleanup and retry; copied profile config remains readable.",
-      "locks": "Tool/path-bound holder metadata; explicit token + ESRCH-only orphan recovery. Crash, contention, replacement and live/reused PID refusal verified.",
-      "limits": "Repository-only recovery CLI. Legacy/unknown/guard locks fail closed; Windows unverified. No OS sandbox or native-local authentication guarantee."
-    },
-    "maintenanceAuthorEntry20261024": {
-      "historyCommit": "80a131a",
-      "historyPath": "docs/current-state.json",
-      "key": "verification.maintenanceAuthorEntry20261024",
-      "scope": "Historical maintenance/author onboarding and 24-row syntax matrix; not current verification."
-    },
-    "evidenceResolutionState20261024": {
-      "historyCommit": "997f4c7",
-      "historyPath": "docs/current-state.json",
-      "key": "verification.evidenceResolutionState20261024",
-      "scope": "Historical provider/entry/baseline regressions and 1005-test result; not current certification."
-    },
-    "inputCacheBoundaries20261024": {
-      "scope": "Local 0.1.7-dev source; no new host/business/Windows certification, push or release.",
-      "defaultSuite": {
-        "tests": 1037,
-        "passed": 1030,
-        "skipped": 7,
-        "failed": 0
-      },
-      "regressions": "32 added tests: bounded walks/reads, target eviction, ordinary worker admission, late callbacks and startup errors. Review findings closed.",
-      "limits": "16 targets/10min idle; ordinary report jobs 2 active/32 queued per kernel instance. Upgrade cleanup stays independently supervised."
-    },
     "authorModuleBoundaries20261024": {
-      "scope": "Local 0.1.7-dev source; certifications unchanged. No push, release or remote workflow.",
+      "scope": "Historical local 0.1.7-dev verification before documentation consolidation; certifications unchanged. No push, release or remote workflow at that time.",
       "defaultSuite": {
         "tests": 1081,
         "passed": 1074,
@@ -338,6 +111,63 @@
         "scope": "Static fixtures and synthetic observations; no target execution/business acceptance."
       },
       "regressions": "Invalid-policy/failed-workflow JSON-HTML replay; aggregate/display overflow, 8MiB evidence/2MiB cells. Immutable relative paths; closure/class/static-block/TS shadow regressions. Review findings closed."
+    },
+    "archivedVerification": {
+      "commit": "08b90e4",
+      "path": "docs/current-state.json",
+      "keys": [
+        "upstreamAcceptance20261021",
+        "authorCi20261023",
+        "ciFailureReview20261023",
+        "sourceConsolidation20261023",
+        "historicalLocalAcceptance20261022",
+        "upstreamStatus20261023",
+        "release015",
+        "staticAnalysisFix20261024",
+        "staticInputBoundaries20261024",
+        "localBoundaries20261024",
+        "maintenanceAuthorEntry20261024",
+        "evidenceResolutionState20261024",
+        "inputCacheBoundaries20261024"
+      ],
+      "scope": "Dated release, source-regression and acceptance records; historical results do not certify current source. Earlier history pointers are retained in that snapshot."
+    },
+    "upstreamStatus20261024": {
+      "checkedAt": "2026-10-24T08:46:21.647725+00:00",
+      "scope": "GitHub issue/PR states refreshed only; maintainer notes remain historical. No source-handler, npm-method or real-install acceptance.",
+      "market932": {
+        "state": "closed",
+        "updatedAt": "2026-10-19T16:56:25Z",
+        "remaining": "Maintainer confirmed 1.66.43 adds full-packument fallback; warning or safe failure when both lookups fail remains a separate change."
+      },
+      "store22": {
+        "state": "open",
+        "updatedAt": "2026-10-19T06:14:20Z",
+        "remaining": "Await a usable npm installation method, then verify a fresh install."
+      },
+      "awesome717": {
+        "state": "open",
+        "merged": false,
+        "updatedAt": "2026-10-17T12:54:55Z"
+      }
+    },
+    "documentationConsolidation20261024": {
+      "scope": "0.1.7-dev documentation and generated skill copy; no npm release or new host/business/platform certification.",
+      "defaultSuite": {
+        "tests": 1081,
+        "passed": 1074,
+        "skipped": 7,
+        "failed": 0
+      },
+      "checks": "Prepublish check and npm run check passed; 38/38 syntax cases and two registered exact catalogues. Whole-repository Markdown links/generated notices checked.",
+      "publicMetadata": {
+        "observedAt": "2026-10-24T08:44:36.435Z",
+        "npmLatest": "0.1.6",
+        "errors": 0,
+        "skippedSources": 0,
+        "notice": "Local plugin README differs from immutable published npm 0.1.6; source documentation changes take effect in a future npm release."
+      },
+      "upstream": "States refreshed in upstreamStatus20261024 only; no new handler/install acceptance."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."

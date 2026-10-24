@@ -29,7 +29,7 @@ JSON 使用独立的 `schemaVersion=1 / kind=plugin-compat-check/upgrade-preview
 
 普通报告的`dependencyGraph`只解释依赖和潜在传播：保留host/client/未知端、必需/可选/子作用域、候选提供者、loader禁用/未知状态及覆盖预算。提供声明不是实际提供证明，环或路径不是实测故障；不跨端补造提供者，不因未找到候选就说宿主缺服务，也不据此自动装包。
 
-HTTP/tool envelope的`reviews`是独立人工记录，四种状态为pending/reviewed/false-positive/fixed。已复核、误报或已修复不消除内核发现、不隐藏新风险、不改变退出码/基线，也不授予compatibility豁免。记录绑定报告发布时的源码身份、目标/观察路径/模式、插件/DSH精确版本、工具/规则/目录及finding证据；变化后的needs-review必须重新核实，不能沿用旧误报/修复。只能按用户明确处置意图保存状态与依据，不因读到发现就自动标记已处理。坏文件/超限或busy须转述，不能覆盖或清空记录；进程崩溃可能留下.lock/.reviews-*.tmp，刷新不自动回收，确认没有任何保存任务后才可清理已核实孤立的lock/tmp，保留JSON和基线。
+HTTP/tool envelope的`reviews`是独立人工记录，四种状态为pending/reviewed/false-positive/fixed。已复核、误报或已修复不消除内核发现、不隐藏新风险、不改变退出码/基线，也不授予compatibility豁免。记录绑定报告发布时的源码身份、目标/观察路径/模式、插件/DSH精确版本、工具/规则/目录及finding证据；变化后的needs-review必须重新核实，不能沿用旧误报/修复。只能按用户明确处置意图保存状态与依据，不因读到发现就自动标记已处理。坏文件/超限或busy须转述，不能覆盖或清空记录。基线与人工记录的崩溃孤锁须按仓库`docs/guide.md#本地状态锁恢复`操作：运行`node <repo>/bin/recover-lock.mjs <确切.lock路径>`检查，再用本次token显式确认。只有同用户/主机且系统证明持有PID不存在时才恢复；不按年龄、PID复用或“没有保存任务”猜测，不递归清理JSON、临时文件或恢复保护锁。旧/损坏基线保留原件，不比较或自动覆盖。
 
 可选功能健康执行器仅在仓库`tools/functional-health.mjs`；默认review只审阅声明。普通兼容检查、健康记录导入及作者提供清单均不构成执行授权；不得自动添加执行开关。仅在用户已明确授权所选制品的安装、宿主/插件执行及HTTP/DOM测量后运行，必要时使用Chrome。声明与本地USTAR制品须校验SHA-256、包名/精确版本及DSH精确版本，预算为32项、请求/导航3秒、HTTP响应64KiB、整轮180秒；不接受作者脚本或跳过身份检查。私有profile不是OS沙箱，安装可能联网，不能借用用户账户/模型配置。
 
@@ -91,7 +91,7 @@ report_status=$?
 
 ## 输出怎么读
 
-下面是当前仓库源码对固定合成夹具的可复现输出，运行命令为 `node bin/compat-check.mjs --nm test/fixtures/labels --dsh-version 0.2.1-rc.2 --no-baseline`，预期退出2。它用于解释报告字段，不代表真实插件业务验收；当前版本为0.1.6，历史输出不追改。
+下面是当前仓库源码对固定合成夹具的可复现输出，运行命令为 `node bin/compat-check.mjs --nm test/fixtures/labels --dsh-version 0.2.1-rc.2 --no-baseline`，预期退出2。它用于解释报告字段，不代表真实插件业务验收；源码版本真源为0.1.6，0.1.7-dev修复尚未发布npm版本。
 
 ```text
 插件数: 4    有运行时面: 否（方法级结论降为「疑似」）
@@ -157,8 +157,7 @@ report_status=$?
     但没有观测浏览器中的实际失败；方法缺失案例也可能依据运行时方法面和源码调用点，
     推断「用户可能失去什么功能」。不要把这个方法案例当成所有发现都已有运行时观测。
     **转述时必须保留这个限定**，不要说成"确定会消失"。
-    实测有过一条 certain 级假阳性：工具说「设置页会消失」，而作者把能力检测写在了
-    一个辅助函数里、早就兜住了，还 log 了降级行为。
+    能力helper的静态支持有边界；不能把旧提取器的历史误报当成当前规则或完整覆盖证明。
   - 只有显式`impactBasis=measured`且有对应观测，才按实测转述，例如明确记录的loader FAILED/PENDING。缺少字段或没有标注“推断”均不能当成实测；损坏报告应报工具错误。
 - **转述结论时带上 `--version` 报出的工具版本**（`--json` 里是 `toolVersion`）。
   同一个插件在「规则表还没覆盖这个方法」和「已经覆盖」的两个版本下，
@@ -204,11 +203,11 @@ CI 里可以直接用：`0` 过，`1`/`2` 按你的策略处理，`3` 是**工�
 - 报结论时**给出可核对的依据**。API源码发现引用真实`file:line`；没有源码位置的loader/声明事实说明包身份及观测或声明来源，不补造行号。
 
 
-0.1.1：`root` 缺项是未采样，不能称为不存在；`coverage.status=limited` 与 `vacuous` 必须转述。现代探针绑定 profile/DSH/采样时间；旧报告明确标为未绑定。解析、读取、资源上限等诊断会限制覆盖，完整性不足不更新基线。当前统计见仓库 `docs/current-state.json`；npm 包是插件，CLI 从仓库使用，根依赖尚未就绪时在授权范围内运行 `npm ci --ignore-scripts`。显式安装检查会执行目标插件，临时 profile 不是不可信代码隔离沙箱。
+`root` 缺项是未采样，不能称为不存在；`coverage.status=limited` 与 `vacuous` 必须转述。现代探针绑定 profile/DSH/采样时间；旧报告明确标为未绑定。解析、读取、资源上限等诊断会限制覆盖，完整性不足不更新基线。当前统计见仓库 `docs/current-state.json`；npm 包是插件，CLI 从仓库使用，根依赖尚未就绪时在授权范围内运行 `npm ci --ignore-scripts`。显式安装检查会执行目标插件，临时 profile 不是不可信代码隔离沙箱。
 
-0.1.3按目标DSH分流声明：从0.2.1-rc.1起优先自有`engines.dsh`，仅缺失该字段时回退官方peer；更旧目标保留旧peer规则与engines建议。非法字段、空/非法范围会报告风险；peer的workspace:^/~/*按当前DSH精确版本处理，engines的workspace不获放行。声明冲突为declared-incompatible及推断影响，不能写成实际加载失败；宿主也可能跳过不兼容bundle后继续启动。历史npm0.1.2使用旧算法；判断实际行为先核对安装包版本，是否公开发布以registry和Plan记录为准。
+声明按目标DSH分流：从0.2.1-rc.1起优先自有`engines.dsh`，仅缺失该字段时回退官方peer；更旧目标保留旧peer规则与engines建议。非法字段、空/非法范围会报告风险；peer的workspace:^/~/*按当前DSH精确版本处理，engines的workspace不获放行。声明冲突为declared-incompatible及推断影响，不能写成实际加载失败；宿主也可能跳过不兼容bundle后继续启动。历史npm0.1.2使用旧算法；判断实际行为先核对安装包版本，是否公开发布以registry和Plan记录为准。
 
-0.1.3的真实rc.2 UI入口为“更多 → 设置 → 内置插件 → 兼容性”。2026-10-18完整tgz/私有宿主/真实Chrome显示报告，禁用后路由移除、重启用后恢复且仅一个标签；自报注册不等于实际渲染。10月17日标签未显示的历史记录本次未复现，原因未定；有限回归不认证所有插件业务功能。HMR会撤销自有注册、计时器和诊断handle，在途任务卸载后不得写基线或返回新成功报告；分析worker仍受原预算回收，不宣称立即终止。
+DSH 0.2.1-rc.2的UI入口为“更多 → 设置 → 内置插件 → 兼容性”。HMR撤销自有注册、计时器及诊断handle，卸载后不得发布新成功或写基线；worker按预算回收，不承诺立即停止。历史现场证据与当前源码分别核验，见仓库docs/current-state.json。
 
 只读目标node_modules同级的独立`compatibility.json`，形如`{"sample@1.0.0":["0.2.1-rc.2"]}`。只有插件名、插件精确版本与DSH精确版本全匹配才豁免范围冲突；不使用包内兼容声明代替授权。无效记录整条忽略（其它有效记录仍用）并限制覆盖；缺文件为空豁免，可读性/JSON错误、非普通文件或超过64KiB则豁免未观测。不得代用户写豁免，豁免不绕过非法字段，也不证明API或业务成功。
 
