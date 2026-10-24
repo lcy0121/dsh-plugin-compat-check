@@ -87,7 +87,11 @@ export function loadHost(env = {}) {
   sandbox.__importMetaUrl = pathToFileURL(HOST).href;
   sandbox.__out = {};
   const wrapped = `${cjs}\n__out.apply = (typeof apply === 'function') ? apply : null;\n`;
-  vm.runInContext(wrapped, sandbox, { timeout: 5000, filename: HOST });
+  vm.runInContext(wrapped, sandbox, {
+    timeout: 5000,
+    filename: HOST,
+    importModuleDynamically: vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER,
+  });
   vm.runInContext("__out.resolveDshVersion = resolveDshVersion", sandbox);
   async function fire(timer) {
     if (!timer || timer.cancelled || timer.fired)

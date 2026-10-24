@@ -95,7 +95,8 @@ function startup(
   };
   h.sandbox.serveReport = async (state, _ctx, force) => {
     checks.push({ state, force });
-    return report;
+    state.reportService ||= new ReportService(async () => report);
+    return state.reportService.get("startup", {}, force);
   };
   h.apply({ get: () => undefined, inject: () => () => {}, effect: () => {} });
   return { ...h, scans, checks };

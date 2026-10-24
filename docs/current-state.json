@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-24T03:19:28.885Z",
-  "testFiles": 69,
-  "tests": 1005,
+  "recordedAt": "2026-10-24T04:00:00.171Z",
+  "testFiles": 71,
+  "tests": 1037,
   "repositoryFiles": {
-    "total": 333,
+    "total": 335,
     "fixtures": 90,
-    "other": 243
+    "other": 245
   },
   "verification": {
     "platform": "darwin",
@@ -319,16 +319,21 @@
       "limits": "Saved reports are not authenticated or re-evaluated against a new baseline. Workflow needs a reviewed published tool SHA; no new DSH certification."
     },
     "evidenceResolutionState20261024": {
-      "scope": "Local 0.1.7-dev source; catalogue certification unchanged. No push/release/remote CI.",
+      "historyCommit": "997f4c7",
+      "historyPath": "docs/current-state.json",
+      "key": "verification.evidenceResolutionState20261024",
+      "scope": "Historical provider/entry/baseline regressions and 1005-test result; not current certification."
+    },
+    "inputCacheBoundaries20261024": {
+      "scope": "Local 0.1.7-dev source; no new host/business/Windows certification, push or release.",
       "defaultSuite": {
-        "tests": 1005,
-        "passed": 998,
+        "tests": 1037,
+        "passed": 1030,
         "skipped": 7,
         "failed": 0
       },
-      "regressions": "45 new cases: 10 provider/absence; 23 ESM/legacy/CJS resolution and scan-budget cases, paths checked against Node; 12 baseline preservation/permissions. No target imports.",
-      "baseline": "Unsafe existing parent permissions are refused without chmod. Invalid/legacy/unsafe stored baselines remain unchanged; valid snapshots and explicit orphan recovery still work.",
-      "limits": "Synthetic observations, packed empty-cache install. Authorized rerun clears sandbox loopback/process/cache restrictions; no new real-host/Windows/business acceptance."
+      "regressions": "32 added tests: bounded walks/reads, target eviction, ordinary worker admission, late callbacks and startup errors. Review findings closed.",
+      "limits": "16 targets/10min idle; ordinary report jobs 2 active/32 queued per kernel instance. Upgrade cleanup stays independently supervised."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."

@@ -952,7 +952,13 @@ async function serveReport(state, ctx, force, options = {}) {
         {
           ttlMs: state.cacheTtlMs,
           watchMs: state.cacheWatchMs,
-          identity: async (options) => {
+          onEvict: (key) => {
+            for (const [token, target] of state.reviewTargets || [])
+              if (target.key === key) state.reviewTargets.delete(token);
+            state.lastReport = null;
+            state.lastReportAt = 0;
+          },
+          identity: async (options, { signal }) => {
             const scope = options._cacheContext,
               current = resolveNodeModules(),
               currentVersion = resolveDshVersion();
@@ -962,25 +968,28 @@ async function serveReport(state, ctx, force, options = {}) {
             const requestedTarget = await fsPromises.realpath(
               options._nodeModules.dir,
             );
-            const identity = await reportIdentity({
-              nodeModules: scope.nodeModules,
-              context: {
-                ...scope,
-                currentVersion,
-                active,
-                requestedTarget,
-                probe: process.env.DSC_PROBE_REPORT || null,
+            const identity = await reportIdentity(
+              {
+                nodeModules: scope.nodeModules,
+                context: {
+                  ...scope,
+                  currentVersion,
+                  active,
+                  requestedTarget,
+                  probe: process.env.DSC_PROBE_REPORT || null,
+                },
+                files: [
+                  join(scope.kernel, "rules", "severity.json"),
+                  catalogPathFor(scope.kernel, currentVersion),
+                  process.env.DSC_PROBE_REPORT,
+                  join(
+                    path.dirname(options._nodeModules.dir),
+                    "compatibility.json",
+                  ),
+                ],
               },
-              files: [
-                join(scope.kernel, "rules", "severity.json"),
-                catalogPathFor(scope.kernel, currentVersion),
-                process.env.DSC_PROBE_REPORT,
-                join(
-                  path.dirname(options._nodeModules.dir),
-                  "compatibility.json",
-                ),
-              ],
-            });
+              { signal },
+            );
             const sameHost = active === scope.nodeModules;
             const itemListing = sameHost
               ? await (async () => {
@@ -1042,10 +1051,9 @@ async function serveReport(state, ctx, force, options = {}) {
     }
   }
   const key = JSON.stringify(context);
-  state.reportInputs ||= new Map();
-  if (!state.reportInputs.has(key))
-    state.reportInputs.set(key, { services: [] });
-  const inputs = state.reportInputs.get(key);
+  const inputs = state.reportService.states.get(key)?.options?._cacheInputs || {
+    services: [],
+  };
   // Canonicalize cache identity only: preserve the requested path for the
   // existing exact probe/profile binding and the report's business target.
   const out = await state.reportService.get(
@@ -1150,7 +1158,10 @@ async function computeReport(state, ctx, options = {}) {
       evidence: catalogEvidence,
     } = loadCatalog(kernel, resolveDshVersion());
     const rulesPath = join(kernel, "rules", "severity.json");
-    const rulesBytes = readFileSync(rulesPath);
+    const { readStaticFile } = await import(
+      pathToFileURL(join(kernel, "lib", "static-input.mjs")).href
+    );
+    const rulesBytes = readStaticFile(rulesPath, 8 * 1024 * 1024);
     const rules = JSON.parse(rulesBytes);
     out.analysisIdentity = {
       rulesSha256: createHash("sha256").update(rulesBytes).digest("hex"),
@@ -1159,20 +1170,26 @@ async function computeReport(state, ctx, options = {}) {
 
     // 运行时面：宿主半边**自己就在进程里**，所以它能拿到比探针更准的东西。
     // 第一版先读探针报告（如果外层给了路径），没有就退回目录 —— 并如实标注。
-    let hostSurface = null;
+    let hostSurface = null,
+      probeReadFailure = null;
     let surfaceWhy = "没有运行时面：结论中的方法级判定降为「疑似」";
     const probePath = process.env.DSC_PROBE_REPORT;
     if (probePath && existsSync(probePath)) {
       try {
-        hostSurface = JSON.parse(readFileSync(probePath, "utf8"));
+        hostSurface = JSON.parse(
+          readStaticFile(probePath, 8 * 1024 * 1024).toString("utf8"),
+        );
         surfaceWhy = `运行时面来自探针报告 ${probePath}`;
       } catch (error) {
-        surfaceWhy = `探针报告读不动（${errText(error)}），退回目录`;
+        probeReadFailure = `探针报告读不动（${errText(error)}）`;
+        surfaceWhy = probeReadFailure + "，退回目录";
       }
     }
     out.surfaceWhy = surfaceWhy;
 
-    const extracted = await extractInWorker(nm.dir, { catalog });
+    const extracted = await extractInWorker(nm.dir, { catalog }, 10000, {
+      signal: options._cacheGuard?.signal,
+    });
     if (state.disposed)
       return failureEnvelope("Plugin generation disposed / 已卸载");
     if (options._cacheInputs)
@@ -1190,7 +1207,9 @@ async function computeReport(state, ctx, options = {}) {
         profileId: nm.dir,
         dshVersion: resolveDshVersion(),
       });
-      surfaceWhy = "当前宿主进程内采集的服务结构；未采集或读取失败不等于缺失";
+      surfaceWhy =
+        (probeReadFailure ? probeReadFailure + "；" : "") +
+        "当前宿主进程内采集的服务结构；未采集或读取失败不等于缺失";
     }
     const itemListing = await (async () => {
       try {
@@ -1668,6 +1687,10 @@ async function attachFindingReviews(state, out, key, kernel) {
     const reviews = await store.readReviews(context);
     if (state.disposed)
       return failureEnvelope("Plugin generation disposed / 已卸载", out);
+    if (
+      state.reportService.identityForReport(key, out.report) !== inputIdentity
+    )
+      throw new Error("报告缓存已回收或变化，请刷新后操作");
     state.reviewTargets ||= new Map();
     state.reviewTargets.set(context.contextToken, {
       context,
@@ -2427,9 +2450,11 @@ export function apply(ctx) {
       try {
         serveReport(state, ctx, false)
           .then((out) => {
-            state.lastReport = out;
-            state.lastReportAt = Date.now();
+            if (state.disposed) return;
             if (out && out.ok) {
+              if (!state.reportService?.ownsReport(out.report)) return;
+              state.lastReport = out;
+              state.lastReportAt = Date.now();
               const sum = out.report.summary || {};
               const b = out.baseline || {};
               const badge = b.badge || {};
@@ -2486,6 +2511,8 @@ export function apply(ctx) {
             for (const request of state.reviewRequests || []) request.abort();
             state.reviewTargets?.clear();
             state.reportService?.dispose();
+            state.lastReport = null;
+            state.lastReportAt = 0;
             for (const off of state.cacheEventDisposers || []) {
               try {
                 off();

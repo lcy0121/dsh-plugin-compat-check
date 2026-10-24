@@ -102,7 +102,7 @@ test("invalidating one canonical target cannot replace another target and dispos
   service.dispose?.();
   release();
   assert.equal((await pending).ok, false);
-  assert.equal(service.state("A").report.value, "A");
+  assert.equal(service.states.size, 0);
   assert.equal((await service.get("B")).ok, false);
 });
 test("bounded filesystem identity notices same-path edits, inventory and judgment inputs without executing plugins", async () => {
@@ -536,8 +536,9 @@ test("slow identity observations and concurrent cached GETs retain one watchdog 
       "Watchdog timers grew during one slow observation: " + peak,
     );
   } finally {
+    const checking = service.states.get("A")?.checking;
     service.dispose();
-    await service.state("A").checking;
+    await checking;
     await tick();
     hook.disable();
   }
@@ -800,5 +801,131 @@ test("symlink aliases retain distinct probe bindings and observe the policy besi
     assert.equal(result.status, 0, result.stdout + result.stderr);
   } finally {
     await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
+for (const lifecycle of ["evict", "dispose"])
+  test(`late startup report cannot retain references after ${lifecycle}`, async () => {
+    const { loadHost } = await import("./support/host-harness.mjs");
+    const h = loadHost({ DSC_AUTORUN_MS: "2", DSC_SCAN_DELAYS: "60000" }),
+      effects = [];
+    let release, captured;
+    const gate = new Promise((r) => (release = r)),
+      report = { summary: {} };
+    const service = new ReportService(async () => ({ ok: true, report }), {
+      maxTargets: 1,
+    });
+    const out = await service.get("A");
+    h.sandbox.serveReport = async (state) => {
+      captured = state;
+      state.reportService = service;
+      await gate;
+      return out;
+    };
+    h.apply({
+      get() {},
+      inject() {},
+      effect(fn) {
+        const off = fn();
+        if (off) effects.push(off);
+      },
+    });
+    await h.fire(h.timers.find((t) => t.delay === 2));
+    assert(captured);
+    if (lifecycle === "evict") service.evict("A");
+    else effects.forEach((off) => off());
+    release();
+    await tick();
+    await tick();
+    assert.equal(captured.lastReport, null);
+    effects.forEach((off) => off());
+    service.dispose();
+  });
+
+for (const lifecycle of ["evict", "dispose"])
+  test(`late review sidecar cannot register a target after ${lifecycle}`, async (t) => {
+    const syncfs = await import("node:fs"),
+      { loadHost } = await import("./support/host-harness.mjs"),
+      { pathToFileURL } = await import("node:url");
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "dsc-late-review-"));
+    t.after(() => fs.rm(root, { recursive: true, force: true }));
+    await fs.mkdir(path.join(root, "lib"));
+    const token = "gate" + path.basename(root).replace(/\W/g, "");
+    let enter, release;
+    const entered = new Promise((r) => (enter = r)),
+      gate = new Promise((r) => (release = r));
+    globalThis[token] = { enter, gate };
+    t.after(() => delete globalThis[token]);
+    const realStore = pathToFileURL(
+      path.resolve("lib/finding-review-store.mjs"),
+    ).href;
+    await fs.writeFile(
+      path.join(root, "lib/finding-review-store.mjs"),
+      `import {reviewContext as realContext,readReviews as realRead} from ${JSON.stringify(realStore)};export {realContext as reviewContext};export async function readReviews(c){const out=await realRead(c);globalThis[${JSON.stringify(token)}].enter();await globalThis[${JSON.stringify(token)}].gate;return out;}`,
+    );
+    const { run } = await import("../bin/compat-check.mjs"),
+      { toJSON } = await import("../lib/report.mjs");
+    const report = toJSON(
+      run({
+        nm: path.resolve("test/fixtures/labels"),
+        dshVersion: "0.2.0-rc.2",
+        baseline: false,
+        _ignoreAutoProbe: true,
+      }),
+    );
+    const service = new ReportService(
+      async () => ({
+        ok: true,
+        report,
+        nodeModules: root,
+        toolVersion: report.toolVersion,
+        analysisIdentity: { rulesSha256: "a".repeat(64) },
+      }),
+      { identity: async () => "fixed" },
+    );
+    const out = await service.get("A"),
+      state = {
+        disposed: false,
+        reportService: service,
+        reviewTargets: new Map(),
+      };
+    const h = loadHost();
+    const pending = h.sandbox.attachFindingReviews(state, out, "A", root);
+    await entered;
+    if (lifecycle === "evict") service.evict("A");
+    else {
+      state.disposed = true;
+      service.dispose();
+    }
+    release();
+    const result = await pending;
+    assert.equal(state.reviewTargets.size, 0);
+    assert.equal(result.reviews?.contextToken ?? null, null);
+    service.dispose();
+  });
+test("startup failures remain visible as warnings without retaining failed reports", async () => {
+  const { loadHost } = await import("./support/host-harness.mjs");
+  const h = loadHost({ DSC_AUTORUN_MS: "2", DSC_SCAN_DELAYS: "60000" }),
+    effects = [];
+  let captured;
+  h.sandbox.serveReport = async (state) => {
+    captured = state;
+    return { ok: false, error: "rules-preflight-failed", report: null };
+  };
+  h.apply({
+    get() {},
+    inject() {},
+    effect(fn) {
+      const off = fn();
+      if (off) effects.push(off);
+    },
+  });
+  try {
+    await h.fire(h.timers.find((t) => t.delay === 2));
+    await tick();
+    assert(h.logs.some((line) => /WARN F2.*rules-preflight-failed/.test(line)));
+    assert.equal(captured.lastReport, null);
+  } finally {
+    effects.forEach((off) => off());
   }
 });
