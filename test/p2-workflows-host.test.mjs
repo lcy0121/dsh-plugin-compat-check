@@ -160,8 +160,11 @@ test("background polling observes manual storage corruption and recovery without
  const first=(await request()).body;
  const {createHash}=await import('node:crypto');const file=home+'/dsh-plugin-compat-check/reviews.'+createHash('sha256').update(fs.realpathSync(nm)).digest('hex')+'.json';
  const {panelHarness}=await import(${JSON.stringify(new URL("./support/panel-harness.mjs", import.meta.url).href)});
- const timers=[];const h=await panelHarness(first,{timers:{setTimeout:(fn,ms)=>{timers.push({fn,ms});return fn;},clearTimeout:()=>{}},fetcher:async(url)=>({ok:true,json:async()=>(await request(url)).body})});
- try{fs.writeFileSync(file,'{corrupt');await timers.filter(t=>t.ms===2000).at(-1).fn();await h.settle();assert.match(h.text(),/Review storage cannot be read/);
+ let releaseFirst;const initialRead=new Promise(resolve=>releaseFirst=resolve);let reads=0;
+ const timers=[];const h=await panelHarness(first,{timers:{setTimeout:(fn,ms)=>{timers.push({fn,ms});return fn;},clearTimeout:()=>{}},fetcher:async(url)=>{if(++reads===1)await initialRead;return{ok:true,json:async()=>(await request(url)).body};}});
+ try{assert.equal(timers.filter(t=>t.ms===2000).length,0,'Polling starts only after the initial response');releaseFirst();
+ const deadline=Date.now()+5000;while(!timers.some(t=>t.ms===2000)){assert(Date.now()<deadline,'Initial report must render and schedule polling');await h.settle();}
+ fs.writeFileSync(file,'{corrupt');await timers.filter(t=>t.ms===2000).at(-1).fn();await h.settle();assert.match(h.text(),/Review storage cannot be read/);
  fs.unlinkSync(file);await timers.filter(t=>t.ms===2000).at(-1).fn();await h.settle();assert.doesNotMatch(h.text(),/Review storage cannot be read/);
  assert.deepEqual((await request()).body.report,first.report);
  }finally{h.dispose();}

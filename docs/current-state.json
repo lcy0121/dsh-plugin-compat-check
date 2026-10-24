@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-25T03:11:12+08:00",
+  "recordedAt": "2026-10-24T19:29:09.113Z",
   "testFiles": 72,
-  "tests": 1108,
+  "tests": 1120,
   "repositoryFiles": {
-    "total": 346,
+    "total": 348,
     "fixtures": 99,
-    "other": 247
+    "other": 249
   },
   "verification": {
     "platform": "darwin",
@@ -36,102 +36,25 @@
     },
     "release016": {
       "tag": "v0.1.6",
-      "kind": "metadata patch; no analysis or UI behavior changes",
-      "hostMinimum": ">=0.2.0-rc.2",
       "artifact": {
-        "file": "dsh-plugin-compat-check-0.1.6.tgz",
-        "sha256": "d29786552d60d783d419dcb9db367d6c76f341d3b8ed0e3f181980dfd2b8ebba",
-        "integrity": "sha512-1LyGGS9KWPpXkJzEeBXPFUEdQuD1ng+cVD61UUOxAAz3m2Nw4prNu8ft1LcG/jLTlwwtPoB7ADK6OynvHTLGoA==",
-        "files": 62,
-        "bytes": 249713
+        "sha256": "d29786552d60d783d419dcb9db367d6c76f341d3b8ed0e3f181980dfd2b8ebba"
       },
-      "localAcceptance": {
-        "verifiedAt": "2026-10-23T12:20:26.737480+00:00",
-        "platform": "macOS arm64",
-        "dshVersion": "0.2.1-rc.2",
-        "tests": 882,
-        "passed": 876,
-        "skipped": 6,
-        "failed": 0,
-        "sameArchiveInstalled": true,
-        "realChromePanel": true,
-        "upgradePreview": true,
-        "dependencyView": true,
-        "manualReviewPersisted": true,
-        "historicalHealthImport": true,
-        "originFence": {
-          "sameOriginStatus": 200,
-          "crossPortStatus": 403
-        },
-        "privateRootRemoved": true,
-        "dependencyAudit": "workspace-lock and plugin-runtime clean"
-      },
-      "source": "https://github.com/lcy0121/dsh-plugin-compat-check/tree/v0.1.6",
-      "scope": "Exact accepted archive and recorded scenarios only. Public distribution and tagged-commit CI verified below; minimum host declaration is not future-version or business certification.",
-      "repositoryDriver": {
-        "initialCi": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39952635359",
-        "failure": "Pinned market favorite recovery: POST and disk passed, first UI read did not. The old driver admitted a card without waiting for the independent installed-state request; a delayed-response Chrome case reproduces this readiness gap.",
-        "regression": "Delayed real HTTP response in Chrome rejects old card-only admission; new response/render wait passes without requiring healthy values or controls, and rejects HTTP503.",
-        "localRealCohort": "All ten note/favorite healthy, transport fault, missing-control and recovery outcomes reproduced; three focused live tests passed.",
-        "scope": "Repository acceptance driver only; npm archive bytes unchanged. Final tagged-commit CI passed, including all ten fixed market action/fault/recovery outcomes."
-      },
-      "publicVerification": {
-        "verifiedAt": "2026-10-23T12:51:50.331549+00:00",
-        "sourceCommit": "a72f8d39ec5615956733254749a59e4c69f48191",
-        "ci": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39954441848",
-        "ciPassed": 5,
-        "fixedBatch": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/39954505854",
-        "github": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.1.6",
-        "npm": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.1.6",
-        "npmLatest": "0.1.6",
-        "npmArchiveMatchesAccepted": true,
-        "githubArchiveMatchesAccepted": true,
-        "publicInstall": {
-          "status": "checked",
-          "toolVersion": "0.1.6",
-          "exitCode": 0,
-          "tempProfileRemoved": true
-        },
-        "publicMetadataProblems": 0,
-        "publicMetadataSkipped": 0
-      }
-    },
-    "authorModuleBoundaries20261024": {
-      "scope": "Historical local 0.1.7-dev verification before documentation consolidation; certifications unchanged. No push, release or remote workflow at that time.",
-      "defaultSuite": {
-        "tests": 1081,
-        "passed": 1074,
-        "skipped": 7,
-        "failed": 0
-      },
-      "syntaxMatrix": {
-        "rows": 38,
-        "supported": 22,
-        "inferred": 2,
-        "abstained": 14,
-        "scope": "Static fixtures and synthetic observations; no target execution/business acceptance."
-      },
-      "regressions": "Invalid-policy/failed-workflow JSON-HTML replay; aggregate/display overflow, 8MiB evidence/2MiB cells. Immutable relative paths; closure/class/static-block/TS shadow regressions. Review findings closed."
+      "sourceCommit": "a72f8d39ec5615956733254749a59e4c69f48191",
+      "scope": "Published 0.1.6 metadata patch retaining 0.1.5 behavior; archive/public verification details in archivedVerification, not the unpublished development build."
     },
     "archivedVerification": {
-      "commit": "08b90e4",
+      "commit": "a97de61c764977cde4cbe13dc94a314a53d51891",
       "path": "docs/current-state.json",
+      "sha256": "9a4aa486192197a2781249f2fb77f024e79997b9c0f5cdc7c842ea2b453e0a0c",
       "keys": [
-        "upstreamAcceptance20261021",
-        "authorCi20261023",
-        "ciFailureReview20261023",
-        "sourceConsolidation20261023",
-        "historicalLocalAcceptance20261022",
-        "upstreamStatus20261023",
-        "release015",
-        "staticAnalysisFix20261024",
-        "staticInputBoundaries20261024",
-        "localBoundaries20261024",
-        "maintenanceAuthorEntry20261024",
-        "evidenceResolutionState20261024",
-        "inputCacheBoundaries20261024"
+        "release016",
+        "authorModuleBoundaries20261024",
+        "documentationConsolidation20261024",
+        "ciOwnedPackagingFix20261024",
+        "rc3Adaptation20261024"
       ],
-      "scope": "Dated release, source-regression and acceptance records; historical results do not certify current source. Earlier history pointers are retained in that snapshot."
+      "earlierHistory": "08b90e4 and 10eaeba:docs/current-state.json",
+      "scope": "Full dated records retrievable with git show <commit>:<path>; sha256 covers the original file bytes. Historical results apply only to recorded inputs, archives and commits, not current source."
     },
     "upstreamStatus20261024": {
       "checkedAt": "2026-10-24T08:46:21.647725+00:00",
@@ -152,211 +75,59 @@
         "updatedAt": "2026-10-17T12:54:55Z"
       }
     },
-    "documentationConsolidation20261024": {
-      "scope": "0.1.7-dev documentation and generated skill copy; no npm release or new host/business/platform certification.",
-      "defaultSuite": {
-        "tests": 1081,
-        "passed": 1074,
-        "skipped": 7,
-        "failed": 0
-      },
-      "checks": "Prepublish check and npm run check passed; 38/38 syntax cases and two registered exact catalogues. Whole-repository Markdown links/generated notices checked.",
-      "publicMetadata": {
-        "observedAt": "2026-10-24T08:44:36.435Z",
-        "npmLatest": "0.1.6",
-        "errors": 0,
-        "skippedSources": 0,
-        "notice": "Local plugin README differs from immutable published npm 0.1.6; source documentation changes take effect in a future npm release."
-      },
-      "upstream": "States refreshed in upstreamStatus20261024 only; no new handler/install acceptance."
-    },
-    "ciOwnedPackagingFix20261024": {
-      "scope": "0.1.7-dev source fix for isolated real-host packaging; not an npm release or new catalogue/business certification.",
-      "failedRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40079731687",
-      "cause": "Live source copies omitted the workspace Prettier build dependency required by prepack.",
-      "fix": "Shared private-source preparation validates manifest/lock/installed Prettier versions, copies the self-contained build package outside plugin files, and runs normal pack hooks.",
-      "regressions": "Default real-prepack regression reproduces original missing-module failure; rejects missing/drifted tooling, checks tgz contents, source preservation and failure cleanup.",
-      "defaultSuite": {
-        "tests": 1083,
-        "passed": 1076,
-        "skipped": 7,
-        "failed": 0
-      },
-      "checks": "Prepublish gate and npm run check passed; 38/38 syntax cases and two registered catalogues unchanged.",
-      "localEngineering": {
-        "schemaVersion": 1,
-        "kind": "plugin-compat-check/engineering-live",
-        "ok": true,
-        "platform": "darwin",
-        "arch": "arm64",
-        "nodeVersion": "26.12.1",
-        "dshVersion": "0.2.1-rc.3",
-        "artifactVersion": "0.1.6",
-        "pressureFunctions": 4000,
-        "reportAvailable": true,
-        "reportMilliseconds": 728.2244169999994,
-        "http": {
-          "samples": 29,
-          "refreshingSamples": 28,
-          "maxMilliseconds": 46.30187500000102
-        },
-        "scope": "Owned web profile, actual tgz and synthetic uncalled functions; HTTP responsiveness only, not business behavior or a production performance guarantee.",
-        "cleanup": {
-          "hostStopped": true,
-          "privateRootRemoved": true
-        }
-      },
-      "remote": {
-        "commit": "768e7341bccc8f393845c5e980d5b0ce38a598d5",
-        "status": "passed",
-        "checks": 5,
-        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40081231670",
-        "scope": "Historical exact fix commit, not current rc.3 adaptation CI."
-      }
-    },
     "rc3Adaptation20261024": {
-      "scope": "Unpublished 0.1.7-dev source, tool version0.1.6. rc.3 provenance/semantics, macOS same-tgz acceptance and Linux exact-commit CI passed. No npm release, merge, Windows/model/account certification.",
+      "scope": "Historical rc.3 acceptance for the exact unpublished source archive and recorded CI commit; no Windows/model/account or general business certification. Full detail in archivedVerification.",
       "provenance": "rules/dsh-0.2.1-rc.3-review.json",
-      "defaultSuite": {
-        "tests": 1030,
-        "passed": 1022,
-        "skipped": 8,
-        "failed": 0
-      },
-      "checks": "npm run check passed: 38 syntax cases, 3 exact catalogues, generated contracts/skill/notices and document links. Full six-direction preview and three-cell author output/budget regressions passed. Prepublish gate passed after final immutability and required-browser guards.",
-      "acceptedArtifact": {
-        "file": "dsh-plugin-compat-check-0.1.6.tgz",
-        "sha256": "9fab57a11f00d8408c395eb54f3ff90d2334ccb963ea7f222fced075572a1c10",
-        "bytes": 262164,
-        "scope": "Private complete source build, not published npm 0.1.6 bytes. Same exact tgz installed for all final browser/host acceptance."
-      },
-      "macOS": {
-        "declarationCases": 5,
-        "hostToolSkill": true,
-        "catalogIdentity": true,
-        "browser": {
-          "available": true,
-          "navigation": "Account menu > Settings > Built-in plugins > Compatibility",
-          "tabCount": 1,
-          "reenabled": true,
-          "httpRestored": true
-        },
-        "navigationDrafts": {
-          "menus": [
-            {
-              "region": "sidebar",
-              "browseMainList": true,
-              "createAction": true
-            },
-            {
-              "region": "conversation",
-              "browseMainList": true,
-              "createAction": true
-            },
-            {
-              "region": "rightbar",
-              "browseMainList": true,
-              "createAction": true
-            }
-          ],
-          "detailAndBadge": true,
-          "blankReuse": true,
-          "presetIsolation": true,
-          "defaultKeep": true,
-          "append": true,
-          "legacyReplace": true,
-          "explicitPolicyPrecedence": true,
-          "createDraftOnly": true
-        },
-        "modelListing": {
-          "noCredentialRequests": 0,
-          "firstUseWait": true,
-          "failureFallback": true,
-          "lastGoodRetained": true,
-          "deadline": true,
-          "requests": 4,
-          "modelCalls": 0,
-          "productionRequests": 0
-        },
-        "productionNetwork": {
-          "productionRequests": 0
-        },
-        "upgradePreview": "Positive new risk and unsupported target, same immutable inputs/catalogue hashes, UI export/filter separation, origin/method fences, route removal/recovery.",
-        "reviewBaseline": "Dependency view, persisted review, unchanged canonical report/baseline, historical health import entry.",
-        "privateRootRemoved": true,
-        "evidenceSha256": "d6e1e62ebfe83221826adea50c54fa7120c44d6cfe3f12fb132b230f0f77f172",
-        "slowSuite": {
-          "tests": 4,
-          "passed": 4,
-          "failed": 0,
-          "skipped": 0
-        }
-      },
+      "acceptedArtifactSha256": "9fab57a11f00d8408c395eb54f3ff90d2334ccb963ea7f222fced075572a1c10",
+      "macOS": "Same-tgz host/tool/skill, browser/navigation/drafts, model-listing fixtures; production requests 0, owned resources removed.",
       "fixedCohort": {
         "manifest": "tools/real-regression-manifest-rc3.json",
-        "manifestSha256": "19278a4fb565f6c5b833b8aceb557264154e100a1b50358fb96c4b0de4511a32",
-        "status": "passed",
-        "replay": "passed",
-        "repeats": 1,
-        "summary": {
-          "independentPackageFamilies": 4,
-          "pinnedArtifacts": 5,
-          "holdoutPackageFamilies": 2,
-          "holdoutPinnedArtifacts": 2,
-          "distinctPlannedCases": 24,
-          "knownOutcomeCases": 24,
-          "staticIdentifiedFailures": 0,
-          "serviceOnlyIdentifiedFailures": 2,
-          "unflaggedNaturalFailures": 2,
-          "unflaggedBusinessOrClientFailures": 10,
-          "driverErrors": 0,
-          "validationErrors": 0
-        },
-        "modelCalls": 0,
-        "accountCalls": 0,
-        "evidenceSha256": "02c2f280354730603234c0aed5c04634a15e8d91fd19ea6b77ec66234961ccb5",
-        "scope": "Five exact npm artifacts, 24 fixed action/failure/recovery outcomes; honest FP/FN retained. Separate rc.3 cohort, rc.2 manifest/history unchanged. One independent live round; not ecosystem accuracy."
-      },
-      "engineering": {
-        "ok": true,
-        "httpMaxMilliseconds": 20.673416999999972,
-        "cleanup": {
-          "hostStopped": true,
-          "privateRootRemoved": true
-        },
-        "scope": "Owned web profile, actual tgz and synthetic uncalled functions; HTTP responsiveness only, not business behavior or a production performance guarantee."
+        "cases": 24,
+        "status": "passed and replayed; honest FP/FN retained, not ecosystem accuracy",
+        "evidenceSha256": "02c2f280354730603234c0aed5c04634a15e8d91fd19ea6b77ec66234961ccb5"
       },
       "remote": {
-        "status": "passed",
         "commit": "dc1603720d4f91e5226db4f857987ae63d7cb588",
         "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40099723661",
         "checksPassed": 6,
-        "nodeVersions": [
-          "22.19.0",
-          "24"
-        ],
         "linuxVersions": [
           "0.2.0-rc.2",
           "0.2.1-rc.2",
           "0.2.1-rc.3"
         ],
-        "linuxRc3": {
-          "tests": 63,
-          "passed": 63,
-          "failed": 0,
-          "skipped": 0,
-          "applicable": true,
-          "browserAvailable": true,
-          "productionRequests": 0,
-          "privateRootRemoved": true,
-          "artifactId": 12561614185,
-          "artifactSha256": "892c2c668931262aba08145b541927252c456ea9ecced80cc2c2ba5a38b0466a",
-          "evidenceSha256": "a96a3d2277cb5a2dfe69b25af168de014a1f7e2bc95c0e7a9ee5bccc5bc5b2ae"
-        },
-        "scope": "Six exact-commit checks success; rc.3 artifact JSON and TAP downloaded and verified, no skip-green. Historical CI record; later documentation-only commit is local."
+        "scope": "Historical exact-commit checks; not current branch CI."
+      }
+    },
+    "sourceContext": {
+      "developmentLine": "0.1.7-dev",
+      "versionSource": "lib/version.mjs",
+      "published": false,
+      "scope": "toolVersion is the checker metadata version; certifiedExactVersions are DSH hosts. Development changes are not npm 0.1.6 delivery."
+    },
+    "latestLocalAcceptance": {
+      "date": "2026-10-25",
+      "scope": "Unpublished 0.1.7-dev source; checker metadata 0.1.6. Local macOS arm64 only; no push, merge, publication, model/account or Windows/business certification.",
+      "defaultSuite": {
+        "tests": 1120,
+        "passed": 1112,
+        "skipped": 8,
+        "failed": 0
       },
-      "review": "Manual whole-change review and regressions passed; fresh-context reviewer unavailable due usage limit, no separate reviewer approval claimed."
+      "checks": "Format, document version-set/link/generated-copy checks, 38/38 syntax cases and all three pinned catalogues passed. Archive pointer and original file SHA-256 verified.",
+      "regressions": "Artifact growth before/during reads, FIFO replacement, bounded worker deadline/cancellation/recovery; root-rule supervised bounded reads; shared/private state directory preservation and explicit recovery; version drift and count generation. No analysis snapshot rebuild.",
+      "realHost": {
+        "dshVersion": "0.2.1-rc.3",
+        "artifactVersion": "0.1.6",
+        "artifactSha256": "4a5e9f0490a5945d2aa5de5ce6c716ce15af135db361c8f7eca527e9edcfbc49",
+        "evidenceSha256": "0c8495898a4118485c2b72855bb59e84b90a9c2da3323b86456a362a3520dbc3",
+        "browser": true,
+        "upgradePreview": true,
+        "manualReviewPersisted": true,
+        "baselineUnchanged": true,
+        "productionRequests": 0,
+        "privateRootRemoved": true
+      }
     }
   },
-  "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."
+  "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
 }

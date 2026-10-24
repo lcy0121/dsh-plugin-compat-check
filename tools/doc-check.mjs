@@ -6,6 +6,8 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { TOOL_VERSION } from "../lib/version.mjs";
+import { CATALOG_REFERENCES } from "../lib/contracts.mjs";
+import { SUPPORTED_PREVIEW_VERSIONS } from "../lib/upgrade-contract.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ROOT_READMES = ["README.md", "README.en.md", "README.ko.md"];
@@ -113,6 +115,50 @@ export function checkDocumentLinks(root, documents) {
   return problems;
 }
 
+/** Check the visible claims, not every version mentioned in commands or history. */
+export function checkDocumentVersions(root) {
+  const expected = CATALOG_REFERENCES.map((item) => item.version).sort();
+  const problems = [];
+  const same = (values) =>
+    JSON.stringify([...values].sort()) === JSON.stringify(expected);
+  const claims = [
+    ["README.md", /已认证精确目录仅 \*\*([^*]+)\*\*/],
+    ["README.en.md", /Certified exact catalogues remain \*\*([^*]+)\*\*/],
+    ["README.ko.md", /인증된 정확한 카탈로그 버전은 \*\*([^*]+)\*\*/],
+    ["plugin/README.md", /已认证精确目录仍仅\*\*([^*]+)\*\*/],
+    ["docs/Plan.md", /仅支持精确\*\*([^*]+)\*\*/],
+    ["docs/Plan.md", /默认矩阵包含([^。]+)。/, "author default"],
+    ["docs/guide.md", /已认证精确目录为([^。]+)。/],
+    ["skill/SKILL.md", /当前已认证目录仅为 ([^。]+)。/],
+    ["docs/author-ci.md", /默认矩阵包含已认证的 ([^。]+)。/, "author default"],
+    [
+      "examples/author-ci.yml",
+      /# Default reviewed source matrix: ([^;]+);/,
+      "author default",
+    ],
+  ];
+  for (const [rel, pattern, label = "certified versions"] of claims) {
+    const text = fs.readFileSync(path.join(root, rel), "utf8");
+    const matches = [...text.matchAll(new RegExp(pattern.source, "g"))];
+    const values =
+      matches[0]?.[1].match(/\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?/g) || [];
+    if (matches.length !== 1 || !same(values))
+      problems.push(`${rel}: ${label} must list ${expected.join(", ")}`);
+  }
+  const current = JSON.parse(
+    fs.readFileSync(path.join(root, "docs/current-state.json"), "utf8"),
+  );
+  if (!same(current.verification?.catalogueScope?.certifiedExactVersions || []))
+    problems.push(
+      "docs/current-state.json: certified versions differ from registry",
+    );
+  if (!same(SUPPORTED_PREVIEW_VERSIONS))
+    problems.push(
+      "lib/upgrade-contract.mjs: certified versions differ from registry",
+    );
+  return problems;
+}
+
 function main(argv) {
   const problems = [];
   try {
@@ -182,6 +228,7 @@ function main(argv) {
   }
   const documents = maintainedDocuments(ROOT);
   problems.push(...checkDocumentLinks(ROOT, documents));
+  problems.push(...checkDocumentVersions(ROOT));
   let summaryTests;
   if (argv.length) {
     if (argv.length !== 2 || argv[0] !== "--test-summary")

@@ -184,3 +184,40 @@ describe('文档信息：可复算的数字必须与仓库一致', () => {
     }
   })
 })
+
+test('version facts reject missing, future or stale author defaults without banning examples', async t => {
+  const {checkDocumentVersions} = await import('../tools/doc-check.mjs');
+  assert.equal(typeof checkDocumentVersions, 'function');
+  assert.deepEqual(checkDocumentVersions(REPO), []);
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-doc-versions-'));
+  t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+  const files = ['README.md','README.en.md','README.ko.md','plugin/README.md','docs/Plan.md','docs/guide.md','docs/author-ci.md','docs/current-state.json','skill/SKILL.md','examples/author-ci.yml'];
+  for(const file of files){fs.mkdirSync(path.dirname(path.join(root,file)),{recursive:true});fs.copyFileSync(path.join(REPO,file),path.join(root,file));}
+  fs.appendFileSync(path.join(root,'docs/guide.md'),'\n未认证示例：0.3.0-rc.1\n');
+  assert.deepEqual(checkDocumentVersions(root),[]);
+  for(const file of files.filter(f=>!f.endsWith('.json'))){
+    const original=fs.readFileSync(path.join(root,file),'utf8');
+    for(const bad of ['0.2.1-rc.4','0.2.1-rc.2']){
+      fs.writeFileSync(path.join(root,file),original.replaceAll('0.2.1-rc.3',bad));
+      assert.ok(checkDocumentVersions(root).some(x=>x.startsWith(file+':')),file+': '+bad);
+    }
+    fs.writeFileSync(path.join(root,file),original);
+  }
+  const plan=fs.readFileSync(path.join(root,'docs/Plan.md'),'utf8');
+  fs.writeFileSync(path.join(root,'docs/Plan.md'),plan.replace(/默认矩阵包含[^。]+。/,'默认上述两版。'));
+  assert.ok(checkDocumentVersions(root).some(x=>/Plan.*author default/.test(x)));
+  fs.writeFileSync(path.join(root,'docs/Plan.md'),plan);
+  const state=JSON.parse(fs.readFileSync(path.join(root,'docs/current-state.json'),'utf8'));
+  state.verification.catalogueScope.certifiedExactVersions.pop();
+  fs.writeFileSync(path.join(root,'docs/current-state.json'),JSON.stringify(state));
+  assert.ok(checkDocumentVersions(root).some(x=>x.startsWith('docs/current-state.json:')));
+});
+
+test('current-state generator counts all fixture forms and refuses incomplete or failed test summaries', async () => {
+  const {repositoryCounts,successfulTestCount} = await import('../tools/update-current-state.mjs');
+  assert.equal(typeof repositoryCounts,'function');
+  assert.deepEqual(repositoryCounts(['README.md','test/fixtures/static-batch.json','test/fixtures/labels/demo/cordis.patch.yml','test/support/helper.mjs']),{total:4,fixtures:2,other:2});
+  assert.equal(successfulTestCount('# tests 1121\n# fail 0\n'),1121);
+  assert.equal(successfulTestCount('ℹ tests 1121\nℹ fail 0\n'),1121);
+  for(const log of ['# tests 4\n# fail 1\n','# tests 4\n',''])assert.throws(()=>successfulTestCount(log),/missing or failing/);
+});

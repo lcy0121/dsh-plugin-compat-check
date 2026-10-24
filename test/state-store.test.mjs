@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import {writeBaseline,baselinePath,baselineTransaction} from '../lib/state-store.mjs';
+import {readBaseline,writeBaseline,baselinePath,baselineTransaction} from '../lib/state-store.mjs';
 import {snapshotForBaseline} from '../lib/baseline.mjs';
 test('atomic baseline replace never writes through a preexisting file symlink',()=>{
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'dsc-store-'));
@@ -79,4 +79,14 @@ test('a new private state directory can be created without changing its existing
 test('invalid new snapshot cannot replace valid stored baseline',t=>{
  const {file}=storeFixture(t),bytes=JSON.stringify(snapshot());fs.writeFileSync(file,bytes);
  const out=baselineTransaction(file,{plugins:{}});assert.equal(out.wrote,false);assert.ok(out.writeError);assert.equal(fs.readFileSync(file,'utf8'),bytes);
+});
+
+test('direct baseline storage rejects shared directories and recovers only after explicit permission repair', {skip:process.platform==='win32'}, t=>{
+ const {dir,file}=storeFixture(t), original=JSON.stringify(snapshot());fs.writeFileSync(file,original);fs.chmodSync(dir,0o755);
+ assert.equal(readBaseline(file).status,'unavailable');
+ assert.match(writeBaseline(file,snapshot()),/private|0700/);
+ assert.equal(fs.statSync(dir).mode&0o777,0o755);assert.equal(fs.readFileSync(file,'utf8'),original);
+ assert.deepEqual(fs.readdirSync(dir),['custom.json']);
+ fs.chmodSync(dir,0o700);
+ assert.equal(readBaseline(file).status,'valid');assert.equal(baselineTransaction(file,snapshot()).wrote,true);
 });

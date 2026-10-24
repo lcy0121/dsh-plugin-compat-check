@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { acquireStateLock } from "../lib/state-lock.mjs";
 
 // Removing record persistence, stale identity checks, or input limits must break these tests.
 import * as Store from "../lib/finding-review-store.mjs";
@@ -59,6 +60,51 @@ const body = (reviews, patch = {}) => ({
   note: "Checked source and host behavior.",
   ...patch,
 });
+
+test(
+  "reviews and baseline locks reject an existing shared-mode directory without chmod or state writes",
+  { skip: process.platform === "win32" },
+  async (t) => {
+    const f = await fixture(t),
+      initial = await Store.readReviews(f.context, f.io),
+      dir = path.join(f.home, "dsh-plugin-compat-check");
+    await fs.mkdir(dir, { mode: 0o755 });
+    await fs.chmod(dir, 0o755);
+    await fs.writeFile(path.join(dir, "unrelated"), "keep");
+    assert.throws(
+      () => acquireStateLock(path.join(dir, "baseline.json.lock")),
+      /private|0700/,
+    );
+    const read = await Store.readReviews(f.context, f.io);
+    assert.match(read.error, /private|0700/);
+    await assert.rejects(
+      Store.saveReview(f.context, body(initial), f.io),
+      (e) => e.code === "REVIEW_STORAGE" && /private|0700/.test(e.message),
+    );
+    assert.equal((await fs.stat(dir)).mode & 0o777, 0o755);
+    assert.deepEqual(await fs.readdir(dir), ["unrelated"]);
+    assert.equal(
+      await fs.readFile(path.join(dir, "unrelated"), "utf8"),
+      "keep",
+    );
+  },
+);
+test(
+  "new review state is private while existing parent permissions stay unchanged",
+  { skip: process.platform === "win32" },
+  async (t) => {
+    const f = await fixture(t),
+      initial = await Store.readReviews(f.context, f.io);
+    await fs.chmod(f.home, 0o755);
+    await Store.saveReview(f.context, body(initial), f.io);
+    assert.equal((await fs.stat(f.home)).mode & 0o777, 0o755);
+    assert.equal(
+      (await fs.stat(path.join(f.home, "dsh-plugin-compat-check"))).mode &
+        0o777,
+      0o700,
+    );
+  },
+);
 
 test("manual false positive persists separately without changing report findings, summary or baseline", async (t) => {
   const f = await fixture(t),
@@ -528,7 +574,7 @@ test("record quota refuses the next manual disposition while retaining all exist
   const doc = { schemaVersion: 1, revision: "1".repeat(64), records };
   Pure.validateReviewDocument(doc);
   const dir = path.join(f.home, "dsh-plugin-compat-check");
-  await fs.mkdir(dir);
+  await fs.mkdir(dir, { mode: 0o700 });
   const file = path.join(dir, `reviews.${ctx.targetKey}.json`),
     bytes = JSON.stringify(doc);
   assert.ok(Buffer.byteLength(bytes) < 1024 * 1024);
@@ -539,6 +585,9 @@ test("record quota refuses the next manual disposition while retaining all exist
       body(initial, { findingId: ctx.findings[1000].findingId }),
       f.io,
     ),
+    (error) =>
+      error.code === "REVIEW_INVALID" &&
+      error.message === "Invalid review storage",
   );
   assert.equal(await fs.readFile(file, "utf8"), bytes);
   assert.equal((await Store.readReviews(ctx, f.io)).error, null);

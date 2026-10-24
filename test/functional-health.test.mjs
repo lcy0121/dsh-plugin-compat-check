@@ -302,6 +302,181 @@ function fixtureArtifact(root) {
   fs.writeFileSync(file, bytes);
   return { file, sha256: createHash("sha256").update(bytes).digest("hex") };
 }
+test("artifact rejects growth after lstat and closes its descriptor before recovery", (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-health-growth-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const artifact = fixtureArtifact(root),
+    expected = { ...declaration().artifact, sha256: artifact.sha256 };
+  const original = fs.readFileSync(artifact.file),
+    lstat = fs.lstatSync,
+    close = fs.closeSync,
+    open = fs.openSync;
+  let changed = false,
+    closed = 0,
+    reader;
+  fs.lstatSync = function (file, ...args) {
+    const value = lstat.call(this, file, ...args);
+    if (file === artifact.file && !changed) {
+      changed = true;
+      fs.truncateSync(file, 33 * 1024 * 1024);
+    }
+    return value;
+  };
+  fs.openSync = function (file, flags, ...args) {
+    const fd = open.call(this, file, flags, ...args);
+    if (file === artifact.file && flags & fs.constants.O_NONBLOCK) reader = fd;
+    return fd;
+  };
+  fs.closeSync = function (fd) {
+    if (fd === reader) closed++;
+    return close.call(this, fd);
+  };
+  try {
+    assert.throws(
+      () => runtime.verifyFunctionalArtifact(artifact.file, expected),
+      /identity changed|byte budget|changed during/,
+    );
+  } finally {
+    fs.lstatSync = lstat;
+    fs.closeSync = close;
+    fs.openSync = open;
+  }
+  assert.equal(closed, 1, "the rejected opened descriptor is closed");
+  assert.throws(
+    () => fs.fstatSync(reader),
+    (e) => e.code === "EBADF",
+  );
+  fs.writeFileSync(artifact.file, original);
+  assert.deepEqual(
+    runtime.verifyFunctionalArtifact(artifact.file, expected),
+    original,
+  );
+});
+
+test(
+  "artifact FIFO replacement cannot block the reader",
+  { skip: process.platform === "win32" },
+  (t) => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-health-fifo-"));
+    t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+    const artifact = fixtureArtifact(root);
+    const script = `import fs from 'node:fs'; import {execFileSync} from 'node:child_process'; import assert from 'node:assert/strict';
+    import {verifyFunctionalArtifact} from ${JSON.stringify(new URL("../tools/functional-health-runtime.mjs", import.meta.url).href)};
+    const file=${JSON.stringify(artifact.file)}, original=fs.lstatSync; let changed=false;
+    fs.lstatSync=function(f,...args){const st=original.call(this,f,...args);if(f===file&&!changed){changed=true;fs.unlinkSync(f);execFileSync('mkfifo',[f]);}return st;};
+    assert.throws(()=>verifyFunctionalArtifact(file,{}),/identity changed|regular file/);`;
+    const result = spawnSync(
+      process.execPath,
+      ["--input-type=module", "-e", script],
+      { encoding: "utf8", timeout: 5000 },
+    );
+    assert.equal(
+      result.error,
+      undefined,
+      "reader must finish without a FIFO writer",
+    );
+    assert.equal(result.status, 0, result.stderr);
+  },
+);
+
+test("artifact verification is supervised, cancellable and recovers after a startup deadline", async (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-health-worker-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const artifact = fixtureArtifact(root),
+    expected = { ...declaration().artifact, sha256: artifact.sha256 };
+  assert.equal(typeof runtime.verifyFunctionalArtifactInWorker, "function");
+  await assert.rejects(
+    runtime.verifyFunctionalArtifactInWorker(artifact.file, expected, {
+      timeoutMs: 1,
+    }),
+    (e) => e.code === "DSC_WORKER_TIMEOUT",
+  );
+  const cancelled = new AbortController();
+  cancelled.abort();
+  await assert.rejects(
+    runtime.verifyFunctionalArtifactInWorker(artifact.file, expected, {
+      signal: cancelled.signal,
+    }),
+    (e) => e.code === "DSC_WORKER_ABORTED",
+  );
+  let ticked = false;
+  const timer = setTimeout(() => {
+    ticked = true;
+  }, 0);
+  const bytes = await runtime.verifyFunctionalArtifactInWorker(
+    artifact.file,
+    expected,
+  );
+  clearTimeout(timer);
+  assert.equal(
+    ticked,
+    true,
+    "parent event loop remains available during verification",
+  );
+  assert.deepEqual(bytes, fs.readFileSync(artifact.file));
+  await assert.rejects(
+    runtime.verifyFunctionalArtifactInWorker(artifact.file, expected, {
+      timeoutMs: 10001,
+    }),
+    /budget/,
+  );
+});
+
+test("artifact growth during descriptor reads stays within the observed byte budget", (t) => {
+  const root = fs.mkdtempSync(
+    path.join(os.tmpdir(), "dsc-health-read-growth-"),
+  );
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const artifact = fixtureArtifact(root),
+    expected = { ...declaration().artifact, sha256: artifact.sha256 },
+    size = fs.statSync(artifact.file).size;
+  const original = fs.readSync;
+  let total = 0;
+  fs.readSync = function (...args) {
+    fs.truncateSync(artifact.file, 33 * 1024 * 1024);
+    const n = original.apply(this, args);
+    total += n;
+    return n;
+  };
+  try {
+    assert.throws(
+      () => runtime.verifyFunctionalArtifact(artifact.file, expected),
+      /changed during|byte budget/,
+    );
+  } finally {
+    fs.readSync = original;
+  }
+  assert.ok(total <= size + 1, `read ${total} bytes from a growing artifact`);
+});
+
+test("cancelling runner preflight terminates verification without DSH or result and removes signal listeners", async (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-health-preflight-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const artifact = fixtureArtifact(root),
+    manifest = declaration(),
+    out = path.join(root, "result.json");
+  manifest.artifact.sha256 = artifact.sha256;
+  const before = process.listenerCount("SIGTERM"),
+    beforeInt = process.listenerCount("SIGINT");
+  const pending = runtime.runFunctionalHealth({
+    manifest,
+    artifact: artifact.file,
+    out,
+  });
+  process.emit("SIGTERM");
+  await assert.rejects(pending, (e) => e.code === "DSC_WORKER_ABORTED");
+  assert.equal(fs.existsSync(out), false);
+  assert.equal(process.listenerCount("SIGTERM"), before);
+  assert.equal(process.listenerCount("SIGINT"), beforeInt);
+  assert.deepEqual(
+    await runtime.verifyFunctionalArtifactInWorker(
+      artifact.file,
+      manifest.artifact,
+    ),
+    fs.readFileSync(artifact.file),
+  );
+});
+
 function fixtureDsh(
   root,
   { status = 200, stall = false, stallVersion = false } = {},

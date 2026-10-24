@@ -370,3 +370,63 @@ test("dispose refuses a replacement directory and preserves its unrelated conten
     fs.rmSync(backup, { recursive: true, force: true });
   }
 });
+
+// Root rules must be read and parsed by the supervised worker, like sources.
+test("upgrade rules never use an unsupervised parent read", async (t) => {
+  const f = fixture(t, 0),
+    original = fs.readFileSync;
+  fs.readFileSync = function (file, ...args) {
+    if (typeof file === "string" && file.endsWith("/rules/severity.json"))
+      throw Error("parent rules read is forbidden");
+    return original.call(this, file, ...args);
+  };
+  try {
+    const result = await runUpgradePreview(input(f));
+    assert.equal(result.status, "compared", result.error);
+    assert.match(result.rules.sha256, /^[a-f0-9]{64}$/);
+  } finally {
+    fs.readFileSync = original;
+  }
+});
+
+test(
+  "upgrade rejects oversized and symbolic-link root rules and recovers",
+  { skip: process.platform === "win32" },
+  async (t) => {
+    const f = fixture(t, 0),
+      project = path.join(f.root, "tool");
+    fs.mkdirSync(project);
+    const source = new URL("../", import.meta.url);
+    for (const dir of ["lib", "rules"])
+      fs.cpSync(new URL(dir, source), path.join(project, dir), {
+        recursive: true,
+      });
+    fs.symlinkSync(
+      new URL("node_modules", source),
+      path.join(project, "node_modules"),
+      "dir",
+    );
+    const { runUpgradePreview: preview } = await import(
+      new URL("lib/upgrade-preview.mjs", `file://${project}/`)
+    );
+    const rulesFile = path.join(project, "rules/severity.json"),
+      original = fs.readFileSync(rulesFile);
+    fs.writeFileSync(
+      rulesFile,
+      Buffer.concat([original, Buffer.alloc(8 * 1024 * 1024, 32)]),
+    );
+    const oversized = await preview(input(f));
+    assert.equal(oversized.status, "error");
+    assert.match(oversized.error, /byte budget/);
+    fs.writeFileSync(path.join(project, "rules-copy.json"), original);
+    fs.unlinkSync(rulesFile);
+    fs.symlinkSync(path.join(project, "rules-copy.json"), rulesFile);
+    const linked = await preview(input(f));
+    assert.equal(linked.status, "error");
+    assert.match(linked.error, /regular file/);
+    fs.unlinkSync(rulesFile);
+    fs.writeFileSync(rulesFile, original);
+    const recovered = await preview(input(f));
+    assert.equal(recovered.status, "compared", recovered.error);
+  },
+);

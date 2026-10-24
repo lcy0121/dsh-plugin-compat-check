@@ -3,7 +3,6 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { createHash } from "node:crypto";
-import { gunzipSync } from "node:zlib";
 import { spawn } from "node:child_process";
 import { command, stopOwnedChild } from "../lib/probe-runner.mjs";
 import { isolatedEnvironment } from "../lib/execution-environment.mjs";
@@ -26,93 +25,11 @@ const summary = (error) =>
     .replace(/Bearer\s+\S+|([?&]token=)[^\s&]+/gi, "[redacted]")
     .slice(0, 1024);
 
-export function verifyFunctionalArtifact(file, expected) {
-  const stat = fs.lstatSync(file);
-  if (
-    !stat.isFile() ||
-    stat.isSymbolicLink() ||
-    stat.size > 32 * 1024 * 1024 ||
-    !file.endsWith(".tgz")
-  )
-    throw Error("Expected bounded regular local .tgz artifact");
-  const bytes = fs.readFileSync(file);
-  if (hash(bytes) !== expected.sha256)
-    throw Error("Artifact SHA256 differs from declaration");
-  const tar = gunzipSync(bytes, { maxOutputLength: 64 * 1024 * 1024 });
-  // Only ordinary USTAR regular files/directories are supported. Do not let
-  // installer PAX/GNU path rewriting disagree with the identity inspected here.
-  if (tar.length < 1024 || tar.length % 512)
-    throw Error("Invalid tar block alignment");
-  let pkg = null,
-    terminated = false;
-  const paths = new Set();
-  for (let offset = 0; offset + 512 <= tar.length; ) {
-    const head = tar.subarray(offset, offset + 512);
-    if (head.every((b) => b === 0)) {
-      if (
-        offset + 1024 > tar.length ||
-        !tar.subarray(offset).every((b) => b === 0)
-      )
-        throw Error("Invalid tar termination or concatenated artifact");
-      terminated = true;
-      break;
-    }
-    const str = (a, b) =>
-      head.subarray(a, b).toString("utf8").replace(/\0.*$/s, "");
-    const checksumText = str(148, 156).trim();
-    const checksum = head.reduce(
-      (sum, byte, index) => sum + (index >= 148 && index < 156 ? 32 : byte),
-      0,
-    );
-    if (
-      !/^[0-7]+$/.test(checksumText) ||
-      parseInt(checksumText, 8) !== checksum
-    )
-      throw Error("Invalid tar header checksum");
-    if (
-      head.subarray(257, 263).toString() !== "ustar\0" ||
-      head.subarray(263, 265).toString() !== "00"
-    )
-      throw Error("Unsupported tar format; ordinary npm USTAR files only");
-    const type = str(156, 157);
-    if (!["", "0", "5"].includes(type) || str(157, 257))
-      throw Error(
-        "Unsupported tar entry: extensions, links and special files are refused",
-      );
-    const name = (str(345, 500) ? str(345, 500) + "/" : "") + str(0, 100);
-    const normalized = type === "5" ? name.replace(/\/$/, "") : name;
-    if (
-      !/^[A-Za-z0-9@._+ /-]+$/.test(name) ||
-      !normalized.startsWith("package/") ||
-      normalized.split("/").some((p) => !p || p === "." || p === "..") ||
-      (type !== "5" && name.endsWith("/"))
-    )
-      throw Error("Unsafe or unsupported tar path");
-    if (paths.has(normalized)) throw Error("Duplicate tar path");
-    paths.add(normalized);
-    const sizeText = str(124, 136).trim();
-    if (!/^[0-7]+$/.test(sizeText)) throw Error("Invalid tar size");
-    const size = parseInt(sizeText, 8);
-    if (
-      !Number.isSafeInteger(size) ||
-      offset + 512 + Math.ceil(size / 512) * 512 > tar.length ||
-      (type === "5" && size !== 0)
-    )
-      throw Error("Truncated or invalid tar artifact");
-    if (name === "package/package.json") {
-      if (pkg || !["", "0"].includes(type) || size > 65536)
-        throw Error("Unsafe or duplicate package identity");
-      pkg = JSON.parse(
-        tar.subarray(offset + 512, offset + 512 + size).toString("utf8"),
-      );
-    }
-    offset += 512 + Math.ceil(size / 512) * 512;
-  }
-  if (!terminated) throw Error("Missing tar termination");
-  if (!pkg || pkg.name !== expected.name || pkg.version !== expected.version)
-    throw Error("Artifact package name/version differs from declaration");
-  return bytes;
-}
+export {
+  verifyFunctionalArtifact,
+  verifyFunctionalArtifactInWorker,
+} from "./functional-artifact.mjs";
+import { verifyFunctionalArtifactInWorker } from "./functional-artifact.mjs";
 
 export async function createFunctionalDom(
   chrome,
@@ -279,19 +196,46 @@ export async function runFunctionalHealth({
 }) {
   const validation = validateFunctionalManifest(manifest);
   if (!validation.valid) throw Error(validation.errors.join("; "));
-  // All trust/identity and destination checks precede process creation or network.
-  const bytes = verifyFunctionalArtifact(artifact, manifest.artifact);
+  const cancellation = new AbortController(),
+    timer = setTimeout(() => cancellation.abort(), LIMITS.totalMs);
+  const cancel = () => cancellation.abort();
+  for (const sig of ["SIGINT", "SIGTERM"]) process.once(sig, cancel);
+  const startedAt = new Date().toISOString();
+  try {
+    // Verification, hashing, decompression and tar parsing share total supervision.
+    const bytes = await verifyFunctionalArtifactInWorker(
+      artifact,
+      manifest.artifact,
+      { signal: cancellation.signal },
+    );
+    cancellation.signal.throwIfAborted();
+    return await runVerifiedHealth(
+      { manifest, out, chromePath },
+      bytes,
+      cancellation,
+      startedAt,
+    );
+  } finally {
+    cancellation.abort();
+    clearTimeout(timer);
+    for (const sig of ["SIGINT", "SIGTERM"])
+      process.removeListener(sig, cancel);
+  }
+}
+
+async function runVerifiedHealth(
+  { manifest, out, chromePath },
+  bytes,
+  cancellation,
+  startedAt,
+) {
+  // All identity and destination checks precede DSH execution or network.
   if (fs.existsSync(out)) throw Error("Output must be a new JSON file");
   if (!fs.statSync(path.dirname(out)).isDirectory())
     throw Error("Output parent is not a directory");
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-functional-health-"));
   fs.chmodSync(root, 0o700);
-  const cancellation = new AbortController(),
-    timer = setTimeout(() => cancellation.abort(), LIMITS.totalMs);
-  const cancel = () => cancellation.abort();
-  for (const sig of ["SIGINT", "SIGTERM"]) process.once(sig, cancel);
-  const startedAt = new Date().toISOString(),
-    cleanupErrors = [];
+  const cleanupErrors = [];
   let host = null,
     chrome = null,
     dom = null,
@@ -442,9 +386,6 @@ export async function runFunctionalHealth({
         "No account/model configuration is supplied; author declarations and imported JSON are not automatically trusted",
       ],
     };
-    clearTimeout(timer);
-    for (const sig of ["SIGINT", "SIGTERM"])
-      process.removeListener(sig, cancel);
   }
   fs.writeFileSync(out, JSON.stringify(result, null, 2) + "\n", {
     flag: "wx",
