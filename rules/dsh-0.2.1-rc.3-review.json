@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "dshVersion": "0.2.1-rc.3",
+  "upstream": {
+    "tag": "dsh-v0.2.1-rc.3",
+    "commit": "1f81c047fc48fa190a683e469daa699857e9afe8",
+    "release": "https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3",
+    "sourceArchiveSha256": "a955f3232202505d714037ddee55cde0e3b5700bdc5b1eba0d520d74442c390d",
+    "previousSourceArchiveSha256": "98d9342331b9b7ef94da401ad26e1a6d1efc6e3afe7967446c8bc1584dc9463d",
+    "npm": {
+      "tarball": "https://registry.npmjs.org/@deepseek-ai/dsh/-/dsh-0.2.1-rc.3.tgz",
+      "integrity": "sha512-H+E9HLnHf7fJqzen84Z9Bq8ggb5xbrcbyhZjXTJLE9NabHr3zteGvTRvdvGkxPl4ov80is4WLglFmSo+/olJjg==",
+      "shasum": "ccc527065b9f736ea299a1f78150a21143d961aa"
+    },
+    "npmArchiveVerified": true
+  },
+  "asar": {
+    "sha256": "848f8437a990ffb88fca6772eb8e0e69af84d066c76087ac973a8d8015b459f4",
+    "bytes": 182472218
+  },
+  "catalogue": {
+    "file": "dsh-api-catalog-0.2.1-rc.3.json",
+    "sha256": "dd253bc418a787d881e402f3650857c2d8e7631b818927743a5f2b81104f25a5",
+    "sourceVerified": true,
+    "counts": {
+      "hostServices": 98,
+      "hostMethods": 291,
+      "clientServices": 8,
+      "clientMethods": 43
+    },
+    "namesChanged": false
+  },
+  "signatureReview": {
+    "host": {
+      "signaturesEqual": true,
+      "signatures": 623,
+      "sourceSha256": "c67bebd4f8f017fb6f36361a1c0c1b942dd062cefb03532fdc12e94cb5d49918"
+    },
+    "client": {
+      "signaturesEqual": true,
+      "signatures": 61,
+      "sourceSha256": "149a0799c8f032243aa1f3d02b4d72ffa720e9f218a939524663e52f9c5eca41"
+    },
+    "packages/boot/app-boot/src/plugin-compatibility.ts": {
+      "identical": true,
+      "sha256": "3aaddccc788734dbcea920f078ae7f8209f57b3330e8431d2f4a5936cf65558f"
+    },
+    "packages/boot/app-boot/src/package-meta.ts": {
+      "identical": true,
+      "sha256": "2b09e3ce0ec793971c53176eded347b735ee41be2ddfdcbfd3492f945fd68e2a"
+    }
+  },
+  "semanticReview": {
+    "publicSignatures": "Full generated host/client signatures including events compared at both fixed tags; no signature changes. DraftInitializationOptions adds optional whenDraftExists; client descriptions change. Product analytics type additions do not imply missing services.",
+    "declarations": "app-boot plugin-compatibility.ts and package-meta.ts identical; engines-first, official peer fallback and exact external exemptions retained.",
+    "lifecycleLoaderHttp": "Boot/HMR, cordis versions and webserver/connection implementation unchanged at the two tags. Unwrap/default export and own injection map semantics retained. Real acceptance exercises activation, restore, cleanup and own HTTP fence.",
+    "navigation": "Three region menus navigate to plugin main list. Folding/visibility is not activation evidence. Create only appends a Cordis draft.",
+    "drafts": "startSession always resolves an unarchived blank; requested preset skips blanks listing other presets. whenDraftExists overrides legacy clearPreviousDraft; keep default, replace/append explicit.",
+    "modelListing": "Official API key route uses credential-gated listModels, first-use bounded wait, lazy refresh and failure fallback. Controlled tests use installed runtime and loopback GET /models only.",
+    "rulesDecision": "No missing service/method or breaking signature evidence; no new fatal/warning static rule. Navigation/draft advisory and executable acceptance cover behavioral changes without guessing business impact."
+  },
+  "scope": "Provenance and semantic review only; runtime/business acceptance recorded separately in docs/current-state.json. This file does not grant future-version compatibility."
+}

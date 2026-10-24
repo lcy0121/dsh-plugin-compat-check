@@ -4,7 +4,7 @@
 
 [简体中文](https://github.com/lcy0121/dsh-plugin-compat-check/blob/0.1.7-dev/README.md) | [English](https://github.com/lcy0121/dsh-plugin-compat-check/blob/0.1.7-dev/README.en.md) | [한국어](https://github.com/lcy0121/dsh-plugin-compat-check/blob/0.1.7-dev/README.ko.md)
 
-已发布**0.1.6**为元数据补丁，保留0.1.5功能；本说明随**0.1.7-dev源码**维护，新增修复尚未发布npm版本，源码版本真源仍为0.1.6。Node `^22.19.0 || >=24`，宿主声明`>=0.2.0-rc.2`；已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2**，最低版本声明不认证未来宿主。[Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/0.1.7-dev/docs/Plan.md)记录契约与待办。
+已发布**0.1.6**为元数据补丁，保留0.1.5功能；本说明随**0.1.7-dev源码**维护，新增修复和rc.3适配尚未发布npm版本，源码版本真源仍为0.1.6。Node `^22.19.0 || >=24`，宿主声明`>=0.2.0-rc.2`；已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3**，最低版本声明不认证未来宿主。[Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/0.1.7-dev/docs/Plan.md)记录契约与待办。
 
 ![历史详情页：源码位置、影响与依据，不代表当前源码验收](https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/main/plugin/assets/compat-detail-partial.png)
 
@@ -14,13 +14,13 @@
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
-此命令安装registry版本。DSH 0.2.1-rc.2入口：**更多 → 设置 → 内置插件 → 兼容性**。选择实际profile，不默认desktop；agent可调用`compat_check`，skill provider指导读取同一报告。
+此命令安装registry版本。源码在DSH 0.2.1-rc.3的入口：**左下角账号菜单 → 设置 → 内置插件 → 兼容性**。选择实际profile，不默认desktop；agent可调用`compat_check`，skill provider指导读取同一报告。
 
 面板提供筛选/折叠、完整报告预览与显式复制、基线新增风险和核实建议。依赖图展示潜在关系，人工记录不改判定，健康页只导入历史JSON。分享前预览敏感信息；筛选不会裁剪完整导出，不自动发帖。[使用指南](https://github.com/lcy0121/dsh-plugin-compat-check/blob/0.1.7-dev/docs/guide.md)给出操作、缓存、锁恢复与资源限额。
 
 ## 升级前兼容性预检
 
-面板输入目标版本，或调用`compat_check({"upgradeTo":"0.2.1-rc.2"})`；当前版本取运行宿主，结果为独立`upgradePreview`，普通`report`为null。两端仅支持上述两个精确版本，未知版本/范围返回`unsupported-version`及退出3，不回退目录。
+面板输入目标版本，或调用`compat_check({"upgradeTo":"0.2.1-rc.3"})`；当前版本取运行宿主，结果为独立`upgradePreview`，普通`report`为null。两端支持上述三个精确版本的任意比较，未知版本/范围返回`unsupported-version`及退出3，不回退目录。例如rc.2→rc.3可比较，rc.4未认证。
 
 预检对同组私有字节静态比较，不执行插件、安装/升级宿主，不使用运行时、probe、豁免或普通缓存/基线，不写产品状态。**0/1/2只表示无/非致命/致命新增或变重风险，3表示无法预检**；0仍可能有旧问题，不证明升级后业务通过。[完整契约](https://github.com/lcy0121/dsh-plugin-compat-check/blob/0.1.7-dev/docs/Plan.md#27-升级前静态预检契约)。
 

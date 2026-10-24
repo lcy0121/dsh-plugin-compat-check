@@ -19,7 +19,7 @@ npm包通过`files: skill/`交付，prepack同步正文及共享内核；包不�
 
 provider/skill name均为dsh-plugin-compat-check，source=bundled、rank=600；提供list/get、description、invocation和正文。frontmatter保持单行name/description及kebab-case名称，不添加disableModelInvocation等旧键。
 
-当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为**12243 字符**，由文档测试核对。工具普通体检返回完整report、baseline、版本和exitCode；升级返回upgradePreview，report为null，不从文本反推字段。正文要求实际源码位置、certainty/impactBasis及coverage/vacuous，不把未知服务当缺失，也不把预测当业务通过。
+当前正文（frontmatter外，slice后trim、JavaScript UTF-16 length）为**12496 字符**，由文档测试核对。工具普通体检返回完整report、baseline、版本和exitCode；升级返回upgradePreview，report为null，不从文本反推字段。正文要求实际源码位置、certainty/impactBasis及coverage/vacuous，不把未知服务当缺失，也不把预测当业务通过。
 
 ## 验证边界
 

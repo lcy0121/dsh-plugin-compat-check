@@ -94,6 +94,16 @@ node tools/business-labels.mjs --predictions <预测.json> --labels <标签.json
 
 真实运行需当次授权的下载、DSH/Chrome执行环境；全新私有profile/缓存不复制账户或用户工作文件。每队列10分钟、清理宽限15秒、最多两轮和64证据文件，终止后确认自有宿主/Chrome停止再清目录，未确认清理即失败。`sidebar-model`另需当次账户/模型授权，工具关闭、两次首步、无重试/标题、每步256token，不属默认测试/CI。回归见`test/business-holdout.test.mjs`及真实回归相关测试。
 
+rc.3来源及语义审查保存在[rules/dsh-0.2.1-rc.3-review.json](../rules/dsh-0.2.1-rc.3-review.json)，包含固定tag/commit、官方npm完整性、ASAR及签名摘要；无命名/签名删除，不新增缺失API规则。三处更多与草稿的真实驱动分别验证区域身份、插件主列表、空白复用和preset/策略隔离。模型发现用私有HOME/DSH_HOME与白名单环境，禁止继承密钥；官方模块只请求受控loopback列表，失败/超时不等于模型不可用。
+
+```sh
+DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 DSC_REQUIRE_RC2_UI=1 DSC_RC2_ARTIFACT=<完整tgz绝对路径> node tools/rc2-live.mjs
+DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 node tools/real-regression.mjs --live --repeat 1 --out-dir <空目录>
+DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 node tools/real-regression.mjs --replay <对应run-root>
+```
+
+显式宿主不符为错误；0.2.0-rc.2保留其它真实门禁，rc.2/rc.3执行完整面板。旧队列清单不变，rc.3用独立`real-regression-manifest-rc3.json`；回放按所选版本/摘要隔离，不互借结果。Linux固定三版矩阵；macOS/Windows/远端CI范围以[current-state](current-state.json)实际证据为准。
+
 ## 提取器与探针维护
 
 - AST与词法绑定区分真实Context、同名普通对象、注释/字符串及遮蔽；源码图保留副作用导入和懒加载来源，不用入口不可达证明死代码。动态、异步、递归或预算不足应弃权并限制覆盖。作者快照、缓存身份与升级捕获共用增量目录枚举，文件共用非阻塞有界/身份检查；复核、冻结也检查预算。缓存生命周期回归覆盖目标容量、闲置淘汰、在途取消、重访和卸载，共享worker队列回归验证并发上限、排队超时/取消和恢复。

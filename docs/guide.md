@@ -2,6 +2,8 @@
 
 本指南随当前仓库源码维护；0.1.7-dev尚未发布，版本真源仍为0.1.6，新增源码修复不代表npm 0.1.6已有交付。面板能力可安装npm插件使用，CLI、健康执行器与作者CI从仓库运行；本地构建见[源码打包说明](../plugin/README.md#从源码构建安装)。各入口均须保留自身输入身份与证据边界，不能把声明放行、激活或无发现改称业务验收通过。
 
+rc.3在左下角账号菜单进入“设置 → 内置插件 → 兼容性”；三处“更多”分别属于全局面板、会话视图和右侧工具。“浏览更多插件”打开主插件列表；“创建你的插件”只向Cordis空白会话追加草稿，不发送。入口折叠不能用来判断激活失败。`startSession`可复用同工作区未归档空白会话，指定preset跳过其它preset的空白；`whenDraftExists`（默认keep，另有replace/append）优先于`clearPreviousDraft`，已有草稿需明确策略。
+
 ## 可选功能健康检查
 
 面板的“功能健康检查”只离线读取用户显式选择的JSON，校验声明摘要并展示历史实测及清理结果；它不运行检查、不安装插件、不联系服务或上传文件。版本相符只说明版本匹配，当前安装制品尚未核验；SHA-256不是作者签名，也不能证明检查声明本身可靠。导入不改变静态发现、基线、人工处置或兼容性豁免。
@@ -130,7 +132,7 @@ node tools/meta-check.mjs --json
 ## 升级预检与有限批量
 
 ```sh
-node bin/compat-check.mjs --nm <profile或node_modules> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json
+node bin/compat-check.mjs --nm <profile或node_modules> --dsh-version 0.2.1-rc.2 --upgrade-to 0.2.1-rc.3 --json
 node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.json
 node tools/static-batch.mjs --manifest test/fixtures/static-batch.json --previous batch.json
 ```

@@ -19,7 +19,8 @@ test("ordinary reports distinguish an exact reviewed catalogue from unknown and 
   for (const [version, reference, selection, verified] of [
     ["0.2.0-rc.2", "0.2.0-rc.2", "exact", true],
     ["0.2.1-rc.2", "0.2.1-rc.2", "exact", true],
-    ["9.9.9", "0.2.1-rc.2", "fallback", false],
+    ["0.2.1-rc.3", "0.2.1-rc.3", "exact", true],
+    ["9.9.9", "0.2.1-rc.3", "fallback", false],
     ["0.2.1-rc.1", "0.2.0-rc.2", "fallback", false],
     [undefined, "0.2.0-rc.2", "fallback", false],
   ]) {
@@ -65,16 +66,19 @@ test("changed bundled bytes fail closed and upgrade support cannot exceed the re
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-catalog-pin-"));
   try {
     fs.mkdirSync(path.join(tmp, "rules"));
-    fs.copyFileSync(
-      path.join(root, "rules/dsh-api-catalog-0.2.1-rc.2.json"),
-      path.join(tmp, "rules/dsh-api-catalog-0.2.1-rc.2.json"),
-    );
-    assert.equal(loadCatalog(tmp, "0.2.1-rc.2").evidence.verified, true);
-    fs.appendFileSync(
-      path.join(tmp, "rules/dsh-api-catalog-0.2.1-rc.2.json"),
-      " ",
-    );
-    assert.throws(() => loadCatalog(tmp, "0.2.1-rc.2"), /摘要/);
+    for (const entry of CATALOG_REFERENCES) {
+      assert.equal(
+        Object.isFrozen(entry),
+        true,
+        "Catalogue reference must be immutable",
+      );
+      const source = path.join(root, "rules", entry.file),
+        target = path.join(tmp, "rules", entry.file);
+      fs.copyFileSync(source, target);
+      assert.equal(loadCatalog(tmp, entry.version).evidence.verified, true);
+      fs.appendFileSync(target, " ");
+      assert.throws(() => loadCatalog(tmp, entry.version), /摘要/);
+    }
     assert.deepEqual(
       [...SUPPORTED_PREVIEW_VERSIONS].sort(),
       CATALOG_REFERENCES.map((c) => c.version).sort(),
@@ -93,11 +97,11 @@ test("fallback warning and reference digest remain visible in text, quiet and sa
     renderIssueReport(body),
   ]) {
     assert.match(text, /9\.9\.9/);
-    assert.match(text, /0\.2\.1-rc\.2/);
+    assert.match(text, /0\.2\.1-rc\.3/);
     assert.match(text, /未认证/);
     assert.match(
       text,
-      /90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743/,
+      /dd253bc418a787d881e402f3650857c2d8e7631b818927743a5f2b81104f25a5/,
     );
   }
 });
@@ -139,7 +143,7 @@ test("panel displays the actual target, reference digest and fallback warning wi
   assert.match(h.text(), /未认证/);
   assert.match(
     h.text(),
-    /90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743/,
+    /dd253bc418a787d881e402f3650857c2d8e7631b818927743a5f2b81104f25a5/,
   );
   assert(h.rows().length > 0);
 });

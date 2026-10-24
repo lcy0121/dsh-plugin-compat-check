@@ -15,13 +15,13 @@ description: 当用户询问已安装DSH插件是否适配当前版本、升级�
 
 ## 升级前对比
 
-用户要比较当前与目标版本时，已注册工具优先调用 `compat_check({"upgradeTo":"0.2.1-rc.2"})`，需要时指定实际 `profile`；当前版本由运行宿主解析，读取返回的 `upgradePreview`，普通 `report`、baseline/cache为null。没有工具时使用仓库 CLI 的独立预检模式，先明确 profile、当前精确版本和目标精确版本，再运行：
+用户要比较当前与目标版本时，已注册工具优先调用 `compat_check({"upgradeTo":"0.2.1-rc.3"})`，需要时指定实际 `profile`；当前版本由运行宿主解析，读取返回的 `upgradePreview`，普通 `report`、baseline/cache为null。没有工具时使用仓库 CLI 的独立预检模式，先明确 profile、当前精确版本和目标精确版本，再运行：
 
 ```bash
-node <repo>/bin/compat-check.mjs --nm <profile或node_modules目录> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json
+node <repo>/bin/compat-check.mjs --nm <profile或node_modules目录> --dsh-version 0.2.1-rc.2 --upgrade-to 0.2.1-rc.3 --json
 ```
 
-此模式的 `--dsh-version` 是**当前精确版本**，`--upgrade-to` 是目标精确版本；当前已认证目录仅为 `0.2.0-rc.2` 和 `0.2.1-rc.2`。未知版本或版本范围返回 `status=unsupported-version`、退出3并标明未认证，不能用邻近目录替代。普通文本输出省略 `--json`；此模式不接受 `--quiet`、探针/启动参数、规则/目录覆盖、基线参数或故障报告，可带无操作的 `--no-baseline`。
+此模式的 `--dsh-version` 是**当前精确版本**，`--upgrade-to` 是目标精确版本；当前已认证目录仅为 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`。未知版本或版本范围返回 `status=unsupported-version`、退出3并标明未认证，不能用邻近目录替代。普通文本输出省略 `--json`；此模式不接受 `--quiet`、探针/启动参数、规则/目录覆盖、基线参数或故障报告，可带无操作的 `--no-baseline`。
 
 JSON 使用独立的 `schemaVersion=1 / kind=plugin-compat-check/upgrade-preview`；读取 `currentReport`、`targetReport`、带插件身份的 `changes`、`summary` 与 `limitations`。它对**同一份已安装制品**做静态版本对比：不执行插件、不启动或升级宿主，不读取旁置/环境探针、profile豁免、基线或缓存，也不写状态。新增/恶化风险含致命项时退出2，其余新增/恶化风险退出1，无新增/恶化风险退出0；输入/扫描失败或未认证版本为3。保留提取不完整、coverage/vacuous和客户端未验证限制；0仍可能有未变化的旧问题。差异是目录与声明策略下的预测，不能据此认定升级后业务通过，也不能代替目标宿主的运行时与业务验收。
 
@@ -207,12 +207,14 @@ CI 里可以直接用：`0` 过，`1`/`2` 按你的策略处理，`3` 是**工�
 
 声明按目标DSH分流：从0.2.1-rc.1起优先自有`engines.dsh`，仅缺失该字段时回退官方peer；更旧目标保留旧peer规则与engines建议。非法字段、空/非法范围会报告风险；peer的workspace:^/~/*按当前DSH精确版本处理，engines的workspace不获放行。声明冲突为declared-incompatible及推断影响，不能写成实际加载失败；宿主也可能跳过不兼容bundle后继续启动。历史npm0.1.2使用旧算法；判断实际行为先核对安装包版本，是否公开发布以registry和Plan记录为准。
 
-DSH 0.2.1-rc.2的UI入口为“更多 → 设置 → 内置插件 → 兼容性”。HMR撤销自有注册、计时器及诊断handle，卸载后不得发布新成功或写基线；worker按预算回收，不承诺立即停止。历史现场证据与当前源码分别核验，见仓库docs/current-state.json。
+DSH 0.2.1-rc.3的UI入口为“左下角账号菜单 → 设置 → 内置插件 → 兼容性”。HMR撤销自有注册、计时器及诊断handle，卸载后不得发布新成功或写基线；worker按预算回收，不承诺立即停止。历史现场证据与当前源码分别核验，见仓库docs/current-state.json。
 
 只读目标node_modules同级的独立`compatibility.json`，形如`{"sample@1.0.0":["0.2.1-rc.2"]}`。只有插件名、插件精确版本与DSH精确版本全匹配才豁免范围冲突；不使用包内兼容声明代替授权。无效记录整条忽略（其它有效记录仍用）并限制覆盖；缺文件为空豁免，可读性/JSON错误、非普通文件或超过64KiB则豁免未观测。不得代用户写豁免，豁免不绕过非法字段，也不证明API或业务成功。
 
-普通体检中，CLI的`--dsh-version`及probe-boot采集值、宿主自己的DSH版本用于目录选择：DSH≥0.2.1-rc.2使用独立rc.2目录，其余/未知使用旧0.2.0-rc.2目录，显式`--catalog`优先。未知版本不猜声明，未来DSH未经认证。单独文件probe不自动补目标版本，需给`--dsh-version`。目录不等于运行时面。当前契约/验收/后续见仓库docs/Plan.md，统计见docs/current-state.json；公开安装以npm registry为准。
+普通体检中，CLI的`--dsh-version`及probe-boot采集值、宿主自己的DSH版本用于目录选择：DSH≥0.2.1-rc.3使用独立rc.3目录，≥0.2.1-rc.2使用rc.2目录，其余/未知使用旧0.2.0-rc.2目录，显式`--catalog`优先。未知版本不猜声明，未来DSH未经认证。单独文件probe不自动补目标版本，需给`--dsh-version`。目录不等于运行时面。当前契约/验收/后续见仓库docs/Plan.md，统计见docs/current-state.json；公开安装以npm registry为准。
 
 普通报告另有 `catalog`：目标版本、参考目录版本、SHA-256、selection、verified、certifiedVersions及warning。转述时同时给出目标与目录身份；fallback/override、未知身份和未认证提示不得省略，verified仅表示内置目录与已验收精确版本匹配，不是业务认证。内置目录摘要不符、同名插件重复安装（含alias及不同版本）会明确无法判定，不允许转述为无冲突；普通报告失败不推进基线。仓库YAML修复仅涉及锁文件等工具依赖，不属于npm插件运行时依赖。新目录治理流程见仓库 `docs/maintaining.md#api目录候选审查`。
 
 对observationVersion=1探针始终校验采样时间：未来偏差最多5分钟（含边界），缺失/非法或超限时撤回该文件的服务及loader证据，不推断FAILED/PENDING或确定方法缺失；普通体检另保留24小时有效期及profile/DSH绑定。转述observation.notes中的原因，保留静态发现和待验证项，不修正原采样时间、不把时钟异常当插件不兼容；修复时钟/重采样后再显式刷新。旧未绑定报告仍只使用显式键，不能补造绑定。仓库CI依赖安全工具不属于npm运行时功能。
+
+rc.3三处“更多”按全局面板/会话视图/右侧工具区分；浏览进入主插件列表，创建仅追加Cordis草稿，不发送。`startSession`复用空白会话；指定preset隔离，`whenDraftExists`默认keep并优先于旧clearPreviousDraft。入口折叠不等于未激活；名称目录没有变化也不证明行为相同。rc.3模型列表发现使用凭据门控，首次可等待/失败回退；不要为体检访问生产/models或发送模型请求。

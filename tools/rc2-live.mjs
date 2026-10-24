@@ -1,6 +1,14 @@
 #!/usr/bin/env node
 /** Owned real-host acceptance: declaration gates, metadata, actual settings UI and reload. */
 import fs from "node:fs";
+import { verifyRc3Navigation } from "./rc3-navigation.mjs";
+import { installRc3Fixture } from "./rc3-fixture.mjs";
+import {
+  acceptanceTarget,
+  assertBrowserAcceptance,
+} from "./acceptance-target.mjs";
+import { isolatedEnvironment } from "../lib/execution-environment.mjs";
+import { CATALOG_REFERENCES } from "../lib/contracts.mjs";
 import { failureDiagnostic, cleanupOwned } from "../lib/owned-process.mjs";
 import path from "node:path";
 import os from "node:os";
@@ -27,21 +35,7 @@ import { prepareOwnedPackageSource } from "./owned-package-source.mjs";
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-rc2-live-"));
-const env = {
-  ...process.env,
-  DSH_HOME: path.join(root, "home"),
-  DSH_AGENTS_HOME: path.join(root, "agents"),
-  npm_config_cache: path.join(root, "npm-cache"),
-};
-for (const k of [
-  "DSC_KERNEL",
-  "DSC_PROBE_REPORT",
-  "DSC_NODE_MODULES",
-  "DSC_PROFILE",
-  "DSC_OUT_DIR",
-  "DSH_VERSION",
-])
-  delete env[k];
+const env = isolatedEnvironment(root);
 const children = new Set();
 let chrome,
   chromeStarting,
@@ -200,7 +194,7 @@ for (const signal of ["SIGTERM", "SIGINT"])
   });
 try {
   const version = (await exec("dsh", ["--version"])).trim().split("\n").at(-1);
-  if (version !== "0.2.1-rc.2")
+  if (!acceptanceTarget(version, process.env.DSC_ACCEPTANCE_DSH_VERSION))
     result = {
       ok: true,
       applicable: false,
@@ -357,6 +351,26 @@ try {
       "Actual subpath metadata check failed",
     );
     result.subpathMetadata = true;
+    if (version === "0.2.1-rc.3") {
+      const official = pathToFileURL(
+        path.resolve(
+          path.dirname(driver.module),
+          "../../dsh-llm-deepseek/lib/index.js",
+        ),
+      ).href;
+      const output = await exec(
+        driver.command,
+        [
+          "--input-type=module",
+          "-e",
+          `import {verifyModelListing} from ${JSON.stringify(pathToFileURL(path.join(repo, "tools/rc3-model-listing.mjs")).href)};console.log(JSON.stringify(await verifyModelListing(await import(${JSON.stringify(official)}))));`,
+        ],
+        15000,
+        driver.env,
+      );
+      result.modelListing = JSON.parse(output.trim().split("\n").at(-1));
+    }
+
     // Install either the selected release bytes or an independently packed checkout.
     const profile = await init("rc2-ui");
     if (process.env.DSC_RC2_ARTIFACT) {
@@ -413,6 +427,7 @@ try {
       prepareOwnedPackageSource(repo, source);
       await exec("npm", [
         "pack",
+        "--ignore-scripts=false",
         path.join(source, "plugin"),
         "--silent",
         "--pack-destination",
@@ -458,8 +473,8 @@ try {
       type: "module",
       main: "index.js",
       dsh: {},
-      engines: { dsh: "0.2.1-rc.2" },
-      peerDependencies: { "@deepseek-ai/dsh": "0.2.1-rc.2" },
+      engines: { dsh: version },
+      peerDependencies: { "@deepseek-ai/dsh": version },
     });
     // A scanned, inactive package makes a positive prediction reproducible without
     // loading its code or changing any real user's profile.
@@ -467,6 +482,7 @@ try {
       path.join(upgradeFixture, "index.js"),
       "export function apply(){}\n",
     );
+    if (version === "0.2.1-rc.3") installRc3Fixture(profile);
     const futureProbeFile = path.join(root, "future-probe.json");
     const host = await boot("rc2-ui", { DSC_PROBE_REPORT: futureProbeFile });
     requireTrue(
@@ -480,8 +496,24 @@ try {
       () =>
         host.output.includes("inject-probe: registered=") &&
         host.output.includes("F2 启动自检:"),
-      "Candidate startup scans and initial report did not complete",
+      "Candidate startup scans and initial report did not complete: " +
+        redact(host.output).slice(-2200),
     );
+    if (version === "0.2.1-rc.3") {
+      await poll(
+        () => host.output.includes("RC3_NO_CREDENTIAL_DISCOVERY_PASS"),
+        "No-credential model discovery failed: " +
+          redact(host.output).slice(-1600),
+      );
+      result.noCredentialDiscovery = true;
+    }
+    requireTrue(
+      host.output.includes("HOST-HALF-ACTIVATED") &&
+        host.output.includes("D1 tool registered: compat_check") &&
+        host.output.includes("SKILL registered: dsh-plugin-compat-check"),
+      "Actual tool/skill/host activation missing",
+    );
+    result.hostToolSkill = true;
     const headers = {
         "X-DSH-Compat-Request": "1",
         Authorization: "Bearer " + new URL(host.url).searchParams.get("token"),
@@ -499,7 +531,7 @@ try {
       initial.status === 200 &&
         initial.body.ok &&
         initial.body.report.dshVersion === version,
-      "Actual candidate report lacks rc.2 identity",
+      "Actual candidate report lacks target identity",
     );
     requireTrue(
       initial.body.issueReport.includes("--probe <probe-report.json>") &&
@@ -512,7 +544,7 @@ try {
       initial.body.report.catalog?.verified === true &&
         initial.body.report.catalog.referenceVersion === version &&
         initial.body.report.catalog.sha256 ===
-          "90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743",
+          CATALOG_REFERENCES.find((c) => c.version === version).sha256,
       "Installed report lost reviewed catalogue identity",
     );
     result.catalogIdentity = true;
@@ -725,6 +757,15 @@ try {
       );
       await evalx(`${welcome}.click()`);
       await poll(() => evalx(`!${welcome}`), "Welcome dialog did not close");
+      if (version === "0.2.1-rc.3") {
+        const workspace = path.join(profile, "rc3-workspace");
+        fs.mkdirSync(workspace);
+        result.rc3Navigation = await verifyRc3Navigation(
+          evalx,
+          poll,
+          workspace,
+        );
+      }
       const settings = async () => {
         await evalx(
           `document.querySelector('button[aria-label="账号菜单"]').click()`,
@@ -766,7 +807,7 @@ try {
       };
       requireTrue(
         await evalx(
-          `document.querySelector('[data-catalog-status="verified"]')?.innerText.includes('90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743') && document.body.innerText.includes('目录认证范围：0.2.1-rc.2')`,
+          `document.querySelector('[data-catalog-status="verified"]')?.innerText.includes('${CATALOG_REFERENCES.find((c) => c.version === version).sha256}') && document.body.innerText.includes('目录认证范围：${version}')`,
         ),
         "Actual DOM lacks catalogue digest and certification scope",
       );
@@ -883,7 +924,9 @@ try {
         `Array.from(document.querySelectorAll('button')).find(e=>e.innerText==='清除筛选').click()`,
       );
       await poll(
-        async () => (await rowNames()).length === 6,
+        async () =>
+          JSON.stringify((await rowNames()).sort()) ===
+          JSON.stringify(Object.keys(initial.body.report.plugins).sort()),
         "Clearing filters did not restore full report",
       );
       result.panelExperience = {
@@ -940,7 +983,7 @@ try {
         upgradeDom.includes("@rc2/upgrade-risk") &&
           upgradeDom.includes("declared-incompatible") &&
           upgradeDom.includes("新增") &&
-          upgradeDom.includes("0.2.1-rc.2 → 0.2.0-rc.2"),
+          upgradeDom.includes(version + " → 0.2.0-rc.2"),
         "Actual DOM lost predicted new-risk details",
       );
       await evalx(
@@ -1000,7 +1043,9 @@ try {
         `Array.from(document.querySelectorAll('button')).find(e=>e.innerText==='清除筛选').click()`,
       );
       await poll(
-        async () => (await rowNames()).length === 6,
+        async () =>
+          JSON.stringify((await rowNames()).sort()) ===
+          JSON.stringify(Object.keys(initial.body.report.plugins).sort()),
         "Post-upgrade full ordinary report changed",
       );
       result.explanationPresentation = {
@@ -1104,7 +1149,8 @@ try {
       await settings();
       result.ui = {
         available: true,
-        navigation: "More > Settings > Built-in plugins > Compatibility",
+        navigation:
+          "Account menu > Settings > Built-in plugins > Compatibility",
         tabCount: await evalx(
           `[...document.querySelectorAll('[role="tab"]')].filter(b=>b.innerText==='兼容性').length`,
         ),
@@ -1354,12 +1400,22 @@ try {
         available: false,
         reason: "No Chrome binary; browser acceptance not performed.",
       };
-    if (process.env.DSC_REQUIRE_RC2_UI === "1")
-      requireTrue(
-        result.ui.available,
-        "Required real browser UI acceptance was not performed",
-      );
+    assertBrowserAcceptance(
+      process.env.DSC_ACCEPTANCE_DSH_VERSION,
+      process.env.DSC_REQUIRE_RC2_UI === "1",
+      result.ui.available,
+    );
     await stop(host);
+    if (version === "0.2.1-rc.3") {
+      const guard = JSON.parse(
+        fs.readFileSync(path.join(profile, "rc3-network.json"), "utf8"),
+      );
+      requireTrue(
+        guard.productionRequests === 0,
+        "Production listing/model request attempted",
+      );
+      result.networkGuard = guard;
+    }
     result.ok = true;
   }
 } catch (error) {

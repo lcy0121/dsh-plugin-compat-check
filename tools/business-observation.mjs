@@ -40,7 +40,11 @@ export function servicePredictionInput(surface, { nm, dshVersion }) {
     root,
   };
 }
-export function installServiceObserver(profile, services) {
+export function installServiceObserver(
+  profile,
+  services,
+  dshVersion = "0.2.1-rc.2",
+) {
   const dir = path.join(profile, "node_modules/@business/service-observer");
   fs.mkdirSync(dir, { recursive: true });
   const output = path.join(profile, "business-workspace/root-services.json");
@@ -57,7 +61,7 @@ export function apply(ctx){
   if(typeof ready?.onReady!=='function')throw Error('Owned service observer requires official application readiness');
   ctx.effect(()=>ready.onReady(()=>{
     const file=${JSON.stringify(output)};
-    const value=sampleServices(ctx,${JSON.stringify(services)},{profileId:${JSON.stringify(path.join(profile, "node_modules"))},dshVersion:'0.2.1-rc.2'});
+    const value=sampleServices(ctx,${JSON.stringify(services)},{profileId:${JSON.stringify(path.join(profile, "node_modules"))},dshVersion:${JSON.stringify(dshVersion)}});
     fs.writeFileSync(file+'.tmp',JSON.stringify(value),{mode:0o600});
     fs.renameSync(file+'.tmp',file);
   }));

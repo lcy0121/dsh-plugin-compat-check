@@ -751,3 +751,22 @@ test("holdout actions cannot precede the independent service-only prediction sea
     f.remove();
   }
 });
+
+test("rc.3 uses an independent fixed cohort and rejects rc.2 evidence", () => {
+  assert.equal(typeof api.createRegression, "function");
+  const modern = api.createRegression("0.2.1-rc.3");
+  assert.equal(modern.manifest.dshVersion, "0.2.1-rc.3");
+  assert.deepEqual(modern.manifest.suites, api.manifest.suites);
+  assert.deepEqual(modern.manifest.budgets, api.manifest.budgets);
+  assert.notEqual(modern.manifest.catalogueHash, api.manifest.catalogueHash);
+  const f = fixture();
+  try {
+    assert.throws(
+      () => modern.validateCohort(f.dir || f, "sidebar-ui-previous"),
+      /catalogue|target/,
+    );
+  } finally {
+    fs.rmSync(f.dir || f, { recursive: true, force: true });
+  }
+  assert.throws(() => api.createRegression("latest"), /exact/);
+});

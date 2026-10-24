@@ -36,7 +36,7 @@ test("offline author matrix preserves exact catalogue/kernel results, identity a
   assert.notEqual(r.status, 3, r.stderr + r.stdout);
   const m = JSON.parse(r.stdout);
   assert.equal(m.kind, "plugin-compat-check/author-ci");
-  assert.equal(m.cells.length, 2);
+  assert.equal(m.cells.length, 3);
   for (const c of m.cells) {
     assert.equal(c.status, "analyzed");
     assert.equal(c.report.catalog.verified, true);

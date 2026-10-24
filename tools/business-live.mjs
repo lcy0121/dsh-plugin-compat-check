@@ -2,6 +2,9 @@
  * source predictions. All state, profiles, child groups and browser are owned.
  */
 import fs from "node:fs";
+import { acceptanceTarget } from "./acceptance-target.mjs";
+import { isolatedEnvironment } from "../lib/execution-environment.mjs";
+import { catalogPathFor } from "../lib/catalog.mjs";
 import path from "node:path";
 import os from "node:os";
 import crypto from "node:crypto";
@@ -176,26 +179,7 @@ export async function runBusiness({
     home = path.join(root, "home"),
     profile = path.join(home, "profiles/business"),
     nm = path.join(profile, "node_modules");
-  const env = {
-    ...process.env,
-    DSH_HOME: home,
-    DSH_AGENTS_HOME: path.join(root, "agents"),
-    npm_config_cache: path.join(root, "npm-cache"),
-    npm_config_store_dir: path.join(root, "pnpm-store"),
-  };
-  for (const key of Object.keys(env))
-    if (
-      key.startsWith("DSC_") ||
-      key.startsWith("DSHM_") ||
-      [
-        "DSH_VERSION",
-        "DSH_PROFILE",
-        "DSH_PROFILE_DIR",
-        "DSH_ACTIVE_PROFILE",
-        "DSH_PROFILE_NAME",
-      ].includes(key)
-    )
-      delete env[key];
+  const env = isolatedEnvironment(root);
   const cancellation = new AbortController(),
     commands = new Set();
   let hostOutput = "";
@@ -280,12 +264,12 @@ export async function runBusiness({
   process.once("SIGINT", interrupt);
   process.once("SIGTERM", interrupt);
   try {
-    fs.mkdirSync(home, { mode: 0o700 });
+    fs.mkdirSync(home, { mode: 0o700, recursive: true });
     const version = (await exec("dsh", ["--version"]))
       .trim()
       .split("\n")
       .at(-1);
-    if (version !== "0.2.1-rc.2")
+    if (!acceptanceTarget(version, process.env.DSC_ACCEPTANCE_DSH_VERSION))
       return {
         applicable: false,
         dshVersion: version,
@@ -387,11 +371,7 @@ export async function runBusiness({
         ].map((f) => [f, hash(fs.readFileSync(path.join(REPO, f)))]),
       ),
       rulesHash: hash(fs.readFileSync(path.join(REPO, "rules/severity.json"))),
-      catalogueHash: hash(
-        fs.readFileSync(
-          path.join(REPO, "rules/dsh-api-catalog-0.2.1-rc.2.json"),
-        ),
-      ),
+      catalogueHash: hash(fs.readFileSync(catalogPathFor(REPO, version))),
     };
     const predicted = run({
       nm,
@@ -405,6 +385,7 @@ export async function runBusiness({
       ? observer.installServiceObserver(
           profile,
           predicted.extract.report.perPlugin[pin.package].services,
+          version,
         )
       : null;
     if (serviceObserver)

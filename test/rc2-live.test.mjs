@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 
 describe(
-  "rc.2 actual declarations, subpath metadata and UI lifecycle",
+  "rc.2/rc.3 actual declarations, subpath metadata and UI lifecycle",
   { skip: process.env.DSC_SLOW !== "1" },
   () => {
     test("real private host matches declaration evidence and shows one compatibility tab after re-enable", () => {
@@ -14,9 +14,28 @@ describe(
       assert.equal(r.status, 0, r.stdout + r.stderr);
       const value = JSON.parse(r.stdout);
       assert.equal(value.ok, true);
-      if (value.applicable === false) return;
+      if (value.applicable === false) {
+        assert.notEqual(process.env.DSC_ACCEPTANCE_DSH_VERSION, "0.2.1-rc.3");
+        return;
+      }
+      if (value.dshVersion === "0.2.1-rc.3") {
+        assert.equal(value.ui.available, true);
+        assert.equal(value.noCredentialDiscovery, true);
+        for (const key of [
+          "firstUseWait",
+          "failureFallback",
+          "lastGoodRetained",
+          "deadline",
+        ])
+          assert.equal(value.modelListing[key], true, key);
+        assert.equal(value.modelListing.productionRequests, 0);
+        assert.equal(value.modelListing.modelCalls, 0);
+        assert.equal(value.rc3Navigation.menus.length, 3);
+        assert.equal(value.rc3Navigation.createDraftOnly, true);
+      }
       assert.equal(value.declarationCases.length, 5);
       assert.ok(value.declarationCases.every((x) => x.matched));
+      assert.equal(value.hostToolSkill, true);
       assert.equal(value.subpathMetadata, true);
       assert.equal(value.runtimeExportContext, true);
       assert.deepEqual(value.originFence, {

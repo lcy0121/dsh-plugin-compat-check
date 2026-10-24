@@ -138,7 +138,7 @@ test(
       const fake = path.join(root, "dsh");
       fs.writeFileSync(
         fake,
-        `#!${process.execPath}\nconst fs=require('node:fs'),path=require('node:path');const a=process.argv.slice(2);if(a.includes('--version')){console.log('0.2.1-rc.2');}else if(a.includes('--dump-config')){const p=path.join(process.env.DSH_HOME,'profiles',a[a.indexOf('--profile')+1]);fs.mkdirSync(path.join(p,'node_modules'),{recursive:true});fs.writeFileSync(path.join(p,'package.json'),JSON.stringify({dsh:{profile:{bundles:[]}}}));}else{fs.writeFileSync(process.env.DSC_CANCEL_MARKER,JSON.stringify({pid:process.pid,root:path.dirname(process.env.DSH_HOME)}));setInterval(()=>{},1000);}`,
+        `#!${process.execPath}\nconst fs=require('node:fs'),path=require('node:path');const a=process.argv.slice(2);if(a.includes('--version')){console.log('0.2.1-rc.2');}else if(a.includes('--dump-config')){const p=path.join(process.env.DSH_HOME,'profiles',a[a.indexOf('--profile')+1]);fs.mkdirSync(path.join(p,'node_modules'),{recursive:true});fs.writeFileSync(path.join(p,'package.json'),JSON.stringify({dsh:{profile:{bundles:[]}}}));}else{fs.writeFileSync(${JSON.stringify(marker)},JSON.stringify({pid:process.pid,root:path.dirname(process.env.DSH_HOME)}));setInterval(()=>{},1000);}`,
         { mode: 0o700 },
       );
       runner = spawn(process.execPath, ["tools/rc2-live.mjs"], {

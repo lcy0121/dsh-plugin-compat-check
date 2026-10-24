@@ -4,13 +4,13 @@
 
 ```bash
 node tools/author-ci.mjs --package ./dist-plugin > compatibility.json
-node tools/author-ci.mjs --package ./dist-plugin --versions 0.2.0-rc.2,0.2.1-rc.2 --format sarif > compatibility.sarif
+node tools/author-ci.mjs --package ./dist-plugin --versions 0.2.0-rc.2,0.2.1-rc.2,0.2.1-rc.3 --format sarif > compatibility.sarif
 node tools/author-ci.mjs --package ./dist-plugin --format junit > compatibility.xml
 # 使用同一 JSON 快照生成便于离线查看的 HTML，不再扫描目标目录
 node tools/author-ci.mjs --report compatibility.json --format html > compatibility.html
 ```
 
-默认矩阵包含已认证的 `0.2.0-rc.2` 和 `0.2.1-rc.2`。未知版本显示 unsupported 并以工具错误阻断，不回退目录或扩大支持范围；矩阵表示静态目录比较，不能改称实际启动过这些版本或通过业务验收。每个 cell 保留 canonical report、内核退出码、DSH/工具/规则/目录和源码快照身份。
+默认矩阵包含已认证的 `0.2.0-rc.2`、`0.2.1-rc.2` 和 `0.2.1-rc.3`。未知版本显示 unsupported 并以工具错误阻断，不回退目录或扩大支持范围；矩阵表示静态目录比较，不能改称实际启动过这些版本或通过业务验收。每个 cell 保留 canonical report、内核退出码、DSH/工具/规则/目录和源码快照身份。
 
 ## 门禁策略
 

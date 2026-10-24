@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /** Real private DSH + packed plugin + HTTP responsiveness. No browser or model call. */
 import fs from "node:fs";
+import { isolatedEnvironment } from "../lib/execution-environment.mjs";
 import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
@@ -12,19 +13,7 @@ const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-live-engineering-"));
 const home = path.join(root, "home"),
   name = "engineering",
-  env = {
-    ...process.env,
-    DSH_HOME: home,
-    DSH_AGENTS_HOME: path.join(root, "agents"),
-  };
-for (const key of [
-  "DSC_KERNEL",
-  "DSC_PROBE_REPORT",
-  "DSC_NODE_MODULES",
-  "DSC_PROFILE",
-  "DSC_OUT_DIR",
-])
-  delete env[key];
+  env = isolatedEnvironment(root);
 const cancellation = new AbortController(),
   commands = new Set();
 let host = null,
@@ -63,7 +52,7 @@ for (const signal of ["SIGTERM", "SIGINT"])
     process.exit(130);
   });
 try {
-  fs.mkdirSync(home, { mode: 0o700 });
+  fs.mkdirSync(home, { mode: 0o700, recursive: true });
   const version = (await run("dsh", ["--version"])).trim().split("\n").at(-1);
   await run("dsh", [
     "--profile",
@@ -76,6 +65,7 @@ try {
   prepareOwnedPackageSource(repo, source);
   await run("npm", [
     "pack",
+    "--ignore-scripts=false",
     path.join(source, "plugin"),
     "--silent",
     "--pack-destination",

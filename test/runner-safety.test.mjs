@@ -77,7 +77,7 @@ test('engineering source copy runs real prepack without borrowing ancestor devel
  else if(a.includes('add')){
   const artifact=a.at(-1).replace(/^file:/,'');
   const list=require('node:child_process').execFileSync('tar',['-tzf',artifact],{encoding:'utf8'});
-  fs.writeFileSync(path.join(process.env.DSC_PACK_RECEIPT),JSON.stringify({artifact,list}));
+  fs.writeFileSync(path.join(__dirname,"..","packed.json"),JSON.stringify({artifact,list}));
   console.error('controlled stop after real pack');process.exit(1);
  }else process.exit(1);`,({dir,env})=>{
   const receipt=path.join(dir,'packed.json');

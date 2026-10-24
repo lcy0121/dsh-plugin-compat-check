@@ -42,7 +42,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dsh: ["0.2.0-rc.2", "0.2.1-rc.2"]
+        dsh: ["0.2.0-rc.2", "0.2.1-rc.2", "0.2.1-rc.3"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -112,6 +112,7 @@ jobs:
           DSC_SLOW: "1"
           DSC_EXECUTION_DIAGNOSTICS: linux-execution-diagnostics
           DSC_REQUIRE_RC2_UI: "1"
+          DSC_ACCEPTANCE_DSH_VERSION: ${{ matrix.dsh }}
           DSC_RC2_LIVE_LOG: linux-rc2.json
           DSC_ENGINEERING_LIVE_LOG: linux-engineering.json
           DSC_BUSINESS_LIVE_DIR: linux-business

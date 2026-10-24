@@ -95,7 +95,7 @@ test("known versions compare one frozen artifact with canonical static evidence,
 test("unknown and approximate versions fail closed before touching inputs", async () => {
   for (const version of [
     "0.2.1",
-    "0.2.1-rc.3",
+    "0.2.1-rc.4",
     "0.2.0",
     "latest",
     "v0.2.1-rc.2",
@@ -434,4 +434,24 @@ test("duplicate installed alias identities cannot hide a risk behind a healthy p
   assert.equal(result.exitCode, 3);
   assert.match(result.error, /重复|同名/);
   assert.equal(result.artifact, null);
+});
+
+test("three reviewed versions compare every direction against one immutable input", async (t) => {
+  const f = fixture(t, { range: ">=0.2.1-rc.3 <0.3.0" });
+  const versions = ["0.2.0-rc.2", "0.2.1-rc.2", "0.2.1-rc.3"];
+  for (const currentVersion of versions)
+    for (const targetVersion of versions) {
+      if (currentVersion === targetVersion) continue;
+      const r = await runUpgradePreview({
+        nm: f.nm,
+        currentVersion,
+        targetVersion,
+      });
+      assert.equal(r.status, "compared", r.error);
+      assertUpgradePreview(r);
+      assert.equal(r.currentReport.catalog.verified, true);
+      assert.equal(r.targetReport.catalog.verified, true);
+      assert.equal(r.artifact.packages[0].name, "preview-fixture");
+      assert.notEqual(r.catalogs.current.sha256, r.catalogs.target.sha256);
+    }
 });

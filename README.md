@@ -6,7 +6,7 @@
 
 ## 版本与入口
 
-已发布 **0.1.6** 为元数据补丁，保留0.1.5功能；当前 **`0.1.7-dev` 源码尚未发布npm版本**，版本真源仍为0.1.6。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2**，最低版本声明不认证未来宿主。
+已发布 **0.1.6** 为元数据补丁，保留0.1.5功能；当前 **`0.1.7-dev` 源码（含rc.3适配）尚未发布npm版本**，版本真源仍为0.1.6。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3**，最低版本声明不认证未来宿主。
 
 npm插件提供兼容性页、详情/角标、`compat_check`与skill。仓库另有CLI、安装检查、静态批量、作者CI和健康执行器，共享内核。npm包无CLI bin，不支持`npx dsh-plugin-compat-check`。[Plan](docs/Plan.md)维护契约与待办，[docs/current-state.json](docs/current-state.json)记录限定验证。
 
@@ -23,7 +23,7 @@ npm插件提供兼容性页、详情/角标、`compat_check`与skill。仓库另
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
-DSH 0.2.1-rc.2：**更多 → 设置 → 内置插件 → 兼容性**。选择实际profile，不默认desktop；agent可调用`compat_check`。面板支持筛选、折叠、完整报告预览/复制和基线新增风险；依赖图仅表示潜在关系，人工记录不改判定，健康页只导入历史JSON。[使用指南](docs/guide.md)说明操作与限制。
+DSH 0.2.1-rc.3：**左下角账号菜单 → 设置 → 内置插件 → 兼容性**。选择实际profile，不默认desktop；agent可调用`compat_check`。面板支持筛选、折叠、完整报告预览/复制和基线新增风险；依赖图仅表示潜在关系，人工记录不改判定，健康页只导入历史JSON。[使用指南](docs/guide.md)说明操作与限制。
 
 ## 仓库CLI
 
@@ -53,13 +53,13 @@ node bin/compat-check.mjs --help
 
 ## 升级预检与作者工具
 
-面板输入目标版本，或调用`compat_check({"upgradeTo":"0.2.1-rc.2"})`；agent当前版本取宿主，结果为`upgradePreview`。CLI须提供两个精确版本：
+面板输入目标版本，或调用`compat_check({"upgradeTo":"0.2.1-rc.3"})`；agent当前版本取宿主，结果为`upgradePreview`。CLI须提供两个精确版本：
 
 ```bash
-node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json
+node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --dsh-version 0.2.1-rc.2 --upgrade-to 0.2.1-rc.3 --json
 ```
 
-仅支持上述两版。预检对同组私有字节静态比较，不执行/升级宿主，不使用运行时、probe、豁免或普通基线；**0/1/2仅表示无/非致命/致命新增或变重风险，3表示无法预检**。0仍可能保留旧问题，不证明目标可用；见[预检契约](docs/Plan.md#27-升级前静态预检契约)。
+支持上述三个精确版本的任意比较；例如0.2.1-rc.4返回未认证/退出3。预检对同组私有字节静态比较，不执行/升级宿主，不使用运行时、probe、豁免或普通基线；**0/1/2仅表示无/非致命/致命新增或变重风险，3表示无法预检**。0仍可能保留旧问题，不证明目标可用；见[预检契约](docs/Plan.md#27-升级前静态预检契约)。
 
 仓库的[作者CI](docs/author-ci.md)提供版本矩阵、风险/覆盖门禁及JSON/SARIF/JUnit/HTML；[指南](docs/guide.md#升级预检与有限批量)提供固定静态批量。健康执行器默认只审阅，显式`--run`须获当次执行授权。独立skill安装见[skill说明](skill/README.md)。根工作区不是插件包，源码安装须按[打包步骤](plugin/README.md#从源码构建安装)生成完整tgz。
 

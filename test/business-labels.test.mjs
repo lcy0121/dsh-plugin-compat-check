@@ -780,7 +780,7 @@ test(
     try {
       fs.writeFileSync(
         path.join(root, "dsh"),
-        `#!${process.execPath}\nconst fs=require('node:fs'),path=require('node:path');const marker=process.env.BUSINESS_CANCEL_MARKER;fs.writeFileSync(marker+'.tmp',JSON.stringify({pid:process.pid,root:path.dirname(process.env.DSH_HOME)}));fs.renameSync(marker+'.tmp',marker);setInterval(()=>{},1000);`,
+        `#!${process.execPath}\nconst fs=require('node:fs'),path=require('node:path');const marker=${JSON.stringify(marker)};fs.writeFileSync(marker+'.tmp',JSON.stringify({pid:process.pid,root:path.dirname(process.env.DSH_HOME)}));fs.renameSync(marker+'.tmp',marker);setInterval(()=>{},1000);`,
         { mode: 0o700 },
       );
       child = spawn(

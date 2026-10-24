@@ -6,7 +6,7 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-Published **0.1.6** is a metadata patch retaining 0.1.5 features. **`0.1.7-dev` source changes have no npm release yet**; the version source remains 0.1.6. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2`. Certified exact catalogues remain **0.2.0-rc.2 and 0.2.1-rc.2**; a minimum declaration does not certify future hosts.
+Published **0.1.6** is a metadata patch retaining 0.1.5 features. **`0.1.7-dev` source changes, including rc.3 adaptation, have no npm release yet**; the version source remains 0.1.6. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2`. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2 and 0.2.1-rc.3**; a minimum declaration does not certify future hosts.
 
 The npm plugin provides a compatibility page, details/badges, `compat_check` and a skill. Repository-only CLI, install checks, static batches, author CI and health executor share the kernel. The npm package has no CLI bin; `npx dsh-plugin-compat-check` is unsupported. [Plan](docs/Plan.md) tracks contracts and tasks; [docs/current-state.json](docs/current-state.json) records scoped verification.
 
@@ -23,7 +23,7 @@ Historical examples of presentation, not acceptance of current source or busines
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
-DSH 0.2.1-rc.2: **More → Settings → Built-in plugins → Compatibility**. Select the actual profile; do not assume desktop. Agents can call `compat_check`. The panel offers filters, collapsed findings, full preview/copy and baseline risk changes. Dependency graphs show potential relationships, review records do not alter verdicts, and health imports historical JSON only. See the [guide](docs/guide.md).
+DSH 0.2.1-rc.3: **bottom-left account menu → Settings → Built-in plugins → Compatibility**. Select the actual profile; do not assume desktop. Agents can call `compat_check`. The panel offers filters, collapsed findings, full preview/copy and baseline risk changes. Dependency graphs show potential relationships, review records do not alter verdicts, and health imports historical JSON only. See the [guide](docs/guide.md).
 
 ## Repository CLI
 
@@ -53,13 +53,13 @@ Default static analysis does not execute plugins or access the network. Ordinary
 
 ## Upgrade preview and author tools
 
-Enter a target version in the panel or call `compat_check({"upgradeTo":"0.2.1-rc.2"})`. The agent uses the running host version and returns `upgradePreview`. CLI requires both exact versions:
+Enter a target version in the panel or call `compat_check({"upgradeTo":"0.2.1-rc.3"})`. The agent uses the running host version and returns `upgradePreview`. CLI requires both exact versions:
 
 ```bash
-node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --dsh-version 0.2.0-rc.2 --upgrade-to 0.2.1-rc.2 --json
+node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --dsh-version 0.2.1-rc.2 --upgrade-to 0.2.1-rc.3 --json
 ```
 
-Only the two versions above are supported. Preview statically compares the same private artifact bytes without executing/upgrading hosts or using runtime observations, probes, exemptions or ordinary baselines. **0/1/2 mean no/nonfatal/fatal added or worsened risks; 3 means preview unavailable.** Zero can retain old issues and does not prove the target works. See the [contract](docs/Plan.md#27-升级前静态预检契约).
+All three exact catalogues can be compared in either direction; 0.2.1-rc.4 is unsupported (exit 3). Preview statically compares the same private artifact bytes without executing/upgrading hosts or using runtime observations, probes, exemptions or ordinary baselines. **0/1/2 mean no/nonfatal/fatal added or worsened risks; 3 means preview unavailable.** Zero can retain old issues and does not prove the target works. See the [contract](docs/Plan.md#27-升级前静态预检契约).
 
 Repository [author CI](docs/author-ci.md) offers version matrices, risk/coverage gates and JSON/SARIF/JUnit/HTML. The [guide](docs/guide.md#升级预检与有限批量) covers fixed static batches. Health execution defaults to review; explicit `--run` requires authorization for that execution. See [skill installation](skill/README.md). The root workspace is not a plugin package; build a complete tgz using the [packaging steps](plugin/README.md#从源码构建安装).
 

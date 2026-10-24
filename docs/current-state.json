@@ -1,26 +1,27 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-24T09:06:57.896Z",
-  "testFiles": 71,
-  "tests": 1083,
+  "recordedAt": "2026-10-24T13:45:59.690459+00:00",
+  "testFiles": 72,
+  "tests": 1030,
   "repositoryFiles": {
-    "total": 337,
-    "fixtures": 90,
-    "other": 247
+    "total": 345,
+    "fixtures": 99,
+    "other": 246
   },
   "verification": {
     "platform": "darwin",
     "arch": "arm64",
     "optionalProfiles": {
-      "parityfix": true,
+      "parityfix": false,
       "desktop": true
     },
     "catalogueScope": {
       "certifiedExactVersions": [
         "0.2.0-rc.2",
-        "0.2.1-rc.2"
+        "0.2.1-rc.2",
+        "0.2.1-rc.3"
       ],
-      "scope": "Reviewed catalogue bytes and version-specific integration only; not business-health certification."
+      "scope": "Reviewed catalogue bytes and version-specific integration; rc.3 macOS verified locally, Linux exact-commit CI pending. Not business-health certification."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -205,7 +206,137 @@
           "privateRootRemoved": true
         }
       },
-      "remote": "Pending verification of the fix commit; original run remains failed."
+      "remote": {
+        "commit": "768e7341bccc8f393845c5e980d5b0ce38a598d5",
+        "status": "passed",
+        "checks": 5,
+        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40081231670",
+        "scope": "Historical exact fix commit, not current rc.3 adaptation CI."
+      }
+    },
+    "rc3Adaptation20261024": {
+      "scope": "Unpublished 0.1.7-dev source, tool version remains 0.1.6. rc.3 catalogue/semantics and local macOS acceptance verified; Linux checks require a separately authorized push. No npm release, merge, Windows/model/account certification.",
+      "provenance": "rules/dsh-0.2.1-rc.3-review.json",
+      "defaultSuite": {
+        "tests": 1030,
+        "passed": 1022,
+        "skipped": 8,
+        "failed": 0
+      },
+      "checks": "npm run check passed: 38 syntax cases, 3 exact catalogues, generated contracts/skill/notices and document links. Full six-direction preview and three-cell author output/budget regressions passed. Prepublish gate passed after final immutability and required-browser guards.",
+      "acceptedArtifact": {
+        "file": "dsh-plugin-compat-check-0.1.6.tgz",
+        "sha256": "9fab57a11f00d8408c395eb54f3ff90d2334ccb963ea7f222fced075572a1c10",
+        "bytes": 262164,
+        "scope": "Private complete source build, not published npm 0.1.6 bytes. Same exact tgz installed for all final browser/host acceptance."
+      },
+      "macOS": {
+        "declarationCases": 5,
+        "hostToolSkill": true,
+        "catalogIdentity": true,
+        "browser": {
+          "available": true,
+          "navigation": "Account menu > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+        },
+        "navigationDrafts": {
+          "menus": [
+            {
+              "region": "sidebar",
+              "browseMainList": true,
+              "createAction": true
+            },
+            {
+              "region": "conversation",
+              "browseMainList": true,
+              "createAction": true
+            },
+            {
+              "region": "rightbar",
+              "browseMainList": true,
+              "createAction": true
+            }
+          ],
+          "detailAndBadge": true,
+          "blankReuse": true,
+          "presetIsolation": true,
+          "defaultKeep": true,
+          "append": true,
+          "legacyReplace": true,
+          "explicitPolicyPrecedence": true,
+          "createDraftOnly": true
+        },
+        "modelListing": {
+          "noCredentialRequests": 0,
+          "firstUseWait": true,
+          "failureFallback": true,
+          "lastGoodRetained": true,
+          "deadline": true,
+          "requests": 4,
+          "modelCalls": 0,
+          "productionRequests": 0
+        },
+        "productionNetwork": {
+          "productionRequests": 0
+        },
+        "upgradePreview": "Positive new risk and unsupported target, same immutable inputs/catalogue hashes, UI export/filter separation, origin/method fences, route removal/recovery.",
+        "reviewBaseline": "Dependency view, persisted review, unchanged canonical report/baseline, historical health import entry.",
+        "privateRootRemoved": true,
+        "evidenceSha256": "d6e1e62ebfe83221826adea50c54fa7120c44d6cfe3f12fb132b230f0f77f172",
+        "slowSuite": {
+          "tests": 4,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        }
+      },
+      "fixedCohort": {
+        "manifest": "tools/real-regression-manifest-rc3.json",
+        "manifestSha256": "19278a4fb565f6c5b833b8aceb557264154e100a1b50358fb96c4b0de4511a32",
+        "status": "passed",
+        "replay": "passed",
+        "repeats": 1,
+        "summary": {
+          "independentPackageFamilies": 4,
+          "pinnedArtifacts": 5,
+          "holdoutPackageFamilies": 2,
+          "holdoutPinnedArtifacts": 2,
+          "distinctPlannedCases": 24,
+          "knownOutcomeCases": 24,
+          "staticIdentifiedFailures": 0,
+          "serviceOnlyIdentifiedFailures": 2,
+          "unflaggedNaturalFailures": 2,
+          "unflaggedBusinessOrClientFailures": 10,
+          "driverErrors": 0,
+          "validationErrors": 0
+        },
+        "modelCalls": 0,
+        "accountCalls": 0,
+        "evidenceSha256": "02c2f280354730603234c0aed5c04634a15e8d91fd19ea6b77ec66234961ccb5",
+        "scope": "Five exact npm artifacts, 24 fixed action/failure/recovery outcomes; honest FP/FN retained. Separate rc.3 cohort, rc.2 manifest/history unchanged. One independent live round; not ecosystem accuracy."
+      },
+      "engineering": {
+        "ok": true,
+        "httpMaxMilliseconds": 20.673416999999972,
+        "cleanup": {
+          "hostStopped": true,
+          "privateRootRemoved": true
+        },
+        "scope": "Owned web profile, actual tgz and synthetic uncalled functions; HTTP responsiveness only, not business behavior or a production performance guarantee."
+      },
+      "remote": {
+        "status": "pending-push-authorization",
+        "expectedChecks": 6,
+        "linuxVersions": [
+          "0.2.0-rc.2",
+          "0.2.1-rc.2",
+          "0.2.1-rc.3"
+        ]
+      },
+      "review": "Manual whole-change review and regressions passed; fresh-context reviewer unavailable due usage limit, no separate reviewer approval claimed."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."
