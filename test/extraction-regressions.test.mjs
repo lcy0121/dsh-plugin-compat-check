@@ -166,3 +166,113 @@ test('a relative patch entry takes precedence over uncertain package exports',()
   assert.equal(p.diagnostics.some(d=>d.kind==='entry-resolution-uncertain'),false);
  });
 });
+
+// The oracle resolves paths and inspects file types; it never imports target code.
+function nodeEntry(f, spec, requireMode=false) {
+ const script=`import fs from 'node:fs';import {fileURLToPath} from 'node:url';import {createRequire} from 'node:module';try{const file=${requireMode?'createRequire(import.meta.url).resolve('+JSON.stringify(spec)+')':'fileURLToPath(import.meta.resolve('+JSON.stringify(spec)+'))'};console.log(JSON.stringify({file:fs.statSync(file).isFile()?fs.realpathSync(file):null}))}catch(error){console.log(JSON.stringify({file:null,error:error.code}))}`;
+ const r=spawnSync(process.execPath,['--input-type=module','-e',script],{cwd:f.pkg,encoding:'utf8',timeout:5000});
+ assert.equal(r.status,0,r.stderr);return JSON.parse(r.stdout);
+}
+for(const target of ['./actual','./directory'])test(`exports target ${target} cannot borrow an extension or directory index`,()=>{
+ const f=packageFixture('throw Error("Target code must not execute")',{meta:{exports:target,dsh:{},type:'module'},files:{'actual.js':'export function apply(ctx){ctx.settings.known()}','directory/index.js':'export function apply(ctx){ctx.settings.known()}'}});
+ try{
+  assert.equal(nodeEntry(f,'sample').file,null);
+  const {report}=extractWithProvenance(f.nm,{catalog}),p=report.perPlugin.sample;
+  assert.equal(report.scanComplete,false);assert.deepEqual(p.entryFiles,[]);
+  assert.ok(p.diagnostics.some(d=>d.kind==='source-unresolved'||d.kind==='entry-resolution-uncertain'));
+ }finally{f.cleanup();}
+});
+for(const source of [
+ "import './helper';export function apply(ctx){ctx.settings.known()}",
+ "export {wire} from './helper';export function apply(ctx){ctx.settings.known()}",
+ "exports.apply=function(ctx){import('./helper');ctx.settings.known()}",
+])test(`ESM relative resolution is exact: ${source.split(';')[0]}`,()=>{
+ const f=packageFixture(source,{files:{'helper.js':'export function wire(ctx){ctx.settings.absent()}'}});
+ try{
+  assert.equal(nodeEntry(f,'./helper').file,null);
+  const {report}=extractWithProvenance(f.nm,{catalog});
+  assert.equal(report.scanComplete,false);
+  assert.ok(report.perPlugin.sample.diagnostics.some(d=>d.kind==='source-unresolved'&&d.file==='helper'));
+  assert.ok(!report.perPlugin.sample.files['host-entry'].includes('helper.js'));
+ }finally{f.cleanup();}
+});
+for(const [label,meta,files,want]of [
+ ['legacy main extension',{main:'./actual',dsh:{}},{'actual.js':'export function apply(ctx){ctx.settings.known()}'},'actual.js'],
+ ['legacy main directory',{main:'./directory',dsh:{}},{'directory/index.js':'export function apply(ctx){ctx.settings.known()}'},'directory/index.js'],
+ ['legacy missing main fallback',{main:'./missing',dsh:{}},{},'index.js'],
+ ['require extension',{}, {'helper.js':'exports.wire=function(ctx){ctx.settings.absent()}'},'helper.js'],
+ ['require directory',{}, {'helper/index.js':'exports.wire=function(ctx){ctx.settings.absent()}'},'helper/index.js'],
+ ['require package main',{}, {'helper/package.json':'{"main":"./actual"}','helper/actual.js':'exports.wire=function(ctx){ctx.settings.absent()}'},'helper/actual.js'],
+ ['require ignored nonstring main',{}, {'helper/package.json':'{"main":3}','helper/index.js':'exports.wire=function(ctx){ctx.settings.absent()}'},'helper/index.js'],
+])test(`${label} retains Node-compatible resolution`,()=>{
+ const requireMode=label.startsWith('require');
+ const f=packageFixture(requireMode?"const helper=require('./helper');exports.apply=function(ctx){helper.wire(ctx)}":'export function apply(ctx){ctx.settings.known()}',{meta,files});
+ try{
+  assert.equal(nodeEntry(f,requireMode?'./helper':'sample',requireMode).file,fs.realpathSync(path.join(f.pkg,want)));
+  const {report}=extractWithProvenance(f.nm,{catalog});
+  assert.equal(report.scanComplete,true,JSON.stringify(report.perPlugin.sample.diagnostics));
+  assert.ok(report.perPlugin.sample.files['host-entry'].includes(want));
+  if(requireMode)assert.ok(report.perPlugin.sample.callSites.some(s=>s.method==='absent'&&!s.inferredReceiver));
+  else assert.deepEqual(report.perPlugin.sample.entryFiles,[want]);
+ }finally{f.cleanup();}
+});
+for(const extension of ['.cjs','.mjs','.ts'])test(`extensionless require cannot guess ${extension}`,()=>{
+ const f=packageFixture("require('./helper');exports.apply=function(ctx){ctx.settings.known()}",{files:{['helper'+extension]:'exports.wire=function(ctx){ctx.settings.absent()}'}});
+ try{
+  assert.equal(nodeEntry(f,'./helper',true).file,null);
+  const {report}=extractWithProvenance(f.nm,{catalog});
+  assert.equal(report.scanComplete,false);
+  assert.ok(report.perPlugin.sample.diagnostics.some(d=>d.kind==='source-unresolved'));
+ }finally{f.cleanup();}
+});
+test('a relative patch entry must resolve exactly even when an extension candidate exists',()=>{
+ const f=packageFixture('export function apply(ctx){ctx.settings.known()}',{files:{'actual.js':'export function apply(ctx){ctx.settings.known()}'}});
+ try{
+  fs.writeFileSync(path.join(f.pkg,'cordis.patch.yml'),'- name: ./actual\n');
+  const {report}=extractWithProvenance(f.nm,{catalog});
+  assert.equal(report.scanComplete,false);assert.deepEqual(report.perPlugin.sample.entryFiles,[]);
+ }finally{f.cleanup();}
+});
+test('a require edge cannot prove an unresolved ESM import of the same specifier',()=>{
+ const f=packageFixture("require('./helper');import {wire} from './helper';export function apply(ctx){wire(ctx)}",{files:{'helper.js':'export function wire(ctx){ctx.settings.absent()}'}});
+ try{
+  const {report}=extractWithProvenance(f.nm,{catalog}),p=report.perPlugin.sample;
+  assert.equal(report.scanComplete,false);
+  assert.ok(p.diagnostics.some(d=>d.kind==='source-unresolved'));
+  assert.ok(!p.callSites.some(s=>s.file==='helper.js'&&!s.inferredReceiver));
+ }finally{f.cleanup();}
+});
+for(const kind of ['directory','dangling-link'])test(`CommonJS directory metadata cannot silently ignore a ${kind}`,()=>{
+ const f=packageFixture("require('./helper');exports.apply=function(ctx){ctx.settings.known()}",{files:{'helper/index.js':'exports.value=1'}});
+ try{
+  const file=path.join(f.pkg,'helper/package.json');
+  if(kind==='directory')fs.mkdirSync(file);else fs.symlinkSync(path.join(f.pkg,'missing.json'),file);
+  const {report}=extractWithProvenance(f.nm,{catalog});
+  assert.equal(report.scanComplete,false);
+  assert.ok(report.perPlugin.sample.diagnostics.some(d=>d.kind==='source-unreadable'));
+ }finally{f.cleanup();}
+});
+for(const value of [null,[],3])test(`CommonJS directory rejects non-object metadata ${JSON.stringify(value)}`,()=>{
+ const f=packageFixture("require('./helper');exports.apply=function(ctx){ctx.settings.known()}",{files:{'helper/package.json':JSON.stringify(value),'helper/index.js':'exports.value=1'}});
+ try{
+  assert.equal(nodeEntry(f,'./helper',true).file,null);
+  const {report}=extractWithProvenance(f.nm,{catalog});
+  assert.equal(report.scanComplete,false);
+  assert.ok(report.perPlugin.sample.diagnostics.some(d=>d.kind==='entry-resolution-uncertain'));
+ }finally{f.cleanup();}
+});
+test('expiry between the verified source read and require resolution retains a partial report',()=>{
+ const f=packageFixture("require('./helper.js');export function apply(ctx){ctx.settings.known()}",{files:{'helper.js':'exports.value=1'}});
+ const entry=fs.realpathSync(path.join(f.pkg,'index.js')),originalStat=fs.lstatSync,originalNow=Date.now;
+ let entryChecks=0,now=0;
+ try{
+  // Keep real descriptor I/O. Advance the clock after readStaticFile verifies
+  // the entry path, as if parsing used up the remaining resolution budget.
+  fs.lstatSync=function(file,...args){const stat=originalStat.call(fs,file,...args);if(path.resolve(String(file))===entry&&++entryChecks===2)now=100;return stat;};
+  Date.now=()=>now;
+  const {report}=extractWithProvenance(f.nm,{catalog,limits:{timeMs:50}});
+  assert.equal(now,100);assert.equal(report.scanComplete,false);
+  assert.ok(report.perPlugin.sample.diagnostics.some(d=>d.kind==='scan-budget-exceeded'));
+  assert.deepEqual(report.perPlugin.sample.calls.settings,['known']);
+ }finally{fs.lstatSync=originalStat;Date.now=originalNow;f.cleanup();}
+});

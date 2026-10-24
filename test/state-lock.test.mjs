@@ -8,6 +8,8 @@ import { once } from "node:events";
 import childProcess from "node:child_process";
 import { syncBuiltinESMExports } from "node:module";
 import { baselineTransaction } from "../lib/state-store.mjs";
+import { snapshotForBaseline } from "../lib/baseline.mjs";
+const snapshot = () => snapshotForBaseline({ plugins: {} }, null);
 const cli = new URL("../bin/recover-lock.mjs", import.meta.url);
 test("state writers acquire and release locks without launching external commands", async (t) => {
   const { file, lock } = setup(t);
@@ -19,7 +21,7 @@ test("state writers acquire and release locks without launching external command
       throw new Error("External process invocation is unavailable");
     };
     syncBuiltinESMExports();
-    const result = baselineTransaction(file, { plugins: {} });
+    const result = baselineTransaction(file, snapshot());
     assert.equal(result.wrote, true);
     assert.equal(launched, 0);
     assert.equal(fs.existsSync(lock), false);
@@ -32,7 +34,10 @@ function setup(t) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-recovery-"));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const file = path.join(dir, "baseline.test.json");
-  fs.writeFileSync(file, '{"original":true}\n');
+  fs.writeFileSync(
+    file,
+    JSON.stringify({ ...snapshot(), original: true }) + "\n",
+  );
   return { dir, file, lock: file + ".lock" };
 }
 function run(lock, token) {
@@ -56,9 +61,10 @@ test("baseline lock records holder and creation info while transaction is active
   const { file, lock } = setup(t);
   let observed;
   baselineTransaction(file, {
+    ...snapshot(),
     toJSON() {
       observed = JSON.parse(fs.readFileSync(lock));
-      return { plugins: {} };
+      return snapshot();
     },
   });
   assert.equal(observed?.pid, process.pid);
@@ -101,6 +107,8 @@ test("CLI inspects and explicitly recovers a crashed holder without touching sta
   assert.equal(fs.existsSync(lock), false);
   assert.deepEqual(fs.readFileSync(file), original);
   assert.equal(fs.readFileSync(other, "utf8"), "keep");
+  assert.equal(baselineTransaction(file, snapshot()).wrote, true);
+  assert.equal(fs.existsSync(lock), false);
 });
 test("legacy incomplete symlink FIFO and oversized metadata are refused", (t) => {
   const { file, lock } = setup(t);
@@ -168,10 +176,11 @@ test("custom baseline names recover only metadata bound to that exact lock path"
 test("writer release never deletes replacement lock", (t) => {
   const { file, lock } = setup(t);
   baselineTransaction(file, {
+    ...snapshot(),
     toJSON() {
       fs.unlinkSync(lock);
       fs.writeFileSync(lock, "replacement");
-      return { plugins: {} };
+      return snapshot();
     },
   });
   assert.equal(fs.readFileSync(lock, "utf8"), "replacement");
@@ -205,7 +214,10 @@ test("unknown birth, foreign host/user and EPERM never authorize removal", async
   assert.equal(result.status, 1);
   assert.match(result.stderr, /unknown.*EPERM/);
   assert.ok(fs.existsSync(lock));
-  assert.equal(fs.readFileSync(file, "utf8"), '{"original":true}\n');
+  assert.deepEqual(JSON.parse(fs.readFileSync(file)), {
+    ...snapshot(),
+    original: true,
+  });
 });
 
 test("recovery guard excludes writers and cannot be implicitly cleared", async (t) => {
@@ -213,7 +225,7 @@ test("recovery guard excludes writers and cannot be implicitly cleared", async (
   const { acquireStateLock } = await import("../lib/state-lock.mjs");
   fs.writeFileSync(lock + ".recovery-lock", "interrupted recovery");
   assert.throws(() => acquireStateLock(lock), /recovery/);
-  assert.equal(baselineTransaction(file, { plugins: {} }).wrote, false);
+  assert.equal(baselineTransaction(file, snapshot()).wrote, false);
   assert.equal(fs.existsSync(lock), false);
   assert.equal(run(lock).status, 1);
   assert.equal(
@@ -266,7 +278,10 @@ test("stale confirmation and simultaneous recoverers preserve replacement and or
   const codes = await Promise.all(children);
   assert.equal(codes.filter((code) => code === 0).length, 1);
   assert.equal(fs.existsSync(lock), false);
-  assert.equal(fs.readFileSync(file, "utf8"), '{"original":true}\n');
+  assert.deepEqual(JSON.parse(fs.readFileSync(file)), {
+    ...snapshot(),
+    original: true,
+  });
 });
 
 test("crashed manual review recovery preserves accepted sidecar and report until an explicit subsequent save", async (t) => {

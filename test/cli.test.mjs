@@ -437,8 +437,9 @@ describe('CLI：基线差分', () => {
     try {
       fs.writeFileSync(bl, '{ 这不是 json')
       const r = runCLI(args(bl))
-      assert.match(r.out, /基线读不出来/, '读不出来的基线必须明说，不能当成"无变化"')
+      assert.match(r.out, /保留原件/, '损坏基线须明确说明保全与恢复边界')
       assert.ok(!/没有任何变化/.test(r.out), '损坏的基线绝不能被读成"没有变化"')
+      assert.equal(fs.readFileSync(bl,'utf8'),'{ 这不是 json')
     } finally { fs.rmSync(bl, { force: true }) }
   })
 

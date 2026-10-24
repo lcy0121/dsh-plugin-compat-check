@@ -1,8 +1,8 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-23T18:45:02.967Z",
+  "recordedAt": "2026-10-24T03:19:28.885Z",
   "testFiles": 69,
-  "tests": 960,
+  "tests": 1005,
   "repositoryFiles": {
     "total": 333,
     "fixtures": 90,
@@ -269,17 +269,10 @@
       }
     },
     "staticAnalysisFix20261024": {
-      "scope": "0.1.7-dev source only; no version bump, remote CI or release.",
-      "regressions": "Helper alternates, ordered conditional exports, CommonJS ownership and mutable/dynamic inject metadata; 11 added tests.",
-      "defaultSuite": {
-        "tests": 893,
-        "passed": 887,
-        "skipped": 6,
-        "failed": 0
-      },
-      "nodeVersion": "26.12.1",
-      "contractSource": "Local DSH 0.2.1-rc.2 ASAR: cordis 4.0.5 Inject.resolve and loader 1.0.6 Node import.",
-      "limits": "Custom export conditions and unsupported URL targets abstain; source inspection is not new host or business acceptance."
+      "historyCommit": "3e7b2b5",
+      "historyPath": "docs/current-state.json",
+      "key": "verification.staticAnalysisFix20261024",
+      "scope": "Historical helper/export/inject regressions and 893-test result in local Git; not current certification."
     },
     "staticInputBoundaries20261024": {
       "scope": "0.1.7-dev local source; no version bump, remote CI or release.",
@@ -324,6 +317,18 @@
       "maintenance": "npm run check covers format, docs/generated copies/notices, syntax and registered catalogue wiring. Formatted host/client/CLI, shared request fence and behavior-based startup regression.",
       "authorCI": "One scan JSON -> static HTML retains gate code and full evidence. Workflow shell verified locally; owned Chrome verified escaped text, no scripts/images/external resources and same saved JSON.",
       "limits": "Saved reports are not authenticated or re-evaluated against a new baseline. Workflow needs a reviewed published tool SHA; no new DSH certification."
+    },
+    "evidenceResolutionState20261024": {
+      "scope": "Local 0.1.7-dev source; catalogue certification unchanged. No push/release/remote CI.",
+      "defaultSuite": {
+        "tests": 1005,
+        "passed": 998,
+        "skipped": 7,
+        "failed": 0
+      },
+      "regressions": "45 new cases: 10 provider/absence; 23 ESM/legacy/CJS resolution and scan-budget cases, paths checked against Node; 12 baseline preservation/permissions. No target imports.",
+      "baseline": "Unsafe existing parent permissions are refused without chmod. Invalid/legacy/unsafe stored baselines remain unchanged; valid snapshots and explicit orphan recovery still work.",
+      "limits": "Synthetic observations, packed empty-cache install. Authorized rerun clears sandbox loopback/process/cache restrictions; no new real-host/Windows/business acceptance."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."

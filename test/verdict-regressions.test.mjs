@@ -1,8 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import path from 'node:path';
 import { buildVerdicts } from '../lib/verdict.mjs';
 import { extractWithProvenance } from '../lib/extract.mjs';
-import { packageFixture, fixtureCatalog as catalog } from './fixture-utils.mjs';
+import { packageFixture, writePackageFixture, fixtureCatalog as catalog } from './fixture-utils.mjs';
 
 function result(source, surface, opts={}) {
   const f=packageFixture(source,opts);
@@ -78,6 +79,30 @@ test('an unobserved external provider always limits consumer coverage',()=>{
  assert.equal(p.coverage.status,'limited');assert.ok(p.coverage.limitations.some(s=>s.includes('settings')));
  }finally{f.cleanup();}
 });
+for (const provider of ['self', 'external']) {
+ for (const [state, info, category] of [
+  ['absent', {present:false}, 'host-service-missing'],
+  ['missing-method', {present:true,methods:{known:'function'}}, 'host-method-missing'],
+  ['unobserved', null, null],
+  ['unreadable', {status:'unreadable',error:'unavailable'}, null],
+  ['incomplete', {present:true,methods:{},truncated:true}, null],
+ ]) test(`${provider} provide declaration cannot override ${state} runtime evidence`,()=>{
+  const f=packageFixture(`export const inject=['settings'];${provider==='self'?"export const provide=['settings'];":''}export function apply(ctx){ctx.settings.absent()}`);
+  try {
+   if(provider==='external')writePackageFixture(path.join(f.nm,'provider'),{name:'provider',version:'1.0.0',main:'index.js',dsh:{}},"export const provide=['settings'];export function apply(){}");
+   const {report}=extractWithProvenance(f.nm,{catalog});
+   const p=buildVerdicts({report,catalog,dshVersion:'0.2.1-rc.2',hostSurface:{observationVersion:1,profileId:f.nm,dshVersion:'0.2.1-rc.2',probedAt:new Date().toISOString(),root:info?{settings:info}:{}},observationTarget:{profileId:f.nm,maxAgeMs:86400000}}).plugins.sample;
+   if(category){
+    const finding=p.findings.find(x=>x.category===category);
+    assert.ok(finding,JSON.stringify(p));assert.equal(finding.certainty,'certain');
+    if(state==='absent'){assert.equal(finding.severity,'fatal');assert.equal(p.verdict,'broken');}
+   }else{
+    assert.ok(!p.findings.some(x=>x.category==='host-service-missing'||x.category==='host-method-missing'));
+    assert.equal(p.coverage.status,'limited');
+   }
+  }finally{f.cleanup();}
+ });
+}
 test('ordinary function ctx parameters do not produce certain host failures',()=>{
  const p=result('function harmless(ctx){ctx.settings.absent()} export function apply(){harmless({settings:{absent(){}}});}',present);
  assert.ok(!p.findings.some(f=>f.certainty==='certain'));assert.equal(p.coverage.status,'limited');

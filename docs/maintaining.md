@@ -97,7 +97,7 @@ node tools/business-labels.mjs --predictions <预测.json> --labels <标签.json
 ## 提取器与探针维护
 
 - AST与词法绑定区分真实Context、同名普通对象、注释/字符串及遮蔽；源码图保留副作用导入和懒加载来源，不用入口不可达证明死代码。动态、异步、递归或预算不足应弃权并限制覆盖。
-- 宿主裸包入口使用标准Node ESM条件，条件按对象顺序选择，types/browser/require不作宿主import条件；根/嵌套exports及数组回退有界解析（128节点/32层）。未知自定义条件、未支持的URL目标或无法确认的入口须诊断，不回退main/index认证；相对patch入口独立优先。回归用Node自身resolve核对路径，不执行目标模块。
+- 宿主裸包入口使用标准Node ESM条件，条件按对象顺序选择，types/browser/require不作宿主import条件；根/嵌套exports及数组回退有界解析（128节点/32层）。exports目标、ESM导入/重导出/动态import与相对patch入口精确匹配，不借扩展名/index认证；相对patch独立优先。无exports的旧main保留Node旧式入口回退，CommonJS require按文件及目录main/index解析，嵌套清单限64KiB且共用源码预算；import/require同名路径不互借证明，非JS/TS模块限制覆盖。回归用Node自身resolve核对路径与文件类型，不执行目标模块；未知条件、URL目标或无法确认的入口须诊断。
 - 2026-10-24只读核对本机DSH 0.2.1-rc.2归档：`@deepseek-ai/cordis@4.0.5`的`Inject.resolve`将数组元素或对象自有键作为依赖名；`required/optional`不是分组字段。loader 1.0.6通过Node import加载并unwrap导出。静态分析只提升已证明的入口导出，变异/逃逸保留诊断及覆盖限制；此源码核对不扩大宿主或业务认证范围。
 - 调用位置必须能由相应源码字节/span验证；包、端侧、作用域和别名是身份的一部分，不能按裸变量名合并。提供方声明只是线索，不证明消费者此刻已获得服务。
 - 未看到与不存在不同。探针只采样点名服务，省略键为`unobserved`，仅明确`absent`才是缺失证据；不执行getter、不复制属性值/凭据/用户内容，保留profile/DSH/时间及完整性边界。
