@@ -101,8 +101,13 @@ README写入口，Plan写契约/待办，指南写操作和限额，维护指南
 
 ## 6. 后续工作
 
-按急迫性与价值排序，非漏洞评级；均沿用上述证据和授权边界：
+按急迫性与价值排序，非漏洞评级；均沿用上述证据和授权边界。rc.3适配为当前最高优先级，以下五项共同验收；来源、规则审查和真实验收完成前，不扩大认证范围：
 
-1. **P1：小规模真实用户试用。** 观察安装→理解→定位，记录误读、失败、误报及分享障碍，衡量定位耗时；优先呈现发现、影响和下一步核实，保留完整证据及coverage/vacuous等限制。下载/star不代替效果，联系/资料收集/公开分别授权，不默认遥测。
-2. **P2：跟进上游验收。** 2026-10-24只读核对公开状态：dsh-market#932已关闭，先前维护者说明1.66.43增加packument回退，双查询均失败时告警/安全失败仍是独立后续；1024#22仍open，待npm安装方式可用后全新实装；0xsline#717仍open未合并。有变化再复验，不重复发帖，补充另取授权。状态核对不代表新版本源码或安装已验收，记录见[current-state](current-state.json)的`upstreamStatus20261024`。
-3. **P2：Windows真实验收（依环境条件暂缓）。** 环境具备后实跑路径、安装器、回收、权限、打包/诊断及自有资源清理；完成前保留未验收边界。
+1. **P0：核验DSH 0.2.1-rc.3来源与语义差分。** 2026-10-24已核对[官方发布说明](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.3)与[tag差分](https://github.com/deepseek-ai/deepseek-harness/compare/dsh-v0.2.1-rc.2...dsh-v0.2.1-rc.3)；npm的next为rc.3、latest仍为rc.2，后续下载/CI须固定精确版本。封存官方制品、ASAR/源文件摘要及来源，按目录审查流程生成独立候选。本机rc.3相对rc.2的命名差分暂为空（host 98服务/291方法、client 8服务/43方法），但源摘要已变；仍须复核API签名、生命周期、engines/peer/豁免及loader/HTTP契约，不能仅复制旧目录或据空差分认证。以下各项的语义依据应链接固定tag源码。
+2. **P0：打通rc.3目录、升级预检与作者矩阵。** 当前普通体检对rc.3回退rc.2且verified=false，升级预检拒绝rc.3。增加独立目录和精确选择，真实验收后再登记CATALOG_REFERENCES与SUPPORTED_PREVIEW_VERSIONS；保留两个旧版本及未知/未来版本的未认证边界。核对三版本间各方向的比较、目录/输入身份、声明策略及坏摘要拒绝；作者CI默认矩阵随登记扩至三版，复验JSON/HTML/SARIF/JUnit与既有输出预算，不放宽限制。同步生成契约副本，名称相同不等于影响或业务已实测。
+3. **P0：适配rc.3导航与草稿行为。** 依[入口契约](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.3/packages/client/ui-entry-customization/README.zh.md)核对左侧栏、会话视图、右侧栏三处更多菜单，以及本插件settings.plugins.tab、详情/角标、tool/skill与HMR；浏览插件进入主列表，不把它当安装弹窗。验收选择器须按区域/role/稳定身份定位，不能命中任意更多按钮；入口折叠或暂时不可见不等于插件未激活。按[草稿升级指南](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.3/docs/upgrade-guide/v0.2.1-rc.2/new-session-blank-reuse/guide.zh.md)及uiWorkspace契约复核空白会话复用、preset隔离、whenDraftExists与clearPreviousDraft；创建入口只准备草稿，不自动发送或调用模型，按语义证据决定是否补规则/诊断。
+4. **P0：补齐rc.3真实验收与CI门禁。** 参数化目前仅认rc.2的真实验收器；请求rc.3时必须实际执行，不得以applicable:false或跳过转绿。保留旧版本，将固定rc.3加入Linux矩阵，并在macOS私有profile/Chrome验收同一完整tgz的激活、双端到货、报告/预检、HTTP边界、复核/基线、卸载恢复及资源清理。固定真实插件队列另存rc.3证据，不覆盖rc.2清单或历史真值；保留静态/观测、自然/受控及驱动错误的区别。针对[API-key模型列表变更](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.3/packages/llm/llm-deepseek-api-key/README.zh.md)，用无凭据配置或受控本地列表验证启动/模型发现的等待、失败与回退，防止验收误用父环境密钥或访问生产/models；不顺带发送模型请求。核对对应提交全部checks与制品证据，不用本机旧测试或菜单出现代替业务验收。
+5. **P0：同步rc.3交付说明与作者入口。** 适配验收后统一三语README、plugin README、指南、skill/生成副本、作者CI示例及current-state中的支持版本、导航步骤、精确命令与平台范围；区分npm插件版本、DSH版本及未发布源码，最低宿主声明不等于rc.3认证。补充rc.2→rc.3示例与未认证版本负例，保留旧目录/旧宿主回归，不在取得证据前宣称支持；发布仍需单独授权，Windows未验收边界保持明确。
+6. **P1：小规模真实用户试用。** 观察安装→理解→定位，记录误读、失败、误报及分享障碍，衡量定位耗时；优先呈现发现、影响和下一步核实，保留完整证据及coverage/vacuous等限制。下载/star不代替效果，联系/资料收集/公开分别授权，不默认遥测。
+7. **P2：跟进上游验收。** 2026-10-24只读核对公开状态：dsh-market#932已关闭，先前维护者说明1.66.43增加packument回退，双查询均失败时告警/安全失败仍是独立后续；1024#22仍open，待npm安装方式可用后全新实装；0xsline#717仍open未合并。有变化再复验，不重复发帖，补充另取授权。状态核对不代表新版本源码或安装已验收，记录见[current-state](current-state.json)的`upstreamStatus20261024`。
+8. **P2：Windows真实验收（依环境条件暂缓）。** 环境具备后实跑路径、安装器、回收、权限、打包/诊断及自有资源清理；完成前保留未验收边界。
