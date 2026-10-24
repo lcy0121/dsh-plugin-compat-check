@@ -8,6 +8,11 @@
 
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import { baselineTransaction } from '../lib/state-store.mjs'
+import { validateBaseline } from '../lib/contracts.mjs'
 
 import { snapshotForBaseline, diffAgainstBaseline, badgeFor, describeDiff, BASELINE_SCHEMA } from '../lib/baseline.mjs'
 
@@ -22,6 +27,70 @@ const find = (key, category = 'host-method-missing', severity = 'feature-dead') 
   severity,
   certainty: 'certain',
   location: { file: 'lib/index.js', line: 1 },
+})
+
+const multiSnapshot = (findings, name = 'sample') => snapshotForBaseline({plugins:Object.fromEntries([[name,{version:'1',verdict:findings.some(f=>f.severity==='fatal')?'broken':findings.length?'partial':'ok',findings}]])}, '0.2.1-rc.3')
+const loaderFinding = id => ({category:'host-entry-inactive',service:null,method:null,severity:'fatal',certainty:'certain',location:null,evidence:{entryId:id,state:'FAILED'}})
+
+test('baseline detects a second failed loader entry even while the package stays broken',()=>{
+ const before=multiSnapshot([loaderFinding('one')]),after=multiSnapshot([loaderFinding('one'),loaderFinding('two')])
+ const d=diffAgainstBaseline(before,after)
+ assert.equal(d.comparable,true);assert.equal(d.worsened.length,1)
+ assert.equal(d.worsened[0].newFindings.length,1);assert.equal(d.worsened[0].newFindings[0].entryId,'two')
+ assert.equal(badgeFor(d).direction,'worse')
+ const reverse=diffAgainstBaseline(after,before)
+ assert.equal(reverse.improved[0].goneFindings.length,1)
+})
+test('baseline never merges different failed loader identities into no change',()=>{
+ const d=diffAgainstBaseline(multiSnapshot([loaderFinding('one')]),multiSnapshot([loaderFinding('two')]))
+ assert.equal(d.worsened[0].newFindings[0].entryId,'two')
+ assert.equal(d.worsened[0].goneFindings[0].entryId,'one')
+})
+test('baseline counts identical duplicate findings one for one',()=>{
+ const f=find('tools.register'),one=multiSnapshot([f]),two=multiSnapshot([f,f])
+ assert.equal(diffAgainstBaseline(one,two).worsened[0].newFindings.length,1)
+ assert.equal(diffAgainstBaseline(two,one).improved[0].goneFindings.length,1)
+ assert.equal(badgeFor(diffAgainstBaseline(two,two)).show,false)
+})
+test('baseline pairs duplicate APIs by occurrence before evidence and ignores reordering',()=>{
+ const a=find('tools.register'),b={...find('tools.register'),location:{file:'other.js',line:2,column:3}}
+ const old=multiSnapshot([a,b]),reordered=multiSnapshot([b,a])
+ assert.deepEqual(old,reordered)
+ const raised={...b,severity:'fatal'}
+ const d=diffAgainstBaseline(old,multiSnapshot([raised,a]))
+ assert.equal(d.worsened[0].changedFindings.length,1)
+ assert.equal(d.worsened[0].changedFindings[0].from.location,'other.js:2')
+ assert.equal(d.worsened[0].newFindings.length,0)
+ const down=diffAgainstBaseline(multiSnapshot([raised,a]),old)
+ assert.equal(down.improved[0].changedFindings.length,1)
+})
+test('baseline location and certainty changes remain visible without claiming weaker evidence means health improved',()=>{
+ const a=find('tools.register'),moved={...a,location:{file:'changed.js',line:9,column:2}}
+ assert.equal(diffAgainstBaseline(multiSnapshot([a]),multiSnapshot([moved])).updated.length,1)
+ const suspect={...a,certainty:'suspected'}
+ assert.equal(diffAgainstBaseline(multiSnapshot([a]),multiSnapshot([suspect])).updated.length,1)
+ assert.equal(diffAgainstBaseline(multiSnapshot([suspect]),multiSnapshot([a])).worsened.length,1)
+})
+test('baseline preserves special dictionary keys through persistence and comparison',()=>{
+ for(const name of ['__proto__','constructor','toString']) {
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'dsc-baseline-keys-'))
+  try {
+   const file=path.join(dir,'baseline.json'),old=multiSnapshot([loaderFinding('one')],name)
+   assert.deepEqual(Object.keys(old.plugins),[name]);assert.deepEqual(validateBaseline(old),[])
+   assert.equal(baselineTransaction(file,old).wrote,true)
+   assert.deepEqual(Object.keys(JSON.parse(fs.readFileSync(file)).plugins),[name])
+   const next=baselineTransaction(file,multiSnapshot([loaderFinding('one'),loaderFinding('two')],name))
+   assert.equal(next.wrote,true);assert.equal(next.diff.worsened[0].name,name)
+  } finally {fs.rmSync(dir,{recursive:true,force:true})}
+ }
+})
+test('baseline identity changes make old lossy snapshots neutral rather than synthesizing loader changes',()=>{
+ const next=multiSnapshot([loaderFinding('one')]),old=structuredClone(next)
+ delete old.identity.findingKeyVersion
+ const diff=diffAgainstBaseline(old,next)
+ assert.equal(diff.comparable,false);assert.equal(badgeFor(diff).show,false)
+ const bad=structuredClone(next);bad.plugins.sample.findings[0].entryId={id:'bad'}
+ assert(validateBaseline(bad).length>0)
 })
 
 describe('基线：快照', () => {

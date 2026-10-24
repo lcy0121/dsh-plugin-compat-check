@@ -41,7 +41,7 @@ function fixture(t) {
           : {}),
       },
       'export function apply(){throw Error("static scans must not execute plugins")}',
-      "- name: ./index.js\n",
+      "- insert:\n    - name: ./index.js\n",
     );
     return pkg;
   }

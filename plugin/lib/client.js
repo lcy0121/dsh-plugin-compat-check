@@ -39,6 +39,14 @@ window.__ModuleLoader__.load({
       const REPORT_SCHEMA = 1;
       const REPORT_KIND = "plugin-compat-check/result";
       const ENVELOPE_KIND = "plugin-compat-check/report";
+      /** Escape untrusted single-line display text; callers supply layout newlines.
+       * JSON identities remain untouched. Visible escapes are safe to render again. */
+      function terminalText(value) {
+        return String(value).replace(
+          /[\x00-\x1f\x7f-\x9f\u061c\u200e\u200f\u2028-\u202e\u2066-\u2069]/g,
+          (c) => "\\u" + c.charCodeAt(0).toString(16).padStart(4, "0"),
+        );
+      }
       /** Reviewed catalogue bytes, not a promise of plugin business compatibility.
        * Adding a version requires source verification, rule review and integration
        * evidence; extraction alone must never extend this list. */
@@ -145,7 +153,9 @@ window.__ModuleLoader__.load({
           text(f.category) &&
           severities.includes(f.severity) &&
           certainties.includes(f.certainty) &&
-          nullableText(f.location)
+          nullableText(f.location) &&
+          (f.entryId === undefined || nullableText(f.entryId)) &&
+          (f.column === undefined || integer(f.column))
         );
       }
       function checkedEntry(v) {

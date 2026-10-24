@@ -47,6 +47,39 @@ import { loadHost } from "./support/host-harness.mjs";
 const HOST = path.join(REPO, "plugin", "index.js");
 const SRC = fs.readFileSync(HOST, "utf8");
 
+test("agent display escapes controls while retaining raw report and error identities", () => {
+  const body = toJSON(
+    run({
+      nm: path.join(REPO, "test/fixtures/labels"),
+      dshVersion: "0.2.1-rc.3",
+      baseline: false,
+      _ignoreAutoProbe: true,
+    }),
+  );
+  body.observation.notes.push("note\nspoof\u001b[2J\u009b\u202e");
+  body.plugins["@label/broken-client"].findings[0].basis = "basis\u2066\rspoof";
+  const compat = {
+    ok: true,
+    toolVersion: body.toolVersion,
+    nodeModules: "owned\u001b[31m",
+    report: body,
+  };
+  const before = JSON.stringify(compat),
+    { sandbox } = loadHost();
+  const text = sandbox.renderForModel(compat);
+  assert(
+    !/[\x00-\x09\x0b-\x1f\x7f-\x9f\u061c\u200e\u200f\u2028-\u202e\u2066-\u2069]/u.test(
+      text,
+    ),
+  );
+  assert(text.includes("note\\u000aspoof\\u001b[2J"));
+  assert.equal(JSON.stringify(compat), before);
+  const failure = { ok: false, error: "error\u001b[2J\nspoof" };
+  const rendered = sandbox.renderForModel(failure);
+  assert(rendered.includes("error\\u001b[2J\\u000aspoof"));
+  assert.equal(sandbox.toolResult(failure, rendered).error, failure.error);
+});
+
 test("agent文本与摘要保留无已验证调用，并分开标注静态确定性和推断影响", () => {
   const result = run({
     nm: path.join(REPO, "test/fixtures/labels"),
@@ -493,7 +526,10 @@ test("unloading an in-flight report before a pending manager read cannot write a
       }),
     );
     fs.writeFileSync(path.join(nm, "index.js"), "export function apply(){}");
-    fs.writeFileSync(path.join(nm, "cordis.patch.yml"), "- name: ./index.js\n");
+    fs.writeFileSync(
+      path.join(nm, "cordis.patch.yml"),
+      "- insert:\n    - name: ./index.js\n",
+    );
     const script = `import {apply} from ${JSON.stringify(pathToFileURL(HOST).href)};
    const off=[];let release,entered;const ready=new Promise(r=>entered=r);let calls=0;
    const ctx={get:key=>key==='pluginManager'?{list:()=>{if(++calls>1)return [];entered();return new Promise(r=>release=r);}}:undefined,inject:()=>()=>{},effect:fn=>{const d=fn();if(typeof d==='function')off.push(d);}};

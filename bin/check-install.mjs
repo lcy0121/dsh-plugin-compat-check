@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { terminalText } from "../lib/contracts.mjs";
 import { exitCodeForSummary } from "../lib/contracts.mjs";
 import { installAndProbe } from "../lib/probe-runner.mjs";
 import { extractWithProvenance } from "../lib/extract.mjs";
@@ -46,7 +47,10 @@ try {
     process.exitCode = output.error ? 3 : exitCodeForSummary(s);
   } else {
     if (json) process.stdout.write(JSON.stringify(result) + "\n");
-    else process.stderr.write(result.status + ": " + result.error + "\n");
+    else
+      process.stderr.write(
+        terminalText(result.status) + ": " + terminalText(result.error) + "\n",
+      );
     process.exitCode = result.exitCode;
   }
 } catch (error) {

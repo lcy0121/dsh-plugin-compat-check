@@ -12,6 +12,7 @@ This inventory covers the production and development npm closure in the reposito
 | --- | --- | --- |
 | [`@babel/parser`](https://www.npmjs.com/package/@babel/parser/v/7.29.9) | 7.29.9 | MIT |
 | [`semver`](https://www.npmjs.com/package/semver/v/7.7.3) | 7.7.3 | ISC |
+| [`yaml`](https://www.npmjs.com/package/yaml/v/2.9.1) | 2.9.1 | ISC |
 
 ### Transitive runtime dependencies
 
@@ -27,7 +28,6 @@ These packages support repository-only tools and are not declared as npm plugin 
 
 | Package | Locked version | License |
 | --- | --- | --- |
-| [`yaml`](https://www.npmjs.com/package/yaml/v/2.9.1) | 2.9.1 | ISC |
 
 ## Development-only dependencies
 

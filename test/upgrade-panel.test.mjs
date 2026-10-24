@@ -68,7 +68,10 @@ function fixture() {
     }),
   );
   fs.writeFileSync(path.join(pkg, "index.js"), "export function apply(){}");
-  fs.writeFileSync(path.join(pkg, "cordis.patch.yml"), "- name: ./index.js\n");
+  fs.writeFileSync(
+    path.join(pkg, "cordis.patch.yml"),
+    "- insert:\n    - name: ./index.js\n",
+  );
   return { root, nm };
 }
 test("preflight is explicit and sends only version context to a separate same-origin route, preserving the ordinary report", async () => {

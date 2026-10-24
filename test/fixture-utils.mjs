@@ -16,7 +16,7 @@ export function packageFixture(source, { meta = {}, files = {} } = {}) {
   writePackageFixture(pkg, {
     name: 'sample', version: '1.0.0', main: 'index.js',
     dsh: { bundle: { patch: 'cordis.patch.yml' } }, ...meta,
-  }, source, '- name: ./index.js\n');
+  }, source, '- insert:\n    - name: ./index.js\n');
   for (const [file, text] of Object.entries(files)) {
     fs.mkdirSync(path.dirname(path.join(pkg, file)), { recursive: true });
     fs.writeFileSync(path.join(pkg, file), text);

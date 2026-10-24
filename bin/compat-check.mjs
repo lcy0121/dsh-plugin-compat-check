@@ -50,7 +50,11 @@ import {
 } from "../lib/state-store.mjs";
 import { probeProfile } from "../lib/probe-runner.mjs";
 import { TOOL_VERSION, versionLine } from "../lib/version.mjs";
-import { createFailure, exitCodeForSummary } from "../lib/contracts.mjs";
+import {
+  createFailure,
+  exitCodeForSummary,
+  terminalText,
+} from "../lib/contracts.mjs";
 import {
   runUpgradePreview,
   renderUpgradePreview,
@@ -447,7 +451,7 @@ async function main() {
           createFailure(error.message, { toolVersion: TOOL_VERSION }),
         ) + "\n",
       );
-    else process.stderr.write(`${error.message}\n\n${USAGE}`);
+    else process.stderr.write(`${terminalText(error.message)}\n\n${USAGE}`);
     process.exitCode = 3;
     return;
   }
@@ -555,7 +559,7 @@ async function main() {
       );
     else
       process.stderr.write(
-        `✗ 体检工具自身出错（不是插件的问题）：${error && error.stack ? error.stack : error}\n`,
+        `✗ 体检工具自身出错（不是插件的问题）：${terminalText(error && error.stack ? error.stack : error)}\n`,
       );
     process.exitCode = 3;
     return;

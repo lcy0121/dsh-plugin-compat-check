@@ -28,7 +28,7 @@ writePackageFixture(
 fs.writeFileSync(${JSON.stringify(marker)}, 'executed');
 export function apply(ctx) { ctx.logger.info('fixture'); }
 `,
-  "- name: ./index.js\n",
+  "- insert:\n    - name: ./index.js\n",
 );
 // A normal check attempts to read this adjacent probe. Upgrade mode must ignore it.
 fs.writeFileSync(path.join(temp, "profile", "probe-report.json"), "{not-json");

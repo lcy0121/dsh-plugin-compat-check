@@ -12,6 +12,13 @@ function scan(source, opts, check) {
   finally { f.cleanup(); }
 }
 
+test('namespace re-export reached through a patch cannot crash the inventory or invent a binding',()=>{
+ scan("export * as helpers from './helper.js';export function apply(ctx){ctx.settings.known()}", {files:{'helper.js':'export function wire(ctx){ctx.tools.register()}' }}, p=>{
+  assert(p.diagnostics.some(d=>d.kind==='module-export-uncertain'));
+  assert(p.callSites.some(s=>s.service==='settings'&&s.method==='known'));
+ });
+});
+
 test('string examples cannot provide a missing service', () => {
   scan('export const inject=["missingSvc"]; const example="ctx.provide(\'missingSvc\')";', {},
     p => assert.deepEqual(p.providedServices, []));
@@ -126,7 +133,7 @@ test('host conditional exports follow Node import conditions and object order',(
  ]){
   const f=packageFixture('export function apply(ctx){ctx.settings.known()}',{meta:{exports},files:{'actual.js':'export function apply(ctx){ctx.settings.absent()}','types.d.ts':'export declare function apply(ctx:unknown):void;'}});
   try{
-   fs.writeFileSync(path.join(f.pkg,'cordis.patch.yml'),'- name: sample\n');
+   fs.writeFileSync(path.join(f.pkg,'cordis.patch.yml'),'- insert:\n    - name: sample\n');
    const {report}=extractWithProvenance(f.nm,{catalog});
    const resolved=spawnSync(process.execPath,['--input-type=module','-e',`process.stdout.write(import.meta.resolve('sample'))`],{cwd:f.root,encoding:'utf8',timeout:5000});
    assert.equal(resolved.status,0,resolved.stderr);
@@ -151,7 +158,7 @@ test('unresolved package exports abstain instead of certifying a legacy fallback
  ]){
   const f=packageFixture('export function apply(ctx){ctx.settings.known()}',{meta:{exports},files:{'actual.js':'export function apply(ctx){ctx.settings.absent()}'}});
   try{
-   fs.writeFileSync(path.join(f.pkg,'cordis.patch.yml'),'- name: sample\n');
+   fs.writeFileSync(path.join(f.pkg,'cordis.patch.yml'),'- insert:\n    - name: sample\n');
    const {report}=extractWithProvenance(f.nm,{catalog});
    assert.equal(report.scanComplete,false,JSON.stringify(exports));
    assert.ok(report.perPlugin.sample.diagnostics.some(d=>d.kind==='entry-resolution-uncertain'));
@@ -228,7 +235,7 @@ for(const extension of ['.cjs','.mjs','.ts'])test(`extensionless require cannot 
 test('a relative patch entry must resolve exactly even when an extension candidate exists',()=>{
  const f=packageFixture('export function apply(ctx){ctx.settings.known()}',{files:{'actual.js':'export function apply(ctx){ctx.settings.known()}'}});
  try{
-  fs.writeFileSync(path.join(f.pkg,'cordis.patch.yml'),'- name: ./actual\n');
+  fs.writeFileSync(path.join(f.pkg,'cordis.patch.yml'),'- insert:\n    - name: ./actual\n');
   const {report}=extractWithProvenance(f.nm,{catalog});
   assert.equal(report.scanComplete,false);assert.deepEqual(report.perPlugin.sample.entryFiles,[]);
  }finally{f.cleanup();}
@@ -333,7 +340,7 @@ for(const [label,source] of [
  ['enum binding',"const file='./worker.js';{enum file{value}require(file)}"],
  ['namespace binding',"const file='./worker.js';{namespace file{export const value=1}require(file)}"],
 ])test(`TypeScript ${label} cannot borrow an outer constant module path`,()=>{
- scan('',{files:{'entry.ts':source,'cordis.patch.yml':'- name: ./entry.ts\n','worker.js':'ctx.settings.absent()'}},p=>{assert(p.diagnostics.some(d=>d.kind==='module-path-uncertain'));assert(!p.files['host-entry'].includes('worker.js'));});
+ scan('',{files:{'entry.ts':source,'cordis.patch.yml':'- insert:\n    - name: ./entry.ts\n','worker.js':'ctx.settings.absent()'}},p=>{assert(p.diagnostics.some(d=>d.kind==='module-path-uncertain'));assert(!p.files['host-entry'].includes('worker.js'));});
 });
 test('a closure eval cannot leave implicit require proof in sibling consumers',()=>{
  scan("const file='./worker.js';function replace(){eval('require=()=>({wire(){}})')}replace();exports.apply=ctx=>require(file).wire(ctx)",{files:{'worker.js':'exports.wire=ctx=>ctx.settings.absent()'}},p=>{assert(p.diagnostics.some(d=>d.kind==='module-path-uncertain'));assert(!p.files['host-entry'].includes('worker.js'));});

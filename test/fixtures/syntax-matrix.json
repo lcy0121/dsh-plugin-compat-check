@@ -581,7 +581,7 @@
       "meta": {
         "exports": "./missing.js"
       },
-      "patch": "- name: ./index.js\n",
+      "patch": "- insert:\n    - name: ./index.js\n",
       "expected": {
         "classification": "supported",
         "calls": [["settings.absent", "index.js", false, false, "ast"]],

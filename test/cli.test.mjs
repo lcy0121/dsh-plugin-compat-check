@@ -25,6 +25,10 @@ import { REPO } from './helpers.mjs'
 import { run } from '../bin/compat-check.mjs'
 import { toJSON } from '../lib/report.mjs'
 import { renderIssueReport } from '../bin/issue-report.mjs'
+import { render } from '../lib/report.mjs'
+import { packageFixture } from './fixture-utils.mjs'
+import { createUpgradeFailure } from '../lib/upgrade-contract.mjs'
+import { renderUpgradePreview } from '../lib/upgrade-preview.mjs'
 
 const CLI = path.join(REPO, 'bin', 'compat-check.mjs')
 const MICRO = path.join(REPO, 'test/fixtures/micro/node_modules')
@@ -32,6 +36,44 @@ const MICRO_SURFACE = path.join(REPO, 'test/fixtures/micro/host-surface.json')
 const BASELINE_SURFACE = path.join(REPO, 'tools/parity/fixtures/host-surface-parityfix.json')
 const LABELS = path.join(REPO, 'test/fixtures/labels')
 const PARITYFIX = optionalProfiles().find(p => p.name === 'parityfix')?.nm
+
+const terminalControl = /[\x00-\x09\x0b-\x1f\x7f-\x9f\u061c\u200e\u200f\u2028-\u202e\u2066-\u2069]/u
+test('human report escapes real source filenames and metadata without changing JSON identities', {skip:process.platform==='win32'},()=>{
+ const file='part\u001b[2J\u009b\u202e.js',name='sample\u001b[31m'
+ const f=packageFixture(`export {apply} from ${JSON.stringify('./'+file)}`,{meta:{name,version:'1.0.0\u0008'},files:{[file]:'export function apply(ctx){ctx.tools.noSuchCompatMethod()}'}})
+ try {
+  const r=run({nm:f.nm,dshVersion:'0.2.1-rc.3',baseline:false,_ignoreAutoProbe:true})
+  assert.equal(r.error,null)
+  const before=JSON.stringify(toJSON(r)),text=render(r,{})
+  assert(!terminalControl.test(text));assert(text.includes('part\\u001b[2J\\u009b\\u202e.js'))
+  const body=toJSON(r)
+  assert.equal(body.plugins[name].name,name)
+  assert(body.plugins[name].findings.some(f=>f.location?.file===file))
+  assert.equal(JSON.stringify(body),before)
+ } finally {f.cleanup()}
+})
+test('terminal notes, baseline diagnostics and tool errors cannot inject lines or control sequences',()=>{
+ const r=run({nm:LABELS,dshVersion:'0.2.1-rc.3',baseline:false,_ignoreAutoProbe:true})
+ r.verdict.observation.notes=['note\nforged\r\t\u0085\u061c\u200f\u2028\u2066']
+ r.baseline={file:'base\u001b[2J.json',wrote:false,note:'note\nspoof',writeError:'failed\u0007',diff:null,badge:{show:false,text:null,direction:null,detail:'detail'}}
+ const before=JSON.stringify(r)
+ for(const quiet of [false,true]) {
+  const out=render(r,{quiet})
+  assert(!terminalControl.test(out));assert(out.includes('note\\u000aforged'))
+  if(quiet)assert.equal(out.split('\n').length,1)
+ }
+ assert.equal(JSON.stringify(r),before)
+ assert(!terminalControl.test(render({error:'error\u001b[2J\nspoof'},{})))
+ const exported=renderIssueReport(toJSON(r))
+ assert(!terminalControl.test(exported));assert(!exported.includes('forged'))
+})
+test('CLI argument errors and upgrade text escape controls while JSON retains their values',()=>{
+ const bad='--bad\u001b[2J\u202e',r=spawnSync(process.execPath,[path.join(REPO,'bin/compat-check.mjs'),bad],{encoding:'utf8',timeout:10000})
+ assert.equal(r.status,3);assert(!terminalControl.test(r.stderr));assert(r.stderr.includes('\\u001b'))
+ const failure=createUpgradeFailure('error\nspoof\u001b[2J',{currentVersion:'0.2.1-rc.3',targetVersion:'bad\u009b'})
+ const original=JSON.stringify(failure),out=renderUpgradePreview(failure)
+ assert(!terminalControl.test(out));assert(out.includes('\\u009b'));assert.equal(JSON.stringify(failure),original)
+})
 
 /**
  * 跑一次 CLI —— **把 `DSH_HOME` 钉进临时目录**。

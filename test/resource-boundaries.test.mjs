@@ -12,6 +12,179 @@ import { extractWithProvenance } from "../lib/extract.mjs";
 import { collectPackageSources } from "../lib/source-graph.mjs";
 import { runAsync } from "../bin/compat-check.mjs";
 import { readStaticFile, readStaticDirectory } from "../lib/static-input.mjs";
+
+for (const [label, patch, files, expected] of [
+  [
+    "id first",
+    "- insert:\n    - id: actual\n      name: ./actual.mjs\n",
+    {},
+    ["actual.mjs"],
+  ],
+  [
+    "flow mappings",
+    "[{insert: [{id: actual, name: ./actual.mjs}]}]",
+    {},
+    ["actual.mjs"],
+  ],
+  [
+    "quoted path",
+    "- insert:\n    - name: './actual file.mjs'\n",
+    { "actual file.mjs": "export function apply(ctx){ctx.settings.absent()}" },
+    ["actual file.mjs"],
+  ],
+  [
+    "config names are data",
+    "- insert:\n    - name: ./actual.mjs\n      config:\n        - name: ./decoy.mjs\n",
+    { "decoy.mjs": "export function apply(ctx){ctx.tools.absent()}" },
+    ["actual.mjs"],
+  ],
+  [
+    "builtin group",
+    "- insert:\n    - id: group\n      name: cordis:group\n      group: true\n      config:\n        - id: actual\n          name: ./actual.mjs\n",
+    {},
+    ["actual.mjs"],
+  ],
+  [
+    "targeted insert",
+    "- insert: [{id: group, name: 'cordis:group', group: true, config: []}]\n- id: group\n  insert: [{id: actual, name: ./actual.mjs}]\n",
+    {},
+    ["actual.mjs"],
+  ],
+  [
+    "disabled row",
+    "- insert: [{id: actual, name: ./actual.mjs}]\n- id: actual\n  disabled: true\n",
+    {},
+    [],
+  ],
+  [
+    "reenabled row",
+    "- insert: [{id: actual, name: ./actual.mjs, disabled: true}]\n- id: actual\n  disabled: false\n",
+    {},
+    ["actual.mjs"],
+  ],
+  [
+    "disabled group descendants",
+    "- insert: [{id: group, name: 'cordis:group', group: true, disabled: true, config: [{name: ./actual.mjs}]}]",
+    {},
+    [],
+  ],
+])
+  test(`patch mounting follows structure and ordered operations: ${label}`, () => {
+    const f = packageFixture("export function apply(){}", {
+      files: {
+        "actual.mjs": "export function apply(ctx){ctx.settings.absent()}",
+        ...files,
+      },
+    });
+    try {
+      fs.writeFileSync(path.join(f.pkg, "cordis.patch.yml"), patch);
+      const { report } = extractWithProvenance(f.nm, { catalog }),
+        p = report.perPlugin.sample;
+      assert.deepEqual(p.files["host-entry"], expected);
+      assert.deepEqual(p.entryFiles, expected);
+      assert.equal(report.scanComplete, true, JSON.stringify(p.diagnostics));
+      const v = buildVerdicts({ report, catalog }).plugins.sample;
+      assert.equal(
+        v.findings.some(
+          (f) => f.service === "settings" && f.method === "absent",
+        ),
+        expected.length > 0,
+      );
+      assert(!p.callSites.some((s) => s.file === "decoy.mjs"));
+    } finally {
+      f.cleanup();
+    }
+  });
+test("patch paths are anchored beside each declared patch and arrays compose in order", () => {
+  const f = packageFixture("export function apply(){}", {
+    meta: { dsh: { bundle: { patch: ["patches/a.yml", "patches/b.yml"] } } },
+    files: {
+      "patches/a.yml": "- insert: [{id: actual, name: ./actual.mjs}]",
+      "patches/b.yml": "- id: actual\n  disabled: false",
+      "patches/actual.mjs": "export function apply(ctx){ctx.settings.absent()}",
+    },
+  });
+  try {
+    const { report } = extractWithProvenance(f.nm, { catalog });
+    assert.deepEqual(report.perPlugin.sample.entryFiles, [
+      "patches/actual.mjs",
+    ]);
+    assert.equal(report.scanComplete, true);
+  } finally {
+    f.cleanup();
+  }
+});
+test("relative insert names are anchored before later name assertions; a mismatch cannot disable the real mount", () => {
+  const f = packageFixture("export function apply(){}", {
+    files: {
+      "actual.mjs": "export function apply(ctx){ctx.settings.absent()}",
+    },
+  });
+  try {
+    fs.writeFileSync(
+      path.join(f.pkg, "cordis.patch.yml"),
+      "- insert: [{id: actual, name: ./actual.mjs}]\n- id: actual\n  name: ./actual.mjs\n  disabled: true\n",
+    );
+    const { report } = extractWithProvenance(f.nm, { catalog }),
+      p = report.perPlugin.sample;
+    assert.deepEqual(p.entryFiles, ["actual.mjs"]);
+    assert(p.diagnostics.some((d) => d.kind === "patch-resolution-uncertain"));
+    assert(
+      buildVerdicts({ report, catalog }).plugins.sample.findings.some(
+        (f) => f.service === "settings" && f.method === "absent",
+      ),
+    );
+  } finally {
+    f.cleanup();
+  }
+});
+for (const [label, patch, limits] of [
+  ["non-insert name", "- id: unknown\n  name: ./actual.mjs\n", {}],
+  ["malformed YAML", "- insert: [", {}],
+  ["wrong root", "name: ./actual.mjs", {}],
+  ["alias", "- insert: &rows [{name: ./actual.mjs}]\n- insert: *rows", {}],
+  ["recursive alias", "- insert: &rows [*rows]", {}],
+  [
+    "unsupported expression",
+    "- insert: [{name: !!js \"throw Error('executed')\"}]",
+    {},
+  ],
+  ["depth budget", "- insert: " + "[".repeat(40) + "{}" + "]".repeat(40), {}],
+  [
+    "node budget",
+    "- insert: [" +
+      Array.from(
+        { length: 20 },
+        (_, i) => `{id: p${i}, name: ./actual.mjs}`,
+      ).join(",") +
+      "]",
+    { yamlNodes: 16 },
+  ],
+])
+  test(`uncertain patch cannot silently certify the legacy index: ${label}`, () => {
+    const f = packageFixture(
+      "export function apply(ctx){ctx.settings.known()}",
+      {
+        files: {
+          "actual.mjs": "export function apply(ctx){ctx.settings.absent()}",
+        },
+      },
+    );
+    try {
+      fs.writeFileSync(path.join(f.pkg, "cordis.patch.yml"), patch);
+      const { report } = extractWithProvenance(f.nm, { catalog, limits }),
+        p = report.perPlugin.sample;
+      assert.equal(report.scanComplete, false);
+      assert.deepEqual(p.entryFiles, []);
+      assert(p.diagnostics.some((d) => /patch|budget/.test(d.kind)));
+      assert.equal(
+        buildVerdicts({ report, catalog }).plugins.sample.coverage.status,
+        "limited",
+      );
+    } finally {
+      f.cleanup();
+    }
+  });
 const job = new URL("./support/resource-worker.mjs", import.meta.url);
 const record = (name, metrics) => {
   if (process.env.DSC_ENGINEERING_LOG)
@@ -365,7 +538,7 @@ test("patch bytes share the per-file and total source budgets", () => {
     try {
       fs.writeFileSync(
         path.join(f.pkg, "cordis.patch.yml"),
-        "#" + "x".repeat(256) + "\n- name: ./index.js\n",
+        "#" + "x".repeat(256) + "\n- insert:\n    - name: ./index.js\n",
       );
       const out = extractWithProvenance(f.nm, { catalog, limits });
       assert.equal(out.report.scanComplete, false);
@@ -528,7 +701,7 @@ test("patch accounting can exhaust the budget before otherwise small source file
   try {
     fs.writeFileSync(
       path.join(f.pkg, "cordis.patch.yml"),
-      "#" + "x".repeat(80) + "\n- name: ./index.js\n",
+      "#" + "x".repeat(80) + "\n- insert:\n    - name: ./index.js\n",
     );
     const out = extractWithProvenance(f.nm, {
       catalog,

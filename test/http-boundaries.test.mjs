@@ -30,7 +30,7 @@ async function withHost(check) {
       dsh: { bundle: { patch: "cordis.patch.yml" } },
     },
     "export function apply(){}",
-    "- name: ./index.js\n",
+    "- insert:\n    - name: ./index.js\n",
   );
   const overrides = {
     DSH_HOME: home,

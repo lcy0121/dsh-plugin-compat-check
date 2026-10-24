@@ -125,7 +125,7 @@ describe('skill：它说的每件事，工具都真的做得到', () => {
       fs.writeFileSync(path.join(pkg, 'package.json'), JSON.stringify({
         name: 'clean-pkg', version: '1.0.0', dsh: { bundle: { patch: './cordis.patch.yml' } },
       }))
-      fs.writeFileSync(path.join(pkg, 'cordis.patch.yml'), '- name: ./index.js\n')
+      fs.writeFileSync(path.join(pkg, 'cordis.patch.yml'), '- insert:\n    - name: ./index.js\n')
       // 只调用运行时面里确实有的方法 → 应当"可用"
       fs.writeFileSync(path.join(pkg, 'index.js'),
         "export const inject = ['tools']\n"

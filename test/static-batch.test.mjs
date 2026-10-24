@@ -39,7 +39,7 @@ function sample(t, source = "export default class Plugin {}") {
       main: "index.js",
       dsh: { bundle: { patch: "cordis.patch.yml" } },
     }),
-    "cordis.patch.yml": "- name: ./index.js\n",
+    "cordis.patch.yml": "- insert:\n    - name: ./index.js\n",
     "index.js": typeof source === "function" ? source(dir) : source,
   };
   for (const [name, bytes] of Object.entries(files))

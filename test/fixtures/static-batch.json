@@ -8,14 +8,14 @@
       "path": "labels/healthy",
       "name": "@label/healthy",
       "version": "1.0.0",
-      "sha256": "c2cfb01a37b68c83b453fb3f0210f774c70520b2da4ce2a73bb6967e22ac6ef2"
+      "sha256": "bf550e907ed95507e0f669eb2b4a111925d24ac08f0fdb293c35c7e1afb55003"
     },
     {
       "id": "broken-service",
       "path": "labels/broken-service",
       "name": "@label/broken-service",
       "version": "1.0.0",
-      "sha256": "1dd49fe033b55a20c715a2144abb9d96d5b62db1963b7ff8bfee1db3836f77f8"
+      "sha256": "554049b4394f88b853cc3a585291f27165fbbfd0201dcf9c2148592d7c800e09"
     },
     {
       "id": "broken-client",

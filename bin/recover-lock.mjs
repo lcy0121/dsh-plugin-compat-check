@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /** Local-only explicit orphan recovery; inspection does not remove the state lock. */
+import { terminalText } from "../lib/contracts.mjs";
 import { recoverStateLock } from "../lib/state-lock.mjs";
 const args = process.argv.slice(2);
 try {
@@ -16,6 +17,6 @@ try {
     );
   console.log(JSON.stringify(recoverStateLock(args[0], { confirm: args[2] })));
 } catch (error) {
-  console.error(`State lock recovery refused: ${error.message}`);
+  console.error(`State lock recovery refused: ${terminalText(error.message)}`);
   process.exitCode = 1;
 }

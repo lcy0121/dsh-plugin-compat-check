@@ -23,7 +23,7 @@ function execute(body) {
       peerDependencies: { "@deepseek-ai/dsh": ">=0.2.0-rc.2 <0.2.1-rc.1" },
     },
     'export function apply(){throw Error("never execute")}',
-    "- name: ./index.js\n",
+    "- insert:\n    - name: ./index.js\n",
   );
   fs.writeFileSync(path.join(nm, "../probe-report.json"), "{corrupt");
   fs.writeFileSync(

@@ -46,7 +46,7 @@ export function measureSyntaxRow(row) {
     const files = {
       "index.js": row.source,
       ...row.files,
-      "cordis.patch.yml": row.patch ?? "- name: sample\n",
+      "cordis.patch.yml": row.patch ?? "- insert:\n    - name: sample\n",
       "package.json": JSON.stringify({
         name: "sample",
         version: "1.0.0",

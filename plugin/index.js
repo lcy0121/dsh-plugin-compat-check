@@ -39,6 +39,7 @@ import {
   assertEnvelope,
   failureEnvelope,
   catalogLines,
+  terminalText,
 } from "./lib/report-contract.js";
 import { nextSteps } from "./lib/finding-guidance.js";
 import {
@@ -1383,7 +1384,7 @@ async function computeReport(state, ctx, options = {}) {
 function renderForModel(compat) {
   try {
     if (!compat || compat.ok !== true) {
-      return `体检没跑成（这是工具的问题，不是插件的结论）：${(compat && compat.error) || "未知原因"}`;
+      return `体检没跑成（这是工具的问题，不是插件的结论）：${terminalText((compat && compat.error) || "未知原因")}`;
     }
     const r = compat.report;
     const L = [];
@@ -1494,9 +1495,9 @@ function renderForModel(compat) {
     L.push(
       "  2) 客户端功能需在浏览器实际操作并核验结果；元素出现和没有报错均不等于业务成功。",
     );
-    return L.join("\n");
+    return L.map(terminalText).join("\n");
   } catch (error) {
-    return `渲染结论时出错（工具的问题）：${errText(error)}`;
+    return `渲染结论时出错（工具的问题）：${terminalText(errText(error))}`;
   }
 }
 
@@ -1593,7 +1594,7 @@ async function upgradeToolResult(state, options) {
     });
     text =
       "升级预检无法比较：" +
-      preview.error +
+      terminalText(preview.error) +
       "；静态预测不等于目标版本业务通过。";
   }
   return {
