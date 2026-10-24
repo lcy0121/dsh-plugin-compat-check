@@ -60,6 +60,7 @@ import { compatibilityText } from "./arrival-text.mjs";
 import { randomUUID } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
+import { prepareOwnedPackageSource } from "./owned-package-source.mjs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -260,17 +261,7 @@ async function main() {
       // Pack hooks stage/unstage files; give them owned inputs so concurrent
       // packaging cannot mutate this checkout or remove another run's kernel.
       const packRoot = path.join(artifactDir, "source");
-      fs.mkdirSync(packRoot, { mode: 0o700 });
-      for (const dir of ["lib", "rules", "plugin", "skill"]) {
-        fs.cpSync(path.join(REPO, dir), path.join(packRoot, dir), {
-          recursive: true,
-          filter: (file) =>
-            path.basename(file) !== "node_modules" &&
-            file !== path.join(REPO, "plugin", "kernel"),
-        });
-      }
-      for (const file of ["LICENSE", "THIRD_PARTY_NOTICES.md"])
-        fs.copyFileSync(path.join(REPO, file), path.join(packRoot, file));
+      prepareOwnedPackageSource(REPO, packRoot);
       const packed = await command(
         "npm",
         [

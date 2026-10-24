@@ -11,7 +11,7 @@ npm test -- --test-reporter=tap > /tmp/dsc-tests.tap
 
 `check`统一核对格式、文档/版本、skill/契约生成副本、第三方说明、可执行语法矩阵和已登记目录；不递归运行测试、不安装/执行目标、不联网或改动源码。矩阵会创建并清理自有合成输入。完整套件仍单独运行；`doc-check --test-summary`核对成功TAP计数，远端元数据与真实DSH/业务验收另按授权进行。
 
-格式检查覆盖宿主入口、预构建客户端、主CLI及列出的共享模块。客户端契约仍由纯模块单一生成；`stage-contract.mjs`在最终客户端生成边界统一格式化，使格式检查与生成检查一致，维护需完整仓库开发依赖（含Prettier）。本地HTTP准入拆为`plugin/lib/local-request.js`，不复制内核判定；VM结构回归用AST处理导入/导出，避免依赖引号和换行。
+格式检查覆盖宿主入口、预构建客户端、主CLI及列出的共享模块。客户端契约仍由纯模块单一生成；`stage-contract.mjs`在最终客户端生成边界统一格式化，使格式检查与生成检查一致，维护需完整仓库开发依赖（含Prettier）。真实验收和客户端到货工具用`tools/owned-package-source.mjs`准备私有打包副本：先核对Prettier的manifest/冻结lock/已装版本，再复制其自包含构建包；依赖缺失或漂移时要求重新npm ci。构建依赖不进入plugin目录或tgz，正常运行全部prepack/postpack钩子，不改仓库工作区。本地HTTP准入拆为`plugin/lib/local-request.js`，不复制内核判定；VM结构回归用AST处理导入/导出，避免依赖引号和换行。
 
 语法事实源为[矩阵病例](../test/fixtures/syntax-matrix.json)，通过真实提取器与判定器执行；可独立运行`npm run check:syntax`，或`node tools/syntax-matrix.mjs --json > syntax-matrix.json`保留逐项期望、实际结果、差异、调用跨度和覆盖证据。退出0表示病例匹配、1表示漂移、2表示参数错误。
 

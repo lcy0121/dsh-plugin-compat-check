@@ -23,6 +23,7 @@ import {
 import { run as check } from "../bin/compat-check.mjs";
 import { TOOL_VERSION } from "../lib/version.mjs";
 import { assertUpgradePreview } from "../lib/upgrade-contract.mjs";
+import { prepareOwnedPackageSource } from "./owned-package-source.mjs";
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-rc2-live-"));
@@ -409,16 +410,7 @@ try {
       }
     } else {
       const source = path.join(root, "source");
-      fs.mkdirSync(source);
-      for (const d of ["lib", "rules", "plugin", "skill"])
-        fs.cpSync(path.join(repo, d), path.join(source, d), {
-          recursive: true,
-          filter: (f) =>
-            path.basename(f) !== "node_modules" &&
-            f !== path.join(repo, "plugin", "kernel"),
-        });
-      for (const file of ["LICENSE", "THIRD_PARTY_NOTICES.md"])
-        fs.copyFileSync(path.join(repo, file), path.join(source, file));
+      prepareOwnedPackageSource(repo, source);
       await exec("npm", [
         "pack",
         path.join(source, "plugin"),

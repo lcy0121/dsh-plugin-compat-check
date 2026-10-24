@@ -70,6 +70,59 @@ fs.writeFileSync(path.join(process.env.DSH_HOME,'pack-record.json'),JSON.stringi
   assert.equal(fs.existsSync(record.dest),false);
  });
 });
+test('engineering source copy runs real prepack without borrowing ancestor development dependencies',()=>{
+ withFakeDsh(`const fs=require('node:fs'),path=require('node:path'),a=process.argv.slice(2);
+ if(a.includes('--version'))console.log('0.2.0-rc.2');
+ else if(a.includes('--dump-config'))fs.mkdirSync(path.join(process.env.DSH_HOME,'profiles',a[a.indexOf('--profile')+1]),{recursive:true});
+ else if(a.includes('add')){
+  const artifact=a.at(-1).replace(/^file:/,'');
+  const list=require('node:child_process').execFileSync('tar',['-tzf',artifact],{encoding:'utf8'});
+  fs.writeFileSync(path.join(process.env.DSC_PACK_RECEIPT),JSON.stringify({artifact,list}));
+  console.error('controlled stop after real pack');process.exit(1);
+ }else process.exit(1);`,({dir,env})=>{
+  const receipt=path.join(dir,'packed.json');
+  const paths=['plugin/lib/client.js','plugin/skill/SKILL.md','skill/SKILL.md'];
+  const before=paths.map(f=>fs.readFileSync(f));
+  const r=spawnSync(process.execPath,['tools/engineering-live.mjs'],{env:{...env,DSC_PACK_RECEIPT:receipt,npm_config_cache:path.join(dir,'cache')},encoding:'utf8',timeout:30000});
+  assert.equal(r.status,1,r.stdout+r.stderr);
+  assert.ok(fs.existsSync(receipt),r.stdout+r.stderr);
+  const {artifact,list}=JSON.parse(fs.readFileSync(receipt));
+  for(const file of ['package/index.js','package/lib/client.js','package/kernel/lib/verdict.mjs','package/skill/SKILL.md','package/THIRD_PARTY_NOTICES.md'])assert.ok(list.split('\n').includes(file),file);
+  assert.doesNotMatch(list,/node_modules\/prettier/);
+  assert.match(r.stdout,/controlled stop after real pack/);
+  assert.equal(fs.existsSync(artifact),false,'owned failed run removes its archive and build inputs');
+  paths.forEach((f,i)=>assert.deepEqual(fs.readFileSync(f),before[i],f));
+ });
+});
+test('private source preparation rejects missing or drifted build dependencies before copying',async()=>{
+ const {prepareOwnedPackageSource}=await import('../tools/owned-package-source.mjs');
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'dsc-build-pin-'));
+ try{
+  const repo=path.join(dir,'repo');fs.mkdirSync(repo);
+  for(const name of ['lib','rules','plugin','skill'])fs.mkdirSync(path.join(repo,name));
+  for(const name of ['LICENSE','THIRD_PARTY_NOTICES.md'])fs.writeFileSync(path.join(repo,name),'fixture');
+  const manifest={devDependencies:{prettier:'3.6.2'}};
+  const lock={packages:{'':{devDependencies:{prettier:'3.6.2'}},'node_modules/prettier':{version:'3.6.2'}}};
+  fs.writeFileSync(path.join(repo,'package.json'),JSON.stringify(manifest));
+  fs.writeFileSync(path.join(repo,'package-lock.json'),JSON.stringify(lock));
+  for(const mode of ['missing','installed-drift','manifest-drift','lock-root-drift','lock-package-drift']){
+   const dependency=path.join(repo,'node_modules/prettier');
+   if(mode!=='missing'){
+    fs.mkdirSync(dependency,{recursive:true});
+    fs.writeFileSync(path.join(dependency,'package.json'),JSON.stringify({name:'prettier',version:mode==='installed-drift'?'0.0.0':'3.6.2'}));
+   }
+   const currentManifest=structuredClone(manifest),currentLock=structuredClone(lock);
+   if(mode==='manifest-drift')currentManifest.devDependencies.prettier='^3.6.2';
+   if(mode==='lock-root-drift')currentLock.packages[''].devDependencies.prettier='0.0.0';
+   if(mode==='lock-package-drift')currentLock.packages['node_modules/prettier'].version='0.0.0';
+   fs.writeFileSync(path.join(repo,'package.json'),JSON.stringify(currentManifest));
+   fs.writeFileSync(path.join(repo,'package-lock.json'),JSON.stringify(currentLock));
+   const destination=path.join(dir,mode);
+   assert.throws(()=>prepareOwnedPackageSource(repo,destination),/Prettier.*npm ci --ignore-scripts/,mode);
+   assert.equal(fs.existsSync(destination),false,mode);
+  }
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
 test('arrival --break never labels an unrelated startup failure as expected',()=>{
  withFakeDsh(`const fs=require('node:fs'),path=require('node:path'),a=process.argv.slice(2);if(a.includes('--dump-config'))fs.mkdirSync(path.join(process.env.DSH_HOME,'profiles',a[a.indexOf('--profile')+1]),{recursive:true});else if(!a.includes('plugin')){console.error('startup failed: controlled unrelated failure');process.exit(1);}`,({env})=>{
   const r=spawnSync(process.execPath,['tools/client-arrival.mjs','--no-plugin','--break','--timeout','1000'],{env:{...env,DSC_CHROME:process.execPath},encoding:'utf8',timeout:10000});

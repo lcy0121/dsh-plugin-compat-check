@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-24T08:47:47.287Z",
+  "recordedAt": "2026-10-24T09:06:57.896Z",
   "testFiles": 71,
-  "tests": 1081,
+  "tests": 1083,
   "repositoryFiles": {
-    "total": 336,
+    "total": 337,
     "fixtures": 90,
-    "other": 246
+    "other": 247
   },
   "verification": {
     "platform": "darwin",
@@ -168,6 +168,44 @@
         "notice": "Local plugin README differs from immutable published npm 0.1.6; source documentation changes take effect in a future npm release."
       },
       "upstream": "States refreshed in upstreamStatus20261024 only; no new handler/install acceptance."
+    },
+    "ciOwnedPackagingFix20261024": {
+      "scope": "0.1.7-dev source fix for isolated real-host packaging; not an npm release or new catalogue/business certification.",
+      "failedRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40079731687",
+      "cause": "Live source copies omitted the workspace Prettier build dependency required by prepack.",
+      "fix": "Shared private-source preparation validates manifest/lock/installed Prettier versions, copies the self-contained build package outside plugin files, and runs normal pack hooks.",
+      "regressions": "Default real-prepack regression reproduces original missing-module failure; rejects missing/drifted tooling, checks tgz contents, source preservation and failure cleanup.",
+      "defaultSuite": {
+        "tests": 1083,
+        "passed": 1076,
+        "skipped": 7,
+        "failed": 0
+      },
+      "checks": "Prepublish gate and npm run check passed; 38/38 syntax cases and two registered catalogues unchanged.",
+      "localEngineering": {
+        "schemaVersion": 1,
+        "kind": "plugin-compat-check/engineering-live",
+        "ok": true,
+        "platform": "darwin",
+        "arch": "arm64",
+        "nodeVersion": "26.12.1",
+        "dshVersion": "0.2.1-rc.3",
+        "artifactVersion": "0.1.6",
+        "pressureFunctions": 4000,
+        "reportAvailable": true,
+        "reportMilliseconds": 728.2244169999994,
+        "http": {
+          "samples": 29,
+          "refreshingSamples": 28,
+          "maxMilliseconds": 46.30187500000102
+        },
+        "scope": "Owned web profile, actual tgz and synthetic uncalled functions; HTTP responsiveness only, not business behavior or a production performance guarantee.",
+        "cleanup": {
+          "hostStopped": true,
+          "privateRootRemoved": true
+        }
+      },
+      "remote": "Pending verification of the fix commit; original run remains failed."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."

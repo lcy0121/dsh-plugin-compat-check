@@ -7,6 +7,7 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { performance } from "node:perf_hooks";
 import { command, stopOwnedChild } from "../lib/probe-runner.mjs";
+import { prepareOwnedPackageSource } from "./owned-package-source.mjs";
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-live-engineering-"));
 const home = path.join(root, "home"),
@@ -72,16 +73,7 @@ try {
     "--dump-config",
   ]);
   const source = path.join(root, "source");
-  fs.mkdirSync(source);
-  for (const dir of ["lib", "rules", "plugin", "skill"])
-    fs.cpSync(path.join(repo, dir), path.join(source, dir), {
-      recursive: true,
-      filter: (file) =>
-        path.basename(file) !== "node_modules" &&
-        file !== path.join(repo, "plugin", "kernel"),
-    });
-  for (const file of ["LICENSE", "THIRD_PARTY_NOTICES.md"])
-    fs.copyFileSync(path.join(repo, file), path.join(source, file));
+  prepareOwnedPackageSource(repo, source);
   await run("npm", [
     "pack",
     path.join(source, "plugin"),
