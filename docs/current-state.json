@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-24T13:45:59.690459+00:00",
+  "recordedAt": "2026-10-24T13:56:36.403625+00:00",
   "testFiles": 72,
   "tests": 1030,
   "repositoryFiles": {
@@ -21,7 +21,7 @@
         "0.2.1-rc.2",
         "0.2.1-rc.3"
       ],
-      "scope": "Reviewed catalogue bytes and version-specific integration; rc.3 macOS verified locally, Linux exact-commit CI pending. Not business-health certification."
+      "scope": "Reviewed exact catalogue bytes and version-specific integration; rc.3 accepted on macOS locally and Linux at the recorded commit. Not general business-health certification."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -215,7 +215,7 @@
       }
     },
     "rc3Adaptation20261024": {
-      "scope": "Unpublished 0.1.7-dev source, tool version remains 0.1.6. rc.3 catalogue/semantics and local macOS acceptance verified; Linux checks require a separately authorized push. No npm release, merge, Windows/model/account certification.",
+      "scope": "Unpublished 0.1.7-dev source, tool version0.1.6. rc.3 provenance/semantics, macOS same-tgz acceptance and Linux exact-commit CI passed. No npm release, merge, Windows/model/account certification.",
       "provenance": "rules/dsh-0.2.1-rc.3-review.json",
       "defaultSuite": {
         "tests": 1030,
@@ -239,8 +239,7 @@
           "navigation": "Account menu > Settings > Built-in plugins > Compatibility",
           "tabCount": 1,
           "reenabled": true,
-          "httpRestored": true,
-          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
+          "httpRestored": true
         },
         "navigationDrafts": {
           "menus": [
@@ -328,13 +327,33 @@
         "scope": "Owned web profile, actual tgz and synthetic uncalled functions; HTTP responsiveness only, not business behavior or a production performance guarantee."
       },
       "remote": {
-        "status": "pending-push-authorization",
-        "expectedChecks": 6,
+        "status": "passed",
+        "commit": "dc1603720d4f91e5226db4f857987ae63d7cb588",
+        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40099723661",
+        "checksPassed": 6,
+        "nodeVersions": [
+          "22.19.0",
+          "24"
+        ],
         "linuxVersions": [
           "0.2.0-rc.2",
           "0.2.1-rc.2",
           "0.2.1-rc.3"
-        ]
+        ],
+        "linuxRc3": {
+          "tests": 63,
+          "passed": 63,
+          "failed": 0,
+          "skipped": 0,
+          "applicable": true,
+          "browserAvailable": true,
+          "productionRequests": 0,
+          "privateRootRemoved": true,
+          "artifactId": 12561614185,
+          "artifactSha256": "892c2c668931262aba08145b541927252c456ea9ecced80cc2c2ba5a38b0466a",
+          "evidenceSha256": "a96a3d2277cb5a2dfe69b25af168de014a1f7e2bc95c0e7a9ee5bccc5bc5b2ae"
+        },
+        "scope": "Six exact-commit checks success; rc.3 artifact JSON and TAP downloaded and verified, no skip-green. Historical CI record; later documentation-only commit is local."
       },
       "review": "Manual whole-change review and regressions passed; fresh-context reviewer unavailable due usage limit, no separate reviewer approval claimed."
     }
