@@ -250,3 +250,16 @@ test("contradictory kernel exit codes invalidate current and previous evidence",
     3,
   );
 });
+
+test("programmatic previous evidence uses the same finite serialized input budget", () => {
+  const c = cell(),
+    previous = matrix([c]);
+  previous.limitations = ["x".repeat(8 * 1024 * 1024)];
+  const result = evaluateMatrix(
+    [c],
+    { ...DEFAULT_POLICY, mode: "new" },
+    previous,
+  );
+  assert.equal(result.exitCode, 3);
+  assert.match(result.reasons[0].message, /output.*budget/i);
+});

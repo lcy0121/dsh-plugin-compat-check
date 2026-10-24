@@ -13,7 +13,7 @@ test("syntax matrix CLI executes all controlled cases and reports evidence", () 
   );
   assert.equal(result.status, 0, result.stderr);
   const report = JSON.parse(result.stdout);
-  assert.equal(report.rows.length, 24);
+  assert.equal(report.rows.length, 38);
   assert.equal(report.failed, 0);
   assert.ok(report.rows.every((row) => row.pass && row.actual && row.expected));
 });
@@ -121,7 +121,7 @@ test("human CLI prints all rows and rejects unsupported arguments", () => {
     timeout: 15000,
   });
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /24\/24 passed/);
+  assert.match(result.stdout, /38\/38 passed/);
   assert.match(result.stdout, /PASS\tsupported\tdirect/);
   assert.match(result.stdout, /PASS\tinferred\tbare-inferred/);
   assert.match(result.stdout, /PASS\tabstained\tdynamic-computed/);

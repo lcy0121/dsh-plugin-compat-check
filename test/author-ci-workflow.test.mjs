@@ -75,3 +75,53 @@ test("copyable workflow runs a single scan, renders its saved evidence, archives
     "",
   );
 });
+
+test("failed workflow scan archives the same tool error in JSON and HTML and exits 3", (t) => {
+  const workflow = YAML.parse(
+    fs.readFileSync(
+      new URL("../examples/author-ci.yml", import.meta.url),
+      "utf8",
+    ),
+  );
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "author-workflow-error-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const env = {
+    ...process.env,
+    TOOL_DIR: path.resolve("."),
+    SELECTED_PACKAGE: path.join(root, "missing-package"),
+    RESULTS_DIR: path.join(root, "results"),
+  };
+  const step = workflow.jobs.compatibility.steps.find((s) => s.id === "scan");
+  const result = spawnSync("bash", ["-e", "-c", step.run], {
+    cwd: root,
+    env,
+    encoding: "utf8",
+    timeout: 15000,
+  });
+  assert.equal(result.status, 3, result.stderr);
+  const json = JSON.parse(
+    fs.readFileSync(path.join(env.RESULTS_DIR, "compatibility.json"), "utf8"),
+  );
+  const html = fs.readFileSync(
+    path.join(env.RESULTS_DIR, "compatibility.html"),
+    "utf8",
+  );
+  const evidence = html
+    .match(/<pre id="evidence">([\s\S]*?)<\/pre>/)[1]
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+  assert.deepEqual(JSON.parse(evidence), json);
+  assert.equal(json.gate.exitCode, 3);
+  assert.equal(json.cells.length, 0);
+  assert.equal(
+    fs
+      .readFileSync(path.join(env.RESULTS_DIR, "gate-exit-code.txt"), "utf8")
+      .trim(),
+    "3",
+  );
+  for (const name of ["scan.stderr.log", "render.stderr.log"])
+    assert.equal(fs.readFileSync(path.join(env.RESULTS_DIR, name), "utf8"), "");
+});

@@ -434,6 +434,285 @@
           ["host-method-missing", "settings.absent", "suspected"]
         ]
       }
+    },
+    {
+      "id": "cjs-template-path",
+      "title": "Literal template module path",
+      "source": "const helper=require(`./helper.js`);exports.apply=ctx=>helper.wire(ctx)",
+      "files": {
+        "helper.js": "exports.wire=function(scope){scope.settings.absent()}"
+      },
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "helper.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "cjs-const-path",
+      "title": "Immutable concatenated module path",
+      "source": "const dir='./';const file=dir+'helper.js';const helper=require(file);exports.apply=ctx=>helper.wire(ctx)",
+      "files": {
+        "helper.js": "exports.wire=function(scope){scope.settings.absent()}"
+      },
+      "meta": {},
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "helper.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "shadowed-module-path",
+      "title": "Parameter shadows the outer constant path",
+      "source": "const file='./helper.js';exports.apply=function(ctx,file){require(file).wire(ctx)}",
+      "files": {
+        "helper.js": "exports.wire=function(scope){scope.settings.absent()}"
+      },
+      "meta": {},
+      "expected": {
+        "classification": "abstained",
+        "calls": [],
+        "dependencies": [],
+        "diagnostics": ["flow-unknown-target", "module-path-uncertain"],
+        "coverage": "limited",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "mutated-module-path",
+      "title": "Mutable path does not erase a proved local call",
+      "source": "let file='./helper.js';file=external();exports.apply=function(ctx){require(file);ctx.settings.absent()}",
+      "files": {
+        "helper.js": "exports.wire=function(scope){scope.settings.absent()}"
+      },
+      "meta": {},
+      "expected": {
+        "classification": "abstained",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": ["module-path-uncertain"],
+        "coverage": "limited",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "dynamic-module-path",
+      "title": "Unknown import interpolation limits coverage",
+      "source": "export function apply(ctx){import(`./${unknown}.js`);ctx.settings.absent()}",
+      "files": {},
+      "meta": {},
+      "expected": {
+        "classification": "abstained",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": ["module-path-uncertain"],
+        "coverage": "limited",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "esm-exact-missing",
+      "title": "ESM cannot borrow a missing extension",
+      "source": "import './helper';export function apply(ctx){ctx.settings.absent()}",
+      "files": {
+        "helper.js": "export const value=1"
+      },
+      "meta": {},
+      "expected": {
+        "classification": "abstained",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": ["source-unresolved"],
+        "coverage": "limited",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "exports-exact-missing",
+      "title": "Exports cannot borrow a missing extension",
+      "source": "export function apply(){}",
+      "files": {
+        "actual.js": "export function apply(ctx){ctx.settings.absent()}"
+      },
+      "meta": {
+        "exports": "./actual"
+      },
+      "expected": {
+        "classification": "abstained",
+        "calls": [["settings.absent", "actual.js", true, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": ["entry-fallback", "source-unresolved"],
+        "coverage": "limited",
+        "findings": [["host-method-missing", "settings.absent", "suspected"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "relative-patch-priority",
+      "title": "Explicit relative patch precedes package exports",
+      "source": "export function apply(ctx){ctx.settings.absent()}",
+      "files": {},
+      "meta": {
+        "exports": "./missing.js"
+      },
+      "patch": "- name: ./index.js\n",
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-method-missing", "settings.absent", "certain"]],
+        "catalogueFindings": [
+          ["host-method-missing", "settings.absent", "suspected"]
+        ]
+      }
+    },
+    {
+      "id": "provide-explicit-absent",
+      "title": "Provide cannot hide accepted runtime absence",
+      "source": "export const provide=['settings'];export function apply(ctx){ctx.settings.absent()}",
+      "files": {},
+      "meta": {},
+      "observation": {
+        "settings": {
+          "present": false
+        }
+      },
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["unprovided-dependency", "settings", "certain"]],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "provide-unobserved",
+      "title": "Provide with unobserved service remains conservative",
+      "source": "export const provide=['settings'];export function apply(ctx){ctx.settings.absent()}",
+      "files": {},
+      "meta": {},
+      "observation": {
+        "settings": {
+          "status": "unobserved"
+        }
+      },
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "limited",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "module-inject-mutation",
+      "title": "Constant module path cannot repair mutated inject",
+      "source": "const deps=['settings'];exports.inject=deps;deps.pop();require(`./helper.js`);exports.apply=function(){}",
+      "files": {
+        "helper.js": "module.exports={}"
+      },
+      "meta": {},
+      "expected": {
+        "classification": "abstained",
+        "calls": [],
+        "dependencies": [["settings", "descriptor-inject", true]],
+        "diagnostics": ["inject-unresolved"],
+        "coverage": "limited",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "module-object-escape",
+      "title": "Known import path cannot restore escaped ownership",
+      "source": "import(`./helper.js`);export function apply(ctx){const o={s:ctx.settings};configure(o);const {s}=o;s.absent()}",
+      "files": {
+        "helper.js": "export const value=1"
+      },
+      "meta": {},
+      "expected": {
+        "classification": "abstained",
+        "calls": [],
+        "dependencies": [],
+        "diagnostics": ["flow-opaque-object", "flow-unknown-target"],
+        "coverage": "limited",
+        "findings": [],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "provide-hard-absent",
+      "title": "Provide cannot hide missing required inject",
+      "source": "export const inject=['settings'];export const provide=['settings'];export function apply(ctx){ctx.settings.absent()}",
+      "files": {},
+      "meta": {},
+      "observation": {
+        "settings": {
+          "present": false
+        }
+      },
+      "expected": {
+        "classification": "supported",
+        "calls": [["settings.absent", "index.js", false, false, "ast"]],
+        "dependencies": [["settings", "required-inject", false]],
+        "diagnostics": [],
+        "coverage": "complete",
+        "findings": [["host-service-missing", "settings", "certain"]],
+        "catalogueFindings": []
+      }
+    },
+    {
+      "id": "provide-inferred-absent",
+      "title": "Explicit absence cannot prove a weak receiver",
+      "source": "export const provide=['settings'];ctx.settings.absent()",
+      "files": {},
+      "meta": {},
+      "observation": {
+        "settings": {
+          "present": false
+        }
+      },
+      "expected": {
+        "classification": "inferred",
+        "calls": [["settings.absent", "index.js", true, false, "ast"]],
+        "dependencies": [],
+        "diagnostics": [],
+        "coverage": "limited",
+        "findings": [["unprovided-dependency", "settings", "suspected"]],
+        "catalogueFindings": []
+      }
     }
   ]
 }

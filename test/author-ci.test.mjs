@@ -273,3 +273,115 @@ test("saved unsupported and tool-error reports remain readable, contradictory fa
     /Invalid saved author CI evidence/,
   );
 });
+
+test("invalid policies produce replayable error evidence with the last validated policy", (t) => {
+  const f = fixture(t),
+    policy = path.join(f.root, "invalid-policy.json"),
+    saved = path.join(f.root, "error.json");
+  for (const value of [null, [], {}, { schemaVersion: 1, mode: "typo" }]) {
+    fs.writeFileSync(policy, JSON.stringify(value));
+    const scanned = run(["--package", f.source, "--policy", policy]);
+    assert.equal(scanned.status, 3);
+    const original = JSON.parse(scanned.stdout);
+    fs.writeFileSync(saved, scanned.stdout);
+    const html = run(["--report", saved, "--format", "html"]);
+    assert.equal(html.status, 3);
+    const evidence = html.stdout
+      .match(/<pre id="evidence">([\s\S]*?)<\/pre>/)?.[1]
+      .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&");
+    assert.deepEqual(
+      JSON.parse(evidence),
+      original,
+      "HTML must retain the original policy error and gate",
+    );
+    assert.equal(original.policy.mode, "all");
+    assert.match(original.gate.reasons[0].message, /Policy|policy/);
+  }
+});
+
+test("dense matrix includes gate reasons and every serialized view in the common output budget", async (t) => {
+  const { authorCI, renderAuthorCI } = await import("../tools/author-ci.mjs");
+  const f = fixture(t);
+  fs.writeFileSync(
+    path.join(f.source, "index.js"),
+    'throw Error("never execute");export function apply(ctx){' +
+      Array.from(
+        { length: 3000 },
+        (_, i) => `ctx.settings.missing${i}();`,
+      ).join("") +
+      "}",
+  );
+  const out = await authorCI(["--package", f.source]);
+  assert.equal(
+    out.gate.exitCode,
+    3,
+    "oversized complete evidence must fail closed",
+  );
+  assert.match(
+    out.gate.reasons.map((r) => r.message).join(";"),
+    /output.*budget/i,
+  );
+  for (const format of ["json", "html", "sarif", "junit"])
+    assert(
+      Buffer.byteLength(renderAuthorCI(out, format) + "\n") <= 8 * 1024 * 1024,
+    );
+});
+
+test("dense accepted JSON can be reused as previous and replayed to HTML without losing evidence", (t) => {
+  const f = fixture(t),
+    saved = path.join(f.root, "dense.json"),
+    policy = path.join(f.root, "new.json");
+  fs.writeFileSync(
+    path.join(f.source, "index.js"),
+    "export function apply(ctx){" +
+      Array.from({ length: 300 }, (_, i) => `ctx.settings.absent${i}();`).join(
+        "",
+      ) +
+      "}",
+  );
+  const before = run(["--package", f.source]);
+  assert.equal(before.status, 1, before.stderr);
+  fs.writeFileSync(saved, before.stdout);
+  const m = JSON.parse(before.stdout);
+  assert(m.gate.reasons.length > 300);
+  fs.writeFileSync(policy, JSON.stringify({ ...m.policy, mode: "new" }));
+  const after = run([
+    "--package",
+    f.source,
+    "--previous",
+    saved,
+    "--policy",
+    policy,
+  ]);
+  assert.notEqual(after.status, 3, after.stdout + after.stderr);
+  const html = run(["--report", saved, "--format", "html"]);
+  assert.equal(html.status, before.status);
+  const evidence = html.stdout
+    .match(/<pre id="evidence">([\s\S]*?)<\/pre>/)[1]
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+  assert.deepEqual(JSON.parse(evidence), m);
+});
+
+test("JSON fitting the read budget still fails closed when a complete display format would overflow", async (t) => {
+  const { authorCI } = await import("../tools/author-ci.mjs");
+  const f = fixture(t);
+  fs.writeFileSync(
+    path.join(f.source, "index.js"),
+    "export function apply(ctx){" +
+      Array.from({ length: 1500 }, (_, i) => `ctx.settings.absent${i}();`).join(
+        "",
+      ) +
+      "}",
+  );
+  const result = await authorCI(["--package", f.source]);
+  assert.equal(result.gate.exitCode, 3);
+  assert.match(result.gate.reasons[0].message, /output.*budget/i);
+});

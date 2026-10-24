@@ -276,3 +276,65 @@ test('expiry between the verified source read and require resolution retains a p
   assert.deepEqual(report.perPlugin.sample.calls.settings,['known']);
  }finally{fs.lstatSync=originalStat;Date.now=originalNow;f.cleanup();}
 });
+
+for(const [label,prefix,argument] of [
+  ['plain template','','`./worker.js`'],
+  ['lexical const',"const file='./worker.js';",'file'],
+  ['constant concatenation',"const dir='./';const file=dir+'worker.js';",'file'],
+  ['constant template',"const name='worker';",'`./${name}.js`'],
+  ['block const',"const file='./wrong.js';",'file'],
+])test(`CommonJS ${label} paths preserve imported Context proof`,()=>{
+  const body=label==='block const'?"{const file='./worker.js';const helper=require(file);helper.wire(ctx)}":`const helper=require(${argument});helper.wire(ctx);`;
+  scan(prefix+`exports.apply=function(ctx){${body}}`,{files:{'worker.js':'exports.wire=function(scope){scope.settings.absent()}','wrong.js':'exports.wire=function(scope){scope.tools.register()}'}},p=>{
+    assert(p.files['host-entry'].includes('worker.js'));
+    assert.deepEqual(p.calls.settings,['absent']);assert.equal(p.callSites.find(s=>s.service==='settings').inferredReceiver,false);assert.deepEqual(p.diagnostics,[]);
+  });
+});
+for(const [label,source] of [
+ ['unknown dynamic import','export function apply(){import(`./${unknown}.js`)}'],
+ ['mutable path',"let file='./worker.js';file=external();exports.apply=function(ctx){require(file).wire(ctx)}"],
+ ['shadowed path',"const file='./worker.js';exports.apply=function(ctx,file){require(file).wire(ctx)}"],
+ ['TDZ alias',"const file=other;const other='./worker.js';exports.apply=function(ctx){require(file).wire(ctx)}"],
+ ['changed const',"const file='./worker.js';file=external();exports.apply=function(ctx){require(file).wire(ctx)}"],
+ ['computed object path',"const object={file:'./worker.js'};exports.apply=function(ctx){require(object.file).wire(ctx)}"],
+ ['cyclic path',"const a=b,b=a;exports.apply=function(ctx){require(a).wire(ctx)}"],
+])test(`unproved ${label} paths explicitly limit coverage`,()=>{
+  scan(source,{files:{'worker.js':'exports.wire=function(ctx){ctx.settings.absent()}'}},p=>{
+    assert(p.diagnostics.some(d=>d.kind==='module-path-uncertain'));assert(!p.files['host-entry'].includes('worker.js'));assert.equal(p.callSites.some(s=>s.service==='settings'&&!s.inferredReceiver),false);
+  });
+});
+test('constant dynamic import adds its exact source without executing it',()=>{
+ scan("const name='./worker.js';import(name);export function apply(){}",{files:{'worker.js':'throw Error("NEVER_IMPORT");ctx.settings.absent()'}},p=>{assert(p.files['host-entry'].includes('worker.js'));assert(!p.diagnostics.some(d=>d.kind==='module-path-uncertain'));});
+});
+test('module path string expansion remains bounded',()=>{
+ scan('const path='+JSON.stringify('./'+'x'.repeat(8192))+ ';exports.apply=ctx=>require(path).wire(ctx)',{},p=>assert(p.diagnostics.some(d=>d.kind==='module-path-budget')));
+});
+test('a shadowed require cannot seed a package source graph',()=>{
+ scan("exports.apply=function(ctx,require){require(`./worker.js`)}",{files:{'worker.js':'ctx.settings.absent()'}},p=>{assert(!p.files['host-entry'].includes('worker.js'));assert.equal(p.callSites.some(s=>s.service==='settings'),false);});
+});
+test('constant module aliases have a finite proof depth',()=>{
+ const declarations="const p0='./worker.js';"+Array.from({length:40},(_,i)=>`const p${i+1}=p${i};`).join('');
+ scan(declarations+'exports.apply=ctx=>require(p40).wire(ctx)',{files:{'worker.js':'exports.wire=ctx=>ctx.settings.absent()'}},p=>{assert(p.diagnostics.some(d=>d.kind==='module-path-budget'));assert(!p.files['host-entry'].includes('worker.js'));});
+});
+test('a direct eval prevents module binding proof without executing the eval',()=>{
+ scan("const path='./worker.js';eval('throw Error(\"NEVER_EXECUTE\")');exports.apply=ctx=>require(path).wire(ctx)",{files:{'worker.js':'exports.wire=ctx=>ctx.settings.absent()'}},p=>{assert(p.diagnostics.some(d=>d.kind==='module-path-uncertain'));assert(!p.files['host-entry'].includes('worker.js'));});
+});
+test('a closure replacing implicit require revokes module proof in sibling consumers',()=>{
+ scan("const file='./worker.js';function replace(){require=()=>({wire(){}})}replace();exports.apply=ctx=>require(file).wire(ctx)",{files:{'worker.js':'exports.wire=ctx=>ctx.settings.absent()'}},p=>{assert(p.diagnostics.some(d=>d.kind==='module-path-uncertain'));assert(!p.files['host-entry'].includes('worker.js'));});
+});
+test('named class expressions shadow outer module path constants',()=>{
+ scan("const p='./worker.js';const C=class p{static load(){return import(p)}};exports.apply=()=>C.load()",{files:{'worker.js':'ctx.settings.absent()'}},p=>{assert(p.diagnostics.some(d=>d.kind==='module-path-uncertain'));assert(!p.files['host-entry'].includes('worker.js'));});
+});
+test('static block var declarations cannot shadow the module require',()=>{
+ scan("class C{static{var require=()=>{}}}exports.apply=ctx=>require('./worker.js').wire(ctx)",{files:{'worker.js':'exports.wire=ctx=>ctx.settings.absent()'}},p=>{assert(p.files['host-entry'].includes('worker.js'));assert(p.callSites.some(s=>s.service==='settings'&&!s.inferredReceiver));});
+});
+for(const [label,source] of [
+ ['parameter property',"const file='./worker.js';export class C{constructor(private file:string){require(file)}}"],
+ ['enum binding',"const file='./worker.js';{enum file{value}require(file)}"],
+ ['namespace binding',"const file='./worker.js';{namespace file{export const value=1}require(file)}"],
+])test(`TypeScript ${label} cannot borrow an outer constant module path`,()=>{
+ scan('',{files:{'entry.ts':source,'cordis.patch.yml':'- name: ./entry.ts\n','worker.js':'ctx.settings.absent()'}},p=>{assert(p.diagnostics.some(d=>d.kind==='module-path-uncertain'));assert(!p.files['host-entry'].includes('worker.js'));});
+});
+test('a closure eval cannot leave implicit require proof in sibling consumers',()=>{
+ scan("const file='./worker.js';function replace(){eval('require=()=>({wire(){}})')}replace();exports.apply=ctx=>require(file).wire(ctx)",{files:{'worker.js':'exports.wire=ctx=>ctx.settings.absent()'}},p=>{assert(p.diagnostics.some(d=>d.kind==='module-path-uncertain'));assert(!p.files['host-entry'].includes('worker.js'));});
+});

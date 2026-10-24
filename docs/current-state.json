@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-24T04:00:00.171Z",
+  "recordedAt": "2026-10-24T04:20:32.522Z",
   "testFiles": 71,
-  "tests": 1037,
+  "tests": 1081,
   "repositoryFiles": {
-    "total": 335,
+    "total": 336,
     "fixtures": 90,
-    "other": 245
+    "other": 246
   },
   "verification": {
     "platform": "darwin",
@@ -300,23 +300,10 @@
       "limits": "Repository-only recovery CLI. Legacy/unknown/guard locks fail closed; Windows unverified. No OS sandbox or native-local authentication guarantee."
     },
     "maintenanceAuthorEntry20261024": {
-      "scope": "0.1.7-dev local source; existing certified versions retained by explicit user choice. No push, release or remote Actions.",
-      "defaultSuite": {
-        "tests": 960,
-        "passed": 953,
-        "skipped": 7,
-        "failed": 0
-      },
-      "syntaxMatrix": {
-        "rows": 24,
-        "supported": 16,
-        "inferred": 1,
-        "abstained": 7,
-        "scope": "Literal expectations against real extraction/verdicts; host evidence is synthetic, not business acceptance."
-      },
-      "maintenance": "npm run check covers format, docs/generated copies/notices, syntax and registered catalogue wiring. Formatted host/client/CLI, shared request fence and behavior-based startup regression.",
-      "authorCI": "One scan JSON -> static HTML retains gate code and full evidence. Workflow shell verified locally; owned Chrome verified escaped text, no scripts/images/external resources and same saved JSON.",
-      "limits": "Saved reports are not authenticated or re-evaluated against a new baseline. Workflow needs a reviewed published tool SHA; no new DSH certification."
+      "historyCommit": "80a131a",
+      "historyPath": "docs/current-state.json",
+      "key": "verification.maintenanceAuthorEntry20261024",
+      "scope": "Historical maintenance/author onboarding and 24-row syntax matrix; not current verification."
     },
     "evidenceResolutionState20261024": {
       "historyCommit": "997f4c7",
@@ -334,6 +321,23 @@
       },
       "regressions": "32 added tests: bounded walks/reads, target eviction, ordinary worker admission, late callbacks and startup errors. Review findings closed.",
       "limits": "16 targets/10min idle; ordinary report jobs 2 active/32 queued per kernel instance. Upgrade cleanup stays independently supervised."
+    },
+    "authorModuleBoundaries20261024": {
+      "scope": "Local 0.1.7-dev source; certifications unchanged. No push, release or remote workflow.",
+      "defaultSuite": {
+        "tests": 1081,
+        "passed": 1074,
+        "skipped": 7,
+        "failed": 0
+      },
+      "syntaxMatrix": {
+        "rows": 38,
+        "supported": 22,
+        "inferred": 2,
+        "abstained": 14,
+        "scope": "Static fixtures and synthetic observations; no target execution/business acceptance."
+      },
+      "regressions": "Invalid-policy/failed-workflow JSON-HTML replay; aggregate/display overflow, 8MiB evidence/2MiB cells. Immutable relative paths; closure/class/static-block/TS shadow regressions. Review findings closed."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; optional profiles depend on local inputs. Concise dated local acceptance is preserved, not rerun by this script; detailed history stays in Git."

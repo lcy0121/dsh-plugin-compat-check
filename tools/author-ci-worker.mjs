@@ -8,6 +8,7 @@ import { run } from "../bin/compat-check.mjs";
 import { toJSON } from "../lib/report.mjs";
 import { CATALOG_REFERENCES } from "../lib/contracts.mjs";
 import { TOOL_VERSION } from "../lib/version.mjs";
+import { ciJSON } from "../lib/author-ci-budget.mjs";
 try {
   const { source, workDir, versions } = workerData,
     nm = path.join(workDir, "node_modules"),
@@ -69,8 +70,7 @@ try {
         !report.plugins[meta.name]
       )
         throw Error("Selected artifact was not uniquely analyzed");
-      if (Buffer.byteLength(JSON.stringify(report)) > 2 * 1024 * 1024)
-        throw Error("Report exceeds output budget");
+      ciJSON(report, { cell: true });
       cells.push({
         dshVersion,
         status: "analyzed",

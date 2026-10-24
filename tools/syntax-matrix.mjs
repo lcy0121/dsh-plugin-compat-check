@@ -46,7 +46,7 @@ export function measureSyntaxRow(row) {
     const files = {
       "index.js": row.source,
       ...row.files,
-      "cordis.patch.yml": "- name: sample\n",
+      "cordis.patch.yml": row.patch ?? "- name: sample\n",
       "package.json": JSON.stringify({
         name: "sample",
         version: "1.0.0",
@@ -77,6 +77,7 @@ export function measureSyntaxRow(row) {
         root: {
           settings: { present: true, methods: { known: "function" } },
           tools: { present: true, methods: { register: "function" } },
+          ...row.observation,
         },
       },
       observationTarget: { profileId: nm },

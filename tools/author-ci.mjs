@@ -18,12 +18,17 @@ import {
   renderJUnit,
   renderHTML,
 } from "../lib/author-ci-output.mjs";
-export const AUTHOR_CI_LIMITS = Object.freeze({
-  versions: 4,
-  timeoutMs: 30000,
-  previousBytes: 8 * 1024 * 1024,
-  policyBytes: 65536,
-});
+import {
+  AUTHOR_CI_LIMITS,
+  ciJSON,
+  checkCIOutput,
+} from "../lib/author-ci-budget.mjs";
+export { AUTHOR_CI_LIMITS };
+const ready = (matrix) => {
+  for (const format of ["json", "html", "sarif", "junit"])
+    renderAuthorCI(matrix, format);
+  return matrix;
+};
 export async function authorCI(args) {
   let policy = DEFAULT_POLICY,
     workDir;
@@ -62,7 +67,7 @@ export async function authorCI(args) {
         ),
       );
       validateSavedReport(saved);
-      return saved;
+      return ready(saved);
     }
     if (!opts["--package"])
       throw Error("Required: --package <built-package-directory>");
@@ -86,13 +91,14 @@ export async function authorCI(args) {
     )
       throw Error("Expected 1..4 distinct exact DSH versions");
     if (opts["--policy"]) {
-      policy = JSON.parse(
+      const candidate = JSON.parse(
         readRegular(
           path.resolve(opts["--policy"]),
           AUTHOR_CI_LIMITS.policyBytes,
         ),
       );
-      validatePolicy(policy);
+      validatePolicy(candidate);
+      policy = candidate;
     }
     const previous = opts["--previous"]
       ? JSON.parse(
@@ -119,7 +125,7 @@ export async function authorCI(args) {
       { timeoutMs: AUTHOR_CI_LIMITS.timeoutMs },
     );
     const gate = evaluateMatrix(value.cells, policy, previous);
-    return {
+    return ready({
       schemaVersion: 1,
       kind: "plugin-compat-check/author-ci",
       toolVersion: TOOL_VERSION,
@@ -132,7 +138,7 @@ export async function authorCI(args) {
         "Certified exact catalogue comparisons only; matrix pass means selected CI policy satisfied, not business compatibility.",
         "Package SHA-256 identifies the bounded source-tree snapshot, not an npm tarball. Review output before publishing.",
       ],
-    };
+    });
   } catch (error) {
     return {
       schemaVersion: 1,
@@ -246,14 +252,18 @@ function validateSavedReport(m) {
   need(checked.exitCode !== 3 || m.gate.exitCode === 3);
 }
 export function renderAuthorCI(matrix, format = "json") {
-  return format === "html"
-    ? renderHTML(matrix)
-    : format === "sarif"
-      ? JSON.stringify(renderSarif(matrix), null, 2)
-      : format === "junit"
-        ? renderJUnit(matrix)
-        : JSON.stringify(matrix, null, 2);
+  const json = ciJSON(matrix);
+  return checkCIOutput(
+    format === "html"
+      ? renderHTML(matrix)
+      : format === "sarif"
+        ? JSON.stringify(renderSarif(matrix), null, 2)
+        : format === "junit"
+          ? renderJUnit(matrix)
+          : json,
+  );
 }
+
 if (
   process.argv[1] &&
   import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href
