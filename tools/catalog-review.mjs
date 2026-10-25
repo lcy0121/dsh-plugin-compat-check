@@ -10,6 +10,7 @@ import semver from "semver";
 import { CATALOG_REFERENCES } from "../lib/contracts.mjs";
 import { SUPPORTED_PREVIEW_VERSIONS } from "../lib/upgrade-contract.mjs";
 import { loadCatalog } from "../lib/catalog.mjs";
+import { validateSemanticBaselines } from "../lib/api-semantics.mjs";
 
 const SOURCES = {
   host: "dsh/node_modules/@deepseek-ai/dsh-tool-cordis/lib/types/api-catalog.js",
@@ -339,10 +340,14 @@ function main() {
         "Usage: node tools/catalog-review.mjs --check-registry [--json]",
       );
       const result = checkCatalogRegistry();
+      const semantic = readJson(path.join(ROOT, "rules/severity.json")).value;
+      const errors = validateSemanticBaselines(semantic);
+      requireThat(errors.length === 0, errors.join("; "));
+      result.semanticVersions = Object.keys(semantic.apiSemantics.baselines);
       console.log(
         json
           ? JSON.stringify(result, null, 2)
-          : `Checked ${result.entries.length} registered exact catalogues; certification unchanged. New versions still require source, rule and real-host acceptance.`,
+          : `Checked ${result.entries.length} registered exact catalogues and ${result.semanticVersions.length} semantic baselines; certification unchanged. New versions still require source, rule and real-host acceptance.`,
       );
       return;
     }

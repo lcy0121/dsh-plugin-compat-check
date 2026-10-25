@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-24T19:29:09.113Z",
-  "testFiles": 72,
-  "tests": 1120,
+  "recordedAt": "2026-10-25T03:50:09.101Z",
+  "testFiles": 73,
+  "tests": 1136,
   "repositoryFiles": {
-    "total": 348,
+    "total": 350,
     "fixtures": 99,
-    "other": 249
+    "other": 251
   },
   "verification": {
     "platform": "darwin",
@@ -106,27 +106,51 @@
     },
     "latestLocalAcceptance": {
       "date": "2026-10-25",
-      "scope": "Unpublished 0.1.7-dev source; checker metadata 0.1.6. Local macOS arm64 only; no push, merge, publication, model/account or Windows/business certification.",
+      "scope": "Unpublished 0.1.7-dev source, checker metadata 0.1.6; current real-host acceptance on macOS arm64/DSH 0.2.1-rc.3 only. No push, merge, release, account/model, Windows or general business certification.",
       "defaultSuite": {
-        "tests": 1120,
-        "passed": 1112,
+        "tests": 1136,
+        "passed": 1128,
         "skipped": 8,
         "failed": 0
       },
-      "checks": "Format, document version-set/link/generated-copy checks, 38/38 syntax cases and all three pinned catalogues passed. Archive pointer and original file SHA-256 verified.",
-      "regressions": "Artifact growth before/during reads, FIFO replacement, bounded worker deadline/cancellation/recovery; root-rule supervised bounded reads; shared/private state directory preservation and explicit recovery; version drift and count generation. No analysis snapshot rebuild.",
+      "checks": "Format, generated contracts/guidance, document facts/links, 38/38 syntax cases, three exact catalogues and two semantic baseline metadata checks passed. No feature snapshot or version-lock rebuild.",
+      "regressions": "Sixteen semantic cases cover exact versions, enum/types, optional guards, aliases/mutations/unknown effects, no raw argument content, malformed/future baselines, CLI/preview/shipped-panel consistency and nonfatal notices.",
+      "semanticScope": {
+        "side": "client",
+        "versions": [
+          "0.2.1-rc.2",
+          "0.2.1-rc.3"
+        ],
+        "parameterOptions": "uiWorkspace.startSession: prompt, agentPreset, clearPreviousDraft and rc.3 whenDraftExists",
+        "notices": "Official timer.setTimeout/setInterval deprecation and sessions.retain lifetime prerequisites; no removal/leak proof.",
+        "provenance": "rules/severity.json apiSemantics: exact tags, archive hashes and four selected source hashes verified against fixed source archives. Earlier/future hosts remain unreviewed for semantics."
+      },
       "realHost": {
         "dshVersion": "0.2.1-rc.3",
         "artifactVersion": "0.1.6",
-        "artifactSha256": "4a5e9f0490a5945d2aa5de5ce6c716ce15af135db361c8f7eca527e9edcfbc49",
-        "evidenceSha256": "0c8495898a4118485c2b72855bb59e84b90a9c2da3323b86456a362a3520dbc3",
-        "browser": true,
-        "upgradePreview": true,
+        "artifactSha256": "931cb0fb543bacad6156ceb6aae9e9c3791973b04811e896e0bf154da6809836",
+        "evidenceSha256": "92c15d24cab571e25b1cbb52617e5b1c6c48a9b231fd5a0315c0cac543b7e088",
+        "apiSemantics": {
+          "installedArtifact": true,
+          "realBrowser": true,
+          "exactVersion": "0.2.1-rc.3",
+          "nonfatalRisk": true,
+          "deprecatedAndLifetimeNotices": true,
+          "fixtureActivated": false
+        },
+        "draftPolicies": true,
+        "retainedCreatorTarget": true,
         "manualReviewPersisted": true,
         "baselineUnchanged": true,
         "productionRequests": 0,
         "privateRootRemoved": true
       }
+    },
+    "previousLocalAcceptance": {
+      "commit": "ec06f21224668cbb6e3264243df1058c851f8ed6",
+      "path": "docs/current-state.json",
+      "sha256": "b48e4f29b3296291b25f34cbbfb30e151f1bdbc642e6f76d7e78049bacf20484",
+      "scope": "Prior bounded-input/private-directory/document-consolidation acceptance; exact source and artifact only."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

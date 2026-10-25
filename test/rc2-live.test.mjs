@@ -61,6 +61,14 @@ describe(
         value.upgradePreview.catalogSha256.target,
       );
       if (value.ui.available) {
+        for (const key of [
+          "installedArtifact",
+          "realBrowser",
+          "nonfatalRisk",
+          "deprecatedAndLifetimeNotices",
+        ])
+          assert.equal(value.apiSemantics[key], true, key);
+        assert.equal(value.apiSemantics.fixtureActivated, false);
         assert.equal(
           value.explanationPresentation.certaintyAndImpactSeparated,
           true,

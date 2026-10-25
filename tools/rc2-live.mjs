@@ -460,6 +460,28 @@ try {
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.cpSync(source, target, { recursive: true });
     }
+    // Static-only semantic fixture: never add this package to the active bundles.
+    const semanticsFixture = path.join(
+      profile,
+      "node_modules/@acceptance/api-semantics",
+    );
+    fs.mkdirSync(semanticsFixture, { recursive: true });
+    writeJSON(path.join(semanticsFixture, "package.json"), {
+      name: "@acceptance/api-semantics",
+      version: "1.0.0",
+      type: "module",
+      main: "index.js",
+      exports: { ".": "./index.js", "./client": "./client.js" },
+      dsh: { client: { platform: "web" } },
+    });
+    fs.writeFileSync(
+      path.join(semanticsFixture, "index.js"),
+      "export function apply(){throw Error('Static semantic fixture must not execute')}\n",
+    );
+    fs.writeFileSync(
+      path.join(semanticsFixture, "client.js"),
+      "export function apply(ctx){ctx.uiWorkspace.startSession(undefined,{whenDraftExists:'bad'});ctx.timer.setTimeout(()=>{},1);ctx.sessions.retain('not-executed',{source:'controllerOperation'})}\n",
+    );
     const upgradeFixture = path.join(
       profile,
       "node_modules",
@@ -833,6 +855,53 @@ try {
           `(()=>{const e=${field(label)};e.value=${JSON.stringify(value)};e.dispatchEvent(new Event('change',{bubbles:true}));})()`,
         );
       };
+      const semanticReport =
+        initial.body.report.plugins["@acceptance/api-semantics"];
+      requireTrue(
+        semanticReport?.findings.length === 1 &&
+          semanticReport.findings[0].category ===
+            (version === "0.2.1-rc.3"
+              ? "api-argument-invalid"
+              : "api-option-unsupported") &&
+          semanticReport.findings[0].severity === "degraded" &&
+          semanticReport.findings[0].location.file === "client.js" &&
+          semanticReport.coverage.limitations.some(
+            (n) => n.includes("弃用") && n.includes("ctx.timeout"),
+          ) &&
+          semanticReport.coverage.limitations.some(
+            (n) => n.includes("生命周期") && n.includes("release"),
+          ),
+        "Installed artifact lost version-bound semantic evidence or invented a fatal failure",
+      );
+      await evalx(`${field("搜索插件")}.focus()`);
+      await chrome.send("Input.insertText", { text: "api-semantics" });
+      await poll(
+        async () =>
+          JSON.stringify(await rowNames()) ===
+          JSON.stringify(["@acceptance/api-semantics"]),
+        "Semantic row missing",
+      );
+      await evalx(
+        `(()=>{const row=document.querySelector('[data-compat-plugin="@acceptance/api-semantics"]');for(const summary of row.querySelectorAll('summary')){if((summary.innerText.startsWith('覆盖限制（')||summary.innerText.startsWith('查看 '))&&!summary.parentElement.open)summary.click()}})()`,
+      );
+      await poll(
+        () =>
+          evalx(
+            `(()=>{const text=document.querySelector('[data-compat-plugin="@acceptance/api-semantics"]').innerText;return text.includes(${JSON.stringify(version === "0.2.1-rc.3" ? "API参数不符" : "版本选项未支持")})&&text.includes('生命周期')&&text.includes('弃用')&&text.includes('未实测业务失败')})()`,
+          ),
+        "Semantic evidence not rendered in actual browser",
+      );
+      result.apiSemantics = {
+        installedArtifact: true,
+        realBrowser: true,
+        exactVersion: version,
+        nonfatalRisk: true,
+        deprecatedAndLifetimeNotices: true,
+        fixtureActivated: false,
+      };
+      await evalx(
+        `[...document.querySelectorAll('button')].find(b=>b.innerText==='清除筛选').click()`,
+      );
       await evalx(`${field("搜索插件")}.focus()`);
       await chrome.send("Input.insertText", { text: "broken" });
       await poll(

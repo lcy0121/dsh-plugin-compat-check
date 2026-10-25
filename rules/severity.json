@@ -1178,5 +1178,82 @@
         }
       ]
     }
+  },
+  "apiSemantics": {
+    "schemaVersion": 1,
+    "scope": "Exact reviewed client semantics only. No adjacent/future host, Host-side name borrowing, plugin execution or new fatal rules. Notices do not change verdict severity.",
+    "baselines": {
+      "0.2.1-rc.2": {
+        "sourceTag": "dsh-v0.2.1-rc.2",
+        "sourceArchiveSha256": "98d9342331b9b7ef94da401ad26e1a6d1efc6e3afe7967446c8bc1584dc9463d",
+        "sources": {
+          "packages/client/ui-workspace/src/client/navigation.ts": "bfadd0cf84e98e61dad4ac943259d789956b0e902e515fb8c96440b2e10f416e",
+          "packages/client/ui-conversation/src/client/contract/input.ts": "785a43edef62434a4495e5f501df53c627506263f556c4428088ba48674c7bb6",
+          "packages/extensions/cordis-client-runner/src/client/timer.ts": "be0996dd6a6a96682a87156943911b8436791da40edcc961f3f5ecd58042c4c0",
+          "packages/api/session-controller/src/client/contract/sessions.ts": "85725b6a54d662c54a5eb6f8f59fe3dfe4069e974a0eaa8b4e81d508742acf7d"
+        },
+        "startSession": {
+          "source": "packages/client/ui-workspace/src/client/navigation.ts",
+          "options": {
+            "prompt": "string",
+            "agentPreset": "string",
+            "clearPreviousDraft": "boolean"
+          }
+        },
+        "notices": {
+          "timer.setTimeout": {
+            "kind": "弃用",
+            "source": "packages/extensions/cordis-client-runner/src/client/timer.ts",
+            "message": "官方标注弃用，接口仍保留；建议审阅 ctx.timeout() 契约后迁移，不代表当前定时器失效。"
+          },
+          "timer.setInterval": {
+            "kind": "弃用",
+            "source": "packages/extensions/cordis-client-runner/src/client/timer.ts",
+            "message": "官方标注弃用，接口仍保留；建议审阅 ctx.interval() 契约后迁移，不代表当前定时器失效。"
+          },
+          "sessions.retain": {
+            "kind": "生命周期",
+            "source": "packages/api/session-controller/src/client/contract/sessions.ts",
+            "message": "返回的是持有引用；需要初次打开完成时 await reference.ready，并在自身作用域结束时 release() 或使用显式 disposal；本分析未验证所有权路径，不证明已发生泄漏。"
+          }
+        }
+      },
+      "0.2.1-rc.3": {
+        "sourceTag": "dsh-v0.2.1-rc.3",
+        "sourceArchiveSha256": "a955f3232202505d714037ddee55cde0e3b5700bdc5b1eba0d520d74442c390d",
+        "sources": {
+          "packages/client/ui-workspace/src/client/navigation.ts": "e85db0304cc7f9fa61dc0e2b34e420dbcaea62478eefcb223af3da4af0a26076",
+          "packages/client/ui-conversation/src/client/contract/input.ts": "74c6f9b4bff213f735ae0a52b993b633b3f1e978152357aa67e4a274ab3380be",
+          "packages/extensions/cordis-client-runner/src/client/timer.ts": "be0996dd6a6a96682a87156943911b8436791da40edcc961f3f5ecd58042c4c0",
+          "packages/api/session-controller/src/client/contract/sessions.ts": "85725b6a54d662c54a5eb6f8f59fe3dfe4069e974a0eaa8b4e81d508742acf7d"
+        },
+        "startSession": {
+          "source": "packages/client/ui-workspace/src/client/navigation.ts",
+          "options": {
+            "prompt": "string",
+            "agentPreset": "string",
+            "clearPreviousDraft": "boolean",
+            "whenDraftExists": "string"
+          }
+        },
+        "notices": {
+          "timer.setTimeout": {
+            "kind": "弃用",
+            "source": "packages/extensions/cordis-client-runner/src/client/timer.ts",
+            "message": "官方标注弃用，接口仍保留；建议审阅 ctx.timeout() 契约后迁移，不代表当前定时器失效。"
+          },
+          "timer.setInterval": {
+            "kind": "弃用",
+            "source": "packages/extensions/cordis-client-runner/src/client/timer.ts",
+            "message": "官方标注弃用，接口仍保留；建议审阅 ctx.interval() 契约后迁移，不代表当前定时器失效。"
+          },
+          "sessions.retain": {
+            "kind": "生命周期",
+            "source": "packages/api/session-controller/src/client/contract/sessions.ts",
+            "message": "返回的是持有引用；需要初次打开完成时 await reference.ready，并在自身作用域结束时 release() 或使用显式 disposal；本分析未验证所有权路径，不证明已发生泄漏。"
+          }
+        }
+      }
+    }
   }
 }
