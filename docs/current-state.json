@@ -1,12 +1,12 @@
 {
-  "toolVersion": "0.1.6",
-  "recordedAt": "2026-10-25T03:50:09.101Z",
+  "toolVersion": "0.1.7",
+  "recordedAt": "2026-10-25T04:18:16.924Z",
   "testFiles": 73,
-  "tests": 1136,
+  "tests": 1137,
   "repositoryFiles": {
-    "total": 350,
+    "total": 344,
     "fixtures": 99,
-    "other": 251
+    "other": 245
   },
   "verification": {
     "platform": "darwin",
@@ -23,134 +23,121 @@
       ],
       "scope": "Reviewed exact catalogue bytes and version-specific integration; rc.3 accepted on macOS locally and Linux at the recorded commit. Not general business-health certification."
     },
+    "sourceContext": {
+      "versionSource": "lib/version.mjs",
+      "integrationTarget": "main",
+      "scope": "Documentation describes the 0.1.7 delivery; actual publication is recorded separately."
+    },
+    "publication": {
+      "releaseTarget": "0.1.7",
+      "npmLatestObserved": "0.1.6",
+      "observedOn": "2026-10-25",
+      "performedByThisTask": false,
+      "scope": "Preparation only: no npm publish, version tag or GitHub release. This snapshot is not a claim that 0.1.7 is publicly distributed."
+    },
+    "history": {
+      "commit": "39d9f1a55fb10c9c3451a87e8c0703d819553f00",
+      "path": "docs/current-state.json",
+      "sha256": "c31fd9a49085a29bfb8a1275f884d039398d31e6592001562b085523bde41445",
+      "scope": "All prior local/remote, cohort, upstream and released-archive records and earlier pointers; historical evidence does not certify this candidate."
+    },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
-      "Optional health executor is not an OS sandbox and imported results are historical.",
-      "Crashed state writers require explicit token-bound recovery of proven orphan locks; unsafe or legacy locks fail closed.",
-      "Release evidence applies only to its exact archive, commit and checked DSH versions; a minimum host declaration does not certify future hosts."
+      "Static checks, catalogue registration and bounded business samples do not certify all business behavior.",
+      "Private execution profiles are not OS sandboxes; account/model execution needs its own authorization.",
+      "CI applies to the exact GitHub commit; formal publication must use the accepted archive."
     ],
-    "history": {
-      "commit": "10eaeba",
-      "path": "docs/current-state.json",
-      "scope": "Detailed past test, release, upstream and live-acceptance records are retained in Git history; historical evidence is not current certification."
-    },
-    "release016": {
-      "tag": "v0.1.6",
-      "artifact": {
-        "sha256": "d29786552d60d783d419dcb9db367d6c76f341d3b8ed0e3f181980dfd2b8ebba"
-      },
-      "sourceCommit": "a72f8d39ec5615956733254749a59e4c69f48191",
-      "scope": "Published 0.1.6 metadata patch retaining 0.1.5 behavior; archive/public verification details in archivedVerification, not the unpublished development build."
-    },
-    "archivedVerification": {
-      "commit": "a97de61c764977cde4cbe13dc94a314a53d51891",
-      "path": "docs/current-state.json",
-      "sha256": "9a4aa486192197a2781249f2fb77f024e79997b9c0f5cdc7c842ea2b453e0a0c",
-      "keys": [
-        "release016",
-        "authorModuleBoundaries20261024",
-        "documentationConsolidation20261024",
-        "ciOwnedPackagingFix20261024",
-        "rc3Adaptation20261024"
-      ],
-      "earlierHistory": "08b90e4 and 10eaeba:docs/current-state.json",
-      "scope": "Full dated records retrievable with git show <commit>:<path>; sha256 covers the original file bytes. Historical results apply only to recorded inputs, archives and commits, not current source."
-    },
-    "upstreamStatus20261024": {
-      "checkedAt": "2026-10-24T08:46:21.647725+00:00",
-      "scope": "GitHub issue/PR states refreshed only; maintainer notes remain historical. No source-handler, npm-method or real-install acceptance.",
+    "upstreamStatus20261025": {
+      "checkedAt": "2026-10-25T04:18:16.864505+00:00",
+      "scope": "GitHub issue/PR states refreshed on 2026-10-25 only; maintainer notes remain historical. No source-handler, npm-method or real-install acceptance.",
       "market932": {
         "state": "closed",
         "updatedAt": "2026-10-19T16:56:25Z",
-        "remaining": "Maintainer confirmed 1.66.43 adds full-packument fallback; warning or safe failure when both lookups fail remains a separate change."
+        "remaining": "Maintainer confirmed 1.66.43 adds full-packument fallback; warning or safe failure when both lookups fail remains a separate change.",
+        "url": "https://github.com/dsh-market/dsh-market/issues/932"
       },
       "store22": {
         "state": "open",
         "updatedAt": "2026-10-19T06:14:20Z",
-        "remaining": "Await a usable npm installation method, then verify a fresh install."
+        "remaining": "Await a usable npm installation method, then verify a fresh install.",
+        "url": "https://github.com/imsai-sh/dsh-1024store/issues/22"
       },
       "awesome717": {
         "state": "open",
         "merged": false,
-        "updatedAt": "2026-10-17T12:54:55Z"
+        "updatedAt": "2026-10-17T12:54:55Z",
+        "url": "https://github.com/0xsline/awesome-deepseek-harness/pull/717"
       }
     },
-    "rc3Adaptation20261024": {
-      "scope": "Historical rc.3 acceptance for the exact unpublished source archive and recorded CI commit; no Windows/model/account or general business certification. Full detail in archivedVerification.",
-      "provenance": "rules/dsh-0.2.1-rc.3-review.json",
-      "acceptedArtifactSha256": "9fab57a11f00d8408c395eb54f3ff90d2334ccb963ea7f222fced075572a1c10",
-      "macOS": "Same-tgz host/tool/skill, browser/navigation/drafts, model-listing fixtures; production requests 0, owned resources removed.",
-      "fixedCohort": {
-        "manifest": "tools/real-regression-manifest-rc3.json",
-        "cases": 24,
-        "status": "passed and replayed; honest FP/FN retained, not ecosystem accuracy",
-        "evidenceSha256": "02c2f280354730603234c0aed5c04634a15e8d91fd19ea6b77ec66234961ccb5"
+    "localCandidate20261025": {
+      "artifact": {
+        "path": "tmp/release-0.1.7-zYOAiu/dsh-plugin-compat-check-0.1.7.tgz",
+        "sha256": "6e98965fb7c1658300e522247ff48039520b0388ce9ac796103cec8204477168",
+        "integrity": "sha512-yYKcIOYu5DVVdDbEFU1LTx3pnGcWWb72D8R4X/xB88uCVtoSQiPkxl0cC0o4/OrePrIfavGD6lJy2nBq0HpNFg==",
+        "bytes": 267696,
+        "entries": 71
       },
-      "remote": {
-        "commit": "dc1603720d4f91e5226db4f857987ae63d7cb588",
-        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40099723661",
-        "checksPassed": 6,
-        "linuxVersions": [
-          "0.2.0-rc.2",
-          "0.2.1-rc.2",
-          "0.2.1-rc.3"
-        ],
-        "scope": "Historical exact-commit checks; not current branch CI."
-      }
-    },
-    "sourceContext": {
-      "developmentLine": "0.1.7-dev",
-      "versionSource": "lib/version.mjs",
-      "published": false,
-      "scope": "toolVersion is the checker metadata version; certifiedExactVersions are DSH hosts. Development changes are not npm 0.1.6 delivery."
-    },
-    "latestLocalAcceptance": {
-      "date": "2026-10-25",
-      "scope": "Unpublished 0.1.7-dev source, checker metadata 0.1.6; current real-host acceptance on macOS arm64/DSH 0.2.1-rc.3 only. No push, merge, release, account/model, Windows or general business certification.",
       "defaultSuite": {
-        "tests": 1136,
-        "passed": 1128,
-        "skipped": 8,
-        "failed": 0
+        "tests": 1137,
+        "pass": 1129,
+        "skip": 8,
+        "fail": 0
       },
-      "checks": "Format, generated contracts/guidance, document facts/links, 38/38 syntax cases, three exact catalogues and two semantic baseline metadata checks passed. No feature snapshot or version-lock rebuild.",
-      "regressions": "Sixteen semantic cases cover exact versions, enum/types, optional guards, aliases/mutations/unknown effects, no raw argument content, malformed/future baselines, CLI/preview/shipped-panel consistency and nonfatal notices.",
-      "semanticScope": {
-        "side": "client",
-        "versions": [
-          "0.2.1-rc.2",
-          "0.2.1-rc.3"
-        ],
-        "parameterOptions": "uiWorkspace.startSession: prompt, agentPreset, clearPreviousDraft and rc.3 whenDraftExists",
-        "notices": "Official timer.setTimeout/setInterval deprecation and sessions.retain lifetime prerequisites; no removal/leak proof.",
-        "provenance": "rules/severity.json apiSemantics: exact tags, archive hashes and four selected source hashes verified against fixed source archives. Earlier/future hosts remain unreviewed for semantics."
+      "checks": {
+        "maintenance": "passed",
+        "prepublish": "passed",
+        "workspaceDependencies": "clean",
+        "pluginRuntimeDependencies": "clean"
       },
-      "realHost": {
+      "publicMetadata": {
+        "status": "passed-with-expected-candidate-notices",
+        "npmLatest": "0.1.6",
+        "notices": [
+          "npm.version-matches",
+          "npm.runtime-metadata-matches",
+          "npm.readme-is-current"
+        ]
+      },
+      "rc3SameArchive": {
+        "ok": true,
         "dshVersion": "0.2.1-rc.3",
-        "artifactVersion": "0.1.6",
-        "artifactSha256": "931cb0fb543bacad6156ceb6aae9e9c3791973b04811e896e0bf154da6809836",
-        "evidenceSha256": "92c15d24cab571e25b1cbb52617e5b1c6c48a9b231fd5a0315c0cac543b7e088",
-        "apiSemantics": {
-          "installedArtifact": true,
-          "realBrowser": true,
-          "exactVersion": "0.2.1-rc.3",
-          "nonfatalRisk": true,
-          "deprecatedAndLifetimeNotices": true,
-          "fixtureActivated": false
-        },
-        "draftPolicies": true,
-        "retainedCreatorTarget": true,
-        "manualReviewPersisted": true,
-        "baselineUnchanged": true,
+        "artifactSha256": "6e98965fb7c1658300e522247ff48039520b0388ce9ac796103cec8204477168",
+        "realBrowser": true,
         "productionRequests": 0,
         "privateRootRemoved": true
-      }
-    },
-    "previousLocalAcceptance": {
-      "commit": "ec06f21224668cbb6e3264243df1058c851f8ed6",
-      "path": "docs/current-state.json",
-      "sha256": "b48e4f29b3296291b25f34cbbfb30e151f1bdbc642e6f76d7e78049bacf20484",
-      "scope": "Prior bounded-input/private-directory/document-consolidation acceptance; exact source and artifact only."
+      },
+      "cohort": {
+        "status": "passed",
+        "replay": "passed",
+        "manifestSha256": "19278a4fb565f6c5b833b8aceb557264154e100a1b50358fb96c4b0de4511a32",
+        "independentPackageFamilies": 4,
+        "pinnedArtifacts": 5,
+        "holdoutPackageFamilies": 2,
+        "holdoutPinnedArtifacts": 2,
+        "distinctPlannedCases": 24,
+        "knownOutcomeCases": 24,
+        "staticIdentifiedFailures": 0,
+        "serviceOnlyIdentifiedFailures": 0,
+        "unflaggedNaturalFailures": 2,
+        "unflaggedBusinessOrClientFailures": 10,
+        "driverErrors": 0,
+        "validationErrors": 0,
+        "scope": "24 fixed cases reproduced with FP/FN retained; replay is historical validation, not ecosystem accuracy or full business certification."
+      },
+      "evidence": {
+        "directory": "tmp/release-0.1.7-zYOAiu",
+        "sha256": {
+          "dsc017-full.tap": "547b46eb372376c9281acc93137fe036e6e42235eeaf97f8c83c3e885c89cdc9",
+          "dsc017-prepublish.tap": "c15ad64da3caafcd239ed23e5437e69301a37f83827b644078fe761d18cf8b12",
+          "dsc017-prepublish.log": "79c9bda041489375ff2da3b8a730619d7d99830731d2892f4276b30beb15e231",
+          "dsc017-maintenance-check.log": "34d630f8811fb687ab93901dc09294bf40cdcbb4e27f2c8e04e054c8960b62eb",
+          "dsc017-dependency-security.json": "c2d5bf3ab9dce457bf4ab6e4d1e136d05a4717a10bc2e7b499ebe6281515c38a",
+          "dsc017-public-metadata.json": "4fd86eb722f59a36dc0752313c3a9bdf30126f7401b958697f87b6cfe9df3388",
+          "dsc017-candidate-rc3-live.json": "61f04ef433865f15cf14088114b102d43f7b831741a17cdf5b90d3c9d8b2722a",
+          "dsc017-cohort-replay.json": "ac98995a3b1e18a2955a5bd0d509f87cb7b127d11625066b09bdbb23929de197"
+        }
+      },
+      "scope": "Local macOS arm64 candidate evidence only. GitHub CI is evaluated separately on the exact pushed commit. No account/model calls, Windows acceptance or formal publication."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

@@ -1,38 +1,5 @@
 #!/usr/bin/env node
-/**
- * **仓库元数据检查** —— GitHub 简介/标签/主页 与 npm 上的包，是否还与产品定义一致。
- *
- * ## 为什么要有它
- *
- * 2026-10-12 发现的：GitHub 简介写着「**在安装前**判断一个 DSH 插件…是否真的可用」，
- * 而 `README.md 的能力边界` 与 `docs/Plan.md` §1 **明写禁止**这句话 ——
- * 插件形态做不到安装前检查（被只读约束排除），只有 CLI 能。
- *
- * 它在首页挂了很久，而此前几轮文档核查**一次都没扫到**，因为检查范围一直限定在
- * 仓库内的 7 份文档里，**没往仓库的元数据看一眼**。
- * 同一天还发现 `plugin/README.md`（= npm 页面）的示例过期 —— 同一类盲区。
- *
- * 所以：**「文档信息」的边界比那 7 份文件更宽。**
- *
- * ## 设计：规则离线可测，联网只负责取数
- *
- * | 层 | 在哪 | 为什么 |
- * |---|---|---|
- * | **规则**（纯函数） | 本文件导出 `RULES` | 由 `test/meta-check.test.mjs` 用合成输入钉住 —— 不联网 |
- * | **取数**（gh / npm） | 本文件的 `fetchGithub` / `fetchNpm` | 网络不可用就**标记来源不可用并说明**；全部来源不可用时退出3，不算通过 |
- *
- * ⚠️ **不与 `tools/doc-check.mjs` 合并**：那个要进 `prepublishOnly` 闸门，必须**离线、秒级**；
- * 这个要联网。混在一起会让发布闸门依赖网络。
- *
- * ## 用法
- *
- *     node tools/meta-check.mjs              # GitHub + npm 都查
- *     node tools/meta-check.mjs --github     # 只查 GitHub
- *     node tools/meta-check.mjs --npm        # 只查 npm
- *     node tools/meta-check.mjs --json
- *
- * 退出码：0 全过 / 1 有问题 / 3 全部数据源都不可用（不是"全过"）。
- */
+/** Read-only GitHub/npm metadata checks. Rules are offline-testable; unavailable sources never count as verified. */
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';

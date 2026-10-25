@@ -91,7 +91,7 @@ report_status=$?
 
 ## 输出怎么读
 
-下面是当前仓库源码对固定合成夹具的可复现输出，运行命令为 `node bin/compat-check.mjs --nm test/fixtures/labels --dsh-version 0.2.1-rc.2 --no-baseline`，预期退出2。它用于解释报告字段，不代表真实插件业务验收；源码版本真源为0.1.6，0.1.7-dev修复尚未发布npm版本。
+下面是当前仓库源码对固定合成夹具的可复现输出，运行命令为 `node bin/compat-check.mjs --nm test/fixtures/labels --dsh-version 0.2.1-rc.2 --no-baseline`，预期退出2。它用于解释报告字段，不代表真实插件业务验收；工具版本为0.1.7，实际发布与验收状态见仓库docs/current-state.json。
 
 ```text
 插件数: 4    有运行时面: 否（方法级结论降为「疑似」）
@@ -99,7 +99,7 @@ report_status=$?
 参考目录：0.2.1-rc.2 · SHA-256：90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743
 目录认证范围：0.2.1-rc.2；仅核验内置目录字节及对应精确版本的集成；不代表业务验收或运行时观测。
 
-工具版本: 0.1.6    证据覆盖有限: 4 个插件
+工具版本: 0.1.7    证据覆盖有限: 4 个插件
 结论: 可用 2    部分可用 1    不兼容 1    （其中 2 个「可用」没有已验证调用，不等于业务通过）
 
 不兼容  @label/broken-client@1.0.0

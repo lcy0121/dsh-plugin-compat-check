@@ -221,3 +221,15 @@ test('current-state generator counts all fixture forms and refuses incomplete or
   assert.equal(successfulTestCount('ℹ tests 1121\nℹ fail 0\n'),1121);
   for(const log of ['# tests 4\n# fail 1\n','# tests 4\n',''])assert.throws(()=>successfulTestCount(log),/missing or failing/);
 });
+
+test('release document facts reject stale product versions and development-only instructions', async t=>{
+ const {checkReleaseFacts}=await import('../tools/doc-check.mjs');
+ assert.equal(typeof checkReleaseFacts,'function');assert.deepEqual(checkReleaseFacts(REPO),[]);
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'dsc-release-docs-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const files=['README.md','README.en.md','README.ko.md','plugin/README.md','docs/Plan.md','docs/guide.md','docs/maintaining.md','docs/author-ci.md','rules/README.md','skill/README.md'];
+ for(const f of files){fs.mkdirSync(path.dirname(path.join(root,f)),{recursive:true});fs.copyFileSync(path.join(REPO,f),path.join(root,f));}
+ assert.deepEqual(checkReleaseFacts(root),[]);
+ for(const f of files){const original=fs.readFileSync(path.join(root,f),'utf8');fs.writeFileSync(path.join(root,f),original.replace(/\*\*\d+\.\d+\.\d+\*\*/,'**0.0.1**'));assert.ok(checkReleaseFacts(root).some(p=>p.startsWith(f+':')),f);fs.writeFileSync(path.join(root,f),original);}
+ fs.appendFileSync(path.join(root,'README.md'),'\nUse 0.1.7-dev; no npm release yet.\n');
+ assert.ok(checkReleaseFacts(root).some(p=>p.startsWith('README.md:')));
+});

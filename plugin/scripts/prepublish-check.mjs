@@ -1,26 +1,5 @@
 #!/usr/bin/env node
-/**
- * `prepublishOnly` 钩子 —— 发布前把两类**不可挽回**的错误挡在门外。
- *
- * ## 为什么必须有它
- *
- * npm 发布是**公开且近乎不可撤回**的。而有两类错误一旦发出去就只能靠发新版弥补：
- *
- * ① **版本号与内核不一致**。版本的真源是 `lib/version.mjs`，但 `package.json`
- *    只能写字面量（npm 只认字面量）。改了一处忘了另一处，发布出去的就是
- *    「包的版本是 A、它自己 `--version` 报 B」—— 而这恰恰是这次发布的**主题**
- *    （见 docs/Plan.md §1、§6：「单版本」）。
- *
- * ② **测试没过就发**。`npm publish` 默认**不跑测试**。测试没过的包发出去，
- *    用户拿到的是我们已知有问题的版本，而他还以为那是"刚发布的最新版"。
- *
- * ## 为什么不用 `npm test` 那种写法
- *
- * 这个包发布时人在**仓库里**（`plugin/` 的上一级就是仓库根），
- * 所以能直接跑仓库的测试套件。但 `files` 字段里不含 `test/` ——
- * 也就是说这个脚本**不能**假设测试文件在包内，必须从仓库根跑。
- * 这正是"发布时必须从仓库检出里发"这条约束的技术原因。
- */
+/** Local-only publication gate: source checkout, consistent version, successful tests and document checks. Never publishes. */
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';

@@ -1,6 +1,6 @@
 # 维护指南
 
-本文随0.1.7-dev源码维护，版本真源仍为0.1.6，新增修复尚未发布npm版本；说明API目录、依赖公告、真实回归及提取器维护。日常命令见[指南](guide.md)，现行分析和报告契约见[Plan](Plan.md)。[current-state](current-state.json)只保存当前事实与有限验收摘要；旧实现的缺陷清单、逐轮实验与发布证据从Git历史查阅，不作为当前验收。
+本文维护**0.1.7**的目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
 
 ## 维护入口与语法覆盖
 
@@ -9,48 +9,40 @@ npm run check
 npm test -- --test-reporter=tap > /tmp/dsc-tests.tap
 ```
 
-`check`统一核对格式、文档/版本、skill/契约生成副本、第三方说明、可执行语法矩阵和已登记目录；不递归运行测试、不安装/执行目标、不联网或改动源码。矩阵会创建并清理自有合成输入。完整套件仍单独运行；`doc-check --test-summary`核对成功TAP计数，远端元数据与真实DSH/业务验收另按授权进行。
+check验证格式、文档/版本/链接、skill/契约副本、第三方说明、可执行语法矩阵及目录登记；不递归跑测试、不联网、不执行目标或改源码。矩阵仅创建/清理自有合成输入。成功TAP交给doc-check核对计数，远端状态及真实宿主另验。
 
-格式检查覆盖宿主入口、预构建客户端、主CLI及列出的共享模块。客户端契约仍由纯模块单一生成；`stage-contract.mjs`在最终客户端生成边界统一格式化，使格式检查与生成检查一致，维护需完整仓库开发依赖（含Prettier）。真实验收和客户端到货工具用`tools/owned-package-source.mjs`准备私有打包副本：先核对Prettier的manifest/冻结lock/已装版本，再复制其自包含构建包；依赖缺失或漂移时要求重新npm ci。构建依赖不进入plugin目录或tgz，正常运行全部prepack/postpack钩子，不改仓库工作区。本地HTTP准入拆为`plugin/lib/local-request.js`，不复制内核判定；VM结构回归用AST处理导入/导出，避免依赖引号和换行。
+客户端纯契约及核实指导经stage-contract生成；最终客户端在生成边界格式化，要求完整开发依赖（含Prettier）。真实验收/到货工具通过`tools/owned-package-source.mjs`准备私有构建副本，核对manifest、lock和已安装Prettier版本，只携带自身构建依赖，不向源码、用户profile或npm运行包注入工具链。
 
-语法事实源为[矩阵病例](../test/fixtures/syntax-matrix.json)，通过真实提取器与判定器执行；可独立运行`npm run check:syntax`，或`node tools/syntax-matrix.mjs --json > syntax-matrix.json`保留逐项期望、实际结果、差异、调用跨度和覆盖证据。退出0表示病例匹配、1表示漂移、2表示参数错误。
+`test/fixtures/syntax-matrix.json`与`tools/syntax-matrix.mjs`分别记录并执行supported / inferred / abstained / excluded病例。每例核验包名、精确调用对/跨度、确定性或诊断，不以解析成功代替结论。扩展语法须增加正反例，并保留动态/超限限制；矩阵与真实业务标签独立，不能调严重度求绿。
 
-| 分类 | 可执行边界 |
-|---|---|
-| supported（支持） | 无提取诊断或弱接收者证据；这是语法分类，观测不足仍可使coverage有限。包括直接/别名/解构、同步转发、闭包、ESM/CJS、标准条件导出、常量计算键、inject和正确排除的阴性病例。并非支持所有同类语法。 |
-| inferred（推断） | 未绑定ctx等弱接收者证据；不能升级为已证明接收者或实测影响。 |
-| abstained（弃权/有限覆盖） | 动态键、异步返回、对象逃逸、歧义键、inject变异、未知导出条件或解析失败阻止完整证明；仍可保留已证明调用和疑似发现，不等于清空结果。 |
-
-矩阵现含精确exports/ESM、相对patch优先、常量模块路径/遮蔽/变异、provide与明确absent/未观测、硬inject及弱接收者、对象逃逸交叉病例。每例独立核对调用、依赖、诊断、coverage及目录疑似发现；另用**合成**宿主观测检查确定性变化，不执行目标源码，也不代表真实DSH或业务验收。新增语法先补正例及阴性/变更边界，期望由人工核实，不用提取器生成自身期望。矩阵漂移应审查原因，不能批量重建期望求绿。
+已完成的A4b排除实验、旧槽位探测和逐轮维护日志保留在`39d9f1a`的相应路径。冻结Python对拍仅作历史比较，当前AST、语法矩阵、到货/实机诊断及行为回归是维护入口；历史参考不是分析真值。
 
 ## API目录候选审查
 
-API目录是生成代码中的声明清单，不能证明运行时方法存在、插件激活或业务成功。普通体检分别展示实际DSH、参考目录身份及认证范围；未知/未来版本不能借用旧目录认证。升级预检只接受明确支持的精确版本。
+仅`lib/contracts.mjs.CATALOG_REFERENCES`登记的精确版本/字节获目录认证；声明最低版本、相邻版本、目录文件名或空API差分均不认证新宿主。普通检查可回退参考目录但保留未认证提示，升级预检拒绝未登记版本。
 
-1. 封存目标官方安装包或稳定本地安装副本，记录渠道/取得日期、精确版本、平台架构、包与`app.asar`路径及SHA-256。审查者核实官方来源；工具只核对本地归档与候选一致性。
-2. 显式提取到私有新目录。提取器只读生成代码文本，不执行JavaScript/插件。最低服务数量检查失败时调查格式变化并补测试，不删除检查求绿。
-3. 离线核验候选来源与API差分，再人工审查签名、生命周期、权限、分端及注入前提；空差分也不能省略语义审查。
-4. 运行针对性正反例和默认测试，在对应DSH、平台、独立私有profile及Chrome中验收激活、双端调用、HTTP/DOM业务、故障恢复、报告身份与资源清理。未观测项保持未验收。
-5. 只有语义审查和真实验收完成后，才提交独立版本目录、`lib/contracts.mjs`中的`CATALOG_REFERENCES`、选择策略及`lib/upgrade-contract.mjs`的`SUPPORTED_PREVIEW_VERSIONS`供review；同步契约副本及说明，保留旧目录与回退路径。
+1. 使用稳定官方源码/安装归档，记录渠道、日期、精确版本、平台架构、包及app.asar摘要；审查者核实官方来源，工具只核对本地候选与归档一致性。
+2. 显式提取到私有新目录，只读代码文本、不执行JS/插件。最低服务数量或格式检查失败时调查并补回归，不删检查求绿。
+3. 离线验证来源与API差分，再人工审查签名、生命周期、权限、分端和注入前提；无命名差异也须做语义审查。
+4. 按对应DSH/平台、独立profile/Chrome验收激活、双端调用、HTTP/DOM、故障恢复、身份及清理；未观测项保持未验收。
+5. 审查/验收完成后独立提交目录、CATALOG_REFERENCES、选择策略与SUPPORTED_PREVIEW_VERSIONS，同步契约/文档，保留旧目录及回退路径。
 
-以下`0.3.0-rc.1`只是候选流程示例，不表示受支持：
+`0.3.0-rc.1`仅为未认证候选示例：
 
 ```sh
 review_dir="$(mktemp -d "${TMPDIR:-/tmp}/dsh-catalog-candidate.XXXXXX")"
-asar='/绝对路径/目标版本的/app.asar'
+asar='/绝对路径/目标版本/app.asar'
 candidate="$review_dir/dsh-api-catalog-0.3.0-rc.1.candidate.json"
 shasum -a 256 "$asar" > "$review_dir/app-asar.sha256"
 python3 -I tools/catalog/extract-host-api.py "$asar" "$candidate"
-node tools/catalog-review.mjs \
-  --before rules/dsh-api-catalog-0.2.1-rc.2.json \
-  --candidate "$candidate" --asar "$asar" --json > "$review_dir/catalog-review.json"
+node tools/catalog-review.mjs --before rules/dsh-api-catalog-0.2.1-rc.3.json --candidate "$candidate" --asar "$asar" --json > "$review_dir/catalog-review.json"
 ```
 
-候选须有`_dshVersion`、两端固定`_source`路径、原始字节`_sourceSha256`和host/client方法。旧目录可作`--before`差分基准，不重做其历史认证。核验重新提取版本、源路径/摘要及API内容；结果给出两目录SHA-256及`diff.host/client`的服务/方法增删，排序稳定。退出0只表示`sourceVerified:true`，`semanticReview / integrationAcceptance`仍为`pending`，`certification`为`not-granted`；退出3是参数、输入、来源、内容、资源或提取失败，不能当作无差分。
+候选须有_dshVersion、固定双端_source路径、原始字节_sourceSha256及方法列表。检查重新提取版本、路径、摘要与API内容，给出两目录SHA-256和稳定排序的双端增删。退出0只表示sourceVerified，semanticReview/integrationAcceptance仍pending、certification为not-granted；退出3是参数/输入/来源/内容/资源或提取错误，不能当无差分。
 
-工具离线且不改输入、规则、pins或支持版本。JSON各2MiB、ASAR4GiB、头8MiB、三个选定源条目各8MiB；拒绝链接、FIFO、非普通文件、非packed或越界条目。Python隔离子进程10秒、输出1MiB，强制回收并清理自有临时目录。前后身份检查不承诺OS原子快照、防协同篡改签名、硬实时或RSS，必须使用稳定归档。
+工具不改输入或支持范围：JSON各2MiB、ASAR4GiB/头8MiB、三个选定packed条目各8MiB；拒绝链接、FIFO、特殊文件及越界。Python隔离子进程10秒、输出1MiB，回收后清自有临时目录。前后身份不是原子快照、签名、防协同篡改、硬实时或RSS保证；使用稳定归档。
 
-不因名称增删直接改severity，不跨端/profile套证据，也不用放宽规则掩盖验收失败。保存候选/来源/差分/语义结论、审查人日期、测试与实际验收证据及认证范围到稳定存档，再清理自有临时目录；分享前检查路径、包名和日志隐私。登记后运行`npm run check:catalogs`：核对已登记目录字节、精确版本选择及预检版本清单的一致性；未登记候选文件不会自动认证。该检查不替代来源、规则与实机验收。失败候选保持未认证；接受后回退须恢复旧pins/支持范围并复测提示和拒绝行为。回归见`test/catalog-governance.test.mjs`、`test/catalog-review.test.mjs`。
+保存来源、差分、语义结论、审查人/日期及真实验收范围到稳定存档，分享前检查隐私。登记后`npm run check:catalogs`核对已登记字节、选择策略、预检版本集合及语义记录；未登记候选不自动认证。失败保持未认证；回退须恢复旧pins/范围并重测提示与拒绝行为。
 
 ## 依赖公告与CI供应链
 
@@ -60,64 +52,59 @@ npm run security:dependencies -- --output dependency-security.json
 node --test test/dependency-security.test.mjs
 ```
 
-[检查程序](../tools/dependency-security.mjs)独立审计两张图：`workspace-lock`读取根冻结lock（含dev/optional/peer），`plugin-runtime`读取plugin自身pins。plugin无lock时仅复制runtime依赖字段，在专属临时目录以`npm install --package-lock-only --ignore-scripts --no-audit --no-fund`解析公共registry；以后有plugin lock则审计其冻结图（含dev）。不以根同名依赖替代plugin依赖，不携带lifecycle脚本、不写回源码或自动修复。
+审计独立检查workspace-lock（含dev/optional/peer）与plugin-runtime。plugin无lock时只复制runtime字段，在专属临时目录用公共npm解析lock，禁用lifecycle、不携带脚本、不写回源码；不能以根同名依赖代替插件图。先核对manifest/lock根记录，陈旧lock是工具错误。证据记录实际manifest/lock摘要与图来源。
 
-先核对manifest声明与lock根记录，陈旧lock是工具错误；证据记录实际manifest/lock摘要及图来源。执行`npm audit --package-lock-only --ignore-scripts --json --include=dev --include=optional --include=peer --audit-level=info`，固定公共npm，任何级别公告（包括未知级别）都阻断，无豁免。退出0表示本次公告数据未发现漏洞，1表示有公告，2表示网络/npm/超时/schema/lock或证据错误；网络失败不转绿。逐一审阅公告URL与依赖路径，显式选择兼容版本更新manifest/lock，再测试和review。
+npm audit固定公共registry，任何公告级别（含未知）均阻断，无豁免；退出0本次未发现公告、1有公告、2网络/npm/超时/schema/lock或证据错误。网络失败不转绿，不自动修复。每npm进程最多120秒（可降低），网络45秒无重试，stdout/stderr缓冲各4MiB；结束只清自有目录。
 
-每npm进程默认/最多120秒（`--timeout-ms`可降低），网络45秒无自动重试，stdout/stderr缓冲各4MiB；成功失败都清理自有临时目录。证据仅存白名单字段，去除控制字符和URL查询/凭据，不存原始响应或stderr；每图最多1000项、每字段256字符，截断不改变阻断，分享前仍须预览。测试替换联网npm子进程并验证实际wrapper、证据与清理，不能代替远端Actions或未来registry状态。
+证据仅白名单字段，去控制字符及URL凭据/查询，不保留原响应/stderr；每图1000项、字段256字符，截断不改变阻断。分享前预览；离线子进程回归不能代替实际registry或未来CI状态。
 
-[Test](../.github/workflows/test.yml)和[静态批量](../.github/workflows/static-batch.yml)固定Actions的完整40位commit，checkout关闭`persist-credentials`，最小权限、job超时、制品7天；审计在独立Node24 job执行一次，不重复到Node矩阵。静态批量保持手动触发。所有job显式禁用npm缓存恢复，直接按锁文件执行npm ci，避免可选缓存服务阻塞环境准备。Node矩阵独立报告结果；发布前检查通过`DSC_TEST_TAP`保留完整TAP及stderr，失败时从对应制品定位末尾真实错误，不能只看截断摘要。更新Action pin时核对官方release、commit和该commit的`action.yml`运行时及实际inputs；Action运行时与被测Node版本分开。当前使用GitHub托管Ubuntu；其它runner另验收，不能靠版本注释认证。npm语义见[官方audit文档](https://docs.npmjs.com/cli/v11/commands/npm-audit/)。
-
-市场业务回归重载后须等待本次导航的`GET /dsh-market/installed`完成并让界面提交渲染；卡片先出现不代表备注/收藏已载入。该就绪条件不依赖业务值或控件存在，503、值不符和控件缺失仍保留失败。
-
-升级面板实机验收须同时等到最终loader扫描与F2启动自检完成，设置页加载后还须显式“重新检查”并等待该报告渲染，再提交预检；启动扫描或首次客户端连接触发服务懒初始化时，新报告会合法撤销旧比较。失败制品保留有界的报告时间和内容摘要以区分真实失效与无内容变化的重读，不保留私有报告正文或鉴权信息。
-
-发布验收可设置`DSC_RC2_ARTIFACT=<确切tgz绝对路径>`、`DSC_REQUIRE_RC2_UI=1`后运行`node tools/rc2-live.mjs`，直接验收选定归档，不重新打包源码。未设置制品路径时仍按源码打包；最终发布必须使用已验收的同一文件。
+[测试](../.github/workflows/test.yml)和[静态批量](../.github/workflows/static-batch.yml)固定Actions完整commit，checkout不保存凭据、最小权限、job限时、制品7天，不恢复npm缓存。公告审计在独立Node24 job跑一次；静态批量手动触发。Node矩阵独立报告；prepublish通过DSC_TEST_TAP保留完整TAP/stderr，失败看末尾真实错误。更新Action pin须核对官方commit/action.yml运行时及inputs，Action运行时与被测Node分开。其它runner另验收。
 
 ## 真实插件回归
 
-[固定manifest](../tools/real-regression-manifest.json)锁定DSH/API目录、五个真实npm制品、摘要及每轮24项业务期望。独立holdout为[causebefore/dsh-pomodoro](https://github.com/causebefore/dsh-pomodoro)的`dsh-pomodoro@0.5.5`和[LUgABeEEE/dsh-global-todo](https://github.com/LUgABeEEE/dsh-global-todo)的`dsh-global-todo@0.13.2`；选自公开市场中可审阅、无需账户/模型且声明形态不同的有界操作，在查看预测前确定，不据其结果调规则或严重度。tarball对照registry integrity，安装树指纹及所审源码字节另外固定；二次重复不增加独立样本数。
+[rc.2清单](../tools/real-regression-manifest.json)及[rc.3清单](../tools/real-regression-manifest-rc3.json)分别锁定DSH/目录、五个npm制品、摘要及每轮24项业务期望，互不借结果。独立holdout为`dsh-pomodoro@0.5.5`与`dsh-global-todo@0.13.2`，先选无需账户/模型且可审阅的操作，再封存预测，不能据结果调规则。重复运行不增加独立样本数。
 
-Pomodoro覆盖必需connection/client注入和schema配置，真值是实际Start后localStorage revision/deadline及新文档恢复；GET config仅说明配置就绪，driver不种植存储。受控故障删除实际主操作按钮，重载恢复。Todo覆盖可选服务/webServer及原始JSON Schema，真值是完成POST/create、私有JSON精确标题及重载DOM成员；故障只对该POST返回503，磁盘和DOM必须均无标题，恢复另建标题。两者均有正常→受控失败→恢复，不调用通知/模型/外部采集功能。
+Pomodoro真值来自Start后的localStorage revision/deadline及新文档恢复，受控故障删主按钮；GET config只说明配置就绪。Todo真值来自POST/create、私有JSON精确标题及重载DOM；故障只对该POST返回503，磁盘/DOM均须无标题，恢复另建标题。正常→故障→恢复分组，不调用通知/模型/外部采集。
 
-静态预测在启动前封存，service-only等待官方appReady就绪事件后采样原始root（不要求所有被测服务存在），并在Chrome/动作前封存；记录动作起止及取标签时间，回放从HTTP/DOM/磁盘receipt重算后置条件，不信任保存的布尔值。自然与受控、静态与service-only分别保留FP/FN、覆盖限制及`clientVerified:false`。浏览器/selector/启动异常是driver错误，不能当插件业务失败。绿色只证明固定结果重现，受控故障仍可为诚实FN，不是生态准确率或未来兼容认证。
+静态预测在启动前封存，service-only等待官方appReady后采样原始root，在Chrome/动作前封存；不要求所有被测服务存在。receipt记录动作时间、请求/DOM/磁盘后置条件及清理；回放重算标签，不信任保存的布尔值或把hash当签名。静态/service-only、自然/受控、FP/FN和驱动错误分列，clientVerified:false保留。绿色只证明固定结果重现，诚实FN仍保留，不代表生态准确率。
 
 ```sh
-node tools/real-regression.mjs --live --out-dir <新空目录> --repeat 2
-node tools/real-regression.mjs --replay <证据根或单队列目录>
+DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 node tools/real-regression.mjs --live --repeat 1 --out-dir <新空目录>
+DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 node tools/real-regression.mjs --replay <证据根或单队列>
 node tools/business-labels.mjs --live --suite holdout-pomodoro --observe-services --out-dir <新空目录> --json
 node tools/business-labels.mjs --live --suite holdout-todo --observe-services --out-dir <另一新空目录> --json
-node tools/business-labels.mjs --predictions <预测.json> --labels <标签.json> --json
 ```
 
-可另选`market / sidebar / sidebar-ui / sidebar-ui-previous`；回放单队列可加`--suite`。固定回归退出0期望重现、1业务/证据不符、3驱动错误；业务度量退出0无错配、1有FP/FN或不计分项、3输入/驱动错误。旧三suite索引只验证原队列，当前索引须含全部五suite；旧driver缺逐动作时间戳，摘要不等于签名。
+另有market/sidebar/sidebar-ui/sidebar-ui-previous队列；旧三suite索引不证明五suite已跑，旧driver缺时序时不得冒充完整证据。固定回归退出0期望重现、1业务/证据不符、3驱动错误；业务度量退出0无错配、1含FP/FN或不计分项、3输入/驱动错误。
 
-真实运行需当次授权的下载、DSH/Chrome执行环境；全新私有profile/缓存不复制账户或用户工作文件。每队列10分钟、清理宽限15秒、最多两轮和64证据文件，终止后确认自有宿主/Chrome停止再清目录，未确认清理即失败。`sidebar-model`另需当次账户/模型授权，工具关闭、两次首步、无重试/标题、每步256token，不属默认测试/CI。回归见`test/business-holdout.test.mjs`及真实回归相关测试。
+真实运行需当次下载/执行授权，不复制账户或用户文件；每队列10分钟、清理宽限15秒、最多两轮/64证据文件。确认自有宿主/Chrome停止后再清目录，清理未确认即失败。sidebar-model另需账户/模型授权：工具关闭、两次首步、无重试/标题、每步256token，不属默认CI。
 
-rc.3来源及语义审查保存在[rules/dsh-0.2.1-rc.3-review.json](../rules/dsh-0.2.1-rc.3-review.json)，包含固定tag/commit、官方npm完整性、ASAR及签名摘要；无命名/签名删除，不新增缺失API规则。三处更多与草稿的真实驱动分别验证区域身份、插件主列表、空白复用和preset/策略隔离。模型发现用私有HOME/DSH_HOME与白名单环境，禁止继承密钥；官方模块只请求受控loopback列表，失败/超时不等于模型不可用。
+浏览器驱动必须等待独立就绪条件：市场重载等本次GET installed响应及渲染，不以卡片或健康业务值代替；升级面板等loader扫描/F2完成及设置页显式重检；语义提示分别展开覆盖限制和发现区再检查可见文本。失败不放宽后置条件，不保留鉴权或私有报告正文。
+
+rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.json)。三处更多、插件主列表、空白复用及preset/草稿策略有实际驱动；模型列表用私有环境、只请求受控loopback列表，不继承密钥，失败/超时不等于模型不可用。0.2.0-rc.2保留其它真实门禁，rc.2/rc.3执行完整面板；显式宿主不符为错误，不以缺浏览器跳过求绿。
+
+同一tgz发布验收：
 
 ```sh
-DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 DSC_REQUIRE_RC2_UI=1 DSC_RC2_ARTIFACT=<完整tgz绝对路径> node tools/rc2-live.mjs
-DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 node tools/real-regression.mjs --live --repeat 1 --out-dir <空目录>
-DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 node tools/real-regression.mjs --replay <对应run-root>
+DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 DSC_REQUIRE_RC2_UI=1 DSC_RC2_ARTIFACT=<确切tgz绝对路径> node tools/rc2-live.mjs
 ```
 
-显式宿主不符为错误；0.2.0-rc.2保留其它真实门禁，rc.2/rc.3执行完整面板。旧队列清单不变，rc.3用独立`real-regression-manifest-rc3.json`；回放按所选版本/摘要隔离，不互借结果。Linux固定三版矩阵；macOS/Windows/远端CI范围以[current-state](current-state.json)实际证据为准。
+未设制品时会重新打包源码；发布必须使用验收过的同一文件。实际平台/版本和CI以[current-state](current-state.json)及对应提交Actions为准。
 
 ## 参数语义基线维护
 
-`rules/severity.json.apiSemantics`独立登记精确客户端版本；当前只有0.2.1-rc.2/rc.3，不改变三版API目录的认证集合。新增或修改先锁定官方源码tag/归档，逐文件核对哈希、公开注释、实现及既有真实行为；归档不执行目标代码。分别审查参数事实、弃用标记与所有权前提，未知项不造致命影响；`clearPreviousDraft`是兼容选项，不能从新字段出现推断其弃用。
+`rules/severity.json.apiSemantics`只登记0.2.1-rc.2/rc.3客户端语义，不改变三版API目录认证。修改前锁定官方tag/归档，逐文件核对哈希、公开契约、实现及真实行为；归档只读，不执行目标。参数事实、弃用标记和所有权前提分别审查；clearPreviousDraft是兼容选项，新字段出现不表示它弃用。
 
-`npm run check:catalogs`同时检查语义记录schema、登记版本及来源引用结构，不能代替源码/语义审查。每次调整补参数正反例、别名/改写/闭包副作用与跨版本反例，并验收同一tgz的HTTP/实际面板；新真实验收夹具只能放入自有profile，保持未激活，不执行其中业务调用。来源、目录、规则摘要、限定结果和清理须可追溯；未来版本、宿主同名API、Windows或模型场景另验收。同步生成的指导副本，保留旧基线；测试不会自动认证新版本。
+check:catalogs验证schema、登记版本及来源引用结构，不能代替语义审查。补类型/枚举、别名/改写、闭包副作用及跨版本正反例，验收同一tgz的HTTP/面板。静态验收夹具只放自有profile，保持未激活；提醒不证明泄漏/移除或业务失败。同步指导副本，保留旧语义基线，不自动认证未来、宿主同名、Windows或模型场景。
 
 ## 提取器与探针维护
 
-- AST与词法绑定区分真实Context、同名普通对象、注释/字符串及遮蔽；源码图保留副作用导入和懒加载来源，不用入口不可达证明死代码。动态、异步、递归或预算不足应弃权并限制覆盖。作者快照、缓存身份与升级捕获共用增量目录枚举，文件共用非阻塞有界/身份检查；复核、冻结也检查预算。缓存生命周期回归覆盖目标容量、闲置淘汰、在途取消、重访和卸载，共享worker队列回归验证并发上限、排队超时/取消和恢复。
-- 宿主裸包入口使用标准Node ESM条件，条件按对象顺序选择，types/browser/require不作宿主import条件；根/嵌套exports及数组回退有界解析（128节点/32层）。exports目标、ESM导入/重导出/动态import与相对patch入口精确匹配，不借扩展名/index认证；相对patch独立优先；有界结构解析顺序insert/id覆盖及已知分组，路径锚定在各patch目录，name是锚定后的身份校验，不能把业务config中的name当入口。别名/表达式、未知跨包或子树不认证，支持边界与预算见[指南](guide.md#日常检查与源码交付)。无exports的旧main保留Node旧式入口回退，CommonJS require按文件及目录main/index解析，嵌套清单限64KiB且共用源码预算；import/require同名路径不互借证明，非JS/TS模块限制覆盖。模块路径只求值无插值模板，以及声明早于引用且未写入/遮蔽的词法const原始值/别名、拼接、常量模板；动态、对象成员、参数、eval及超限保守限制覆盖。每文件路径分析最多200000 AST节点、4096相对引用，每次求值128节点/32层/8192字符串单元，内层共用源码时间检查。require链接按调用跨度隔离；闭包写入隐式require或直接eval撤回全文件的原生require证明。路径绑定区分具名类、静态块var及TS参数属性/枚举/命名空间的遮蔽，不代表完整支持对应TS值流；复杂namespace值流仍可推断/诊断。路径证明不提升弱Context或异步返回。回归用Node自身resolve核对路径与文件类型，不执行目标模块；未知条件、URL目标或无法确认的入口须诊断。
-- 2026-10-24只读核对本机DSH 0.2.1-rc.2归档：`@deepseek-ai/cordis@4.0.5`的`Inject.resolve`将数组元素或对象自有键作为依赖名；`required/optional`不是分组字段。loader 1.0.6通过Node import加载并unwrap导出。静态分析只提升已证明的入口导出，变异/逃逸保留诊断及覆盖限制；此源码核对不扩大宿主或业务认证范围。
-- 调用位置必须能由相应源码字节/span验证；包、端侧、作用域和别名是身份的一部分，不能按裸变量名合并。提供方声明只是线索，不证明消费者此刻已获得服务。
-- 未看到与不存在不同。探针只采样点名服务，省略键为`unobserved`，仅明确`absent`才是缺失证据；不执行getter、不复制属性值/凭据/用户内容，保留profile/DSH/时间及完整性边界。
-- 诊断只写运行器自有私有目录（`DSC_OUT_DIR`），拒绝不安全既有路径/链接；输出或启动失败明确报告，不用catch、空结果或旧探针掩盖。
-- 每项修复补针对性正反例：同时拦误报与新增漏报；清理断言只检查本次调用拥有的资源。敏感值守卫需同时验证真实形态命中、占位说明不命中，持续噪音会损害守卫有效性。
+- 宿主裸包按Node ESM条件/对象顺序解析exports，types/browser/require不作宿主import条件；128节点/32层。exports/ESM/相对patch精确匹配，不加扩展名/index猜测；无exports旧main及CommonJS按各自回退，嵌套清单64KiB且共用源码预算。
+- patch路径锚定各patch目录，按insert/id顺序及已知分组组合，name只校验锚定身份；业务config不引入挂载。表达式、别名或未知跨包/子树限制覆盖，不能以入口不可达证明代码永不执行。
+- 模块路径仅证明无插值模板，或声明早于引用且无写入/遮蔽的词法const原始值/别名、拼接、常量模板。每文件200000 AST节点/4096相对引用，每次求值128节点/32层/8192字符串单元；共用时间检查。动态/对象成员/参数/eval/超限保守弃权。
+- require链接按调用span隔离；闭包写入隐式require或直接eval撤回原生require证明。具名类、静态块var及TS参数属性/枚举/namespace遮蔽须区分，不代表完整支持对应TS值流。路径证明不提升弱Context或异步服务身份，复杂namespace保留诊断。
+- inject只提升已证明的最终导出；数组元素或对象自有键是服务名，required/optional不是分组。调用位置须匹配源码span；包、端侧、作用域及别名均属身份，不能按裸变量名合并。provide不证明实际提供。
+- 探针仅采样点名服务，不执行getter、不复制属性值/凭据/用户内容。现代文件绑定profile/DSH/时间，24小时有效、未来容差5分钟（含边界）；无效时撤回该文件服务/loader证据，独立进程内证据另判。旧格式仅认显式键；boot失败清自有资源。
+- 输入、缓存身份、作者快照、升级捕获/验证共用有界枚举与非阻塞文件核验；缓存淘汰/卸载取消在途任务，共享worker队列检验并发、排队超时/取消及恢复。诊断只写自有私有目录，输出/启动失败明确报告，不用空结果掩盖。
 
-现行边界见[Plan §2](Plan.md#2-现行判定与集成契约)；回归包括`test/extraction-regressions.test.mjs`、`test/p2-flow.test.mjs`、`test/probe-safety.test.mjs`、`test/observation-time.test.mjs`和`test/secrets.test.mjs`。旧正则缺陷编号及过时性能数字保留于Git历史，维护当前契约不依赖历史编号连续。
+每项修改补能拦误报与漏报的行为正反例，清理断言只检查本次拥有的资源。敏感值守卫同时验证真实命中及占位说明不命中；历史性能数字、缺陷编号和Python参考不构成当前准确率或性能承诺。

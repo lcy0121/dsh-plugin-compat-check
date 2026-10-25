@@ -6,7 +6,7 @@
 
 ## 版本与入口
 
-已发布 **0.1.6** 为元数据补丁，保留0.1.5功能；当前 **`0.1.7-dev` 源码（含rc.3适配）尚未发布npm版本**，版本真源仍为0.1.6。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3**，最低版本声明不认证未来宿主。
+**0.1.7** 提供rc.3适配、升级预检、参数语义与边界加固。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3**，最低版本声明不认证未来宿主。
 
 npm插件提供兼容性页、详情/角标、`compat_check`与skill。仓库另有CLI、安装检查、静态批量、作者CI和健康执行器，共享内核。npm包无CLI bin，不支持`npx dsh-plugin-compat-check`。[Plan](docs/Plan.md)维护契约与待办，[docs/current-state.json](docs/current-state.json)记录限定验证。
 
@@ -27,10 +27,10 @@ DSH 0.2.1-rc.3：**左下角账号菜单 → 设置 → 内置插件 → 兼容�
 
 ## 仓库CLI
 
-使用本分支源码能力：
+仓库工具从源码运行：
 
 ```bash
-git clone --branch 0.1.7-dev https://github.com/lcy0121/dsh-plugin-compat-check.git
+git clone --branch main https://github.com/lcy0121/dsh-plugin-compat-check.git
 cd dsh-plugin-compat-check
 npm ci --ignore-scripts
 node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
@@ -49,7 +49,7 @@ node bin/compat-check.mjs --help
 | `--rules <json>` / `--catalog <json>` | 覆盖规则 / 参考目录 |
 | `--help` / `--version` | 完整帮助 / 工具版本 |
 
-默认静态分析不执行插件、不联网，普通检查默认写自身基线；一次性检查用`--no-baseline`，不完整扫描不推进。`--probe-boot`及`node bin/check-install.mjs <spec> --json`会安装/执行目标，须明确执行授权；临时profile不是OS沙箱。完整参数以`--help`为准。
+静态检查不执行目标或联网，普通检查写自身基线；no-baseline禁读写，不完整扫描不推进。probe-boot/安装检查会执行目标，须相应授权；临时profile不是OS沙箱。
 
 ## 升级预检与作者工具
 
@@ -59,13 +59,13 @@ node bin/compat-check.mjs --help
 node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --dsh-version 0.2.1-rc.2 --upgrade-to 0.2.1-rc.3 --json
 ```
 
-支持上述三个精确版本的任意比较；例如0.2.1-rc.4返回未认证/退出3。预检对同组私有字节静态比较，不执行/升级宿主，不使用运行时、probe、豁免或普通基线；**0/1/2仅表示无/非致命/致命新增或变重风险，3表示无法预检**。0仍可能保留旧问题，不证明目标可用；见[预检契约](docs/Plan.md#27-升级前静态预检契约)。
+三个精确版本可任意比较，未知版本退出3。只静态比较同组私有字节，不升级/执行宿主或借用probe、豁免、普通基线。**0/1/2表示无/非致命/致命新增或变重风险，3表示无法预检**；0仍可有旧风险。见[契约](docs/Plan.md#27-升级前静态预检契约)。
 
-仓库的[作者CI](docs/author-ci.md)提供版本矩阵、风险/覆盖门禁及JSON/SARIF/JUnit/HTML；[指南](docs/guide.md#升级预检与有限批量)提供固定静态批量。健康执行器默认只审阅，显式`--run`须获当次执行授权。独立skill安装见[skill说明](skill/README.md)。根工作区不是插件包，源码安装须按[打包步骤](plugin/README.md#从源码构建安装)生成完整tgz。
+[作者CI](docs/author-ci.md)提供矩阵、门禁及JSON/SARIF/JUnit/HTML；[指南](docs/guide.md#升级预检与有限批量)提供静态批量。健康执行器默认review，run须授权。另见[skill](skill/README.md)与[完整tgz构建](plugin/README.md#从源码构建安装)。
 
 ## 结果与验证
 
-普通CLI退出码：**0未发现冲突、1部分可用或未知、2不兼容、3工具/输入错误**；安装检查的2还可能是peer闸门拒绝。保留`certainty`、`impactBasis`、`coverage`、`vacuous`；未观测不等于缺失，静态事实不等于实测影响，客户端业务需另验收。旧/损坏基线保留原件，不自动覆盖。分享前预览，脱敏不保证任意文本无秘密，导出不自动发帖。
+普通退出码：**0未发现冲突、1部分可用或未知、2不兼容、3工具/输入错误**。保留certainty/impactBasis/coverage/vacuous，未观测不是缺失；坏基线保留原件。客户端业务另验收，分享前预览，导出不自动发帖。
 
 ```bash
 npm test

@@ -1,52 +1,5 @@
 #!/usr/bin/env node
-/**
- * H1' 的**到货侧**：计划加载的客户端条目，在真实浏览器里到底到了几个。
- *
- * ## 这个工具补的是哪一半
- *
- * H1' 的原定义是「**计划加载**的 `__DSH_BOOT__.entries` vs **实际到货**」。
- * 它分成两半，而两半的数据来源**完全不同**：
- *
- * | 半边 | 问什么 | 从哪拿 |
- * |---|---|---|
- * | 宿主侧 | 声明了客户端半边，那半边真的能被解析到吗 | 静态可判（`plugin/index.js` 的 `clientHalf`） |
- * | **到货侧（本文件）** | 计划要加载的条目，浏览器里真的到了吗 | **只有浏览器**：CDP 的 `Network` 域 |
- *
- * ## 为什么必须看网络，而不是看某个"注册表"
- *
- * 实测过浏览器里暴露了什么（`web` profile + 本插件，无头 Chrome）：
- *
- * ```
- * __DSH_BOOT__     = { rev, entries: [66 条], batches: [3 批] }   ← 这是**计划**
- * __ModuleLoader__ = { mode, pendingQueue, load, create }         ← **没有**已加载的注册表
- * ```
- *
- * 也就是说"到货了没有"**没有任何现成的 API 可读**。所以从**网络层**判：
- * 每条条目的 URL（`plugins/??<id>/client.js&rev=<rev>`）在 `Network.responseReceived`
- * 里出现了吗、状态码是多少、有没有 `loadingFailed`。
- *
- * 这比"看某个标记存不存在"强：它是浏览器**自己**给出的传输结果，不是插件自报的。
- *
- * ## 判据（三个都要）
- *
- * 一条条目算「到货」，当且仅当：
- *   1. 它的 URL 有 `Network.responseReceived` 且状态码 2xx；
- *   2. 没有对应的 `Network.loadingFailed`；
- *   3. 整轮里没有 `Runtime.exceptionThrown`（有异常就说明"到了但执行失败"，
- *      而那正是客户端条目最致命的形态 —— 界面会被一张错误屏替代）。
- *
- * 第 3 条是**整轮**的，不是逐条目的：浏览器不会告诉你"这个异常属于哪个条目"。
- * 所以它只能回答"这一轮干不干净"，不能回答"是哪一条坏了" —— 这个限制写在输出里。
- *
- * ## 用法
- *
- *     node tools/client-arrival.mjs                    # 用 web 模板 + 本插件（确定性最好）
- *     node tools/client-arrival.mjs --profile desktop  # 换一个 profile（会复制它）
- *     node tools/client-arrival.mjs --json
- *     node tools/client-arrival.mjs --break            # 文件缺失：宿主拒绝启动
- *     node tools/client-arrival.mjs --break-import     # 文件存在：浏览器导入抛错
- *     node tools/client-arrival.mjs --keep             # 留下临时 profile 与 Chrome 数据目录
- */
+/** Owned browser transport acceptance for planned client entries. Network/page failures do not prove business correctness. */
 
 import {
   failureDiagnostic,

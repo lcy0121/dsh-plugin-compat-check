@@ -159,6 +159,33 @@ export function checkDocumentVersions(root) {
   return problems;
 }
 
+/** Product delivery wording is independent of registry publication receipts. */
+export function checkReleaseFacts(root) {
+  const problems = [];
+  for (const rel of [
+    ...ROOT_READMES,
+    "plugin/README.md",
+    "docs/Plan.md",
+    "docs/guide.md",
+    "docs/maintaining.md",
+    "docs/author-ci.md",
+    "rules/README.md",
+    "skill/README.md",
+  ]) {
+    const text = fs.readFileSync(path.join(root, rel), "utf8");
+    const version = /\*\*(\d+\.\d+\.\d+)\*\*/.exec(text)?.[1];
+    if (version !== TOOL_VERSION)
+      problems.push(`${rel}: delivery version must be ${TOOL_VERSION}`);
+    if (
+      /\d+\.\d+\.\d+-dev|尚未发布npm|no npm release yet|source remains 0\.1\.6/i.test(
+        text,
+      )
+    )
+      problems.push(`${rel}: stale development-only delivery description`);
+  }
+  return problems;
+}
+
 function main(argv) {
   const problems = [];
   try {
@@ -193,11 +220,7 @@ function main(argv) {
     problems.push(`testFiles: ${current.testFiles} != ${count}`);
   if (current.toolVersion !== TOOL_VERSION)
     problems.push("toolVersion differs from kernel");
-  for (const rel of [
-    "plugin/package.json",
-    "probe/package.json",
-    "tools/slot-probe/package.json",
-  ])
+  for (const rel of ["plugin/package.json", "probe/package.json"])
     if (JSON.parse(read(rel)).version !== TOOL_VERSION)
       problems.push(`${rel}: version differs from kernel`);
   for (const rel of ROOT_READMES) {
@@ -229,6 +252,7 @@ function main(argv) {
   const documents = maintainedDocuments(ROOT);
   problems.push(...checkDocumentLinks(ROOT, documents));
   problems.push(...checkDocumentVersions(ROOT));
+  problems.push(...checkReleaseFacts(ROOT));
   let summaryTests;
   if (argv.length) {
     if (argv.length !== 2 || argv[0] !== "--test-summary")

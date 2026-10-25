@@ -35,18 +35,11 @@ import { render, toJSON } from "../lib/report.mjs";
 import { renderIssueReport } from "./issue-report.mjs";
 import { readProfileCompatibility } from "../lib/profile-compatibility.mjs";
 import { loadCatalog } from "../lib/catalog.mjs";
-import {
-  snapshotForBaseline,
-  diffAgainstBaseline,
-  badgeFor,
-  BASELINE_SCHEMA,
-} from "../lib/baseline.mjs";
+import { snapshotForBaseline } from "../lib/baseline.mjs";
 import {
   baselinePath,
   baselineIdentity,
   baselineTransaction,
-  readBaseline as readStoredBaseline,
-  writeBaseline as writeStoredBaseline,
 } from "../lib/state-store.mjs";
 import { probeProfile } from "../lib/probe-runner.mjs";
 import { TOOL_VERSION, versionLine } from "../lib/version.mjs";
@@ -215,8 +208,6 @@ function findProbeReport(nm) {
  */
 const baselineFileFor = (nm, profile, mode = "catalogue") =>
   baselinePath(nm, mode, profile);
-const readBaseline = readStoredBaseline;
-const writeBaseline = writeStoredBaseline;
 
 /* ── 拿到运行时面：自己起一次宿主（--probe-boot） ───────────────────── */
 

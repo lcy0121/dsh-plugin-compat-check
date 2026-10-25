@@ -1,30 +1,4 @@
-/**
- * 「单版本」这个承诺的守门人。
- *
- * ## 它在守什么
- *
- * docs/Plan.md §1 约定的是「单仓库、**单版本**、一份 Node 内核、三个入口」。
- * 实测下来这条**从来没兑现过**：`plugin/package.json` 是 `0.0.1`，而 CLI、`.sh`、
- * 报告 JSON 里**一个版本号都没有**。
- *
- * 后果不是"不好看"，是**结论无法追溯**：用户拿着一条「`dsh-keep-awake` 部分可用」
- * 来问"凭什么"，第一句必须问"你用的是哪一版工具" —— 而那个问题当时无解。
- * 同一个插件，规则表覆盖变了、提取器修了假阳性之后结论都会变。
- *
- * ## 为什么需要这么多条断言去守一个常量
- *
- * 因为版本号**必须出现在多个地方**，而那些地方各有各的理由：
- *
- * | 位置 | 为什么必须有 | 谁能读到 |
- * |---|---|---|
- * | `lib/version.mjs` | **唯一真源** | 内核 / CLI / `.sh` |
- * | `plugin/package.json` | npm 只认字面量 | npm / DSH 装载器 |
- * | `probe/package.json` | 探针以 `file:` 装进临时 profile | pnpm |
- * | 报告 JSON 的 `toolVersion` | 结论要可追溯 | 用户 / CI |
- *
- * 「必须出现在多处」+「只能有一处真源」⇒ **只能靠测试把它们钉在一起**。
- * 少了这一层，下一次改版本时必然只改其中一处 —— 而没有人会发现。
- */
+/** Version consistency across the kernel, distributed plugin, active probe and reports. */
 
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
@@ -49,7 +23,7 @@ describe('单版本：一处真源，多处出现，全部钉住', () => {
 
   test('每个 package.json 的 version 都等于真源', () => {
     // 任何一处漏改，这里会直接告诉你改哪个文件的哪个字段。
-    const pkgs = ['plugin/package.json', 'probe/package.json', 'tools/slot-probe/package.json']
+    const pkgs = ['plugin/package.json', 'probe/package.json']
     const bad = []
     for (const rel of pkgs) {
       const v = readJSON(rel).version

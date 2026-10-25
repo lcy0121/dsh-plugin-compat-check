@@ -6,7 +6,7 @@
 
 ## 버전과 진입점
 
-공개된 **0.1.6**은 0.1.5 기능을 유지하는 메타데이터 패치입니다. **`0.1.7-dev` 소스 변경(rc.3 대응 포함)은 아직 npm으로 배포되지 않았으며**, 버전 원본은 0.1.6입니다. Node `^22.19.0 || >=24`, 선언된 호스트 최소 버전은 `>=0.2.0-rc.2`입니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3**뿐이며, 최소 버전 선언이 미래 호스트를 인증하지는 않습니다.
+**0.1.7**은 rc.3 대응, 업그레이드 사전 검사, 매개변수 의미 검사와 입력 경계 강화를 제공합니다. Node `^22.19.0 || >=24`, 호스트 최소 선언은 `>=0.2.0-rc.2`입니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3**이며, 최소 버전 선언이 미래 호스트를 인증하지는 않습니다.
 
 npm 플러그인은 호환성 페이지, 상세/배지, `compat_check`와 skill을 제공합니다. 저장소 전용 CLI, 설치 검사, 정적 일괄 검사, 작성자 CI와 기능 검사 실행기는 같은 커널을 사용합니다. npm 패키지에는 CLI bin이 없으며 `npx dsh-plugin-compat-check`는 지원하지 않습니다. [Plan](docs/Plan.md)은 계약과 할 일을, [docs/current-state.json](docs/current-state.json)은 제한된 검증 결과를 기록합니다.
 
@@ -27,10 +27,10 @@ DSH 0.2.1-rc.3: **왼쪽 아래 계정 메뉴 → 설정 → 내장 플러그인
 
 ## 저장소 CLI
 
-이 브랜치의 소스 기능을 사용하려면:
+저장소 도구는 소스에서 실행합니다:
 
 ```bash
-git clone --branch 0.1.7-dev https://github.com/lcy0121/dsh-plugin-compat-check.git
+git clone --branch main https://github.com/lcy0121/dsh-plugin-compat-check.git
 cd dsh-plugin-compat-check
 npm ci --ignore-scripts
 node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
@@ -49,7 +49,7 @@ node bin/compat-check.mjs --help
 | `--rules <json>` / `--catalog <json>` | 규칙 / 참조 카탈로그 지정 |
 | `--help` / `--version` | 전체 도움말 / 도구 버전 |
 
-기본 정적 분석은 플러그인을 실행하거나 네트워크에 접근하지 않습니다. 일반 검사는 자체 기준선을 기록하므로 일회성 검사에는 `--no-baseline`을 사용하세요. 불완전한 검사는 기준선을 갱신하지 않습니다. `--probe-boot`와 `node bin/check-install.mjs <spec> --json`은 대상을 설치/실행하므로 명시적 실행 승인이 필요합니다. 임시 profile은 OS 샌드박스가 아닙니다. 전체 옵션은 `--help`를 확인하세요.
+정적 검사는 대상 실행이나 네트워크 접근 없이 동작합니다. 일반 검사는 기준선을 기록하며 no-baseline은 읽기/쓰기를 막습니다. 불완전한 검사는 갱신하지 않습니다. probe-boot/설치 검사는 대상을 실행하므로 승인이 필요하며, 임시 profile은 OS 샌드박스가 아닙니다.
 
 ## 업그레이드 사전 검사와 작성자 도구
 
@@ -59,13 +59,13 @@ node bin/compat-check.mjs --help
 node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --dsh-version 0.2.1-rc.2 --upgrade-to 0.2.1-rc.3 --json
 ```
 
-위 세 정확한 버전을 양방향으로 비교합니다. 0.2.1-rc.4는 미인증이며 종료 코드 3을 반환합니다. 동일한 비공개 복사본을 정적으로 비교하며 호스트 실행/업그레이드, 런타임 관측, probe, 예외나 일반 기준선을 사용하지 않습니다. **0/1/2는 추가·악화 위험 없음/비치명적/치명적 위험, 3은 사전 검사 불가**입니다. 0이어도 기존 문제가 남을 수 있으며 대상의 정상 동작을 보장하지 않습니다. [계약](docs/Plan.md#27-升级前静态预检契约)을 참고하세요.
+세 정확한 버전을 서로 비교하며 미인증 버전은 코드 3을 반환합니다. 같은 비공개 바이트를 정적으로 비교하고 호스트 실행/업그레이드, probe, 예외나 일반 기준선을 사용하지 않습니다. **0/1/2는 추가·악화 위험 없음/비치명적/치명적 위험, 3은 검사 불가**입니다. 0이어도 기존 위험은 남을 수 있습니다. [계약](docs/Plan.md#27-升级前静态预检契约)을 참고하세요.
 
-저장소 [작성자 CI](docs/author-ci.md)는 버전 행렬, 위험/범위 게이트와 JSON/SARIF/JUnit/HTML을 제공합니다. 고정 정적 일괄 검사는 [안내](docs/guide.md#升级预检与有限批量)에 있습니다. 기능 검사 실행기는 기본적으로 검토만 하며 명시적 `--run`에는 해당 실행의 승인이 필요합니다. [skill 설치](skill/README.md)도 참고하세요. 루트 작업 공간은 플러그인 패키지가 아니므로 [패키징 절차](plugin/README.md#从源码构建安装)에 따라 완전한 tgz를 생성해야 합니다.
+[작성자 CI](docs/author-ci.md)는 행렬, 게이트와 JSON/SARIF/JUnit/HTML을 제공합니다. 정적 일괄 검사는 [안내](docs/guide.md#升级预检与有限批量)를 따릅니다. 기능 실행기는 기본 review이며 run에는 승인이 필요합니다. [skill](skill/README.md)과 [완전한 tgz 생성](plugin/README.md#从源码构建安装)도 참고하세요.
 
 ## 결과와 검증
 
-일반 CLI 종료 코드: **0 충돌 발견 없음, 1 부분 사용 가능 또는 알 수 없음, 2 비호환, 3 도구/입력 오류**. 설치 검사에서 2는 peer 게이트 거부일 수도 있습니다. `certainty`, `impactBasis`, `coverage`, `vacuous`를 유지하세요. 미관측은 부재가 아니며 정적 사실은 실측 영향이 아닙니다. 클라이언트 실제 기능은 별도 검증이 필요합니다. 오래되거나 손상된 기준선은 보존하고 자동 덮어쓰지 않습니다. 공유 전 내용을 확인하세요. 임의 텍스트의 비밀을 완전히 제거한다고 보장하지 않으며 자동 게시하지 않습니다.
+일반 종료 코드: **0 충돌 발견 없음, 1 부분 사용 가능 또는 미확인, 2 비호환, 3 도구/입력 오류**. certainty/impactBasis/coverage/vacuous를 유지하세요. 미관측은 부재가 아니며 손상된 기준선은 보존합니다. 클라이언트 실제 기능은 별도 검증하고 공유 전 내용을 확인하세요. 자동 게시하지 않습니다.
 
 ```bash
 npm test

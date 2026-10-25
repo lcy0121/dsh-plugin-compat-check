@@ -1,17 +1,4 @@
-/**
- * 仓库元数据检查的**规则测试** —— 全程离线，不碰 gh / npm。
- *
- * ## 为什么单独测规则
- *
- * 联网部分（取 GitHub 与 npm 的数据）每次跑都可能变，也没法在 CI 以外的环境稳定复现；
- * 但**规则本身是纯函数**，可以用合成输入逐条验。这与项目里其它工具的分工一致
- * （`tools/doc-check.mjs` 独立于测试，`tools/labels.mjs` 的规则由慢测试盯）。
- *
- * ## 最重要的一条断言
- *
- * `catch the real bug` —— 把**当时真的挂在首页上**的那份简介喂进去。
- * 一条从没见过红的检查，与永远绿的检查在证据上没有区别。
- */
+/** Offline metadata rule regressions, including historical false product claims. */
 
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
