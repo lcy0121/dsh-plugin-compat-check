@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-25T04:18:16.924Z",
+  "recordedAt": "2026-10-25T04:34:24.665Z",
   "testFiles": 73,
   "tests": 1137,
   "repositoryFiles": {
@@ -137,7 +137,32 @@
           "dsc017-cohort-replay.json": "ac98995a3b1e18a2955a5bd0d509f87cb7b127d11625066b09bdbb23929de197"
         }
       },
-      "scope": "Local macOS arm64 candidate evidence only. GitHub CI is evaluated separately on the exact pushed commit. No account/model calls, Windows acceptance or formal publication."
+      "scope": "Local macOS arm64 candidate evidence only. GitHub CI is evaluated separately on the exact pushed commit. No account/model calls, Windows acceptance or formal publication.",
+      "ciAssertionFollowup": {
+        "initialRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40161611089",
+        "initialResult": "4/6 passed; rc.2 and rc.3 failed the stale expectation of two service-only true positives for old sidebar.",
+        "cause": "Previous regex ignored the dynamic !!js disabled guard and treated the host root as proven. Current bounded patch parsing discloses fallback coverage and two honest false negatives. A single-file old/current source-graph control confirmed the difference.",
+        "fix": "Live assertions retain exact business failures, require both FN and limited coverage, and check all six current-editor classifications. No runtime, budget, pinned artifact or business-outcome expectation changed.",
+        "localValidation": {
+          "realRc3EditorCases": 2,
+          "realRc3EditorPassed": 2,
+          "defaultTests": 1137,
+          "pass": 1129,
+          "skip": 8,
+          "fail": 0,
+          "maintenance": "passed",
+          "prepublish": "passed"
+        },
+        "sha256": {
+          "dsc017-sidebar-red.tap": "60b49ad0adc52c03bd79f7b4a4396c9231e12c3b24b9bfbebd29dc2d72be2f10",
+          "dsc017-sidebar-green.tap": "839d34583583b223279f140a93020e5cb437918e021f4cb8a8a65dd270501fc3",
+          "dsc017-ci-fix-prepublish.tap": "0bdd7103d74ffc4ecb30c69ba240398cd9a1981d3c8e5afbeb9b0e1bca1e68d8",
+          "dsc017-ci-fix-prepublish.log": "79c9bda041489375ff2da3b8a730619d7d99830731d2892f4276b30beb15e231",
+          "dsc017-ci-fix-check.log": "34d630f8811fb687ab93901dc09294bf40cdcbb4e27f2c8e04e054c8960b62eb",
+          "dsc017-sidebar-extraction-debug.json": "37d46cdfad9e04d5817f9996461dd5c423e22d18fe57eee79ef8db805dd391f7"
+        },
+        "scope": "Local reproduction and verification; subsequent GitHub CI is evaluated on the exact follow-up commit. Accepted archive bytes are unchanged."
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

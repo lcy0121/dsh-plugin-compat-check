@@ -962,16 +962,38 @@ describe(
           );
           assert.equal(v.serviceObserved.prediction.loaderLabelsUsed, false);
           assert.equal(v.serviceObserved.prediction.sealedBeforeActions, true);
-          assert.equal(
-            v.serviceObserved.metrics.baseline.truePositive,
-            previous ? 2 : 0,
-          );
+          // The old package's !!js disabled guard cannot prove a host mount.
+          // Keep the real HTTP405 failures and limited coverage as honest FN;
+          // never restore the former regex's unconditional hard-inject proof.
+          assert.equal(v.serviceObserved.metrics.baseline.truePositive, 0);
           assert.equal(
             v.serviceObserved.metrics.baseline.trueNegative,
             previous ? 0 : 4,
           );
-          assert.equal(v.serviceObserved.metrics.baseline.falseNegative, 0);
+          assert.equal(
+            v.serviceObserved.metrics.baseline.falseNegative,
+            previous ? 2 : 0,
+          );
           assert.equal(v.serviceObserved.metrics.baseline.falsePositive, 0);
+          assert.deepEqual(
+            v.serviceObserved.rows.map((r) => r.classification),
+            previous
+              ? ["falseNegative", "falseNegative"]
+              : [
+                  "trueNegative",
+                  "falseNegative",
+                  "trueNegative",
+                  "trueNegative",
+                  "falseNegative",
+                  "trueNegative",
+                ],
+          );
+          if (previous)
+            assert.ok(
+              v.serviceObserved.rows.every(
+                (r) => r.coverageLimited && !r.flagged && !r.clientVerified,
+              ),
+            );
           assert.notEqual(v.serviceObserved.artifactDigest, v.artifactDigest);
           assert.equal(v.cleanup.privateRootRemoved, true);
           assert.equal(v.prediction.sealedBeforeActions, true);

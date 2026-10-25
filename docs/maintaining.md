@@ -66,7 +66,7 @@ npm audit固定公共registry，任何公告级别（含未知）均阻断，无
 
 Pomodoro真值来自Start后的localStorage revision/deadline及新文档恢复，受控故障删主按钮；GET config只说明配置就绪。Todo真值来自POST/create、私有JSON精确标题及重载DOM；故障只对该POST返回503，磁盘/DOM均须无标题，恢复另建标题。正常→故障→恢复分组，不调用通知/模型/外部采集。
 
-静态预测在启动前封存，service-only等待官方appReady后采样原始root，在Chrome/动作前封存；不要求所有被测服务存在。receipt记录动作时间、请求/DOM/磁盘后置条件及清理；回放重算标签，不信任保存的布尔值或把hash当签名。静态/service-only、自然/受控、FP/FN和驱动错误分列，clientVerified:false保留。绿色只证明固定结果重现，诚实FN仍保留，不代表生态准确率。
+静态预测在启动前封存，service-only等待官方appReady后采样原始root，在Chrome/动作前封存；不要求所有被测服务存在。receipt记录动作时间、请求/DOM/磁盘后置条件及清理；回放重算标签，不信任保存的布尔值或把hash当签名。静态/service-only、自然/受控、FP/FN和驱动错误分列，clientVerified:false保留。旧sidebar的动态禁用patch不能证明顶层挂载，其两项HTTP405失败保留为limited/FN，不能要求service-only零漏报。绿色只证明固定结果重现，不代表生态准确率。
 
 ```sh
 DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 node tools/real-regression.mjs --live --repeat 1 --out-dir <新空目录>
