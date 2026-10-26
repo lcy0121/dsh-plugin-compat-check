@@ -1912,7 +1912,7 @@ window.__ModuleLoader__.load({
 
     // lib/workflow-panels.mjs
     function createDisclosure(React3, h2) {
-      return function Disclosure({ title, count, children }) {
+      return function Disclosure2({ title, count, children }) {
         const [open, setOpen] = React3.useState(false);
         const content = Array.isArray(children) ? children[0] : children;
         return h2(
@@ -1947,10 +1947,10 @@ window.__ModuleLoader__.load({
         subcontext: "\u5B50\u4F5C\u7528\u57DF",
         unknown: "\u5FC5\u9700\u6027\u672A\u77E5",
       };
-      const Disclosure = createDisclosure(React3, h2);
+      const Disclosure2 = createDisclosure(React3, h2);
       const table = (caption, headers, rows) =>
         h2(
-          UI.Fold || Disclosure,
+          UI.Fold || Disclosure2,
           { key: caption, title: caption, count: `${rows.length} \u9879` },
           () =>
             h2(
@@ -2532,7 +2532,7 @@ window.__ModuleLoader__.load({
     function createFunctionalHealthPanel(React3, HealthContract, UI = {}) {
       const h2 = (type, props, ...children) =>
         React3.createElement(UI[type] || type, props, ...children);
-      const Disclosure = createDisclosure(React3, h2);
+      const Disclosure2 = createDisclosure(React3, h2);
       const statusLabels = {
         "tested-pass": "\u6240\u9009\u68C0\u67E5\u901A\u8FC7",
         "tested-failed": "\u6240\u9009\u68C0\u67E5\u5931\u8D25",
@@ -2675,7 +2675,7 @@ window.__ModuleLoader__.load({
                     "\uFF1B\u6458\u8981\u6821\u9A8C\u4E0D\u662F\u4F5C\u8005\u7B7E\u540D\u6216\u4E1A\u52A1\u8BA4\u8BC1\u3002",
                 ),
                 h2(
-                  UI.Fold || Disclosure,
+                  UI.Fold || Disclosure2,
                   {
                     title: "\u529F\u80FD\u5065\u5EB7\u68C0\u67E5\u7ED3\u679C",
                     count: `${result.checks.length} \u9879`,
@@ -6251,7 +6251,7 @@ window.__ModuleLoader__.load({
 
     // compat:styles
     var styles_default =
-      '.dsc-ui .relative {\n  position: relative;\n}\n\n.dsc-ui .mb-3 {\n  margin-bottom: 0.75rem;\n}\n\n.dsc-ui .block {\n  display: block;\n}\n\n.dsc-ui .inline {\n  display: inline;\n}\n\n.dsc-ui .flex {\n  display: flex;\n}\n\n.dsc-ui .inline-flex {\n  display: inline-flex;\n}\n\n.dsc-ui .table {\n  display: table;\n}\n\n.dsc-ui .table-caption {\n  display: table-caption;\n}\n\n.dsc-ui .table-cell {\n  display: table-cell;\n}\n\n.dsc-ui .table-row {\n  display: table-row;\n}\n\n.dsc-ui .h-10 {\n  height: 2.5rem;\n}\n\n.dsc-ui .h-8 {\n  height: 2rem;\n}\n\n.dsc-ui .h-9 {\n  height: 2.25rem;\n}\n\n.dsc-ui .h-full {\n  height: 100%;\n}\n\n.dsc-ui .h-px {\n  height: 1px;\n}\n\n.dsc-ui .min-h-20 {\n  min-height: 5rem;\n}\n\n.dsc-ui .w-full {\n  width: 100%;\n}\n\n.dsc-ui .w-px {\n  width: 1px;\n}\n\n.dsc-ui .max-w-full {\n  max-width: 100%;\n}\n\n.dsc-ui .shrink-0 {\n  flex-shrink: 0;\n}\n\n.dsc-ui .caption-bottom {\n  caption-side: bottom;\n}\n\n.dsc-ui .items-center {\n  align-items: center;\n}\n\n.dsc-ui .justify-center {\n  justify-content: center;\n}\n\n.dsc-ui .gap-2 {\n  gap: 0.5rem;\n}\n\n.dsc-ui .overflow-auto {\n  overflow: auto;\n}\n\n.dsc-ui .whitespace-nowrap {\n  white-space: nowrap;\n}\n\n.dsc-ui .rounded-lg {\n  border-radius: 0.5rem;\n}\n\n.dsc-ui .rounded-md {\n  border-radius: 0.375rem;\n}\n\n.dsc-ui .rounded-xl {\n  border-radius: 0.75rem;\n}\n\n.dsc-ui .border {\n  border-width: 1px;\n}\n\n.dsc-ui .border-b {\n  border-bottom-width: 1px;\n}\n\n.dsc-ui .border-border {\n  --tw-border-opacity: 1;\n  border-color: hsl(var(--dsc-border) / var(--tw-border-opacity, 1));\n}\n\n.dsc-ui .border-input {\n  --tw-border-opacity: 1;\n  border-color: hsl(var(--dsc-input) / var(--tw-border-opacity, 1));\n}\n\n.dsc-ui .bg-background {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-background) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-border {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-border) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-card {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-card) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-muted\\/40 {\n  background-color: hsl(var(--dsc-muted) / 0.4);\n}\n\n.dsc-ui .bg-primary {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-primary) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-secondary {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-secondary) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-transparent {\n  background-color: transparent;\n}\n\n.dsc-ui .p-3 {\n  padding: 0.75rem;\n}\n\n.dsc-ui .p-4 {\n  padding: 1rem;\n}\n\n.dsc-ui .px-2 {\n  padding-left: 0.5rem;\n  padding-right: 0.5rem;\n}\n\n.dsc-ui .px-3 {\n  padding-left: 0.75rem;\n  padding-right: 0.75rem;\n}\n\n.dsc-ui .px-4 {\n  padding-left: 1rem;\n  padding-right: 1rem;\n}\n\n.dsc-ui .py-0\\.5 {\n  padding-top: 0.125rem;\n  padding-bottom: 0.125rem;\n}\n\n.dsc-ui .py-1 {\n  padding-top: 0.25rem;\n  padding-bottom: 0.25rem;\n}\n\n.dsc-ui .py-2 {\n  padding-top: 0.5rem;\n  padding-bottom: 0.5rem;\n}\n\n.dsc-ui .py-3 {\n  padding-top: 0.75rem;\n  padding-bottom: 0.75rem;\n}\n\n.dsc-ui .text-left {\n  text-align: left;\n}\n\n.dsc-ui .align-top {\n  vertical-align: top;\n}\n\n.dsc-ui .align-middle {\n  vertical-align: middle;\n}\n\n.dsc-ui .text-sm {\n  font-size: 0.875rem;\n  line-height: 1.25rem;\n}\n\n.dsc-ui .text-xs {\n  font-size: 0.75rem;\n  line-height: 1rem;\n}\n\n.dsc-ui .font-medium {\n  font-weight: 500;\n}\n\n.dsc-ui .font-semibold {\n  font-weight: 600;\n}\n\n.dsc-ui .leading-none {\n  line-height: 1;\n}\n\n.dsc-ui .text-card-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-card-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-muted-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-muted-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-primary-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-primary-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-secondary-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-secondary-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .shadow-sm {\n  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);\n  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);\n  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);\n}\n\n.dsc-ui .outline {\n  outline-style: solid;\n}\n\n.dsc-ui .filter {\n  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);\n}\n\n.dsc-ui .transition-colors {\n  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;\n  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  transition-duration: 150ms;\n}\n\n.dsc-ui {\n  box-sizing: border-box;\n  --dsc-background: 0 0% 100%;\n  --dsc-foreground: 240 10% 12%;\n  --dsc-card: 0 0% 100%;\n  --dsc-card-foreground: 240 10% 12%;\n  --dsc-primary: 240 6% 18%;\n  --dsc-primary-foreground: 0 0% 98%;\n  --dsc-secondary: 240 5% 96%;\n  --dsc-secondary-foreground: 240 6% 18%;\n  --dsc-muted: 240 5% 96%;\n  --dsc-muted-foreground: 240 4% 40%;\n  --dsc-accent: 240 5% 94%;\n  --dsc-accent-foreground: 240 6% 18%;\n  --dsc-border: 240 6% 88%;\n  --dsc-input: 240 6% 84%;\n  --dsc-ring: 240 5% 40%;\n  font:\n    13px/1.6 system-ui,\n    -apple-system,\n    sans-serif;\n  color: hsl(var(--dsc-foreground));\n  text-align: left;\n  min-width: 0;\n}\n.dsc-ui[data-theme="dark"] {\n  --dsc-background: 240 6% 11%;\n  --dsc-foreground: 0 0% 94%;\n  --dsc-card: 240 5% 13%;\n  --dsc-card-foreground: 0 0% 94%;\n  --dsc-primary: 0 0% 94%;\n  --dsc-primary-foreground: 240 6% 12%;\n  --dsc-secondary: 240 4% 20%;\n  --dsc-secondary-foreground: 0 0% 94%;\n  --dsc-muted: 240 4% 20%;\n  --dsc-muted-foreground: 240 5% 68%;\n  --dsc-accent: 240 4% 23%;\n  --dsc-accent-foreground: 0 0% 94%;\n  --dsc-border: 240 4% 28%;\n  --dsc-input: 240 4% 34%;\n  --dsc-ring: 240 5% 72%;\n}\n.dsc-ui *,\n.dsc-ui *::before,\n.dsc-ui *::after {\n  box-sizing: border-box;\n  border-style: solid;\n  border-width: 0;\n}\n.dsc-ui button,\n.dsc-ui input,\n.dsc-ui select,\n.dsc-ui textarea {\n  font: inherit;\n  color: inherit;\n}\n.dsc-ui button {\n  cursor: pointer;\n}\n.dsc-ui button:disabled {\n  cursor: not-allowed;\n}\n.dsc-ui p {\n  margin: 8px 0;\n}\n.dsc-ui h3 {\n  margin: 0 0 12px;\n  font-size: 14px;\n  font-weight: 600;\n}\n.dsc-ui table {\n  border-collapse: collapse;\n  text-align: left;\n}\n.dsc-ui code {\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n}\n.dsc-ui details > summary {\n  cursor: pointer;\n  padding: 6px 0;\n}\n.dsc-ui :is(button, input, select, textarea, summary):focus-visible {\n  outline: 2px solid hsl(var(--dsc-ring));\n  outline-offset: 3px;\n}\n.dsc-ui .compat-page {\n  display: grid;\n  gap: 16px;\n  padding: 8px 0 24px;\n  min-width: 0;\n}\n.dsc-ui .compat-primary {\n  padding: 20px;\n  min-width: 0;\n}\n.dsc-ui .compat-heading {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  gap: 12px;\n}\n.dsc-ui .compat-title {\n  font-size: 20px;\n  font-weight: 650;\n  letter-spacing: -0.035em;\n  margin: 0;\n}\n.dsc-ui .compat-subtitle {\n  color: hsl(var(--dsc-muted-foreground));\n  margin: 0;\n}\n.dsc-ui .compat-toolbar {\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 8px;\n  margin: 16px 0 10px;\n}\n.dsc-ui .compat-toolbar input {\n  width: 220px;\n  max-width: 100%;\n}\n.dsc-ui .compat-metrics {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 8px;\n  margin: 16px 0;\n}\n.dsc-ui .compat-metrics > div {\n  flex: 1;\n  min-width: 100px;\n  padding: 10px 14px;\n  border: 1px solid hsl(var(--dsc-border));\n  border-radius: 8px;\n  background: hsl(var(--dsc-muted) / 0.45);\n}\n.dsc-ui .compat-metrics strong {\n  font-size: 22px;\n  font-weight: 600;\n  margin-right: 8px;\n}\n.dsc-ui .compat-meta {\n  color: hsl(var(--dsc-muted-foreground));\n  font-size: 12px;\n  overflow-wrap: anywhere;\n}\n.dsc-ui .compat-report-context,\n.dsc-ui .compat-report-meta,\n.dsc-ui .compat-report-meta details {\n  min-width: 0;\n  max-width: 100%;\n  overflow-wrap: anywhere;\n  word-break: normal;\n}\n.dsc-ui .compat-report-meta {\n  margin-top: 10px;\n}\n.dsc-ui .compat-section-divider {\n  margin-top: 16px;\n}\n.dsc-ui .compat-results-divider {\n  margin: 14px 0 8px;\n}\n.dsc-ui .compat-report-information {\n  min-width: 0;\n  padding: 16px;\n  overflow-wrap: anywhere;\n}\n.dsc-ui .compat-results {\n  min-width: 580px;\n  table-layout: auto;\n}\n.dsc-ui .compat-results th:first-child,\n.dsc-ui .compat-results td:first-child {\n  min-width: 220px;\n  width: 28%;\n  overflow-wrap: break-word;\n}\n.dsc-ui .compat-results th:nth-child(2),\n.dsc-ui .compat-results td:nth-child(2) {\n  width: 110px;\n  white-space: nowrap;\n}\n.dsc-ui .compat-auxiliary {\n  display: grid;\n  gap: 12px;\n  min-width: 0;\n}\n.dsc-ui .compat-auxiliary > section {\n  padding: 16px;\n  min-width: 0;\n}\n.dsc-ui .compat-fold {\n  min-width: 0;\n  margin: 12px 0;\n}\n.dsc-ui .compat-fold-header {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 12px;\n  padding: 12px 16px;\n}\n.dsc-ui .compat-fold-title {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  font-weight: 600;\n  min-width: 0;\n}\n.dsc-ui .compat-count {\n  font-size: 12px;\n  font-weight: 400;\n  color: hsl(var(--dsc-muted-foreground));\n}\n.dsc-ui .compat-fold-content {\n  padding: 0 16px 16px;\n  min-width: 0;\n}\n.dsc-ui .compat-relation-table {\n  min-width: 900px;\n  table-layout: auto;\n}\n.dsc-ui .compat-relation-table :is(th, td) {\n  min-width: 100px;\n  overflow-wrap: break-word;\n  word-break: normal;\n}\n.dsc-ui .compat-relation-table :is(th, td):first-child {\n  min-width: 240px;\n  width: 26%;\n}\n.dsc-ui .compat-relation-table :is(th, td):nth-child(2) {\n  min-width: 280px;\n  width: 30%;\n}\n.dsc-ui .compat-relation-table th {\n  vertical-align: top;\n}\n.dsc-ui [data-slot="badge"][data-tone="neutral"] {\n  border-color: hsl(var(--dsc-border));\n  background: hsl(var(--dsc-muted));\n  color: hsl(var(--dsc-muted-foreground));\n}\n.dsc-ui [data-slot="badge"][data-tone="ok"] {\n  border-color: #16a34a40;\n  background: #16a34a15;\n  color: #15803d;\n}\n.dsc-ui [data-slot="badge"][data-tone="partial"] {\n  border-color: #d9770640;\n  background: #d9770615;\n  color: #a65306;\n}\n.dsc-ui [data-slot="badge"][data-tone="broken"] {\n  border-color: #dc262640;\n  background: #dc262615;\n  color: #c92525;\n}\n.dsc-ui[data-theme="dark"] [data-slot="badge"][data-tone="ok"] {\n  color: #86efac;\n}\n.dsc-ui[data-theme="dark"] [data-slot="badge"][data-tone="partial"] {\n  color: #fcd34d;\n}\n.dsc-ui[data-theme="dark"] [data-slot="badge"][data-tone="broken"] {\n  color: #fca5a5;\n}\n.dsc-ui.dsc-inline {\n  display: inline;\n}\n@media (max-width: 640px) {\n  .dsc-ui .compat-primary {\n    padding: 14px;\n  }\n  .dsc-ui .compat-title {\n    font-size: 18px;\n  }\n  .dsc-ui .compat-heading {\n    gap: 8px;\n  }\n  .dsc-ui .compat-metrics > div {\n    min-width: 90px;\n    padding: 8px 10px;\n  }\n}\n.dsc-ui .placeholder\\:text-muted-foreground::placeholder {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-muted-foreground) / var(--tw-text-opacity, 1));\n}\n.dsc-ui .hover\\:bg-accent:hover {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-accent) / var(--tw-bg-opacity, 1));\n}\n.dsc-ui .hover\\:bg-muted\\/50:hover {\n  background-color: hsl(var(--dsc-muted) / 0.5);\n}\n.dsc-ui .hover\\:bg-primary\\/90:hover {\n  background-color: hsl(var(--dsc-primary) / 0.9);\n}\n.dsc-ui .hover\\:bg-secondary\\/80:hover {\n  background-color: hsl(var(--dsc-secondary) / 0.8);\n}\n.dsc-ui .hover\\:text-accent-foreground:hover {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-accent-foreground) / var(--tw-text-opacity, 1));\n}\n.dsc-ui .focus-visible\\:outline-none:focus-visible {\n  outline: 2px solid transparent;\n  outline-offset: 2px;\n}\n.dsc-ui .focus-visible\\:ring-2:focus-visible {\n  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);\n  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);\n  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);\n}\n.dsc-ui .focus-visible\\:ring-ring:focus-visible {\n  --tw-ring-opacity: 1;\n  --tw-ring-color: hsl(var(--dsc-ring) / var(--tw-ring-opacity, 1));\n}\n.dsc-ui .focus-visible\\:ring-offset-2:focus-visible {\n  --tw-ring-offset-width: 2px;\n}\n.dsc-ui .disabled\\:pointer-events-none:disabled {\n  pointer-events: none;\n}\n.dsc-ui .disabled\\:cursor-not-allowed:disabled {\n  cursor: not-allowed;\n}\n.dsc-ui .disabled\\:opacity-50:disabled {\n  opacity: 0.5;\n}\n.dsc-ui :is(.\\[\\&_tr\\:last-child\\]\\:border-0 tr:last-child) {\n  border-width: 0px;\n}\n.dsc-ui :is(.\\[\\&_tr\\]\\:border-b tr) {\n  border-bottom-width: 1px;\n}\n';
+      '.dsc-ui .relative {\n  position: relative;\n}\n\n.dsc-ui .mb-3 {\n  margin-bottom: 0.75rem;\n}\n\n.dsc-ui .block {\n  display: block;\n}\n\n.dsc-ui .inline {\n  display: inline;\n}\n\n.dsc-ui .flex {\n  display: flex;\n}\n\n.dsc-ui .inline-flex {\n  display: inline-flex;\n}\n\n.dsc-ui .table {\n  display: table;\n}\n\n.dsc-ui .table-caption {\n  display: table-caption;\n}\n\n.dsc-ui .table-cell {\n  display: table-cell;\n}\n\n.dsc-ui .table-row {\n  display: table-row;\n}\n\n.dsc-ui .hidden {\n  display: none;\n}\n\n.dsc-ui .h-10 {\n  height: 2.5rem;\n}\n\n.dsc-ui .h-8 {\n  height: 2rem;\n}\n\n.dsc-ui .h-9 {\n  height: 2.25rem;\n}\n\n.dsc-ui .h-full {\n  height: 100%;\n}\n\n.dsc-ui .h-px {\n  height: 1px;\n}\n\n.dsc-ui .min-h-20 {\n  min-height: 5rem;\n}\n\n.dsc-ui .w-full {\n  width: 100%;\n}\n\n.dsc-ui .w-px {\n  width: 1px;\n}\n\n.dsc-ui .max-w-full {\n  max-width: 100%;\n}\n\n.dsc-ui .shrink-0 {\n  flex-shrink: 0;\n}\n\n.dsc-ui .caption-bottom {\n  caption-side: bottom;\n}\n\n.dsc-ui .items-center {\n  align-items: center;\n}\n\n.dsc-ui .justify-center {\n  justify-content: center;\n}\n\n.dsc-ui .gap-2 {\n  gap: 0.5rem;\n}\n\n.dsc-ui .overflow-auto {\n  overflow: auto;\n}\n\n.dsc-ui .whitespace-nowrap {\n  white-space: nowrap;\n}\n\n.dsc-ui .rounded-lg {\n  border-radius: 0.5rem;\n}\n\n.dsc-ui .rounded-md {\n  border-radius: 0.375rem;\n}\n\n.dsc-ui .rounded-xl {\n  border-radius: 0.75rem;\n}\n\n.dsc-ui .border {\n  border-width: 1px;\n}\n\n.dsc-ui .border-b {\n  border-bottom-width: 1px;\n}\n\n.dsc-ui .border-border {\n  --tw-border-opacity: 1;\n  border-color: hsl(var(--dsc-border) / var(--tw-border-opacity, 1));\n}\n\n.dsc-ui .border-input {\n  --tw-border-opacity: 1;\n  border-color: hsl(var(--dsc-input) / var(--tw-border-opacity, 1));\n}\n\n.dsc-ui .bg-background {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-background) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-border {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-border) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-card {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-card) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-muted\\/40 {\n  background-color: hsl(var(--dsc-muted) / 0.4);\n}\n\n.dsc-ui .bg-primary {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-primary) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-secondary {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-secondary) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-transparent {\n  background-color: transparent;\n}\n\n.dsc-ui .p-3 {\n  padding: 0.75rem;\n}\n\n.dsc-ui .p-4 {\n  padding: 1rem;\n}\n\n.dsc-ui .px-2 {\n  padding-left: 0.5rem;\n  padding-right: 0.5rem;\n}\n\n.dsc-ui .px-3 {\n  padding-left: 0.75rem;\n  padding-right: 0.75rem;\n}\n\n.dsc-ui .px-4 {\n  padding-left: 1rem;\n  padding-right: 1rem;\n}\n\n.dsc-ui .py-0\\.5 {\n  padding-top: 0.125rem;\n  padding-bottom: 0.125rem;\n}\n\n.dsc-ui .py-1 {\n  padding-top: 0.25rem;\n  padding-bottom: 0.25rem;\n}\n\n.dsc-ui .py-2 {\n  padding-top: 0.5rem;\n  padding-bottom: 0.5rem;\n}\n\n.dsc-ui .py-3 {\n  padding-top: 0.75rem;\n  padding-bottom: 0.75rem;\n}\n\n.dsc-ui .text-left {\n  text-align: left;\n}\n\n.dsc-ui .align-top {\n  vertical-align: top;\n}\n\n.dsc-ui .align-middle {\n  vertical-align: middle;\n}\n\n.dsc-ui .text-sm {\n  font-size: var(--dsc-font-body);\n  line-height: 1.6;\n}\n\n.dsc-ui .text-xs {\n  font-size: var(--dsc-font-small);\n  line-height: 1.6;\n}\n\n.dsc-ui .font-medium {\n  font-weight: 500;\n}\n\n.dsc-ui .font-semibold {\n  font-weight: 600;\n}\n\n.dsc-ui .leading-none {\n  line-height: 1;\n}\n\n.dsc-ui .text-card-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-card-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-muted-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-muted-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-primary-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-primary-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-secondary-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-secondary-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .shadow-sm {\n  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);\n  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);\n  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);\n}\n\n.dsc-ui .outline {\n  outline-style: solid;\n}\n\n.dsc-ui .filter {\n  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);\n}\n\n.dsc-ui .transition-colors {\n  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;\n  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  transition-duration: 150ms;\n}\n\n.dsc-ui {\n  box-sizing: border-box;\n  --dsc-font-body: 13px;\n  --dsc-font-heading: 14px;\n  --dsc-font-small: 12px;\n  --dsc-background: 0 0% 100%;\n  --dsc-foreground: 240 10% 12%;\n  --dsc-card: 0 0% 100%;\n  --dsc-card-foreground: 240 10% 12%;\n  --dsc-primary: 240 6% 18%;\n  --dsc-primary-foreground: 0 0% 98%;\n  --dsc-secondary: 240 5% 96%;\n  --dsc-secondary-foreground: 240 6% 18%;\n  --dsc-muted: 240 5% 96%;\n  --dsc-muted-foreground: 240 4% 40%;\n  --dsc-accent: 240 5% 94%;\n  --dsc-accent-foreground: 240 6% 18%;\n  --dsc-border: 240 6% 88%;\n  --dsc-input: 240 6% 84%;\n  --dsc-ring: 240 5% 40%;\n  font:\n    var(--dsc-font-body) / 1.6 system-ui,\n    -apple-system,\n    sans-serif;\n  color: hsl(var(--dsc-foreground));\n  text-align: left;\n  min-width: 0;\n}\n.dsc-ui[data-theme="dark"] {\n  --dsc-background: 240 6% 11%;\n  --dsc-foreground: 0 0% 94%;\n  --dsc-card: 240 5% 13%;\n  --dsc-card-foreground: 0 0% 94%;\n  --dsc-primary: 0 0% 94%;\n  --dsc-primary-foreground: 240 6% 12%;\n  --dsc-secondary: 240 4% 20%;\n  --dsc-secondary-foreground: 0 0% 94%;\n  --dsc-muted: 240 4% 20%;\n  --dsc-muted-foreground: 240 5% 68%;\n  --dsc-accent: 240 4% 23%;\n  --dsc-accent-foreground: 0 0% 94%;\n  --dsc-border: 240 4% 28%;\n  --dsc-input: 240 4% 34%;\n  --dsc-ring: 240 5% 72%;\n}\n.dsc-ui *,\n.dsc-ui *::before,\n.dsc-ui *::after {\n  box-sizing: border-box;\n  border-style: solid;\n  border-width: 0;\n}\n.dsc-ui button,\n.dsc-ui input,\n.dsc-ui select,\n.dsc-ui textarea {\n  font: inherit;\n  color: inherit;\n}\n.dsc-ui button {\n  cursor: pointer;\n}\n.dsc-ui button:disabled {\n  cursor: not-allowed;\n}\n.dsc-ui p {\n  margin: 8px 0;\n}\n.dsc-ui h3 {\n  margin: 0 0 12px;\n  font-size: var(--dsc-font-heading);\n  font-weight: 600;\n}\n.dsc-ui table {\n  border-collapse: collapse;\n  text-align: left;\n}\n.dsc-ui code {\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n}\n.dsc-ui :is(button, input, select, textarea):focus-visible {\n  outline: 2px solid hsl(var(--dsc-ring));\n  outline-offset: 3px;\n}\n.dsc-ui .compat-page {\n  display: grid;\n  gap: 16px;\n  padding: 8px 0 24px;\n  min-width: 0;\n}\n.dsc-ui .compat-primary {\n  padding: 20px;\n  min-width: 0;\n}\n.dsc-ui .compat-heading {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  gap: 12px;\n}\n.dsc-ui .compat-title {\n  font-size: var(--dsc-font-heading);\n  font-weight: 600;\n  letter-spacing: normal;\n  margin: 0;\n}\n.dsc-ui .compat-subtitle {\n  color: hsl(var(--dsc-muted-foreground));\n  margin: 0;\n}\n.dsc-ui .compat-toolbar {\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 8px;\n  margin: 16px 0 10px;\n}\n.dsc-ui .compat-toolbar input {\n  width: 220px;\n  max-width: 100%;\n}\n.dsc-ui .compat-metrics {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 8px;\n  margin: 16px 0;\n}\n.dsc-ui .compat-metrics > div {\n  flex: 1;\n  min-width: 100px;\n  padding: 10px 14px;\n  border: 1px solid hsl(var(--dsc-border));\n  border-radius: 8px;\n  background: hsl(var(--dsc-muted) / 0.45);\n}\n.dsc-ui .compat-metrics strong {\n  font-size: 22px;\n  font-weight: 600;\n  margin-right: 8px;\n}\n.dsc-ui .compat-meta {\n  color: hsl(var(--dsc-muted-foreground));\n  font-size: var(--dsc-font-body);\n  overflow-wrap: anywhere;\n}\n.dsc-ui .compat-report-context,\n.dsc-ui .compat-report-meta,\n.dsc-ui .compat-report-meta details {\n  min-width: 0;\n  max-width: 100%;\n  overflow-wrap: anywhere;\n  word-break: normal;\n}\n.dsc-ui .compat-report-meta {\n  margin-top: 10px;\n}\n.dsc-ui .compat-section-divider {\n  margin-top: 16px;\n}\n.dsc-ui .compat-results-divider {\n  margin: 14px 0 8px;\n}\n.dsc-ui .compat-report-information {\n  min-width: 0;\n  padding: 16px;\n  overflow-wrap: anywhere;\n}\n.dsc-ui .compat-results {\n  min-width: 580px;\n  table-layout: auto;\n}\n.dsc-ui .compat-results th:first-child,\n.dsc-ui .compat-results td:first-child {\n  min-width: 220px;\n  width: 28%;\n  overflow-wrap: break-word;\n}\n.dsc-ui .compat-results th:nth-child(2),\n.dsc-ui .compat-results td:nth-child(2) {\n  width: 110px;\n  white-space: nowrap;\n}\n.dsc-ui .compat-auxiliary {\n  display: grid;\n  gap: 12px;\n  min-width: 0;\n}\n.dsc-ui .compat-auxiliary > section {\n  padding: 16px;\n  min-width: 0;\n}\n.dsc-ui .compat-fold {\n  min-width: 0;\n  margin: 12px 0;\n}\n.dsc-ui .compat-fold-header {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  justify-content: space-between;\n  gap: 12px;\n  padding: 12px 16px;\n}\n.dsc-ui .compat-fold-title {\n  display: flex;\n  flex: 1 1 160px;\n  align-items: center;\n  gap: 8px;\n  font-weight: 600;\n  min-width: 0;\n}\n.dsc-ui .compat-count {\n  font-size: var(--dsc-font-body);\n  font-weight: 400;\n  color: hsl(var(--dsc-muted-foreground));\n}\n.dsc-ui .compat-fold-content {\n  padding: 0 16px 16px;\n  min-width: 0;\n}\n.dsc-ui .compat-relation-table {\n  min-width: 900px;\n  table-layout: auto;\n}\n.dsc-ui .compat-relation-table :is(th, td) {\n  min-width: 100px;\n  overflow-wrap: break-word;\n  word-break: normal;\n}\n.dsc-ui .compat-relation-table :is(th, td):first-child {\n  min-width: 240px;\n  width: 26%;\n}\n.dsc-ui .compat-relation-table :is(th, td):nth-child(2) {\n  min-width: 280px;\n  width: 30%;\n}\n.dsc-ui .compat-relation-table th {\n  vertical-align: top;\n}\n.dsc-ui [data-slot="badge"][data-tone="neutral"] {\n  border-color: hsl(var(--dsc-border));\n  background: hsl(var(--dsc-muted));\n  color: hsl(var(--dsc-muted-foreground));\n}\n.dsc-ui [data-slot="badge"][data-tone="ok"] {\n  border-color: #16a34a40;\n  background: #16a34a15;\n  color: #15803d;\n}\n.dsc-ui [data-slot="badge"][data-tone="partial"] {\n  border-color: #d9770640;\n  background: #d9770615;\n  color: #a65306;\n}\n.dsc-ui [data-slot="badge"][data-tone="broken"] {\n  border-color: #dc262640;\n  background: #dc262615;\n  color: #c92525;\n}\n.dsc-ui[data-theme="dark"] [data-slot="badge"][data-tone="ok"] {\n  color: #86efac;\n}\n.dsc-ui[data-theme="dark"] [data-slot="badge"][data-tone="partial"] {\n  color: #fcd34d;\n}\n.dsc-ui[data-theme="dark"] [data-slot="badge"][data-tone="broken"] {\n  color: #fca5a5;\n}\n.dsc-ui.dsc-inline {\n  display: inline;\n}\n@media (max-width: 640px) {\n  .dsc-ui .compat-primary {\n    padding: 14px;\n  }\n  .dsc-ui .compat-title {\n    font-size: var(--dsc-font-heading);\n  }\n  .dsc-ui .compat-heading {\n    gap: 8px;\n  }\n  .dsc-ui .compat-metrics > div {\n    min-width: 90px;\n    padding: 8px 10px;\n  }\n}\n\n.dsc-ui .compat-fold-title {\n  margin: 0;\n  overflow-wrap: anywhere;\n}\n.dsc-ui .compat-fold-header > h3 {\n  font-size: var(--dsc-font-heading);\n}\n.dsc-ui .compat-disclosure {\n  margin: 8px 0;\n}\n.dsc-ui .compat-disclosure > .compat-fold-header {\n  padding: 0;\n  gap: 8px;\n}\n.dsc-ui .compat-disclosure > .compat-fold-content {\n  padding: 8px 0 0;\n}\n.dsc-ui [data-slot="collapsible-content"][hidden] {\n  display: none;\n}\n\n.dsc-ui .compat-fold-header > button {\n  margin-left: auto;\n}\n.dsc-ui .compat-count {\n  white-space: nowrap;\n}\n.dsc-ui .placeholder\\:text-muted-foreground::placeholder {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-muted-foreground) / var(--tw-text-opacity, 1));\n}\n.dsc-ui .hover\\:bg-accent:hover {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-accent) / var(--tw-bg-opacity, 1));\n}\n.dsc-ui .hover\\:bg-muted\\/50:hover {\n  background-color: hsl(var(--dsc-muted) / 0.5);\n}\n.dsc-ui .hover\\:bg-primary\\/90:hover {\n  background-color: hsl(var(--dsc-primary) / 0.9);\n}\n.dsc-ui .hover\\:bg-secondary\\/80:hover {\n  background-color: hsl(var(--dsc-secondary) / 0.8);\n}\n.dsc-ui .hover\\:text-accent-foreground:hover {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-accent-foreground) / var(--tw-text-opacity, 1));\n}\n.dsc-ui .focus-visible\\:outline-none:focus-visible {\n  outline: 2px solid transparent;\n  outline-offset: 2px;\n}\n.dsc-ui .focus-visible\\:ring-2:focus-visible {\n  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);\n  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);\n  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);\n}\n.dsc-ui .focus-visible\\:ring-ring:focus-visible {\n  --tw-ring-opacity: 1;\n  --tw-ring-color: hsl(var(--dsc-ring) / var(--tw-ring-opacity, 1));\n}\n.dsc-ui .focus-visible\\:ring-offset-2:focus-visible {\n  --tw-ring-offset-width: 2px;\n}\n.dsc-ui .disabled\\:pointer-events-none:disabled {\n  pointer-events: none;\n}\n.dsc-ui .disabled\\:cursor-not-allowed:disabled {\n  cursor: not-allowed;\n}\n.dsc-ui .disabled\\:opacity-50:disabled {\n  opacity: 0.5;\n}\n.dsc-ui :is(.\\[\\&_tr\\:last-child\\]\\:border-0 tr:last-child) {\n  border-width: 0px;\n}\n.dsc-ui :is(.\\[\\&_tr\\]\\:border-b tr) {\n  border-bottom-width: 1px;\n}\n';
 
     // plugin/src/components/ui/index.jsx
     var cn = (...values) => twMerge(clsx(values));
@@ -6413,16 +6413,43 @@ window.__ModuleLoader__.load({
         ...props,
       });
     }
-    function Fold({ title, count, children, className, defaultOpen = false }) {
-      const [open, setOpen] = React.useState(defaultOpen);
+    var titleText = (value) => {
+      if (value == null || typeof value === "boolean") return "";
+      if (Array.isArray(value)) return value.map(titleText).join("");
+      if (typeof value === "object")
+        return titleText(value.props?.children ?? value.children);
+      return String(value);
+    };
+    function Fold({
+      title,
+      count,
+      children,
+      className,
+      defaultOpen = false,
+      open: controlledOpen,
+      onOpenChange,
+      framed = true,
+      heading = false,
+      keepMounted = false,
+      ...props
+    }) {
+      const [internalOpen, setOpen] = React.useState(defaultOpen);
+      const open = controlledOpen === void 0 ? internalOpen : controlledOpen;
       const content =
         Array.isArray(children) && children.length === 1
           ? children[0]
           : children;
+      const Shell = framed ? Card : "div";
+      const Heading = heading ? "h3" : "div";
       return /* @__PURE__ */ React.createElement(
-        Card,
+        Shell,
         {
-          className: cn("compat-fold", className),
+          ...props,
+          className: cn(
+            "compat-fold",
+            !framed && "compat-disclosure",
+            className,
+          ),
           "data-slot": "collapsible",
           "data-state": open ? "open" : "closed",
         },
@@ -6430,7 +6457,7 @@ window.__ModuleLoader__.load({
           "div",
           { className: "compat-fold-header" },
           /* @__PURE__ */ React.createElement(
-            "div",
+            Heading,
             { className: "compat-fold-title" },
             title,
             count != null
@@ -6444,9 +6471,14 @@ window.__ModuleLoader__.load({
           /* @__PURE__ */ React.createElement(
             Button,
             {
-              "aria-label": `${open ? "\u6536\u8D77" : "\u5C55\u5F00"}${title}`,
+              className: "shrink-0",
+              "aria-label": `${open ? "\u6536\u8D77" : "\u5C55\u5F00"}${titleText(title)}`,
               "aria-expanded": open,
-              onClick: () => setOpen((value) => !value),
+              onClick: () => {
+                const next = !open;
+                if (controlledOpen === void 0) setOpen(next);
+                onOpenChange?.(next);
+              },
               type: "button",
               variant: "ghost",
             },
@@ -6458,13 +6490,42 @@ window.__ModuleLoader__.load({
             ),
           ),
         ),
-        open
+        open || keepMounted
           ? /* @__PURE__ */ React.createElement(
               "div",
-              { className: "compat-fold-content" },
+              {
+                "data-slot": "collapsible-content",
+                hidden: !open,
+                className: "compat-fold-content",
+              },
               typeof content === "function" ? content() : content,
             )
           : null,
+      );
+    }
+    function Disclosure({ children, open, onToggle, ...props }) {
+      const [summary, ...content] = Array.isArray(children)
+        ? children
+        : [children];
+      const title = summary?.props?.children ?? summary?.children;
+      return /* @__PURE__ */ React.createElement(
+        Fold,
+        {
+          ...props,
+          title,
+          framed: false,
+          keepMounted: true,
+          defaultOpen: Boolean(open),
+          open: onToggle ? Boolean(open) : void 0,
+          onOpenChange: onToggle
+            ? (next) =>
+                onToggle({
+                  target: { open: next },
+                  currentTarget: { open: next },
+                })
+            : void 0,
+        },
+        content,
       );
     }
     function hostTheme() {
@@ -6572,6 +6633,7 @@ window.__ModuleLoader__.load({
       caption: TableCaption,
       label: Label,
       section: Card,
+      details: Disclosure,
       Fold,
     };
 
@@ -6806,21 +6868,24 @@ window.__ModuleLoader__.load({
         flexWrap: "wrap",
         marginBottom: "10px",
       },
-      title: { fontSize: "20px", fontWeight: 650, letterSpacing: "-.03em" },
-      meta: { color: "hsl(var(--dsc-muted-foreground))", fontSize: "12px" },
+      title: { fontSize: "var(--dsc-font-heading)", fontWeight: 600 },
+      meta: {
+        color: "hsl(var(--dsc-muted-foreground))",
+        fontSize: "var(--dsc-font-body)",
+      },
       btn: {},
       table: {},
       th: {},
       td: {},
       mono: {
         fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-        fontSize: "12px",
+        fontSize: "var(--dsc-font-body)",
         overflowWrap: "anywhere",
       },
       pill: {},
       note: {
         color: "hsl(var(--dsc-muted-foreground))",
-        fontSize: "12px",
+        fontSize: "var(--dsc-font-body)",
         marginTop: "10px",
       },
       err: {
@@ -6828,7 +6893,7 @@ window.__ModuleLoader__.load({
         border: "1px solid #dc262640",
         borderRadius: "8px",
         background: "#dc262608",
-        fontSize: "13px",
+        fontSize: "var(--dsc-font-body)",
       },
       hint: { color: "hsl(var(--dsc-muted-foreground))", padding: "12px 0" },
       finding: {
@@ -6836,10 +6901,13 @@ window.__ModuleLoader__.load({
         paddingTop: "10px",
         borderTop: "1px solid hsl(var(--dsc-border))",
       },
-      suspect: { color: "hsl(var(--dsc-muted-foreground))", fontSize: "12px" },
+      suspect: {
+        color: "hsl(var(--dsc-muted-foreground))",
+        fontSize: "var(--dsc-font-body)",
+      },
       dim: {
         color: "hsl(var(--dsc-muted-foreground))",
-        fontSize: "12px",
+        fontSize: "var(--dsc-font-body)",
         marginTop: "4px",
       },
     };
@@ -7569,7 +7637,7 @@ window.__ModuleLoader__.load({
       }
       return h(
         "details",
-        { "data-upgrade-preview": true },
+        { "data-upgrade-preview": true, heading: true },
         h(
           "summary",
           { style: { cursor: "pointer" } },
@@ -7627,6 +7695,7 @@ window.__ModuleLoader__.load({
       return h(
         "div",
         null,
+        h("h3", null, "\u6545\u969C\u62A5\u544A"),
         h(
           "button",
           {

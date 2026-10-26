@@ -183,33 +183,55 @@ export function Alert({ className, ...props }) {
   );
 }
 
-// A native disclosure composed with our shadcn Button: no portal, second React,
-// or headless runtime is needed. Children are mounted only after explicit opening.
+// Shared disclosure chrome for tables and report sections. A framed table is
+// lazy; legacy details preserve their mounted forms while hiding closed content.
+const titleText = (value) => {
+  if (value == null || typeof value === "boolean") return "";
+  if (Array.isArray(value)) return value.map(titleText).join("");
+  if (typeof value === "object")
+    return titleText(value.props?.children ?? value.children);
+  return String(value);
+};
 export function Fold({
   title,
   count,
   children,
   className,
   defaultOpen = false,
+  open: controlledOpen,
+  onOpenChange,
+  framed = true,
+  heading = false,
+  keepMounted = false,
+  ...props
 }) {
-  const [open, setOpen] = React.useState(defaultOpen);
+  const [internalOpen, setOpen] = React.useState(defaultOpen);
+  const open = controlledOpen === undefined ? internalOpen : controlledOpen;
   const content =
     Array.isArray(children) && children.length === 1 ? children[0] : children;
+  const Shell = framed ? Card : "div";
+  const Heading = heading ? "h3" : "div";
   return (
-    <Card
-      className={cn("compat-fold", className)}
+    <Shell
+      {...props}
+      className={cn("compat-fold", !framed && "compat-disclosure", className)}
       data-slot="collapsible"
       data-state={open ? "open" : "closed"}
     >
       <div className="compat-fold-header">
-        <div className="compat-fold-title">
+        <Heading className="compat-fold-title">
           {title}
           {count != null ? <span className="compat-count">{count}</span> : null}
-        </div>
+        </Heading>
         <Button
-          aria-label={`${open ? "收起" : "展开"}${title}`}
+          className="shrink-0"
+          aria-label={`${open ? "收起" : "展开"}${titleText(title)}`}
           aria-expanded={open}
-          onClick={() => setOpen((value) => !value)}
+          onClick={() => {
+            const next = !open;
+            if (controlledOpen === undefined) setOpen(next);
+            onOpenChange?.(next);
+          }}
           type="button"
           variant="ghost"
         >
@@ -217,12 +239,44 @@ export function Fold({
           <span aria-hidden="true">{open ? "−" : "+"}</span>
         </Button>
       </div>
-      {open ? (
-        <div className="compat-fold-content">
+      {open || keepMounted ? (
+        <div
+          data-slot="collapsible-content"
+          hidden={!open}
+          className="compat-fold-content"
+        >
           {typeof content === "function" ? content() : content}
         </div>
       ) : null}
-    </Card>
+    </Shell>
+  );
+}
+
+// Adapt the shared factories' details/summary markup without rendering native
+// triangle controls. onToggle remains compatible with the controlled review log.
+export function Disclosure({ children, open, onToggle, ...props }) {
+  const [summary, ...content] = Array.isArray(children) ? children : [children];
+  const title = summary?.props?.children ?? summary?.children;
+  return (
+    <Fold
+      {...props}
+      title={title}
+      framed={false}
+      keepMounted
+      defaultOpen={Boolean(open)}
+      open={onToggle ? Boolean(open) : undefined}
+      onOpenChange={
+        onToggle
+          ? (next) =>
+              onToggle({
+                target: { open: next },
+                currentTarget: { open: next },
+              })
+          : undefined
+      }
+    >
+      {content}
+    </Fold>
   );
 }
 
@@ -335,5 +389,6 @@ export const ui = {
   caption: TableCaption,
   label: Label,
   section: Card,
+  details: Disclosure,
   Fold,
 };

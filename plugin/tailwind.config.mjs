@@ -4,6 +4,10 @@ export default {
   corePlugins: { preflight: false },
   theme: {
     extend: {
+      fontSize: {
+        sm: ["var(--dsc-font-body)", { lineHeight: "1.6" }],
+        xs: ["var(--dsc-font-small)", { lineHeight: "1.6" }],
+      },
       colors: Object.fromEntries(
         [
           "background",

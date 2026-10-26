@@ -217,3 +217,50 @@ test("an older slow health import cannot replace the last selected evidence", as
     h.dispose();
   }
 });
+
+test("shared history disclosure updates the controlled review history and hides it on collapse", async () => {
+  const data = sample();
+  data.reviews.items = Object.entries(data.report.plugins).flatMap(
+    ([pluginName, plugin]) =>
+      plugin.findings.map((finding, findingIndex) => ({
+        findingId: createHash("sha256")
+          .update(pluginName + findingIndex)
+          .digest("hex"),
+        pluginName,
+        pluginVersion: plugin.version,
+        findingIndex,
+        status: "pending",
+        note: "",
+        record: null,
+        history: [],
+        historyCount: 0,
+        reviewReason: null,
+      })),
+  );
+  data.reviews.history = [
+    {
+      findingId: "b".repeat(64),
+      pluginName: "historical-demo",
+      pluginVersion: "0.0.1",
+      status: "reviewed",
+      note: "Complete historical rationale",
+      updatedAt: "2026-10-21T00:00:00.000Z",
+    },
+  ];
+  const before = JSON.stringify(data);
+  const h = await panelHarness(data);
+  try {
+    const expand = h.field("展开历史处置完整依据（1）");
+    assert(expand);
+    assert.doesNotMatch(h.text(), /Complete historical rationale/);
+    expand.props.onClick();
+    h.render();
+    assert.match(h.text(), /Complete historical rationale/);
+    h.field("收起历史处置完整依据（1）").props.onClick();
+    h.render();
+    assert.doesNotMatch(h.text(), /Complete historical rationale/);
+    assert.equal(JSON.stringify(data), before);
+  } finally {
+    h.dispose();
+  }
+});

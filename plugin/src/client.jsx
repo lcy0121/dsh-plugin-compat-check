@@ -273,21 +273,24 @@ var styles = {
     flexWrap: "wrap",
     marginBottom: "10px",
   },
-  title: { fontSize: "20px", fontWeight: 650, letterSpacing: "-.03em" },
-  meta: { color: "hsl(var(--dsc-muted-foreground))", fontSize: "12px" },
+  title: { fontSize: "var(--dsc-font-heading)", fontWeight: 600 },
+  meta: {
+    color: "hsl(var(--dsc-muted-foreground))",
+    fontSize: "var(--dsc-font-body)",
+  },
   btn: {},
   table: {},
   th: {},
   td: {},
   mono: {
     fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-    fontSize: "12px",
+    fontSize: "var(--dsc-font-body)",
     overflowWrap: "anywhere",
   },
   pill: {},
   note: {
     color: "hsl(var(--dsc-muted-foreground))",
-    fontSize: "12px",
+    fontSize: "var(--dsc-font-body)",
     marginTop: "10px",
   },
   err: {
@@ -295,7 +298,7 @@ var styles = {
     border: "1px solid #dc262640",
     borderRadius: "8px",
     background: "#dc262608",
-    fontSize: "13px",
+    fontSize: "var(--dsc-font-body)",
   },
   hint: { color: "hsl(var(--dsc-muted-foreground))", padding: "12px 0" },
   finding: {
@@ -303,10 +306,13 @@ var styles = {
     paddingTop: "10px",
     borderTop: "1px solid hsl(var(--dsc-border))",
   },
-  suspect: { color: "hsl(var(--dsc-muted-foreground))", fontSize: "12px" },
+  suspect: {
+    color: "hsl(var(--dsc-muted-foreground))",
+    fontSize: "var(--dsc-font-body)",
+  },
   dim: {
     color: "hsl(var(--dsc-muted-foreground))",
-    fontSize: "12px",
+    fontSize: "var(--dsc-font-body)",
     marginTop: "4px",
   },
 };
@@ -1038,7 +1044,7 @@ function UpgradePreview(p) {
   }
   return h(
     "details",
-    { "data-upgrade-preview": true },
+    { "data-upgrade-preview": true, heading: true },
     h("summary", { style: { cursor: "pointer" } }, "升级前兼容性预检（静态）"),
     h(
       "p",
@@ -1088,6 +1094,7 @@ function ReportPreview(p) {
   return h(
     "div",
     null,
+    h("h3", null, "故障报告"),
     h(
       "button",
       {

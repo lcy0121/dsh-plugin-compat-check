@@ -831,7 +831,7 @@ try {
       if (process.env.DSC_UI018_ACCEPTANCE === "1")
         result.ui018 = await verifyUi018(chrome, evalx, poll);
       await evalx(
-        `document.querySelector('[data-catalog-status] details')?.setAttribute('open', '')`,
+        `(()=>{const b=document.querySelector('[data-catalog-status] button[aria-expanded=\"false\"]');if(b)b.click();else document.querySelector('[data-catalog-status] details')?.setAttribute('open','')})()`,
       );
 
       requireTrue(
@@ -889,7 +889,7 @@ try {
         "Semantic row missing",
       );
       await evalx(
-        `(()=>{const row=document.querySelector('[data-compat-plugin="@acceptance/api-semantics"]');for(const summary of row.querySelectorAll('summary')){if((summary.innerText.startsWith('覆盖限制（')||summary.innerText.startsWith('查看 '))&&!summary.parentElement.open)summary.click()}})()`,
+        `(()=>{const row=document.querySelector('[data-compat-plugin="@acceptance/api-semantics"]');for(const b of row.querySelectorAll('button[aria-expanded=\"false\"]')){if(/展开(?:覆盖限制（|查看 )/.test(b.getAttribute('aria-label')))b.click()}for(const summary of row.querySelectorAll('summary')){if((summary.innerText.startsWith('覆盖限制（')||summary.innerText.startsWith('查看 '))&&!summary.parentElement.open)summary.click()}})()`,
       );
       await poll(
         () =>
@@ -949,7 +949,7 @@ try {
         "Pending filter failed",
       );
       await evalx(
-        `Array.from(document.querySelectorAll('[data-compat-plugin] summary')).find(e=>e.innerText.startsWith('查看')).click()`,
+        `(document.querySelector('[data-compat-plugin] button[aria-label^=\"展开查看 \"]')||Array.from(document.querySelectorAll('[data-compat-plugin] summary')).find(e=>e.innerText.startsWith('查看'))).click()`,
       );
       await poll(
         () =>
@@ -1026,7 +1026,7 @@ try {
         "Pre-upgrade ordinary filter failed",
       );
       await evalx(
-        `document.querySelector('[data-upgrade-preview] > summary').click()`,
+        `(document.querySelector('[data-upgrade-preview] > .compat-fold-header button')||document.querySelector('[data-upgrade-preview] > summary')).click()`,
       );
       await poll(
         () => evalx(`Boolean(${field("目标 DSH 版本")})`),
@@ -1063,7 +1063,7 @@ try {
         "Actual DOM lost predicted new-risk details",
       );
       await evalx(
-        `Array.from(document.querySelectorAll('[data-upgrade-result="compared"] summary')).find(e=>e.innerText==='查看输入制品、目录来源与预测限制').click()`,
+        `(document.querySelector('[data-upgrade-result="compared"] button[aria-label="展开查看输入制品、目录来源与预测限制"]')||Array.from(document.querySelectorAll('[data-upgrade-result="compared"] summary')).find(e=>e.innerText==='查看输入制品、目录来源与预测限制')).click()`,
       );
       const provenanceDom = await evalx(
         `document.querySelector('[data-upgrade-result="compared"]').innerText`,
@@ -1290,7 +1290,7 @@ try {
           "Panel lost future rejection reason",
         );
         await evalx(
-          `[...document.querySelectorAll('summary')].find(e=>e.innerText==='查看采样与检查信息').parentElement.open=true`,
+          `(()=>{const b=document.querySelector('button[aria-label=\"展开查看采样与检查信息\"]');if(b)b.click();else {const s=[...document.querySelectorAll('summary')].find(e=>e.innerText==='查看采样与检查信息');if(s)s.parentElement.open=true;}})()`,
         );
         requireTrue(
           await evalx(`document.body.innerText.includes('未来时钟偏差')`),

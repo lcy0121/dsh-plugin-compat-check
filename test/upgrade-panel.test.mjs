@@ -129,6 +129,14 @@ test("actual static comparison is displayed separately with added findings, cata
     await click(h);
     await h.settle();
     assert.match(h.text(), /新增.*1/);
+    const addedToggle = h.field("收起新增（1）");
+    assert(addedToggle, "New risks retain their initially expanded state");
+    addedToggle.props.onClick();
+    h.render();
+    assert.equal(h.field("展开新增（1）").props["aria-expanded"], false);
+    h.field("展开新增（1）").props.onClick();
+    h.render();
+    assert.equal(h.field("收起新增（1）").props["aria-expanded"], true);
     assert.match(h.text(), /upgrade-demo/);
     assert.match(h.text(), /declared-incompatible/);
     assert.match(h.text(), /certain/);

@@ -1,8 +1,8 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-26T07:41:58.356Z",
+  "recordedAt": "2026-10-26T08:03:45.649Z",
   "testFiles": 73,
-  "tests": 1141,
+  "tests": 1143,
   "repositoryFiles": {
     "total": 351,
     "fixtures": 99,
@@ -323,7 +323,25 @@
         "fullTapSha256": "4f15fc1d2138c91139d0d4bb4bc625f890c0cd4b787dac2ba9d642c32a48835f",
         "browserLayoutSha256": "b0c3e04d111a06dd80e3e2ad690a19fde111a15804dbfbbbd8c1924b3c559ff8"
       },
-      "previewState": "Runtime profile moved outside the repository to system temporary storage; the original local port remains available. Repository credential guard passed unchanged."
+      "previewState": "Runtime profile moved outside the repository to system temporary storage; the original local port remains available. Repository credential guard passed unchanged.",
+      "typographyFollowup": {
+        "baseCommit": "2817ce3",
+        "tests": {
+          "total": 1143,
+          "pass": 1135,
+          "skip": 8,
+          "fail": 0
+        },
+        "font": "Dependency panel reference: system-ui; headings 14px/600, body 13px/400, disclosure buttons 12px/500.",
+        "nativeTriangleControls": 0,
+        "behavior": "Explicit shared buttons for all legacy details; hidden forms retain input; review history remains controlled; added upgrade risks initially open and user-collapsible.",
+        "clientSha256": "2d81266099a85c32e04dd5f3a35ea2f3b78bf81e3670886be61920c7a6a7eafe",
+        "evidence": {
+          "directory": "tmp/ui-typography-20261026",
+          "fullTapSha256": "3cead058274aa399f9a08853b987df36b367c97262e6a90eea6740f026327970",
+          "fontProofSha256": "215732abada506adabca35c0bf59724a5c0e1ecbc1174839d4a0be346aeda718"
+        }
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

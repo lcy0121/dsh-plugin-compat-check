@@ -2,6 +2,9 @@
 
 .dsc-ui {
   box-sizing: border-box;
+  --dsc-font-body: 13px;
+  --dsc-font-heading: 14px;
+  --dsc-font-small: 12px;
   --dsc-background: 0 0% 100%;
   --dsc-foreground: 240 10% 12%;
   --dsc-card: 0 0% 100%;
@@ -18,7 +21,7 @@
   --dsc-input: 240 6% 84%;
   --dsc-ring: 240 5% 40%;
   font:
-    13px/1.6 system-ui,
+    var(--dsc-font-body) / 1.6 system-ui,
     -apple-system,
     sans-serif;
   color: hsl(var(--dsc-foreground));
@@ -67,7 +70,7 @@
 }
 .dsc-ui h3 {
   margin: 0 0 12px;
-  font-size: 14px;
+  font-size: var(--dsc-font-heading);
   font-weight: 600;
 }
 .dsc-ui table {
@@ -77,11 +80,7 @@
 .dsc-ui code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
-.dsc-ui details > summary {
-  cursor: pointer;
-  padding: 6px 0;
-}
-.dsc-ui :is(button, input, select, textarea, summary):focus-visible {
+.dsc-ui :is(button, input, select, textarea):focus-visible {
   outline: 2px solid hsl(var(--dsc-ring));
   outline-offset: 3px;
 }
@@ -102,9 +101,9 @@
   gap: 12px;
 }
 .dsc-ui .compat-title {
-  font-size: 20px;
-  font-weight: 650;
-  letter-spacing: -0.035em;
+  font-size: var(--dsc-font-heading);
+  font-weight: 600;
+  letter-spacing: normal;
   margin: 0;
 }
 .dsc-ui .compat-subtitle {
@@ -143,7 +142,7 @@
 }
 .dsc-ui .compat-meta {
   color: hsl(var(--dsc-muted-foreground));
-  font-size: 12px;
+  font-size: var(--dsc-font-body);
   overflow-wrap: anywhere;
 }
 .dsc-ui .compat-report-context,
@@ -198,6 +197,7 @@
 }
 .dsc-ui .compat-fold-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -205,13 +205,14 @@
 }
 .dsc-ui .compat-fold-title {
   display: flex;
+  flex: 1 1 160px;
   align-items: center;
   gap: 8px;
   font-weight: 600;
   min-width: 0;
 }
 .dsc-ui .compat-count {
-  font-size: 12px;
+  font-size: var(--dsc-font-body);
   font-weight: 400;
   color: hsl(var(--dsc-muted-foreground));
 }
@@ -276,7 +277,7 @@
     padding: 14px;
   }
   .dsc-ui .compat-title {
-    font-size: 18px;
+    font-size: var(--dsc-font-heading);
   }
   .dsc-ui .compat-heading {
     gap: 8px;
@@ -285,4 +286,32 @@
     min-width: 90px;
     padding: 8px 10px;
   }
+}
+
+.dsc-ui .compat-fold-title {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.dsc-ui .compat-fold-header > h3 {
+  font-size: var(--dsc-font-heading);
+}
+.dsc-ui .compat-disclosure {
+  margin: 8px 0;
+}
+.dsc-ui .compat-disclosure > .compat-fold-header {
+  padding: 0;
+  gap: 8px;
+}
+.dsc-ui .compat-disclosure > .compat-fold-content {
+  padding: 8px 0 0;
+}
+.dsc-ui [data-slot="collapsible-content"][hidden] {
+  display: none;
+}
+
+.dsc-ui .compat-fold-header > button {
+  margin-left: auto;
+}
+.dsc-ui .compat-count {
+  white-space: nowrap;
 }

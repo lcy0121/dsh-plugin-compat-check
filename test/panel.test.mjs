@@ -107,7 +107,7 @@ test("panel keeps report time, cache age and pending coverage visible with colla
   assert.match(h.text(), /2026-10-21/);
   assert.match(h.text(), /缓存/);
   assert(
-    h.find((n) => n.type === "details"),
+    h.find((n) => n.type === "button" && n.props["aria-expanded"] === false),
     "Details must be collapsible",
   );
   assert.match(h.text(), /证据覆盖/);
@@ -279,6 +279,48 @@ test("report context stays with results while upgrade and report explanations ha
     assert(
       separators[0] < search && search < separators[1] && separators[1] < table,
     );
+  } finally {
+    h.dispose();
+  }
+});
+
+test("all report disclosures use explicit shared expand/collapse buttons and preserve form input", async () => {
+  const h = await panelHarness(sample());
+  try {
+    assert(
+      !h.find((n) => n.type === "details" || n.type === "summary"),
+      "Native triangle-only disclosures must be replaced across the panel",
+    );
+    for (const title of [
+      "升级前兼容性预检（静态）",
+      "查看采样与检查信息",
+      "查看已认证目录与来源",
+    ]) {
+      const expand = h.field("展开" + title);
+      assert(expand, title);
+      assert.equal(expand.props["data-slot"], "button");
+      assert.equal(expand.props["aria-expanded"], false);
+      expand.props.onClick();
+      h.render();
+      assert.equal(h.field("收起" + title).props["aria-expanded"], true);
+      if (title.startsWith("升级")) {
+        const content = () =>
+          h
+            .nodes(h.find((n) => n.props["data-upgrade-preview"]))
+            .find((n) => n.props["data-slot"] === "collapsible-content");
+        assert.equal(content().props.hidden, false);
+        change(h, "目标 DSH 版本", "0.2.1-rc.3");
+        h.field("收起" + title).props.onClick();
+        h.render();
+        assert.equal(content().props.hidden, true);
+        h.field("展开" + title).props.onClick();
+        h.render();
+        assert.equal(h.field("目标 DSH 版本").props.value, "0.2.1-rc.3");
+      }
+      h.field("收起" + title).props.onClick();
+      h.render();
+      assert.equal(h.field("展开" + title).props["aria-expanded"], false);
+    }
   } finally {
     h.dispose();
   }
