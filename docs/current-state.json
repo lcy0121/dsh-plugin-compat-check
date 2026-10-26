@@ -1,8 +1,8 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-26T07:02:57.719Z",
+  "recordedAt": "2026-10-26T07:41:58.356Z",
   "testFiles": 73,
-  "tests": 1140,
+  "tests": 1141,
   "repositoryFiles": {
     "total": 351,
     "fixtures": 99,
@@ -299,6 +299,31 @@
         }
       },
       "scope": "Local macOS arm64 UI development only. Main table remains visible; auxiliary tables mount on expansion. Long-scope/narrow screenshot uses an explicit disposable CSS fixture. DOM counts compare collapsed/expanded UI in the same eight-plugin report, not a render-time benchmark. Client bytes increased; shared polling, broader lazy mounting and delivery deduplication remain pending. No new release or remote CI claim; Windows remains unverified."
+    },
+    "ui018LayoutFollowup20261026": {
+      "scope": "Local UI layout follow-up to ea75e2d; prior same-archive acceptance remains historical. Preview loads this exact generated client in an owned DSH 0.2.1-rc.3 profile; no new release or Windows claim.",
+      "defaultSuite": {
+        "tests": 1141,
+        "pass": 1133,
+        "skip": 8,
+        "fail": 0
+      },
+      "ui": {
+        "upgradeCard": true,
+        "separateReportInformationCard": true,
+        "catalogueWrapping": true,
+        "twoSeparators": true,
+        "observedNarrowViewport": 466,
+        "metadataClientWidth": 147,
+        "metadataScrollWidth": 147
+      },
+      "clientSha256": "8103973821c75d948896bd067538286c2954a32acaae93943bf88802b03d24b2",
+      "evidence": {
+        "directory": "tmp/ui-layout-20261026",
+        "fullTapSha256": "4f15fc1d2138c91139d0d4bb4bc625f890c0cd4b787dac2ba9d642c32a48835f",
+        "browserLayoutSha256": "b0c3e04d111a06dd80e3e2ad690a19fde111a15804dbfbbbd8c1924b3c559ff8"
+      },
+      "previewState": "Runtime profile moved outside the repository to system temporary storage; the original local port remains available. Repository credential guard passed unchanged."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

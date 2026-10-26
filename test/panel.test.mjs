@@ -239,3 +239,47 @@ test("overview and plugin detail use the same shadcn controls and semantic statu
     }
   }
 });
+
+test("report context stays with results while upgrade and report explanations have distinct cards", async () => {
+  const data = sample();
+  data.nodeModulesWhy = "isolated preview profile";
+  const h = await panelHarness(data);
+  try {
+    const card = (label) =>
+      h.find(
+        (n) =>
+          n.type === "section" &&
+          n.props["data-slot"] === "card" &&
+          n.props["aria-label"] === label,
+      );
+    const primary = card("兼容性体检结果");
+    const upgrade = card("升级前兼容性预检");
+    const explanation = card("报告说明与检查信息");
+    assert(
+      upgrade,
+      "Upgrade preview must have the same card boundary as other tools",
+    );
+    assert(h.nodes(upgrade).some((n) => n.props["data-upgrade-preview"]));
+    assert(
+      explanation,
+      "Report-wide legend and diagnostics need an explicit group",
+    );
+    assert.match(h.text(explanation), /确定（certain）.*影响依据/s);
+    assert.match(h.text(explanation), /工具版本：/);
+    assert.match(h.text(explanation), /isolated preview profile/);
+    assert.doesNotMatch(h.text(primary), /工具版本：|对象来源：/);
+    assert.match(h.text(primary), /2026-10-21|缓存/);
+    const nodes = h.nodes(primary);
+    const separators = nodes
+      .map((n, i) => (n.props["data-slot"] === "separator" ? i : -1))
+      .filter((i) => i >= 0);
+    const search = nodes.indexOf(h.field("搜索插件"));
+    const table = nodes.findIndex((n) => n.type === "table");
+    assert.equal(separators.length, 2);
+    assert(
+      separators[0] < search && search < separators[1] && separators[1] < table,
+    );
+  } finally {
+    h.dispose();
+  }
+});

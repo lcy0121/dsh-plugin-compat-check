@@ -22,6 +22,7 @@ import {
   Button,
   Badge as StatusBadge,
   Card,
+  Separator,
   Alert,
   Fold,
   Scope,
@@ -1037,7 +1038,7 @@ function UpgradePreview(p) {
   }
   return h(
     "details",
-    { style: { margin: "14px 0" }, "data-upgrade-preview": true },
+    { "data-upgrade-preview": true },
     h("summary", { style: { cursor: "pointer" } }, "升级前兼容性预检（静态）"),
     h(
       "p",
@@ -1172,7 +1173,7 @@ function ReportMeta(p) {
   if (c && c.refreshing) cache += "；后台正在刷新";
   return h(
     "div",
-    { style: styles.note },
+    { className: "compat-meta compat-report-meta" },
     h("div", null, "报告时间：" + (d.computedAt || "未提供") + " · " + cache),
     h(
       "div",
@@ -1355,8 +1356,13 @@ function Table(p) {
             `${s.vacuousOk} 个“可用”没有已验证调用；未发现冲突不等于业务通过。`,
           )
         : null,
-      h(ReportMeta, { data: data }),
-      h(Badge, { baseline: data.baseline }),
+      h(
+        "div",
+        { className: "compat-report-context" },
+        h(ReportMeta, { data: data }),
+        h(Badge, { baseline: data.baseline }),
+      ),
+      h(Separator, { className: "compat-section-divider" }),
       h(
         "div",
         { className: "compat-toolbar" },
@@ -1439,6 +1445,7 @@ function Table(p) {
             "没有符合筛选条件的插件。清除筛选可查看完整报告。",
           )
         : null,
+      h(Separator, { className: "compat-results-divider" }),
       h(
         "div",
         { style: { overflowX: "auto" } },
@@ -1510,7 +1517,11 @@ function Table(p) {
       "div",
       { className: "compat-auxiliary", "aria-label": "辅助工具与证据" },
       h(Card, { className: "p-4" }, h(ReportPreview, { data: data })),
-      h(UpgradePreview, { data: data }),
+      h(
+        Card,
+        { "aria-label": "升级前兼容性预检" },
+        h(UpgradePreview, { data: data }),
+      ),
       h(DependencyPanel, { graph: report.dependencyGraph }),
       h(FindingReviewPanel, {
         report: report,
@@ -1519,34 +1530,42 @@ function Table(p) {
       }),
       h(FunctionalHealthPanel, { report: report }),
     ),
-    h(EvidenceLegend),
     h(
-      "div",
-      { style: styles.note },
-      "工具版本：" +
-        (data.toolVersion || "未知") +
-        " · " +
-        (report.hasRuntimeSurface
-          ? "方法级证据含宿主运行时观测；以每条发现为准。"
-          : "方法级证据来自官方 API 契约目录，静态事实单独判定。"),
-    ),
-    h(
-      "details",
-      null,
-      h("summary", { style: styles.meta }, "查看采样与检查信息"),
+      Card,
+      {
+        className: "compat-report-information",
+        "aria-label": "报告说明与检查信息",
+      },
+      h("h3", null, "报告说明与检查信息"),
+      h(EvidenceLegend),
       h(
         "div",
         { style: styles.note },
-        ((report.observation && report.observation.notes) || []).join("；"),
+        "工具版本：" +
+          (data.toolVersion || "未知") +
+          " · " +
+          (report.hasRuntimeSurface
+            ? "方法级证据含宿主运行时观测；以每条发现为准。"
+            : "方法级证据来自官方 API 契约目录，静态事实单独判定。"),
       ),
       h(
-        "div",
-        { style: styles.note },
-        "对象来源：" +
-          (data.nodeModulesWhy || "未提供") +
-          (data.elapsedMs !== undefined
-            ? " · 耗时 " + data.elapsedMs + "ms"
-            : ""),
+        "details",
+        null,
+        h("summary", { style: styles.meta }, "查看采样与检查信息"),
+        h(
+          "div",
+          { style: styles.note },
+          ((report.observation && report.observation.notes) || []).join("；"),
+        ),
+        h(
+          "div",
+          { style: styles.note },
+          "对象来源：" +
+            (data.nodeModulesWhy || "未提供") +
+            (data.elapsedMs !== undefined
+              ? " · 耗时 " + data.elapsedMs + "ms"
+              : ""),
+        ),
       ),
     ),
   );

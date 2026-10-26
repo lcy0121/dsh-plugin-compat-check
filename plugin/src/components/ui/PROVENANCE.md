@@ -1,13 +1,14 @@
 # UI component provenance
 
-The Button, Card, Badge, Input, Textarea, Table, Label and Alert primitives in
+The Button, Card, Badge, Input, Textarea, Table, Label, Separator and Alert primitives in
 `index.jsx` are adapted from [shadcn/ui](https://github.com/shadcn-ui/ui), MIT,
 using the [new-york source registry](https://ui.shadcn.com/r/styles/new-york/button.json)
-and [Native Select](https://ui.shadcn.com/docs/components/native-select).
+[Native Select](https://ui.shadcn.com/docs/components/native-select), and
+[Separator](https://ui.shadcn.com/docs/components/separator).
 
 Local adaptations: function components compatible with the host's React;
 unused ref/asChild/portal features removed; semantic status colors; scoped theme
-tokens; native Select; a disclosure composed from Card and Button with explicit
+tokens; native Select and Separator semantics; a disclosure composed from Card and Button with explicit
 expanded state and conditional content. No Radix/Base UI or React runtime is
 bundled. The disclosure is a local component, not an unmodified upstream
 Collapsible. Tailwind utilities compile with preflight disabled and every rule

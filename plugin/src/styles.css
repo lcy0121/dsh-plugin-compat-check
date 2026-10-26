@@ -146,6 +146,28 @@
   font-size: 12px;
   overflow-wrap: anywhere;
 }
+.dsc-ui .compat-report-context,
+.dsc-ui .compat-report-meta,
+.dsc-ui .compat-report-meta details {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.dsc-ui .compat-report-meta {
+  margin-top: 10px;
+}
+.dsc-ui .compat-section-divider {
+  margin-top: 16px;
+}
+.dsc-ui .compat-results-divider {
+  margin: 14px 0 8px;
+}
+.dsc-ui .compat-report-information {
+  min-width: 0;
+  padding: 16px;
+  overflow-wrap: anywhere;
+}
 .dsc-ui .compat-results {
   min-width: 580px;
   table-layout: auto;

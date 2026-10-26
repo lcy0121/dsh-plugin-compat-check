@@ -39,12 +39,11 @@ JS/TS AST、词法绑定及源码图识别Context、服务和调用span，按hos
 
 UI使用`settings.plugins.tab`、`plugins.detail.section / .badge`，不以缺可靠身份的`plugins.item`作包级判断。客户端经`window.__ModuleLoader__.load({id,factory})`注册，宿主不代构建；tool required为顶层数组，skill通过provider注册。profile选择实际目标，不默认desktop。
 
-0.1.8 UI主结果已前置：总览先显示结论数量、目标/时间/缓存、覆盖与中性基线提示、筛选及逐插件结果，再显示故障报告、升级预检、依赖关系、人工处置和健康记录。目录来源按需展开，未认证警告仍直接可见；certainty/impactBasis、coverage/vacuous及完整导出保持原契约。
+0.1.8 UI主结果已前置：总览先显示结论数量、目标/时间/缓存、覆盖与中性基线提示、筛选及逐插件结果，再显示故障报告、升级预检、依赖关系、人工处置和健康记录。目录来源按需展开，未认证警告仍直接可见；目录摘要/路径在卡片内换行，报告信息、筛选与结果表用Separator分隔。升级预检使用独立卡片，证据释义、工具版本与采样来源集中于页尾“报告说明与检查信息”卡片；certainty/impactBasis、coverage/vacuous及完整导出保持原契约。
 
 依赖关系各表和已导入的健康检查结果提供带数量的展开/收起按钮，默认收起，关闭时不挂载表格DOM；覆盖、截断及历史记录边界仍在折叠外。主结果表保持展开。插件/loader辅助表前两列最小240/280px，长scope名称不逐字挤压，窄容器在表内横向滚动，原生按钮支持键盘及aria-expanded状态。
 
 UI真源为`plugin/src/client.jsx`、`plugin/src/components/ui/`及`plugin/src/styles.css`，采用经适配的shadcn/ui组件与统一主题；折叠由Card/Button组合，来源和MIT说明见[组件记录](../plugin/src/components/ui/PROVENANCE.md)。Tailwind/esbuild只在开发期运行，产物仍为`plugin/lib/client.js`的ModuleLoader入口，内嵌预编译CSS，复用宿主React，不引入ReactDOM/浮层运行时。样式及变量限定于`.dsc-ui`，跟随宿主深浅色，按挂载所有者共享并在最后卸载时移除；不能直接编辑生成产物。限定实机、DOM与体积证据见current-state，组件迁移不等于已经减重。
-
 
 rc.3入口为左下角账号菜单→设置→内置插件→兼容性。导航/草稿验收核对活动区域、目标会话及内容后置条件；富草稿持有与释放须成对，不承诺已销毁输入的附件恢复。折叠或空标题不作为激活失败。
 
