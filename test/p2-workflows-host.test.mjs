@@ -25,7 +25,7 @@ function host(body) {
   );
   const script = `import assert from 'node:assert/strict';import fs from 'node:fs';import {Readable} from 'node:stream';import {apply} from ${JSON.stringify(new URL("../plugin/index.js", import.meta.url).href)};
  const root=${JSON.stringify(root)},home=${JSON.stringify(home)},nm=${JSON.stringify(nm)},pkg=${JSON.stringify(pkg)},routes=new Map(),effects=[];let tool;
- const ctx={get:()=>undefined,inject:(deps,cb)=>{const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path)}},tools:{register:t=>{tool=t;return()=>{}}}});if(typeof off==='function')effects.push(off);return off;},effect:fn=>{const off=fn();if(typeof off==='function')effects.push(off);}};apply(ctx);
+ const ctx={get:n=>n==='connection'?{requestRejection:()=>undefined}:undefined,inject:(deps,cb)=>{const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path)}},tools:{register:t=>{tool=t;return()=>{}}}});if(typeof off==='function')effects.push(off);return off;},effect:fn=>{const off=fn();if(typeof off==='function')effects.push(off);}};apply(ctx);
  const request=async(pathname='/plugin-compat-check/report',body,headers={},method=body===undefined?'GET':'POST')=>{const route=routes.get(pathname.split('?')[0]);assert(route,'Requested workflow route is not registered: '+pathname);const req=Readable.from(body===undefined?[]:[Buffer.from(typeof body==='string'?body:JSON.stringify(body))]);Object.assign(req,{method,url:pathname,headers:{'x-dsh-compat-request':'1',host:'127.0.0.1:8123',origin:'http://127.0.0.1:8123','content-type':'application/json',...headers},socket:{encrypted:false}});let text,status;await route.handler(req,{writeHead:c=>status=c,setHeader(){},end:t=>text=t});return {status,body:JSON.parse(text)};};
  try{${body};console.log('WORKFLOWS_OK')}finally{for(const off of effects)off();}process.exit(0);`;
   try {
@@ -172,7 +172,7 @@ test("background polling observes manual storage corruption and recovery without
 
 test("hung host plugin listing fails cold and forced reports, keeps baseline, and recovers after late resolution", () =>
   host(`
- let mode='hang',late=[];ctx.get=name=>name==='pluginManager'?{list:()=>mode==='hang'?new Promise(resolve=>late.push(resolve)):[]}:undefined;
+ let mode='hang',late=[];ctx.get=name=>name==='connection'?{requestRejection:()=>undefined}:name==='pluginManager'?{list:()=>mode==='hang'?new Promise(resolve=>late.push(resolve)):[]}:undefined;
  const cold=(await request()).body;assert.equal(cold.ok,false);assert.match(cold.error,/超时/);assert.equal(cold.report.ok,false);
  mode='good';const good=(await request('/plugin-compat-check/report?refresh=1')).body;assert.equal(good.ok,true,good.error);
  const baselineDir=home+'/dsh-plugin-compat-check';const baselines=fs.readdirSync(baselineDir).filter(f=>f.startsWith('baseline.')).map(f=>[f,fs.readFileSync(baselineDir+'/'+f,'utf8')]);

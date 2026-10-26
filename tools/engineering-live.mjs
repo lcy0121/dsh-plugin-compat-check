@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /** Real private DSH + packed plugin + HTTP responsiveness. No browser or model call. */
 import fs from "node:fs";
+import { ownedHostHeaders } from "./owned-host-session.mjs";
 import { isolatedEnvironment } from "../lib/execution-environment.mjs";
 import os from "node:os";
 import path from "node:path";
@@ -143,10 +144,7 @@ try {
       reject(new Error("Private host exited: " + redact(output.slice(-1000))));
     });
   });
-  const headers = {
-    "X-DSH-Compat-Request": "1",
-    Authorization: "Bearer " + new URL(url).searchParams.get("token"),
-  };
+  const headers = await ownedHostHeaders(url);
   const reportUrl = new URL("/plugin-compat-check/report?refresh=1", url);
   const fetchReport = async () => {
     const r = await fetch(reportUrl, {

@@ -178,7 +178,7 @@ test("ordinary HTTP reports refresh after source and loader changes without forc
   });
   const script = `import assert from 'node:assert/strict';import fs from 'node:fs';import {apply} from ${JSON.stringify(pathToFileURL(path.resolve("plugin/index.js")).href)};
   const routes=new Map(),effects=[],entry={id:'slot-demo',disabled:false,options:{},fiber:{state:2}};let custom={ping(){}};
-  const ctx={get:n=>n==='loader'?{entries:()=>[entry]}:n==='pluginManager'?{list:async()=>[{id:'slot-demo',packageName:'demo'}]}:n==='customService'?custom:undefined,inject:(deps,cb)=>{if(deps[0]!=='webServer')return;const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path)}}});if(off)effects.push(off);},effect:f=>{const off=f();if(off)effects.push(off);}};apply(ctx);
+  const ctx={get:n=>n==='connection'?{requestRejection:()=>undefined}:n==='loader'?{entries:()=>[entry]}:n==='pluginManager'?{list:async()=>[{id:'slot-demo',packageName:'demo'}]}:n==='customService'?custom:undefined,inject:(deps,cb)=>{if(deps[0]!=='webServer')return;const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path)}}});if(off)effects.push(off);},effect:f=>{const off=f();if(off)effects.push(off);}};apply(ctx);
   const request=async()=>{let text;await routes.get('/plugin-compat-check/report').handler({method:'GET',headers:{'x-dsh-compat-request':'1',host:'127.0.0.1'},url:'/plugin-compat-check/report',socket:{}},{writeHead(){},end:t=>text=t});return JSON.parse(text);};
   async function waitFor(fn){let last;for(let i=0;i<200;i++){const r=await request();last=r;if(fn(r))return r;await new Promise(r=>setTimeout(r,20));}assert.fail('automatic refresh did not settle: '+JSON.stringify({plugins:last.report?.plugins,cache:last.cache}));}
   try{
@@ -639,7 +639,7 @@ test("ordinary host commits only the current filesystem generation to the real p
     const routes=new Map(),effects=[],holds=new Map();let reads=0;
     function hold(at){let enter,release;const started=new Promise(r=>enter=r),gate=new Promise(r=>release=r);const item={started,gate,enter,release};holds.set(at,item);return item;}
     const manager={list:async()=>{const pause=holds.get(++reads);if(pause){pause.enter();await pause.gate;}return [];}};
-    const ctx={get:n=>n==='pluginManager'?manager:undefined,inject:(deps,cb)=>{if(deps[0]!=='webServer')return;const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path)}}});if(off)effects.push(off);},effect:f=>{const off=f();if(off)effects.push(off);}};apply(ctx);
+    const ctx={get:n=>n==='connection'?{requestRejection:()=>undefined}:n==='pluginManager'?manager:undefined,inject:(deps,cb)=>{if(deps[0]!=='webServer')return;const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path)}}});if(off)effects.push(off);},effect:f=>{const off=f();if(off)effects.push(off);}};apply(ctx);
     const request=async(force=false)=>{let text;await routes.get('/plugin-compat-check/report').handler({method:'GET',headers:{'x-dsh-compat-request':'1',host:'127.0.0.1'},url:'/plugin-compat-check/report'+(force?'?refresh=1':''),socket:{}},{writeHead(){},end:t=>text=t});return JSON.parse(text);};
     const meta=${JSON.stringify(path.join(pkg, "package.json"))};const writeVersion=v=>fs.writeFileSync(meta,JSON.stringify({name:'demo',version:v,main:'index.js',dsh:{}}));
     try{
@@ -769,7 +769,7 @@ test("symlink aliases retain distinct probe bindings and observe the policy besi
     }),
   );
   const script = `import assert from 'node:assert/strict';import fs from 'node:fs';import {apply} from ${JSON.stringify(pathToFileURL(path.resolve("plugin/index.js")).href)};
-    const routes=new Map(),effects=[];const ctx={get:()=>undefined,inject:(deps,cb)=>{if(deps[0]!=='webServer')return;const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path)}}});if(off)effects.push(off);},effect:f=>{const off=f();if(off)effects.push(off);}};apply(ctx);
+    const routes=new Map(),effects=[];const ctx={get:n=>n==='connection'?{requestRejection:()=>undefined}:undefined,inject:(deps,cb)=>{if(deps[0]!=='webServer')return;const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path)}}});if(off)effects.push(off);},effect:f=>{const off=f();if(off)effects.push(off);}};apply(ctx);
     const request=async()=>{let text;await routes.get('/plugin-compat-check/report').handler({method:'GET',headers:{'x-dsh-compat-request':'1',host:'127.0.0.1'},url:'/plugin-compat-check/report',socket:{}},{writeHead(){},end:t=>text=t});return JSON.parse(text);};
     try{
       const first=await request();assert.equal(first.ok,true,first.error);assert.equal(first.report.observation.usable,true);assert.equal(first.nodeModules,${JSON.stringify(a)});

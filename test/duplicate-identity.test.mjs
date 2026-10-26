@@ -195,7 +195,7 @@ function hostReport(f, dshVersion = "0.2.1-rc.2") {
     const baseline=baselinePath(nm),before='existing baseline must survive duplicate inventory\\n';
     fs.mkdirSync(${JSON.stringify(path.join(f.home, "dsh-plugin-compat-check"))},{recursive:true});
     fs.writeFileSync(baseline,before);
-    const ctx={get:()=>undefined,inject:(deps,cb)=>{
+    const ctx={get:n=>n==='connection'?{requestRejection:()=>undefined}:undefined,inject:(deps,cb)=>{
       const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path);}},tools:{register:t=>{tool=t;return()=>{};}}});
       if(typeof off==='function')effects.push(off);return off;
     },effect:fn=>{const off=fn();if(typeof off==='function')effects.push(off);}};

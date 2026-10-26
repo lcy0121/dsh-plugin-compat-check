@@ -33,6 +33,14 @@ export function installRc3Fixture(profile) {
     path.join(dir, "index.js"),
     `import fs from 'node:fs';export const inject=['llm','appReady','agents','workspaceRegistry','sessionTitle'];export function apply(ctx){
  const receipt=${JSON.stringify(path.join(profile, "rc3-network.json"))};const record=()=>fs.writeFileSync(receipt,JSON.stringify({productionRequests:production}));
+ if (${JSON.stringify(process.env.DSC_HTTP_AUTH_ACCEPTANCE === "1")}) {
+  const shape=Object.fromEntries(Array.from({length:10000},(_,i)=>['field'+i,'OWNED_VALUE_NOT_FOR_EXPORT']));ctx.provide('hardeningBudget',shape);
+  ctx.inject(['connection','webServer'], auth=>auth.webServer.register({kind:'exact',path:'/acceptance/auth-expiry',handler(req,res){
+   const current=auth.connection.requestRejection(req);if(current!==undefined){res.writeHead(current);res.end('{}');return;}
+   const now=Date.now;let expired;try{Date.now=()=>now()+31*24*60*60*1000;expired=auth.connection.requestRejection(req);}finally{Date.now=now;}
+   res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({current:null,expired}));
+  }}));
+ }
  const original=globalThis.fetch;let production=0;record();
  globalThis.fetch=(input,...args)=>{const url=new URL(typeof input==='string'?input:input.url||String(input));if(url.hostname==='api.deepseek.com'){production++;record();throw Error('Acceptance forbids production model/listing requests');}return original(input,...args)};
  ctx.effect(()=>()=>{globalThis.fetch=original});

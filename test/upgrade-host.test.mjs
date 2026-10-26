@@ -32,7 +32,7 @@ function execute(body) {
   );
   const script = `import assert from 'node:assert/strict';import fs from 'node:fs';import {apply} from ${JSON.stringify(pathToFileURL(path.join(repo, "plugin/index.js")).href)};
  const root=${JSON.stringify(root)},nm=${JSON.stringify(nm)},pkg=${JSON.stringify(pkg)},routes=new Map(),effects=[];let tool;
- const ctx={get:()=>undefined,inject:(deps,cb)=>{const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path);}},tools:{register:t=>{tool=t;return()=>{};}}});if(typeof off==='function')effects.push(off);return off;},effect:fn=>{const off=fn();if(typeof off==='function')effects.push(off);}};apply(ctx);
+ const ctx={get:n=>n==='connection'?{requestRejection:()=>undefined}:undefined,inject:(deps,cb)=>{const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path);}},tools:{register:t=>{tool=t;return()=>{};}}});if(typeof off==='function')effects.push(off);return off;},effect:fn=>{const off=fn();if(typeof off==='function')effects.push(off);}};apply(ctx);
  const route=routes.get('/plugin-compat-check/upgrade-preview');assert(route,'Upgrade route not registered');
  const request=async(query,headers={host:'127.0.0.1:8123'},method='GET')=>{let code,text;await route.handler({headers:{'x-dsh-compat-request':'1',...headers},method,url:'/plugin-compat-check/upgrade-preview?'+query,socket:{encrypted:false}},{writeHead:c=>code=c,setHeader(){},end:t=>text=t});return {status:code,body:JSON.parse(text)};};
  try{${body};console.log('UPGRADE_HOST_OK')}finally{for(const off of effects)off();}process.exit(0);`;

@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-26T18:36:37.243Z",
-  "testFiles": 74,
-  "tests": 1170,
+  "recordedAt": "2026-10-26T19:30:21.391Z",
+  "testFiles": 75,
+  "tests": 1186,
   "repositoryFiles": {
-    "total": 351,
+    "total": 354,
     "fixtures": 99,
-    "other": 252
+    "other": 255
   },
   "verification": {
     "platform": "darwin",
@@ -26,7 +26,7 @@
     "sourceContext": {
       "versionSource": "lib/version.mjs",
       "integrationTarget": "main",
-      "scope": "Unpublished 0.1.8 UI, P2 optimizations and P1 recovery/draft protection in current source. Version remains 0.1.7; publication fields describe the historical published 0.1.7 only."
+      "scope": "Unpublished 0.1.8 UI, P1 recovery/drafts and P2 redaction/authentication/list/sampling hardening in current source. Version remains 0.1.7; publication fields describe historical published 0.1.7 only."
     },
     "publication": {
       "releaseTarget": "0.1.7",
@@ -254,6 +254,66 @@
         "privateRootRemoved": true
       },
       "limits": "Drafts are in-memory for the mounted page session; no automatic migration or persistence across page reload. Per-flight report deadline, at most three rounds for continually changing input; client independently bounds its whole request. Ignored cancellation cannot forcibly stop arbitrary host promises, but late results are discarded."
+    },
+    "ui018P2HardeningLocal20261027": {
+      "scope": "Local macOS arm64 and DSH0.2.1-rc.3 only, candidate based on54f719c; no remote CI, release, older-host auth rerun or Windows/Linux-browser certification.",
+      "defaultSuite": {
+        "tests": 1186,
+        "pass": 1178,
+        "skip": 8,
+        "testFiles": 75
+      },
+      "artifactSha256": "36d9217cd280f0219ef57a03c199b6932f5f5739799d7594295f5115115793fe",
+      "redaction": "Quoted/single/nested/case/escaped/unicode/entity labelled credentials hide the whole description; CLI share output matches panel preview/copy; safe identity/location retained. No universal or raw-JSON redaction claim.",
+      "auth": {
+        "realHost": true,
+        "missingAndForgedDenied": true,
+        "launchBearerAndQueryNotBypasses": true,
+        "officialSignedCookieExpiry": true,
+        "expiryClock": "Controlled synchronous +31 days in owned test fixture, restored immediately",
+        "sameOriginCookieRecovery": true
+      },
+      "lists": {
+        "realBrowser": true,
+        "inactiveSyntheticPlugins": 124,
+        "findings": 123,
+        "findingPageSize": 50,
+        "finalFindingPage": 23,
+        "addedRiskCount": 124,
+        "addedRiskPageSize": 50,
+        "versionPluginPageSize": 50,
+        "elements": 1809,
+        "completeExport": true,
+        "actualSamplingTruncation": true,
+        "propertyValuesAbsent": true
+      },
+      "syntheticHarness": {
+        "upgradePlugins": 123,
+        "visibleRiskEntries": 50,
+        "renderedElements": 465,
+        "createdElements": 605,
+        "scope": "Actual generated client in hook harness; not browser layout/latency."
+      },
+      "sampling": {
+        "perService": {
+          "properties": 1000,
+          "methods": 200,
+          "prototypeDepth": 12,
+          "jsonBytes": 65536,
+          "cooperativeMs": 25
+        },
+        "wholeRound": {
+          "services": 1000,
+          "propertyVisits": 10000,
+          "jsonBytes": 1048576,
+          "cooperativeMs": 100,
+          "inputEntries": 50000
+        },
+        "scope": "Names, identity, wanted and metadata counted; skipped services unknown, unrelated captured evidence retains coverage. No native-reflection/ctx.get preemption or intermediate RSS guarantee."
+      },
+      "review": "One independent read-only review; aggregate sampling finding reproduced then fixed via RED/GREEN global bytes/count/properties/time and scoped-coverage regressions, followed by fullsuite.",
+      "productionRequests": 0,
+      "privateRootRemoved": true
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

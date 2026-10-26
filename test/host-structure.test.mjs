@@ -574,7 +574,10 @@ describe("report route enforces the complete local origin authority", () => {
     });
     let route;
     apply({
-      get: () => undefined,
+      get: (name) =>
+        name === "connection"
+          ? { requestRejection: () => undefined }
+          : undefined,
       inject: (deps, fn) =>
         fn(
           deps.includes("webServer")

@@ -47,6 +47,8 @@ Auxiliary tables start collapsed; use the labelled Expand/Collapse buttons. Sect
 
 New risks requires comparable history. A first or incomplete check may have no saved history; this does not mean there is no risk. An OK verdict with no verified calls does not certify business functionality either.
 
+Finding lists, upgrade risk groups, both version inventories and input artifacts use 50-item pages. Added/worsened risks start expanded; other read-only details load on demand. Pagination preserves the complete export. The UI uses the host login session; if authentication fails, reopen the host-provided login URL. Never include that URL or cookies in a report.
+
 ### Saving a manual review
 
 1. Expand a finding in the main results and investigate its source location and suggested next steps.

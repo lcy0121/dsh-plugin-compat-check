@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 /** Owned real-host acceptance: declaration gates, metadata, actual settings UI and reload. */
 import fs from "node:fs";
+import {
+  verifyHostHttpAuth,
+  verifyUi018Hardening,
+} from "./ui018-hardening.mjs";
+import { ownedHostHeaders } from "./owned-host-session.mjs";
 import { verifyUi018 } from "./ui018-acceptance.mjs";
 import { verifyRc3Navigation } from "./rc3-navigation.mjs";
 import { installRc3Fixture } from "./rc3-fixture.mjs";
@@ -537,10 +542,7 @@ try {
       "Actual tool/skill/host activation missing",
     );
     result.hostToolSkill = true;
-    const headers = {
-        "X-DSH-Compat-Request": "1",
-        Authorization: "Bearer " + new URL(host.url).searchParams.get("token"),
-      },
+    const headers = await ownedHostHeaders(host.url),
       reportUrl = new URL("/plugin-compat-check/report?refresh=1", host.url);
     const fetchReport = async () => {
       const r = await fetch(reportUrl, {
@@ -549,6 +551,8 @@ try {
       });
       return { status: r.status, body: await r.json() };
     };
+    if (process.env.DSC_HTTP_AUTH_ACCEPTANCE === "1")
+      result.httpAuth = await verifyHostHttpAuth({ url: host.url, headers });
     let initial = await fetchReport();
     requireTrue(
       initial.status === 200 &&
@@ -1675,6 +1679,64 @@ try {
           inactiveFixtures: true,
         };
       }
+      if (process.env.DSC_UI018_HARDENING === "1")
+        result.ui018Hardening = await verifyUi018Hardening({
+          chrome,
+          evalx,
+          poll,
+          profile,
+          refresh: () => refreshVisibleReport(chrome, evalx, poll),
+          submitUpgrade: async (target) => {
+            await evalx(
+              `document.querySelector('[data-upgrade-preview]').scrollIntoView({block:'center'});document.querySelector('[data-upgrade-preview] > .compat-fold-header button[aria-expanded="false"]')?.click()`,
+            );
+            const cursor = await submitUpgradeTarget(
+              chrome,
+              evalx,
+              poll,
+              target,
+            );
+            let requestId;
+            await poll(
+              () => {
+                for (const event of chrome.events.slice(cursor)) {
+                  const p = event.params || {};
+                  if (
+                    event.method === "Network.requestWillBeSent" &&
+                    new URL(p.request.url).pathname ===
+                      "/plugin-compat-check/upgrade-preview"
+                  )
+                    requestId = p.requestId;
+                  if (
+                    requestId &&
+                    p.requestId === requestId &&
+                    event.method === "Network.loadingFinished"
+                  )
+                    return true;
+                }
+                return false;
+              },
+              "Large upgrade comparison did not finish",
+              40000,
+            );
+            const response = await chrome.send("Network.getResponseBody", {
+              requestId,
+            });
+            await poll(
+              () =>
+                evalx(
+                  `!!document.querySelector('[data-upgrade-result="compared"]')`,
+                ),
+              "Large comparison did not render",
+            );
+            return JSON.parse(
+              response.base64Encoded
+                ? Buffer.from(response.body, "base64").toString()
+                : response.body,
+            );
+          },
+          screenshotDir: process.env.DSC_UI018_SCREENSHOTS,
+        });
       if (process.env.DSC_RC2_SCREENSHOT) {
         const s = await chrome.send("Page.captureScreenshot", {
           format: "png",

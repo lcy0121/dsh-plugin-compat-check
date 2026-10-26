@@ -178,3 +178,50 @@ test("rules和catalog从canonical输入或options保留固定占位，不导出�
     fixture.cleanup();
   }
 });
+
+test("quoted, escaped, mixed-case and nested credential descriptions are hidden as whole fields", async () => {
+  const fixture = packageFixture(
+    "export function apply(ctx){ctx.settings.missing()}",
+  );
+  try {
+    const body = toJSON(
+      run({
+        nm: fixture.nm,
+        dshVersion: version,
+        baseline: false,
+        _ignoreAutoProbe: true,
+      }),
+    );
+    const finding = body.plugins.sample.findings[0];
+    assert(finding);
+    const payloads = [
+      '{"password":"CANARY_QUOTED"}',
+      "{'PaSsWoRd' : 'CANARY_SINGLE'}",
+      '{"outer":{"accessToken":"CANARY_NESTED"}}',
+      String.raw`{\"api_key\":\"CANARY_ESCAPED\"}`,
+      '{"Authorization" : "CANARY_AUTH"}',
+      '{"client-secret":"CANARY_CLIENT"}',
+      '{"pwd":"CANARY_PWD"}',
+      '{"session_id":"CANARY_SESSION"}',
+      '{"Cookie":"CANARY_COOKIE"}',
+      '{"privateKey":"CANARY_PRIVATE"}',
+      String.raw`{"pass\u0077ord":"CANARY_UNICODE"}`,
+      "{&quot;password&quot;:&quot;CANARY_ENTITY&quot;}",
+    ];
+    for (const text of payloads) {
+      finding.basis = `loader error prefix ${text} suffix SHOULD_HIDE_WHOLE_FIELD`;
+      finding.location = { file: "lib/index.js", line: 42 };
+      body.observation.notes = [text];
+      body.plugins.sample.coverage.limitations = [text];
+      const before = JSON.stringify(body),
+        output = renderIssueReport(body);
+      assert.doesNotMatch(output, /CANARY|SHOULD/, text);
+      assert.match(output, /说明包含路径、链接、凭据或控制字符，已隐藏/);
+      assert(output.includes("`sample`"));
+      assert(output.includes("`lib/index.js:42`"));
+      assert.equal(JSON.stringify(body), before);
+    }
+  } finally {
+    fixture.cleanup();
+  }
+});

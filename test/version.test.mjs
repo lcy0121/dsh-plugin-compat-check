@@ -118,7 +118,7 @@ describe('面板报告也带版本', () => {
     const mod = await import(new URL('../plugin/index.js', import.meta.url).href)
     let route = null
     const ctx = {
-      get: () => undefined,
+      get: name => name === "connection" ? {requestRejection:()=>undefined} : undefined,
       inject: (deps, cb) => cb({
         webServer: { register: (r) => { if(r.path==='/plugin-compat-check/report')route = r } },
         tools: null, agents: null, skills: null,

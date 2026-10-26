@@ -469,3 +469,67 @@ test("large report pages bound DOM while filters and full export retain the enti
     h.dispose();
   }
 });
+
+test("a single plugin finding list is paged without truncating its exported report", async () => {
+  const data = sample(),
+    pl = data.report.plugins["@label/broken-client"],
+    seed = pl.findings[0];
+  pl.findings = Array.from({ length: 123 }, (_, i) => ({
+    ...structuredClone(seed),
+    basis: `finding-marker-${i}`,
+    location: { file: "lib/index.js", line: i + 1 },
+  }));
+  data.issueReport = renderIssueReport(data.report);
+  const before = JSON.stringify(data);
+  const h = await panelHarness(data);
+  try {
+    h.field("展开查看 123 条发现与未验证项").props.onClick();
+    h.render();
+    assert.match(h.text(), /finding-marker-0\b/);
+    assert.doesNotMatch(h.text(), /finding-marker-50\b/);
+    h.field("下一页插件发现").props.onClick();
+    h.render();
+    assert.match(h.text(), /finding-marker-50\b/);
+    assert.doesNotMatch(h.text(), /finding-marker-0\b/);
+    h.field("下一页插件发现").props.onClick();
+    h.render();
+    assert.match(h.text(), /finding-marker-122\b/);
+    h.button("预览故障报告").props.onClick();
+    h.render();
+    assert(
+      h.field("故障报告预览").props.value.includes("finding\\-marker\\-122"),
+    );
+    assert.equal(JSON.stringify(data), before);
+  } finally {
+    h.dispose();
+  }
+});
+
+test("issue preview and explicit clipboard copy use the CLI redacted whole-field output", async () => {
+  const data = sample();
+  data.report.plugins["@label/broken-client"].findings[0].basis =
+    'loader failed {"outer":{"PaSsWoRd":"CANARY_QUOTED_CREDENTIAL"}} suffix';
+  data.issueReport = renderIssueReport(data.report);
+  const before = JSON.stringify(data);
+  let copied;
+  const h = await panelHarness(data, {
+    clipboard: {
+      writeText: async (value) => {
+        copied = value;
+      },
+    },
+  });
+  try {
+    h.button("预览故障报告").props.onClick();
+    h.render();
+    const preview = h.field("故障报告预览").props.value;
+    assert.equal(preview, data.issueReport);
+    assert(!preview.includes("CANARY"));
+    assert(preview.includes("`@label/broken-client`"));
+    await h.button("复制报告").props.onClick();
+    assert.equal(copied, preview);
+    assert.equal(JSON.stringify(data), before);
+  } finally {
+    h.dispose();
+  }
+});

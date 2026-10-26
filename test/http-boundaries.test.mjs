@@ -5,9 +5,13 @@ import os from "node:os";
 import path from "node:path";
 import http from "node:http";
 import { writePackageFixture } from "./fixture-utils.mjs";
+import * as LocalRequest from "../plugin/lib/local-request.js";
 import { launchChromePipe } from "../lib/debugger.mjs";
 
-const requestHeaders = { "X-DSH-Compat-Request": "1" };
+const requestHeaders = {
+  "X-DSH-Compat-Request": "1",
+  cookie: "owned-test-session=valid",
+};
 const chromePath =
   process.env.DSC_CHROME ||
   [
@@ -16,7 +20,11 @@ const chromePath =
     "/usr/bin/chromium",
   ].find((file) => fs.existsSync(file));
 
-async function withHost(check) {
+async function withHost(
+  check,
+  authCheck = (req) =>
+    req.headers.cookie === "owned-test-session=valid" ? undefined : 401,
+) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-http-boundary-"));
   const home = path.join(root, "home"),
     nm = path.join(home, "profiles/http/node_modules");
@@ -51,6 +59,10 @@ async function withHost(check) {
   const server = http.createServer(async (req, res) => {
     const route = routes.get(new URL(req.url, "http://localhost").pathname);
     if (!route) {
+      res.setHeader(
+        "set-cookie",
+        "owned-test-session=valid; Path=/; SameSite=Strict",
+      );
       res.setHeader("content-type", "text/html");
       res.end("<!doctype html><body>owned page</body>");
       return;
@@ -72,7 +84,8 @@ async function withHost(check) {
       new URL("../plugin/index.js?http=" + path.basename(root), import.meta.url)
     );
     apply({
-      get: () => undefined,
+      get: (name) =>
+        name === "connection" ? { requestRejection: authCheck } : undefined,
       inject: (deps, fn) => {
         if (!deps.includes("webServer")) return;
         const off = fn({
@@ -188,6 +201,10 @@ test(
     assert.ok(chromePath, "Chrome is required for browser boundary acceptance");
     await withHost(async ({ home, origin, receipts }) => {
       const attack = http.createServer((req, res) => {
+        res.setHeader(
+          "set-cookie",
+          "owned-test-session=valid; Path=/; SameSite=Strict",
+        );
         res.setHeader("content-type", "text/html");
         res.end(
           '<!doctype html><img src="' +
@@ -253,3 +270,129 @@ test(
     });
   },
 );
+
+test("host authentication is required before any report, metadata, preview or review side effect", async () =>
+  withHost(async ({ home, origin }) => {
+    for (const route of [
+      "/report?refresh=1",
+      "/report?metadata=1",
+      "/upgrade-preview?targetVersion=0.2.1-rc.3",
+      "/reviews",
+    ])
+      for (const cookie of [
+        undefined,
+        "owned-test-session=forged",
+        "owned-test-session=expired",
+      ]) {
+        const res = await fetch(origin + "/plugin-compat-check" + route, {
+          method: route === "/reviews" ? "POST" : "GET",
+          headers: {
+            "X-DSH-Compat-Request": "1",
+            ...(cookie ? { cookie } : {}),
+            ...(route === "/reviews"
+              ? { "content-type": "application/json" }
+              : {}),
+          },
+          ...(route === "/reviews" ? { body: "{}" } : {}),
+        });
+        assert.equal(res.status, 401, route);
+        assert.equal(res.headers.get("cache-control"), "no-store");
+        assert.equal(
+          fs.existsSync(path.join(home, "dsh-plugin-compat-check")),
+          false,
+        );
+      }
+    const res = await fetch(origin + "/plugin-compat-check/report?refresh=1", {
+      headers: requestHeaders,
+    });
+    assert.equal(res.status, 200);
+    assert.equal((await res.json()).ok, true);
+  }));
+
+test("host auth method is called with its service receiver and failures never downgrade to CSRF-only access", () => {
+  const req = {
+    headers: { host: "127.0.0.1:8123", "x-dsh-compat-request": "1" },
+    socket: { remoteAddress: "127.0.0.1" },
+  };
+  for (const connection of [
+    undefined,
+    {},
+    {
+      requestRejection() {
+        throw new Error("PRIVATE");
+      },
+    },
+    { requestRejection: () => false },
+    { requestRejection: () => null },
+    { requestRejection: () => Promise.resolve(undefined) },
+  ])
+    assert.equal(
+      LocalRequest.requestRejection({ get: () => connection }, req),
+      503,
+    );
+  const connection = {
+    requestRejection(r) {
+      assert.equal(this, connection);
+      assert.equal(r, req);
+      return undefined;
+    },
+  };
+  assert.equal(
+    LocalRequest.requestRejection({ get: () => connection }, req),
+    null,
+  );
+  for (const rejection of [401, 403])
+    assert.equal(
+      LocalRequest.requestRejection(
+        { get: () => ({ requestRejection: () => rejection }) },
+        req,
+      ),
+      rejection,
+    );
+  assert.equal(
+    LocalRequest.requestRejection(
+      {
+        get() {
+          throw new Error("must not query auth");
+        },
+      },
+      { headers: {} },
+    ),
+    403,
+  );
+});
+
+test("owned acceptance login exchanges only the root launch URL for a signed session cookie", async () => {
+  const { ownedHostHeaders } = await import("../tools/owned-host-session.mjs");
+  let calls = 0;
+  const fetcher = async (url, options) => {
+    calls++;
+    assert.equal(options.redirect, "manual");
+    return {
+      status: 303,
+      headers: new Headers({
+        "set-cookie":
+          "dsh-auth-owned=v1.owned.signature; Path=/; HttpOnly; SameSite=Strict",
+      }),
+    };
+  };
+  const headers = await ownedHostHeaders(
+    "http://127.0.0.1:8123/?token=owned-launch",
+    { fetch: fetcher },
+  );
+  assert.equal(headers.Cookie, "dsh-auth-owned=v1.owned.signature");
+  assert.equal(headers.Authorization, undefined);
+  for (const url of [
+    "https://external.test/?token=owned",
+    "http://127.0.0.1:8123/other?token=owned",
+    "http://127.0.0.1:8123/?token=a&token=b",
+  ])
+    await assert.rejects(ownedHostHeaders(url, { fetch: fetcher }));
+  assert.equal(calls, 1);
+  await assert.rejects(
+    ownedHostHeaders("http://127.0.0.1:8123/?token=owned", {
+      fetch: async () => ({ status: 401, headers: new Headers() }),
+    }),
+    /session/,
+  );
+});

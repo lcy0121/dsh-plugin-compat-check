@@ -158,7 +158,7 @@ test("host HTTP, agent and actual client factory retain future-probe rejection a
     import fs from 'node:fs';
     import {apply} from ${JSON.stringify(new URL("../plugin/index.js", import.meta.url).href)};
     const routes=new Map(),effects=[]; let tool;
-    const ctx={get:()=>undefined,inject:(deps,cb)=>{const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path)}},tools:{register:t=>{tool=t;return()=>{}}}});if(typeof off==='function')effects.push(off);return off;},effect:fn=>{const off=fn();if(typeof off==='function')effects.push(off)}};
+    const ctx={get:n=>n==='connection'?{requestRejection:()=>undefined}:undefined,inject:(deps,cb)=>{const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path)}},tools:{register:t=>{tool=t;return()=>{}}}});if(typeof off==='function')effects.push(off);return off;},effect:fn=>{const off=fn();if(typeof off==='function')effects.push(off)}};
     apply(ctx);
     const request=async()=>{let text,status;await routes.get('/plugin-compat-check/report').handler({headers:{'x-dsh-compat-request':'1',host:'127.0.0.1:8123'},method:'GET',url:'/plugin-compat-check/report?refresh=1',socket:{encrypted:false}},{writeHead:c=>status=c,setHeader(){},end:t=>text=t});return {status,body:JSON.parse(text)}};
     try {

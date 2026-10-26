@@ -479,3 +479,96 @@ test("review metadata full-reads keep the same report preview but invalidate cha
     fs.rmSync(f.root, { recursive: true, force: true });
   }
 });
+
+test("large upgrade groups, version inventories and artifact sources paginate lazily with complete counts", async (t) => {
+  const f = fixture(),
+    data = ordinary();
+  try {
+    const source = path.join(f.nm, "upgrade-demo");
+    for (let i = 0; i < 122; i++) {
+      const name = "upgrade-page-" + String(i).padStart(3, "0"),
+        dir = path.join(f.nm, name);
+      fs.cpSync(source, dir, { recursive: true });
+      const meta = JSON.parse(fs.readFileSync(path.join(dir, "package.json")));
+      meta.name = name;
+      fs.writeFileSync(path.join(dir, "package.json"), JSON.stringify(meta));
+    }
+    const { runUpgradePreview } = await import("../lib/upgrade-preview.mjs");
+    const preview = await runUpgradePreview({
+      nm: f.nm,
+      currentVersion: "0.2.0-rc.2",
+      targetVersion: "0.2.1-rc.2",
+    });
+    assert.equal(preview.summary.added, 123);
+    const before = JSON.stringify(preview);
+    const metrics = {};
+    const h = await panelHarness(data, {
+      metrics,
+      fetcher: async (url) => ({
+        ok: true,
+        json: async () =>
+          structuredClone(
+            String(url).includes("/upgrade-preview") ? preview : data,
+          ),
+      }),
+    });
+    try {
+      enter(h, "0.2.1-rc.2");
+      await click(h);
+      await h.settle();
+      assert(h.field("下一页新增风险"));
+      assert(h.nodes().length < 1600);
+      assert(
+        metrics.created < 3000,
+        "Closed sections must not eagerly build the full inventories",
+      );
+      t.diagnostic(
+        JSON.stringify({
+          syntheticUpgradePlugins: 123,
+          renderedElements: h.nodes().length,
+          createdElements: metrics.created,
+          visibleRiskEntries: 50,
+        }),
+      );
+      assert.equal(
+        h.nodes().filter((n) => n.props["data-upgrade-change"]).length,
+        50,
+      );
+      h.field("下一页新增风险").props.onClick();
+      h.render();
+      assert.match(h.text(), /第\s*2\s*\/\s*3\s*页\s*·\s*共\s*123\s*项/);
+      const toggle = h.find(
+        (n) =>
+          n.type === "button" &&
+          String(n.props["aria-label"]).startsWith("展开目标版本静态结果"),
+      );
+      assert(toggle);
+      toggle.props.onClick();
+      h.render();
+      assert(h.field("下一页目标版本插件"));
+      assert.equal(
+        h.nodes().filter((n) => n.props["data-upgrade-plugin"]).length,
+        50,
+      );
+      h.field("下一页目标版本插件").props.onClick();
+      h.render();
+      assert.equal(
+        h.nodes().filter((n) => n.props["data-upgrade-plugin"]).length,
+        50,
+      );
+      h.field("展开查看输入制品、目录来源与预测限制").props.onClick();
+      h.render();
+      assert(h.field("下一页输入制品"));
+      h.field("下一页输入制品").props.onClick();
+      h.render();
+      h.field("下一页输入制品").props.onClick();
+      h.render();
+      assert.match(h.text(), /第\s*3\s*\/\s*3\s*页\s*·\s*共\s*123\s*项/);
+      assert.equal(JSON.stringify(preview), before);
+    } finally {
+      h.dispose();
+    }
+  } finally {
+    fs.rmSync(f.root, { recursive: true, force: true });
+  }
+});

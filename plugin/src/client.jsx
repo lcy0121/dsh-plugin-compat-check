@@ -298,6 +298,29 @@ function EvidenceLegend() {
   );
 }
 
+// Presentation-only pages retain the full canonical arrays for export and counts.
+function PagedList({ items, label, renderItem }) {
+  const [selection, setSelection] = React.useState(null);
+  const page =
+    selection?.items === items
+      ? Math.min(selection.page, Math.max(0, Math.ceil(items.length / 50) - 1))
+      : 0;
+  const start = page * 50;
+  return h(
+    "div",
+    { "data-paged-list": label },
+    items
+      .slice(start, start + 50)
+      .map((item, i) => renderItem(item, start + i)),
+    h(Pager, {
+      page,
+      total: items.length,
+      label,
+      onPageChange: (next) => setSelection({ items, page: next }),
+    }),
+  );
+}
+
 function Findings(p) {
   var pl = p.plugin;
   if (!pl.findings || pl.findings.length === 0) {
@@ -354,56 +377,60 @@ function Findings(p) {
     "div",
     null,
     p.hideCoverage ? null : h(Coverage, { plugin: pl }),
-    pl.findings.map(function (f, i) {
-      var api = f.service
-        ? f.method
-          ? f.service + "." + f.method
-          : f.service
-        : "(包声明)";
-      var loc = f.location ? f.location.file + ":" + f.location.line : "—";
-      return h(
-        "div",
-        { key: i, style: styles.finding },
-        h(Sev, { severity: f.severity }),
-        h("span", null, " " + (CATEGORY[f.category] || f.category) + " "),
-        h("code", { style: styles.mono }, api),
-        h("span", { style: styles.mono }, " @ " + loc),
-        h(
-          "span",
-          {
-            style: styles.evidence,
-            title:
-              f.certainty === "certain"
-                ? "当前证据足以支持该条发现，可来自明确静态事实或合格运行时观测；不等于影响已实测。"
-                : "当前证据不足以确定该条发现；存在运行时观测也不代表该调用已验证。",
-          },
-          f.certainty === "certain" ? " [确定]" : " [疑似]",
-        ),
-        f.impact
-          ? h(
-              "div",
-              { style: styles.body },
-              (f.impactBasis === "measured"
-                ? "影响（实测）："
-                : f.impactBasis === "inferred"
-                  ? "影响（推断，非实测）："
-                  : "影响（依据未提供）：") + f.impact,
-            )
-          : null,
-        f.basis ? h("div", { style: styles.body }, "依据：" + f.basis) : null,
-        h(
+    h(PagedList, {
+      items: pl.findings,
+      label: p.label || "插件发现",
+      renderItem: function (f, i) {
+        var api = f.service
+          ? f.method
+            ? f.service + "." + f.method
+            : f.service
+          : "(包声明)";
+        var loc = f.location ? f.location.file + ":" + f.location.line : "—";
+        return h(
           "div",
-          { style: { marginTop: "6px" } },
-          h("strong", null, "下一步核实"),
+          { key: i, style: styles.finding, "data-compat-finding": i + 1 },
+          h(Sev, { severity: f.severity }),
+          h("span", null, " " + (CATEGORY[f.category] || f.category) + " "),
+          h("code", { style: styles.mono }, api),
+          h("span", { style: styles.mono }, " @ " + loc),
           h(
-            "ol",
-            { style: { margin: "4px 0", paddingLeft: "22px" } },
-            FindingGuidance.nextSteps(f).map(function (step, j) {
-              return h("li", { key: j }, step);
-            }),
+            "span",
+            {
+              style: styles.evidence,
+              title:
+                f.certainty === "certain"
+                  ? "当前证据足以支持该条发现，可来自明确静态事实或合格运行时观测；不等于影响已实测。"
+                  : "当前证据不足以确定该条发现；存在运行时观测也不代表该调用已验证。",
+            },
+            f.certainty === "certain" ? " [确定]" : " [疑似]",
           ),
-        ),
-      );
+          f.impact
+            ? h(
+                "div",
+                { style: styles.body },
+                (f.impactBasis === "measured"
+                  ? "影响（实测）："
+                  : f.impactBasis === "inferred"
+                    ? "影响（推断，非实测）："
+                    : "影响（依据未提供）：") + f.impact,
+              )
+            : null,
+          f.basis ? h("div", { style: styles.body }, "依据：" + f.basis) : null,
+          h(
+            "div",
+            { style: { marginTop: "6px" } },
+            h("strong", null, "下一步核实"),
+            h(
+              "ol",
+              { style: { margin: "4px 0", paddingLeft: "22px" } },
+              FindingGuidance.nextSteps(f).map(function (step, j) {
+                return h("li", { key: j }, step);
+              }),
+            ),
+          ),
+        );
+      },
     }),
   );
 }
@@ -732,16 +759,45 @@ function DetailBadge(props) {
   );
 }
 
+function UpgradeReportBody({ report, label }) {
+  const names = useMemo(() => Object.keys(report.plugins), [report.plugins]);
+  return h(PagedList, {
+    items: names,
+    label: label + "插件",
+    renderItem: function (name) {
+      const pl = report.plugins[name];
+      return h(
+        "div",
+        { key: name, "data-upgrade-plugin": name, style: { margin: "8px 0" } },
+        h(
+          Fold,
+          {
+            title:
+              name +
+              "@" +
+              (pl.version || "?") +
+              " · " +
+              pl.verdict +
+              (pl.vacuous ? " · 无已验证调用" : "") +
+              " · 发现 " +
+              pl.findings.length,
+            framed: false,
+          },
+          () =>
+            h(Findings, {
+              plugin: pl,
+              hideCoverage: true,
+              label: label + " " + name + "发现",
+            }),
+        ),
+        h(Coverage, { plugin: pl }),
+      );
+    },
+  });
+}
 function UpgradeDetails(p) {
-  var r = p.result;
+  const r = p.result;
   if (!r.ok) return h("div", { role: "status", style: styles.err }, r.error);
-  var groups = [
-    ["added", "新增"],
-    ["worsened", "变重"],
-    ["resolved", "消失"],
-    ["improved", "减轻"],
-    ["unchanged", "不变"],
-  ];
   return h(
     "div",
     { "data-upgrade-result": "compared" },
@@ -767,74 +823,87 @@ function UpgradeDetails(p) {
           "本次没有发现新增或变重的静态风险；目标版本仍可能有原有风险，不等于业务通过。",
         )
       : null,
-    groups.map(function (group) {
-      return r.changes[group[0]].length
+    [
+      ["added", "新增"],
+      ["worsened", "变重"],
+      ["resolved", "消失"],
+      ["improved", "减轻"],
+      ["unchanged", "不变"],
+    ].map(([key, label]) =>
+      r.changes[key].length
         ? h(
-            "details",
+            Fold,
             {
-              key: group[0],
-              open: group[0] === "added" || group[0] === "worsened",
+              key,
+              title: label + "（" + r.changes[key].length + "）",
+              defaultOpen: key === "added" || key === "worsened",
+              framed: false,
             },
-            h(
-              "summary",
-              null,
-              group[1] + "（" + r.changes[group[0]].length + "）",
-            ),
-            r.changes[group[0]].map(function (entry, i) {
-              var f = entry.finding || entry.after;
-              return h(
-                "div",
-                { key: i, style: { margin: "8px 0" } },
-                h(
-                  "div",
-                  null,
-                  entry.plugin +
-                    " · " +
-                    f.category +
-                    " · " +
-                    [f.service, f.method].filter(Boolean).join("."),
-                ),
-                h(
-                  "div",
-                  { style: styles.mono },
-                  f.severity +
-                    " / " +
-                    f.certainty +
-                    " / " +
-                    f.impactBasis +
-                    (f.location
-                      ? " · " + f.location.file + ":" + f.location.line
-                      : ""),
-                ),
-                entry.before
-                  ? h(
+            () =>
+              h(PagedList, {
+                items: r.changes[key],
+                label: label + "风险",
+                renderItem: function (entry, i) {
+                  const f = entry.finding || entry.after;
+                  return h(
+                    "div",
+                    {
+                      key: i,
+                      "data-upgrade-change": key,
+                      style: { margin: "8px 0" },
+                    },
+                    h(
                       "div",
-                      { style: styles.body },
-                      "此前：" +
-                        entry.before.severity +
+                      null,
+                      entry.plugin +
+                        " · " +
+                        f.category +
+                        " · " +
+                        [f.service, f.method].filter(Boolean).join("."),
+                    ),
+                    h(
+                      "div",
+                      { style: styles.mono },
+                      f.severity +
                         " / " +
-                        entry.before.certainty +
+                        f.certainty +
                         " / " +
-                        entry.before.impactBasis,
-                    )
-                  : null,
-                h("div", null, f.impact),
-                h("div", { style: styles.body }, f.basis),
-              );
-            }),
+                        f.impactBasis +
+                        (f.location
+                          ? " · " + f.location.file + ":" + f.location.line
+                          : ""),
+                    ),
+                    entry.before
+                      ? h(
+                          "div",
+                          { style: styles.body },
+                          "此前：" +
+                            entry.before.severity +
+                            " / " +
+                            entry.before.certainty +
+                            " / " +
+                            entry.before.impactBasis,
+                        )
+                      : null,
+                    h("div", null, f.impact),
+                    h("div", { style: styles.body }, f.basis),
+                  );
+                },
+              }),
           )
-        : null;
-    }),
-    ["currentReport", "targetReport"].map(function (side) {
-      var report = r[side],
-        s = report.summary;
+        : null,
+    ),
+    ["currentReport", "targetReport"].map((side) => {
+      const report = r[side],
+        s = report.summary,
+        label = side === "currentReport" ? "当前版本" : "目标版本";
       return h(
-        "details",
-        { key: side },
-        h(
-          "summary",
-          null,
-          (side === "currentReport" ? "当前版本" : "目标版本") +
+        Fold,
+        {
+          key: side,
+          framed: false,
+          title:
+            label +
             "静态结果 " +
             report.dshVersion +
             " · 不兼容 " +
@@ -843,64 +912,55 @@ function UpgradeDetails(p) {
             s.partial +
             " · 未知 " +
             s.unknown,
-        ),
-        Object.keys(report.plugins).map(function (name) {
-          var pl = report.plugins[name];
-          return h(
-            "div",
-            { key: name, style: { margin: "8px 0" } },
-            h(
-              "div",
-              null,
-              name +
-                "@" +
-                (pl.version || "?") +
-                " · " +
-                pl.verdict +
-                (pl.vacuous ? " · 无已验证调用" : ""),
-            ),
-            h(Findings, { plugin: pl }),
-          );
-        }),
+        },
+        () => h(UpgradeReportBody, { report, label }),
       );
     }),
-    h(
-      "details",
-      null,
-      h("summary", null, "查看输入制品、目录来源与预测限制"),
-      h("div", { style: styles.mono }, "输入 SHA-256：" + r.artifact.sha256),
-      r.artifact.packages.map(function (item, i) {
-        return h(
-          "div",
-          { key: i, style: styles.mono },
-          item.name + "@" + (item.version || "?") + " SHA-256：" + item.sha256,
-        );
-      }),
-      ["current", "target"].map(function (side) {
-        var c = r.catalogs[side];
-        return h(
-          "div",
-          { key: side, style: styles.mono },
-          "API 目录：" +
-            c.version +
-            " · " +
-            c.file +
-            " · SHA-256：" +
-            c.sha256 +
-            " · 来源：" +
-            c.source.host +
-            " / " +
-            c.source.client,
-        );
-      }),
+    h(Fold, { framed: false, title: "查看输入制品、目录来源与预测限制" }, () =>
       h(
         "div",
-        { style: styles.mono },
-        "规则：" + r.rules.file + " · SHA-256：" + r.rules.sha256,
+        null,
+        h("div", { style: styles.mono }, "输入 SHA-256：" + r.artifact.sha256),
+        h(PagedList, {
+          items: r.artifact.packages,
+          label: "输入制品",
+          renderItem: (item, i) =>
+            h(
+              "div",
+              { key: i, style: styles.mono },
+              item.name +
+                "@" +
+                (item.version || "?") +
+                " SHA-256：" +
+                item.sha256,
+            ),
+        }),
+        ["current", "target"].map((side) => {
+          const c = r.catalogs[side];
+          return h(
+            "div",
+            { key: side, style: styles.mono },
+            "API 目录：" +
+              c.version +
+              " · " +
+              c.file +
+              " · SHA-256：" +
+              c.sha256 +
+              " · 来源：" +
+              c.source.host +
+              " / " +
+              c.source.client,
+          );
+        }),
+        h(
+          "div",
+          { style: styles.mono },
+          "规则：" + r.rules.file + " · SHA-256：" + r.rules.sha256,
+        ),
+        r.limitations.map((note, i) =>
+          h("div", { key: i, style: styles.paragraph }, note),
+        ),
       ),
-      r.limitations.map(function (note, i) {
-        return h("div", { key: i, style: styles.paragraph }, note);
-      }),
     ),
   );
 }

@@ -6,6 +6,7 @@ export async function panelHarness(
   data,
   {
     clipboard,
+    metrics,
     subject,
     fetcher,
     timers,
@@ -19,15 +20,18 @@ export async function panelHarness(
     cleanups = [];
   let frame, loaded, tree;
   const React = {
-    createElement: (type, props, ...children) => ({
-      type,
-      props: props || {},
-      children: children.length
-        ? children
-        : props?.children === undefined
-          ? []
-          : [props.children],
-    }),
+    createElement: (type, props, ...children) => {
+      if (metrics) metrics.created = (metrics.created || 0) + 1;
+      return {
+        type,
+        props: props || {},
+        children: children.length
+          ? children
+          : props?.children === undefined
+            ? []
+            : [props.children],
+      };
+    },
     useState(initial) {
       const i = frame.i++,
         s = frame.store;
@@ -133,6 +137,7 @@ export async function panelHarness(
     };
   }
   function render() {
+    if (metrics) metrics.created = 0;
     tree = views
       ? views.map((view, i) =>
           walk(

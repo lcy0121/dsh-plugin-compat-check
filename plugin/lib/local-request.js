@@ -42,3 +42,21 @@ export function isTrustedRequest(req) {
     return false;
   }
 }
+
+/** The official synchronous Connection gate owns signatures, expiry and session policy. */
+export function requestRejection(ctx, req) {
+  if (!isTrustedRequest(req)) return 403;
+  try {
+    const connection = ctx.get?.("connection", false);
+    if (typeof connection?.requestRejection !== "function") return 503;
+    const result = connection.requestRejection(req);
+    if (result === undefined) return null;
+    if (result === 401 || result === 403) return result;
+    // An unexpected async implementation is not an authentication success.
+    if (result && typeof result.then === "function")
+      Promise.resolve(result).catch(() => {});
+    return 503;
+  } catch {
+    return 503;
+  }
+}

@@ -33,7 +33,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire as __createRequire } from "node:module";
 import { createHash } from "node:crypto";
 
-import { isTrustedRequest } from "./lib/local-request.js";
+import { requestRejection } from "./lib/local-request.js";
 import { loaderObservations, privateDiagnostic } from "./lib/host-resources.js";
 import {
   assertEnvelope,
@@ -1658,8 +1658,11 @@ function registerUpgradeRoute(ctx, state) {
             });
             res.end(JSON.stringify(body));
           };
-          if (!isTrustedRequest(req))
-            return send(403, { error: "refused: untrusted request" });
+          const rejection = requestRejection(ctx, req);
+          if (rejection !== null)
+            return send(rejection, {
+              error: "请求未通过宿主身份与同源校验；请重新打开宿主登录页面",
+            });
           if (req.method !== "GET")
             return send(405, { error: "升级预检仅支持 GET" });
           try {
@@ -1830,10 +1833,11 @@ function registerFindingReviewRoute(ctx, state) {
             });
             res.end(JSON.stringify(body));
           };
-          if (!isTrustedRequest(req))
-            return send(403, {
+          const rejection = requestRejection(ctx, req);
+          if (rejection !== null)
+            return send(rejection, {
               ok: false,
-              error: "refused: untrusted request",
+              error: "请求未通过宿主身份与同源校验；请重新打开宿主登录页面",
             });
           if (req.method !== "POST")
             return send(405, { ok: false, error: "人工处置仅支持POST" });
@@ -2313,12 +2317,17 @@ export function apply(ctx) {
               handler: async (req, res) => {
                 // 体检结论是本机信息（装了哪些插件、用了哪些 API），
                 // 不该被这台机器上的任意页面读到。
-                if (!isTrustedRequest(req)) {
-                  res.writeHead(403, {
+                const rejection = requestRejection(ctx, req);
+                if (rejection !== null) {
+                  res.writeHead(rejection, {
                     "content-type": "application/json; charset=utf-8",
+                    "cache-control": "no-store",
                   });
                   res.end(
-                    JSON.stringify({ error: "refused: untrusted request" }),
+                    JSON.stringify({
+                      error:
+                        "请求未通过宿主身份与同源校验；请重新打开宿主登录页面",
+                    }),
                   );
                   return;
                 }
