@@ -6251,7 +6251,7 @@ window.__ModuleLoader__.load({
 
     // compat:styles
     var styles_default =
-      '.dsc-ui .relative {\n  position: relative;\n}\n\n.dsc-ui .mb-3 {\n  margin-bottom: 0.75rem;\n}\n\n.dsc-ui .block {\n  display: block;\n}\n\n.dsc-ui .inline {\n  display: inline;\n}\n\n.dsc-ui .flex {\n  display: flex;\n}\n\n.dsc-ui .inline-flex {\n  display: inline-flex;\n}\n\n.dsc-ui .table {\n  display: table;\n}\n\n.dsc-ui .table-caption {\n  display: table-caption;\n}\n\n.dsc-ui .table-cell {\n  display: table-cell;\n}\n\n.dsc-ui .table-row {\n  display: table-row;\n}\n\n.dsc-ui .hidden {\n  display: none;\n}\n\n.dsc-ui .h-10 {\n  height: 2.5rem;\n}\n\n.dsc-ui .h-8 {\n  height: 2rem;\n}\n\n.dsc-ui .h-9 {\n  height: 2.25rem;\n}\n\n.dsc-ui .h-full {\n  height: 100%;\n}\n\n.dsc-ui .h-px {\n  height: 1px;\n}\n\n.dsc-ui .min-h-20 {\n  min-height: 5rem;\n}\n\n.dsc-ui .w-full {\n  width: 100%;\n}\n\n.dsc-ui .w-px {\n  width: 1px;\n}\n\n.dsc-ui .max-w-full {\n  max-width: 100%;\n}\n\n.dsc-ui .shrink-0 {\n  flex-shrink: 0;\n}\n\n.dsc-ui .caption-bottom {\n  caption-side: bottom;\n}\n\n.dsc-ui .items-center {\n  align-items: center;\n}\n\n.dsc-ui .justify-center {\n  justify-content: center;\n}\n\n.dsc-ui .gap-2 {\n  gap: 0.5rem;\n}\n\n.dsc-ui .overflow-auto {\n  overflow: auto;\n}\n\n.dsc-ui .whitespace-nowrap {\n  white-space: nowrap;\n}\n\n.dsc-ui .rounded-lg {\n  border-radius: 0.5rem;\n}\n\n.dsc-ui .rounded-md {\n  border-radius: 0.375rem;\n}\n\n.dsc-ui .rounded-xl {\n  border-radius: 0.75rem;\n}\n\n.dsc-ui .border {\n  border-width: 1px;\n}\n\n.dsc-ui .border-b {\n  border-bottom-width: 1px;\n}\n\n.dsc-ui .border-border {\n  --tw-border-opacity: 1;\n  border-color: hsl(var(--dsc-border) / var(--tw-border-opacity, 1));\n}\n\n.dsc-ui .border-input {\n  --tw-border-opacity: 1;\n  border-color: hsl(var(--dsc-input) / var(--tw-border-opacity, 1));\n}\n\n.dsc-ui .bg-background {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-background) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-border {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-border) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-card {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-card) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-muted\\/40 {\n  background-color: hsl(var(--dsc-muted) / 0.4);\n}\n\n.dsc-ui .bg-primary {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-primary) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-secondary {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-secondary) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-transparent {\n  background-color: transparent;\n}\n\n.dsc-ui .p-3 {\n  padding: 0.75rem;\n}\n\n.dsc-ui .p-4 {\n  padding: 1rem;\n}\n\n.dsc-ui .px-2 {\n  padding-left: 0.5rem;\n  padding-right: 0.5rem;\n}\n\n.dsc-ui .px-3 {\n  padding-left: 0.75rem;\n  padding-right: 0.75rem;\n}\n\n.dsc-ui .px-4 {\n  padding-left: 1rem;\n  padding-right: 1rem;\n}\n\n.dsc-ui .py-0\\.5 {\n  padding-top: 0.125rem;\n  padding-bottom: 0.125rem;\n}\n\n.dsc-ui .py-1 {\n  padding-top: 0.25rem;\n  padding-bottom: 0.25rem;\n}\n\n.dsc-ui .py-2 {\n  padding-top: 0.5rem;\n  padding-bottom: 0.5rem;\n}\n\n.dsc-ui .py-3 {\n  padding-top: 0.75rem;\n  padding-bottom: 0.75rem;\n}\n\n.dsc-ui .text-left {\n  text-align: left;\n}\n\n.dsc-ui .align-top {\n  vertical-align: top;\n}\n\n.dsc-ui .align-middle {\n  vertical-align: middle;\n}\n\n.dsc-ui .text-sm {\n  font-size: var(--dsc-font-body);\n  line-height: 1.6;\n}\n\n.dsc-ui .text-xs {\n  font-size: var(--dsc-font-small);\n  line-height: 1.6;\n}\n\n.dsc-ui .font-medium {\n  font-weight: 500;\n}\n\n.dsc-ui .font-semibold {\n  font-weight: 600;\n}\n\n.dsc-ui .leading-none {\n  line-height: 1;\n}\n\n.dsc-ui .text-card-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-card-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-muted-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-muted-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-primary-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-primary-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-secondary-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-secondary-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .shadow-sm {\n  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);\n  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);\n  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);\n}\n\n.dsc-ui .outline {\n  outline-style: solid;\n}\n\n.dsc-ui .filter {\n  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);\n}\n\n.dsc-ui .transition-colors {\n  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;\n  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  transition-duration: 150ms;\n}\n\n.dsc-ui {\n  box-sizing: border-box;\n  --dsc-font-body: 13px;\n  --dsc-font-heading: 14px;\n  --dsc-font-small: 12px;\n  --dsc-background: 0 0% 100%;\n  --dsc-foreground: 240 10% 12%;\n  --dsc-card: 0 0% 100%;\n  --dsc-card-foreground: 240 10% 12%;\n  --dsc-primary: 240 6% 18%;\n  --dsc-primary-foreground: 0 0% 98%;\n  --dsc-secondary: 240 5% 96%;\n  --dsc-secondary-foreground: 240 6% 18%;\n  --dsc-muted: 240 5% 96%;\n  --dsc-muted-foreground: 240 4% 40%;\n  --dsc-accent: 240 5% 94%;\n  --dsc-accent-foreground: 240 6% 18%;\n  --dsc-border: 240 6% 88%;\n  --dsc-input: 240 6% 84%;\n  --dsc-ring: 240 5% 40%;\n  font:\n    var(--dsc-font-body) / 1.6 system-ui,\n    -apple-system,\n    sans-serif;\n  color: hsl(var(--dsc-foreground));\n  text-align: left;\n  min-width: 0;\n}\n.dsc-ui[data-theme="dark"] {\n  --dsc-background: 240 6% 11%;\n  --dsc-foreground: 0 0% 94%;\n  --dsc-card: 240 5% 13%;\n  --dsc-card-foreground: 0 0% 94%;\n  --dsc-primary: 0 0% 94%;\n  --dsc-primary-foreground: 240 6% 12%;\n  --dsc-secondary: 240 4% 20%;\n  --dsc-secondary-foreground: 0 0% 94%;\n  --dsc-muted: 240 4% 20%;\n  --dsc-muted-foreground: 240 5% 68%;\n  --dsc-accent: 240 4% 23%;\n  --dsc-accent-foreground: 0 0% 94%;\n  --dsc-border: 240 4% 28%;\n  --dsc-input: 240 4% 34%;\n  --dsc-ring: 240 5% 72%;\n}\n.dsc-ui *,\n.dsc-ui *::before,\n.dsc-ui *::after {\n  box-sizing: border-box;\n  border-style: solid;\n  border-width: 0;\n}\n.dsc-ui button,\n.dsc-ui input,\n.dsc-ui select,\n.dsc-ui textarea {\n  font: inherit;\n  color: inherit;\n}\n.dsc-ui button {\n  cursor: pointer;\n}\n.dsc-ui button:disabled {\n  cursor: not-allowed;\n}\n.dsc-ui p {\n  margin: 8px 0;\n}\n.dsc-ui h3 {\n  margin: 0 0 12px;\n  font-size: var(--dsc-font-heading);\n  font-weight: 600;\n}\n.dsc-ui table {\n  border-collapse: collapse;\n  text-align: left;\n}\n.dsc-ui code {\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n}\n.dsc-ui :is(button, input, select, textarea):focus-visible {\n  outline: 2px solid hsl(var(--dsc-ring));\n  outline-offset: 3px;\n}\n.dsc-ui .compat-page {\n  display: grid;\n  gap: 16px;\n  padding: 8px 0 24px;\n  min-width: 0;\n}\n.dsc-ui .compat-primary {\n  padding: 20px;\n  min-width: 0;\n}\n.dsc-ui .compat-heading {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  gap: 12px;\n}\n.dsc-ui .compat-title {\n  font-size: var(--dsc-font-heading);\n  font-weight: 600;\n  letter-spacing: normal;\n  margin: 0;\n}\n.dsc-ui .compat-subtitle {\n  color: hsl(var(--dsc-muted-foreground));\n  margin: 0;\n}\n.dsc-ui .compat-toolbar {\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 8px;\n  margin: 16px 0 10px;\n}\n.dsc-ui .compat-toolbar input {\n  width: 220px;\n  max-width: 100%;\n}\n.dsc-ui .compat-metrics {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 8px;\n  margin: 16px 0;\n}\n.dsc-ui .compat-metrics > div {\n  flex: 1;\n  min-width: 100px;\n  padding: 10px 14px;\n  border: 1px solid hsl(var(--dsc-border));\n  border-radius: 8px;\n  background: hsl(var(--dsc-muted) / 0.45);\n}\n.dsc-ui .compat-metrics strong {\n  font-size: 22px;\n  font-weight: 600;\n  margin-right: 8px;\n}\n.dsc-ui .compat-meta {\n  color: hsl(var(--dsc-muted-foreground));\n  font-size: var(--dsc-font-body);\n  overflow-wrap: anywhere;\n}\n.dsc-ui .compat-report-context,\n.dsc-ui .compat-report-meta,\n.dsc-ui .compat-report-meta details {\n  min-width: 0;\n  max-width: 100%;\n  overflow-wrap: anywhere;\n  word-break: normal;\n}\n.dsc-ui .compat-report-meta {\n  margin-top: 10px;\n}\n.dsc-ui .compat-section-divider {\n  margin-top: 16px;\n}\n.dsc-ui .compat-results-divider {\n  margin: 14px 0 8px;\n}\n.dsc-ui .compat-report-information {\n  min-width: 0;\n  padding: 16px;\n  overflow-wrap: anywhere;\n}\n.dsc-ui .compat-results {\n  min-width: 580px;\n  table-layout: auto;\n}\n.dsc-ui .compat-results th:first-child,\n.dsc-ui .compat-results td:first-child {\n  min-width: 220px;\n  width: 28%;\n  overflow-wrap: break-word;\n}\n.dsc-ui .compat-results th:nth-child(2),\n.dsc-ui .compat-results td:nth-child(2) {\n  width: 110px;\n  white-space: nowrap;\n}\n.dsc-ui .compat-auxiliary {\n  display: grid;\n  gap: 12px;\n  min-width: 0;\n}\n.dsc-ui .compat-auxiliary > section {\n  padding: 16px;\n  min-width: 0;\n}\n.dsc-ui .compat-fold {\n  min-width: 0;\n  margin: 12px 0;\n}\n.dsc-ui .compat-fold-header {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  justify-content: space-between;\n  gap: 12px;\n  padding: 12px 16px;\n}\n.dsc-ui .compat-fold-title {\n  display: flex;\n  flex: 1 1 160px;\n  align-items: center;\n  gap: 8px;\n  font-weight: 600;\n  min-width: 0;\n}\n.dsc-ui .compat-count {\n  font-size: var(--dsc-font-body);\n  font-weight: 400;\n  color: hsl(var(--dsc-muted-foreground));\n}\n.dsc-ui .compat-fold-content {\n  padding: 0 16px 16px;\n  min-width: 0;\n}\n.dsc-ui .compat-relation-table {\n  min-width: 900px;\n  table-layout: auto;\n}\n.dsc-ui .compat-relation-table :is(th, td) {\n  min-width: 100px;\n  overflow-wrap: break-word;\n  word-break: normal;\n}\n.dsc-ui .compat-relation-table :is(th, td):first-child {\n  min-width: 240px;\n  width: 26%;\n}\n.dsc-ui .compat-relation-table :is(th, td):nth-child(2) {\n  min-width: 280px;\n  width: 30%;\n}\n.dsc-ui .compat-relation-table th {\n  vertical-align: top;\n}\n.dsc-ui [data-slot="badge"][data-tone="neutral"] {\n  border-color: hsl(var(--dsc-border));\n  background: hsl(var(--dsc-muted));\n  color: hsl(var(--dsc-muted-foreground));\n}\n.dsc-ui [data-slot="badge"][data-tone="ok"] {\n  border-color: #16a34a40;\n  background: #16a34a15;\n  color: #15803d;\n}\n.dsc-ui [data-slot="badge"][data-tone="partial"] {\n  border-color: #d9770640;\n  background: #d9770615;\n  color: #a65306;\n}\n.dsc-ui [data-slot="badge"][data-tone="broken"] {\n  border-color: #dc262640;\n  background: #dc262615;\n  color: #c92525;\n}\n.dsc-ui[data-theme="dark"] [data-slot="badge"][data-tone="ok"] {\n  color: #86efac;\n}\n.dsc-ui[data-theme="dark"] [data-slot="badge"][data-tone="partial"] {\n  color: #fcd34d;\n}\n.dsc-ui[data-theme="dark"] [data-slot="badge"][data-tone="broken"] {\n  color: #fca5a5;\n}\n.dsc-ui.dsc-inline {\n  display: inline;\n}\n@media (max-width: 640px) {\n  .dsc-ui .compat-primary {\n    padding: 14px;\n  }\n  .dsc-ui .compat-title {\n    font-size: var(--dsc-font-heading);\n  }\n  .dsc-ui .compat-heading {\n    gap: 8px;\n  }\n  .dsc-ui .compat-metrics > div {\n    min-width: 90px;\n    padding: 8px 10px;\n  }\n}\n\n.dsc-ui .compat-fold-title {\n  margin: 0;\n  overflow-wrap: anywhere;\n}\n.dsc-ui .compat-fold-header > h3 {\n  font-size: var(--dsc-font-heading);\n}\n.dsc-ui .compat-disclosure {\n  margin: 8px 0;\n}\n.dsc-ui .compat-disclosure > .compat-fold-header {\n  padding: 0;\n  gap: 8px;\n}\n.dsc-ui .compat-disclosure > .compat-fold-content {\n  padding: 8px 0 0;\n}\n.dsc-ui [data-slot="collapsible-content"][hidden] {\n  display: none;\n}\n\n.dsc-ui .compat-fold-header > button {\n  margin-left: auto;\n}\n.dsc-ui .compat-count {\n  white-space: nowrap;\n}\n.dsc-ui .placeholder\\:text-muted-foreground::placeholder {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-muted-foreground) / var(--tw-text-opacity, 1));\n}\n.dsc-ui .hover\\:bg-accent:hover {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-accent) / var(--tw-bg-opacity, 1));\n}\n.dsc-ui .hover\\:bg-muted\\/50:hover {\n  background-color: hsl(var(--dsc-muted) / 0.5);\n}\n.dsc-ui .hover\\:bg-primary\\/90:hover {\n  background-color: hsl(var(--dsc-primary) / 0.9);\n}\n.dsc-ui .hover\\:bg-secondary\\/80:hover {\n  background-color: hsl(var(--dsc-secondary) / 0.8);\n}\n.dsc-ui .hover\\:text-accent-foreground:hover {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-accent-foreground) / var(--tw-text-opacity, 1));\n}\n.dsc-ui .focus-visible\\:outline-none:focus-visible {\n  outline: 2px solid transparent;\n  outline-offset: 2px;\n}\n.dsc-ui .focus-visible\\:ring-2:focus-visible {\n  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);\n  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);\n  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);\n}\n.dsc-ui .focus-visible\\:ring-ring:focus-visible {\n  --tw-ring-opacity: 1;\n  --tw-ring-color: hsl(var(--dsc-ring) / var(--tw-ring-opacity, 1));\n}\n.dsc-ui .focus-visible\\:ring-offset-2:focus-visible {\n  --tw-ring-offset-width: 2px;\n}\n.dsc-ui .disabled\\:pointer-events-none:disabled {\n  pointer-events: none;\n}\n.dsc-ui .disabled\\:cursor-not-allowed:disabled {\n  cursor: not-allowed;\n}\n.dsc-ui .disabled\\:opacity-50:disabled {\n  opacity: 0.5;\n}\n.dsc-ui :is(.\\[\\&_tr\\:last-child\\]\\:border-0 tr:last-child) {\n  border-width: 0px;\n}\n.dsc-ui :is(.\\[\\&_tr\\]\\:border-b tr) {\n  border-bottom-width: 1px;\n}\n';
+      '.dsc-ui .relative {\n  position: relative;\n}\n\n.dsc-ui .mb-3 {\n  margin-bottom: 0.75rem;\n}\n\n.dsc-ui .block {\n  display: block;\n}\n\n.dsc-ui .inline {\n  display: inline;\n}\n\n.dsc-ui .flex {\n  display: flex;\n}\n\n.dsc-ui .inline-flex {\n  display: inline-flex;\n}\n\n.dsc-ui .table {\n  display: table;\n}\n\n.dsc-ui .table-caption {\n  display: table-caption;\n}\n\n.dsc-ui .table-cell {\n  display: table-cell;\n}\n\n.dsc-ui .table-row {\n  display: table-row;\n}\n\n.dsc-ui .hidden {\n  display: none;\n}\n\n.dsc-ui .h-10 {\n  height: 2.5rem;\n}\n\n.dsc-ui .h-8 {\n  height: 2rem;\n}\n\n.dsc-ui .h-9 {\n  height: 2.25rem;\n}\n\n.dsc-ui .h-full {\n  height: 100%;\n}\n\n.dsc-ui .h-px {\n  height: 1px;\n}\n\n.dsc-ui .min-h-20 {\n  min-height: 5rem;\n}\n\n.dsc-ui .w-full {\n  width: 100%;\n}\n\n.dsc-ui .w-px {\n  width: 1px;\n}\n\n.dsc-ui .max-w-full {\n  max-width: 100%;\n}\n\n.dsc-ui .shrink-0 {\n  flex-shrink: 0;\n}\n\n.dsc-ui .caption-bottom {\n  caption-side: bottom;\n}\n\n.dsc-ui .items-center {\n  align-items: center;\n}\n\n.dsc-ui .justify-center {\n  justify-content: center;\n}\n\n.dsc-ui .gap-2 {\n  gap: 0.5rem;\n}\n\n.dsc-ui .overflow-auto {\n  overflow: auto;\n}\n\n.dsc-ui .whitespace-nowrap {\n  white-space: nowrap;\n}\n\n.dsc-ui .rounded-lg {\n  border-radius: 0.5rem;\n}\n\n.dsc-ui .rounded-md {\n  border-radius: 0.375rem;\n}\n\n.dsc-ui .rounded-xl {\n  border-radius: 0.75rem;\n}\n\n.dsc-ui .border {\n  border-width: 1px;\n}\n\n.dsc-ui .border-b {\n  border-bottom-width: 1px;\n}\n\n.dsc-ui .border-border {\n  --tw-border-opacity: 1;\n  border-color: hsl(var(--dsc-border) / var(--tw-border-opacity, 1));\n}\n\n.dsc-ui .border-input {\n  --tw-border-opacity: 1;\n  border-color: hsl(var(--dsc-input) / var(--tw-border-opacity, 1));\n}\n\n.dsc-ui .bg-background {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-background) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-border {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-border) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-card {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-card) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-muted\\/40 {\n  background-color: hsl(var(--dsc-muted) / 0.4);\n}\n\n.dsc-ui .bg-primary {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-primary) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-secondary {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-secondary) / var(--tw-bg-opacity, 1));\n}\n\n.dsc-ui .bg-transparent {\n  background-color: transparent;\n}\n\n.dsc-ui .p-3 {\n  padding: 0.75rem;\n}\n\n.dsc-ui .p-4 {\n  padding: 1rem;\n}\n\n.dsc-ui .px-2 {\n  padding-left: 0.5rem;\n  padding-right: 0.5rem;\n}\n\n.dsc-ui .px-3 {\n  padding-left: 0.75rem;\n  padding-right: 0.75rem;\n}\n\n.dsc-ui .px-4 {\n  padding-left: 1rem;\n  padding-right: 1rem;\n}\n\n.dsc-ui .py-0\\.5 {\n  padding-top: 0.125rem;\n  padding-bottom: 0.125rem;\n}\n\n.dsc-ui .py-1 {\n  padding-top: 0.25rem;\n  padding-bottom: 0.25rem;\n}\n\n.dsc-ui .py-2 {\n  padding-top: 0.5rem;\n  padding-bottom: 0.5rem;\n}\n\n.dsc-ui .py-3 {\n  padding-top: 0.75rem;\n  padding-bottom: 0.75rem;\n}\n\n.dsc-ui .text-left {\n  text-align: left;\n}\n\n.dsc-ui .align-top {\n  vertical-align: top;\n}\n\n.dsc-ui .align-middle {\n  vertical-align: middle;\n}\n\n.dsc-ui .text-sm {\n  font-size: var(--dsc-font-body);\n  line-height: 1.6;\n}\n\n.dsc-ui .text-xs {\n  font-size: var(--dsc-font-small);\n  line-height: 1.6;\n}\n\n.dsc-ui .font-medium {\n  font-weight: 500;\n}\n\n.dsc-ui .font-semibold {\n  font-weight: 600;\n}\n\n.dsc-ui .leading-none {\n  line-height: 1;\n}\n\n.dsc-ui .text-card-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-card-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-muted-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-muted-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-primary-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-primary-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .text-secondary-foreground {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-secondary-foreground) / var(--tw-text-opacity, 1));\n}\n\n.dsc-ui .shadow-sm {\n  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);\n  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);\n  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);\n}\n\n.dsc-ui .outline {\n  outline-style: solid;\n}\n\n.dsc-ui .filter {\n  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);\n}\n\n.dsc-ui .transition-colors {\n  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;\n  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  transition-duration: 150ms;\n}\n\n.dsc-ui {\n  box-sizing: border-box;\n  --dsc-font-body: 13px;\n  --dsc-font-heading: 14px;\n  --dsc-font-small: 12px;\n  --dsc-background: 0 0% 100%;\n  --dsc-foreground: 240 10% 12%;\n  --dsc-card: 0 0% 100%;\n  --dsc-card-foreground: 240 10% 12%;\n  --dsc-primary: 240 6% 18%;\n  --dsc-primary-foreground: 0 0% 98%;\n  --dsc-secondary: 240 5% 96%;\n  --dsc-secondary-foreground: 240 6% 18%;\n  --dsc-muted: 240 5% 96%;\n  --dsc-muted-foreground: 240 4% 40%;\n  --dsc-accent: 240 5% 94%;\n  --dsc-accent-foreground: 240 6% 18%;\n  --dsc-border: 240 6% 88%;\n  --dsc-input: 240 6% 84%;\n  --dsc-ring: 240 5% 40%;\n  font:\n    var(--dsc-font-body) / 1.6 system-ui,\n    -apple-system,\n    sans-serif;\n  color: hsl(var(--dsc-foreground));\n  text-align: left;\n  min-width: 0;\n}\n.dsc-ui[data-theme="dark"] {\n  --dsc-background: 240 6% 11%;\n  --dsc-foreground: 0 0% 94%;\n  --dsc-card: 240 5% 13%;\n  --dsc-card-foreground: 0 0% 94%;\n  --dsc-primary: 0 0% 94%;\n  --dsc-primary-foreground: 240 6% 12%;\n  --dsc-secondary: 240 4% 20%;\n  --dsc-secondary-foreground: 0 0% 94%;\n  --dsc-muted: 240 4% 20%;\n  --dsc-muted-foreground: 240 5% 68%;\n  --dsc-accent: 240 4% 23%;\n  --dsc-accent-foreground: 0 0% 94%;\n  --dsc-border: 240 4% 28%;\n  --dsc-input: 240 4% 34%;\n  --dsc-ring: 240 5% 72%;\n}\n.dsc-ui *,\n.dsc-ui *::before,\n.dsc-ui *::after {\n  box-sizing: border-box;\n  border-style: solid;\n  border-width: 0;\n}\n.dsc-ui button,\n.dsc-ui input,\n.dsc-ui select,\n.dsc-ui textarea {\n  font: inherit;\n  color: inherit;\n}\n.dsc-ui button {\n  cursor: pointer;\n}\n.dsc-ui button:disabled {\n  cursor: not-allowed;\n}\n.dsc-ui p {\n  margin: 8px 0;\n}\n.dsc-ui h3 {\n  margin: 0 0 12px;\n  font-size: var(--dsc-font-heading);\n  font-weight: 600;\n}\n.dsc-ui table {\n  border-collapse: collapse;\n  text-align: left;\n}\n.dsc-ui code {\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n}\n.dsc-ui :is(button, input, select, textarea):focus-visible {\n  outline: 2px solid hsl(var(--dsc-ring));\n  outline-offset: 3px;\n}\n.dsc-ui .compat-page {\n  display: grid;\n  gap: 16px;\n  padding: 8px 0 24px;\n  min-width: 0;\n}\n.dsc-ui .compat-primary {\n  padding: 20px;\n  min-width: 0;\n}\n.dsc-ui .compat-heading {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  gap: 12px;\n}\n.dsc-ui .compat-title {\n  font-size: var(--dsc-font-heading);\n  font-weight: 600;\n  letter-spacing: normal;\n  margin: 0;\n}\n.dsc-ui .compat-subtitle {\n  color: hsl(var(--dsc-muted-foreground));\n  margin: 0;\n}\n.dsc-ui .compat-toolbar {\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 8px;\n  margin: 16px 0 10px;\n}\n.dsc-ui .compat-toolbar input {\n  width: 220px;\n  max-width: 100%;\n}\n.dsc-ui .compat-metrics {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 8px;\n  margin: 16px 0;\n}\n.dsc-ui .compat-metrics > div {\n  flex: 1;\n  min-width: 100px;\n  padding: 10px 14px;\n  border: 1px solid hsl(var(--dsc-border));\n  border-radius: 8px;\n  background: hsl(var(--dsc-muted) / 0.45);\n}\n.dsc-ui .compat-metrics strong {\n  font-size: 22px;\n  font-weight: 600;\n  margin-right: 8px;\n}\n.dsc-ui .compat-meta {\n  color: hsl(var(--dsc-muted-foreground));\n  font-size: var(--dsc-font-body);\n  overflow-wrap: anywhere;\n}\n.dsc-ui .compat-report-context,\n.dsc-ui .compat-report-meta,\n.dsc-ui .compat-report-meta details {\n  min-width: 0;\n  max-width: 100%;\n  overflow-wrap: anywhere;\n  word-break: normal;\n}\n.dsc-ui .compat-report-meta {\n  margin-top: 10px;\n}\n.dsc-ui .compat-section-divider {\n  margin-top: 16px;\n}\n.dsc-ui .compat-results-divider {\n  margin: 14px 0 8px;\n}\n.dsc-ui .compat-report-information {\n  min-width: 0;\n  padding: 16px;\n  overflow-wrap: anywhere;\n}\n.dsc-ui .compat-results {\n  min-width: 580px;\n  table-layout: auto;\n}\n.dsc-ui .compat-results th:first-child,\n.dsc-ui .compat-results td:first-child {\n  min-width: 220px;\n  width: 28%;\n  overflow-wrap: break-word;\n}\n.dsc-ui .compat-results th:nth-child(2),\n.dsc-ui .compat-results td:nth-child(2) {\n  width: 110px;\n  white-space: nowrap;\n}\n.dsc-ui .compat-auxiliary {\n  display: grid;\n  gap: 12px;\n  min-width: 0;\n}\n.dsc-ui .compat-auxiliary > section {\n  padding: 16px;\n  min-width: 0;\n}\n.dsc-ui .compat-fold {\n  min-width: 0;\n  margin: 12px 0;\n}\n.dsc-ui .compat-fold-header {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  justify-content: space-between;\n  gap: 12px;\n  padding: 12px 16px;\n}\n.dsc-ui .compat-fold-title {\n  display: flex;\n  flex: 1 1 160px;\n  align-items: center;\n  gap: 8px;\n  font-weight: 600;\n  min-width: 0;\n}\n.dsc-ui .compat-count {\n  font-size: var(--dsc-font-body);\n  font-weight: 400;\n  color: hsl(var(--dsc-muted-foreground));\n}\n.dsc-ui .compat-fold-content {\n  padding: 0 16px 16px;\n  min-width: 0;\n}\n.dsc-ui .compat-relation-table {\n  min-width: 900px;\n  table-layout: auto;\n}\n.dsc-ui .compat-relation-table :is(th, td) {\n  min-width: 100px;\n  overflow-wrap: break-word;\n  word-break: normal;\n}\n.dsc-ui .compat-relation-table :is(th, td):first-child {\n  min-width: 240px;\n  width: 26%;\n}\n.dsc-ui .compat-relation-table :is(th, td):nth-child(2) {\n  min-width: 280px;\n  width: 30%;\n}\n.dsc-ui .compat-relation-table th {\n  vertical-align: top;\n}\n.dsc-ui [data-slot="badge"][data-tone="neutral"] {\n  border-color: hsl(var(--dsc-border));\n  background: hsl(var(--dsc-muted));\n  color: hsl(var(--dsc-muted-foreground));\n}\n.dsc-ui [data-slot="badge"][data-tone="ok"] {\n  border-color: #16a34a40;\n  background: #16a34a15;\n  color: #15803d;\n}\n.dsc-ui [data-slot="badge"][data-tone="partial"] {\n  border-color: #d9770640;\n  background: #d9770615;\n  color: #a65306;\n}\n.dsc-ui [data-slot="badge"][data-tone="broken"] {\n  border-color: #dc262640;\n  background: #dc262615;\n  color: #c92525;\n}\n.dsc-ui[data-theme="dark"] [data-slot="badge"][data-tone="ok"] {\n  color: #86efac;\n}\n.dsc-ui[data-theme="dark"] [data-slot="badge"][data-tone="partial"] {\n  color: #fcd34d;\n}\n.dsc-ui[data-theme="dark"] [data-slot="badge"][data-tone="broken"] {\n  color: #fca5a5;\n}\n.dsc-ui.dsc-inline {\n  display: inline;\n}\n@media (max-width: 640px) {\n  .dsc-ui .compat-primary {\n    padding: 14px;\n  }\n  .dsc-ui .compat-title {\n    font-size: var(--dsc-font-heading);\n  }\n  .dsc-ui .compat-heading {\n    gap: 8px;\n  }\n  .dsc-ui .compat-metrics > div {\n    min-width: 90px;\n    padding: 8px 10px;\n  }\n}\n\n.dsc-ui .compat-fold-title {\n  color: hsl(var(--dsc-foreground));\n  margin: 0;\n  overflow-wrap: anywhere;\n}\n.dsc-ui .compat-fold-header > h3 {\n  font-size: var(--dsc-font-heading);\n}\n.dsc-ui .compat-disclosure {\n  margin: 8px 0;\n}\n.dsc-ui .compat-disclosure > .compat-fold-header {\n  padding: 0;\n  gap: 8px;\n}\n.dsc-ui .compat-disclosure > .compat-fold-content {\n  padding: 8px 0 0;\n}\n.dsc-ui [data-slot="collapsible-content"][hidden] {\n  display: none;\n}\n\n.dsc-ui .compat-fold-header > button {\n  margin-left: auto;\n}\n.dsc-ui .compat-count {\n  white-space: nowrap;\n}\n.dsc-ui .placeholder\\:text-muted-foreground::placeholder {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-muted-foreground) / var(--tw-text-opacity, 1));\n}\n.dsc-ui .hover\\:bg-accent:hover {\n  --tw-bg-opacity: 1;\n  background-color: hsl(var(--dsc-accent) / var(--tw-bg-opacity, 1));\n}\n.dsc-ui .hover\\:bg-muted\\/50:hover {\n  background-color: hsl(var(--dsc-muted) / 0.5);\n}\n.dsc-ui .hover\\:bg-primary\\/90:hover {\n  background-color: hsl(var(--dsc-primary) / 0.9);\n}\n.dsc-ui .hover\\:bg-secondary\\/80:hover {\n  background-color: hsl(var(--dsc-secondary) / 0.8);\n}\n.dsc-ui .hover\\:text-accent-foreground:hover {\n  --tw-text-opacity: 1;\n  color: hsl(var(--dsc-accent-foreground) / var(--tw-text-opacity, 1));\n}\n.dsc-ui .focus-visible\\:outline-none:focus-visible {\n  outline: 2px solid transparent;\n  outline-offset: 2px;\n}\n.dsc-ui .focus-visible\\:ring-2:focus-visible {\n  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);\n  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);\n  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);\n}\n.dsc-ui .focus-visible\\:ring-ring:focus-visible {\n  --tw-ring-opacity: 1;\n  --tw-ring-color: hsl(var(--dsc-ring) / var(--tw-ring-opacity, 1));\n}\n.dsc-ui .focus-visible\\:ring-offset-2:focus-visible {\n  --tw-ring-offset-width: 2px;\n}\n.dsc-ui .disabled\\:pointer-events-none:disabled {\n  pointer-events: none;\n}\n.dsc-ui .disabled\\:cursor-not-allowed:disabled {\n  cursor: not-allowed;\n}\n.dsc-ui .disabled\\:opacity-50:disabled {\n  opacity: 0.5;\n}\n.dsc-ui :is(.\\[\\&_tr\\:last-child\\]\\:border-0 tr:last-child) {\n  border-width: 0px;\n}\n.dsc-ui :is(.\\[\\&_tr\\]\\:border-b tr) {\n  border-bottom-width: 1px;\n}\n';
 
     // plugin/src/components/ui/index.jsx
     var cn = (...values) => twMerge(clsx(values));
@@ -6390,7 +6390,7 @@ window.__ModuleLoader__.load({
     var TableHead = element(
       "th",
       "table-head",
-      "h-10 px-3 text-left align-middle font-medium text-muted-foreground",
+      "h-10 px-3 text-left align-middle font-medium text-foreground",
     );
     var TableCell = element(
       "td",
@@ -6869,9 +6869,14 @@ window.__ModuleLoader__.load({
         marginBottom: "10px",
       },
       title: { fontSize: "var(--dsc-font-heading)", fontWeight: 600 },
-      meta: {
+      annotation: {
         color: "hsl(var(--dsc-muted-foreground))",
         fontSize: "var(--dsc-font-body)",
+      },
+      annotationParagraph: {
+        color: "hsl(var(--dsc-muted-foreground))",
+        fontSize: "var(--dsc-font-body)",
+        marginTop: "10px",
       },
       btn: {},
       table: {},
@@ -6883,8 +6888,8 @@ window.__ModuleLoader__.load({
         overflowWrap: "anywhere",
       },
       pill: {},
-      note: {
-        color: "hsl(var(--dsc-muted-foreground))",
+      paragraph: {
+        color: "hsl(var(--dsc-foreground))",
         fontSize: "var(--dsc-font-body)",
         marginTop: "10px",
       },
@@ -6901,12 +6906,12 @@ window.__ModuleLoader__.load({
         paddingTop: "10px",
         borderTop: "1px solid hsl(var(--dsc-border))",
       },
-      suspect: {
-        color: "hsl(var(--dsc-muted-foreground))",
+      evidence: {
+        color: "hsl(var(--dsc-foreground))",
         fontSize: "var(--dsc-font-body)",
       },
-      dim: {
-        color: "hsl(var(--dsc-muted-foreground))",
+      body: {
+        color: "hsl(var(--dsc-foreground))",
         fontSize: "var(--dsc-font-body)",
         marginTop: "4px",
       },
@@ -6926,7 +6931,7 @@ window.__ModuleLoader__.load({
       if (!c) return null;
       return h(
         "div",
-        { style: styles.dim },
+        { style: styles.body },
         "\u8BC1\u636E\u8986\u76D6\uFF1A" +
           (c.status === "complete" ? "\u5B8C\u6574" : "\u6709\u9650") +
           "\uFF1B\u5DF2\u9A8C\u8BC1\u8C03\u7528 " +
@@ -6956,7 +6961,7 @@ window.__ModuleLoader__.load({
     function EvidenceLegend() {
       return h(
         "div",
-        { style: styles.note },
+        { style: styles.paragraph },
         "\u786E\u5B9A\uFF08certain\uFF09\u53EF\u7531\u660E\u786E\u9759\u6001\u4E8B\u5B9E\u6216\u5408\u683C\u8FD0\u884C\u65F6\u89C2\u6D4B\u652F\u6301\uFF1B\u7591\u4F3C\uFF08suspected\uFF09\u8868\u793A\u5F53\u524D\u8BC1\u636E\u4E0D\u8DB3\u4EE5\u786E\u5B9A\u8BE5\u6761\u53D1\u73B0\u3002",
         "\u5F71\u54CD\u4F9D\u636E\uFF1A\u5B9E\u6D4B\uFF08measured\uFF09\u987B\u6709\u5BF9\u5E94\u89C2\u6D4B\uFF0C\u63A8\u65AD\uFF08inferred\uFF09\u4E0D\u7B49\u4E8E\u4E1A\u52A1\u5F71\u54CD\u5DF2\u5B9E\u6D4B\u3002",
         "\u672A\u89C2\u6D4B\u4E0D\u7B49\u4E8E\u7F3A\u5931\uFF1B\u6CA1\u6709\u5DF2\u9A8C\u8BC1\u8C03\u7528\u4ECD\u53EF\u80FD\u5B58\u5728\u670D\u52A1\u4F9D\u8D56\u6216\u5BA2\u6237\u7AEF\u529F\u80FD\uFF1B\u8C03\u7528\u6838\u9A8C\u548C\u8986\u76D6\u5B8C\u6574\u5747\u4E0D\u7B49\u4E8E\u4E1A\u52A1\u9A8C\u6536\u901A\u8FC7\u3002",
@@ -6972,7 +6977,7 @@ window.__ModuleLoader__.load({
           parts.push(
             h(
               "div",
-              { key: "v", style: styles.suspect },
+              { key: "v", style: styles.evidence },
               "\u672C\u8F6E\u672A\u53D1\u73B0\u51B2\u7A81\uFF0C\u4F46\u6CA1\u6709\u5DF2\u9A8C\u8BC1\u8C03\u7528\uFF1B\u63D2\u4EF6\u4ECD\u53EF\u80FD\u4F9D\u8D56 DSH \u670D\u52A1\u6216\u5305\u542B\u672A\u9A8C\u8BC1\u7684\u5BA2\u6237\u7AEF\u529F\u80FD\uFF0C\u4E0D\u80FD\u636E\u6B64\u786E\u8BA4\u4E1A\u52A1\u53EF\u7528\u3002",
             ),
           );
@@ -6988,7 +6993,7 @@ window.__ModuleLoader__.load({
           parts.push(
             h(
               "div",
-              { key: "n", style: styles.dim },
+              { key: "n", style: styles.body },
               "\u65E0\u8BC1\u636E\u53EF\u5224\uFF08\u53EA\u51FA\u73B0\u540D\u5B57\uFF0C\u6CA1\u6709\u8C03\u7528\u70B9\uFF09\uFF1A" +
                 noCalls
                   .map(function (c) {
@@ -7002,7 +7007,7 @@ window.__ModuleLoader__.load({
           parts.push(
             h(
               "div",
-              { key: "c", style: styles.dim },
+              { key: "c", style: styles.body },
               "\u5BA2\u6237\u7AEF\u534A\u8FB9\uFF08\u547D\u4EE4\u884C\u6D4B\u4E0D\u5230\uFF0C\u9700\u754C\u9762\u9A8C\u8BC1\uFF09\uFF1A" +
                 pl.clientSide
                   .map(function (c) {
@@ -7037,7 +7042,7 @@ window.__ModuleLoader__.load({
             h(
               "span",
               {
-                style: styles.suspect,
+                style: styles.evidence,
                 title:
                   f.certainty === "certain"
                     ? "\u5F53\u524D\u8BC1\u636E\u8DB3\u4EE5\u652F\u6301\u8BE5\u6761\u53D1\u73B0\uFF0C\u53EF\u6765\u81EA\u660E\u786E\u9759\u6001\u4E8B\u5B9E\u6216\u5408\u683C\u8FD0\u884C\u65F6\u89C2\u6D4B\uFF1B\u4E0D\u7B49\u4E8E\u5F71\u54CD\u5DF2\u5B9E\u6D4B\u3002"
@@ -7048,7 +7053,7 @@ window.__ModuleLoader__.load({
             f.impact
               ? h(
                   "div",
-                  { style: styles.dim },
+                  { style: styles.body },
                   (f.impactBasis === "measured"
                     ? "\u5F71\u54CD\uFF08\u5B9E\u6D4B\uFF09\uFF1A"
                     : f.impactBasis === "inferred"
@@ -7058,7 +7063,7 @@ window.__ModuleLoader__.load({
                 )
               : null,
             f.basis
-              ? h("div", { style: styles.dim }, "\u4F9D\u636E\uFF1A" + f.basis)
+              ? h("div", { style: styles.body }, "\u4F9D\u636E\uFF1A" + f.basis)
               : null,
             h(
               "div",
@@ -7145,7 +7150,7 @@ window.__ModuleLoader__.load({
         return h(
           "div",
           {
-            style: mergeStyle(styles.dim, {
+            style: mergeStyle(styles.body, {
               marginTop: 0,
               marginBottom: "8px",
             }),
@@ -7156,7 +7161,7 @@ window.__ModuleLoader__.load({
       if (b.error) {
         return h(
           "div",
-          { style: styles.dim },
+          { style: styles.body },
           "\u57FA\u7EBF\u5DEE\u5206\u6CA1\u7B97\u6210\uFF1A" + b.error,
         );
       }
@@ -7165,7 +7170,7 @@ window.__ModuleLoader__.load({
         return h(
           "div",
           {
-            style: mergeStyle(styles.dim, {
+            style: mergeStyle(styles.body, {
               marginTop: 0,
               marginBottom: "8px",
             }),
@@ -7226,7 +7231,7 @@ window.__ModuleLoader__.load({
         diff.dshVersionChanged
           ? h(
               "span",
-              { style: mergeStyle(styles.dim, { marginLeft: "8px" }) },
+              { style: mergeStyle(styles.body, { marginLeft: "8px" }) },
               "DSH " +
                 (diff.dshVersionFrom || "?") +
                 " \u2192 " +
@@ -7305,7 +7310,7 @@ window.__ModuleLoader__.load({
       if (!hit) {
         return h(
           "div",
-          { style: styles.dim },
+          { style: styles.body },
           "\u8FD9\u4E2A\u63D2\u4EF6\u4E0D\u5728\u672C\u6B21\u4F53\u68C0\u8303\u56F4\u5185\uFF08\u53EF\u80FD\u5B83\u4E0D\u662F\u5E26 dsh \u6E05\u5355\u7684\u793E\u533A\u63D2\u4EF6\uFF0C\u6216\u5B83\u7684\u6761\u76EE\u7528\u4E86\u522B\u7684\u952E\u540D\uFF09\u3002\u8BF7\u4EE5\u300C\u517C\u5BB9\u6027\u300D\u603B\u89C8\u9875\u4E3A\u51C6\u3002",
         );
       }
@@ -7320,7 +7325,7 @@ window.__ModuleLoader__.load({
           h(Badge, { tone: pl.verdict }, v.text),
           h(
             "span",
-            { style: styles.meta },
+            { style: styles.annotation },
             "dsh-plugin-compat-check \xB7 " +
               (pl.findings || []).length +
               " \u6761\u53D1\u73B0",
@@ -7401,7 +7406,7 @@ window.__ModuleLoader__.load({
         !r2.summary.added && !r2.summary.worsened
           ? h(
               "p",
-              { style: styles.note },
+              { style: styles.paragraph },
               "\u672C\u6B21\u6CA1\u6709\u53D1\u73B0\u65B0\u589E\u6216\u53D8\u91CD\u7684\u9759\u6001\u98CE\u9669\uFF1B\u76EE\u6807\u7248\u672C\u4ECD\u53EF\u80FD\u6709\u539F\u6709\u98CE\u9669\uFF0C\u4E0D\u7B49\u4E8E\u4E1A\u52A1\u901A\u8FC7\u3002",
             )
           : null,
@@ -7447,7 +7452,7 @@ window.__ModuleLoader__.load({
                     entry.before
                       ? h(
                           "div",
-                          { style: styles.dim },
+                          { style: styles.body },
                           "\u6B64\u524D\uFF1A" +
                             entry.before.severity +
                             " / " +
@@ -7457,7 +7462,7 @@ window.__ModuleLoader__.load({
                         )
                       : null,
                     h("div", null, f.impact),
-                    h("div", { style: styles.dim }, f.basis),
+                    h("div", { style: styles.body }, f.basis),
                   );
                 }),
               )
@@ -7556,7 +7561,7 @@ window.__ModuleLoader__.load({
               r2.rules.sha256,
           ),
           r2.limitations.map(function (note, i) {
-            return h("div", { key: i, style: styles.note }, note);
+            return h("div", { key: i, style: styles.paragraph }, note);
           }),
         ),
       );
@@ -7645,7 +7650,7 @@ window.__ModuleLoader__.load({
         ),
         h(
           "p",
-          { style: styles.note },
+          { style: styles.paragraph },
           "\u6BD4\u8F83\u540C\u4E00\u7EC4\u5DF2\u5B89\u88C5\u5236\u54C1\u5728\u4E24\u4E2A\u7248\u672C\u76EE\u5F55\u4E0B\u7684\u9759\u6001\u98CE\u9669\u3002\u9759\u6001\u9884\u6D4B\u4E0D\u7B49\u4E8E\u76EE\u6807\u7248\u672C\u4E1A\u52A1\u901A\u8FC7\uFF1B\u4E0D\u81EA\u52A8\u5B89\u88C5\u6216\u5347\u7EA7\u3002\u5F53\u524D\u7248\u672C\uFF1A" +
             (currentVersion || "\u672A\u77E5") +
             "\u3002\u53EF\u9009\u76EE\u5F55\u7248\u672C\uFF1A" +
@@ -7716,7 +7721,7 @@ window.__ModuleLoader__.load({
               { style: { margin: "10px 0" } },
               h(
                 "p",
-                { style: styles.note },
+                { style: styles.paragraph },
                 "\u8FD9\u662F\u672C\u6B21\u5B8C\u6574\u62A5\u544A\uFF0C\u7B5B\u9009\u4E0D\u4F1A\u5220\u51CF\u5BFC\u51FA\u5185\u5BB9\u3002\u4FDD\u7559\u63D2\u4EF6\u540D\u4E0E\u5305\u5185\u4F4D\u7F6E\uFF1B\u8BF7\u9884\u89C8\u654F\u611F\u4FE1\u606F\u540E\u518D\u5206\u4EAB\u3002",
               ),
               text3 === null
@@ -7771,7 +7776,7 @@ window.__ModuleLoader__.load({
                     ),
                     h(
                       "span",
-                      { role: "status", style: styles.meta },
+                      { role: "status", style: styles.annotation },
                       copied[0],
                     ),
                   ),
@@ -7996,7 +8001,7 @@ window.__ModuleLoader__.load({
           s.vacuousOk
             ? h(
                 "p",
-                { className: "compat-meta" },
+                { className: "compat-coverage-note" },
                 `${s.vacuousOk} \u4E2A\u201C\u53EF\u7528\u201D\u6CA1\u6709\u5DF2\u9A8C\u8BC1\u8C03\u7528\uFF1B\u672A\u53D1\u73B0\u51B2\u7A81\u4E0D\u7B49\u4E8E\u4E1A\u52A1\u901A\u8FC7\u3002`,
               )
             : null,
@@ -8067,7 +8072,7 @@ window.__ModuleLoader__.load({
           risksState[0]
             ? h(
                 "div",
-                { role: "status", style: styles.note },
+                { role: "status", style: styles.paragraph },
                 comparable
                   ? "\u4EC5\u663E\u793A\u57FA\u7EBF\u5DEE\u5206\u4E2D\u7684\u65B0\u589E\u6216\u53D8\u91CD\u98CE\u9669\uFF1B\u65E0\u53D8\u5316\u4E0D\u8868\u793A\u4E1A\u52A1\u901A\u8FC7\u3002"
                   : "\u5C1A\u65E0\u53EF\u6BD4\u8F83\u57FA\u7EBF\uFF1B\u672C\u89C6\u56FE\u4E0D\u80FD\u5224\u65AD\u65B0\u589E\u98CE\u9669\uFF0C\u4E0D\u8868\u793A\u6CA1\u6709\u98CE\u9669\u3002",
@@ -8075,7 +8080,7 @@ window.__ModuleLoader__.load({
             : null,
           h(
             "div",
-            { style: styles.meta },
+            { style: styles.annotation },
             "\u663E\u793A " +
               shown.length +
               " / " +
@@ -8085,7 +8090,7 @@ window.__ModuleLoader__.load({
           !shown.length
             ? h(
                 "div",
-                { role: "status", style: styles.note },
+                { role: "status", style: styles.paragraph },
                 "\u6CA1\u6709\u7B26\u5408\u7B5B\u9009\u6761\u4EF6\u7684\u63D2\u4EF6\u3002\u6E05\u9664\u7B5B\u9009\u53EF\u67E5\u770B\u5B8C\u6574\u62A5\u544A\u3002",
               )
             : null,
@@ -8205,7 +8210,7 @@ window.__ModuleLoader__.load({
           h(EvidenceLegend),
           h(
             "div",
-            { style: styles.note },
+            { style: styles.annotationParagraph },
             "\u5DE5\u5177\u7248\u672C\uFF1A" +
               (data.toolVersion || "\u672A\u77E5") +
               " \xB7 " +
@@ -8218,19 +8223,19 @@ window.__ModuleLoader__.load({
             null,
             h(
               "summary",
-              { style: styles.meta },
+              { style: styles.annotation },
               "\u67E5\u770B\u91C7\u6837\u4E0E\u68C0\u67E5\u4FE1\u606F",
             ),
             h(
               "div",
-              { style: styles.note },
+              { style: styles.annotationParagraph },
               ((report2.observation && report2.observation.notes) || []).join(
                 "\uFF1B",
               ),
             ),
             h(
               "div",
-              { style: styles.note },
+              { style: styles.annotationParagraph },
               "\u5BF9\u8C61\u6765\u6E90\uFF1A" +
                 (data.nodeModulesWhy || "\u672A\u63D0\u4F9B") +
                 (data.elapsedMs !== void 0

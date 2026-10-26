@@ -274,9 +274,14 @@ var styles = {
     marginBottom: "10px",
   },
   title: { fontSize: "var(--dsc-font-heading)", fontWeight: 600 },
-  meta: {
+  annotation: {
     color: "hsl(var(--dsc-muted-foreground))",
     fontSize: "var(--dsc-font-body)",
+  },
+  annotationParagraph: {
+    color: "hsl(var(--dsc-muted-foreground))",
+    fontSize: "var(--dsc-font-body)",
+    marginTop: "10px",
   },
   btn: {},
   table: {},
@@ -288,8 +293,8 @@ var styles = {
     overflowWrap: "anywhere",
   },
   pill: {},
-  note: {
-    color: "hsl(var(--dsc-muted-foreground))",
+  paragraph: {
+    color: "hsl(var(--dsc-foreground))",
     fontSize: "var(--dsc-font-body)",
     marginTop: "10px",
   },
@@ -306,12 +311,12 @@ var styles = {
     paddingTop: "10px",
     borderTop: "1px solid hsl(var(--dsc-border))",
   },
-  suspect: {
-    color: "hsl(var(--dsc-muted-foreground))",
+  evidence: {
+    color: "hsl(var(--dsc-foreground))",
     fontSize: "var(--dsc-font-body)",
   },
-  dim: {
-    color: "hsl(var(--dsc-muted-foreground))",
+  body: {
+    color: "hsl(var(--dsc-foreground))",
     fontSize: "var(--dsc-font-body)",
     marginTop: "4px",
   },
@@ -333,7 +338,7 @@ function Coverage(p) {
   if (!c) return null;
   return h(
     "div",
-    { style: styles.dim },
+    { style: styles.body },
     "证据覆盖：" +
       (c.status === "complete" ? "完整" : "有限") +
       "；已验证调用 " +
@@ -358,7 +363,7 @@ function Coverage(p) {
 function EvidenceLegend() {
   return h(
     "div",
-    { style: styles.note },
+    { style: styles.paragraph },
     "确定（certain）可由明确静态事实或合格运行时观测支持；疑似（suspected）表示当前证据不足以确定该条发现。",
     "影响依据：实测（measured）须有对应观测，推断（inferred）不等于业务影响已实测。",
     "未观测不等于缺失；没有已验证调用仍可能存在服务依赖或客户端功能；调用核验和覆盖完整均不等于业务验收通过。",
@@ -375,7 +380,7 @@ function Findings(p) {
       parts.push(
         h(
           "div",
-          { key: "v", style: styles.suspect },
+          { key: "v", style: styles.evidence },
           "本轮未发现冲突，但没有已验证调用；插件仍可能依赖 DSH 服务或包含未验证的客户端功能，不能据此确认业务可用。",
         ),
       );
@@ -391,7 +396,7 @@ function Findings(p) {
       parts.push(
         h(
           "div",
-          { key: "n", style: styles.dim },
+          { key: "n", style: styles.body },
           "无证据可判（只出现名字，没有调用点）：" +
             noCalls
               .map(function (c) {
@@ -405,7 +410,7 @@ function Findings(p) {
       parts.push(
         h(
           "div",
-          { key: "c", style: styles.dim },
+          { key: "c", style: styles.body },
           "客户端半边（命令行测不到，需界面验证）：" +
             pl.clientSide
               .map(function (c) {
@@ -438,7 +443,7 @@ function Findings(p) {
         h(
           "span",
           {
-            style: styles.suspect,
+            style: styles.evidence,
             title:
               f.certainty === "certain"
                 ? "当前证据足以支持该条发现，可来自明确静态事实或合格运行时观测；不等于影响已实测。"
@@ -449,7 +454,7 @@ function Findings(p) {
         f.impact
           ? h(
               "div",
-              { style: styles.dim },
+              { style: styles.body },
               (f.impactBasis === "measured"
                 ? "影响（实测）："
                 : f.impactBasis === "inferred"
@@ -457,7 +462,7 @@ function Findings(p) {
                   : "影响（依据未提供）：") + f.impact,
             )
           : null,
-        f.basis ? h("div", { style: styles.dim }, "依据：" + f.basis) : null,
+        f.basis ? h("div", { style: styles.body }, "依据：" + f.basis) : null,
         h(
           "div",
           { style: { marginTop: "6px" } },
@@ -583,7 +588,7 @@ function Badge(p) {
     return h(
       "div",
       {
-        style: mergeStyle(styles.dim, {
+        style: mergeStyle(styles.body, {
           marginTop: 0,
           marginBottom: "8px",
         }),
@@ -592,14 +597,14 @@ function Badge(p) {
     );
   }
   if (b.error) {
-    return h("div", { style: styles.dim }, "基线差分没算成：" + b.error);
+    return h("div", { style: styles.body }, "基线差分没算成：" + b.error);
   }
   var badge = b.badge || {};
   if (!badge.show) {
     return h(
       "div",
       {
-        style: mergeStyle(styles.dim, {
+        style: mergeStyle(styles.body, {
           marginTop: 0,
           marginBottom: "8px",
         }),
@@ -657,7 +662,7 @@ function Badge(p) {
     diff.dshVersionChanged
       ? h(
           "span",
-          { style: mergeStyle(styles.dim, { marginLeft: "8px" }) },
+          { style: mergeStyle(styles.body, { marginLeft: "8px" }) },
           "DSH " +
             (diff.dshVersionFrom || "?") +
             " → " +
@@ -740,7 +745,7 @@ function DetailSectionBody(props) {
     // 空白会被读成"这个插件没问题"，而它其实是"我们没算出来"。
     return h(
       "div",
-      { style: styles.dim },
+      { style: styles.body },
       "这个插件不在本次体检范围内（可能它不是带 dsh 清单的社区插件，或它的条目用了别的键名）。" +
         "请以「兼容性」总览页为准。",
     );
@@ -756,7 +761,7 @@ function DetailSectionBody(props) {
       h(StatusBadge, { tone: pl.verdict }, v.text),
       h(
         "span",
-        { style: styles.meta },
+        { style: styles.annotation },
         "dsh-plugin-compat-check · " + (pl.findings || []).length + " 条发现",
       ),
       h(
@@ -830,7 +835,7 @@ function UpgradeDetails(p) {
     !r.summary.added && !r.summary.worsened
       ? h(
           "p",
-          { style: styles.note },
+          { style: styles.paragraph },
           "本次没有发现新增或变重的静态风险；目标版本仍可能有原有风险，不等于业务通过。",
         )
       : null,
@@ -876,7 +881,7 @@ function UpgradeDetails(p) {
                 entry.before
                   ? h(
                       "div",
-                      { style: styles.dim },
+                      { style: styles.body },
                       "此前：" +
                         entry.before.severity +
                         " / " +
@@ -886,7 +891,7 @@ function UpgradeDetails(p) {
                     )
                   : null,
                 h("div", null, f.impact),
-                h("div", { style: styles.dim }, f.basis),
+                h("div", { style: styles.body }, f.basis),
               );
             }),
           )
@@ -966,7 +971,7 @@ function UpgradeDetails(p) {
         "规则：" + r.rules.file + " · SHA-256：" + r.rules.sha256,
       ),
       r.limitations.map(function (note, i) {
-        return h("div", { key: i, style: styles.note }, note);
+        return h("div", { key: i, style: styles.paragraph }, note);
       }),
     ),
   );
@@ -1048,7 +1053,7 @@ function UpgradePreview(p) {
     h("summary", { style: { cursor: "pointer" } }, "升级前兼容性预检（静态）"),
     h(
       "p",
-      { style: styles.note },
+      { style: styles.paragraph },
       "比较同一组已安装制品在两个版本目录下的静态风险。静态预测不等于目标版本业务通过；不自动安装或升级。当前版本：" +
         (currentVersion || "未知") +
         "。可选目录版本：" +
@@ -1113,7 +1118,7 @@ function ReportPreview(p) {
           { style: { margin: "10px 0" } },
           h(
             "p",
-            { style: styles.note },
+            { style: styles.paragraph },
             "这是本次完整报告，筛选不会删减导出内容。保留插件名与包内位置；请预览敏感信息后再分享。",
           ),
           text === null
@@ -1162,7 +1167,11 @@ function ReportPreview(p) {
                   },
                   "复制报告",
                 ),
-                h("span", { role: "status", style: styles.meta }, copied[0]),
+                h(
+                  "span",
+                  { role: "status", style: styles.annotation },
+                  copied[0],
+                ),
               ),
         )
       : null,
@@ -1359,7 +1368,7 @@ function Table(p) {
       s.vacuousOk
         ? h(
             "p",
-            { className: "compat-meta" },
+            { className: "compat-coverage-note" },
             `${s.vacuousOk} 个“可用”没有已验证调用；未发现冲突不等于业务通过。`,
           )
         : null,
@@ -1430,7 +1439,7 @@ function Table(p) {
       risksState[0]
         ? h(
             "div",
-            { role: "status", style: styles.note },
+            { role: "status", style: styles.paragraph },
             comparable
               ? "仅显示基线差分中的新增或变重风险；无变化不表示业务通过。"
               : "尚无可比较基线；本视图不能判断新增风险，不表示没有风险。",
@@ -1438,7 +1447,7 @@ function Table(p) {
         : null,
       h(
         "div",
-        { style: styles.meta },
+        { style: styles.annotation },
         "显示 " +
           shown.length +
           " / " +
@@ -1448,7 +1457,7 @@ function Table(p) {
       !shown.length
         ? h(
             "div",
-            { role: "status", style: styles.note },
+            { role: "status", style: styles.paragraph },
             "没有符合筛选条件的插件。清除筛选可查看完整报告。",
           )
         : null,
@@ -1547,7 +1556,7 @@ function Table(p) {
       h(EvidenceLegend),
       h(
         "div",
-        { style: styles.note },
+        { style: styles.annotationParagraph },
         "工具版本：" +
           (data.toolVersion || "未知") +
           " · " +
@@ -1558,15 +1567,15 @@ function Table(p) {
       h(
         "details",
         null,
-        h("summary", { style: styles.meta }, "查看采样与检查信息"),
+        h("summary", { style: styles.annotation }, "查看采样与检查信息"),
         h(
           "div",
-          { style: styles.note },
+          { style: styles.annotationParagraph },
           ((report.observation && report.observation.notes) || []).join("；"),
         ),
         h(
           "div",
-          { style: styles.note },
+          { style: styles.annotationParagraph },
           "对象来源：" +
             (data.nodeModulesWhy || "未提供") +
             (data.elapsedMs !== undefined

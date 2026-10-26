@@ -153,7 +153,7 @@ export const TableRow = element(
 export const TableHead = element(
   "th",
   "table-head",
-  "h-10 px-3 text-left align-middle font-medium text-muted-foreground",
+  "h-10 px-3 text-left align-middle font-medium text-foreground",
 );
 export const TableCell = element(
   "td",
