@@ -287,7 +287,7 @@ test("pure validation and panel present pending and review-required states witho
       props: props || {},
       children,
     }),
-    useState: (x) => [x, () => {}],
+    useState: (x) => [typeof x === "function" ? x() : x, () => {}],
     useEffect: () => {},
     useRef: (x) => ({ current: x }),
   };

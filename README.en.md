@@ -53,6 +53,8 @@ New risks requires comparable history. A first or incomplete check may have no s
 2. Find the same plugin in Manual finding review; finding numbers follow that plugin's finding order in the main results. Choose **Pending / Reviewed / False positive / Fixed**, then document the evidence: test steps and actual behavior for a false positive, or the change and retest result for a fix. Reviewed means a person investigated it, not that it passed.
 3. Choose **Save review** (保存人工处置) and wait for the saved confirmation. Use Show more reviews (显示更多处置) for additional entries. Expand prior-review summaries or the full review history when you need earlier evidence.
 
+Unsaved input stays as a draft for the current page session. When a background refresh changes the report identity, the old draft is marked expired and cannot be saved onto a new finding. Choose Copy draft (复制草稿), investigate the current finding again and paste/save explicitly, or Discard draft (放弃草稿). Updates to records within the same report keep your input. Save or copy before reloading, leaving the page or unloading the plugin; drafts are not written to disk.
+
 Records are stored locally. Changes to source, versions or evidence may require re-review, while old evidence remains in history. **Marking a finding false positive or fixed does not hide it, alter verdicts/exit codes/baselines or grant an exemption.** Recheck after changing code or configuration. You can skip manual review when you only need the current results.
 
 See the [guide](docs/guide.md) for detailed operations, evidence boundaries and budgets.

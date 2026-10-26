@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-26T12:40:25.712Z",
+  "recordedAt": "2026-10-26T18:36:37.243Z",
   "testFiles": 74,
-  "tests": 1156,
+  "tests": 1170,
   "repositoryFiles": {
-    "total": 350,
+    "total": 351,
     "fixtures": 99,
-    "other": 251
+    "other": 252
   },
   "verification": {
     "platform": "darwin",
@@ -26,7 +26,7 @@
     "sourceContext": {
       "versionSource": "lib/version.mjs",
       "integrationTarget": "main",
-      "scope": "Unpublished 0.1.8 UI and P2 development in current source. Version remains 0.1.7; publication fields describe the historical published 0.1.7 only."
+      "scope": "Unpublished 0.1.8 UI, P2 optimizations and P1 recovery/draft protection in current source. Version remains 0.1.7; publication fields describe the historical published 0.1.7 only."
     },
     "publication": {
       "releaseTarget": "0.1.7",
@@ -221,6 +221,39 @@
         "clientSha256": "266054a728b8d910699a5fb7dfcb71e6dd73d51bb16be1464bd104a61b4a695b",
         "proofSha256": "2658b07e39a9b1c7ba9dded3c99330af441f30e605546930c2d6f210f7d71102"
       }
+    },
+    "ui018P1RecoveryLocal20261027": {
+      "scope": "Local macOS arm64, unpublished working tree based on c1fed46. Existing UI architecture preserved; no remote CI, publication or Windows claim.",
+      "defaultSuite": {
+        "tests": 1170,
+        "pass": 1162,
+        "skip": 8,
+        "testFiles": 74
+      },
+      "budgetsMs": {
+        "hostListing": 1500,
+        "identity": 12000,
+        "reportFlight": 45000,
+        "reviewRead": 5000,
+        "clientRequest": 50000
+      },
+      "regressions": [
+        "Cold/forced hung host service reports failure, retains prior report/baseline and recovers; ignored-abort late compute cannot publish or commit.",
+        "Client deadline covers fetch and JSON decoding, coalesced retry and lifecycle cancellation.",
+        "Dirty drafts retain original context and finding across revision/context/unavailable data; stale saves disabled, explicit copy/discard, late context and same-context revision responses cannot clear drafts.",
+        "Final review fixes: synchronous lifecycle/generation fence after asynchronous freshness check; empty, non-Error and unreadable rejection reasons cannot become success or leave a request pending."
+      ],
+      "realHost": {
+        "dsh": "0.2.1-rc.3",
+        "artifactSha256": "c72082b04b09e82893d4495442a81102b13338fd66bef74cc6a8b0d5f4b59f54",
+        "sameVersionSourceChange": true,
+        "draftAndEditorIdentityAndFocusPreserved": true,
+        "copyAndDiscard": true,
+        "previousUiAndPaginationRegression": true,
+        "productionRequests": 0,
+        "privateRootRemoved": true
+      },
+      "limits": "Drafts are in-memory for the mounted page session; no automatic migration or persistence across page reload. Per-flight report deadline, at most three rounds for continually changing input; client independently bounds its whole request. Ignored cancellation cannot forcibly stop arbitrary host promises, but late results are discarded."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

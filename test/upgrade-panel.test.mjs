@@ -268,6 +268,7 @@ test("metadata-only polling preserves a pending and completed upgrade preview, w
     const h = await panelHarness(data, {
       timers: {
         setTimeout: (fn, ms) => {
+          if (ms === 50000) return fn;
           assert.equal(ms, 2000);
           timers.push(fn);
           return fn;
@@ -364,6 +365,7 @@ test("review metadata full-reads keep the same report preview but invalidate cha
     const h = await panelHarness(data, {
       timers: {
         setTimeout: (fn, ms) => {
+          if (ms === 50000) return fn;
           assert.equal(ms, 2000);
           timers.push(fn);
           return fn;

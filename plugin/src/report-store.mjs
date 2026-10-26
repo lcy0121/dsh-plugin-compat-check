@@ -1,6 +1,8 @@
+import { bounded } from "../../lib/async-boundary.mjs";
 /** Shared, lifecycle-bound client reports. No React or DOM mutation required. */
 export function createReportStore({
   fetch = globalThis.fetch,
+  requestTimeoutMs = 50000,
   validate,
   document = globalThis.document,
   setTimeout = globalThis.setTimeout,
@@ -127,36 +129,47 @@ export function createReportStore({
       const current = () =>
         pending === run && generation === run.generation && active();
       run.promise = Promise.resolve()
-        .then(async () => {
-          if (!current()) return;
-          let value = await read(
-            force || background ? urlFor(force, background) : route,
-            run.controller?.signal,
-          );
-          if (!current()) return;
-          let accepted;
-          if (background && metadataMatches(value))
-            accepted = { ...latest, cache: value.cache };
-          else {
-            if (background) value = await read(route, run.controller?.signal);
-            if (!current()) return;
-            accepted = validate(value);
-            if (!accepted.ok && latest?.ok)
-              throw Error(accepted.error || "后台刷新失败");
-            const bytes = JSON.stringify(accepted.report);
-            if (latest && reportBytes === bytes)
-              accepted = {
-                ...accepted,
-                report: latest.report,
-                baseline: latest.report.baseline ?? accepted.baseline,
-              };
-            reportBytes = bytes;
-          }
-          if (!current()) return;
-          latest = accepted;
-          state = { phase: "done", data: accepted, error: null };
-          notify();
-        })
+        .then(() =>
+          bounded(
+            async (signal) => {
+              if (!current() || signal?.aborted) return;
+              let value = await read(
+                force || background ? urlFor(force, background) : route,
+                signal,
+              );
+              if (!current() || signal?.aborted) return;
+              let accepted;
+              if (background && metadataMatches(value))
+                accepted = { ...latest, cache: value.cache };
+              else {
+                if (background) value = await read(route, signal);
+                if (!current() || signal?.aborted) return;
+                accepted = validate(value);
+                if (!accepted.ok && latest?.ok)
+                  throw Error(accepted.error || "后台刷新失败");
+                const bytes = JSON.stringify(accepted.report);
+                if (latest && reportBytes === bytes)
+                  accepted = {
+                    ...accepted,
+                    report: latest.report,
+                    baseline: latest.report.baseline ?? accepted.baseline,
+                  };
+                reportBytes = bytes;
+              }
+              if (!current() || signal?.aborted) return;
+              latest = accepted;
+              state = { phase: "done", data: accepted, error: null };
+              notify();
+            },
+            {
+              timeoutMs: requestTimeoutMs,
+              signal: run.controller?.signal,
+              label: "报告请求",
+              setTimeout,
+              clearTimeout,
+            },
+          ),
+        )
         .catch((error) => {
           if (!current()) return;
           const message = String(error?.message || error);

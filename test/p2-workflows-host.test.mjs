@@ -169,3 +169,17 @@ test("background polling observes manual storage corruption and recovery without
  assert.deepEqual((await request()).body.report,first.report);
  }finally{h.dispose();}
 `));
+
+test("hung host plugin listing fails cold and forced reports, keeps baseline, and recovers after late resolution", () =>
+  host(`
+ let mode='hang',late=[];ctx.get=name=>name==='pluginManager'?{list:()=>mode==='hang'?new Promise(resolve=>late.push(resolve)):[]}:undefined;
+ const cold=(await request()).body;assert.equal(cold.ok,false);assert.match(cold.error,/超时/);assert.equal(cold.report.ok,false);
+ mode='good';const good=(await request('/plugin-compat-check/report?refresh=1')).body;assert.equal(good.ok,true,good.error);
+ const baselineDir=home+'/dsh-plugin-compat-check';const baselines=fs.readdirSync(baselineDir).filter(f=>f.startsWith('baseline.')).map(f=>[f,fs.readFileSync(baselineDir+'/'+f,'utf8')]);
+ mode='hang';const failed=(await request('/plugin-compat-check/report?refresh=1')).body;assert.equal(failed.ok,false);assert.match(failed.error,/超时/);
+ const retained=(await request()).body;assert.deepEqual(retained.report,good.report);assert.equal(retained.cache.stale,true);assert.match(retained.cache.refreshError,/超时/);
+ for(const [file,bytes] of baselines)assert.equal(fs.readFileSync(baselineDir+'/'+file,'utf8'),bytes);
+ mode='good';const recovered=(await request('/plugin-compat-check/report?refresh=1')).body;assert.equal(recovered.ok,true,recovered.error);
+ for(const resolve of late)resolve([]);await new Promise(setImmediate);
+ const final=(await request()).body;assert.deepEqual(final.report,recovered.report);
+`));

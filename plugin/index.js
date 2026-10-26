@@ -907,6 +907,18 @@ function resolveNodeModules(requestedProfile = null) {
  * previous report with explicit stale/error metadata. The TTL still refreshes
  * time-dependent observations even when the sampled identity is unchanged.
  */
+/** Host calls get their own bound; cancellation must never become an empty success. */
+async function hostPluginListing(ctx, kernel, signal) {
+  const { bounded } = await import(
+    pathToFileURL(join(kernel, "lib", "async-boundary.mjs")).href
+  );
+  return bounded(() => ctx.get?.("pluginManager", false)?.list?.(), {
+    timeoutMs: 1500,
+    signal,
+    label: "宿主插件列表读取",
+  });
+}
+
 async function serveReport(state, ctx, force, options = {}) {
   if (state.disposed)
     return failureEnvelope("Plugin generation disposed / 已卸载");
@@ -995,9 +1007,11 @@ async function serveReport(state, ctx, force, options = {}) {
             const itemListing = sameHost
               ? await (async () => {
                   try {
-                    const listing = await ctx
-                      .get?.("pluginManager", false)
-                      ?.list?.();
+                    const listing = await hostPluginListing(
+                      ctx,
+                      kernel,
+                      signal,
+                    );
                     return (
                       Array.isArray(listing)
                         ? listing
@@ -1006,7 +1020,9 @@ async function serveReport(state, ctx, force, options = {}) {
                       id: i.id ?? i.entryId ?? i.slotId,
                       packageName: i.packageName ?? i.package ?? i.name,
                     }));
-                  } catch {
+                  } catch (error) {
+                    if (["TimeoutError", "AbortError"].includes(error.name))
+                      throw error;
                     return [];
                   }
                 })()
@@ -1214,7 +1230,11 @@ async function computeReport(state, ctx, options = {}) {
     }
     const itemListing = await (async () => {
       try {
-        const listing = await ctx.get?.("pluginManager", false)?.list?.();
+        const listing = await hostPluginListing(
+          ctx,
+          kernel,
+          options._cacheGuard?.signal,
+        );
         return (
           Array.isArray(listing)
             ? listing
@@ -1223,7 +1243,8 @@ async function computeReport(state, ctx, options = {}) {
           id: i.id ?? i.entryId ?? i.slotId,
           packageName: i.packageName ?? i.package ?? i.name,
         }));
-      } catch {
+      } catch (error) {
+        if (["TimeoutError", "AbortError"].includes(error.name)) throw error;
         return [];
       }
     })();
@@ -1296,7 +1317,9 @@ async function computeReport(state, ctx, options = {}) {
           ? ctx.get("pluginManager", false)
           : undefined;
       const listing =
-        pm && typeof pm.list === "function" ? await pm.list() : null;
+        pm && typeof pm.list === "function"
+          ? await hostPluginListing(ctx, kernel, options._cacheGuard?.signal)
+          : null;
       if (listing) {
         const arr = Array.isArray(listing)
           ? listing
@@ -1313,6 +1336,7 @@ async function computeReport(state, ctx, options = {}) {
           .filter(Boolean);
       }
     } catch (error) {
+      if (["TimeoutError", "AbortError"].includes(error.name)) throw error;
       out.itemsError = errText(error);
     }
 
@@ -1686,7 +1710,14 @@ async function attachFindingReviews(state, out, key, kernel) {
       catalogIdentity: out.report.catalog?.sha256,
       toolVersion: out.toolVersion,
     });
-    const reviews = await store.readReviews(context);
+    const { bounded } = await import(
+      pathToFileURL(join(kernel, "lib", "async-boundary.mjs")).href
+    );
+    const reviews = await bounded(() => store.readReviews(context), {
+      timeoutMs: 5000,
+      signal: state.reportService.states.get(key)?.controller.signal,
+      label: "人工处置记录读取",
+    });
     if (state.disposed)
       return failureEnvelope("Plugin generation disposed / 已卸载", out);
     if (

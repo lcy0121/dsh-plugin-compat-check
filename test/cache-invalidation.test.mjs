@@ -538,7 +538,7 @@ test("slow identity observations and concurrent cached GETs retain one watchdog 
   } finally {
     const checking = service.states.get("A")?.checking;
     service.dispose();
-    await checking;
+    await checking?.catch(() => {});
     await tick();
     hook.disable();
   }
@@ -850,6 +850,10 @@ for (const lifecycle of ["evict", "dispose"])
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "dsc-late-review-"));
     t.after(() => fs.rm(root, { recursive: true, force: true }));
     await fs.mkdir(path.join(root, "lib"));
+    await fs.copyFile(
+      path.resolve("lib/async-boundary.mjs"),
+      path.join(root, "lib/async-boundary.mjs"),
+    );
     const token = "gate" + path.basename(root).replace(/\W/g, "");
     let enter, release;
     const entered = new Promise((r) => (enter = r)),

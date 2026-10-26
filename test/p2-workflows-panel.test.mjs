@@ -264,3 +264,205 @@ test("shared history disclosure updates the controlled review history and hides 
     h.dispose();
   }
 });
+
+function withReviewItems(data) {
+  data.reviews.items = Object.entries(data.report.plugins).flatMap(
+    ([pluginName, plugin]) =>
+      plugin.findings.map((_, findingIndex) => ({
+        findingId: createHash("sha256")
+          .update(pluginName + findingIndex)
+          .digest("hex"),
+        pluginName,
+        pluginVersion: plugin.version,
+        findingIndex,
+        status: "pending",
+        note: "",
+        record: null,
+        history: [],
+        historyCount: 0,
+        reviewReason: null,
+      })),
+  );
+  return data;
+}
+test("polling retains dirty drafts under original context, copy and discard are explicit, and new findings stay clean", async () => {
+  let data = withReviewItems(sample()),
+    copied;
+  const timers = new Map();
+  let id = 0;
+  const h = await panelHarness(data, {
+    clipboard: {
+      writeText: async (text) => {
+        copied = text;
+      },
+    },
+    fetcher: async () => ({
+      ok: true,
+      json: async () => structuredClone(data),
+    }),
+    timers: {
+      setTimeout: (fn, ms) => {
+        timers.set(++id, { fn, ms });
+        return id;
+      },
+      clearTimeout: (k) => timers.delete(k),
+    },
+  });
+  const item = data.reviews.items[0],
+    label = `${item.pluginName} 发现 ${item.findingIndex + 1} 核实依据`;
+  const poll = async () => {
+    const t = [...timers.values()].find((t) => t.ms === 2000);
+    assert(t);
+    await t.fn();
+    await h.settle();
+  };
+  try {
+    h.field(label).props.onChange({
+      target: { value: "未保存的独立核实依据" },
+    });
+    h.render();
+    data = { ...data, reviews: { ...data.reviews, revision: "1".repeat(64) } };
+    await poll();
+    assert.equal(h.field(label).props.value, "未保存的独立核实依据");
+    data = {
+      ...data,
+      computedAt: "2026-10-22T00:00:01.000Z",
+      reviews: { ...data.reviews, contextToken: "b".repeat(64) },
+    };
+    await poll();
+    assert.match(h.text(), /草稿已过期/);
+    const old = h.find((n) => n.props["data-review-stale"] === true);
+    assert(old);
+    assert.equal(
+      h.find(
+        (n) =>
+          n.type === "textarea" && n.props.value === "未保存的独立核实依据",
+      ).props.disabled,
+      false,
+    );
+    const save = h
+      .nodes(old)
+      .find((n) => n.type === "button" && h.text(n) === "保存人工处置");
+    assert(save.props.disabled);
+    assert(
+      h
+        .nodes()
+        .some(
+          (n) =>
+            n.type === "textarea" &&
+            n.props["aria-label"] === label &&
+            n.props.value === "",
+        ),
+    );
+    await h.button("复制草稿").props.onClick();
+    h.render();
+    assert.match(copied, /未保存的独立核实依据/);
+    h.button("放弃草稿").props.onClick();
+    h.render();
+    assert.doesNotMatch(h.text(), /草稿已过期/);
+    assert.equal(h.field(label).props.value, "");
+  } finally {
+    h.dispose();
+  }
+});
+
+test("late save responses cannot clear expired drafts or mark a new context as saved; unavailable reviews retain drafts", async () => {
+  let data = withReviewItems(sample()),
+    release;
+  const timers = new Map();
+  let id = 0;
+  const h = await panelHarness(data, {
+    fetcher: async (url) =>
+      url.includes("/reviews")
+        ? new Promise((r) => {
+            release = r;
+          })
+        : { ok: true, json: async () => structuredClone(data) },
+    timers: {
+      setTimeout: (fn, ms) => {
+        timers.set(++id, { fn, ms });
+        return id;
+      },
+      clearTimeout: (k) => timers.delete(k),
+    },
+  });
+  const old = structuredClone(data.reviews),
+    item = old.items[0],
+    label = `${item.pluginName} 发现 ${item.findingIndex + 1} 核实依据`;
+  const poll = async () => {
+    await [...timers.values()].find((t) => t.ms === 2000).fn();
+    await h.settle();
+  };
+  try {
+    h.field(label).props.onChange({ target: { value: "保留这份核实依据" } });
+    h.render();
+    const save = h.button("保存人工处置").props.onClick();
+    data = {
+      ...data,
+      reviews: { ...data.reviews, contextToken: "c".repeat(64) },
+    };
+    await poll();
+    release({ ok: true, json: async () => ({ ok: true, reviews: old }) });
+    await save;
+    await h.settle();
+    assert.match(h.text(), /草稿已过期/);
+    assert.doesNotMatch(h.text(), /人工处置已保存/);
+    assert(
+      h.find(
+        (n) => n.type === "textarea" && n.props.value === "保留这份核实依据",
+      ),
+    );
+    data = { ...data, reviews: null };
+    await poll();
+    assert(
+      h.find(
+        (n) => n.type === "textarea" && n.props.value === "保留这份核实依据",
+      ),
+    );
+  } finally {
+    h.dispose();
+  }
+});
+
+test("a delayed save cannot overwrite a newer revision of the same report or clear its draft", async () => {
+  let data = withReviewItems(sample()),
+    release;
+  const timers = new Map();
+  let id = 0;
+  const old = structuredClone(data.reviews),
+    item = old.items[0],
+    label = `${item.pluginName} 发现 ${item.findingIndex + 1} 核实依据`;
+  const h = await panelHarness(data, {
+    fetcher: async (url) =>
+      url.includes("/reviews")
+        ? new Promise((r) => {
+            release = r;
+          })
+        : { ok: true, json: async () => structuredClone(data) },
+    timers: {
+      setTimeout: (fn, ms) => {
+        timers.set(++id, { fn, ms });
+        return id;
+      },
+      clearTimeout: (k) => timers.delete(k),
+    },
+  });
+  try {
+    h.field(label).props.onChange({
+      target: { value: "较新记录到达前的草稿" },
+    });
+    h.render();
+    const saving = h.button("保存人工处置").props.onClick();
+    data = { ...data, reviews: { ...data.reviews, revision: "f".repeat(64) } };
+    await [...timers.values()].find((t) => t.ms === 2000).fn();
+    await h.settle();
+    release({ ok: true, json: async () => ({ ok: true, reviews: old }) });
+    await saving;
+    await h.settle();
+    assert.equal(h.field(label).props.value, "较新记录到达前的草稿");
+    assert.doesNotMatch(h.text(), /人工处置已保存/);
+    assert.match(h.text(), /记录已变化/);
+  } finally {
+    h.dispose();
+  }
+});

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createReportStore } from "../plugin/src/report-store.mjs";
 const turn = async () => {
-  for (let i = 0; i < 8; i++) await Promise.resolve();
+  for (let i = 0; i < 20; i++) await Promise.resolve();
 };
 const report = (target = "A", time = "1") => ({
   kind: "plugin-compat-check/report",
@@ -41,7 +41,7 @@ function fixture({ hidden = false, fetcher } = {}) {
       return value;
     },
     setTimeout: (fn, ms) => {
-      assert.equal(ms, 2000);
+      assert([2000, 50000].includes(ms));
       timers.set(++id, fn);
       return id;
     },
@@ -268,5 +268,114 @@ test("a manual refresh interrupted by visibility is retried as force when visibl
     assert.equal(e.snapshot().data.computedAt, "fresh");
   } finally {
     sub.unsubscribe();
+  }
+});
+
+test("request deadline covers body decoding, retains last report, and permits recovery without late publication", async () => {
+  const timers = new Map();
+  let next = 0,
+    mode = "good",
+    release,
+    signal;
+  const store = createReportStore({
+    requestTimeoutMs: 50000,
+    validate: (x) => x,
+    setTimeout: (fn, ms) => {
+      timers.set(++next, { fn, ms });
+      return next;
+    },
+    clearTimeout: (id) => timers.delete(id),
+    fetch: async (_, options) => {
+      signal = options.signal;
+      return {
+        ok: true,
+        json: () =>
+          mode === "hang"
+            ? new Promise((r) => {
+                release = r;
+              })
+            : report(mode),
+      };
+    },
+  });
+  const e = store.target(),
+    sub = e.subscribe(() => {});
+  try {
+    await turn();
+    assert.equal(e.snapshot().data.nodeModules, "good");
+    mode = "hang";
+    const pending = e.refresh();
+    await turn();
+    const deadline = [...timers.values()].find((t) => t.ms === 50000);
+    assert(deadline, "in-flight body decoding must have a deadline");
+    deadline.fn();
+    await pending;
+    assert(signal.aborted);
+    assert.equal(e.snapshot().data.nodeModules, "good");
+    assert.equal(e.snapshot().data.cache.stale, true);
+    assert.match(e.snapshot().error, /超时/);
+    mode = "recovered";
+    await e.refresh();
+    release(report("late"));
+    await turn();
+    assert.equal(e.snapshot().data.nodeModules, "recovered");
+  } finally {
+    sub.unsubscribe();
+    store.dispose();
+  }
+  assert.equal(timers.size, 0);
+});
+
+test("cold timeout unblocks one queued manual retry, and unmount cancels both wait and deadline", async () => {
+  const timers = new Map(),
+    signals = [];
+  let id = 0,
+    calls = 0;
+  const store = createReportStore({
+    validate: (x) => x,
+    setTimeout: (fn, ms) => {
+      timers.set(++id, { fn, ms });
+      return id;
+    },
+    clearTimeout: (id) => timers.delete(id),
+    fetch: (_, { signal }) => {
+      signals.push(signal);
+      calls++;
+      return new Promise(() => {});
+    },
+  });
+  const entry = store.target(),
+    sub = entry.subscribe(() => {});
+  await turn();
+  const retry = entry.refresh();
+  [...timers.values()].find((t) => t.ms === 50000).fn();
+  await turn();
+  assert.equal(calls, 2);
+  assert.equal(entry.snapshot().phase, "error");
+  assert.match(entry.snapshot().error, /超时/);
+  sub.unsubscribe();
+  await retry;
+  assert.equal(timers.size, 0);
+  assert(signals.every((s) => s.aborted));
+  store.dispose();
+});
+
+test("empty rejection reasons produce visible errors and allow the next report request", async () => {
+  let failed = true;
+  const f = fixture({
+    fetcher: () => (failed ? Promise.reject() : report("recovered")),
+  });
+  const e = f.store.target(),
+    sub = e.subscribe(() => {});
+  try {
+    await turn();
+    assert.equal(e.snapshot().phase, "error");
+    assert.match(e.snapshot().error, /失败/);
+    failed = false;
+    await e.refresh();
+    assert.equal(e.snapshot().data.nodeModules, "recovered");
+  } finally {
+    sub.unsubscribe();
+    f.store.dispose();
   }
 });

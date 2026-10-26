@@ -83,6 +83,7 @@ export async function panelHarness(
       navigator: { clipboard },
       crypto: webcrypto,
       TextEncoder,
+      AbortController,
       console: logger,
       fetch:
         fetcher ||
@@ -113,7 +114,8 @@ export async function panelHarness(
     });
   function walk(el, key = "root") {
     if (el == null || typeof el === "boolean") return null;
-    if (Array.isArray(el)) return el.map((v, i) => walk(v, key + "." + i));
+    if (Array.isArray(el))
+      return el.map((v, i) => walk(v, key + "." + (v?.props?.key ?? i)));
     if (typeof el !== "object") return String(el);
     if (typeof el.type === "function") {
       const saved = frame;
@@ -125,7 +127,9 @@ export async function panelHarness(
     }
     return {
       ...el,
-      children: el.children.map((v, i) => walk(v, key + "." + i)),
+      children: el.children.map((v, i) =>
+        walk(v, key + "." + (v?.props?.key ?? i)),
+      ),
     };
   }
   function render() {

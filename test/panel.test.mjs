@@ -365,6 +365,7 @@ test("mounted overview, detail and badge reuse one transport subscription", asyn
     },
     timers: {
       setTimeout: (fn, ms) => {
+        if (ms === 50000) return fn;
         assert.equal(ms, 2000);
         timers.push(fn);
         return fn;

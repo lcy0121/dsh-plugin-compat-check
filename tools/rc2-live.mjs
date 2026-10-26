@@ -1501,6 +1501,74 @@ try {
           ordinaryReportUnchanged: true,
         };
       }
+      if (process.env.DSC_UI018_RECOVERY === "1") {
+        const draftText =
+          "OWNED UNSAVED DRAFT: verify after a same-version source change";
+        await evalx(
+          `(()=>{const row=[...document.querySelectorAll('[data-review-finding]')].find(r=>r.innerText.includes('@label/broken-client'));if(!row)throw Error('Owned review row missing');window.__ownedDraftEditor=row.querySelector('textarea');row.scrollIntoView({block:'center'});window.__ownedDraftEditor.focus();})()`,
+        );
+        await chrome.send("Input.insertText", { text: draftText });
+        const beforeDraft = await ordinary();
+        fs.appendFileSync(
+          path.join(profile, "node_modules/@label/broken-client/index.js"),
+          "\n// Owned same-version source edit for draft protection acceptance\n",
+        );
+        await poll(
+          async () =>
+            (await ordinary()).reviews?.contextToken !==
+            beforeDraft.reviews?.contextToken,
+          "Source change did not replace review context",
+        );
+        await poll(
+          () =>
+            evalx(
+              `document.querySelector('[data-review-stale="true"]')?.innerText.includes('草稿已过期')`,
+            ),
+          "UI did not retain expired draft",
+        );
+        requireTrue(
+          await evalx(
+            `(()=>{const row=document.querySelector('[data-review-stale="true"]');return row?.querySelector('textarea')===window.__ownedDraftEditor&&document.activeElement===window.__ownedDraftEditor&&window.__ownedDraftEditor.value.includes(${JSON.stringify(draftText)})&&[...row.querySelectorAll('button')].find(b=>b.innerText==='保存人工处置')?.disabled;})()`,
+          ),
+          "Draft input, DOM identity, focus or stale save guard was lost",
+        );
+        const screenshotDir = process.env.DSC_UI018_SCREENSHOTS;
+        if (screenshotDir) {
+          fs.mkdirSync(screenshotDir, { recursive: true });
+          const shot = await chrome.send("Page.captureScreenshot", {
+            format: "png",
+          });
+          fs.writeFileSync(
+            path.join(screenshotDir, "expired-draft.png"),
+            Buffer.from(shot.data, "base64"),
+          );
+        }
+        await evalx(
+          `[...document.querySelector('[data-review-stale="true"]').querySelectorAll('button')].find(b=>b.innerText==='复制草稿').click()`,
+        );
+        await poll(
+          async () =>
+            String(await evalx("navigator.clipboard.readText()")).includes(
+              draftText,
+            ),
+          "Expired draft copy lost input",
+        );
+        await evalx(
+          `[...document.querySelector('[data-review-stale="true"]').querySelectorAll('button')].find(b=>b.innerText==='放弃草稿').click()`,
+        );
+        await poll(
+          () => evalx(`!document.querySelector('[data-review-stale="true"]')`),
+          "Explicit discard did not remove old draft",
+        );
+        result.ui018Recovery = {
+          realBrowser: true,
+          sameVersionSourceChange: true,
+          draftPreserved: true,
+          editorIdentityAndFocusPreserved: true,
+          staleSaveDisabled: true,
+          copyAndDiscard: true,
+        };
+      }
       if (process.env.DSC_UI018_P2 === "1") {
         // Owned, inactive fixture packages exercise the real artifact with more
         // than two pages. They never become active DSH bundles.
