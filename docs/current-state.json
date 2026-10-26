@@ -30,10 +30,29 @@
     },
     "publication": {
       "releaseTarget": "0.1.7",
-      "npmLatestObserved": "0.1.6",
-      "observedOn": "2026-10-25",
+      "status": "published",
+      "npm": {
+        "latest": "0.1.7",
+        "publishedAt": "2026-10-25T06:25:21.798Z",
+        "integrity": "sha512-yYKcIOYu5DVVdDbEFU1LTx3pnGcWWb72D8R4X/xB88uCVtoSQiPkxl0cC0o4/OrePrIfavGD6lJy2nBq0HpNFg==",
+        "shasum": "ccea783d4f1e76ea82f07b6727668de5efa63025",
+        "fileCount": 71,
+        "unpackedSize": 982299
+      },
+      "githubRelease": {
+        "tag": "v0.1.7",
+        "publishedAt": "2026-10-25T06:25:23Z",
+        "tagCommit": "3a5075ec63e51df9502517a144408e362ad983be",
+        "assets": [
+          "dsh-plugin-compat-check-0.1.7.tgz",
+          "RELEASE-VERIFICATION.json",
+          "SHA256SUMS"
+        ]
+      },
+      "observedOn": "2026-10-26",
       "performedByThisTask": false,
-      "scope": "Preparation only: no npm publish, version tag or GitHub release. This snapshot is not a claim that 0.1.7 is publicly distributed."
+      "artifactMatch": "npm dist.integrity and dist.shasum equal the accepted archive, whose sha256 6e98965fb7c1658300e522247ff48039520b0388ce9ac796103cec8204477168 is the one listed in RELEASE-VERIFICATION.json and SHA256SUMS.",
+      "scope": "Registry and release existence plus archive identity only. Not a claim that 0.1.7 is installed on any profile, that the panel renders, or that any plugin judgement was accepted; each remains a separate verification."
     },
     "history": {
       "commit": "39d9f1a55fb10c9c3451a87e8c0703d819553f00",
@@ -91,12 +110,14 @@
       },
       "publicMetadata": {
         "status": "passed-with-expected-candidate-notices",
+        "observedBeforeRelease": true,
         "npmLatest": "0.1.6",
         "notices": [
           "npm.version-matches",
           "npm.runtime-metadata-matches",
           "npm.readme-is-current"
-        ]
+        ],
+        "resolvedBy": "publication.npm.latest is 0.1.7 since 2026-10-25; these notices described the unpublished candidate and are retained as history, not as open defects."
       },
       "rc3SameArchive": {
         "ok": true,
