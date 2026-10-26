@@ -4,7 +4,15 @@ import vm from "node:vm";
 import { webcrypto } from "node:crypto";
 export async function panelHarness(
   data,
-  { clipboard, subject, fetcher, timers } = {},
+  {
+    clipboard,
+    subject,
+    fetcher,
+    timers,
+    views,
+    clientFile,
+    logger = console,
+  } = {},
 ) {
   const stores = new Map(),
     effects = [],
@@ -42,6 +50,13 @@ export async function panelHarness(
       if (!s[i] || deps.some((x, j) => x !== s[i].deps[j])) s[i] = { fn, deps };
       return s[i].fn;
     },
+    useMemo(compute, deps) {
+      const i = frame.i++,
+        s = frame.store;
+      if (!s[i] || deps.some((x, j) => x !== s[i].deps[j]))
+        s[i] = { value: compute(), deps };
+      return s[i].value;
+    },
     useEffect(fn, deps) {
       const i = frame.i++,
         s = frame.store;
@@ -60,7 +75,7 @@ export async function panelHarness(
   };
   vm.runInNewContext(
     fs.readFileSync(
-      new URL("../../plugin/lib/client.js", import.meta.url),
+      clientFile || new URL("../../plugin/lib/client.js", import.meta.url),
       "utf8",
     ),
     {
@@ -68,7 +83,7 @@ export async function panelHarness(
       navigator: { clipboard },
       crypto: webcrypto,
       TextEncoder,
-      console,
+      console: logger,
       fetch:
         fetcher ||
         (async () => ({
@@ -114,12 +129,23 @@ export async function panelHarness(
     };
   }
   function render() {
-    tree = walk(
-      React.createElement(
-        components[subject ? "plugins.detail.section" : "settings.plugins.tab"],
-        subject ? { subject: { kind: "package", pkg: { name: subject } } } : {},
-      ),
-    );
+    tree = views
+      ? views.map((view, i) =>
+          walk(
+            React.createElement(components[view.slot], view.props || {}),
+            "slot:" + i,
+          ),
+        )
+      : walk(
+          React.createElement(
+            components[
+              subject ? "plugins.detail.section" : "settings.plugins.tab"
+            ],
+            subject
+              ? { subject: { kind: "package", pkg: { name: subject } } }
+              : {},
+          ),
+        );
     const pending = effects.splice(0);
     for (const fn of pending) {
       const off = fn();

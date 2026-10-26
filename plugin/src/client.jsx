@@ -1,4 +1,5 @@
 import * as React from "react";
+import { createReportStore } from "./report-store.mjs";
 import { assertEnvelope, catalogLines } from "../../lib/contracts.mjs";
 import { nextSteps } from "../../lib/finding-guidance.mjs";
 import {
@@ -26,6 +27,8 @@ import {
   Alert,
   Fold,
   Scope,
+  DeferredPanel,
+  Pager,
 } from "./components/ui/index.jsx";
 const ReportContract = { assertEnvelope, catalogLines };
 const FindingGuidance = { nextSteps };
@@ -44,20 +47,28 @@ const FunctionalHealthContract = {
 
 const h = (type, props, ...children) =>
   React.createElement(ui[type] || type, props, ...children);
-var DependencyPanel = WorkflowPanelFactory.createDependencyPanel(
-  React,
-  DependencyGraphContract,
-  ui,
+const memo = React.memo || ((component) => component);
+const useMemo = React.useMemo || ((compute) => compute());
+var DependencyPanel = memo(
+  WorkflowPanelFactory.createDependencyPanel(
+    React,
+    DependencyGraphContract,
+    ui,
+  ),
 );
-var FindingReviewPanel = WorkflowPanelFactory.createFindingReviewPanel(
-  React,
-  FindingReviewContract,
-  ui,
+var FindingReviewPanel = memo(
+  WorkflowPanelFactory.createFindingReviewPanel(
+    React,
+    FindingReviewContract,
+    ui,
+  ),
 );
-var FunctionalHealthPanel = WorkflowPanelFactory.createFunctionalHealthPanel(
-  React,
-  FunctionalHealthContract,
-  ui,
+var FunctionalHealthPanel = memo(
+  WorkflowPanelFactory.createFunctionalHealthPanel(
+    React,
+    FunctionalHealthContract,
+    ui,
+  ),
 );
 
 var SLOT = "settings.plugins.tab";
@@ -152,116 +163,33 @@ function acceptPayload(data) {
   }
 }
 
-function useCompatibility() {
-  var state = React.useState({ phase: "loading", data: null, error: null });
-  var alive = React.useRef(true),
-    latest = React.useRef(null),
-    pending = React.useRef(null),
-    queuedForce = React.useRef(false);
-  var set = state[1];
-  var load = React.useCallback(function (refresh, background) {
-    if (pending.current) {
-      if (refresh) queuedForce.current = true;
-      return pending.current;
-    }
-    function read(url) {
-      return fetch(url, {
-        headers: {
-          accept: "application/json",
-          "X-DSH-Compat-Request": "1",
-        },
-        credentials: "same-origin",
-      }).then(function (res) {
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        return res.json();
-      });
-    }
-    var request = Promise.resolve()
-      .then(function () {
-        return read(
-          refresh
-            ? ROUTE + "?refresh=1"
-            : background
-              ? ROUTE + "?metadata=1"
-              : ROUTE,
-        );
-      })
-      .then(function (data) {
-        if (
-          background &&
-          data.kind === "plugin-compat-check/report-metadata" &&
-          data.ok &&
-          latest.current &&
-          data.computedAt === latest.current.computedAt &&
-          data.nodeModules === latest.current.nodeModules &&
-          data.dshVersion === latest.current.report.dshVersion &&
-          (data.reviewsRevision || null) ===
-            ((latest.current.reviews && latest.current.reviews.revision) ||
-              null) &&
-          (data.reviewsError || null) ===
-            ((latest.current.reviews && latest.current.reviews.error) ||
-              null) &&
-          (data.reviewsContextToken || null) ===
-            ((latest.current.reviews && latest.current.reviews.contextToken) ||
-              null)
-        ) {
-          return Object.assign({}, latest.current, { cache: data.cache });
-        }
-        return background ? read(ROUTE) : data;
-      })
-      .then(function (data) {
-        data = acceptPayload(data);
-        if (!data.ok && latest.current)
-          throw new Error(data.error || "后台刷新失败");
-        if (!alive.current) return;
-        latest.current = data;
-        set({ phase: "done", data: data, error: null });
-      })
-      .catch(function (error) {
-        if (!alive.current) return;
-        var message = String((error && error.message) || error);
-        if (latest.current && latest.current.ok) {
-          var previous = latest.current;
-          var kept = Object.assign({}, previous, {
-            cache: Object.assign({}, previous.cache, {
-              hit: true,
-              stale: true,
-              refreshing: false,
-              refreshError: message,
-            }),
-          });
-          set({ phase: "done", data: kept, error: message });
-        } else set({ phase: "error", data: null, error: message });
-      })
-      .then(function () {
-        pending.current = null;
-        if (queuedForce.current && alive.current) {
-          queuedForce.current = false;
-          return load(true, false);
-        }
-      });
-    pending.current = request;
-    return request;
-  }, []);
-  React.useEffect(
-    function () {
-      alive.current = true;
-      var timer;
-      function schedule() {
-        if (alive.current)
-          timer = setTimeout(function () {
-            return load(false, true).then(schedule);
-          }, 2000);
-      }
-      load(false).then(schedule);
-      return function () {
-        alive.current = false;
-        clearTimeout(timer);
-      };
-    },
-    [load],
+const reportStore = createReportStore({ validate: acceptPayload });
+function useCompatibility(active = true, route = ROUTE) {
+  const entry = reportStore.target(route);
+  const state = React.useState({ route, value: entry.snapshot() });
+  const subscription = React.useRef(null);
+  React.useEffect(() => {
+    const current = reportStore.target(route);
+    const handle = current.subscribe((value) => state[1]({ route, value }), {
+      visible: active,
+    });
+    subscription.current = handle;
+    return () => {
+      handle.unsubscribe();
+      if (subscription.current === handle) subscription.current = null;
+    };
+  }, [route]);
+  React.useEffect(() => {
+    subscription.current?.setVisible(active);
+  }, [active]);
+  const reload = React.useCallback(
+    (force = true) => reportStore.target(route).refresh(force),
+    [route],
   );
-  return { value: state[0], reload: load };
+  return {
+    value: state[0].route === route ? state[0].value : entry.snapshot(),
+    reload,
+  };
 }
 
 var styles = {
@@ -570,8 +498,8 @@ function verdictOf(plugin) {
 }
 
 /** 详情页要的是**单个插件**的结论；数据源与总览表同一个路由，所以不可能两边不一致。 */
-function usePluginState() {
-  return useCompatibility();
+function usePluginState(props) {
+  return useCompatibility(props?.reportVisible !== false);
 }
 
 /**
@@ -699,7 +627,7 @@ function DetailSection(props) {
 }
 
 function DetailSectionBody(props) {
-  var st = usePluginState();
+  var st = usePluginState(props);
   var data = st.value.data;
   var hit = pickPlugin(data, props);
   // 解析失败时把**看到的形状**记下来。角标静默不渲染是最难查的形态：
@@ -783,7 +711,7 @@ function DetailSectionBody(props) {
 
 /** C3 · 详情页角标：一行字，放在标题行 */
 function DetailBadge(props) {
-  var st = usePluginState();
+  var st = usePluginState(props);
   var data = st.value.data;
   var hit = pickPlugin(data, props);
   mark({
@@ -1049,7 +977,7 @@ function UpgradePreview(p) {
   }
   return h(
     "details",
-    { "data-upgrade-preview": true, heading: true },
+    { "data-upgrade-preview": true, heading: true, keepMounted: true },
     h("summary", { style: { cursor: "pointer" } }, "升级前兼容性预检（静态）"),
     h(
       "p",
@@ -1265,46 +1193,66 @@ function Table(p) {
     certaintyState = React.useState("all"),
     pendingState = React.useState("all"),
     risksState = React.useState(false);
+  const [pagination, setPagination] = React.useState(null);
+  const names = useMemo(
+    () =>
+      Object.keys(report?.plugins || {}).sort((a, b) => {
+        const rank = { broken: 0, partial: 1, unknown: 2, ok: 3 };
+        return (
+          rank[report.plugins[a].verdict] - rank[report.plugins[b].verdict] ||
+          a.localeCompare(b)
+        );
+      }),
+    [report],
+  );
+  const diff = data?.baseline?.diff;
+  const comparable = Boolean(diff?.comparable);
+  const risks = useMemo(() => {
+    const result = new Set();
+    if (comparable) {
+      for (const entry of diff.worsened || []) result.add(entry.name);
+      for (const entry of diff.added || [])
+        if (report?.plugins[entry.name]?.findings.length)
+          result.add(entry.name);
+    }
+    return result;
+  }, [diff, report, comparable]);
+  const filterKey = JSON.stringify([
+    queryState[0],
+    verdictState[0],
+    certaintyState[0],
+    pendingState[0],
+    risksState[0],
+  ]);
+  const shown = useMemo(() => {
+    const query = String(queryState[0]).trim().toLowerCase();
+    return names.filter((name) => {
+      const pl = report.plugins[name];
+      const pending =
+        pl.coverage.status !== "complete" ||
+        pl.vacuous ||
+        (pl.clientSide || []).length > 0;
+      return (
+        name.toLowerCase().includes(query) &&
+        (verdictState[0] === "all" || pl.verdict === verdictState[0]) &&
+        (certaintyState[0] === "all" ||
+          pl.findings.some((f) => f.certainty === certaintyState[0])) &&
+        (pendingState[0] === "all" ||
+          (pendingState[0] === "pending" ? pending : !pending)) &&
+        (!risksState[0] || (comparable && risks.has(name)))
+      );
+    });
+  }, [names, report, filterKey, risks, comparable]);
+  const pageSize = 50;
+  const page =
+    pagination?.report === report && pagination?.filterKey === filterKey
+      ? Math.min(
+          pagination.page,
+          Math.max(0, Math.ceil(shown.length / pageSize) - 1),
+        )
+      : 0;
+  const visible = shown.slice(page * pageSize, (page + 1) * pageSize);
   if (!report) return null;
-  var names = Object.keys(report.plugins);
-  names.sort(function (a, b) {
-    var rank = { broken: 0, partial: 1, unknown: 2, ok: 3 };
-    var d = rank[report.plugins[a].verdict] - rank[report.plugins[b].verdict];
-    return d !== 0 ? d : a.localeCompare(b);
-  });
-  var diff = data.baseline && data.baseline.diff,
-    comparable = Boolean(diff && diff.comparable),
-    risks = {};
-  if (comparable) {
-    (diff.worsened || []).forEach(function (entry) {
-      risks[entry.name] = true;
-    });
-    (diff.added || []).forEach(function (entry) {
-      if (
-        report.plugins[entry.name] &&
-        report.plugins[entry.name].findings.length
-      )
-        risks[entry.name] = true;
-    });
-  }
-  var shown = names.filter(function (name) {
-    var pl = report.plugins[name];
-    var pending =
-      pl.coverage.status !== "complete" ||
-      pl.vacuous ||
-      (pl.clientSide || []).length > 0;
-    return (
-      name.toLowerCase().includes(String(queryState[0]).trim().toLowerCase()) &&
-      (verdictState[0] === "all" || pl.verdict === verdictState[0]) &&
-      (certaintyState[0] === "all" ||
-        pl.findings.some(function (f) {
-          return f.certainty === certaintyState[0];
-        })) &&
-      (pendingState[0] === "all" ||
-        (pendingState[0] === "pending" ? pending : !pending)) &&
-      (!risksState[0] || (comparable && risks[name]))
-    );
-  });
   var s = report.summary || {};
   function select(label, state, options) {
     return h(
@@ -1314,6 +1262,7 @@ function Table(p) {
         value: state[0],
         style: styles.btn,
         onChange: function (event) {
+          setPagination(null);
           state[1](event.target.value);
         },
       },
@@ -1388,6 +1337,7 @@ function Table(p) {
           value: queryState[0],
           style: mergeStyle(styles.btn, { minWidth: "150px" }),
           onChange: function (event) {
+            setPagination(null);
             queryState[1](event.target.value);
           },
         }),
@@ -1415,6 +1365,7 @@ function Table(p) {
             style: styles.btn,
             "aria-pressed": risksState[0],
             onClick: function () {
+              setPagination(null);
               risksState[1](!risksState[0]);
             },
           },
@@ -1426,6 +1377,7 @@ function Table(p) {
             type: "button",
             style: styles.btn,
             onClick: function () {
+              setPagination(null);
               queryState[1]("");
               verdictState[1]("all");
               certaintyState[1]("all");
@@ -1482,7 +1434,7 @@ function Table(p) {
           h(
             "tbody",
             null,
-            shown.map(function (n) {
+            visible.map(function (n) {
               var pl = report.plugins[n],
                 v = VERDICT[pl.verdict] || VERDICT.unknown;
               return h(
@@ -1528,6 +1480,14 @@ function Table(p) {
           ),
         ),
       ),
+      h(Pager, {
+        page,
+        total: shown.length,
+        pageSize,
+        label: "插件兼容性结果",
+        onPageChange: (next) =>
+          setPagination({ report, filterKey, page: next }),
+      }),
     ),
     h(
       "div",
@@ -1538,13 +1498,26 @@ function Table(p) {
         { "aria-label": "升级前兼容性预检" },
         h(UpgradePreview, { data: data }),
       ),
-      h(DependencyPanel, { graph: report.dependencyGraph }),
-      h(FindingReviewPanel, {
-        report: report,
-        reviews: data.reviews,
-        onSave: saveFindingReview,
-      }),
-      h(FunctionalHealthPanel, { report: report }),
+      h(
+        DeferredPanel,
+        { title: "依赖关系与潜在影响", label: "依赖关系与潜在影响" },
+        () => h(DependencyPanel, { graph: report.dependencyGraph }),
+      ),
+      h(
+        DeferredPanel,
+        { title: "发现的人工处置", label: "发现的人工处置" },
+        () =>
+          h(FindingReviewPanel, {
+            report: report,
+            reviews: data.reviews,
+            onSave: saveFindingReview,
+          }),
+      ),
+      h(
+        DeferredPanel,
+        { title: "功能健康检查（独立实测记录）", label: "功能健康检查" },
+        () => h(FunctionalHealthPanel, { report: report }),
+      ),
     ),
     h(
       Card,
@@ -1587,8 +1560,8 @@ function Table(p) {
   );
 }
 
-function Panel() {
-  var st = useCompatibility();
+function Panel(props) {
+  var st = useCompatibility(props?.reportVisible !== false);
   var value = st.value;
   mark({
     state: value.phase,
@@ -1677,6 +1650,8 @@ function apply(ctx) {
   // 最外层 try：注册失败也**绝不能**把客户端启动带崩 ——
   // 那正好是本工具要检测的那类故障（健康检查插件自己制造故障）。
   try {
+    if (typeof ctx.effect === "function")
+      ctx.effect(() => () => reportStore.dispose());
     registerSlot(
       ctx,
       SLOT,
@@ -1733,7 +1708,21 @@ function registerSlot(ctx, slot, spec, Comp, tag) {
   try {
     ctx.slots.inject(slot, function () {
       return ctx.slots.register(spec, function ThemedSlot(props) {
-        return h(Scope, { inline: tag === "detail-badge" }, h(Comp, props));
+        const [visible, setVisible] = React.useState(
+          typeof IntersectionObserver !== "function",
+        );
+        const mounted = React.useRef(false);
+        if (visible) mounted.current = true;
+        return h(
+          Scope,
+          { inline: tag === "detail-badge", onVisibilityChange: setVisible },
+          mounted.current
+            ? h(Comp, { ...props, reportVisible: visible })
+            : h("span", {
+                "aria-hidden": true,
+                style: { display: "inline-block", height: "1px", width: "1px" },
+              }),
+        );
       });
     });
     registered.push(slot);

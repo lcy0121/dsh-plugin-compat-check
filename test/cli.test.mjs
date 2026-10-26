@@ -456,11 +456,11 @@ describe('CLI：基线差分', () => {
   const tmpBaseline = () => path.join(TEST_HOME, `dsc-bl-${process.pid}-${Math.random().toString(36).slice(2)}.json`)
   const args = (bl) => ['--nm', BASELINE_NM, '--probe', MICRO_SURFACE, '--dsh-version', '0.2.0-rc.2', '--baseline-file', bl]
 
-  test('第一次：说明「还没有基线」，而不是「没有变化」', () => {
+  test('首次保存：说明「尚无可比较记录」，而不是「没有变化」', () => {
     const bl = tmpBaseline()
     try {
       const r = runCLI(args(bl))
-      assert.match(r.out, /还没有基线/)
+      assert.match(r.out, /尚无可比较的历史记录/)
       assert.ok(fs.existsSync(bl), '第一次应当写出基线')
     } finally { fs.rmSync(bl, { force: true }) }
   })

@@ -131,10 +131,10 @@ describe('基线：快照', () => {
 describe('基线：差分', () => {
   const base = (plugins) => snapshotForBaseline(verdict(plugins, '0.2.0-rc.2'), '0.2.0-rc.2')
 
-  test('没有基线 → 不可比，且说明原因是「第一次」而不是「没问题」', () => {
+  test('没有基线 → 不可比，且说明原因是「无历史记录」而不是「没问题」', () => {
     const d = diffAgainstBaseline(null, base({}))
     assert.equal(d.comparable, false)
-    assert.match(d.reason, /第一次体检/)
+    assert.match(d.reason, /尚无可比较的历史记录/)
     // 关键：不可比**不是**「没有变化」
     assert.equal(badgeFor(d).show, false)
   })

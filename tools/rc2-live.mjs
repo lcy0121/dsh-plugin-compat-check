@@ -1285,15 +1285,11 @@ try {
         await evalx(
           `[...document.querySelectorAll('button')].find(b=>b.innerText==='重新检查').click()`,
         );
-        await poll(
-          () => evalx(`document.body.textContent.includes('未来时钟偏差')`),
-          "Panel lost future rejection reason",
-        );
         await evalx(
           `(()=>{const b=document.querySelector('button[aria-label=\"展开查看采样与检查信息\"]');if(b)b.click();else {const s=[...document.querySelectorAll('summary')].find(e=>e.innerText==='查看采样与检查信息');if(s)s.parentElement.open=true;}})()`,
         );
-        requireTrue(
-          await evalx(`document.body.innerText.includes('未来时钟偏差')`),
+        await poll(
+          () => evalx(`document.body.innerText.includes('未来时钟偏差')`),
           "Future reason is not visible in sampling details",
         );
         result.futureProbe = {
@@ -1388,6 +1384,16 @@ try {
         "Installed report lacks dependency graph",
       );
       await evalx(
+        `document.querySelector('[aria-label="依赖关系与潜在影响"]')?.scrollIntoView({block:'center'})`,
+      );
+      await poll(
+        () =>
+          evalx(
+            `!!document.querySelector('[aria-label="展开插件及 loader 条目"]')`,
+          ),
+        "Dependency panel did not enter view",
+      );
+      await evalx(
         `document.querySelector('[aria-label="展开插件及 loader 条目"]')?.click()`,
       );
       requireTrue(
@@ -1395,6 +1401,9 @@ try {
           `Boolean(document.querySelector('[aria-label="依赖关系与潜在影响"] table'))`,
         ),
         "Dependency view did not render in actual Chrome",
+      );
+      await evalx(
+        `document.querySelector('[aria-label="发现的人工处置"]')?.scrollIntoView({block:'center'})`,
       );
       await poll(
         () =>
@@ -1434,6 +1443,16 @@ try {
             stateFiles().filter(([name]) => !name.startsWith("reviews.")),
           ),
         "Manual action changed baseline state",
+      );
+      await evalx(
+        `document.querySelector('[aria-label="功能健康检查"]')?.scrollIntoView({block:'center'})`,
+      );
+      await poll(
+        () =>
+          evalx(
+            `!!document.querySelector('[aria-label="导入功能健康检查记录"]')`,
+          ),
+        "Health panel did not enter view",
       );
       result.p2Workflows = {
         realBrowser: true,
@@ -1480,6 +1499,112 @@ try {
           manifestSha256: record.identity.manifestSha256,
           historicalOnly: true,
           ordinaryReportUnchanged: true,
+        };
+      }
+      if (process.env.DSC_UI018_P2 === "1") {
+        // Owned, inactive fixture packages exercise the real artifact with more
+        // than two pages. They never become active DSH bundles.
+        const fixtureSource = path.join(repo, "test/fixtures/labels/healthy");
+        for (let i = 0; i < 120; i++) {
+          const name = `@large/compat-${String(i).padStart(3, "0")}`;
+          const target = path.join(profile, "node_modules", name);
+          fs.cpSync(fixtureSource, target, { recursive: true });
+          const meta = JSON.parse(
+            fs.readFileSync(path.join(target, "package.json")),
+          );
+          meta.name = name;
+          writeJSON(path.join(target, "package.json"), meta);
+        }
+        await evalx(
+          `document.querySelector('.compat-primary').scrollIntoView({block:'start'});[...document.querySelectorAll('button')].find(b=>b.innerText==='清除筛选').click()`,
+        );
+        const large = await refreshVisibleReport(chrome, evalx, poll);
+        requireTrue(
+          Object.keys(large.report.plugins).length >= 120,
+          "Large fixture inventory missing",
+        );
+        await evalx(
+          `${field("搜索插件")}.focus();${field("搜索插件")}.select()`,
+        );
+        await chrome.send("Input.insertText", { text: "@large/compat-" });
+        await poll(
+          async () => (await rowNames()).length === 50,
+          "Main table did not bound the first page",
+        );
+        const seen = [...(await rowNames())];
+        for (const count of [50, 20]) {
+          await evalx(
+            `document.querySelector('[aria-label="下一页插件兼容性结果"]').click()`,
+          );
+          await poll(
+            async () =>
+              (await rowNames()).length === count &&
+              !(await rowNames()).some((name) => seen.includes(name)),
+            "Main table page duplicated or omitted rows",
+          );
+          seen.push(...(await rowNames()));
+        }
+        requireTrue(
+          new Set(seen).size === 120 && seen.includes("@large/compat-119"),
+          "Pagination lost installed fixtures",
+        );
+        await evalx(
+          `${field("搜索插件")}.focus();${field("搜索插件")}.select()`,
+        );
+        await chrome.send("Input.insertText", { text: "@large/compat-119" });
+        await poll(
+          async () =>
+            JSON.stringify(await rowNames()) ===
+            JSON.stringify(["@large/compat-119"]),
+          "Filtering did not reset the page",
+        );
+        await evalx(
+          `[...document.querySelectorAll('button')].find(b=>b.innerText==='清除筛选').click()`,
+        );
+        await poll(
+          async () => (await rowNames()).length === 50,
+          "Clear filters did not restore the first page",
+        );
+        await evalx(
+          `document.querySelector('[aria-label="依赖关系与潜在影响"]').scrollIntoView({block:'center'});document.querySelector('[aria-label="展开插件及 loader 条目"]')?.click()`,
+        );
+        await poll(
+          () =>
+            evalx(
+              `document.querySelectorAll('table[aria-label="插件及 loader 条目"] tbody tr').length===50`,
+            ),
+          "Loader table did not page",
+        );
+        await evalx(
+          `document.querySelector('[aria-label="下一页插件及 loader 条目"]').click()`,
+        );
+        await poll(
+          () =>
+            evalx(
+              `document.querySelector('[aria-label="插件及 loader 条目分页"]').innerText.includes('第 2 /')`,
+            ),
+          "Loader next page did not advance",
+        );
+        await evalx(
+          `[...document.querySelectorAll('button')].find(b=>b.innerText==='预览故障报告')?.click()`,
+        );
+        await poll(
+          () =>
+            evalx(
+              `document.querySelector('[aria-label="故障报告预览"]')?.value.includes('@large/compat-119')`,
+            ),
+          "Paginated UI truncated full export",
+        );
+        result.ui018P2 = {
+          realBrowser: true,
+          syntheticPlugins: 120,
+          completeInventory: Object.keys(large.report.plugins).length,
+          mainPageSize: 50,
+          loaderPageSize: 50,
+          allFixturePagesVisited: true,
+          filteringResetsPage: true,
+          fullExport: true,
+          inactiveFixtures: true,
         };
       }
       if (process.env.DSC_RC2_SCREENSHOT) {

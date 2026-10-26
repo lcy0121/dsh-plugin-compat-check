@@ -187,7 +187,8 @@
   gap: 12px;
   min-width: 0;
 }
-.dsc-ui .compat-auxiliary > section {
+.dsc-ui .compat-auxiliary > section,
+.dsc-ui .compat-panel-mount > section {
   padding: 16px;
   min-width: 0;
 }
@@ -315,4 +316,19 @@
 }
 .dsc-ui .compat-count {
   white-space: nowrap;
+}
+
+.dsc-ui .compat-panel-mount {
+  min-width: 0;
+}
+.dsc-ui .compat-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+.dsc-ui .compat-pagination > span {
+  margin-right: auto;
+  color: hsl(var(--dsc-muted-foreground));
 }

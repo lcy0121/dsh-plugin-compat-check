@@ -350,6 +350,15 @@ test("shipped panel renders parameter risks and maintenance notices from the can
       computedAt: "2026-10-25T00:00:00Z",
       nodeModules: f.nm,
     });
+    for (const button of h
+      .nodes()
+      .filter(
+        (n) =>
+          n.type === "button" &&
+          /^展开(?:查看 \d+ 条|覆盖限制)/.test(n.props["aria-label"] || ""),
+      ))
+      button.props.onClick();
+    h.render();
     assert.match(h.text(), /API参数不符/);
     assert.match(h.text(), /弃用.*ctx.timeout/);
     assert.match(h.text(), /生命周期.*ready.*release/);

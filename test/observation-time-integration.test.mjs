@@ -199,7 +199,10 @@ test("host HTTP, agent and actual client factory retain future-probe rejection a
   checkRejected(data.agent.report);
   assert.match(data.agent.text, /未来|时钟/);
   const h = await panelHarness(data.http.body);
+  h.field("展开查看采样与检查信息").props.onClick();
+  h.render();
   assert.match(h.text(), /未来|时钟/);
+  h.dispose();
   assert.equal(data.recovered.body.report.observation.usable, true);
   assert(
     data.recovered.body.report.plugins.sample.findings.some(

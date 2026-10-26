@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-26T08:03:45.649Z",
-  "testFiles": 73,
-  "tests": 1143,
+  "recordedAt": "2026-10-26T12:40:25.712Z",
+  "testFiles": 74,
+  "tests": 1156,
   "repositoryFiles": {
-    "total": 351,
+    "total": 350,
     "fixtures": 99,
-    "other": 252
+    "other": 251
   },
   "verification": {
     "platform": "darwin",
@@ -26,7 +26,7 @@
     "sourceContext": {
       "versionSource": "lib/version.mjs",
       "integrationTarget": "main",
-      "scope": "Working source includes the three planned 0.1.8 UI improvements. Version source remains 0.1.7; publication fields describe the historical 0.1.7 release, not this unpublished development archive."
+      "scope": "Unpublished 0.1.8 UI and P2 development in current source. Version remains 0.1.7; publication fields describe the historical published 0.1.7 only."
     },
     "publication": {
       "releaseTarget": "0.1.7",
@@ -55,10 +55,9 @@
       "scope": "Registry and release existence plus archive identity only. Not a claim that 0.1.7 is installed on any profile, that the panel renders, or that any plugin judgement was accepted; each remains a separate verification."
     },
     "history": {
-      "commit": "39d9f1a55fb10c9c3451a87e8c0703d819553f00",
+      "commit": "f5ec0d0",
       "path": "docs/current-state.json",
-      "sha256": "c31fd9a49085a29bfb8a1275f884d039398d31e6592001562b085523bde41445",
-      "scope": "All prior local/remote, cohort, upstream and released-archive records and earlier pointers; historical evidence does not certify this candidate."
+      "scope": "Historical 0.1.7 release and UI P1 acceptance records, upstream state and earlier pointers. Does not certify this unpublished P2 candidate."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -88,259 +87,139 @@
         "url": "https://github.com/0xsline/awesome-deepseek-harness/pull/717"
       }
     },
-    "localCandidate20261025": {
-      "artifact": {
-        "path": "tmp/release-0.1.7-zYOAiu/dsh-plugin-compat-check-0.1.7.tgz",
-        "sha256": "6e98965fb7c1658300e522247ff48039520b0388ce9ac796103cec8204477168",
-        "integrity": "sha512-yYKcIOYu5DVVdDbEFU1LTx3pnGcWWb72D8R4X/xB88uCVtoSQiPkxl0cC0o4/OrePrIfavGD6lJy2nBq0HpNFg==",
-        "bytes": 267696,
-        "entries": 71
-      },
+    "ui018P2Local20261026": {
+      "scope": "Local macOS arm64 only. Synthetic fixtures, not general plugin business certification. No remote CI, publication or Windows claim. Existing Card/Fold/component styles retained.",
       "defaultSuite": {
-        "tests": 1137,
-        "pass": 1129,
+        "tests": 1156,
+        "pass": 1148,
         "skip": 8,
         "fail": 0
       },
-      "checks": {
-        "maintenance": "passed",
-        "prepublish": "passed",
-        "workspaceDependencies": "clean",
-        "pluginRuntimeDependencies": "clean"
+      "baselineCopy": "Separate missing, first-saved, incomplete, preview and retained-history messages; persistence policy unchanged.",
+      "subscription": "One report chain per route/target; pause and abort without visible subscribers or in hidden document; coalesced force refresh, metadata reuse, target isolation and late response rejection.",
+      "rendering": {
+        "mainAndRelationshipPageSize": 50,
+        "readOnlyDisclosures": "Unmount when closed; format only opened page.",
+        "forms": "Mount at first opening, retain on collapse.",
+        "auxiliary": "Initialize near viewport, retain visited editors; memoize stable report-derived work."
       },
-      "publicMetadata": {
-        "status": "passed-with-expected-candidate-notices",
-        "observedBeforeRelease": true,
-        "npmLatest": "0.1.6",
-        "notices": [
-          "npm.version-matches",
-          "npm.runtime-metadata-matches",
-          "npm.readme-is-current"
-        ],
-        "resolvedBy": "publication.npm.latest is 0.1.7 since 2026-10-25; these notices described the unpublished candidate and are retained as history, not as open defects."
-      },
-      "rc3SameArchive": {
-        "ok": true,
-        "dshVersion": "0.2.1-rc.3",
-        "artifactSha256": "6e98965fb7c1658300e522247ff48039520b0388ce9ac796103cec8204477168",
-        "realBrowser": true,
-        "productionRequests": 0,
-        "privateRootRemoved": true
-      },
-      "cohort": {
-        "status": "passed",
-        "replay": "passed",
-        "manifestSha256": "19278a4fb565f6c5b833b8aceb557264154e100a1b50358fb96c4b0de4511a32",
-        "independentPackageFamilies": 4,
-        "pinnedArtifacts": 5,
-        "holdoutPackageFamilies": 2,
-        "holdoutPinnedArtifacts": 2,
-        "distinctPlannedCases": 24,
-        "knownOutcomeCases": 24,
-        "staticIdentifiedFailures": 0,
-        "serviceOnlyIdentifiedFailures": 0,
-        "unflaggedNaturalFailures": 2,
-        "unflaggedBusinessOrClientFailures": 10,
-        "driverErrors": 0,
-        "validationErrors": 0,
-        "scope": "24 fixed cases reproduced with FP/FN retained; replay is historical validation, not ecosystem accuracy or full business certification."
-      },
-      "evidence": {
-        "directory": "tmp/release-0.1.7-zYOAiu",
-        "sha256": {
-          "dsc017-full.tap": "547b46eb372376c9281acc93137fe036e6e42235eeaf97f8c83c3e885c89cdc9",
-          "dsc017-prepublish.tap": "c15ad64da3caafcd239ed23e5437e69301a37f83827b644078fe761d18cf8b12",
-          "dsc017-prepublish.log": "79c9bda041489375ff2da3b8a730619d7d99830731d2892f4276b30beb15e231",
-          "dsc017-maintenance-check.log": "34d630f8811fb687ab93901dc09294bf40cdcbb4e27f2c8e04e054c8960b62eb",
-          "dsc017-dependency-security.json": "c2d5bf3ab9dce457bf4ab6e4d1e136d05a4717a10bc2e7b499ebe6281515c38a",
-          "dsc017-public-metadata.json": "4fd86eb722f59a36dc0752313c3a9bdf30126f7401b958697f87b6cfe9df3388",
-          "dsc017-candidate-rc3-live.json": "61f04ef433865f15cf14088114b102d43f7b831741a17cdf5b90d3c9d8b2722a",
-          "dsc017-cohort-replay.json": "ac98995a3b1e18a2955a5bd0d509f87cb7b127d11625066b09bdbb23929de197"
-        }
-      },
-      "scope": "Local macOS arm64 candidate evidence only. GitHub CI is evaluated separately on the exact pushed commit. No account/model calls, Windows acceptance or formal publication.",
-      "ciAssertionFollowup": {
-        "initialRun": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40161611089",
-        "initialResult": "4/6 passed; rc.2 and rc.3 failed the stale expectation of two service-only true positives for old sidebar.",
-        "cause": "Previous regex ignored the dynamic !!js disabled guard and treated the host root as proven. Current bounded patch parsing discloses fallback coverage and two honest false negatives. A single-file old/current source-graph control confirmed the difference.",
-        "fix": "Live assertions retain exact business failures, require both FN and limited coverage, and check all six current-editor classifications. No runtime, budget, pinned artifact or business-outcome expectation changed.",
-        "localValidation": {
-          "realRc3EditorCases": 2,
-          "realRc3EditorPassed": 2,
-          "defaultTests": 1137,
-          "pass": 1129,
-          "skip": 8,
-          "fail": 0,
-          "maintenance": "passed",
-          "prepublish": "passed"
-        },
-        "sha256": {
-          "dsc017-sidebar-red.tap": "60b49ad0adc52c03bd79f7b4a4396c9231e12c3b24b9bfbebd29dc2d72be2f10",
-          "dsc017-sidebar-green.tap": "839d34583583b223279f140a93020e5cb437918e021f4cb8a8a65dd270501fc3",
-          "dsc017-ci-fix-prepublish.tap": "0bdd7103d74ffc4ecb30c69ba240398cd9a1981d3c8e5afbeb9b0e1bca1e68d8",
-          "dsc017-ci-fix-prepublish.log": "79c9bda041489375ff2da3b8a730619d7d99830731d2892f4276b30beb15e231",
-          "dsc017-ci-fix-check.log": "34d630f8811fb687ab93901dc09294bf40cdcbb4e27f2c8e04e054c8960b62eb",
-          "dsc017-sidebar-extraction-debug.json": "37d46cdfad9e04d5817f9996461dd5c423e22d18fe57eee79ef8db805dd391f7"
-        },
-        "scope": "Local reproduction and verification; subsequent GitHub CI is evaluated on the exact follow-up commit. Accepted archive bytes are unchanged."
-      }
-    },
-    "ui018Development20261026": {
-      "status": "implemented-and-verified-locally",
-      "nextReleaseTarget": "0.1.8",
-      "artifactVersion": "0.1.7",
-      "published": false,
-      "defaultSuite": {
-        "tests": 1140,
-        "pass": 1132,
-        "skip": 8,
-        "fail": 0
-      },
-      "checks": {
-        "maintenance": "passed",
-        "prepublish": "passed",
-        "workspaceDependencies": "clean",
-        "pluginRuntimeDependencies": "clean"
-      },
-      "rc3SameArchive": {
-        "ok": true,
-        "dshVersion": "0.2.1-rc.3",
-        "artifactSha256": "2fdfc2faddd421388044503bbd89137bfca7dd2a294cd8e36b853f2bdf7f0d96",
-        "realBrowser": true,
-        "detailAndBadge": true,
-        "ui": {
-          "controls": {
-            "light": {
-              "expected": {
-                "color": "rgb(28, 28, 34)",
-                "background": "rgb(255, 255, 255)"
-              },
-              "input": {
-                "color": "rgb(28, 28, 34)",
-                "background": "rgb(255, 255, 255)"
-              },
-              "cell": "rgb(28, 28, 34)"
-            },
-            "dark": {
-              "expected": {
-                "color": "rgb(240, 240, 240)",
-                "background": "rgb(26, 26, 30)"
-              },
-              "input": {
-                "color": "rgb(240, 240, 240)",
-                "background": "rgb(26, 26, 30)"
-              },
-              "cell": "rgb(240, 240, 240)"
-            }
-          },
-          "initial": {
-            "order": true,
-            "rows": 8,
-            "domElements": 316,
-            "collapsed": true,
-            "styles": 1
-          },
-          "colors": {
-            "light": "rgb(255, 255, 255)",
-            "dark": "rgb(31, 31, 35)"
-          },
-          "layout": {
-            "domElements": 358,
-            "first": 240,
-            "second": 280,
-            "wordBreak": "normal",
-            "expanded": "true"
-          },
-          "narrow": {
-            "viewport": 336,
-            "scroll": 900,
-            "first": 240,
-            "second": 280,
-            "wordBreak": "normal",
-            "outer": 360
-          },
-          "keyboard": true,
-          "syntheticLongNameFixture": true,
-          "stylesRemovedAndRecovered": true
-        },
-        "manualReviewUnchangedReport": true,
-        "productionRequests": 0,
-        "privateRootRemoved": true
+      "delivery": {
+        "removedHostCopies": 4,
+        "sharedHostContracts": 3,
+        "kernel": "Three thin re-exports share host implementations; remove CLI/browser-only modules; retain full browser validation, MIT notices, host React and independent archive execution."
       },
       "sizes": {
-        "artifact": {
-          "file": "dsh-plugin-compat-check-0.1.7.tgz",
-          "bytes": 292892,
-          "sha256": "2fdfc2faddd421388044503bbd89137bfca7dd2a294cd8e36b853f2bdf7f0d96"
-        },
-        "client": {
-          "before": {
-            "raw": 195983,
-            "gzip": 46076
+        "records": [
+          {
+            "ref": "3a5075",
+            "archive": 267685,
+            "unpacked": 982299,
+            "files": 71,
+            "client": {
+              "raw": 195983,
+              "gzip": 46076
+            }
           },
-          "after": {
-            "raw": 290069,
-            "gzip": 55859
+          {
+            "ref": "f5ec0d0",
+            "archive": 293914,
+            "unpacked": 1193311,
+            "files": 72,
+            "client": {
+              "raw": 295221,
+              "gzip": 56756
+            }
+          },
+          {
+            "ref": "current",
+            "archive": 237781,
+            "unpacked": 888630,
+            "files": 61,
+            "client": {
+              "raw": 166780,
+              "gzip": 46518
+            }
           }
+        ],
+        "artifact": {
+          "path": "tmp/p2-018-20261026/dsh-plugin-compat-check-0.1.7.tgz",
+          "sha256": "67003287a601abf58eaff32a134aeffda696723af9254f001ce017e503e0b1d6"
         },
-        "cssBytes": 11823,
-        "baselineCommit": "3a5075ec63e51df9502517a144408e362ad983be",
-        "gzipMethod": "Node zlib.gzipSync, default options; bytes measure the browser client including embedded CSS only."
+        "method": "npm pack; unpacked/file counts from npm manifest; client gzip=Node zlib.gzipSync default options. Baselines rebuilt from immutable commits with real prepack. 3a5075 unpacked size matches published 0.1.7. Current version remains 0.1.7, unpublished."
+      },
+      "syntheticPerformance": {
+        "baseline": "f5ec0d0",
+        "plugins": 1000,
+        "environment": {
+          "node": "v26.12.1",
+          "platform": "darwin",
+          "arch": "arm64"
+        },
+        "scope": "Synthetic persistent-hook harness using the actual generated clients. Elements are rendered host-element trees, not browser layout. Mean render time is diagnostic, not a timing gate or user-perceived latency.",
+        "before": {
+          "initialElements": 36114,
+          "visiblePluginRows": 1000,
+          "hiddenContentElements": 18011,
+          "meanRenderMs": 22.694127099999996,
+          "expandedLoaderRows": 1000,
+          "expandedElements": 40124
+        },
+        "after": {
+          "initialElements": 1010,
+          "visiblePluginRows": 50,
+          "hiddenContentElements": 0,
+          "meanRenderMs": 1.8409020999999997,
+          "expandedLoaderRows": 50,
+          "expandedElements": 1225
+        }
+      },
+      "actualHost": {
+        "dshVersion": "0.2.1-rc.3",
+        "artifactSha256": "67003287a601abf58eaff32a134aeffda696723af9254f001ce017e503e0b1d6",
+        "realBrowser": true,
+        "syntheticPlugins": 120,
+        "completeInventory": 128,
+        "mainPageSize": 50,
+        "loaderPageSize": 50,
+        "allFixturePagesVisited": true,
+        "filteringResetsPage": true,
+        "fullExport": true,
+        "inactiveFixtures": true,
+        "initialDOM": {
+          "order": true,
+          "rows": 8,
+          "domElements": 217,
+          "collapsed": true,
+          "styles": 1
+        },
+        "themeAndColumns": true,
+        "keyboard": true,
+        "stylesUnloadAndRecovery": true,
+        "manualReviewAndUpgrade": true,
+        "futureProbeRejectionAndRecovery": true,
+        "productionRequests": 0,
+        "privateRootRemoved": true
       },
       "evidence": {
-        "directory": "tmp/ui018-20261026",
+        "directory": "tmp/p2-018-20261026",
         "sha256": {
-          "prepublish.tap": "59c0f5ad4d55187d2bcdc6e5b7dabb1b44cd550b61d03fb81701ca6eb052506e",
+          "full.tap": "3e605d0c8e71ccf84974a15c0239f6af8c8f837177f0eae32a9c217aee2d90ee",
+          "check.log": "8c8527d7fc71136a7db6d3b7459ccd4b335a3bf893dcce7444158831fecda086",
+          "prepublish.tap": "d585ca92638a5bf3d3c2e550ec0af58903bf6e1bcba84e1c495dc0a15e025be6",
           "prepublish.log": "79c9bda041489375ff2da3b8a730619d7d99830731d2892f4276b30beb15e231",
-          "check.log": "d12c712e7767602fe1c0c2e8c234005a77d6b8d966daf81f2736a43a5e526914",
-          "dependency-security.json": "930ea454af27367b8c801f9bd3b2f3d160c461f61b182569b205c4467d2efbcc",
-          "live.json": "e44a9389e193eb05b3c1d98e3b0ca6973c22db65e656ab5a4e55d01734d97978",
-          "sizes.json": "72cbd532d8fe97b364523b10c612fba354225e50eef92465293aa3b109dc081c"
+          "live.json": "df76e3e3012153d694419168d7d849ee2db9eb2f3778d81ff184c43a61a5316a",
+          "sizes.json": "965ff217803825776121fdc1064ea72eb00a99b0556c65601596f69ce1adf3bb",
+          "performance.json": "d00d736099e279d6ffcdbc512a9cf8a73f29939b1c7138ca9113699f98d4d2cd",
+          "package-green.tap": "adaab9b37b095f577b7226de6341589a73cd9d08410d0f70c040a188e35ccaa6",
+          "preview.png": "2658b07e39a9b1c7ba9dded3c99330af441f30e605546930c2d6f210f7d71102"
         }
       },
-      "scope": "Local macOS arm64 UI development only. Main table remains visible; auxiliary tables mount on expansion. Long-scope/narrow screenshot uses an explicit disposable CSS fixture. DOM counts compare collapsed/expanded UI in the same eight-plugin report, not a render-time benchmark. Client bytes increased; shared polling, broader lazy mounting and delivery deduplication remain pending. No new release or remote CI claim; Windows remains unverified."
-    },
-    "ui018LayoutFollowup20261026": {
-      "scope": "Local UI layout follow-up to ea75e2d; prior same-archive acceptance remains historical. Preview loads this exact generated client in an owned DSH 0.2.1-rc.3 profile; no new release or Windows claim.",
-      "defaultSuite": {
-        "tests": 1141,
-        "pass": 1133,
-        "skip": 8,
-        "fail": 0
-      },
-      "ui": {
-        "upgradeCard": true,
-        "separateReportInformationCard": true,
-        "catalogueWrapping": true,
-        "twoSeparators": true,
-        "observedNarrowViewport": 466,
-        "metadataClientWidth": 147,
-        "metadataScrollWidth": 147
-      },
-      "clientSha256": "8103973821c75d948896bd067538286c2954a32acaae93943bf88802b03d24b2",
-      "evidence": {
-        "directory": "tmp/ui-layout-20261026",
-        "fullTapSha256": "4f15fc1d2138c91139d0d4bb4bc625f890c0cd4b787dac2ba9d642c32a48835f",
-        "browserLayoutSha256": "b0c3e04d111a06dd80e3e2ad690a19fde111a15804dbfbbbd8c1924b3c559ff8"
-      },
-      "previewState": "Runtime profile moved outside the repository to system temporary storage; the original local port remains available. Repository credential guard passed unchanged.",
-      "typographyFollowup": {
-        "baseCommit": "2817ce3",
-        "tests": {
-          "total": 1143,
-          "pass": 1135,
-          "skip": 8,
-          "fail": 0
-        },
-        "font": "Dependency panel reference: system-ui; headings 14px/600, body 13px/400, disclosure buttons 12px/500.",
-        "nativeTriangleControls": 0,
-        "behavior": "Explicit shared buttons for all legacy details; hidden forms retain input; review history remains controlled; added upgrade risks initially open and user-collapsible.",
-        "clientSha256": "2d81266099a85c32e04dd5f3a35ea2f3b78bf81e3670886be61920c7a6a7eafe",
-        "evidence": {
-          "directory": "tmp/ui-typography-20261026",
-          "fullTapSha256": "3cead058274aa399f9a08853b987df36b367c97262e6a90eea6740f026327970",
-          "fontProofSha256": "215732abada506adabca35c0bf59724a5c0e1ecbc1174839d4a0be346aeda718"
-        }
+      "independentReview": "Fresh-context read-only review found no blocking defects or new critical verification gaps.",
+      "preview": {
+        "url": "http://127.0.0.1:50251/",
+        "sameAcceptedArchive": true,
+        "clientSha256": "266054a728b8d910699a5fb7dfcb71e6dd73d51bb16be1464bd104a61b4a695b",
+        "proofSha256": "2658b07e39a9b1c7ba9dded3c99330af441f30e605546930c2d6f210f7d71102"
       }
     }
   },

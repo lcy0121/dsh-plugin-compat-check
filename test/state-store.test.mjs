@@ -90,3 +90,20 @@ test('direct baseline storage rejects shared directories and recovers only after
  fs.chmodSync(dir,0o700);
  assert.equal(readBaseline(file).status,'valid');assert.equal(baselineTransaction(file,snapshot()).wrote,true);
 });
+
+test('baseline copy distinguishes absent history, incomplete checks, preview and a saved first record', t=>{
+ const {file}=storeFixture(t),first=snapshot();
+ const incomplete=baselineTransaction(file,first,{advance:false,skipReason:'incomplete'});
+ assert.match(incomplete.note,/尚无可比较的历史记录/);
+ assert.match(incomplete.note,/覆盖不完整/);
+ assert.doesNotMatch(incomplete.note,/第一次|保留上次|保留已有/);
+ assert.equal(fs.existsSync(file),false);
+ const repeated=baselineTransaction(file,first,{advance:false,skipReason:'preview'});
+ assert.match(repeated.note,/预览/);assert.doesNotMatch(repeated.note,/第一次|保留上次|保留已有/);
+ const saved=baselineTransaction(file,first);
+ assert.equal(saved.wrote,true);assert.match(saved.note,/已保存本次/);
+ const bytes=fs.readFileSync(file);
+ const retained=baselineTransaction(file,first,{advance:false,skipReason:'incomplete'});
+ assert.match(retained.note,/保留已有对比记录/);assert.doesNotMatch(retained.note,/尚无|第一次|预览/);
+ assert.deepEqual(fs.readFileSync(file),bytes);
+});

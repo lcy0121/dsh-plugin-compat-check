@@ -9,38 +9,6 @@ const plugin = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."),
 const outputs = [];
 for (const item of [
   {
-    source: "dependency-graph",
-    host: "dependency-graph",
-    label: "DEPENDENCY GRAPH",
-    global: "DependencyGraphContract",
-    exports:
-      "buildDependencyGraph:buildDependencyGraph, validateDependencyGraph:validateDependencyGraph",
-  },
-  {
-    source: "finding-review",
-    host: "finding-review",
-    label: "FINDING REVIEW",
-    global: "FindingReviewContract",
-    exports:
-      "REVIEW_STATUS_LABELS:REVIEW_STATUS_LABELS, REVIEW_LIMITS:REVIEW_LIMITS, validateReviewInput:validateReviewInput, validateReviewEnvelope:validateReviewEnvelope",
-  },
-  {
-    source: "functional-health-contract",
-    host: "functional-health-contract",
-    label: "FUNCTIONAL HEALTH CONTRACT",
-    global: "FunctionalHealthContract",
-    exports:
-      "validateFunctionalHealthResult:validateFunctionalHealthResult, canonicalFunctionalManifest:canonicalFunctionalManifest",
-  },
-  {
-    source: "workflow-panels",
-    host: "workflow-panels",
-    label: "WORKFLOW PANELS",
-    global: "WorkflowPanelFactory",
-    exports:
-      "createDependencyPanel:createDependencyPanel, createFindingReviewPanel:createFindingReviewPanel, createFunctionalHealthPanel:createFunctionalHealthPanel",
-  },
-  {
     source: "contracts",
     host: "report-contract",
     label: "REPORT CONTRACT",
@@ -74,6 +42,20 @@ for (const item of [
     `// Generated from ${sourcePath}; run node plugin/scripts/stage-contract.mjs\n` +
       source,
   ]);
+}
+// These views/validators are bundled directly from root sources. Shipping a
+// second host copy served no import, so reject stale leftovers in check mode.
+for (const name of [
+  "dependency-graph",
+  "finding-review",
+  "functional-health-contract",
+  "workflow-panels",
+]) {
+  const file = path.join(plugin, "lib", `${name}.js`);
+  if (!fs.existsSync(file)) continue;
+  if (process.argv.includes("--check"))
+    throw Error("Unused generated host artifact: " + file);
+  fs.rmSync(file);
 }
 for (const [file, value] of outputs) {
   if (fs.existsSync(file) && fs.readFileSync(file, "utf8") === value) continue;

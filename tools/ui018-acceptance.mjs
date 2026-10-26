@@ -71,6 +71,16 @@ export async function verifyUi018(chrome, evaluate, poll) {
       "UI colors did not change with host theme",
     );
     await evaluate(
+      `document.querySelector('[aria-label="依赖关系与潜在影响"]')?.scrollIntoView({block:'center'})`,
+    );
+    await poll(
+      () =>
+        evaluate(
+          `!!document.querySelector('[aria-label="展开插件及 loader 条目"]')`,
+        ),
+      "Deferred dependency panel did not mount on entering view",
+    );
+    await evaluate(
       `(()=>{const button=document.querySelector('[aria-label="展开插件及 loader 条目"]');button.focus();})()`,
     );
     await chrome.send("Input.dispatchKeyEvent", {

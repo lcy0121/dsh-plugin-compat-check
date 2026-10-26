@@ -573,3 +573,83 @@ test("dependency validation rejects declaration and requirement contradictions",
   ).affected[0].requirements = ["optional"];
   assert.equal(graphModule.validateDependencyGraph(weakened), false);
 });
+
+test("large dependency disclosures format only the opened page, preserving all rows and limits", async () => {
+  const { createDependencyPanel } = await import("../lib/workflow-panels.mjs");
+  const graph = graphOf(
+    Object.fromEntries(
+      Array.from({ length: 123 }, (_, i) => [
+        `p-${String(i).padStart(3, "0")}`,
+        {},
+      ]),
+    ),
+  );
+  for (const node of graph.nodes)
+    node.entries = [{ id: node.name, state: "ACTIVE", disabled: false }];
+  assert.equal(graphModule.validateDependencyGraph(graph), true);
+  let formatted = 0,
+    page = 0;
+  for (const node of graph.nodes)
+    Object.defineProperty(node.entries[0], "state", {
+      get() {
+        formatted++;
+        return "ACTIVE";
+      },
+      configurable: true,
+    });
+  const React = {
+    createElement: (type, props, ...children) => ({
+      type,
+      props: props || {},
+      children,
+    }),
+    useState: () => [
+      page,
+      (next) => {
+        page = next;
+      },
+    ],
+  };
+  const Fold = () => {},
+    Pager = () => {};
+  const Panel = createDependencyPanel(
+    React,
+    {
+      validateDependencyGraph(g) {
+        const valid = graphModule.validateDependencyGraph(g);
+        formatted = 0;
+        return valid;
+      },
+    },
+    { Fold, Pager },
+  );
+  const collect = (node) =>
+    !node || typeof node !== "object"
+      ? []
+      : Array.isArray(node)
+        ? node.flatMap(collect)
+        : [node, ...node.children.flatMap(collect)];
+  const root = Panel({ graph });
+  assert.equal(formatted, 0, "closed tables must not format loader states");
+  const fold = collect(root).find(
+    (n) => n.type === Fold && n.props.title === "插件及 loader 条目",
+  );
+  const table = fold.children[0]();
+  let content = table.type(table.props);
+  assert.equal(formatted, 50);
+  assert.equal(
+    collect(content).filter((n) => n.type === "tbody")[0].children.length,
+    50,
+  );
+  const pager = collect(content).find((n) => n.type === Pager);
+  assert.equal(pager.props.total, 123);
+  pager.props.onPageChange(2);
+  content = table.type(table.props);
+  assert.equal(formatted, 73);
+  assert.equal(
+    collect(content).filter((n) => n.type === "tbody")[0].children.length,
+    23,
+  );
+  assert.match(JSON.stringify(content), /p-122/);
+  assert.match(JSON.stringify(root), /预算|覆盖/);
+});

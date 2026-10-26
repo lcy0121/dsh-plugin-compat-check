@@ -141,6 +141,14 @@ test("comparable new-risk view uses the existing baseline diff, including worsen
 test("readable finding guidance is available in both collapsed-row details and the plugin detail section", async () => {
   for (const subject of [undefined, "@label/broken-client"]) {
     const h = await panelHarness(sample(), { subject });
+    if (!subject) {
+      h.find(
+        (n) =>
+          n.type === "button" &&
+          n.props["aria-label"] === "展开查看 1 条发现与未验证项",
+      ).props.onClick();
+      h.render();
+    }
     assert.match(h.text(), /下一步核实/);
   }
 });
@@ -266,10 +274,15 @@ test("report context stays with results while upgrade and report explanations ha
     );
     assert.match(h.text(explanation), /确定（certain）.*影响依据/s);
     assert.match(h.text(explanation), /工具版本：/);
-    assert.match(h.text(explanation), /isolated preview profile/);
+    h.field("展开查看采样与检查信息").props.onClick();
+    h.render();
+    assert.match(
+      h.text(card("报告说明与检查信息")),
+      /isolated preview profile/,
+    );
     assert.doesNotMatch(h.text(primary), /工具版本：|对象来源：/);
     assert.match(h.text(primary), /2026-10-21|缓存/);
-    const nodes = h.nodes(primary);
+    const nodes = h.nodes(card("兼容性体检结果"));
     const separators = nodes
       .map((n, i) => (n.props["data-slot"] === "separator" ? i : -1))
       .filter((i) => i >= 0);
@@ -321,6 +334,136 @@ test("all report disclosures use explicit shared expand/collapse buttons and pre
       h.render();
       assert.equal(h.field("展开" + title).props["aria-expanded"], false);
     }
+  } finally {
+    h.dispose();
+  }
+});
+
+test("mounted overview, detail and badge reuse one transport subscription", async () => {
+  const data = sample(),
+    requests = [],
+    timers = [];
+  const h = await panelHarness(data, {
+    views: [
+      { slot: "settings.plugins.tab" },
+      {
+        slot: "plugins.detail.section",
+        props: {
+          subject: { kind: "package", pkg: { name: "@label/healthy" } },
+        },
+      },
+      {
+        slot: "plugins.detail.badge",
+        props: {
+          subject: { kind: "package", pkg: { name: "@label/healthy" } },
+        },
+      },
+    ],
+    fetcher: async (url) => {
+      requests.push(url);
+      return { ok: true, json: async () => data };
+    },
+    timers: {
+      setTimeout: (fn, ms) => {
+        assert.equal(ms, 2000);
+        timers.push(fn);
+        return fn;
+      },
+      clearTimeout: () => {},
+    },
+  });
+  try {
+    assert.equal(requests.length, 1);
+    assert.equal(timers.length, 1);
+    assert(h.find((n) => n.props["data-compat-detail"] === "@label/healthy"));
+    assert(
+      h.find((n) => n.props["data-compat-detail-badge"] === "@label/healthy"),
+    );
+  } finally {
+    h.dispose();
+  }
+});
+
+test("closed read-only findings build no evidence DOM and upgrade forms mount only on first opening", async () => {
+  const h = await panelHarness(sample());
+  try {
+    assert.equal(h.field("目标 DSH 版本"), undefined);
+    assert.doesNotMatch(h.text(), /下一步核实/);
+    const details = h.find(
+      (n) =>
+        n.type === "button" &&
+        n.props["aria-label"] === "展开查看 1 条发现与未验证项",
+    );
+    details.props.onClick();
+    h.render();
+    assert.match(h.text(), /下一步核实/);
+    h.find(
+      (n) =>
+        n.type === "button" &&
+        n.props["aria-label"] === "收起查看 1 条发现与未验证项",
+    ).props.onClick();
+    h.render();
+    assert.doesNotMatch(h.text(), /下一步核实/);
+    h.field("展开升级前兼容性预检（静态）").props.onClick();
+    h.render();
+    change(h, "目标 DSH 版本", "0.2.1-rc.3");
+    h.field("收起升级前兼容性预检（静态）").props.onClick();
+    h.render();
+    assert.equal(h.field("目标 DSH 版本").props.value, "0.2.1-rc.3");
+  } finally {
+    h.dispose();
+  }
+});
+
+test("large report pages bound DOM while filters and full export retain the entire report", async () => {
+  const data = sample();
+  const seed = structuredClone(
+    data.report.plugins["@label/healthy"] ||
+      Object.values(data.report.plugins).find((p) => p.verdict === "ok"),
+  );
+  data.report.plugins = Object.fromEntries(
+    Array.from({ length: 123 }, (_, i) => [
+      `@large/plugin-${String(i).padStart(3, "0")}`,
+      {
+        ...structuredClone(seed),
+        name: `@large/plugin-${String(i).padStart(3, "0")}`,
+      },
+    ]),
+  );
+  data.report.summary = {
+    ...data.report.summary,
+    total: 123,
+    limited: seed.coverage.status === "limited" ? 123 : 0,
+    ok: 123,
+    broken: 0,
+    partial: 0,
+    unknown: 0,
+    vacuousOk: seed.vacuous ? 123 : 0,
+  };
+  data.exitCode = data.report.exitCode = 0;
+  delete data.report.dependencyGraph;
+  data.issueReport = "all 123 plugins, including plugin-122";
+  const before = JSON.stringify(data);
+  const h = await panelHarness(data);
+  try {
+    assert.equal(h.rows().length, 50);
+    assert.equal(h.rows()[0], "@large/plugin-000");
+    h.field("下一页插件兼容性结果").props.onClick();
+    h.render();
+    assert.equal(h.rows().length, 50);
+    assert.equal(h.rows()[0], "@large/plugin-050");
+    h.field("下一页插件兼容性结果").props.onClick();
+    h.render();
+    assert.equal(h.rows().length, 23);
+    assert(h.field("下一页插件兼容性结果").props.disabled);
+    change(h, "搜索插件", "plugin-122");
+    assert.deepEqual(h.rows(), ["@large/plugin-122"]);
+    change(h, "搜索插件", "");
+    assert.equal(h.rows()[0], "@large/plugin-000");
+    h.button("预览故障报告").props.onClick();
+    h.render();
+    assert.equal(h.field("故障报告预览").props.value, data.issueReport);
+    assert.equal(JSON.stringify(data), before);
   } finally {
     h.dispose();
   }

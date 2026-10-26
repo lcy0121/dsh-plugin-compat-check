@@ -40,6 +40,8 @@ function ordinary() {
   };
 }
 function enter(h, value) {
+  h.field("展开升级前兼容性预检（静态）")?.props.onClick();
+  h.render();
   const input = h.field("目标 DSH 版本");
   assert(input, "Upgrade target input is missing");
   input.props.onChange({ target: { value } });
@@ -142,6 +144,8 @@ test("actual static comparison is displayed separately with added findings, cata
     assert.match(h.text(), /certain/);
     assert.match(h.text(), /inferred/);
     assert.match(h.text(), /静态.*不.*业务|不等于.*业务/);
+    h.field("展开查看输入制品、目录来源与预测限制").props.onClick();
+    h.render();
     assert.match(h.text(), new RegExp(preview.artifact.sha256));
     assert.match(h.text(), /dsh-api-catalog/);
     assert.equal(h.rows().length, 4);

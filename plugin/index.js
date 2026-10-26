@@ -1273,6 +1273,7 @@ async function computeReport(state, ctx, options = {}) {
       finalizeBaseline = () =>
         store.baselineTransaction(bfile, snap, {
           advance: extracted.report.scanComplete,
+          skipReason: "incomplete",
         });
       if (!options._cacheGuard) baseline = finalizeBaseline();
     } catch (error) {

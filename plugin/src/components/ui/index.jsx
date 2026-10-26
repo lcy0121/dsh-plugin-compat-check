@@ -207,6 +207,8 @@ export function Fold({
 }) {
   const [internalOpen, setOpen] = React.useState(defaultOpen);
   const open = controlledOpen === undefined ? internalOpen : controlledOpen;
+  const visited = React.useRef(false);
+  if (open) visited.current = true;
   const content =
     Array.isArray(children) && children.length === 1 ? children[0] : children;
   const Shell = framed ? Card : "div";
@@ -239,7 +241,7 @@ export function Fold({
           <span aria-hidden="true">{open ? "−" : "+"}</span>
         </Button>
       </div>
-      {open || keepMounted ? (
+      {open || (keepMounted && visited.current) ? (
         <div
           data-slot="collapsible-content"
           hidden={!open}
@@ -254,7 +256,13 @@ export function Fold({
 
 // Adapt the shared factories' details/summary markup without rendering native
 // triangle controls. onToggle remains compatible with the controlled review log.
-export function Disclosure({ children, open, onToggle, ...props }) {
+export function Disclosure({
+  children,
+  open,
+  onToggle,
+  keepMounted = false,
+  ...props
+}) {
   const [summary, ...content] = Array.isArray(children) ? children : [children];
   const title = summary?.props?.children ?? summary?.children;
   return (
@@ -262,7 +270,7 @@ export function Disclosure({ children, open, onToggle, ...props }) {
       {...props}
       title={title}
       framed={false}
-      keepMounted
+      keepMounted={keepMounted}
       defaultOpen={Boolean(open)}
       open={onToggle ? Boolean(open) : undefined}
       onOpenChange={
@@ -277,6 +285,74 @@ export function Disclosure({ children, open, onToggle, ...props }) {
     >
       {content}
     </Fold>
+  );
+}
+
+// Keep card boundaries and headings visible; initialize heavy sections only when
+// they approach the viewport. Once visited, retain editor state and focus.
+export function DeferredPanel({ title, label, children }) {
+  const root = React.useRef(null);
+  const [ready, setReady] = React.useState(
+    typeof IntersectionObserver !== "function",
+  );
+  React.useEffect(() => {
+    if (ready || typeof IntersectionObserver !== "function") return;
+    const observer = new IntersectionObserver(
+      (rows) => {
+        if (rows.some((row) => row.isIntersecting)) {
+          setReady(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    if (root.current) observer.observe(root.current);
+    return () => observer.disconnect();
+  }, [ready]);
+  const content =
+    Array.isArray(children) && children.length === 1 ? children[0] : children;
+  return (
+    <div ref={root} className="compat-panel-mount">
+      {ready ? (
+        typeof content === "function" ? (
+          content()
+        ) : (
+          content
+        )
+      ) : (
+        <Card aria-label={label}>
+          <h3>{title}</h3>
+          <p role="status">内容将在进入视区时加载。</p>
+        </Card>
+      )}
+    </div>
+  );
+}
+export function Pager({ page, total, pageSize = 50, onPageChange, label }) {
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  if (pages === 1) return null;
+  return (
+    <nav className="compat-pagination" aria-label={`${label}分页`}>
+      <span role="status">
+        第 {page + 1} / {pages} 页 · 共 {total} 项
+      </span>
+      <Button
+        type="button"
+        aria-label={`上一页${label}`}
+        disabled={page === 0}
+        onClick={() => onPageChange(page - 1)}
+      >
+        上一页
+      </Button>
+      <Button
+        type="button"
+        aria-label={`下一页${label}`}
+        disabled={page + 1 >= pages}
+        onClick={() => onPageChange(page + 1)}
+      >
+        下一页
+      </Button>
+    </nav>
   );
 }
 
@@ -308,9 +384,24 @@ function hostTheme() {
     ? "dark"
     : "light";
 }
-export function Scope({ children, inline = false }) {
+export function Scope({ children, inline = false, onVisibilityChange }) {
+  const container = React.useRef(null);
   const [theme, setTheme] = React.useState(hostTheme);
   React.useEffect(installStyles, []);
+  React.useEffect(() => {
+    if (!onVisibilityChange) return;
+    if (typeof IntersectionObserver !== "function") {
+      onVisibilityChange(true);
+      return;
+    }
+    const node = container.current;
+    if (!node) return;
+    const observer = new IntersectionObserver((rows) =>
+      onVisibilityChange(rows.some((row) => row.isIntersecting)),
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [onVisibilityChange]);
   React.useEffect(() => {
     if (
       typeof document === "undefined" ||
@@ -340,6 +431,7 @@ export function Scope({ children, inline = false }) {
   const Comp = inline ? "span" : "div";
   return (
     <Comp
+      ref={container}
       className={inline ? "dsc-ui dsc-inline" : "dsc-ui"}
       data-theme={theme}
     >
@@ -391,4 +483,5 @@ export const ui = {
   section: Card,
   details: Disclosure,
   Fold,
+  Pager,
 };

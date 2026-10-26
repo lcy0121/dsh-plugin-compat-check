@@ -139,11 +139,15 @@ test("panel displays the actual target, reference digest and fallback warning wi
   };
   const h = await panelHarness(data);
   assert.match(h.text(), /9\.9\.9/);
-  assert.match(h.text(), /参考目录.*0\.2\.1-rc\.2/);
+  assert.match(h.text(), /未认证/);
+  h.field("展开查看目录与覆盖限制").props.onClick();
+  h.render();
+  assert.match(h.text(), /参考目录.*0\.2\.1-rc\.3/);
   assert.match(h.text(), /未认证/);
   assert.match(
     h.text(),
     /dd253bc418a787d881e402f3650857c2d8e7631b818927743a5f2b81104f25a5/,
   );
   assert(h.rows().length > 0);
+  h.dispose();
 });

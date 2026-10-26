@@ -2,10 +2,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { build } from "esbuild";
+import { build, transform } from "esbuild";
 import postcss from "postcss";
 import tailwind from "tailwindcss";
-import { format } from "prettier";
 import config from "../tailwind.config.mjs";
 
 const root = path.resolve(
@@ -33,7 +32,13 @@ export async function buildClient({ check = false } = {}) {
         .map((selector) => `.dsc-ui ${selector.trim()}`)
         .join(", ");
   });
-  const css = result.root.toString();
+  const css = (
+    await transform(result.root.toString(), {
+      loader: "css",
+      minify: true,
+      legalComments: "inline",
+    })
+  ).code;
   const output = await build({
     absWorkingDir: root,
     entryPoints: ["plugin/src/client.jsx"],
@@ -46,6 +51,9 @@ export async function buildClient({ check = false } = {}) {
     external: ["react", "react-dom", "react-dom/*"],
     legalComments: "inline",
     treeShaking: true,
+    minifySyntax: true,
+    minifyWhitespace: true,
+    minifyIdentifiers: false,
     plugins: [
       {
         name: "compat-css",
@@ -63,10 +71,20 @@ export async function buildClient({ check = false } = {}) {
     ],
   });
   const body = output.outputFiles[0].text;
-  const contents = await format(
-    `// Generated from plugin/src/client.jsx and shared lib sources. Run npm run build:client.\n// React is supplied by DSH; CSS is precompiled and scoped to .dsc-ui.\nwindow.__ModuleLoader__.load({\n  id: "dsh-plugin-compat-check",\n  factory: (require) => {\n    var module = { exports: {} };\n    var exports = module.exports;\n${body}\n    return module.exports;\n  },\n});\n`,
-    { parser: "babel" },
-  );
+  // Keep stable diagnostic names while shipping compact generated code. The
+  // handwritten sources are formatted; --check verifies this exact artifact.
+  const contents = `// Generated from plugin/src/client.jsx and shared lib sources. Run npm run build:client.
+// React is supplied by DSH; CSS is precompiled and scoped to .dsc-ui.
+window.__ModuleLoader__.load({
+  id: "dsh-plugin-compat-check",
+  factory: (require) => {
+    var module = { exports: {} };
+    var exports = module.exports;
+${body}
+    return module.exports;
+  },
+});
+`;
   const file = path.join(root, "plugin/lib/client.js");
   if (check) {
     if (fs.readFileSync(file, "utf8") !== contents)

@@ -323,9 +323,14 @@ export function run(options = {}) {
         baselineIdentity(nm, result.verdict.observation.mode, rules, catalog),
       );
       const advance = !options.dryRun && extracted.report.scanComplete;
+      const skipReason = options.dryRun ? "preview" : "incomplete";
       if (options._deferBaseline)
-        result._pendingBaseline = { file, snapshot: snap, advance };
-      else result.baseline = baselineTransaction(file, snap, { advance });
+        result._pendingBaseline = { file, snapshot: snap, advance, skipReason };
+      else
+        result.baseline = baselineTransaction(file, snap, {
+          advance,
+          skipReason,
+        });
     }
   } catch (error) {
     result.error = error && error.message ? error.message : String(error);
@@ -354,6 +359,7 @@ export async function runAsync(options = {}, supervision = {}) {
       if (!result.error && pending)
         result.baseline = baselineTransaction(pending.file, pending.snapshot, {
           advance: pending.advance,
+          skipReason: pending.skipReason,
         });
       return result;
     } catch (error) {
