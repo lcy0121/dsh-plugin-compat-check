@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /** Owned real-host acceptance: declaration gates, metadata, actual settings UI and reload. */
 import fs from "node:fs";
+import { verifyUi018 } from "./ui018-acceptance.mjs";
 import { verifyRc3Navigation } from "./rc3-navigation.mjs";
 import { installRc3Fixture } from "./rc3-fixture.mjs";
 import {
@@ -827,6 +828,12 @@ try {
         status: 200,
         body: await refreshVisibleReport(chrome, evalx, poll),
       };
+      if (process.env.DSC_UI018_ACCEPTANCE === "1")
+        result.ui018 = await verifyUi018(chrome, evalx, poll);
+      await evalx(
+        `document.querySelector('[data-catalog-status] details')?.setAttribute('open', '')`,
+      );
+
       requireTrue(
         await evalx(
           `document.querySelector('[data-catalog-status="verified"]')?.innerText.includes('${CATALOG_REFERENCES.find((c) => c.version === version).sha256}') && document.body.innerText.includes('目录认证范围：${version}')`,
@@ -1138,6 +1145,15 @@ try {
         () => evalx(`${toggle}?.getAttribute('aria-checked')==='false'`),
         "Plugin did not disable",
       );
+      if (process.env.DSC_UI018_ACCEPTANCE === "1")
+        await poll(
+          () =>
+            evalx(
+              `document.querySelectorAll('style[data-dsh-compat-styles]').length===0`,
+            ),
+          "Styles survived removal of all plugin slots",
+        );
+
       await poll(async () => {
         try {
           const r = await fetch(reportUrl, {
@@ -1216,6 +1232,16 @@ try {
       );
       result.upgradePreview.routeRemovedAndRestored = true;
       await settings();
+      if (process.env.DSC_UI018_ACCEPTANCE === "1") {
+        requireTrue(
+          await evalx(
+            `document.querySelectorAll('style[data-dsh-compat-styles]').length===1`,
+          ),
+          "Styles did not recover exactly once",
+        );
+        result.ui018.stylesRemovedAndRecovered = true;
+      }
+
       result.ui = {
         available: true,
         navigation:
@@ -1360,6 +1386,9 @@ try {
         beforeReview.report.dependencyGraph?.kind ===
           "plugin-compat-check/dependency-graph",
         "Installed report lacks dependency graph",
+      );
+      await evalx(
+        `document.querySelector('[aria-label="展开插件及 loader 条目"]')?.click()`,
       );
       requireTrue(
         await evalx(

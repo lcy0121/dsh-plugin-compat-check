@@ -104,7 +104,7 @@ test("host与实际client bundle生成的建议与纯模块逐字相同", () => 
     .toString()
     .replace(
       "return module.exports;",
-      "exports.__steps=FindingGuidance.nextSteps;return module.exports;",
+      "module.exports.__steps=FindingGuidance.nextSteps;return module.exports;",
     );
   const browserNextSteps = vm.runInNewContext(
     "(" + factory + ")",

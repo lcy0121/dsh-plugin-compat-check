@@ -50,7 +50,7 @@ const BODY = factoryBody(SRC)
 function explainClient(body, subject) {
   const data = {schemaVersion:1,kind:'plugin-compat-check/report',ok:true,error:null,exitCode:body.exitCode,toolVersion:body.toolVersion,baseline:null,report:{...body,hasRuntimeSurface:body.observation.usable}}
   const React = {
-    createElement: (type, props, ...children) => ({type,props:props||{},children}),
+    createElement: (type, props, ...children) => ({type,props:props||{},children:children.length?children:props?.children===undefined?[]:[props.children]}),
     useState: initial => [initial && initial.phase === 'loading' ? {phase:'done',data} : initial, () => {}],
     useRef: initial => ({current:initial}), useCallback: fn => fn, useEffect() {},
   }
@@ -63,7 +63,7 @@ function explainClient(body, subject) {
     if(el===null || el===undefined || typeof el==='boolean')return
     if(Array.isArray(el)){el.forEach(walk);return}
     if(typeof el==='string' || typeof el==='number'){text.push(String(el));return}
-    if(typeof el.type==='function'){walk(el.type(el.props));return}
+    if(typeof el.type==='function'){walk(el.type({...el.props,children:el.children.length===1?el.children[0]:el.children}));return}
     if(el.props?.title)text.push(el.props.title)
     walk(el.children)
   }
@@ -201,7 +201,7 @@ function makeReact() {
   // 一个"挂起的 promise"用来模拟 fetch 完成后的数据
   let resolved = null
   const React = {
-    createElement: (type, props, ...children) => ({ __el: true, type, props: props || {}, children }),
+    createElement: (type, props, ...children) => ({ __el: true, type, props: props || {}, children: children.length ? children : props?.children === undefined ? [] : [props.children] }),
     useState: (initial) => [initial, () => {}],
     useRef: (initial) => ({ current: initial }),
     useCallback: (fn) => fn,
@@ -216,7 +216,7 @@ function makeReact() {
 function renderTree(el, React, depth = 0) {
   if (!el || typeof el !== 'object' || !el.__el) return
   if (typeof el.type === 'function') {
-    const out = el.type(el.props)
+    const out = el.type({...el.props, children: el.children.length===1 ? el.children[0] : el.children})
     renderTree(out, React, depth + 1)
     return
   }

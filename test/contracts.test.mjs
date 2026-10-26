@@ -30,7 +30,7 @@ function clientAccept() {
     .toString()
     .replace(
       "return module.exports;",
-      "exports.__accept=acceptPayload;return module.exports;",
+      "module.exports.__accept=acceptPayload;return module.exports;",
     );
   return vm.runInNewContext("(" + factory + ")", sandbox)(() => ({})).__accept;
 }
@@ -355,7 +355,7 @@ test("actual client payload acceptance rejects missing evidence and unsupported 
       .toString()
       .replace(
         "return module.exports;",
-        "exports.__accept=acceptPayload;return module.exports;",
+        "module.exports.__accept=acceptPayload;return module.exports;",
       );
     const factory = vm.runInNewContext("(" + body + ")", {
       ...sandbox,
@@ -402,6 +402,8 @@ test("staging detects stale host/browser artifacts and updates both from the can
       "plugin/lib/report-contract.js",
       "plugin/lib/finding-guidance.js",
       "plugin/scripts/stage-contract.mjs",
+      "plugin/scripts/build-client.mjs",
+      "plugin/tailwind.config.mjs",
     ])
       fs.copyFileSync(name, path.join(dir, name));
     fs.writeFileSync(
@@ -414,6 +416,7 @@ test("staging detects stale host/browser artifacts and updates both from the can
       path.join(dir, "node_modules"),
       "dir",
     );
+    fs.cpSync("plugin/src", path.join(dir, "plugin/src"), { recursive: true });
     const canonical = path.join(dir, "lib/contracts.mjs");
     fs.writeFileSync(
       canonical,
@@ -445,7 +448,7 @@ test("staging detects stale host/browser artifacts and updates both from the can
       .toString()
       .replace(
         "return module.exports;",
-        "exports.__accept=acceptPayload;return module.exports;",
+        "module.exports.__accept=acceptPayload;return module.exports;",
       );
     const exported = vm.runInNewContext("(" + instrumented + ")")(() => ({}));
     const old = {

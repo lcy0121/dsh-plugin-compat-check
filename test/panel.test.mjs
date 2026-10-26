@@ -144,3 +144,98 @@ test("readable finding guidance is available in both collapsed-row details and t
     assert.match(h.text(), /下一步核实/);
   }
 });
+
+test("primary plugin results precede all auxiliary workflows and remain visible by default", async () => {
+  const h = await panelHarness(sample());
+  try {
+    const nodes = h.nodes();
+    const results = nodes.findIndex(
+      (n) => n.type === "table" && n.props["aria-label"] === "插件兼容性结果",
+    );
+    assert(results >= 0, "The primary table needs an accessible identity");
+    for (const label of ["依赖关系与潜在影响", "功能健康检查"])
+      assert(
+        results < nodes.findIndex((n) => n.props["aria-label"] === label),
+        label,
+      );
+    assert(results < nodes.findIndex((n) => n.props["data-upgrade-preview"]));
+    assert(
+      results <
+        nodes.findIndex(
+          (n) => n.type === "button" && h.text(n) === "预览故障报告",
+        ),
+    );
+    assert.equal(h.rows().length, 4);
+  } finally {
+    h.dispose();
+  }
+});
+
+test("auxiliary loader table starts unmounted and its explicit toggle preserves report and main filters", async () => {
+  const data = sample(),
+    before = JSON.stringify(data);
+  const h = await panelHarness(data);
+  try {
+    const findToggle = () =>
+      h.find(
+        (n) =>
+          n.type === "button" &&
+          n.props["aria-label"] === "展开插件及 loader 条目",
+      );
+    const toggle = findToggle();
+    assert(toggle, "Large auxiliary tables need an explicit expansion control");
+    assert.equal(toggle.props["aria-expanded"], false);
+    assert(
+      !h.find(
+        (n) =>
+          n.type === "table" && n.props["aria-label"] === "插件及 loader 条目",
+      ),
+    );
+    change(h, "搜索插件", "healthy");
+    toggle.props.onClick();
+    h.render();
+    const table = h.find(
+      (n) =>
+        n.type === "table" && n.props["aria-label"] === "插件及 loader 条目",
+    );
+    assert(table);
+    const cells = h.nodes(table).filter((n) => n.type === "td");
+    assert(cells.length > 0);
+    const close = h.find(
+      (n) =>
+        n.type === "button" &&
+        n.props["aria-label"] === "收起插件及 loader 条目",
+    );
+    assert.equal(close.props["aria-expanded"], true);
+    close.props.onClick();
+    h.render();
+    assert(
+      !h.find(
+        (n) =>
+          n.type === "table" && n.props["aria-label"] === "插件及 loader 条目",
+      ),
+    );
+    assert.deepEqual(h.rows(), ["@label/healthy"]);
+    assert.equal(JSON.stringify(data), before);
+  } finally {
+    h.dispose();
+  }
+});
+
+test("overview and plugin detail use the same shadcn controls and semantic status badges", async () => {
+  for (const subject of [undefined, "@label/broken-client"]) {
+    const h = await panelHarness(sample(), { subject });
+    try {
+      assert(
+        h.find((n) => n.type === "button" && n.props["data-slot"] === "button"),
+      );
+      assert(h.find((n) => n.props["data-slot"] === "badge"));
+      if (!subject) {
+        assert.equal(h.field("搜索插件").props["data-slot"], "input");
+        assert.equal(h.field("按结论筛选").props["data-slot"], "native-select");
+      }
+    } finally {
+      h.dispose();
+    }
+  }
+});

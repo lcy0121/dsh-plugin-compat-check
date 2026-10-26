@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-25T04:34:24.665Z",
+  "recordedAt": "2026-10-26T07:02:57.719Z",
   "testFiles": 73,
-  "tests": 1137,
+  "tests": 1140,
   "repositoryFiles": {
-    "total": 344,
+    "total": 351,
     "fixtures": 99,
-    "other": 245
+    "other": 252
   },
   "verification": {
     "platform": "darwin",
@@ -26,7 +26,7 @@
     "sourceContext": {
       "versionSource": "lib/version.mjs",
       "integrationTarget": "main",
-      "scope": "Documentation describes the 0.1.7 delivery; actual publication is recorded separately."
+      "scope": "Working source includes the three planned 0.1.8 UI improvements. Version source remains 0.1.7; publication fields describe the historical 0.1.7 release, not this unpublished development archive."
     },
     "publication": {
       "releaseTarget": "0.1.7",
@@ -184,6 +184,121 @@
         },
         "scope": "Local reproduction and verification; subsequent GitHub CI is evaluated on the exact follow-up commit. Accepted archive bytes are unchanged."
       }
+    },
+    "ui018Development20261026": {
+      "status": "implemented-and-verified-locally",
+      "nextReleaseTarget": "0.1.8",
+      "artifactVersion": "0.1.7",
+      "published": false,
+      "defaultSuite": {
+        "tests": 1140,
+        "pass": 1132,
+        "skip": 8,
+        "fail": 0
+      },
+      "checks": {
+        "maintenance": "passed",
+        "prepublish": "passed",
+        "workspaceDependencies": "clean",
+        "pluginRuntimeDependencies": "clean"
+      },
+      "rc3SameArchive": {
+        "ok": true,
+        "dshVersion": "0.2.1-rc.3",
+        "artifactSha256": "2fdfc2faddd421388044503bbd89137bfca7dd2a294cd8e36b853f2bdf7f0d96",
+        "realBrowser": true,
+        "detailAndBadge": true,
+        "ui": {
+          "controls": {
+            "light": {
+              "expected": {
+                "color": "rgb(28, 28, 34)",
+                "background": "rgb(255, 255, 255)"
+              },
+              "input": {
+                "color": "rgb(28, 28, 34)",
+                "background": "rgb(255, 255, 255)"
+              },
+              "cell": "rgb(28, 28, 34)"
+            },
+            "dark": {
+              "expected": {
+                "color": "rgb(240, 240, 240)",
+                "background": "rgb(26, 26, 30)"
+              },
+              "input": {
+                "color": "rgb(240, 240, 240)",
+                "background": "rgb(26, 26, 30)"
+              },
+              "cell": "rgb(240, 240, 240)"
+            }
+          },
+          "initial": {
+            "order": true,
+            "rows": 8,
+            "domElements": 316,
+            "collapsed": true,
+            "styles": 1
+          },
+          "colors": {
+            "light": "rgb(255, 255, 255)",
+            "dark": "rgb(31, 31, 35)"
+          },
+          "layout": {
+            "domElements": 358,
+            "first": 240,
+            "second": 280,
+            "wordBreak": "normal",
+            "expanded": "true"
+          },
+          "narrow": {
+            "viewport": 336,
+            "scroll": 900,
+            "first": 240,
+            "second": 280,
+            "wordBreak": "normal",
+            "outer": 360
+          },
+          "keyboard": true,
+          "syntheticLongNameFixture": true,
+          "stylesRemovedAndRecovered": true
+        },
+        "manualReviewUnchangedReport": true,
+        "productionRequests": 0,
+        "privateRootRemoved": true
+      },
+      "sizes": {
+        "artifact": {
+          "file": "dsh-plugin-compat-check-0.1.7.tgz",
+          "bytes": 292892,
+          "sha256": "2fdfc2faddd421388044503bbd89137bfca7dd2a294cd8e36b853f2bdf7f0d96"
+        },
+        "client": {
+          "before": {
+            "raw": 195983,
+            "gzip": 46076
+          },
+          "after": {
+            "raw": 290069,
+            "gzip": 55859
+          }
+        },
+        "cssBytes": 11823,
+        "baselineCommit": "3a5075ec63e51df9502517a144408e362ad983be",
+        "gzipMethod": "Node zlib.gzipSync, default options; bytes measure the browser client including embedded CSS only."
+      },
+      "evidence": {
+        "directory": "tmp/ui018-20261026",
+        "sha256": {
+          "prepublish.tap": "59c0f5ad4d55187d2bcdc6e5b7dabb1b44cd550b61d03fb81701ca6eb052506e",
+          "prepublish.log": "79c9bda041489375ff2da3b8a730619d7d99830731d2892f4276b30beb15e231",
+          "check.log": "d12c712e7767602fe1c0c2e8c234005a77d6b8d966daf81f2736a43a5e526914",
+          "dependency-security.json": "930ea454af27367b8c801f9bd3b2f3d160c461f61b182569b205c4467d2efbcc",
+          "live.json": "e44a9389e193eb05b3c1d98e3b0ca6973c22db65e656ab5a4e55d01734d97978",
+          "sizes.json": "72cbd532d8fe97b364523b10c612fba354225e50eef92465293aa3b109dc081c"
+        }
+      },
+      "scope": "Local macOS arm64 UI development only. Main table remains visible; auxiliary tables mount on expansion. Long-scope/narrow screenshot uses an explicit disposable CSS fixture. DOM counts compare collapsed/expanded UI in the same eight-plugin report, not a render-time benchmark. Client bytes increased; shared polling, broader lazy mounting and delivery deduplication remain pending. No new release or remote CI claim; Windows remains unverified."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

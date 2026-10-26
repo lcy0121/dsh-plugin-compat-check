@@ -50,7 +50,8 @@ describe('不变式：提取结果必须自恰', { skip: profiles.length ? false
 
       test('① 每个调用点都能在它声称的 file:line 上被验证', () => {
         // 这是**最强的一条**：它把「报告的结论」直接钉回源码字节。
-        // 声称的取值表达式必须真的出现在那一行 —— 不然这条结论就是编的。
+        // AST表达式可跨行或以括号开头；receiver可在call span内部。
+        // 同时核对起始行与完整span，不能只截第一行或要求receiver在span首字节。
         const bad = []
         let checked = 0
         for (const [name, p] of Object.entries(r.report.perPlugin)) {
@@ -71,7 +72,12 @@ describe('不变式：提取结果必须自恰', { skip: profiles.length ? false
             // 源码里实际命中的那个表达式：直接 ctx 取用是 `ctx.<svc>`，别名是变量名
             const token = s.matched
             if (!token) { bad.push(`${name} ${s.file}:${s.line} 没有记录 matched（证据形态 ${s.via}）`); continue }
-            if (!line.includes(token)) {
+            const spanMatches = Number.isSafeInteger(s.start) && Number.isSafeInteger(s.end)
+              ? s.start >= 0 && s.end > s.start && s.end <= text.length &&
+                text.slice(0,s.start).split('\n').length === s.line &&
+                text.slice(s.start,s.end).includes(token)
+              : line.includes(token)
+            if (!spanMatches) {
               bad.push(`${name} ${s.file}:${s.line} via=${s.via} 声称命中 ${JSON.stringify(token)}，该行是 ${JSON.stringify(line.trim().slice(0, 80))}`)
             }
           }

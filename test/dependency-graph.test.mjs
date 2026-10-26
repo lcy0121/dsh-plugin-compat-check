@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { run } from "../bin/compat-check.mjs";
 import { toJSON, render } from "../lib/report.mjs";
 import { packageFixture } from "./fixture-utils.mjs";
+import { panelHarness } from "./support/panel-harness.mjs";
 
 // Catches reports silently dropping dependency declarations before consumers see them.
 test("successful JSON reports expose required host relationships without changing the verdict", () => {
@@ -317,10 +318,6 @@ test("dependency panel renders candidate states, requirements and potential path
       assert.fail("依赖关系视图尚无可渲染组件");
     throw error;
   });
-  const elements = {
-    createElement: (type, props, ...children) => ({ type, props, children }),
-  };
-  const panel = module.createDependencyPanel(elements, graphModule);
   const graph = graphOf(
     {
       a: provider("svc"),
@@ -338,32 +335,81 @@ test("dependency panel renders candidate states, requirements and potential path
       ],
     },
   );
-  const text = (value) =>
-    value === null || value === undefined
-      ? ""
-      : Array.isArray(value)
-        ? value.map(text).join(" ")
-        : typeof value === "object"
-          ? text(value.children)
-          : String(value);
-  const rendered = text(panel({ graph }));
-  for (const part of [
-    "a",
-    "alternate",
-    "b",
-    "svc",
-    "可选",
-    "disabled",
-    "潜在",
-    "host",
-  ])
-    assert.ok(rendered.includes(part), part);
-  const bad = structuredClone(graph);
-  bad.edges[0].to = "missing";
-  const rejected = text(panel({ graph: bad }));
-  assert.ok(rejected.includes("不可用"));
-  assert.ok(!rejected.includes("alternate"));
-  assert.ok(text(panel({ graph: null })).includes("未提供"));
+  const fixture = packageFixture("export function apply(){}");
+  const report = toJSON(
+    run({
+      nm: fixture.nm,
+      dshVersion: "0.2.1-rc.2",
+      baseline: false,
+      _ignoreAutoProbe: true,
+    }),
+  );
+  const payload = (graph) => ({
+    schemaVersion: 1,
+    kind: "plugin-compat-check/report",
+    ok: true,
+    error: null,
+    exitCode: report.exitCode,
+    toolVersion: report.toolVersion,
+    baseline: null,
+    report: { ...report, dependencyGraph: graph },
+  });
+  let h;
+  try {
+    h = await panelHarness(payload(graph));
+    for (const label of [
+      "插件及 loader 条目",
+      "服务依赖及候选提供者",
+      "提供声明（仅候选）",
+      "潜在受影响插件及关系路径",
+    ]) {
+      const toggle = h.find(
+        (n) => n.type === "button" && n.props["aria-label"] === "展开" + label,
+      );
+      assert(toggle, label);
+      toggle.props.onClick();
+      h.render();
+    }
+    for (const part of [
+      "a",
+      "alternate",
+      "b",
+      "svc",
+      "可选",
+      "disabled",
+      "潜在",
+      "host",
+    ])
+      assert.ok(h.text().includes(part), part);
+    h.dispose();
+    const bad = structuredClone(graph);
+    bad.edges[0].to = "missing";
+    h = await panelHarness(payload(bad));
+    assert.ok(h.text().includes("不可用"));
+    assert.ok(!h.text().includes("alternate"));
+    assert.ok(
+      !h.find(
+        (n) =>
+          n.type === "button" &&
+          n.props["aria-label"] === "展开插件及 loader 条目",
+      ),
+    );
+    // Missing optional data remains explicit without suppressing core results.
+    const missing = module.createDependencyPanel(
+      {
+        createElement: (type, props, ...children) => ({
+          type,
+          props,
+          children,
+        }),
+      },
+      graphModule,
+    )({ graph: null });
+    assert.match(JSON.stringify(missing), /未提供/);
+  } finally {
+    h?.dispose();
+    fixture.cleanup();
+  }
 });
 
 // Catches CLI consumers receiving only a total count with no actionable service relationship.

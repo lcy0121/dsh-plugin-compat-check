@@ -170,6 +170,11 @@ test("verified health import remains historical, rejects a changed declaration, 
     await importRecord(input, tampered);
     await h.settle();
     assert.match(h.text(), /声明与记录摘要不一致/);
+    h.find(
+      (n) =>
+        n.type === "button" && n.props["aria-label"] === "展开功能健康检查结果",
+    ).props.onClick();
+    h.render();
     assert.match(h.text(), /GET \/health/);
     assert.doesNotMatch(h.text(), /GET \/different/);
     await importRecord(input, healthRecord(data, "99.0.0"));

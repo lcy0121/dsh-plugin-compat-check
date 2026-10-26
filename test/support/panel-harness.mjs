@@ -14,7 +14,11 @@ export async function panelHarness(
     createElement: (type, props, ...children) => ({
       type,
       props: props || {},
-      children,
+      children: children.length
+        ? children
+        : props?.children === undefined
+          ? []
+          : [props.children],
     }),
     useState(initial) {
       const i = frame.i++,

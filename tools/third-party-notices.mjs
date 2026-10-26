@@ -12,7 +12,23 @@ const lock = read("package-lock.json"),
 const rows = Object.entries(lock.packages)
   .filter(([file]) => file)
   .map(([file, entry]) => {
-    const meta = read(`${file}/package.json`);
+    const esbuildPlatform = /^node_modules\/@esbuild\/[^/]+$/.test(file);
+    if (
+      esbuildPlatform &&
+      (!entry.optional ||
+        entry.version !== lock.packages["node_modules/esbuild"].version ||
+        entry.license !== "MIT")
+    )
+      throw Error("Unexpected esbuild platform package metadata: " + file);
+    const meta = fs.existsSync(path.join(root, file, "package.json"))
+      ? read(`${file}/package.json`)
+      : esbuildPlatform
+        ? {
+            name: file.slice("node_modules/".length),
+            version: entry.version,
+            license: entry.license,
+          }
+        : read(`${file}/package.json`);
     if (
       meta.version !== entry.version ||
       meta.license !== entry.license ||
@@ -21,9 +37,25 @@ const rows = Object.entries(lock.packages)
       throw Error(
         `Installed dependency differs from lock: ${file}; run npm ci --ignore-scripts`,
       );
-    const license = fs
-      .readFileSync(path.join(root, file, "LICENSE"), "utf8")
-      .trim();
+    const licenseRoot = esbuildPlatform ? "node_modules/esbuild" : file;
+    const licenseFile = fs
+      .readdirSync(path.join(root, licenseRoot))
+      .find((name) => /^licen[sc]e(?:[-.].*)?$/i.test(name));
+    let license;
+    if (licenseFile)
+      license = fs
+        .readFileSync(path.join(root, licenseRoot, licenseFile), "utf8")
+        .trim();
+    else if (
+      meta.name === "dlv" &&
+      meta.version === "1.1.3" &&
+      /https:\/\/oss\.ninja\/mit\/developit\//.test(
+        fs.readFileSync(path.join(root, file, "README.md"), "utf8"),
+      )
+    )
+      license =
+        "MIT declared by dlv@1.1.3; its installed README links the author's license at https://oss.ninja/mit/developit/. The published build-only package contains no standalone license text.";
+    else throw Error("Missing dependency license: " + file);
     return { file, entry, meta, license };
   });
 for (const field of ["dependencies", "devDependencies"]) {
@@ -37,18 +69,27 @@ for (const field of ["dependencies", "devDependencies"]) {
   )
     throw Error("Workspace manifest differs from lock: " + field);
 }
-const byName = new Map(rows.map((row) => [row.meta.name, row]));
-if (byName.size !== rows.length)
-  throw Error(
-    "Nested dependency versions need an explicit notices classification",
-  );
+const byPath = new Map(rows.map((row) => [row.file, row]));
+const byName = new Map(
+  rows
+    .filter((row) => row.file === `node_modules/${row.meta.name}`)
+    .map((row) => [row.meta.name, row]),
+);
 const runtime = new Set();
-function visit(name) {
-  if (runtime.has(name)) return;
-  const row = byName.get(name);
-  if (!row) throw Error(`Missing locked dependency: ${name}`);
-  runtime.add(name);
-  for (const dep of Object.keys(row.meta.dependencies || {})) visit(dep);
+function visit(name, from = "") {
+  let directory = from,
+    row;
+  for (;;) {
+    row = byPath.get(path.posix.join(directory, "node_modules", name));
+    if (row || !directory) break;
+    const parent = path.posix.dirname(directory);
+    directory = parent === "." ? "" : parent;
+  }
+  if (!row) throw Error(`Missing locked dependency: ${name} from ${from}`);
+  if (runtime.has(row.file)) return;
+  runtime.add(row.file);
+  for (const dep of Object.keys(row.meta.dependencies || {}))
+    visit(dep, row.file);
 }
 for (const [name, version] of Object.entries(plugin.dependencies || {})) {
   if (byName.get(name)?.meta.version !== version)
@@ -66,24 +107,38 @@ function table(items) {
     ),
   ].join("\n");
 }
-const direct = rows.filter((row) =>
-  Object.hasOwn(plugin.dependencies || {}, row.meta.name),
+const direct = rows.filter(
+  (row) =>
+    row.file === `node_modules/${row.meta.name}` &&
+    Object.hasOwn(plugin.dependencies || {}, row.meta.name),
 );
 const transitive = rows.filter(
-  (row) =>
-    runtime.has(row.meta.name) &&
-    !Object.hasOwn(plugin.dependencies || {}, row.meta.name),
+  (row) => runtime.has(row.file) && !direct.includes(row),
 );
 const repository = rows.filter(
   (row) =>
-    !runtime.has(row.meta.name) &&
+    !runtime.has(row.file) &&
     Object.hasOwn(workspace.dependencies || {}, row.meta.name),
 );
 const development = rows.filter(
   (row) =>
-    !runtime.has(row.meta.name) &&
+    !runtime.has(row.file) &&
     !Object.hasOwn(workspace.dependencies || {}, row.meta.name),
 );
+for (const row of rows) {
+  if (
+    [direct, transitive, repository, development].filter((group) =>
+      group.includes(row),
+    ).length !== 1
+  )
+    throw Error(`Dependency inventory must classify exactly once: ${row.file}`);
+}
+const bundledNames = new Set([
+  "class-variance-authority",
+  "clsx",
+  "tailwind-merge",
+]);
+const bundled = development.filter((row) => bundledNames.has(row.meta.name));
 if (development.some((row) => row.entry.dev !== true))
   throw Error(
     "Unclassified repository runtime dependency; review the inventory sections",
@@ -107,7 +162,17 @@ const sections = [
   "These packages support repository-only tools and are not declared as npm plugin runtime dependencies.",
   table(repository),
   "## Development-only dependencies",
-  table(development),
+  table(development.filter((row) => !bundledNames.has(row.meta.name))),
+  "Optional esbuild platform binaries are inventoried from the frozen lock and share the matching esbuild package's MIT license; only the current platform is installed. dlv@1.1.3 declares MIT through its package metadata and README license link.",
+  "## Client-bundled dependencies and component sources",
+  "These packages are build inputs bundled into the precompiled client, not additional npm runtime installs. React remains host-provided.",
+  table(bundled),
+  fs
+    .readFileSync(
+      path.join(root, "plugin/src/components/ui/PROVENANCE.md"),
+      "utf8",
+    )
+    .trim(),
   "Prettier also distributes its own bundled dependencies under MIT, ISC, BSD-3-Clause, BSD-2-Clause and Apache-2.0. Their individual notices are preserved in the installed `prettier/THIRD-PARTY-NOTICES.md`; the Prettier MIT license below does not replace those terms. Prettier is not shipped in this plugin.",
   "## Host-provided software and test inputs",
   "DeepSeek Harness and React are supplied by the host, not bundled here. The API catalog snapshots record their DSH source/version in `_source`; the upstream project is [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), licensed under [MIT](https://github.com/deepseek-ai/deepseek-harness/blob/master/LICENSE). External Node.js, Python, pnpm and Chrome installations retain their respective notices. Real-plugin acceptance downloads separately identified npm artifacts into private test directories; those artifacts are not redistributed as repository fixtures or inside this npm package.",

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 export function prepareOwnedPackageSource(repo, destination) {
-  let prettier;
+  let dependencies;
   try {
     const read = (name) =>
       JSON.parse(fs.readFileSync(path.join(repo, name), "utf8"));
@@ -21,10 +21,29 @@ export function prepareOwnedPackageSource(repo, destination) {
       Object.keys(installed.optionalDependencies || {}).length
     )
       throw new Error("Build dependency drift");
-    prettier = fs.realpathSync(path.join(repo, "node_modules", "prettier"));
+    for (const name of [
+      "esbuild",
+      "tailwindcss",
+      "postcss",
+      "class-variance-authority",
+      "clsx",
+      "tailwind-merge",
+    ]) {
+      const actual = read(`node_modules/${name}/package.json`);
+      const pinned = lock.packages?.[`node_modules/${name}`]?.version;
+      if (
+        !pinned ||
+        manifest.devDependencies?.[name] !== pinned ||
+        lock.packages?.[""]?.devDependencies?.[name] !== pinned ||
+        actual.version !== pinned ||
+        actual.name !== name
+      )
+        throw Error("Client build dependency drift: " + name);
+    }
+    dependencies = fs.realpathSync(path.join(repo, "node_modules"));
   } catch {
     throw new Error(
-      "Prettier build dependency is missing or differs from the frozen workspace lock; run npm ci --ignore-scripts before preparing a private package source",
+      "Prettier/client build dependencies are missing or differ from the frozen workspace lock; run npm ci --ignore-scripts before preparing a private package source",
     );
   }
   fs.mkdirSync(destination, { mode: 0o700 });
@@ -35,13 +54,17 @@ export function prepareOwnedPackageSource(repo, destination) {
         path.basename(file) !== "node_modules" &&
         file !== path.join(repo, "plugin", "kernel"),
     });
-  for (const name of ["LICENSE", "THIRD_PARTY_NOTICES.md"])
+  for (const name of [
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "package.json",
+    "package-lock.json",
+  ])
     fs.copyFileSync(path.join(repo, name), path.join(destination, name));
 
-  // Prettier is a self-contained build dependency. Copy its installed package
-  // only into the private workspace, outside plugin/files and the final tgz.
-  fs.mkdirSync(path.join(destination, "node_modules"), { mode: 0o700 });
-  fs.cpSync(prettier, path.join(destination, "node_modules", "prettier"), {
+  // Preserve the frozen build closure, including esbuild's platform binary,
+  // only in the owned workspace, outside plugin/files and the final tgz.
+  fs.cpSync(dependencies, path.join(destination, "node_modules"), {
     recursive: true,
   });
 }

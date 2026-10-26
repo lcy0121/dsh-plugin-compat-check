@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-本计划维护**0.1.7**的交付契约。版本真源是`lib/version.mjs`；[README](../README.md)、[指南](guide.md)、[维护指南](maintaining.md)和[作者CI](author-ci.md)分别承担入口、操作、维护和作者接入说明。[docs/current-state.json](current-state.json)记录可复算计数、限定验收及实际发布状态；历史明细按其中Git提交/路径追溯。
+本计划维护**0.1.7**的交付契约及0.1.8开发中的UI改进；源码版本号尚未调整，开发验证不代表新版本发布。版本真源是`lib/version.mjs`；[README](../README.md)、[指南](guide.md)、[维护指南](maintaining.md)和[作者CI](author-ci.md)分别承担入口、操作、维护和作者接入说明。[docs/current-state.json](current-state.json)记录可复算计数、限定验收及实际发布状态；历史明细按其中Git提交/路径追溯。
 
 ## 1. 项目定位与交付状态
 
@@ -38,6 +38,13 @@ JS/TS AST、词法绑定及源码图识别Context、服务和调用span，按hos
 ### 2.4 DSH接入要点
 
 UI使用`settings.plugins.tab`、`plugins.detail.section / .badge`，不以缺可靠身份的`plugins.item`作包级判断。客户端经`window.__ModuleLoader__.load({id,factory})`注册，宿主不代构建；tool required为顶层数组，skill通过provider注册。profile选择实际目标，不默认desktop。
+
+0.1.8 UI主结果已前置：总览先显示结论数量、目标/时间/缓存、覆盖与中性基线提示、筛选及逐插件结果，再显示故障报告、升级预检、依赖关系、人工处置和健康记录。目录来源按需展开，未认证警告仍直接可见；certainty/impactBasis、coverage/vacuous及完整导出保持原契约。
+
+依赖关系各表和已导入的健康检查结果提供带数量的展开/收起按钮，默认收起，关闭时不挂载表格DOM；覆盖、截断及历史记录边界仍在折叠外。主结果表保持展开。插件/loader辅助表前两列最小240/280px，长scope名称不逐字挤压，窄容器在表内横向滚动，原生按钮支持键盘及aria-expanded状态。
+
+UI真源为`plugin/src/client.jsx`、`plugin/src/components/ui/`及`plugin/src/styles.css`，采用经适配的shadcn/ui组件与统一主题；折叠由Card/Button组合，来源和MIT说明见[组件记录](../plugin/src/components/ui/PROVENANCE.md)。Tailwind/esbuild只在开发期运行，产物仍为`plugin/lib/client.js`的ModuleLoader入口，内嵌预编译CSS，复用宿主React，不引入ReactDOM/浮层运行时。样式及变量限定于`.dsc-ui`，跟随宿主深浅色，按挂载所有者共享并在最后卸载时移除；不能直接编辑生成产物。限定实机、DOM与体积证据见current-state，组件迁移不等于已经减重。
+
 
 rc.3入口为左下角账号菜单→设置→内置插件→兼容性。导航/草稿验收核对活动区域、目标会话及内容后置条件；富草稿持有与释放须成对，不承诺已销毁输入的附件恢复。折叠或空标题不作为激活失败。
 
@@ -95,8 +102,11 @@ README写入口，Plan写契约/待办，guide写操作/预算，maintaining写�
 
 ## 6. 后续工作
 
-仅列未完成事项；优先级不是漏洞评级。
+仅列未完成事项；优先级不是漏洞评级。0.1.8的三项P1界面改进已并入§2.4；后续按测量结果收敛轮询、渲染和交付开销。
 
-1. **P1：小规模真实用户试用。** 观察安装→理解→定位的误读、失败、误报和分享障碍，记录定位耗时；保留证据及coverage/vacuous限制，不以下载/star代替效果。联系、资料收集和公开分别授权，不默认遥测。
-2. **P2：跟进上游验收。** 按2026-10-25核对状态跟进[market#932](https://github.com/dsh-market/dsh-market/issues/932)（已关闭，双查询失败处理仍需验收）、[1024#22](https://github.com/imsai-sh/dsh-1024store/issues/22)（待npm安装方式）及[0xsline#717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)（未合并）；变化后再验证，不重复发帖，补充反馈另取授权。状态见current-state，不代表当前安装已验收。
-3. **P2：Windows真实验收（依环境条件暂缓）。** 环境具备后验证路径、安装、回收、权限、打包/诊断和自有资源清理；完成前保留未验收边界。
+1. **P2：0.1.8共享订阅与可见性轮询。** 当前`useCompatibility`随组件挂载各自启动2秒轮询，详情section与badge分别订阅；改为按报告目标隔离的共享数据源，使总览、详情与角标复用请求和结果。页面不可见或无活跃订阅时暂停轮询，恢复可见时核对新鲜度，最后一个订阅卸载时清理定时器及在途请求；验证多组件只保留一条轮询链、手动刷新与失败恢复正常，目标变化和卸载后不发布过时结果。
+2. **P2：0.1.8按需渲染与大列表开销。** 继续将辅助面板整体按需挂载，无可操作数据时使用紧凑空态，错误和覆盖不足仍须可见。先测量多插件场景的渲染次数、耗时和DOM规模，再选择缓存排序/筛选/派生关系、分页或虚拟滚动等必要措施，不以组件调用数量代替性能证据。验证折叠确实减少渲染工作，筛选、人工输入、升级预检状态及完整报告导出不受影响。
+3. **P2：0.1.8交付代码去重与裁剪。** 核对`lib/`真源、`plugin/lib/`生成副本、客户端内联及`stage-kernel`暂存模块的实际依赖和体积，按宿主/浏览器需要减少重复交付与无用代码，浏览器仅携带必要校验和呈现逻辑。保持单一真源及可复现生成，不直接维护多份实现或为减重削弱输入/报告校验；以归档大小、解包体积及客户端原始/压缩字节对比说明收益，并验证独立tgz安装、客户端加载与面板/tool/内核契约一致。
+4. **P1：小规模真实用户试用。** 观察安装→理解→定位的误读、失败、误报和分享障碍，记录定位耗时；保留证据及coverage/vacuous限制，不以下载/star代替效果。联系、资料收集和公开分别授权，不默认遥测。
+5. **P2：跟进上游验收。** 按2026-10-25核对状态跟进[market#932](https://github.com/dsh-market/dsh-market/issues/932)（已关闭，双查询失败处理仍需验收）、[1024#22](https://github.com/imsai-sh/dsh-1024store/issues/22)（待npm安装方式）及[0xsline#717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)（未合并）；变化后再验证，不重复发帖，补充反馈另取授权。状态见current-state，不代表当前安装已验收。
+6. **P2：Windows真实验收（依环境条件暂缓）。** 环境具备后验证路径、安装、回收、权限、打包/诊断和自有资源清理；完成前保留未验收边界。

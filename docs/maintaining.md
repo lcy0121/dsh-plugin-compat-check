@@ -11,7 +11,11 @@ npm test -- --test-reporter=tap > /tmp/dsc-tests.tap
 
 check验证格式、文档/版本/链接、skill/契约副本、第三方说明、可执行语法矩阵及目录登记；不递归跑测试、不联网、不执行目标或改源码。矩阵仅创建/清理自有合成输入。成功TAP交给doc-check核对计数，远端状态及真实宿主另验。
 
-客户端纯契约及核实指导经stage-contract生成；最终客户端在生成边界格式化，要求完整开发依赖（含Prettier）。真实验收/到货工具通过`tools/owned-package-source.mjs`准备私有构建副本，核对manifest、lock和已安装Prettier版本，只携带自身构建依赖，不向源码、用户profile或npm运行包注入工具链。
+客户端UI真源为`plugin/src/client.jsx`、`plugin/src/components/ui/`和`plugin/src/styles.css`；纯契约及workflow仍由`lib/*.mjs`共享。先`npm ci --ignore-scripts`，再`npm run build:client`生成宿主可加载的预编译客户端；`npm run check:client`只检查可复现字节，`stage-contract`同时生成宿主契约副本和客户端，prepack会调用它。React由宿主提供，Tailwind不启用preflight，规则、主题及样式生命周期限定于插件容器；新增组件须同步来源/MIT、主题、键盘及窄容器验收，不能直接改`plugin/lib/client.js`。
+
+真实验收/到货工具通过`tools/owned-package-source.mjs`准备私有构建副本，核对manifest、lock和已安装构建依赖版本，复制自有依赖闭包，不向源码、用户profile或npm运行包注入工具链。构建工具不作为插件运行依赖发布。selector-parser覆盖固定为已修复的7.1.6；修改Tailwind或该覆盖后须重建、复验列宽/主题及运行依赖审计，不能忽略开发闭包公告。
+
+三项UI验收在原有同一tgz命令上增加`DSC_UI018_ACCEPTANCE=1`，可用`DSC_UI018_SCREENSHOTS=<自有目录>`保存截图。实际安装界面核对主表顺序、初始表格DOM、键盘展开/收起、深浅色、列宽及卸载/恢复；长名称窄容器截图来自明确标记的临时CSS夹具，不冒充真实安装插件。组件测试另覆盖三个槽位、筛选/导出和旧请求拒绝。
 
 `test/fixtures/syntax-matrix.json`与`tools/syntax-matrix.mjs`分别记录并执行supported / inferred / abstained / excluded病例。每例核验包名、精确调用对/跨度、确定性或诊断，不以解析成功代替结论。扩展语法须增加正反例，并保留动态/超限限制；矩阵与真实业务标签独立，不能调严重度求绿。
 

@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 /** Keep host/browser presentation artifacts byte-reproducible from pure sources. */
 import fs from "node:fs";
-import { format, resolveConfig } from "prettier";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildClient } from "./build-client.mjs";
 const plugin = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."),
   root = path.dirname(plugin);
-const client = path.join(plugin, "lib/client.js");
-let next = fs.readFileSync(client, "utf8");
 const outputs = [];
 for (const item of [
   {
@@ -71,37 +69,12 @@ for (const item of [
     throw new Error(
       "Browser presentation source must not import dependencies: " + sourcePath,
     );
-  const start = `    // BEGIN GENERATED ${item.label}`;
-  const end = `    // END GENERATED ${item.label}`;
-  const block =
-    start +
-    `\n    var ${item.global} = (function () {\n` +
-    source.replace(/^export /gm, "") +
-    `\nreturn { ${item.exports} };\n    })();\n` +
-    end;
-  const a = next.indexOf(start),
-    b = next.indexOf(end);
-  if (a >= 0 && b > a)
-    next = next.slice(0, a) + block + next.slice(b + end.length);
-  else {
-    const marker = '    var React = require("react");';
-    if (!next.includes(marker))
-      throw new Error("Missing client injection marker");
-    next = next.replace(marker, block + "\n\n" + marker);
-  }
   outputs.push([
     path.join(plugin, `lib/${item.host}.js`),
     `// Generated from ${sourcePath}; run node plugin/scripts/stage-contract.mjs\n` +
       source,
   ]);
 }
-// Format the complete generated artifact at its canonical generation boundary.
-// A formatted client must remain byte-identical on every subsequent check.
-next = await format(next, {
-  ...(await resolveConfig(client)),
-  filepath: client,
-});
-outputs.unshift([client, next]);
 for (const [file, value] of outputs) {
   if (fs.existsSync(file) && fs.readFileSync(file, "utf8") === value) continue;
   if (process.argv.includes("--check"))
@@ -110,3 +83,5 @@ for (const [file, value] of outputs) {
     );
   fs.writeFileSync(file, value);
 }
+
+await buildClient({ check: process.argv.includes("--check") });

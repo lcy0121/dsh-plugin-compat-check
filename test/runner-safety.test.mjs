@@ -101,11 +101,13 @@ test('private source preparation rejects missing or drifted build dependencies b
   const repo=path.join(dir,'repo');fs.mkdirSync(repo);
   for(const name of ['lib','rules','plugin','skill'])fs.mkdirSync(path.join(repo,name));
   for(const name of ['LICENSE','THIRD_PARTY_NOTICES.md'])fs.writeFileSync(path.join(repo,name),'fixture');
-  const manifest={devDependencies:{prettier:'3.6.2'}};
-  const lock={packages:{'':{devDependencies:{prettier:'3.6.2'}},'node_modules/prettier':{version:'3.6.2'}}};
+  const pins={prettier:'3.6.2',esbuild:'0.28.2',tailwindcss:'3.4.19',postcss:'8.5.31','class-variance-authority':'0.7.1',clsx:'2.1.1','tailwind-merge':'2.6.0'};
+  const manifest={devDependencies:pins};
+  const lock={packages:{'':{devDependencies:{...pins}},...Object.fromEntries(Object.entries(pins).map(([name,version])=>['node_modules/'+name,{version}]))}};
+  for(const [name,version] of Object.entries(pins)){if(name==='prettier')continue;const folder=path.join(repo,'node_modules',name);fs.mkdirSync(folder,{recursive:true});fs.writeFileSync(path.join(folder,'package.json'),JSON.stringify({name,version}));}
   fs.writeFileSync(path.join(repo,'package.json'),JSON.stringify(manifest));
   fs.writeFileSync(path.join(repo,'package-lock.json'),JSON.stringify(lock));
-  for(const mode of ['missing','installed-drift','manifest-drift','lock-root-drift','lock-package-drift']){
+  for(const mode of ['missing','installed-drift','manifest-drift','lock-root-drift','lock-package-drift','client-build-drift']){
    const dependency=path.join(repo,'node_modules/prettier');
    if(mode!=='missing'){
     fs.mkdirSync(dependency,{recursive:true});
@@ -115,6 +117,7 @@ test('private source preparation rejects missing or drifted build dependencies b
    if(mode==='manifest-drift')currentManifest.devDependencies.prettier='^3.6.2';
    if(mode==='lock-root-drift')currentLock.packages[''].devDependencies.prettier='0.0.0';
    if(mode==='lock-package-drift')currentLock.packages['node_modules/prettier'].version='0.0.0';
+   if(mode==='client-build-drift')currentLock.packages['node_modules/esbuild'].version='0.0.0';
    fs.writeFileSync(path.join(repo,'package.json'),JSON.stringify(currentManifest));
    fs.writeFileSync(path.join(repo,'package-lock.json'),JSON.stringify(currentLock));
    const destination=path.join(dir,mode);
