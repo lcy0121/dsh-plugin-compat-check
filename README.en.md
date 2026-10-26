@@ -23,7 +23,39 @@ Historical examples of presentation, not acceptance of current source or busines
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
-DSH 0.2.1-rc.3: **bottom-left account menu → Settings → Built-in plugins → Compatibility**. Select the actual profile; do not assume desktop. Agents can call `compat_check`. The panel offers filters, collapsed findings, full preview/copy and baseline risk changes. Dependency graphs show potential relationships, review records do not alter verdicts, and health imports historical JSON only. See the [guide](docs/guide.md).
+After installing, open the DSH instance using that profile, then navigate to:
+
+**Bottom-left More (⋯) or user avatar (account menu) → Settings → Built-in plugins → Compatibility (兼容性)**.
+
+“More” means the bottom-left account entry. Select the Compatibility tab inside Built-in plugins, and verify that this is the profile where you installed the plugin; do not assume desktop. Agents can also call `compat_check`.
+
+### Using each panel
+
+This describes the repository's **unpublished 0.1.8 development UI**. Layout and buttons in the published 0.1.7 may differ. The plugin currently displays Chinese labels; panel names below include them for reference.
+
+| Panel | Purpose and actions |
+|---|---|
+| **Compatibility check / 兼容性检查** | Check verdict counts, the profile/target DSH, report time and cache status. Use Recheck to update the report; search and combine verdict/certainty/verification filters, then expand a row's findings/unverified items and coverage limits to read source locations, evidence and next steps. Main results show 50 rows per page with Previous/Next controls. |
+| **Issue report / 故障报告** | Open Preview issue report, inspect sensitive information, then choose Copy report and share it yourself. Filters and pagination preserve the complete export; nothing is posted automatically. |
+| **Static upgrade preview / 升级前兼容性预检（静态）** | Expand, enter an exact target DSH version, and choose Run upgrade preview. Read added/worsened risks, existing issues and coverage limits. This is static prediction: it does not install or upgrade DSH, and no new risks does not certify business functionality. |
+| **Dependencies / 依赖关系与潜在影响** | Expand plugin/loader entries, service dependencies, candidate providers or impact paths as needed. Large tables show 50 rows per page. These are investigation clues; declarations, loader states and paths do not prove service availability or actual failure propagation. |
+| **Manual review / 发现的人工处置** | Select a status for a finding you investigated, fill in Review evidence, and choose Save review. Track investigation progress, false-positive reasons or repair verification; see the steps below. |
+| **Functional health / 功能健康检查（独立实测记录）** | Generate JSON with the repository health executor, then choose Import functional health record to inspect historical results and artifact identity. Skip this if you have no record. The panel only reads the file; it does not execute checks, install plugins or upload records. |
+| **Report information / 报告说明与检查信息** | Read certainty, measured/inferred impact and coverage boundaries. Expand sampling/check information to inspect observations and target provenance. Catalogue/source details in the main results expose catalogue identity; uncertified targets display a warning directly. |
+
+Auxiliary tables start collapsed; use the labelled Expand/Collapse buttons. Sections load as they approach the viewport, and wide tables scroll horizontally inside narrow containers. Plugin details/badges show individual results; the Compatibility tab contains the full list and filters.
+
+New risks requires comparable history. A first or incomplete check may have no saved history; this does not mean there is no risk. An OK verdict with no verified calls does not certify business functionality either.
+
+### Saving a manual review
+
+1. Expand a finding in the main results and investigate its source location and suggested next steps.
+2. Find the same plugin in Manual finding review; finding numbers follow that plugin's finding order in the main results. Choose **Pending / Reviewed / False positive / Fixed**, then document the evidence: test steps and actual behavior for a false positive, or the change and retest result for a fix. Reviewed means a person investigated it, not that it passed.
+3. Choose **Save review** (保存人工处置) and wait for the saved confirmation. Use Show more reviews (显示更多处置) for additional entries. Expand prior-review summaries or the full review history when you need earlier evidence.
+
+Records are stored locally. Changes to source, versions or evidence may require re-review, while old evidence remains in history. **Marking a finding false positive or fixed does not hide it, alter verdicts/exit codes/baselines or grant an exemption.** Recheck after changing code or configuration. You can skip manual review when you only need the current results.
+
+See the [guide](docs/guide.md) for detailed operations, evidence boundaries and budgets.
 
 ## Repository CLI
 
