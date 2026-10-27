@@ -653,3 +653,30 @@ test("large dependency disclosures format only the opened page, preserving all r
   assert.match(JSON.stringify(content), /p-122/);
   assert.match(JSON.stringify(root), /预算|覆盖/);
 });
+
+test("provider and client package disclosure branches retain stable identities", async () => {
+  const { createDependencyPanel } = await import("../lib/workflow-panels.mjs");
+  const React = {
+    createElement: (type, props, ...children) => ({
+      type,
+      props: props || {},
+      children,
+    }),
+  };
+  const Fold = () => {};
+  const render = createDependencyPanel(React, graphModule, { Fold });
+  for (const [graph, id] of [
+    [graphOf({ provider: provider("svc") }), "providers"],
+    [graphOf({ consumer: { clientInject: ["client-package"] } }), "packages"],
+  ]) {
+    assert.equal(graphModule.validateDependencyGraph(graph), true);
+    const tree = render({ graph });
+    const collect = (n) =>
+      !n || typeof n !== "object"
+        ? []
+        : Array.isArray(n)
+          ? n.flatMap(collect)
+          : [n, ...n.children.flatMap(collect)];
+    assert(collect(tree).some((n) => n.type === Fold && n.props.key === id));
+  }
+});

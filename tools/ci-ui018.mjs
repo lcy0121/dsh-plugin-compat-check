@@ -60,6 +60,15 @@ export function validateUi018Evidence(result, artifactSha256) {
       "keyboardFocus",
       "originalReportUnchanged",
     ],
+    uiI18n: [
+      "realBrowser",
+      "hostLanguage",
+      "threeLanguages",
+      "draftPreserved",
+      "identityPreserved",
+      "narrowAndTheme",
+      "canonicalReportUnchanged",
+    ],
     localHistory: [
       "realBrowser",
       "explicitSnapshotSave",
@@ -239,6 +248,7 @@ export async function runUi018Ci(output) {
         "DSC_UI018_HARDENING",
         "DSC_UI018_REVIEW_NAVIGATION",
         "DSC_UI018_HISTORY",
+        "DSC_UI018_I18N",
       ].map((key) => [key, "1"]),
     );
     write("flags.json", flags);
@@ -267,6 +277,11 @@ export async function runUi018Ci(output) {
       "large-upgrade.png",
       "review-navigation.png",
       "local-history.png",
+      "ui-language-zh.png",
+      "ui-language-en.png",
+      "ui-language-ko.png",
+      "ui-language-en-narrow.png",
+      "ui-language-ko-narrow.png",
     ]) {
       const bytes = fs.readFileSync(path.join(output, "screenshots", name));
       if (

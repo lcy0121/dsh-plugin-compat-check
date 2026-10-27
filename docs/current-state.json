@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-27T13:25:08.499Z",
-  "testFiles": 78,
-  "tests": 1217,
+  "recordedAt": "2026-10-27T14:36:48.306Z",
+  "testFiles": 79,
+  "tests": 1226,
   "repositoryFiles": {
-    "total": 374,
+    "total": 382,
     "fixtures": 99,
-    "other": 275
+    "other": 283
   },
   "verification": {
     "platform": "darwin",
@@ -26,7 +26,7 @@
     "sourceContext": {
       "versionSource": "lib/version.mjs",
       "integrationTarget": "main",
-      "scope": "Unpublished 0.1.8 candidate including local review archives and opt-in report snapshots/trends. Version remains0.1.7; published0.1.7 metadata is historical only."
+      "scope": "Unpublished 0.1.8 candidate including Chinese/English/Korean UI, consolidated advanced tools, local review archives and opt-in report snapshots/trends. Version remains0.1.7; published0.1.7 metadata is historical only."
     },
     "publication": {
       "releaseTarget": "0.1.7",
@@ -67,6 +67,11 @@
         "commit": "56accb0",
         "path": "docs/current-state.json",
         "scope": "Previous 0.1.8 metadata cache/review navigation/UI CI/module split acceptance; does not certify new archive/snapshot functionality."
+      },
+      "uiHistoryPredecessor": {
+        "commit": "a355e2d",
+        "path": "docs/current-state.json",
+        "scope": "Historical archive/report-history implementation and eight-flag local same-tgz acceptance. Does not certify later i18n/layout changes."
       }
     },
     "limitations": [
@@ -97,113 +102,77 @@
         "url": "https://github.com/0xsline/awesome-deepseek-harness/pull/717"
       }
     },
-    "ui018HistoryLocal20261027": {
-      "scope": "Local macOS arm64/DSH0.2.1-rc.3, controlled fixtures and independent tgz only. No push/release, Linux run, Windows or general business-health certification.",
-      "reviewArchives": {
-        "activeLimits": {
-          "bytes": 1048576,
-          "records": 1000
-        },
-        "archiveLimits": {
-          "filesPerTarget": 100,
-          "bytesPerFile": 1056768,
-          "totalBytesPerTarget": 105906176
-        },
-        "behavior": "Explicit history-only or all-saved archive; revision/common lock/freshness guarded. Durable full identity/evidence backup before active replacement. Compact bounded replacement, no silent prune. Import/restore remains reference-only; current review requires explicit re-investigation/save. Capacity, preview/export and explicit delete retained."
+    "ui018I18nLocal20261027": {
+      "scope": "Local macOS arm64/DSH0.2.1-rc.3, owned profiles/fixtures, independent tgz. No push/release, first corresponding Linux run, Windows or general business-health certification.",
+      "localization": {
+        "languages": [
+          "zh",
+          "en",
+          "ko"
+        ],
+        "messages": 438,
+        "host": "Follow host document.lang primary BCP47 language; optional plugin-local stored override; unsupported language falls back English. No host preference mutation.",
+        "preservation": "Fixed labels, status, ARIA and tagged operation confirmations update in place. Raw findings, diagnostics, user notes and complete exports remain verbatim. Stable fold IDs preserve expansion/page state; imported health status updates without reimport.",
+        "delivery": "No additional i18n runtime dependency. Source dictionaries use readable gettext keys; build compacts repeated keys and emits UTF-8."
       },
-      "snapshots": {
-        "limits": {
-          "filesPerTarget": 20,
-          "bytesPerFile": 8388608,
-          "totalBytesPerTarget": 67108864
-        },
-        "behavior": "Opt-in immutable snapshots, search by label/time/target/version/plugin, full paginated reports and two-snapshot comparison. Target/path/DSH/tool/mode/rules/catalog must match for directional diff. Weaker coverage/binding/certainty/measurement never presented as repair; added risk has priority. Imports are historical references, hashes are not authenticity signatures; no baseline advancement."
-      },
-      "lifecycle": "Folded management panels have no background requests. Same-report metadata timestamps retain state; changed identity aborts and releases prior requests, delayed file imports/results cannot populate new target. Host official-session/same-origin/header fence before body/work, body8MiB+16KiB/5sec, entire request20sec/max2; client disconnect/unload/deadline prevent late writes.",
+      "layout": "Results first; diagnostic export and collapsed evidence notes inside primary; dependencies, manual review, static upgrade preview follow. Review archives, snapshots/trends and external health import share a default-closed advanced group; metadata footer is folded. Existing data capabilities, explicit actions and draft protection retained.",
       "review": {
-        "status": "Partial independent review, completed by author self-review",
-        "limitation": "The single fresh-context reviewer hit an account usage limit before a whole-diff verdict; it identified the pending-request reset bug. No second reviewer. Author completed remaining review and executable verification.",
-        "fixes": "Near-limit active rewrite, lost evidence direction, pending request reset, client-disconnect/deadline late-write guards all covered by regression tests."
+        "status": "Completed independent fresh-context review and author screenshot/behavior verification",
+        "fixes": "Stable dependency fold identities, reactive health status, translated review filter options, provider/client-package branch arguments, locale-aware operation confirmations; regression coverage retained."
       },
-      "ci": "Same-tgz CI entrypoint expanded to8flags including DSC_UI018_HISTORY, requiring explicit save, archive capacity relief, reference-only imports, full export preview, comparable/neutral comparisons, explicit deletion and report/baseline invariance; local-history.png recorded. First corresponding Linux run still pending authorized push.",
       "defaultSuite": {
-        "tests": 1217,
-        "pass": 1209,
+        "tests": 1226,
+        "pass": 1218,
         "skip": 8,
         "fail": 0
       },
+      "gates": "npm run check and local-only prepublish gate passed. A timing-sensitive preexisting debugger fixture timed out during a concurrent full UI run; isolated and subsequent serial full gate passed without weakening deadlines/assertions.",
       "actualAcceptance": {
         "ok": true,
         "host": "0.2.1-rc.3",
         "platform": "darwin",
         "arch": "arm64",
-        "artifactSha256": "d36143a14b502e0746dcc68d7e464f1ef96b23b1065ef423dccbda439342768e",
-        "sourceBaseCommit": "56accb09e544f2c287b95b3d64677eca37765d40",
+        "artifactSha256": "43a479d2f6429862b61b7def694ba7b69d5815937e127d23ebbc4bea17f307e8",
+        "sourceBaseCommit": "a355e2d55da4247e91a981c4ddbd87b963d2f26d",
         "sourceSnapshotDirty": true,
-        "sourceManifestSha256": "8441720360010820a044f369a32f4e428a6842cffba10d051419c2acb3332762",
-        "binding": "Accepted working-source snapshot based on this commit; final documentation evidence is recorded after execution. All72 runtime package files independently matched final source or specified shared-contract wrappers. Not a clean-commit Linux claim.",
-        "localHistory": {
+        "sourceManifestSha256": "1a81c38fe9af67005e929d88fd8c6b260e68f34f6c787e3f8be856caf33c4557",
+        "binding": "Accepted working-source snapshot; final documentation evidence recorded after execution. All72 runtime files matched source/shared-contract wrappers. Not a clean-commit/Linux claim.",
+        "uiI18n": {
           "realBrowser": true,
-          "explicitSnapshotSave": true,
-          "archiveCapacityFreed": true,
-          "referenceImportOnly": true,
-          "fullExportPreview": true,
-          "comparison": true,
-          "criteriaMismatchNeutral": true,
-          "explicitDelete": true,
-          "originalReportAndBaselineUnchanged": true
-        },
-        "ui018": {
-          "keyboard": true,
-          "layout": {
-            "domElements": 351,
-            "first": 240,
-            "second": 280,
-            "wordBreak": "normal",
-            "expanded": "true"
-          },
-          "stylesRemovedAndRecovered": true
-        },
-        "reviewNavigation": {
-          "realBrowser": true,
-          "bidirectional": true,
-          "identityBound": true,
-          "filters": true,
-          "keyboardFocus": true,
-          "originalReportUnchanged": true,
-          "targetFindingIndex": 122,
-          "maxMountedEditors": 21
-        },
-        "recovery": {
-          "realBrowser": true,
-          "sameVersionSourceChange": true,
+          "hostLanguage": true,
+          "threeLanguages": true,
           "draftPreserved": true,
-          "editorIdentityAndFocusPreserved": true,
-          "staleSaveDisabled": true,
-          "copyAndDiscard": true
+          "identityPreserved": true,
+          "narrowAndTheme": true,
+          "canonicalReportUnchanged": true,
+          "metrics": [
+            {
+              "locale": "en",
+              "width": 355,
+              "scroll": 355,
+              "theme": "rgb(31, 31, 35)",
+              "buttonWrap": true
+            },
+            {
+              "locale": "ko",
+              "width": 355,
+              "scroll": 355,
+              "theme": "rgb(31, 31, 35)",
+              "buttonWrap": true
+            }
+          ]
         },
-        "httpAuth": {
-          "realHost": true,
-          "missingAndForgedDenied": true,
-          "launchBearerAndQueryNotBypasses": true,
-          "officialSignedCookieExpiry": true,
-          "expiryClock": "Controlled synchronous +31 days in owned test fixture, restored immediately",
-          "sameOriginCookieRecovery": true
+        "existingFlows": "All nine same-artifact CI flags passed: original UI/theme/keyboard/unload, P2 lists/export, recovery/drafts, HTTP auth, hardening, review navigation, local history and i18n. New summary badge boundaries and short-English-word readability checked in real geometry.",
+        "networkGuard": {
+          "productionRequests": 0
         },
-        "productionRequests": 0,
         "cleanup": {
           "privateRootRemoved": true
         },
-        "evidence": "tmp/p3-history/release-acceptance/summary.json, live.json, source.json, payload-proof.json, SHA256SUMS and screenshots/"
+        "payloadFiles": 72,
+        "previewUrl": "http://127.0.0.1:50251/"
       },
-      "gates": {
-        "defaultSuite": true,
-        "maintainedCheck": true,
-        "prepublishOnly": true,
-        "independentReview": "incomplete due account usage limit; remaining author self-review completed",
-        "firstMatchingLinuxRun": "pending authorized push",
-        "noPushOrPublish": true
-      }
+      "ci": "tools/ci-ui018.mjs requires the three-language and narrow/theme screenshots plus all nine evidence sections. First matching Linux run remains pending authorized push."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

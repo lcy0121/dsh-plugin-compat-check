@@ -1,3 +1,5 @@
+import { useLocale } from "../../i18n/locale.jsx";
+import { t, localeStore, uiMessage, messageText } from "../../i18n/runtime.mjs";
 // Adapted from shadcn/ui (MIT), new-york registry. See PROVENANCE.md.
 import * as React from "react";
 import { cva } from "class-variance-authority";
@@ -7,7 +9,7 @@ import css from "virtual:compat-styles";
 
 const cn = (...values) => twMerge(clsx(values));
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-normal rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -20,7 +22,10 @@ const buttonVariants = cva(
         ghost:
           "bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground",
       },
-      size: { default: "h-9 px-4 py-2", sm: "h-8 rounded-md px-3 text-xs" },
+      size: {
+        default: "min-h-9 px-4 py-2",
+        sm: "min-h-8 rounded-md px-3 text-xs",
+      },
     },
     defaultVariants: { variant: "outline", size: "sm" },
   },
@@ -205,6 +210,7 @@ export function Fold({
   keepMounted = false,
   ...props
 }) {
+  useLocale();
   const [internalOpen, setOpen] = React.useState(defaultOpen);
   const open = controlledOpen === undefined ? internalOpen : controlledOpen;
   const visited = React.useRef(false);
@@ -227,7 +233,9 @@ export function Fold({
         </Heading>
         <Button
           className="shrink-0"
-          aria-label={`${open ? "收起" : "展开"}${titleText(title)}`}
+          aria-label={t(open ? "收起{p0}" : "展开{p0}", {
+            p0: titleText(title),
+          })}
           aria-expanded={open}
           onClick={() => {
             const next = !open;
@@ -237,7 +245,7 @@ export function Fold({
           type="button"
           variant="ghost"
         >
-          {open ? "收起" : "展开"}
+          {open ? t("收起") : t("展开")}
           <span aria-hidden="true">{open ? "−" : "+"}</span>
         </Button>
       </div>
@@ -326,7 +334,7 @@ export function DeferredPanel({ title, label, children, active = false }) {
       ) : (
         <Card aria-label={label}>
           <h3>{title}</h3>
-          <p role="status">内容将在进入视区时加载。</p>
+          <p role="status">{t("内容将在进入视区时加载。")}</p>
         </Card>
       )}
     </div>
@@ -336,25 +344,32 @@ export function Pager({ page, total, pageSize = 50, onPageChange, label }) {
   const pages = Math.max(1, Math.ceil(total / pageSize));
   if (pages === 1) return null;
   return (
-    <nav className="compat-pagination" aria-label={`${label}分页`}>
+    <nav
+      className="compat-pagination"
+      aria-label={t("{p0}分页", { p0: label })}
+    >
       <span role="status">
-        第 {page + 1} / {pages} 页 · 共 {total} 项
+        {t("第 {p0} / {p1} 页 · 共 {p2} 项", {
+          p0: page + 1,
+          p1: pages,
+          p2: total,
+        })}
       </span>
       <Button
         type="button"
-        aria-label={`上一页${label}`}
+        aria-label={t("上一页{p0}", { p0: label })}
         disabled={page === 0}
         onClick={() => onPageChange(page - 1)}
       >
-        上一页
+        {t(" 上一页 ")}
       </Button>
       <Button
         type="button"
-        aria-label={`下一页${label}`}
+        aria-label={t("下一页{p0}", { p0: label })}
         disabled={page + 1 >= pages}
         onClick={() => onPageChange(page + 1)}
       >
-        下一页
+        {t(" 下一页 ")}
       </Button>
     </nav>
   );
@@ -389,6 +404,7 @@ function hostTheme() {
     : "light";
 }
 export function Scope({ children, inline = false, onVisibilityChange }) {
+  const locale = useLocale();
   const container = React.useRef(null);
   const [theme, setTheme] = React.useState(hostTheme);
   React.useEffect(installStyles, []);
@@ -438,6 +454,7 @@ export function Scope({ children, inline = false, onVisibilityChange }) {
       ref={container}
       className={inline ? "dsc-ui dsc-inline" : "dsc-ui"}
       data-theme={theme}
+      lang={locale}
     >
       {children}
     </Comp>
@@ -488,4 +505,8 @@ export const ui = {
   details: Disclosure,
   Fold,
   Pager,
+  t,
+  locale: localeStore.locale,
+  uiMessage,
+  messageText,
 };

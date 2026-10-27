@@ -1,3 +1,6 @@
+import { catalogueLines } from "../i18n/presentation.mjs";
+import { LanguageSelect } from "../i18n/locale.jsx";
+import { t, builtin, uiMessage, messageText } from "../i18n/runtime.mjs";
 import { HistoryTools } from "./history.jsx";
 /** Ordinary report layout, filters, export and auxiliary panels. */
 import * as React from "react";
@@ -13,6 +16,7 @@ import {
 } from "../components/report-common.jsx";
 import {
   Card,
+  Fold,
   Button,
   Separator,
   Alert,
@@ -29,7 +33,7 @@ export function createReportPanels({
   FunctionalHealthPanel,
   Badge,
 }) {
-  const ReportContract = { catalogLines };
+  const ReportContract = { catalogLines: catalogueLines };
   function ReportPreview(p) {
     var shown = React.useState(false),
       copied = React.useState("");
@@ -38,7 +42,6 @@ export function createReportPanels({
     return h(
       "div",
       null,
-      h("h3", null, "故障报告"),
       h(
         "button",
         {
@@ -49,7 +52,7 @@ export function createReportPanels({
             copied[1]("");
           },
         },
-        shown[0] ? "关闭报告预览" : "预览故障报告",
+        shown[0] ? t("关闭报告预览") : t("预览故障报告"),
       ),
       shown[0]
         ? h(
@@ -58,19 +61,23 @@ export function createReportPanels({
             h(
               "p",
               { style: styles.paragraph },
-              "这是本次完整报告，筛选不会删减导出内容。保留插件名与包内位置；请预览敏感信息后再分享。",
+              t(
+                "这是本次完整报告，筛选不会删减导出内容。保留插件名与包内位置；请预览敏感信息后再分享。",
+              ),
             ),
             text === null
               ? h(
                   "div",
                   { role: "status" },
-                  "当前报告未提供导出文本，请刷新并确认宿主与客户端版本一致。",
+                  t(
+                    "当前报告未提供导出文本，请刷新并确认宿主与客户端版本一致。",
+                  ),
                 )
               : h(
                   "div",
                   null,
                   h("textarea", {
-                    "aria-label": "故障报告预览",
+                    "aria-label": t("故障报告预览"),
                     readOnly: true,
                     value: text,
                     rows: 14,
@@ -98,18 +105,22 @@ export function createReportPanels({
                           )
                             throw Error("Clipboard unavailable");
                           await navigator.clipboard.writeText(text);
-                          copied[1]("已复制。请确认敏感信息后再分享。");
+                          copied[1](
+                            uiMessage("已复制。请确认敏感信息后再分享。"),
+                          );
                         } catch (error) {
-                          copied[1]("无法自动复制，请选中预览文本手动复制。");
+                          copied[1](
+                            uiMessage("无法自动复制，请选中预览文本手动复制。"),
+                          );
                         }
                       },
                     },
-                    "复制报告",
+                    t("复制报告"),
                   ),
                   h(
                     "span",
                     { role: "status", style: styles.annotation },
-                    copied[0],
+                    messageText(copied[0]),
                   ),
                 ),
           )
@@ -122,21 +133,30 @@ export function createReportPanels({
       c = d.cache;
     var cache =
       c && c.hit
-        ? "缓存报告（约 " + Math.max(0, Math.round(c.ageMs / 1000)) + " 秒前）"
-        : "本次重新计算的报告";
-    if (c && c.stale) cache += "；输入已变化，报告待刷新";
-    if (c && c.refreshing) cache += "；后台正在刷新";
+        ? t("缓存报告（约 {p0} 秒前）", {
+            p0: Math.max(0, Math.round(c.ageMs / 1000)),
+          })
+        : t("本次重新计算的报告");
+    if (c && c.stale) cache += t("；输入已变化，报告待刷新");
+    if (c && c.refreshing) cache += t("；后台正在刷新");
     return h(
       "div",
       { className: "compat-meta compat-report-meta" },
-      h("div", null, "报告时间：" + (d.computedAt || "未提供") + " · " + cache),
       h(
         "div",
         null,
-        "体检对象：" +
-          (d.nodeModules || "未提供") +
-          " · 目标 DSH：" +
-          (d.report.dshVersion || "未知"),
+        t("报告时间：{p0} · {p1}", {
+          p0: d.computedAt || t("未提供"),
+          p1: cache,
+        }),
+      ),
+      h(
+        "div",
+        null,
+        t("体检对象：{p0} · 目标 DSH：{p1}", {
+          p0: d.nodeModules || t("未提供"),
+          p1: d.report.dshVersion || t("未知"),
+        }),
       ),
       h(
         "div",
@@ -149,8 +169,8 @@ export function createReportPanels({
           ? h(
               Alert,
               { role: "alert" },
-              d.report.catalog?.warning ||
-                "API目录身份未提供，目标版本未认证。",
+              builtin(d.report.catalog?.warning) ||
+                t("API目录身份未提供，目标版本未认证。"),
             )
           : null,
         h(
@@ -160,8 +180,8 @@ export function createReportPanels({
             "summary",
             null,
             d.report.catalog?.verified
-              ? "查看已认证目录与来源"
-              : "查看目录与覆盖限制",
+              ? t("查看已认证目录与来源")
+              : t("查看目录与覆盖限制"),
           ),
           ...ReportContract.catalogLines(d.report.catalog).map((line, i) =>
             h("div", { key: i }, line),
@@ -172,7 +192,7 @@ export function createReportPanels({
         ? h(
             "div",
             { role: "status", style: styles.err },
-            "最近刷新失败，保留上次成功报告：" + c.refreshError,
+            t("最近刷新失败，保留上次成功报告：{p0}", { p0: c.refreshError }),
           )
         : null,
     );
@@ -192,7 +212,7 @@ export function createReportPanels({
     var result = await response.json();
     if (!response.ok || !result.ok || result.reviews?.error)
       throw new Error(
-        result.error || result.reviews?.error || "人工处置保存失败",
+        result.error || result.reviews?.error || t("人工处置保存失败"),
       );
     return result.reviews;
   }
@@ -327,15 +347,16 @@ export function createReportPanels({
       { className: "compat-page" },
       h(
         Card,
-        { className: "compat-primary", "aria-label": "兼容性体检结果" },
+        { className: "compat-primary", "aria-label": t("兼容性体检结果") },
         h(
           "div",
           { className: "compat-heading" },
-          h("h2", { className: "compat-title" }, "兼容性检查"),
+          h("h2", { className: "compat-title" }, t("兼容性检查")),
+          h(LanguageSelect),
           h(
             "span",
             { className: "compat-subtitle" },
-            `${names.length} 个已安装插件`,
+            t("{p0} 个已安装插件", { p0: names.length }),
           ),
           h(
             Button,
@@ -345,17 +366,17 @@ export function createReportPanels({
               onClick: () => p.onReload(),
               style: { marginLeft: "auto" },
             },
-            "重新检查",
+            t("重新检查"),
           ),
         ),
         h(
           "div",
-          { className: "compat-metrics", "aria-label": "兼容性摘要" },
+          { className: "compat-metrics", "aria-label": t("兼容性摘要") },
           ...[
-            ["broken", "不兼容"],
-            ["partial", "部分可用"],
-            ["unknown", "未知"],
-            ["ok", "可用"],
+            ["broken", t("不兼容")],
+            ["partial", t("部分可用")],
+            ["unknown", t("未知")],
+            ["ok", t("可用")],
           ].map(([key, label]) =>
             h(
               "div",
@@ -369,7 +390,9 @@ export function createReportPanels({
           ? h(
               "p",
               { className: "compat-coverage-note" },
-              `${s.vacuousOk} 个“可用”没有已验证调用；未发现冲突不等于业务通过。`,
+              t("{p0} 个“可用”没有已验证调用；未发现冲突不等于业务通过。", {
+                p0: s.vacuousOk,
+              }),
             )
           : null,
         h(
@@ -383,8 +406,8 @@ export function createReportPanels({
           "div",
           { className: "compat-toolbar" },
           h("input", {
-            "aria-label": "搜索插件",
-            placeholder: "搜索插件名称",
+            "aria-label": t("搜索插件"),
+            placeholder: t("搜索插件名称"),
             value: queryState[0],
             style: mergeStyle(styles.btn, { minWidth: "150px" }),
             onChange: function (event) {
@@ -392,22 +415,22 @@ export function createReportPanels({
               queryState[1](event.target.value);
             },
           }),
-          select("按结论筛选", verdictState, [
-            ["all", "全部结论"],
-            ["broken", "不兼容"],
-            ["partial", "部分可用"],
-            ["unknown", "未知"],
-            ["ok", "可用"],
+          select(t("按结论筛选"), verdictState, [
+            ["all", t("全部结论")],
+            ["broken", t("不兼容")],
+            ["partial", t("部分可用")],
+            ["unknown", t("未知")],
+            ["ok", t("可用")],
           ]),
-          select("按确定性筛选", certaintyState, [
-            ["all", "全部确定性"],
-            ["certain", "含确定发现"],
-            ["suspected", "含疑似发现"],
+          select(t("按确定性筛选"), certaintyState, [
+            ["all", t("全部确定性")],
+            ["certain", t("含确定发现")],
+            ["suspected", t("含疑似发现")],
           ]),
-          select("按验证状态筛选", pendingState, [
-            ["all", "全部验证状态"],
-            ["pending", "有待验证部分"],
-            ["complete", "无待验证部分"],
+          select(t("按验证状态筛选"), pendingState, [
+            ["all", t("全部验证状态")],
+            ["pending", t("有待验证部分")],
+            ["complete", t("无待验证部分")],
           ]),
           h(
             "button",
@@ -420,7 +443,7 @@ export function createReportPanels({
                 risksState[1](!risksState[0]);
               },
             },
-            "本次新增风险",
+            t("本次新增风险"),
           ),
           h(
             "button",
@@ -436,7 +459,7 @@ export function createReportPanels({
                 risksState[1](false);
               },
             },
-            "清除筛选",
+            t("清除筛选"),
           ),
         ),
         risksState[0]
@@ -444,24 +467,23 @@ export function createReportPanels({
               "div",
               { role: "status", style: styles.paragraph },
               comparable
-                ? "仅显示基线差分中的新增或变重风险；无变化不表示业务通过。"
-                : "尚无可比较基线；本视图不能判断新增风险，不表示没有风险。",
+                ? t("仅显示基线差分中的新增或变重风险；无变化不表示业务通过。")
+                : t("尚无可比较基线；本视图不能判断新增风险，不表示没有风险。"),
             )
           : null,
         h(
           "div",
           { style: styles.annotation },
-          "显示 " +
-            shown.length +
-            " / " +
-            names.length +
-            " 个插件；筛选仅改变呈现。",
+          t("显示 {p0} / {p1} 个插件；筛选仅改变呈现。", {
+            p0: shown.length,
+            p1: names.length,
+          }),
         ),
         !shown.length
           ? h(
               "div",
               { role: "status", style: styles.paragraph },
-              "没有符合筛选条件的插件。清除筛选可查看完整报告。",
+              t("没有符合筛选条件的插件。清除筛选可查看完整报告。"),
             )
           : null,
         h(Separator, { className: "compat-results-divider" }),
@@ -470,16 +492,16 @@ export function createReportPanels({
           { style: { overflowX: "auto" } },
           h(
             "table",
-            { className: "compat-results", "aria-label": "插件兼容性结果" },
+            { className: "compat-results", "aria-label": t("插件兼容性结果") },
             h(
               "thead",
               null,
               h(
                 "tr",
                 null,
-                h("th", { style: styles.th }, "插件"),
-                h("th", { style: styles.th }, "结论"),
-                h("th", { style: styles.th }, "发现与核实"),
+                h("th", { style: styles.th }, t("插件")),
+                h("th", { style: styles.th }, t("结论")),
+                h("th", { style: styles.th }, t("发现与核实")),
               ),
             ),
             h(
@@ -500,7 +522,7 @@ export function createReportPanels({
                       { style: styles.mono },
                       "@" +
                         (pl.version || "?") +
-                        (pl.vacuous ? " · 无已验证调用" : ""),
+                        (pl.vacuous ? t(" · 无已验证调用") : ""),
                     ),
                   ),
                   h(
@@ -542,30 +564,30 @@ export function createReportPanels({
           page,
           total: shown.length,
           pageSize,
-          label: "插件兼容性结果",
+          label: t("插件兼容性结果"),
           onPageChange: (next) =>
             setPagination({ report, filterKey, page: next }),
         }),
+        h(ReportPreview, { data }),
+        h(
+          Fold,
+          { title: t("报告与证据说明"), framed: false, keepMounted: true },
+          () => h(EvidenceLegend),
+        ),
       ),
       h(
         "div",
-        { className: "compat-auxiliary", "aria-label": "辅助工具与证据" },
-        h(Card, { className: "p-4" }, h(ReportPreview, { data: data })),
-        h(
-          Card,
-          { "aria-label": "升级前兼容性预检" },
-          h(UpgradePreview, { data: data }),
-        ),
+        { className: "compat-auxiliary", "aria-label": t("辅助工具与证据") },
         h(
           DeferredPanel,
-          { title: "依赖关系与潜在影响", label: "依赖关系与潜在影响" },
+          { title: t("依赖关系与潜在影响"), label: t("依赖关系与潜在影响") },
           () => h(DependencyPanel, { graph: report.dependencyGraph }),
         ),
         h(
           DeferredPanel,
           {
-            title: "发现的人工处置",
-            label: "发现的人工处置",
+            title: t("发现的人工处置"),
+            label: t("发现的人工处置"),
             active:
               reviewFocus &&
               reviewFocus.contextToken === reviewIndex.token &&
@@ -583,35 +605,64 @@ export function createReportPanels({
               onLocateMain: locateMain,
             }),
         ),
-        h(HistoryTools, { data }),
         h(
-          DeferredPanel,
-          { title: "功能健康检查（独立实测记录）", label: "功能健康检查" },
-          () => h(FunctionalHealthPanel, { report: report }),
+          Card,
+          { "aria-label": t("升级前兼容性预检") },
+          h(UpgradePreview, { data: data }),
+        ),
+        h(
+          Fold,
+          {
+            title: t("高级工具"),
+            heading: true,
+            keepMounted: true,
+            "data-advanced-tools": "",
+          },
+          () =>
+            h(
+              "div",
+              { className: "compat-auxiliary" },
+              h(
+                "p",
+                { style: styles.annotation },
+                t(
+                  "归档、历史对照和外部健康记录。仅在需要时展开，不会自动运行检查。",
+                ),
+              ),
+              h(HistoryTools, { data }),
+              h(
+                DeferredPanel,
+                {
+                  title: t("功能健康检查（独立实测记录）"),
+                  label: t("功能健康检查"),
+                },
+                () => h(FunctionalHealthPanel, { report: report }),
+              ),
+            ),
         ),
       ),
       h(
-        Card,
+        Fold,
         {
+          title: t("报告说明与检查信息"),
           className: "compat-report-information",
-          "aria-label": "报告说明与检查信息",
+          "aria-label": t("报告说明与检查信息"),
+          keepMounted: true,
         },
-        h("h3", null, "报告说明与检查信息"),
-        h(EvidenceLegend),
         h(
           "div",
           { style: styles.annotationParagraph },
-          "工具版本：" +
-            (data.toolVersion || "未知") +
-            " · " +
-            (report.hasRuntimeSurface
-              ? "方法级证据含宿主运行时观测；以每条发现为准。"
-              : "方法级证据来自官方 API 契约目录，静态事实单独判定。"),
+          t("工具版本：{p0} · {p1}", {
+            p0: data.toolVersion || t("未知"),
+            p1: report.hasRuntimeSurface
+              ? t("方法级证据含宿主运行时观测；以每条发现为准。")
+              : t("方法级证据来自官方 API 契约目录，静态事实单独判定。"),
+          }),
         ),
         h(
           "details",
           null,
-          h("summary", { style: styles.annotation }, "查看采样与检查信息"),
+          h("summary", { style: styles.annotation }, t("查看采样与检查信息")),
           h(
             "div",
             { style: styles.annotationParagraph },
@@ -620,11 +671,13 @@ export function createReportPanels({
           h(
             "div",
             { style: styles.annotationParagraph },
-            "对象来源：" +
-              (data.nodeModulesWhy || "未提供") +
-              (data.elapsedMs !== undefined
-                ? " · 耗时 " + data.elapsedMs + "ms"
-                : ""),
+            t("对象来源：{p0}{p1}", {
+              p0: data.nodeModulesWhy || t("未提供"),
+              p1:
+                data.elapsedMs !== undefined
+                  ? t(" · 耗时 {p0}ms", { p0: data.elapsedMs })
+                  : "",
+            }),
           ),
         ),
       ),

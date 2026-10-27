@@ -23,6 +23,7 @@ export async function verifyLocalHistory({
           .sort()
           .map((n) => [n, fs.readFileSync(path.join(baselineDir, n), "utf8")])
       : [];
+  await evalx(`document.querySelector('[aria-label="展开高级工具"]')?.click()`);
   const beforeBaseline = baseline();
   const read = () =>
     evalx(

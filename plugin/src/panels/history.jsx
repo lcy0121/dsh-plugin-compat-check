@@ -1,3 +1,4 @@
+import { t, builtin, uiMessage, messageText } from "../i18n/runtime.mjs";
 /** Explicit local history controls. Closed panels never fetch or mount large records. */
 import * as React from "react";
 import {
@@ -20,7 +21,7 @@ import {
 } from "../../../lib/finding-review.mjs";
 const bytes = (n) => `${Math.ceil((n || 0) / 1024)} KiB`;
 function validateResult(action, value) {
-  if (!value || typeof value !== "object") throw Error("历史管理响应无效");
+  if (!value || typeof value !== "object") throw Error(t("历史管理响应无效"));
   if (
     [
       "snapshot-list",
@@ -38,7 +39,7 @@ function validateResult(action, value) {
           !x || typeof x.label !== "string" || !/^[a-f0-9]{64}$/.test(x.id),
       )
     )
-      throw Error("历史列表响应无效");
+      throw Error(t("历史列表响应无效"));
   } else if (
     [
       "review-state",
@@ -53,7 +54,7 @@ function validateResult(action, value) {
       value.archives.length > 100 ||
       value.archives.some((x) => !x || !/^[a-f0-9]{64}$/.test(x.id))
     )
-      throw Error("归档列表响应无效");
+      throw Error(t("归档列表响应无效"));
   } else if (action === "snapshot-read") validateReportSnapshot(value.data);
   else if (action === "review-read" || action === "review-export")
     validateReviewDocument(
@@ -130,19 +131,19 @@ function useHistoryActions(data) {
         });
         const value = await response.json();
         if (!response.ok || !value.ok)
-          throw Error(value.error || "本地历史操作失败");
+          throw Error(value.error || t("本地历史操作失败"));
         results.push(validateResult(spec.action, value.result));
       }
       if (owner.current === context && sequence.current === token) {
         onSuccess?.(Array.isArray(request) ? results : results[0]);
-        setNotice("操作完成；历史记录不认证当前状态。");
+        setNotice(uiMessage("操作完成；历史记录不认证当前状态。"));
       }
     } catch (e) {
       if (owner.current === context && sequence.current === token)
         setError(
           e.name === "AbortError"
-            ? "操作已取消或超时，请核对容量与列表后重试。"
-            : e.message || "本地历史操作失败",
+            ? t("操作已取消或超时，请核对容量与列表后重试。")
+            : e.message || t("本地历史操作失败"),
         );
     } finally {
       clearTimeout(timer);
@@ -161,7 +162,7 @@ function useHistoryActions(data) {
       "div",
       null,
       error ? h(Alert, { role: "alert" }, error) : null,
-      notice ? h("p", { role: "status" }, notice) : null,
+      notice ? h("p", { role: "status" }, messageText(notice)) : null,
     ),
   };
 }
@@ -173,10 +174,12 @@ function ExportPreview({ value, onClose }) {
     h(
       Alert,
       null,
-      "导出包含目标路径、插件、源码位置及人工依据。请核对敏感信息后再下载或分享；不会自动上传。",
+      t(
+        "导出包含目标路径、插件、源码位置及人工依据。请核对敏感信息后再下载或分享；不会自动上传。",
+      ),
     ),
     h("textarea", {
-      "aria-label": "历史JSON导出预览",
+      "aria-label": t("历史JSON导出预览"),
       readOnly: true,
       rows: 10,
       value: JSON.stringify(value, null, 2),
@@ -201,9 +204,9 @@ function ExportPreview({ value, onClose }) {
           setTimeout(() => URL.revokeObjectURL(url), 1000);
         },
       },
-      "下载历史JSON",
+      t("下载历史JSON"),
     ),
-    h("button", { type: "button", onClick: onClose }, "关闭导出预览"),
+    h("button", { type: "button", onClick: onClose }, t("关闭导出预览")),
   );
 }
 function ImportFile({ session, action, onSuccess, maxBytes, label }) {
@@ -239,13 +242,13 @@ function ImportFile({ session, action, onSuccess, maxBytes, label }) {
               file.size < 1 ||
               file.size > maxBytes
             )
-              throw Error("导入文件超过大小限制");
+              throw Error(t("导入文件超过大小限制"));
             const data = JSON.parse(await file.text());
             if (token !== serial.current || !session.isCurrent()) return;
             session.run({ action, data }, onSuccess);
           } catch (reason) {
             if (token === serial.current && session.isCurrent())
-              setError(reason.message || "导入JSON无效");
+              setError(reason.message || t("导入JSON无效"));
           } finally {
             input.value = "";
           }
@@ -288,7 +291,9 @@ function ReviewArchiveContent({ data }) {
     h(
       "p",
       null,
-      "归档保留完整身份与依据，导入或恢复只作历史参考，不会恢复为当前“已复核”。未保存草稿留在原编辑区。",
+      t(
+        "归档保留完整身份与依据，导入或恢复只作历史参考，不会恢复为当前“已复核”。未保存草稿留在原编辑区。",
+      ),
     ),
     h(
       "button",
@@ -297,7 +302,7 @@ function ReviewArchiveContent({ data }) {
         disabled: session.busy,
         onClick: () => operation({ action: "review-state" }, setState),
       },
-      "加载处置容量与归档",
+      t("加载处置容量与归档"),
     ),
     session.status,
     copyNotice ? h("p", { role: "status" }, copyNotice) : null,
@@ -308,7 +313,18 @@ function ReviewArchiveContent({ data }) {
           h(
             "p",
             null,
-            `活动处置 ${state.capacity.records} / ${state.capacity.recordLimit} 条，${bytes(state.capacity.bytes)} / ${bytes(state.capacity.byteLimit)}；可归档历史 ${state.capacity.historical} 条；归档 ${state.archives.length} / ${state.archiveLimit} 份。`,
+            t(
+              "活动处置 {p0} / {p1} 条，{p2} / {p3}；可归档历史 {p4} 条；归档 {p5} / {p6} 份。",
+              {
+                p0: state.capacity.records,
+                p1: state.capacity.recordLimit,
+                p2: bytes(state.capacity.bytes),
+                p3: bytes(state.capacity.byteLimit),
+                p4: state.capacity.historical,
+                p5: state.archives.length,
+                p6: state.archiveLimit,
+              },
+            ),
           ),
           h(
             "button",
@@ -318,7 +334,7 @@ function ReviewArchiveContent({ data }) {
               onClick: () =>
                 operation({ action: "review-export" }, setExported),
             },
-            "预览导出活动处置",
+            t("预览导出活动处置"),
           ),
           h(
             "button",
@@ -332,7 +348,7 @@ function ReviewArchiveContent({ data }) {
                   revision: state.revision,
                 }),
             },
-            "归档历史处置",
+            t("归档历史处置"),
           ),
           h(
             "button",
@@ -346,18 +362,18 @@ function ReviewArchiveContent({ data }) {
                   revision: state.revision,
                 }),
             },
-            "归档全部处置",
+            t("归档全部处置"),
           ),
           h(ImportFile, {
             session,
             action: "review-import",
             onSuccess: setState,
             maxBytes: 1048576 + 8192,
-            label: "导入处置归档（仅参考）",
+            label: t("导入处置归档（仅参考）"),
           }),
           h(PagedList, {
             items: state.archives,
-            label: "处置归档",
+            label: t("处置归档"),
             renderItem: (item) =>
               h(
                 "article",
@@ -365,7 +381,12 @@ function ReviewArchiveContent({ data }) {
                 h(
                   "p",
                   null,
-                  `${item.createdAt} · ${item.records} 条 · ${bytes(item.bytes)} · ${item.id}`,
+                  t("{p0} · {p1} 条 · {p2} · {p3}", {
+                    p0: item.createdAt,
+                    p1: item.records,
+                    p2: bytes(item.bytes),
+                    p3: item.id,
+                  }),
                 ),
                 h(
                   "button",
@@ -378,7 +399,7 @@ function ReviewArchiveContent({ data }) {
                         setView,
                       ),
                   },
-                  "查看或恢复为参考",
+                  t("查看或恢复为参考"),
                 ),
                 h(
                   "button",
@@ -388,7 +409,7 @@ function ReviewArchiveContent({ data }) {
                     onClick: () =>
                       setConfirm({ action: "review-delete", id: item.id }),
                   },
-                  "移除归档",
+                  t("移除归档"),
                 ),
               ),
           }),
@@ -402,10 +423,16 @@ function ReviewArchiveContent({ data }) {
             "p",
             null,
             confirm.action === "review-delete"
-              ? "将永久移除此本地归档。请先导出可信备份；不会自动删除其他历史。"
+              ? t(
+                  "将永久移除此本地归档。请先导出可信备份；不会自动删除其他历史。",
+                )
               : confirm.mode === "all"
-                ? "先保存完整归档，再清空所有已保存活动处置（包括当前状态）。当前发现将需重新核实，未保存草稿保留。"
-                : "先保存完整归档，再从活动文件移走旧发现的历史处置；当前发现的已保存状态保留。",
+                ? t(
+                    "先保存完整归档，再清空所有已保存活动处置（包括当前状态）。当前发现将需重新核实，未保存草稿保留。",
+                  )
+                : t(
+                    "先保存完整归档，再从活动文件移走旧发现的历史处置；当前发现的已保存状态保留。",
+                  ),
           ),
           h(
             "button",
@@ -414,7 +441,7 @@ function ReviewArchiveContent({ data }) {
               disabled: session.busy,
               onClick: () => operation({ ...confirm, confirm: true }, setState),
             },
-            "确认归档或移除",
+            t("确认归档或移除"),
           ),
           h(
             "button",
@@ -423,7 +450,7 @@ function ReviewArchiveContent({ data }) {
               disabled: session.busy,
               onClick: () => setConfirm(null),
             },
-            "取消",
+            t("取消"),
           ),
         )
       : null,
@@ -431,21 +458,21 @@ function ReviewArchiveContent({ data }) {
       ? h(
           "div",
           null,
-          h("h4", null, "历史处置参考（不是当前已复核）"),
+          h("h4", null, t("历史处置参考（不是当前已复核）")),
           h(
             "button",
             { type: "button", onClick: () => setExported(view.data) },
-            "预览导出处置归档",
+            t("预览导出处置归档"),
           ),
           h("input", {
-            "aria-label": "检索归档插件",
-            placeholder: "检索归档插件",
+            "aria-label": t("检索归档插件"),
+            placeholder: t("检索归档插件"),
             value: query,
             onChange: (e) => setQuery(e.target.value),
           }),
           h(PagedList, {
             items: rows,
-            label: "归档处置依据",
+            label: t("归档处置依据"),
             renderItem: (r) =>
               h(
                 "article",
@@ -456,7 +483,7 @@ function ReviewArchiveContent({ data }) {
                   `${r.pluginName}@${r.pluginVersion} · ${r.status}`,
                 ),
                 h("p", null, r.note),
-                h(Fold, { title: "查看原处置身份", framed: false }, () =>
+                h(Fold, { title: t("查看原处置身份"), framed: false }, () =>
                   h(
                     "pre",
                     { style: { ...styles.mono, whiteSpace: "pre-wrap" } },
@@ -472,17 +499,19 @@ function ReviewArchiveContent({ data }) {
                         await navigator.clipboard.writeText(r.note);
                         if (session.isCurrent())
                           setCopyNotice(
-                            "历史依据已复制；请重新核实当前发现后显式保存。",
+                            t("历史依据已复制；请重新核实当前发现后显式保存。"),
                           );
                       } catch {
                         if (session.isCurrent())
                           setCopyNotice(
-                            "无法自动复制，请选中依据或在导出预览中手动复制。",
+                            t(
+                              "无法自动复制，请选中依据或在导出预览中手动复制。",
+                            ),
                           );
                       }
                     },
                   },
-                  "复制历史依据",
+                  t("复制历史依据"),
                 ),
               ),
           }),
@@ -506,14 +535,22 @@ function SnapshotView({ snapshot }) {
     h(
       "p",
       null,
-      `${snapshot.label} · 保存 ${snapshot.savedAt} · 检查 ${snapshot.computedAt}`,
+      t("{p0} · 保存 {p1} · 检查 {p2}", {
+        p0: snapshot.label,
+        p1: snapshot.savedAt,
+        p2: snapshot.computedAt,
+      }),
     ),
     h(
       "p",
       null,
-      `目标 ${snapshot.identity.profileId} · DSH ${snapshot.identity.dshVersion} · 工具 ${snapshot.identity.toolVersion}`,
+      t("目标 {p0} · DSH {p1} · 工具 {p2}", {
+        p0: snapshot.identity.profileId,
+        p1: snapshot.identity.dshVersion,
+        p2: snapshot.identity.toolVersion,
+      }),
     ),
-    h(Fold, { title: "查看历史判定身份", framed: false }, () =>
+    h(Fold, { title: t("查看历史判定身份"), framed: false }, () =>
       h(
         "pre",
         { style: { ...styles.mono, whiteSpace: "pre-wrap" } },
@@ -521,14 +558,14 @@ function SnapshotView({ snapshot }) {
       ),
     ),
     h("input", {
-      "aria-label": "检索历史报告插件",
+      "aria-label": t("检索历史报告插件"),
       value: query,
-      placeholder: "检索历史报告插件",
+      placeholder: t("检索历史报告插件"),
       onChange: (e) => setQuery(e.target.value),
     }),
     h(PagedList, {
       items: names,
-      label: "历史报告插件",
+      label: t("历史报告插件"),
       renderItem: (name) =>
         h(
           "article",
@@ -538,8 +575,10 @@ function SnapshotView({ snapshot }) {
             null,
             `${name}@${snapshot.report.plugins[name].version} · ${VERDICT[snapshot.report.plugins[name].verdict]?.text}`,
           ),
-          h(Fold, { title: `查看历史发现 ${name}`, framed: false }, () =>
-            h(Findings, { plugin: snapshot.report.plugins[name] }),
+          h(
+            Fold,
+            { title: t("查看历史发现 {p0}", { p0: name }), framed: false },
+            () => h(Findings, { plugin: snapshot.report.plugins[name] }),
           ),
         ),
     }),
@@ -610,7 +649,7 @@ function ReportHistoryContent({ data }) {
         h(
           "option",
           { key: item.id, value: item.id },
-          `${item.label || "未命名"} · ${item.savedAt} · ${item.identity.dshVersion}`,
+          `${item.label || t("未命名")} · ${item.savedAt} · ${item.identity.dshVersion}`,
         ),
       ),
     );
@@ -620,13 +659,15 @@ function ReportHistoryContent({ data }) {
     h(
       "p",
       null,
-      "仅在点击保存时保留完整快照。历史快照不认证当前目标，摘要校验不是签名；静态/宿主观测和业务健康是不同证据。身份不相同时中性展示，证据减少不代表修复。",
+      t(
+        "仅在点击保存时保留完整快照。历史快照不认证当前目标，摘要校验不是签名；静态/宿主观测和业务健康是不同证据。身份不相同时中性展示，证据减少不代表修复。",
+      ),
     ),
     h("input", {
-      "aria-label": "快照备注",
+      "aria-label": t("快照备注"),
       value: label,
       maxLength: REPORT_HISTORY_LIMITS.label,
-      placeholder: "例如：更新前、更新后",
+      placeholder: t("例如：更新前、更新后"),
       onChange: (e) => setLabel(e.target.value),
     }),
     h(
@@ -637,7 +678,7 @@ function ReportHistoryContent({ data }) {
         onClick: () =>
           session.run({ action: "snapshot-save", label }, setState),
       },
-      "保存当前报告快照",
+      t("保存当前报告快照"),
     ),
     h(
       "button",
@@ -646,7 +687,7 @@ function ReportHistoryContent({ data }) {
         disabled: session.busy,
         onClick: () => session.run({ action: "snapshot-list" }, setState),
       },
-      "加载历史报告",
+      t("加载历史报告"),
     ),
     session.status,
     state
@@ -656,11 +697,19 @@ function ReportHistoryContent({ data }) {
           h(
             "p",
             null,
-            `历史报告 ${state.capacity.records} / ${state.capacity.recordLimit} 份，${bytes(state.capacity.bytes)} / ${bytes(state.capacity.byteLimit)}。容量用尽后请导出并显式移除；不会自动清理。`,
+            t(
+              "历史报告 {p0} / {p1} 份，{p2} / {p3}。容量用尽后请导出并显式移除；不会自动清理。",
+              {
+                p0: state.capacity.records,
+                p1: state.capacity.recordLimit,
+                p2: bytes(state.capacity.bytes),
+                p3: bytes(state.capacity.byteLimit),
+              },
+            ),
           ),
           h("input", {
-            "aria-label": "检索历史快照",
-            placeholder: "按备注、时间、版本或目标检索",
+            "aria-label": t("检索历史快照"),
+            placeholder: t("按备注、时间、版本或目标检索"),
             value: query,
             onChange: (e) => setQuery(e.target.value),
           }),
@@ -669,11 +718,11 @@ function ReportHistoryContent({ data }) {
             action: "snapshot-import",
             onSuccess: setState,
             maxBytes: REPORT_HISTORY_LIMITS.fileBytes,
-            label: "导入历史快照（不认证当前）",
+            label: t("导入历史快照（不认证当前）"),
           }),
           h(PagedList, {
             items,
-            label: "历史快照",
+            label: t("历史快照"),
             renderItem: (item) =>
               h(
                 "article",
@@ -681,7 +730,7 @@ function ReportHistoryContent({ data }) {
                 h(
                   "p",
                   null,
-                  `${item.label || "未命名"} · ${item.savedAt} · DSH ${item.identity.dshVersion} · ${bytes(item.bytes)}`,
+                  `${item.label || t("未命名")} · ${item.savedAt} · DSH ${item.identity.dshVersion} · ${bytes(item.bytes)}`,
                 ),
                 h(
                   "button",
@@ -694,7 +743,7 @@ function ReportHistoryContent({ data }) {
                         (r) => setView(r.data),
                       ),
                   },
-                  "查看快照",
+                  t("查看快照"),
                 ),
                 h(
                   "button",
@@ -703,12 +752,12 @@ function ReportHistoryContent({ data }) {
                     disabled: session.busy,
                     onClick: () => setConfirm(item.id),
                   },
-                  "移除快照",
+                  t("移除快照"),
                 ),
               ),
           }),
-          selector("对照起点快照", before, setBefore),
-          selector("对照终点快照", after, setAfter),
+          selector(t("对照起点快照"), before, setBefore),
+          selector(t("对照终点快照"), after, setAfter),
           h(
             "button",
             {
@@ -734,7 +783,7 @@ function ReportHistoryContent({ data }) {
                   },
                 ),
             },
-            "对照两份历史报告",
+            t("对照两份历史报告"),
           ),
         )
       : null,
@@ -742,7 +791,7 @@ function ReportHistoryContent({ data }) {
       ? h(
           Alert,
           null,
-          h("p", null, "将永久移除此本地快照。请先预览导出并保留可信备份。"),
+          h("p", null, t("将永久移除此本地快照。请先预览导出并保留可信备份。")),
           h(
             "button",
             {
@@ -760,12 +809,12 @@ function ReportHistoryContent({ data }) {
                   },
                 ),
             },
-            "确认移除快照",
+            t("确认移除快照"),
           ),
           h(
             "button",
             { type: "button", onClick: () => setConfirm(null) },
-            "取消",
+            t("取消"),
           ),
         )
       : null,
@@ -773,11 +822,11 @@ function ReportHistoryContent({ data }) {
       ? h(
           "div",
           null,
-          h("h4", null, "历史报告明细"),
+          h("h4", null, t("历史报告明细")),
           h(
             "button",
             { type: "button", onClick: () => setExported(view) },
-            "预览导出历史快照",
+            t("预览导出历史快照"),
           ),
           h(SnapshotView, { snapshot: view }),
         )
@@ -786,19 +835,19 @@ function ReportHistoryContent({ data }) {
       ? h(
           "div",
           null,
-          h(Alert, { role: "status" }, comparison.reason),
+          h(Alert, { role: "status" }, builtin(comparison.reason)),
           comparison.comparable
             ? h(
                 "div",
                 null,
                 h("input", {
-                  "aria-label": "检索对照插件",
+                  "aria-label": t("检索对照插件"),
                   value: pluginQuery,
                   onChange: (e) => setPluginQuery(e.target.value),
                 }),
                 h(PagedList, {
                   items: rows,
-                  label: "历史报告差分",
+                  label: t("历史报告差分"),
                   renderItem: (r) =>
                     h(
                       "article",
@@ -806,12 +855,22 @@ function ReportHistoryContent({ data }) {
                       h(
                         "strong",
                         null,
-                        `${r.name} · ${directions[r.direction]}`,
+                        `${r.name} · ${t(directions[r.direction])}`,
                       ),
                       h(
                         "p",
                         null,
-                        `之前 ${r.from?.version || "—"} / ${r.from?.verdict || "—"} / 发现 ${r.from?.findings ?? 0}；之后 ${r.to?.version || "—"} / ${r.to?.verdict || "—"} / 发现 ${r.to?.findings ?? 0}`,
+                        t(
+                          "之前 {p0} / {p1} / 发现 {p2}；之后 {p3} / {p4} / 发现 {p5}",
+                          {
+                            p0: r.from?.version || "—",
+                            p1: r.from?.verdict || "—",
+                            p2: r.from?.findings ?? 0,
+                            p3: r.to?.version || "—",
+                            p4: r.to?.verdict || "—",
+                            p5: r.to?.findings ?? 0,
+                          },
+                        ),
                       ),
                     ),
                 }),
@@ -822,7 +881,9 @@ function ReportHistoryContent({ data }) {
               Fold,
               {
                 key: i,
-                title: i ? "查看对照终点完整报告" : "查看对照起点完整报告",
+                title: i
+                  ? t("查看对照终点完整报告")
+                  : t("查看对照起点完整报告"),
               },
               () => h(SnapshotView, { snapshot }),
             ),
@@ -836,10 +897,10 @@ export function HistoryTools({ data }) {
   return h(
     "div",
     { className: "compat-auxiliary" },
-    h(Fold, { title: "人工处置记录管理", heading: true }, () =>
+    h(Fold, { title: t("人工处置记录管理"), heading: true }, () =>
       h(ReviewArchiveContent, { data }),
     ),
-    h(Fold, { title: "本地历史报告与趋势", heading: true }, () =>
+    h(Fold, { title: t("本地历史报告与趋势"), heading: true }, () =>
       h(ReportHistoryContent, { data }),
     ),
   );

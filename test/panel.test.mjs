@@ -161,7 +161,7 @@ test("primary plugin results precede all auxiliary workflows and remain visible 
       (n) => n.type === "table" && n.props["aria-label"] === "插件兼容性结果",
     );
     assert(results >= 0, "The primary table needs an accessible identity");
-    for (const label of ["依赖关系与潜在影响", "功能健康检查"])
+    for (const label of ["依赖关系与潜在影响"])
       assert(
         results < nodes.findIndex((n) => n.props["aria-label"] === label),
         label,
@@ -257,7 +257,7 @@ test("report context stays with results while upgrade and report explanations ha
       h.find(
         (n) =>
           n.type === "section" &&
-          n.props["data-slot"] === "card" &&
+          ["card", "collapsible"].includes(n.props["data-slot"]) &&
           n.props["aria-label"] === label,
       );
     const primary = card("兼容性体检结果");
@@ -272,8 +272,11 @@ test("report context stays with results while upgrade and report explanations ha
       explanation,
       "Report-wide legend and diagnostics need an explicit group",
     );
-    assert.match(h.text(explanation), /确定（certain）.*影响依据/s);
-    assert.match(h.text(explanation), /工具版本：/);
+    h.field("展开报告与证据说明").props.onClick();
+    h.field("展开报告说明与检查信息").props.onClick();
+    h.render();
+    assert.match(h.text(card("兼容性体检结果")), /确定（certain）.*影响依据/s);
+    assert.match(h.text(card("报告说明与检查信息")), /工具版本：/);
     h.field("展开查看采样与检查信息").props.onClick();
     h.render();
     assert.match(
@@ -300,6 +303,8 @@ test("report context stays with results while upgrade and report explanations ha
 test("all report disclosures use explicit shared expand/collapse buttons and preserve form input", async () => {
   const h = await panelHarness(sample());
   try {
+    h.field("展开报告说明与检查信息").props.onClick();
+    h.render();
     assert(
       !h.find((n) => n.type === "details" || n.type === "summary"),
       "Native triangle-only disclosures must be replaced across the panel",

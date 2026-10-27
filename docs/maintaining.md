@@ -13,6 +13,8 @@ check验证格式、文档/版本/链接、skill/契约副本、第三方说明�
 
 宿主`plugin/index.js`保留加载/资源编排，报告、人工处置、HTTP及预检分别在`plugin/lib/host-{reports,reviews,http,upgrade}.js`；内核处置派生缓存为`lib/review-sidecar-cache.mjs`，不授权保存。客户端入口保留订阅及槽位，普通报告/预检在`plugin/src/panels/`，共用展示在`plugin/src/components/report-common.jsx`。客户端UI真源为`plugin/src/client.jsx`、`plugin/src/components/ui/`和`plugin/src/styles.css`；纯契约及workflow仍由`lib/*.mjs`共享。先`npm ci --ignore-scripts`，再`npm run build:client`生成宿主可加载的预编译客户端；`npm run check:client`只检查可复现字节，`stage-contract`生成3份启动必需的宿主契约和客户端，prepack会调用它；打包内核的对应模块重导出宿主契约，避免第二份实现。浏览器直接按需打包真源，JS/CSS压缩产物由生成校验管理，格式检查针对手写源；移除未用宿主副本及CLI/浏览器专用内核文件时，须复验独立tgz安装、worker、普通/升级tool。React由宿主提供，Tailwind不启用preflight，规则、主题及样式生命周期限定于插件容器；新增组件须同步来源/MIT、主题、键盘及窄容器验收，不能直接改`plugin/lib/client.js`。
 
+UI词典位于`plugin/src/i18n/{zh,en,ko}.json`，用可读原文作为消息键，插值必须保持`{pN}`及重复次数；构建将各语言的重复键替换为短ID，保留中文原文供内置状态映射。`runtime.mjs`共享宿主lang观察和本地偏好，`locale.jsx`使各槽位及memo面板更新；不得按语言设置React key或重建编辑器。只对固定UI/已知内置状态调用翻译，发现、用户依据和导出不得按词典全局替换。新增文案须补齐三词典、ARIA及覆盖测试，不能更改后端契约或结论。
+
 真实验收/到货工具通过`tools/owned-package-source.mjs`准备私有构建副本，核对manifest、lock和已安装构建依赖版本，复制自有依赖闭包，不向源码、用户profile或npm运行包注入工具链。构建工具不作为插件运行依赖发布。selector-parser覆盖固定为已修复的7.1.6；修改Tailwind或该覆盖后须重建、复验列宽/主题及运行依赖审计，不能忽略开发闭包公告。
 
 三项UI验收在原有同一tgz命令上增加`DSC_UI018_ACCEPTANCE=1`，可用`DSC_UI018_SCREENSHOTS=<自有目录>`保存截图。实际安装界面核对主表顺序、初始表格DOM、键盘展开/收起、深浅色、列宽及卸载/恢复；长名称窄容器截图来自明确标记的临时CSS夹具，不冒充真实安装插件。组件测试另覆盖三个槽位、筛选/导出、共享请求/可见性和旧请求拒绝。增加`DSC_UI018_P2=1`会在同一自有profile追加120个非激活合成插件，验主表/loader每页50、跨页完整性、筛选重置和完整导出。`node tools/ui018-performance.mjs`对比固定提交与当前客户端的1000插件元素树、隐藏内容及渲染耗时；这是合成hook测试，耗时不作性能门禁或浏览器延迟承诺。
@@ -120,3 +122,5 @@ check:catalogs验证schema、登记版本及来源引用结构，不能代替语
 归档在`lib/review-archive.mjs`，复用活动review路径/锁/有界读取；不可将归档记录直接合并成当前已复核。快照契约与中性比较为`lib/report-history-contract.mjs`，落盘为`lib/report-history.mjs`，共用`lib/local-history-store.mjs`的私有目录、不可覆盖内容对象和限额。新HTTP入口为`plugin/lib/host-history.js`，UI为`plugin/src/panels/history.jsx`；沿用Card/Fold/Pager及原报告/草稿状态。不得为历史功能提高活动sidecar上限或改变基线/判定标准。
 
 CI同一tgz入口现增加`DSC_UI018_HISTORY=1`，验证显式快照、容量释放、参考导入、完整导出预览、相容/不相容对照、显式删除、普通报告及基线不变，并保存`local-history.png`。完整入口开关共8项；本地macOS通过不表示对应Linux提交已跑过。历史对象摘要仅用于损坏检测，不是签名；导入报告的自报身份不能当作真实采样证明。
+
+多语言验收增加`DSC_UI018_I18N=1`：实际安装界面验证宿主lang变化、中英韩标签、同一编辑器/原始草稿、报告及基线不变，并保存三语截图和英韩窄容器深色CSS夹具。`tools/ci-ui018.mjs`统一启用该项并拒绝缺失结果/截图；本地macOS实跑不等同Linux CI。

@@ -9,6 +9,15 @@ function complete() {
     applicable: true,
     dshVersion: "0.2.1-rc.3",
     artifactSha256: "a".repeat(64),
+    uiI18n: {
+      realBrowser: true,
+      hostLanguage: true,
+      threeLanguages: true,
+      draftPreserved: true,
+      identityPreserved: true,
+      narrowAndTheme: true,
+      canonicalReportUnchanged: true,
+    },
     localHistory: {
       realBrowser: true,
       explicitSnapshotSave: true,
@@ -80,6 +89,7 @@ test("UI CI evidence gate rejects unavailable, incomplete, wrong-host and wrong-
     { ui: { available: false } },
     { ui018P2: undefined },
     { reviewNavigation: undefined },
+    { uiI18n: undefined },
     { networkGuard: { productionRequests: 1 } },
   ])
     assert.throws(() =>
@@ -93,6 +103,7 @@ test("UI CI evidence gate rejects unavailable, incomplete, wrong-host and wrong-
     "ui018Hardening",
     "reviewNavigation",
     "localHistory",
+    "uiI18n",
     "cleanup",
   ]) {
     const value = structuredClone(good);

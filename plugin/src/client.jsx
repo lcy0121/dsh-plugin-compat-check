@@ -1,4 +1,11 @@
 import {
+  baselineText,
+  baselineDetail,
+  baselineBadge,
+} from "./i18n/presentation.mjs";
+import { useLocale } from "./i18n/locale.jsx";
+import { t, builtin } from "./i18n/runtime.mjs";
+import {
   h,
   styles,
   VERDICT,
@@ -28,7 +35,7 @@ const ReportContract = { assertEnvelope, catalogLines };
 
 const DependencyGraphContract = { validateDependencyGraph };
 const FindingReviewContract = {
-  categoryLabel: (value) => CATEGORY[value] || value,
+  categoryLabel: (value) => builtin(CATEGORY[value]) || value,
   REVIEW_STATUS_LABELS,
   REVIEW_LIMITS,
   validateReviewInput,
@@ -39,7 +46,11 @@ const FunctionalHealthContract = {
   canonicalFunctionalManifest,
 };
 
-const memo = React.memo || ((component) => component);
+const memo = (component) =>
+  (React.memo || ((value) => value))(function LocalizedPanel(props) {
+    useLocale();
+    return component(props);
+  });
 
 var DependencyPanel = memo(
   WorkflowPanelFactory.createDependencyPanel(
@@ -71,7 +82,7 @@ const { Table } = createReportPanels({
   Badge,
 });
 var SLOT = "settings.plugins.tab";
-var LABEL = "兼容性";
+var LABEL = t("兼容性");
 var ROUTE = "/plugin-compat-check/report";
 // C3：单插件视图的两个槽位。实测（docs/Plan.md §5 C3）：
 //   - 详情页不是「抽屉」，是侧栏插件面板**换了 React 视图状态**：
@@ -123,7 +134,9 @@ function acceptPayload(data) {
       String((error && error.message) || error),
     );
     throw new Error(
-      "无法读取体检报告：报告格式或版本不受支持，请刷新页面并确认宿主与插件版本一致。",
+      t(
+        "无法读取体检报告：报告格式或版本不受支持，请刷新页面并确认宿主与插件版本一致。",
+      ),
     );
   }
 }
@@ -205,18 +218,18 @@ function pickPlugin(data, props) {
           : null;
     var hit = byPkg(direct, "subject.pkg.name");
     if (hit) return hit;
-    hit = byPkg(subj.id, "subject.id=包名");
+    hit = byPkg(subj.id, t("subject.id=包名"));
     if (hit) return hit;
     hit = lookupLedger(report, subj.id);
     if (hit) return hit;
   }
   if (props && typeof props === "object") {
-    var hit2 = byPkg(props.id, "props.id=包名");
+    var hit2 = byPkg(props.id, t("props.id=包名"));
     if (hit2) return hit2;
     hit2 = lookupLedger(report, props.id);
     if (hit2) return hit2;
     if (props.view) {
-      hit2 = byPkg(SELF_ITEM_ID, "自家条目 id");
+      hit2 = byPkg(SELF_ITEM_ID, t("自家条目 id"));
       if (hit2) return hit2;
     }
   }
@@ -235,7 +248,7 @@ function lookupLedger(report, id) {
       return {
         name: pkg,
         plugin: report.plugins[pkg],
-        how: "台账条目 " + id + " → " + pkg,
+        how: t("台账条目 {p0} → {p1}", { p0: id, p1: pkg }),
       };
     }
   }
@@ -272,11 +285,15 @@ function Badge(p) {
           marginBottom: "8px",
         }),
       },
-      b.note,
+      baselineText(b.note),
     );
   }
   if (b.error) {
-    return h("div", { style: styles.body }, "基线差分没算成：" + b.error);
+    return h(
+      "div",
+      { style: styles.body },
+      t("基线差分没算成：{p0}", { p0: b.error }),
+    );
   }
   var badge = b.badge || {};
   if (!badge.show) {
@@ -288,7 +305,7 @@ function Badge(p) {
           marginBottom: "8px",
         }),
       },
-      badge.detail || "与上次相比没有任何变化",
+      baselineDetail(b) || t("与上次相比没有任何变化"),
     );
   }
   var color =
@@ -311,7 +328,9 @@ function Badge(p) {
         e.reason,
     );
     (e.newFindings || []).forEach(function (f) {
-      lines.push("    新增：" + f.key + " @ " + (f.location || "—"));
+      lines.push(
+        t("    新增：{p0} @ {p1}", { p0: f.key, p1: f.location || "—" }),
+      );
     });
   });
   (diff.improved || []).forEach(function (e) {
@@ -336,7 +355,7 @@ function Badge(p) {
               ? "ok"
               : "neutral",
       },
-      badge.text,
+      baselineBadge(b),
     ),
     diff.dshVersionChanged
       ? h(
@@ -371,8 +390,9 @@ function DetailSection(props) {
     return h(
       "div",
       { style: styles.err },
-      "dsh-plugin-compat-check: 渲染时出错 —— " +
-        String((error && error.message) || error),
+      t("dsh-plugin-compat-check: 渲染时出错 —— {p0}", {
+        p0: String((error && error.message) || error),
+      }),
     );
   }
 }
@@ -409,14 +429,15 @@ function DetailSectionBody(props) {
   mark({ detailSectionRendered: true, detailFor: hit ? hit.name : null });
 
   if (st.value.phase === "loading") {
-    return h("div", { style: styles.hint }, "正在体检…");
+    return h("div", { style: styles.hint }, t("正在体检…"));
   }
   if (st.value.phase === "error" || !data || data.ok === false) {
     return h(
       "div",
       { style: styles.err },
-      "拿不到体检结果（这是工具的问题，不是这个插件的结论）：" +
-        (st.value.error || (data && data.error) || "未知原因"),
+      t("拿不到体检结果（这是工具的问题，不是这个插件的结论）：{p0}", {
+        p0: st.value.error || (data && data.error) || t("未知原因"),
+      }),
     );
   }
   if (!hit) {
@@ -425,8 +446,10 @@ function DetailSectionBody(props) {
     return h(
       "div",
       { style: styles.body },
-      "这个插件不在本次体检范围内（可能它不是带 dsh 清单的社区插件，或它的条目用了别的键名）。" +
-        "请以「兼容性」总览页为准。",
+      t(
+        "这个插件不在本次体检范围内（可能它不是带 dsh 清单的社区插件，或它的条目用了别的键名）。请以「兼容性」总览页为准。",
+        {},
+      ),
     );
   }
   var pl = hit.plugin;
@@ -441,7 +464,9 @@ function DetailSectionBody(props) {
       h(
         "span",
         { style: styles.annotation },
-        "dsh-plugin-compat-check · " + (pl.findings || []).length + " 条发现",
+        t("dsh-plugin-compat-check · {p0} 条发现", {
+          p0: (pl.findings || []).length,
+        }),
       ),
       h(
         "button",
@@ -452,7 +477,7 @@ function DetailSectionBody(props) {
             st.reload(true);
           },
         },
-        "重新检查",
+        t("重新检查"),
       ),
     ),
     h(Findings, { plugin: pl }),
@@ -508,7 +533,7 @@ function Panel(props) {
     return h(
       "div",
       { style: styles.root },
-      h("div", { style: styles.hint }, "正在体检已装插件……"),
+      h("div", { style: styles.hint }, t("正在体检已装插件……")),
     );
   }
   if (value.phase === "error") {
@@ -521,13 +546,13 @@ function Panel(props) {
         h(
           "div",
           { style: { fontWeight: 600, marginBottom: "4px" } },
-          "拿不到体检结果",
+          t("拿不到体检结果"),
         ),
         h("div", null, value.error),
         h(
           "div",
           { style: { marginTop: "6px", opacity: 0.75 } },
-          "这一条是工具本身的问题，不是插件的结论 —— 请不要据此判断兼容性。",
+          t("这一条是工具本身的问题，不是插件的结论 —— 请不要据此判断兼容性。"),
         ),
       ),
       h(
@@ -539,7 +564,7 @@ function Panel(props) {
             st.reload(true);
           },
         },
-        "重试",
+        t("重试"),
       ),
     );
   }
@@ -554,9 +579,9 @@ function Panel(props) {
         h(
           "div",
           { style: { fontWeight: 600, marginBottom: "4px" } },
-          "体检没跑成",
+          t("体检没跑成"),
         ),
-        h("div", null, (data && data.error) || "未知原因"),
+        h("div", null, (data && data.error) || t("未知原因")),
       ),
     );
   }
@@ -578,7 +603,12 @@ function apply(ctx) {
     registerSlot(
       ctx,
       SLOT,
-      { name: SLOT, id: "dsh-plugin-compat-check", order: 1, label: LABEL },
+      {
+        name: SLOT,
+        id: "dsh-plugin-compat-check",
+        order: 1,
+        label: () => t("兼容性"),
+      },
       Panel,
       "tab",
     );
@@ -631,6 +661,7 @@ function registerSlot(ctx, slot, spec, Comp, tag) {
   try {
     ctx.slots.inject(slot, function () {
       return ctx.slots.register(spec, function ThemedSlot(props) {
+        useLocale();
         const [visible, setVisible] = React.useState(
           typeof IntersectionObserver !== "function",
         );

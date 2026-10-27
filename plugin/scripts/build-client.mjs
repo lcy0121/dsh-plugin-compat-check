@@ -48,6 +48,7 @@ export async function buildClient({ check = false } = {}) {
     platform: "browser",
     target: ["es2020"],
     jsx: "transform",
+    charset: "utf8",
     external: ["react", "react-dom", "react-dom/*"],
     legalComments: "inline",
     treeShaking: true,
@@ -55,6 +56,39 @@ export async function buildClient({ check = false } = {}) {
     minifyWhitespace: true,
     minifyIdentifiers: false,
     plugins: [
+      {
+        name: "compact-locale-keys",
+        setup(builder) {
+          const keys = Object.keys(
+            JSON.parse(
+              fs.readFileSync(
+                path.join(root, "plugin/src/i18n/zh.json"),
+                "utf8",
+              ),
+            ),
+          ).sort();
+          const ids = new Map(keys.map((key, index) => [key, `m${index}`]));
+          builder.onLoad(
+            { filter: /[\/]i18n[\/](?:zh|en|ko)\.json$/ },
+            (args) => {
+              const dictionary = JSON.parse(fs.readFileSync(args.path, "utf8"));
+              if (
+                Object.keys(dictionary).length !== keys.length ||
+                keys.some((key) => typeof dictionary[key] !== "string")
+              )
+                throw Error("Incomplete UI locale: " + args.path);
+              return {
+                contents: JSON.stringify(
+                  Object.fromEntries(
+                    keys.map((key) => [ids.get(key), dictionary[key]]),
+                  ),
+                ),
+                loader: "json",
+              };
+            },
+          );
+        },
+      },
       {
         name: "compat-css",
         setup(builder) {

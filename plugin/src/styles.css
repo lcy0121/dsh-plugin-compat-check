@@ -129,8 +129,8 @@
 }
 .dsc-ui .compat-metrics > div {
   flex: 1;
-  min-width: 100px;
-  padding: 10px 14px;
+  min-width: 116px;
+  padding: 10px;
   border: 1px solid hsl(var(--dsc-border));
   border-radius: 8px;
   background: hsl(var(--dsc-muted) / 0.45);
@@ -331,4 +331,35 @@
 .dsc-ui .compat-pagination > span {
   margin-right: auto;
   color: hsl(var(--dsc-muted-foreground));
+}
+
+/* Translation lengths vary; controls and titles stay within narrow host slots. */
+.dsc-ui .compat-language {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+.dsc-ui .compat-language select {
+  border: 1px solid hsl(var(--dsc-input));
+  border-radius: 6px;
+  background: hsl(var(--dsc-background));
+  padding: 4px 8px;
+  max-width: 100%;
+}
+.dsc-ui button {
+  height: auto;
+  min-height: 32px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.dsc-ui .compat-fold-title {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.dsc-ui .compat-metrics [data-slot="badge"] {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }

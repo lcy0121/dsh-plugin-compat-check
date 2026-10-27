@@ -5,6 +5,10 @@ import { createHash } from "node:crypto";
 import { run } from "../bin/compat-check.mjs";
 import { toJSON } from "../lib/report.mjs";
 import { panelHarness } from "./support/panel-harness.mjs";
+function openAdvanced(h) {
+  h.field("展开高级工具")?.props.onClick();
+  h.render();
+}
 function sample() {
   const report = toJSON(
     run({
@@ -52,6 +56,8 @@ test("overview exposes separate dependency, manual review and imported health se
   try {
     assert.match(h.text(), /依赖关系与潜在(?:故障传播|影响)/);
     assert.match(h.text(), /发现的人工处置/);
+    assert.equal(h.field("导入功能健康检查记录"), undefined);
+    openAdvanced(h);
     assert.match(h.text(), /功能健康检查/);
     assert(h.field("导入功能健康检查记录"));
     assert.deepEqual(urls, ["/plugin-compat-check/report"]);
@@ -71,6 +77,7 @@ test("invalid or oversized imported health evidence stays local and cannot chang
     },
   });
   try {
+    openAdvanced(h);
     const input = h.field("导入功能健康检查记录");
     assert(input);
     await input.props.onChange({
@@ -159,6 +166,7 @@ test("verified health import remains historical, rejects a changed declaration, 
     },
   });
   try {
+    openAdvanced(h);
     const input = h.field("导入功能健康检查记录"),
       record = healthRecord(data);
     await importRecord(input, record);
@@ -190,6 +198,7 @@ test("an older slow health import cannot replace the last selected evidence", as
   const data = sample(),
     h = await panelHarness(data);
   try {
+    openAdvanced(h);
     const input = h.field("导入功能健康检查记录");
     let release;
     const older = input.props.onChange({
@@ -677,6 +686,7 @@ test("history panels stay folded and perform no background reads; snapshots and 
   });
   try {
     assert.equal(requests.length, 0);
+    openAdvanced(h);
     h.field("展开本地历史报告与趋势").props.onClick();
     h.render();
     assert.equal(requests.length, 0);
@@ -684,6 +694,7 @@ test("history panels stay folded and perform no background reads; snapshots and 
     await h.settle();
     assert.equal(requests.at(-1).action, "snapshot-list");
     assert.match(h.text(), /历史快照不认证当前目标/);
+    openAdvanced(h);
     h.field("展开人工处置记录管理").props.onClick();
     h.render();
     h.button("加载处置容量与归档").props.onClick();
@@ -752,6 +763,7 @@ test("archive confirmation is explicit, export is previewed, and snapshot action
     },
   });
   try {
+    openAdvanced(h);
     h.field("展开人工处置记录管理").props.onClick();
     h.render();
     h.button("加载处置容量与归档").props.onClick();
@@ -769,6 +781,7 @@ test("archive confirmation is explicit, export is previewed, and snapshot action
     await h.settle();
     assert.match(h.field("历史JSON导出预览").props.value, /review-archive/);
     assert(h.button("下载历史JSON"));
+    openAdvanced(h);
     h.field("展开本地历史报告与趋势").props.onClick();
     h.render();
     h.field("快照备注").props.onChange({ target: { value: "before upgrade" } });
@@ -809,6 +822,7 @@ test("invalid and oversized history imports never issue writes", async () => {
     },
   });
   try {
+    openAdvanced(h);
     h.field("展开本地历史报告与趋势").props.onClick();
     h.render();
     h.button("加载历史报告").props.onClick();
@@ -862,6 +876,7 @@ test("metadata timestamps retain an open history session; an import finishing af
     },
   });
   try {
+    openAdvanced(h);
     h.field("展开本地历史报告与趋势").props.onClick();
     h.render();
     h.button("加载历史报告").props.onClick();
@@ -927,6 +942,7 @@ test("a report change aborts a pending history request and allows the next expli
     },
   });
   try {
+    openAdvanced(h);
     h.field("展开本地历史报告与趋势").props.onClick();
     h.render();
     h.button("加载历史报告").props.onClick();
@@ -945,6 +961,24 @@ test("a report change aborts a pending history request and allows the next expli
   } finally {
     release?.();
     await h.settle();
+    h.dispose();
+  }
+});
+
+test("imported health status follows language changes without reimporting the record", async () => {
+  const data = sample(),
+    h = await panelHarness(data);
+  try {
+    openAdvanced(h);
+    await importRecord(h.field("导入功能健康检查记录"), healthRecord(data));
+    await h.settle();
+    assert.match(h.text(), /所选检查通过/);
+    h.nodes()
+      .find((n) => n.props["data-ui-language"] !== undefined)
+      .props.onChange({ target: { value: "en" } });
+    await h.settle();
+    assert.doesNotMatch(h.text(), /所选检查通过/);
+  } finally {
     h.dispose();
   }
 });

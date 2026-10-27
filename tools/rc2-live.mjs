@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { verifyUiI18n } from "./ui018-i18n.mjs";
 import { verifyLocalHistory } from "./ui018-history.mjs";
 /** Owned real-host acceptance: declaration gates, metadata, actual settings UI and reload. */
 import fs from "node:fs";
@@ -822,7 +823,7 @@ try {
         await poll(
           () =>
             evalx(
-              `[...document.querySelectorAll('[role="tab"]')].filter(b=>b.innerText==='兼容性').length===1&&document.body.innerText.includes('工具版本：')`,
+              `[...document.querySelectorAll('[role="tab"]')].filter(b=>b.innerText==='兼容性').length===1&&!!document.querySelector('table[aria-label="插件兼容性结果"]')`,
             ),
           "Compatibility tab/report not actually rendered",
         );
@@ -847,6 +848,16 @@ try {
         "Actual DOM lacks catalogue digest and certification scope",
       );
       result.catalogUiIdentity = true;
+      await evalx(
+        `document.querySelector('[aria-label="展开报告与证据说明"]')?.click()`,
+      );
+      await poll(
+        () =>
+          evalx(
+            `document.body.innerText.includes('确定（certain）可由明确静态事实或合格运行时观测支持')`,
+          ),
+        "Evidence notes did not open",
+      );
       const explanationText = await evalx("document.body.innerText");
       requireTrue(
         explanationText.includes(
@@ -1292,7 +1303,17 @@ try {
           `[...document.querySelectorAll('button')].find(b=>b.innerText==='重新检查').click()`,
         );
         await evalx(
-          `(()=>{const b=document.querySelector('button[aria-label=\"展开查看采样与检查信息\"]');if(b)b.click();else {const s=[...document.querySelectorAll('summary')].find(e=>e.innerText==='查看采样与检查信息');if(s)s.parentElement.open=true;}})()`,
+          `document.querySelector('[aria-label="展开报告说明与检查信息"]')?.click()`,
+        );
+        await poll(
+          () =>
+            evalx(
+              `!!document.querySelector('[aria-label="展开查看采样与检查信息"]')`,
+            ),
+          "Sampling metadata did not mount",
+        );
+        await evalx(
+          `(()=>{document.querySelector('[aria-label=\"展开报告说明与检查信息\"]')?.click();const b=document.querySelector('button[aria-label=\"展开查看采样与检查信息\"]');if(b)b.click();else {const s=[...document.querySelectorAll('summary')].find(e=>e.innerText==='查看采样与检查信息');if(s)s.parentElement.open=true;}})()`,
         );
         await poll(
           () => evalx(`document.body.innerText.includes('未来时钟偏差')`),
@@ -1451,7 +1472,14 @@ try {
         "Manual action changed baseline state",
       );
       await evalx(
-        `document.querySelector('[aria-label="功能健康检查"]')?.scrollIntoView({block:'center'})`,
+        `document.querySelector('[aria-label="展开高级工具"]')?.click()`,
+      );
+      await poll(
+        () => evalx(`!!document.querySelector('[aria-label="功能健康检查"]')`),
+        "Advanced tools did not mount health section",
+      );
+      await evalx(
+        `document.querySelector('[aria-label="功能健康检查"]').scrollIntoView({block:'center'})`,
       );
       await poll(
         () =>
@@ -1753,6 +1781,14 @@ try {
           evalx,
           poll,
           profile,
+          screenshotDir: process.env.DSC_UI018_SCREENSHOTS,
+        });
+      if (process.env.DSC_UI018_I18N === "1")
+        result.uiI18n = await verifyUiI18n({
+          chrome,
+          evalx,
+          poll,
+          readReport: ordinary,
           screenshotDir: process.env.DSC_UI018_SCREENSHOTS,
         });
       if (process.env.DSC_RC2_SCREENSHOT) {

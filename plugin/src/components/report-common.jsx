@@ -1,3 +1,4 @@
+import { t, builtin, localeStore } from "../i18n/runtime.mjs";
 /** Shared report typography and bounded finding presentation. */
 import * as React from "react";
 import { ui, Pager, Fold, Badge as StatusBadge } from "./ui/index.jsx";
@@ -6,13 +7,34 @@ const FindingGuidance = { nextSteps };
 const h = (type, props, ...children) =>
   React.createElement(ui[type] || type, props, ...children);
 
-const useMemo = React.useMemo || ((compute) => compute());
+const useMemo = (compute, deps) =>
+  (React.useMemo || ((fn) => fn()))(compute, [...deps, localeStore.locale()]);
 
 var VERDICT = {
-  broken: { text: "不兼容", color: "#dc2626" },
-  partial: { text: "部分可用", color: "#d97706" },
-  unknown: { text: "未知", color: "#6b7280" },
-  ok: { text: "可用", color: "#16a34a" },
+  broken: {
+    get text() {
+      return t("不兼容");
+    },
+    color: "#dc2626",
+  },
+  partial: {
+    get text() {
+      return t("部分可用");
+    },
+    color: "#d97706",
+  },
+  unknown: {
+    get text() {
+      return t("未知");
+    },
+    color: "#6b7280",
+  },
+  ok: {
+    get text() {
+      return t("可用");
+    },
+    color: "#16a34a",
+  },
 };
 
 var SEVERITY = {
@@ -109,7 +131,7 @@ function Sev(p) {
   return h(
     "span",
     { style: { color: color, fontWeight: 600 } },
-    SEVERITY[s] || s,
+    builtin(SEVERITY[s]) || s,
   );
 }
 
@@ -119,10 +141,10 @@ function Coverage(p) {
   return h(
     "div",
     { style: styles.body },
-    "证据覆盖：" +
-      (c.status === "complete" ? "完整" : "有限") +
-      "；已验证调用 " +
-      c.verifiedCalls,
+    t("证据覆盖：{p0}；已验证调用 {p1}", {
+      p0: c.status === "complete" ? t("完整") : t("有限"),
+      p1: c.verifiedCalls,
+    }),
     c.limitations.length
       ? h(
           "details",
@@ -130,10 +152,10 @@ function Coverage(p) {
           h(
             "summary",
             { style: { cursor: "pointer" } },
-            "覆盖限制（" + c.limitations.length + "）",
+            t("覆盖限制（{p0}）", { p0: c.limitations.length }),
           ),
           c.limitations.map(function (note, i) {
-            return h("div", { key: i }, "覆盖限制：" + note);
+            return h("div", { key: i }, t("覆盖限制：{p0}", { p0: note }));
           }),
         )
       : null,
@@ -144,9 +166,15 @@ function EvidenceLegend() {
   return h(
     "div",
     { style: styles.paragraph },
-    "确定（certain）可由明确静态事实或合格运行时观测支持；疑似（suspected）表示当前证据不足以确定该条发现。",
-    "影响依据：实测（measured）须有对应观测，推断（inferred）不等于业务影响已实测。",
-    "未观测不等于缺失；没有已验证调用仍可能存在服务依赖或客户端功能；调用核验和覆盖完整均不等于业务验收通过。",
+    t(
+      "确定（certain）可由明确静态事实或合格运行时观测支持；疑似（suspected）表示当前证据不足以确定该条发现。",
+    ),
+    t(
+      "影响依据：实测（measured）须有对应观测，推断（inferred）不等于业务影响已实测。",
+    ),
+    t(
+      "未观测不等于缺失；没有已验证调用仍可能存在服务依赖或客户端功能；调用核验和覆盖完整均不等于业务验收通过。",
+    ),
   );
 }
 
@@ -209,7 +237,9 @@ function Findings(p) {
         h(
           "div",
           { key: "v", style: styles.evidence },
-          "本轮未发现冲突，但没有已验证调用；插件仍可能依赖 DSH 服务或包含未验证的客户端功能，不能据此确认业务可用。",
+          t(
+            "本轮未发现冲突，但没有已验证调用；插件仍可能依赖 DSH 服务或包含未验证的客户端功能，不能据此确认业务可用。",
+          ),
         ),
       );
     }
@@ -225,12 +255,13 @@ function Findings(p) {
         h(
           "div",
           { key: "n", style: styles.body },
-          "无证据可判（只出现名字，没有调用点）：" +
-            noCalls
+          t("无证据可判（只出现名字，没有调用点）：{p0}", {
+            p0: noCalls
               .map(function (c) {
                 return c.service;
               })
               .join("、"),
+          }),
         ),
       );
     }
@@ -239,12 +270,13 @@ function Findings(p) {
         h(
           "div",
           { key: "c", style: styles.body },
-          "客户端半边（命令行测不到，需界面验证）：" +
-            pl.clientSide
+          t("客户端半边（命令行测不到，需界面验证）：{p0}", {
+            p0: pl.clientSide
               .map(function (c) {
                 return c.service;
               })
               .join("、"),
+          }),
         ),
       );
     }
@@ -256,7 +288,7 @@ function Findings(p) {
     p.hideCoverage ? null : h(Coverage, { plugin: pl }),
     h(PagedList, {
       items: pl.findings,
-      label: p.label || "插件发现",
+      label: p.label || t("插件发现"),
       focus: p.focus,
       focusIndex: p.focusIndex,
       renderItem: function (f, i) {
@@ -264,7 +296,7 @@ function Findings(p) {
           ? f.method
             ? f.service + "." + f.method
             : f.service
-          : "(包声明)";
+          : t("(包声明)");
         var loc = f.location ? f.location.file + ":" + f.location.line : "—";
         return h(
           "div",
@@ -284,11 +316,15 @@ function Findings(p) {
                   "data-review-link": p.reviewItems.get(i).findingId,
                   onClick: () => p.onReview(p.reviewItems.get(i)),
                 },
-                "核实与人工处置",
+                t("核实与人工处置"),
               )
             : null,
           h(Sev, { severity: f.severity }),
-          h("span", null, " " + (CATEGORY[f.category] || f.category) + " "),
+          h(
+            "span",
+            null,
+            " " + (builtin(CATEGORY[f.category]) || f.category) + " ",
+          ),
           h("code", { style: styles.mono }, api),
           h("span", { style: styles.mono }, " @ " + loc),
           h(
@@ -297,32 +333,38 @@ function Findings(p) {
               style: styles.evidence,
               title:
                 f.certainty === "certain"
-                  ? "当前证据足以支持该条发现，可来自明确静态事实或合格运行时观测；不等于影响已实测。"
-                  : "当前证据不足以确定该条发现；存在运行时观测也不代表该调用已验证。",
+                  ? t(
+                      "当前证据足以支持该条发现，可来自明确静态事实或合格运行时观测；不等于影响已实测。",
+                    )
+                  : t(
+                      "当前证据不足以确定该条发现；存在运行时观测也不代表该调用已验证。",
+                    ),
             },
-            f.certainty === "certain" ? " [确定]" : " [疑似]",
+            f.certainty === "certain" ? t(" [确定]") : t(" [疑似]"),
           ),
           f.impact
             ? h(
                 "div",
                 { style: styles.body },
                 (f.impactBasis === "measured"
-                  ? "影响（实测）："
+                  ? t("影响（实测）：")
                   : f.impactBasis === "inferred"
-                    ? "影响（推断，非实测）："
-                    : "影响（依据未提供）：") + f.impact,
+                    ? t("影响（推断，非实测）：")
+                    : t("影响（依据未提供）：")) + f.impact,
               )
             : null,
-          f.basis ? h("div", { style: styles.body }, "依据：" + f.basis) : null,
+          f.basis
+            ? h("div", { style: styles.body }, t("依据：{p0}", { p0: f.basis }))
+            : null,
           h(
             "div",
             { style: { marginTop: "6px" } },
-            h("strong", null, "下一步核实"),
+            h("strong", null, t("下一步核实")),
             h(
               "ol",
               { style: { margin: "4px 0", paddingLeft: "22px" } },
               FindingGuidance.nextSteps(f).map(function (step, j) {
-                return h("li", { key: j }, step);
+                return h("li", { key: j }, builtin(step));
               }),
             ),
           ),
@@ -339,7 +381,7 @@ function FindingDisclosure({ plugin, focus, ...props }) {
   return h(
     Fold,
     {
-      title: "查看 " + plugin.findings.length + " 条发现与未验证项",
+      title: t("查看 {p0} 条发现与未验证项", { p0: plugin.findings.length }),
       framed: false,
       open,
       onOpenChange: setOpen,
