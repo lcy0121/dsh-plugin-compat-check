@@ -1,3 +1,4 @@
+import { createHistoryRuntime } from "./lib/host-history.js";
 import { createReportRuntime } from "./lib/host-reports.js";
 import { createReviewRuntime } from "./lib/host-reviews.js";
 import { createUpgradeRuntime } from "./lib/host-upgrade.js";
@@ -68,6 +69,13 @@ const createHttpRuntimeInstance = createHttpRuntime({
   errText,
 });
 
+const historyRuntime = createHistoryRuntime({
+  resolveNodeModules,
+  resolveKernelDir,
+  readRequest: (...args) => readReviewRequest(...args),
+  log,
+  errText,
+});
 function registerReportRoute(...args) {
   return createHttpRuntimeInstance.registerReportRoute(...args);
 }
@@ -1517,6 +1525,7 @@ export function apply(ctx) {
     // E1：注册随包的 skill。**失败只留日志，绝不抛** —— 见文件顶部硬规矩。
     try {
       registerFindingReviewRoute(ctx, state);
+      historyRuntime.registerHistoryRoute(ctx, state);
       registerUpgradeRoute(ctx, state);
       registerSkill(ctx);
     } catch (error) {
@@ -1678,6 +1687,7 @@ export function apply(ctx) {
           () => () => {
             state.disposed = true;
             for (const request of state.reviewRequests || []) request.abort();
+            for (const request of state.historyRequests || []) request.abort();
             state.reviewTargets?.clear();
             state.reviewSidecars?.dispose();
             state.reportService?.dispose();

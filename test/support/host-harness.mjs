@@ -1,3 +1,4 @@
+import { createHistoryRuntime } from "../../plugin/lib/host-history.js";
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
@@ -76,6 +77,7 @@ export function loadHost(env = {}) {
   // 把 ESM 的 import 换成受控替身；导出换成赋值
   const cjs = hostVmSource(SRC);
   sandbox.__modules = {
+    "./lib/host-history.js": { createHistoryRuntime },
     "./lib/host-http.js": { createHttpRuntime },
     "./lib/host-upgrade.js": { createUpgradeRuntime },
     "./lib/host-reviews.js": { createReviewRuntime },

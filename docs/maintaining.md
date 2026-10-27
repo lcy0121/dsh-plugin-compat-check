@@ -114,3 +114,9 @@ check:catalogs验证schema、登记版本及来源引用结构，不能代替语
 - 输入、缓存身份、作者快照、升级捕获/验证共用有界枚举与非阻塞文件核验；缓存淘汰/卸载取消在途任务，共享worker队列检验并发、排队超时/取消及恢复。诊断只写自有私有目录，输出/启动失败明确报告，不用空结果掩盖。
 
 每项修改补能拦误报与漏报的行为正反例，清理断言只检查本次拥有的资源。敏感值守卫同时验证真实命中及占位说明不命中；历史性能数字、缺陷编号和Python参考不构成当前准确率或性能承诺。
+
+## 本地历史管理维护
+
+归档在`lib/review-archive.mjs`，复用活动review路径/锁/有界读取；不可将归档记录直接合并成当前已复核。快照契约与中性比较为`lib/report-history-contract.mjs`，落盘为`lib/report-history.mjs`，共用`lib/local-history-store.mjs`的私有目录、不可覆盖内容对象和限额。新HTTP入口为`plugin/lib/host-history.js`，UI为`plugin/src/panels/history.jsx`；沿用Card/Fold/Pager及原报告/草稿状态。不得为历史功能提高活动sidecar上限或改变基线/判定标准。
+
+CI同一tgz入口现增加`DSC_UI018_HISTORY=1`，验证显式快照、容量释放、参考导入、完整导出预览、相容/不相容对照、显式删除、普通报告及基线不变，并保存`local-history.png`。完整入口开关共8项；本地macOS通过不表示对应Linux提交已跑过。历史对象摘要仅用于损坏检测，不是签名；导入报告的自报身份不能当作真实采样证明。

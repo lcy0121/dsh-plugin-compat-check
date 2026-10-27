@@ -61,10 +61,9 @@ export function createReviewRuntime({ resolveNodeModules, log, errText }) {
     }
   }
 
-  function readReviewRequest(req, signal) {
+  function readReviewRequest(req, signal, maxBytes = 16384) {
     return new Promise((resolve, reject) => {
-      const maxBytes = 16384,
-        chunks = [];
+      const chunks = [];
       let bytes = 0,
         settled = false;
       const finish = (error, value) => {

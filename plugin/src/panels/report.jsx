@@ -1,3 +1,4 @@
+import { HistoryTools } from "./history.jsx";
 /** Ordinary report layout, filters, export and auxiliary panels. */
 import * as React from "react";
 import {
@@ -582,6 +583,7 @@ export function createReportPanels({
               onLocateMain: locateMain,
             }),
         ),
+        h(HistoryTools, { data }),
         h(
           DeferredPanel,
           { title: "功能健康检查（独立实测记录）", label: "功能健康检查" },

@@ -103,7 +103,7 @@ async function withHost(
         if (typeof off === "function") disposers.push(off);
       },
     });
-    assert.equal(routes.size, 3);
+    assert.equal(routes.size, 4);
     await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
     await check({
       root,
@@ -128,12 +128,14 @@ test("HTTP requests without the application header cannot compute reports, previ
       "/report?refresh=1",
       "/upgrade-preview?targetVersion=0.2.0-rc.2",
       "/reviews",
+      "/history",
     ]) {
       const response = await fetch(origin + "/plugin-compat-check" + route, {
-        method: route === "/reviews" ? "POST" : "GET",
-        headers:
-          route === "/reviews" ? { "content-type": "application/json" } : {},
-        ...(route === "/reviews" ? { body: "{}" } : {}),
+        method: ["/reviews", "/history"].includes(route) ? "POST" : "GET",
+        headers: ["/reviews", "/history"].includes(route)
+          ? { "content-type": "application/json" }
+          : {},
+        ...(["/reviews", "/history"].includes(route) ? { body: "{}" } : {}),
       });
       assert.equal(response.status, 403, route);
     }
@@ -278,6 +280,7 @@ test("host authentication is required before any report, metadata, preview or re
       "/report?metadata=1",
       "/upgrade-preview?targetVersion=0.2.1-rc.3",
       "/reviews",
+      "/history",
     ])
       for (const cookie of [
         undefined,
@@ -285,15 +288,15 @@ test("host authentication is required before any report, metadata, preview or re
         "owned-test-session=expired",
       ]) {
         const res = await fetch(origin + "/plugin-compat-check" + route, {
-          method: route === "/reviews" ? "POST" : "GET",
+          method: ["/reviews", "/history"].includes(route) ? "POST" : "GET",
           headers: {
             "X-DSH-Compat-Request": "1",
             ...(cookie ? { cookie } : {}),
-            ...(route === "/reviews"
+            ...(["/reviews", "/history"].includes(route)
               ? { "content-type": "application/json" }
               : {}),
           },
-          ...(route === "/reviews" ? { body: "{}" } : {}),
+          ...(["/reviews", "/history"].includes(route) ? { body: "{}" } : {}),
         });
         assert.equal(res.status, 401, route);
         assert.equal(res.headers.get("cache-control"), "no-store");

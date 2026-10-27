@@ -183,3 +183,21 @@ test("hung host plugin listing fails cold and forced reports, keeps baseline, an
  for(const resolve of late)resolve([]);await new Promise(setImmediate);
  const final=(await request()).body;assert.deepEqual(final.report,recovered.report);
 `));
+
+test("local archive and snapshot routes enforce authentication, stale identity and unchanged baselines", () =>
+  host(`
+ const first=(await request()).body,token=first.reviews.contextToken,base={computedAt:first.computedAt,contextToken:token};
+ const baselineDir=home+'/dsh-plugin-compat-check',baselines=fs.readdirSync(baselineDir).filter(f=>f.startsWith('baseline.')).map(f=>[f,fs.readFileSync(baselineDir+'/'+f,'utf8')]);
+ const route='/plugin-compat-check/history';
+ assert.equal((await request(route,{...base,action:'snapshot-list'},{origin:'http://127.0.0.1:9999'})).status,403);
+ assert.equal((await request(route,undefined,{},'GET')).status,405);
+ assert.equal((await request(route,{...base,action:'snapshot-list',path:'/etc/passwd'})).status,400);
+ const item=first.reviews.items[0];await request('/plugin-compat-check/reviews',{contextToken:token,findingId:item.findingId,status:'reviewed',note:'archive evidence'});
+ const capacity=await request(route,{...base,action:'review-state'});assert.equal(capacity.status,200,JSON.stringify(capacity.body));assert.equal(capacity.body.result.capacity.records,1);
+ assert.equal((await request(route,{...base,action:'review-archive',revision:capacity.body.result.revision,mode:'all'})).status,400);
+ const archived=await request(route,{...base,action:'review-archive',revision:capacity.body.result.revision,mode:'all',confirm:true});assert.equal(archived.status,200,JSON.stringify(archived.body));assert.equal(archived.body.result.capacity.records,0);
+ const snap=await request(route,{...base,action:'snapshot-save',label:'owned local snapshot'});assert.equal(snap.status,200,JSON.stringify(snap.body));assert.equal(snap.body.result.items.length,1);
+ const id=snap.body.result.items[0].id,read=await request(route,{...base,action:'snapshot-read',id});assert.equal(read.body.result.historicalOnly,true);assert.equal(read.body.result.data.label,'owned local snapshot');
+ assert.equal((await request(route,{...base,computedAt:'obsolete',action:'snapshot-save',label:'stale'})).status,409);
+ for(const[file,bytes]of baselines)assert.equal(fs.readFileSync(baselineDir+'/'+file,'utf8'),bytes,'History must not advance baseline');
+`));

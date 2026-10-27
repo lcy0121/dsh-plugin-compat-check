@@ -292,6 +292,7 @@ describe("宿主半边：结构完整性（功能全灭的回归）", () => {
     assert.deepEqual(
       registered.routes.map((r) => r.path).sort(),
       [
+        "/plugin-compat-check/history",
         "/plugin-compat-check/report",
         "/plugin-compat-check/reviews",
         "/plugin-compat-check/upgrade-preview",
@@ -506,7 +507,7 @@ test("host subscriptions return route/tool/provider disposers to their owner", (
     },
   };
   apply(ctx);
-  assert.equal(active, 5);
+  assert.equal(active, 6);
   for (const off of cleanup) off();
   assert.equal(active, 0, "no owned registrations may survive unload");
 });

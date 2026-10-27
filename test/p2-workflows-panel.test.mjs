@@ -633,3 +633,318 @@ test("identity navigation crosses both plugin and finding pages while filtered d
     h.dispose();
   }
 });
+
+test("history panels stay folded and perform no background reads; snapshots and archives open only on explicit action", async () => {
+  const data = sample(),
+    requests = [];
+  const h = await panelHarness(data, {
+    fetcher: async (url, opts) => {
+      if (url === "/plugin-compat-check/history") {
+        const body = JSON.parse(opts.body);
+        requests.push(body);
+        return {
+          ok: true,
+          json: async () => ({
+            ok: true,
+            result:
+              body.action === "review-state"
+                ? {
+                    revision: "0".repeat(64),
+                    capacity: {
+                      records: 0,
+                      recordLimit: 1000,
+                      bytes: 0,
+                      byteLimit: 1048576,
+                      historical: 0,
+                    },
+                    archives: [],
+                    archiveLimit: 100,
+                  }
+                : {
+                    items: [],
+                    capacity: {
+                      records: 0,
+                      recordLimit: 20,
+                      bytes: 0,
+                      byteLimit: 67108864,
+                    },
+                  },
+          }),
+        };
+      }
+      return { ok: true, json: async () => data };
+    },
+  });
+  try {
+    assert.equal(requests.length, 0);
+    h.field("展开本地历史报告与趋势").props.onClick();
+    h.render();
+    assert.equal(requests.length, 0);
+    h.button("加载历史报告").props.onClick();
+    await h.settle();
+    assert.equal(requests.at(-1).action, "snapshot-list");
+    assert.match(h.text(), /历史快照不认证当前目标/);
+    h.field("展开人工处置记录管理").props.onClick();
+    h.render();
+    h.button("加载处置容量与归档").props.onClick();
+    await h.settle();
+    assert.equal(requests.at(-1).action, "review-state");
+    assert.match(h.text(), /1000/);
+    assert.match(h.text(), /只作历史参考/);
+  } finally {
+    h.dispose();
+  }
+});
+
+test("archive confirmation is explicit, export is previewed, and snapshot actions retain ordinary risks", async () => {
+  const data = sample(),
+    before = JSON.stringify(data),
+    requests = [];
+  let records = 1;
+  const state = () => ({
+    revision: "b".repeat(64),
+    capacity: {
+      records,
+      recordLimit: 1000,
+      bytes: 700,
+      byteLimit: 1048576,
+      historical: 0,
+    },
+    archives: [],
+    archiveLimit: 100,
+  });
+  const h = await panelHarness(data, {
+    fetcher: async (url, opts) => {
+      if (url === "/plugin-compat-check/history") {
+        const body = JSON.parse(opts.body);
+        requests.push(body);
+        if (body.action === "review-archive") {
+          assert.equal(body.confirm, true);
+          records = 0;
+        }
+        const result =
+          body.action === "review-export"
+            ? {
+                schemaVersion: 1,
+                kind: "plugin-compat-check/review-archive",
+                targetKey: "a".repeat(64),
+                createdAt: "2026-10-27T00:00:00Z",
+                document: {
+                  schemaVersion: 1,
+                  revision: "a".repeat(64),
+                  records: [],
+                },
+              }
+            : body.action.startsWith("review-")
+              ? state()
+              : {
+                  items: [],
+                  capacity: {
+                    records: 0,
+                    recordLimit: 20,
+                    bytes: 0,
+                    byteLimit: 67108864,
+                  },
+                };
+        return { ok: true, json: async () => ({ ok: true, result }) };
+      }
+      return { ok: true, json: async () => data };
+    },
+  });
+  try {
+    h.field("展开人工处置记录管理").props.onClick();
+    h.render();
+    h.button("加载处置容量与归档").props.onClick();
+    await h.settle();
+    h.button("归档全部处置").props.onClick();
+    h.render();
+    assert.equal(
+      requests.filter((r) => r.action === "review-archive").length,
+      0,
+    );
+    h.button("确认归档或移除").props.onClick();
+    await h.settle();
+    assert.equal(records, 0);
+    h.button("预览导出活动处置").props.onClick();
+    await h.settle();
+    assert.match(h.field("历史JSON导出预览").props.value, /review-archive/);
+    assert(h.button("下载历史JSON"));
+    h.field("展开本地历史报告与趋势").props.onClick();
+    h.render();
+    h.field("快照备注").props.onChange({ target: { value: "before upgrade" } });
+    h.render();
+    h.button("保存当前报告快照").props.onClick();
+    await h.settle();
+    assert.equal(requests.at(-1).label, "before upgrade");
+    assert.equal(JSON.stringify(data), before);
+    assert.equal(h.rows().length, 4);
+  } finally {
+    h.dispose();
+  }
+});
+test("invalid and oversized history imports never issue writes", async () => {
+  const data = sample(),
+    requests = [];
+  const h = await panelHarness(data, {
+    fetcher: async (url, opts) => {
+      if (url === "/plugin-compat-check/history") {
+        requests.push(JSON.parse(opts.body));
+        return {
+          ok: true,
+          json: async () => ({
+            ok: true,
+            result: {
+              items: [],
+              capacity: {
+                records: 0,
+                recordLimit: 20,
+                bytes: 0,
+                byteLimit: 67108864,
+              },
+            },
+          }),
+        };
+      }
+      return { ok: true, json: async () => data };
+    },
+  });
+  try {
+    h.field("展开本地历史报告与趋势").props.onClick();
+    h.render();
+    h.button("加载历史报告").props.onClick();
+    await h.settle();
+    for (const file of [
+      {
+        size: 9000000,
+        text: async () => {
+          throw Error("must not read");
+        },
+      },
+      { size: 10, text: async () => "{invalid" },
+    ]) {
+      await h
+        .field("导入历史快照（不认证当前）")
+        .props.onChange({ target: { files: [file], value: "owned" } });
+      h.render();
+    }
+    assert.equal(requests.length, 1);
+    assert.match(h.text(), /JSON|导入/);
+  } finally {
+    h.dispose();
+  }
+});
+
+test("metadata timestamps retain an open history session; an import finishing after report identity change cannot write", async () => {
+  let data = withReviewItems(sample()),
+    release;
+  const calls = [];
+  const h = await panelHarness(data, {
+    fetcher: async (url, opts) => {
+      if (url === "/plugin-compat-check/history") {
+        calls.push(JSON.parse(opts.body));
+        return {
+          ok: true,
+          json: async () => ({
+            ok: true,
+            result: {
+              items: [],
+              capacity: {
+                records: 0,
+                recordLimit: 20,
+                bytes: 0,
+                byteLimit: 67108864,
+              },
+            },
+          }),
+        };
+      }
+      return { ok: true, json: async () => structuredClone(data) };
+    },
+  });
+  try {
+    h.field("展开本地历史报告与趋势").props.onClick();
+    h.render();
+    h.button("加载历史报告").props.onClick();
+    await h.settle();
+    assert(h.field("检索历史快照"));
+    data = structuredClone(data);
+    data.computedAt = "2026-10-28T00:00:00Z";
+    data.report.observation.probedAt = "2026-10-28T00:00:00Z";
+    h.button("重新检查").props.onClick();
+    await h.settle();
+    assert(
+      h.field("检索历史快照"),
+      "metadata-only timestamp must not reset history state",
+    );
+    const pending = h.field("导入历史快照（不认证当前）").props.onChange({
+      target: {
+        files: [{ size: 100, text: () => new Promise((r) => (release = r)) }],
+        value: "owned",
+      },
+    });
+    data = structuredClone(data);
+    data.computedAt = "2026-10-28T01:00:00Z";
+    data.report.plugins["@label/broken-client"].version = "2.0.0";
+    data.reviews.contextToken = "f".repeat(64);
+    h.button("重新检查").props.onClick();
+    await h.settle();
+    release("{}");
+    await pending;
+    await h.settle();
+    assert.equal(calls.filter((c) => c.action === "snapshot-import").length, 0);
+  } finally {
+    h.dispose();
+  }
+});
+
+test("a report change aborts a pending history request and allows the next explicit action", async () => {
+  let data = sample(),
+    release;
+  let calls = 0;
+  const response = () => ({
+    ok: true,
+    json: async () => ({
+      ok: true,
+      result: {
+        items: [],
+        capacity: {
+          records: 0,
+          recordLimit: 20,
+          bytes: 0,
+          byteLimit: 67108864,
+        },
+      },
+    }),
+  });
+  const h = await panelHarness(data, {
+    fetcher: async (url) => {
+      if (url === "/plugin-compat-check/history") {
+        if (++calls === 1)
+          return new Promise((r) => (release = () => r(response())));
+        return response();
+      }
+      return { ok: true, json: async () => structuredClone(data) };
+    },
+  });
+  try {
+    h.field("展开本地历史报告与趋势").props.onClick();
+    h.render();
+    h.button("加载历史报告").props.onClick();
+    await h.settle();
+    assert.equal(calls, 1);
+    data = structuredClone(data);
+    data.computedAt = "2026-10-28T00:00:00Z";
+    data.report.plugins["@label/broken-client"].version = "2.0.0";
+    data.reviews.contextToken = "c".repeat(64);
+    h.button("重新检查").props.onClick();
+    await h.settle();
+    h.button("加载历史报告").props.onClick();
+    await h.settle();
+    assert.equal(calls, 2);
+    assert(h.field("检索历史快照"));
+  } finally {
+    release?.();
+    await h.settle();
+    h.dispose();
+  }
+});

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { verifyLocalHistory } from "./ui018-history.mjs";
 /** Owned real-host acceptance: declaration gates, metadata, actual settings UI and reload. */
 import fs from "node:fs";
 import {
@@ -1744,6 +1745,14 @@ try {
           evalx,
           poll,
           readReport: ordinary,
+          screenshotDir: process.env.DSC_UI018_SCREENSHOTS,
+        });
+      if (process.env.DSC_UI018_HISTORY === "1")
+        result.localHistory = await verifyLocalHistory({
+          chrome,
+          evalx,
+          poll,
+          profile,
           screenshotDir: process.env.DSC_UI018_SCREENSHOTS,
         });
       if (process.env.DSC_RC2_SCREENSHOT) {
