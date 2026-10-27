@@ -466,3 +466,170 @@ test("a delayed save cannot overwrite a newer revision of the same report or cle
     h.dispose();
   }
 });
+
+test("review filters expose category, API, source and saved rationale without altering original risks", async () => {
+  const data = withReviewItems(sample()),
+    item = data.reviews.items[0];
+  data.report.plugins[item.pluginName].findings[item.findingIndex].location = {
+    file: "lib/owned.js",
+    line: 42,
+  };
+  const before = JSON.stringify(data),
+    h = await panelHarness(data);
+  try {
+    assert.match(h.text(), /类别：/);
+    assert.match(h.text(), /lib\/owned.js:42/);
+    h.field("筛选处置插件").props.onChange({
+      target: { value: item.pluginName },
+    });
+    h.render();
+    assert.equal(
+      h.nodes().filter((n) => n.props["data-review-finding"]).length,
+      1,
+    );
+    h.field("筛选人工状态").props.onChange({ target: { value: "reviewed" } });
+    h.render();
+    assert.equal(
+      h.nodes().filter((n) => n.props["data-review-finding"]).length,
+      0,
+    );
+    assert.match(h.text(), /没有符合筛选的处置发现/);
+    assert.deepEqual(h.rows().sort(), Object.keys(data.report.plugins).sort());
+    assert.equal(JSON.stringify(data), before);
+  } finally {
+    h.dispose();
+  }
+});
+
+test("main-to-review navigation activates unvisited editors and reverse navigation clears main filters", async () => {
+  const data = withReviewItems(sample()),
+    item = data.reviews.items[0];
+  const h = await panelHarness(data, {
+    intersectionObserver: class {
+      constructor(callback, options) {
+        if (!options) callback([{ isIntersecting: true }]);
+      }
+      observe() {}
+      disconnect() {}
+    },
+  });
+  try {
+    assert.equal(
+      h.nodes().filter((n) => n.props["data-review-finding"]).length,
+      0,
+    );
+    const count = data.report.plugins[item.pluginName].findings.length;
+    h.field(`展开查看 ${count} 条发现与未验证项`).props.onClick();
+    h.render();
+    const jump = h.find(
+      (n) =>
+        n.type === "button" && n.props["data-review-link"] === item.findingId,
+    );
+    assert(jump);
+    jump.props.onClick();
+    await h.settle();
+    assert(h.find((n) => n.props["data-review-finding"] === item.findingId));
+    assert.equal(
+      h.find((n) => n.props["data-review-finding"] === item.findingId).props[
+        "data-review-focused"
+      ],
+      true,
+    );
+    h.field("搜索插件").props.onChange({
+      target: { value: "does-not-match-any-plugin" },
+    });
+    h.render();
+    assert.equal(h.rows().length, 0);
+    const back = h.find(
+      (n) =>
+        n.type === "button" && n.props["data-main-link"] === item.findingId,
+    );
+    assert(back);
+    back.props.onClick();
+    await h.settle();
+    assert(h.rows().includes(item.pluginName));
+    assert(h.find((n) => n.props["data-finding-id"] === item.findingId));
+  } finally {
+    h.dispose();
+  }
+});
+
+test("identity navigation crosses both plugin and finding pages while filtered dirty drafts stay mounted", async () => {
+  const data = sample(),
+    seed = data.report.plugins["@label/broken-client"],
+    targetName = "@zz/navigation-target";
+  for (let i = 0; i < 65; i++)
+    data.report.plugins[`@page/plugin-${String(i).padStart(2, "0")}`] = {
+      ...structuredClone(seed),
+      name: `@page/plugin-${String(i).padStart(2, "0")}`,
+    };
+  data.report.plugins[targetName] = {
+    ...structuredClone(seed),
+    name: targetName,
+    findings: Array.from({ length: 123 }, (_, i) => ({
+      ...structuredClone(seed.findings[0]),
+      method: `ownedMethod${i}`,
+    })),
+  };
+  data.report.summary.broken += 66;
+  data.report.summary.limited += 66;
+  withReviewItems(data);
+  const target = data.reviews.items.find(
+      (i) => i.pluginName === targetName && i.findingIndex === 122,
+    ),
+    before = JSON.stringify(data);
+  const h = await panelHarness(data, {
+    intersectionObserver: class {
+      constructor(callback, options) {
+        if (!options) callback([{ isIntersecting: true }]);
+      }
+      observe() {}
+      disconnect() {}
+    },
+  });
+  try {
+    h.field("搜索插件").props.onChange({ target: { value: targetName } });
+    h.render();
+    h.field("展开查看 123 条发现与未验证项").props.onClick();
+    h.render();
+    for (let i = 0; i < 2; i++) {
+      h.field("下一页插件发现").props.onClick();
+      h.render();
+    }
+    h.find(
+      (n) => n.props["data-review-link"] === target.findingId,
+    ).props.onClick();
+    await h.settle();
+    const row = () =>
+      h.find((n) => n.props["data-review-finding"] === target.findingId);
+    assert(row());
+    assert(
+      h.nodes().filter((n) => n.props["data-review-finding"]).length <= 21,
+    );
+    const editorLabel = `${targetName} 发现 123 核实依据`;
+    h.field(editorLabel).props.onChange({
+      target: { value: "owned draft at page three" },
+    });
+    h.render();
+    h.field("筛选处置插件").props.onChange({
+      target: { value: "@nonmatching" },
+    });
+    h.render();
+    h.field("筛选人工状态").props.onChange({ target: { value: "reviewed" } });
+    h.render();
+    assert(row());
+    assert.equal(h.field(editorLabel).props.value, "owned draft at page three");
+    h.field("搜索插件").props.onChange({ target: { value: "@nonmatching" } });
+    h.render();
+    h.find(
+      (n) => n.props["data-main-link"] === target.findingId,
+    ).props.onClick();
+    await h.settle();
+    assert(h.rows().includes(targetName));
+    assert(h.find((n) => n.props["data-finding-id"] === target.findingId));
+    assert.match(h.text(h.field("插件兼容性结果分页")), /第\s+2\s*\/\s*2\s+页/);
+    assert.equal(JSON.stringify(data), before);
+  } finally {
+    h.dispose();
+  }
+});

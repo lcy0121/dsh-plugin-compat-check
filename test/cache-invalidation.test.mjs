@@ -854,6 +854,10 @@ for (const lifecycle of ["evict", "dispose"])
       path.resolve("lib/async-boundary.mjs"),
       path.join(root, "lib/async-boundary.mjs"),
     );
+    await fs.copyFile(
+      path.resolve("lib/review-sidecar-cache.mjs"),
+      path.join(root, "lib/review-sidecar-cache.mjs"),
+    );
     const token = "gate" + path.basename(root).replace(/\W/g, "");
     let enter, release;
     const entered = new Promise((r) => (enter = r)),
@@ -865,7 +869,7 @@ for (const lifecycle of ["evict", "dispose"])
     ).href;
     await fs.writeFile(
       path.join(root, "lib/finding-review-store.mjs"),
-      `import {reviewContext as realContext,readReviews as realRead} from ${JSON.stringify(realStore)};export {realContext as reviewContext};export async function readReviews(c){const out=await realRead(c);globalThis[${JSON.stringify(token)}].enter();await globalThis[${JSON.stringify(token)}].gate;return out;}`,
+      `import {reviewContext as realContext,readReviews as realRead,reviewFileIdentity} from ${JSON.stringify(realStore)};export {realContext as reviewContext,reviewFileIdentity};export async function readReviews(c){const out=await realRead(c);globalThis[${JSON.stringify(token)}].enter();await globalThis[${JSON.stringify(token)}].gate;return out;}`,
     );
     const { run } = await import("../bin/compat-check.mjs"),
       { toJSON } = await import("../lib/report.mjs");

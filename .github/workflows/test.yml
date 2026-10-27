@@ -37,7 +37,7 @@ jobs:
           retention-days: 7
   linux-live:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     needs: test
     strategy:
       fail-fast: false
@@ -62,7 +62,7 @@ jobs:
         run: |
           chrome_path="$(command -v google-chrome)"
           echo "DSC_CHROME=$chrome_path" >> "$GITHUB_ENV"
-          python3 - <<'PY' > linux-chrome-preparation.json
+          python3 - <<'PY' > "$RUNNER_TEMP/linux-chrome-preparation.json"
           import hashlib, json, pathlib, re, subprocess, time
           root = pathlib.Path('/opt/google/chrome')
           binary = root / 'chrome'
@@ -91,7 +91,10 @@ jobs:
           print(json.dumps(dict(complete=True, files=len(rows), bytes=sum(r['bytes'] for r in rows),
                                 milliseconds=(time.monotonic()-started)*1000, chromeLaunches=0, rows=rows)))
           PY
-          node -e 'const x=require("./linux-chrome-preparation.json");console.log(JSON.stringify({complete:x.complete,files:x.files,bytes:x.bytes,milliseconds:x.milliseconds,chromeLaunches:x.chromeLaunches}))'
+          node -e 'const x=require(process.env.RUNNER_TEMP+"/linux-chrome-preparation.json");console.log(JSON.stringify({complete:x.complete,files:x.files,bytes:x.bytes,milliseconds:x.milliseconds,chromeLaunches:x.chromeLaunches}))'
+      - name: Complete 0.1.8 UI acceptance on one independent package
+        if: matrix.dsh == '0.2.1-rc.3'
+        run: node tools/ci-ui018.mjs "$RUNNER_TEMP/linux-ui018"
       - name: Real Linux Chrome startup and failure evidence
         shell: bash
         env:
@@ -130,7 +133,7 @@ jobs:
           retention-days: 7
           path: |
             linux-execution-diagnostics/
-            linux-chrome-preparation.json
+            ${{ runner.temp }}/linux-chrome-preparation.json
             linux-live.tap
             linux-chrome-startup.tap
             linux-chrome-environment.txt
@@ -139,6 +142,7 @@ jobs:
             linux-business/
             linux-sidebar/
             linux-editors/
+            ${{ runner.temp }}/linux-ui018/
   dependency-security:
     runs-on: ubuntu-latest
     timeout-minutes: 10

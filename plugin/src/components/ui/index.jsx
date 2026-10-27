@@ -290,12 +290,16 @@ export function Disclosure({
 
 // Keep card boundaries and headings visible; initialize heavy sections only when
 // they approach the viewport. Once visited, retain editor state and focus.
-export function DeferredPanel({ title, label, children }) {
+export function DeferredPanel({ title, label, children, active = false }) {
   const root = React.useRef(null);
   const [ready, setReady] = React.useState(
     typeof IntersectionObserver !== "function",
   );
   React.useEffect(() => {
+    if (active) {
+      setReady(true);
+      return;
+    }
     if (ready || typeof IntersectionObserver !== "function") return;
     const observer = new IntersectionObserver(
       (rows) => {
@@ -308,12 +312,12 @@ export function DeferredPanel({ title, label, children }) {
     );
     if (root.current) observer.observe(root.current);
     return () => observer.disconnect();
-  }, [ready]);
+  }, [ready, active]);
   const content =
     Array.isArray(children) && children.length === 1 ? children[0] : children;
   return (
     <div ref={root} className="compat-panel-mount">
-      {ready ? (
+      {ready || active ? (
         typeof content === "function" ? (
           content()
         ) : (

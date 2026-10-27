@@ -7,6 +7,7 @@ export async function panelHarness(
   {
     clipboard,
     metrics,
+    intersectionObserver,
     subject,
     fetcher,
     timers,
@@ -88,6 +89,7 @@ export async function panelHarness(
       crypto: webcrypto,
       TextEncoder,
       AbortController,
+      IntersectionObserver: intersectionObserver,
       console: logger,
       fetch:
         fetcher ||
@@ -129,6 +131,12 @@ export async function panelHarness(
       frame = saved;
       return walk(out, key + ".component");
     }
+    if (
+      intersectionObserver &&
+      el.props.ref &&
+      typeof el.props.ref === "object"
+    )
+      el.props.ref.current = {};
     return {
       ...el,
       children: el.children.map((v, i) =>

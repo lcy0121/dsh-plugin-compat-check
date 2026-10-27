@@ -1,3 +1,7 @@
+import { createReportRuntime } from "./lib/host-reports.js";
+import { createReviewRuntime } from "./lib/host-reviews.js";
+import { createUpgradeRuntime } from "./lib/host-upgrade.js";
+import { createHttpRuntime } from "./lib/host-http.js";
 // Host half of the dsh-plugin-compat-check plugin — loader self-introspection
 // (docs/Plan.md §2.4: read ctx.loader.entries(), recover failure reasons,
 // never throw).
@@ -21,33 +25,52 @@
 //   ${DSC_OUT_DIR}/loader-introspect.json (explicit owned private directory only)
 // plus structured console lines prefixed with [dsh-plugin-compat-check].
 
-import {
-  existsSync,
-  readFileSync,
-  realpathSync,
-  promises as fsPromises,
-} from "node:fs";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { homedir } from "node:os";
 import path, { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire as __createRequire } from "node:module";
-import { createHash } from "node:crypto";
 
 import { requestRejection } from "./lib/local-request.js";
-import { loaderObservations, privateDiagnostic } from "./lib/host-resources.js";
+import { privateDiagnostic } from "./lib/host-resources.js";
 import {
-  assertEnvelope,
   failureEnvelope,
   catalogLines,
   terminalText,
 } from "./lib/report-contract.js";
 import { nextSteps } from "./lib/finding-guidance.js";
-import {
-  createUpgradeFailure as upgradeFailure,
-  SUPPORTED_PREVIEW_VERSIONS,
-} from "./lib/upgrade-contract.js";
+import { SUPPORTED_PREVIEW_VERSIONS } from "./lib/upgrade-contract.js";
 
 export const name = "dsh-plugin-compat-check";
+const createReportRuntimeInstance = createReportRuntime({
+  resolveKernelDir,
+  resolveNodeModules,
+  resolveDshVersion,
+  log,
+  errText,
+  attachFindingReviews: (...args) => attachFindingReviews(...args),
+});
+const createReviewRuntimeInstance = createReviewRuntime({
+  resolveNodeModules,
+  log,
+  errText,
+});
+const createUpgradeRuntimeInstance = createUpgradeRuntime({
+  resolveKernelDir,
+  resolveNodeModules,
+  resolveDshVersion,
+  errText,
+});
+const createHttpRuntimeInstance = createHttpRuntime({
+  serveReport: (...args) => serveReport(...args),
+  serveUpgradePreview: (...args) => serveUpgradePreview(...args),
+  log,
+  errText,
+});
+
+function registerReportRoute(...args) {
+  return createHttpRuntimeInstance.registerReportRoute(...args);
+}
 
 /**
  * Deliberately empty: every service this plugin reads is read through
@@ -908,185 +931,12 @@ function resolveNodeModules(requestedProfile = null) {
  * time-dependent observations even when the sampled identity is unchanged.
  */
 /** Host calls get their own bound; cancellation must never become an empty success. */
-async function hostPluginListing(ctx, kernel, signal) {
-  const { bounded } = await import(
-    pathToFileURL(join(kernel, "lib", "async-boundary.mjs")).href
-  );
-  return bounded(() => ctx.get?.("pluginManager", false)?.list?.(), {
-    timeoutMs: 1500,
-    signal,
-    label: "宿主插件列表读取",
-  });
+function hostPluginListing(...args) {
+  return createReportRuntimeInstance.hostPluginListing(...args);
 }
 
-async function serveReport(state, ctx, force, options = {}) {
-  if (state.disposed)
-    return failureEnvelope("Plugin generation disposed / 已卸载");
-  const kernel = resolveKernelDir(),
-    nm = resolveNodeModules(options.profile || null);
-  if (!kernel) return failureEnvelope("找不到判定内核");
-  if (!nm.dir) {
-    // Keep computeReport's version identity on target-resolution failures.
-    const out = await computeReport(state, ctx, options);
-    return failureEnvelope(out.error, out);
-  }
-  const canonical = await fsPromises.realpath(nm.dir),
-    version = resolveDshVersion();
-  const context = {
-    nodeModules: canonical,
-    observationProfile: path.resolve(nm.dir),
-    kernel: await fsPromises.realpath(kernel),
-    dshVersion: version,
-    probe: process.env.DSC_PROBE_REPORT || null,
-  };
-  if (!state.reportService) {
-    const [
-      { ReportService },
-      { reportIdentity },
-      { catalogPathFor },
-      { sampleServices },
-    ] = await Promise.all([
-      import(pathToFileURL(join(kernel, "lib", "report-service.mjs")).href),
-      import(pathToFileURL(join(kernel, "lib", "report-identity.mjs")).href),
-      import(pathToFileURL(join(kernel, "lib", "catalog.mjs")).href),
-      import(pathToFileURL(join(kernel, "lib", "observation.mjs")).href),
-    ]);
-    if (state.disposed)
-      return failureEnvelope("Plugin generation disposed / 已卸载");
-    if (!state.reportService)
-      state.reportService = new ReportService(
-        async (options, guard) => {
-          const out = await computeReport(state, ctx, {
-            ...options,
-            _cacheGuard: guard,
-          });
-          return out.ok ? assertEnvelope(out) : failureEnvelope(out.error, out);
-        },
-        {
-          ttlMs: state.cacheTtlMs,
-          watchMs: state.cacheWatchMs,
-          onEvict: (key) => {
-            for (const [token, target] of state.reviewTargets || [])
-              if (target.key === key) state.reviewTargets.delete(token);
-            state.lastReport = null;
-            state.lastReportAt = 0;
-          },
-          identity: async (options, { signal }) => {
-            const scope = options._cacheContext,
-              current = resolveNodeModules(),
-              currentVersion = resolveDshVersion();
-            const active = current.dir
-              ? await fsPromises.realpath(current.dir)
-              : null;
-            const requestedTarget = await fsPromises.realpath(
-              options._nodeModules.dir,
-            );
-            const identity = await reportIdentity(
-              {
-                nodeModules: scope.nodeModules,
-                context: {
-                  ...scope,
-                  currentVersion,
-                  active,
-                  requestedTarget,
-                  probe: process.env.DSC_PROBE_REPORT || null,
-                },
-                files: [
-                  join(scope.kernel, "rules", "severity.json"),
-                  catalogPathFor(scope.kernel, currentVersion),
-                  process.env.DSC_PROBE_REPORT,
-                  join(
-                    path.dirname(options._nodeModules.dir),
-                    "compatibility.json",
-                  ),
-                ],
-              },
-              { signal },
-            );
-            const sameHost = active === scope.nodeModules;
-            const itemListing = sameHost
-              ? await (async () => {
-                  try {
-                    const listing = await hostPluginListing(
-                      ctx,
-                      kernel,
-                      signal,
-                    );
-                    return (
-                      Array.isArray(listing)
-                        ? listing
-                        : listing?.items || listing?.plugins || []
-                    ).map((i) => ({
-                      id: i.id ?? i.entryId ?? i.slotId,
-                      packageName: i.packageName ?? i.package ?? i.name,
-                    }));
-                  } catch (error) {
-                    if (["TimeoutError", "AbortError"].includes(error.name))
-                      throw error;
-                    return [];
-                  }
-                })()
-              : [];
-            const loader = sameHost
-              ? loaderObservations(ctx, identity.manifests, itemListing)
-              : null;
-            const observation = sameHost
-              ? sampleServices(
-                  ctx,
-                  [
-                    ...identity.services,
-                    ...(options._cacheInputs.services || []),
-                  ],
-                  { profileId: scope.nodeModules, dshVersion: currentVersion },
-                )
-              : null;
-            // Sampling timestamps are evidence, not a changing service identity.
-            return JSON.stringify([
-              identity.digest,
-              loader,
-              observation?.root || null,
-            ]);
-          },
-        },
-      );
-  }
-  if (!state.cacheEventDisposers && typeof ctx.on === "function") {
-    state.cacheEventDisposers = [];
-    // Verified in the bundled loader and plugin-manager emit sites; the
-    // bounded watchdog also catches source edits and hosts without ctx.on.
-    for (const event of [
-      "plugin-manager/changed",
-      "plugin-manager/install-state",
-      "loader/entry-init",
-      "loader/partial-dispose",
-      "loader/volatile-update",
-    ]) {
-      try {
-        const off = ctx.on(event, () => state.reportService?.notify());
-        if (typeof off === "function") state.cacheEventDisposers.push(off);
-      } catch {}
-    }
-  }
-  const key = JSON.stringify(context);
-  const inputs = state.reportService.states.get(key)?.options?._cacheInputs || {
-    services: [],
-  };
-  // Canonicalize cache identity only: preserve the requested path for the
-  // existing exact probe/profile binding and the report's business target.
-  const out = await state.reportService.get(
-    key,
-    {
-      ...options,
-      _cacheContext: context,
-      _cacheInputs: inputs,
-      _nodeModules: { dir: nm.dir, why: nm.why },
-    },
-    force,
-  );
-  if (state.disposed)
-    return failureEnvelope("Plugin generation disposed / 已卸载");
-  if (!out?.ok) return failureEnvelope(out?.error, out || {});
-  return attachFindingReviews(state, assertEnvelope(out), key, kernel);
+function serveReport(...args) {
+  return createReportRuntimeInstance.serveReport(...args);
 }
 
 /**
@@ -1096,301 +946,8 @@ async function serveReport(state, ctx, force, options = {}) {
  *   - 客户端跑在浏览器里，读不了文件系统；
  *   - 结论（五元组 + 确定性）是内核的产物，算出唯一一份才不会两边漂移。
  */
-async function computeReport(state, ctx, options = {}) {
-  if (state.disposed)
-    return failureEnvelope("Plugin generation disposed / 已卸载");
-  const started = Date.now();
-  const out = {
-    schemaVersion: 1,
-    kind: "plugin-compat-check/report",
-    computedAt: new Date().toISOString(),
-    ok: false,
-    error: null,
-    kernelDir: null,
-    // 「这份结论是哪一版工具给的」。面板是本插件的主要入口，
-    // 少了它，用户来问"凭什么"时第一句就卡住 —— 而同一插件在不同版本的
-    // 规则表/提取器下结论会变（见 lib/version.mjs 和 docs/Plan.md §1、§3 第 2 条）。
-    toolVersion: null,
-    nodeModules: null,
-    nodeModulesWhy: null,
-    // C4：与上次体检的差分包（没有基线时为 null，并带 note 说明为什么）
-    baseline: null,
-    report: null,
-  };
-  try {
-    const kernel = resolveKernelDir();
-    if (
-      options._cacheContext &&
-      (options._cacheContext.dshVersion !== resolveDshVersion() ||
-        options._cacheContext.probe !==
-          (process.env.DSC_PROBE_REPORT || null) ||
-        options._cacheContext.nodeModules !==
-          (await fsPromises.realpath(options._nodeModules.dir)) ||
-        options._cacheContext.kernel !==
-          (kernel && (await fsPromises.realpath(kernel))))
-    )
-      return failureEnvelope("报告上下文已变化，等待目标报告刷新");
-    out.kernelDir = kernel;
-    // 版本要**尽早**拿到：连"找不到内核"这条错误路径上，用户也需要知道
-    // 是哪一版工具报的这个错。`version.mjs` 只在有内核时才读得到 ——
-    // 读不到就保持 null，**不猜**。
-    if (kernel) {
-      try {
-        const vmod = await import(
-          pathToFileURL(join(kernel, "lib", "version.mjs")).href
-        );
-        out.toolVersion = vmod.TOOL_VERSION ?? null;
-      } catch (error) {
-        log(`版本读不到（${errText(error)}）—— 报告里的 toolVersion 将是 null`);
-      }
-    }
-    if (!kernel) {
-      out.error =
-        "找不到判定内核（lib/extract.mjs + lib/verdict.mjs）。" +
-        "插件形态下它们是同仓库的相邻目录；发布形态请设 DSC_KERNEL。";
-      return out;
-    }
-    const nm =
-      options._nodeModules || resolveNodeModules(options.profile || null);
-    out.nodeModules = nm.dir;
-    out.nodeModulesWhy = nm.why;
-    if (!nm.dir) {
-      out.error = `找不到要体检的 node_modules：${nm.why}`;
-      return out;
-    }
-
-    const { extractInWorker } = await import(
-      pathToFileURL(join(kernel, "lib", "worker-analysis.mjs")).href
-    );
-    const { buildVerdicts } = await import(
-      pathToFileURL(join(kernel, "lib", "verdict.mjs")).href
-    );
-
-    const { loadCatalog } = await import(
-      pathToFileURL(join(kernel, "lib", "catalog.mjs")).href
-    );
-    const {
-      file: catalogPath,
-      catalog,
-      evidence: catalogEvidence,
-    } = loadCatalog(kernel, resolveDshVersion());
-    const rulesPath = join(kernel, "rules", "severity.json");
-    const { readStaticFile } = await import(
-      pathToFileURL(join(kernel, "lib", "static-input.mjs")).href
-    );
-    const rulesBytes = readStaticFile(rulesPath, 8 * 1024 * 1024);
-    const rules = JSON.parse(rulesBytes);
-    out.analysisIdentity = {
-      rulesSha256: createHash("sha256").update(rulesBytes).digest("hex"),
-      catalogSha256: catalogEvidence.sha256,
-    };
-
-    // 运行时面：宿主半边**自己就在进程里**，所以它能拿到比探针更准的东西。
-    // 第一版先读探针报告（如果外层给了路径），没有就退回目录 —— 并如实标注。
-    let hostSurface = null,
-      probeReadFailure = null;
-    let surfaceWhy = "没有运行时面：结论中的方法级判定降为「疑似」";
-    const probePath = process.env.DSC_PROBE_REPORT;
-    if (probePath && existsSync(probePath)) {
-      try {
-        hostSurface = JSON.parse(
-          readStaticFile(probePath, 8 * 1024 * 1024).toString("utf8"),
-        );
-        surfaceWhy = `运行时面来自探针报告 ${probePath}`;
-      } catch (error) {
-        probeReadFailure = `探针报告读不动（${errText(error)}）`;
-        surfaceWhy = probeReadFailure + "，退回目录";
-      }
-    }
-    out.surfaceWhy = surfaceWhy;
-
-    const extracted = await extractInWorker(nm.dir, { catalog }, 10000, {
-      signal: options._cacheGuard?.signal,
-    });
-    if (state.disposed)
-      return failureEnvelope("Plugin generation disposed / 已卸载");
-    if (options._cacheInputs)
-      options._cacheInputs.services = extracted.report.services;
-    const { sampleServices } = await import(
-      pathToFileURL(join(kernel, "lib", "observation.mjs")).href
-    );
-    const currentTarget = resolveNodeModules();
-    const sameHost =
-      currentTarget.dir &&
-      (await fsPromises.realpath(currentTarget.dir)) ===
-        (await fsPromises.realpath(nm.dir));
-    if (!hostSurface && sameHost) {
-      hostSurface = sampleServices(ctx, extracted.report.services, {
-        profileId: nm.dir,
-        dshVersion: resolveDshVersion(),
-      });
-      surfaceWhy =
-        (probeReadFailure ? probeReadFailure + "；" : "") +
-        "当前宿主进程内采集的服务结构；未采集或读取失败不等于缺失";
-    }
-    const itemListing = await (async () => {
-      try {
-        const listing = await hostPluginListing(
-          ctx,
-          kernel,
-          options._cacheGuard?.signal,
-        );
-        return (
-          Array.isArray(listing)
-            ? listing
-            : listing?.items || listing?.plugins || []
-        ).map((i) => ({
-          id: i.id ?? i.entryId ?? i.slotId,
-          packageName: i.packageName ?? i.package ?? i.name,
-        }));
-      } catch (error) {
-        if (["TimeoutError", "AbortError"].includes(error.name)) throw error;
-        return [];
-      }
-    })();
-    const loaderState = sameHost
-      ? loaderObservations(ctx, extracted.report.manifests, itemListing)
-      : { rows: [], unmapped: [], available: false };
-    out.loaderCoverage = loaderState;
-
-    out.surfaceWhy = surfaceWhy;
-    const { readProfileCompatibility } = await import(
-      pathToFileURL(join(kernel, "lib", "profile-compatibility.mjs")).href
-    );
-    const compatibility = readProfileCompatibility(nm.dir);
-    const verdict = buildVerdicts({
-      report: extracted.report,
-      hostSurface,
-      rules,
-      catalog,
-      dshVersion: resolveDshVersion(),
-      entryStates: loaderState.rows,
-      observationTarget: { profileId: nm.dir, maxAgeMs: 24 * 60 * 60 * 1000 },
-      compatibilityExemptions: compatibility.exemptions,
-      compatibilityNotes: compatibility.notes,
-    });
-
-    // ── C4：基线差分 ──
-    // 用**与 CLI 完全相同**的 lib/baseline.mjs。面板说"变差了"而命令行说"没变"
-    // 这种分叉在结构上就不可能发生。
-    let baseline = null,
-      finalizeBaseline = null;
-    try {
-      const { snapshotForBaseline, diffAgainstBaseline, badgeFor } =
-        await import(pathToFileURL(join(kernel, "lib", "baseline.mjs")).href);
-      const store = await import(
-        pathToFileURL(join(kernel, "lib", "state-store.mjs")).href
-      );
-      const identity = store.baselineIdentity(
-        nm.dir,
-        verdict.observation.mode,
-        rules,
-        catalog,
-      );
-      const snap = snapshotForBaseline(verdict, resolveDshVersion(), identity);
-      const bfile = store.baselinePath(nm.dir, verdict.observation.mode);
-      if (state.disposed)
-        return failureEnvelope("Plugin generation disposed / 已卸载");
-      finalizeBaseline = () =>
-        store.baselineTransaction(bfile, snap, {
-          advance: extracted.report.scanComplete,
-          skipReason: "incomplete",
-        });
-      if (!options._cacheGuard) baseline = finalizeBaseline();
-    } catch (error) {
-      baseline = {
-        error: errText(error),
-        note: "基线差分没算成（不影响本次结论）",
-      };
-    }
-
-    // 只把面板要用的部分送过去：完整 report 在 desktop profile 上是 ~1 MB，
-    // 而面板要的只是每个插件的结论与去处。
-    // ── 面板条目台账：id → 包名 ──
-    // `plugins.detail.*` 只收到 `{subject:{kind,id}}`，**没有包名**，而 id 常常
-    // 不等于包名（插件面板自己那个条目的 id 就叫 `plugins`）。所以从面板管理器
-    // 自己的只读服务里取这张表，让客户端能解析出"这是哪个插件"。
-    // 取不到不算失败：客户端会退回到"id 就是包名"的判断，并如实不渲染角标。
-    try {
-      const pm =
-        typeof ctx.get === "function"
-          ? ctx.get("pluginManager", false)
-          : undefined;
-      const listing =
-        pm && typeof pm.list === "function"
-          ? await hostPluginListing(ctx, kernel, options._cacheGuard?.signal)
-          : null;
-      if (listing) {
-        const arr = Array.isArray(listing)
-          ? listing
-          : listing.items || listing.plugins || [];
-        out.items = arr
-          .map((it) => {
-            if (!it || typeof it !== "object") return null;
-            const id = it.id ?? it.entryId ?? it.slotId ?? null;
-            const pkg = it.packageName ?? it.package ?? it.name ?? null;
-            return id && pkg
-              ? { id, packageName: String(pkg), label: it.label ?? null }
-              : null;
-          })
-          .filter(Boolean);
-      }
-    } catch (error) {
-      if (["TimeoutError", "AbortError"].includes(error.name)) throw error;
-      out.itemsError = errText(error);
-    }
-
-    const { toJSON } = await import(
-      pathToFileURL(join(kernel, "lib", "report.mjs")).href
-    );
-    const { renderIssueReport } = await import(
-      pathToFileURL(join(kernel, "lib", "issue-report.mjs")).href
-    );
-    if (state.disposed)
-      return failureEnvelope("Plugin generation disposed / 已卸载");
-    const canonical = toJSON({
-      error: null,
-      extract: extracted,
-      verdict,
-      entryStates: loaderState.rows,
-      baseline,
-      catalog: catalogEvidence,
-      inputs: {
-        nodeModules: nm.dir,
-        hasRuntimeSurface: verdict.observation.usable,
-        catalog: catalogPath,
-        rules: rulesPath,
-      },
-    });
-    if (options._cacheGuard && finalizeBaseline)
-      options._cacheGuard.commit(() => {
-        baseline = finalizeBaseline();
-        canonical.baseline = baseline;
-        out.baseline = baseline;
-        out.report.baseline = baseline;
-        out.issueReport = renderIssueReport(canonical);
-      });
-    out.issueReport = renderIssueReport(canonical);
-    out.baseline = canonical.baseline;
-    out.dshVersion = canonical.dshVersion;
-    out.exitCode = canonical.exitCode;
-    out.report = {
-      ...canonical,
-      hasRuntimeSurface: verdict.observation.usable,
-      loaderCoverage: out.loaderCoverage,
-      surfaceWhy,
-      items: out.items || [],
-      itemsError: out.itemsError || null,
-      manifests: extracted.report.manifests,
-      serviceCount: extracted.report.services.length,
-      siteTotal: (extracted.report.callSites || []).length,
-    };
-    out.ok = true;
-    out.elapsedMs = Date.now() - started;
-  } catch (error) {
-    out.error = errText(error);
-  }
-  return out;
+function computeReport(...args) {
+  return createReportRuntimeInstance.computeReport(...args);
 }
 
 // ---------------------------------------------------------------------------
@@ -1528,383 +1085,32 @@ function renderForModel(compat) {
 
 /** 工具的服务集合：`tools`；`agents` 用来把相对路径解析到会话工作目录。 */
 /** Static version comparisons never enter the ordinary report cache or baseline path. */
-function unavailableUpgrade(error, options = {}) {
-  let toolVersion = "unknown";
-  try {
-    toolVersion = JSON.parse(
-      readFileSync(new URL("./package.json", import.meta.url), "utf8"),
-    ).version;
-  } catch {}
-  return upgradeFailure(error, {
-    toolVersion,
-    currentVersion: resolveDshVersion(),
-    targetVersion: options.targetVersion,
-    ...options,
-  });
+function unavailableUpgrade(...args) {
+  return createUpgradeRuntimeInstance.unavailableUpgrade(...args);
 }
 
-async function serveUpgradePreview(state, options = {}) {
-  const currentVersion = resolveDshVersion(),
-    targetVersion = options.targetVersion || null;
-  const failure = (error) =>
-    unavailableUpgrade(error, { currentVersion, targetVersion });
-  try {
-    if (state.disposed) return failure("Plugin generation disposed / 已卸载");
-    if (options.currentVersion && options.currentVersion !== currentVersion)
-      return failure("当前 DSH 版本已变化，请刷新普通报告后重新预检");
-    if (options.invalidRequest) return failure(options.invalidRequest);
-    if (
-      !SUPPORTED_PREVIEW_VERSIONS.includes(currentVersion) ||
-      !SUPPORTED_PREVIEW_VERSIONS.includes(targetVersion)
-    )
-      return unavailableUpgrade(
-        "版本未认证：仅支持有明确 API 目录的精确版本 " +
-          SUPPORTED_PREVIEW_VERSIONS.join("、"),
-        { currentVersion, targetVersion, status: "unsupported-version" },
-      );
-    const kernel = resolveKernelDir();
-    if (!kernel) return failure("找不到升级预检内核");
-    const engine = await import(
-      pathToFileURL(join(kernel, "lib/upgrade-preview.mjs")).href
-    );
-    if (state.disposed) return failure("Plugin generation disposed / 已卸载");
-    const nm = resolveNodeModules(options.profile || null);
-    const canonical = nm.dir && (await fsPromises.realpath(nm.dir));
-    if (state.disposed) return failure("Plugin generation disposed / 已卸载");
-    const key = JSON.stringify([canonical, currentVersion, targetVersion]);
-    if (state.upgradeFlight && state.upgradeFlight.key !== key)
-      return failure("另一目标的升级预检正在运行，请稍后重试");
-    let flight = state.upgradeFlight;
-    if (!flight) {
-      const controller = new AbortController();
-      flight = {
-        key,
-        controller,
-        promise: engine.runUpgradePreview(
-          { nm: nm.dir, currentVersion, targetVersion },
-          { signal: controller.signal },
-        ),
-      };
-      state.upgradeFlight = flight;
-    }
-    try {
-      const result = await flight.promise;
-      if (!state.disposed) return result;
-      return failure(
-        [result.ok ? null : result.error, "Plugin generation disposed / 已卸载"]
-          .filter(Boolean)
-          .join("；"),
-      );
-    } finally {
-      if (state.upgradeFlight === flight) state.upgradeFlight = null;
-    }
-  } catch (error) {
-    return failure(errText(error));
-  }
+function serveUpgradePreview(...args) {
+  return createUpgradeRuntimeInstance.serveUpgradePreview(...args);
 }
 
-async function upgradeToolResult(state, options) {
-  let preview, text;
-  try {
-    const kernel = resolveKernelDir();
-    if (!kernel) throw Error("找不到升级预检内核");
-    const { renderUpgradePreview } = await import(
-      pathToFileURL(join(kernel, "lib/upgrade-preview.mjs")).href
-    );
-    preview = await serveUpgradePreview(state, options);
-    text = renderUpgradePreview(preview);
-  } catch (error) {
-    preview = unavailableUpgrade(errText(error), {
-      targetVersion: options.targetVersion,
-    });
-    text =
-      "升级预检无法比较：" +
-      terminalText(preview.error) +
-      "；静态预测不等于目标版本业务通过。";
-  }
-  return {
-    schemaVersion: 1,
-    kind: "plugin-compat-check/tool-result",
-    ok: preview.ok,
-    error: preview.error,
-    exitCode: preview.exitCode,
-    toolVersion: preview.toolVersion,
-    report: null,
-    baseline: null,
-    cache: null,
-    nodeModules: "",
-    hasRuntimeSurface: false,
-    summary: preview.ok
-      ? `静态升级预检：新增 ${preview.summary.added} / 变重 ${preview.summary.worsened}；不等于目标版本业务通过`
-      : "升级预检无法比较",
-    text,
-    upgradePreview: preview,
-  };
+function upgradeToolResult(...args) {
+  return createUpgradeRuntimeInstance.upgradeToolResult(...args);
 }
 
-function registerUpgradeRoute(ctx, state) {
-  if (typeof ctx.inject !== "function") return;
-  ctx.inject(["webServer"], (scope) => {
-    try {
-      return scope.webServer.register({
-        name: "dsh-plugin-compat-check/upgrade-preview",
-        kind: "exact",
-        path: "/plugin-compat-check/upgrade-preview",
-        handler: async (req, res) => {
-          const send = (status, body) => {
-            res.writeHead(status, {
-              "content-type": "application/json; charset=utf-8",
-              "cache-control": "no-store",
-            });
-            res.end(JSON.stringify(body));
-          };
-          const rejection = requestRejection(ctx, req);
-          if (rejection !== null)
-            return send(rejection, {
-              error: "请求未通过宿主身份与同源校验；请重新打开宿主登录页面",
-            });
-          if (req.method !== "GET")
-            return send(405, { error: "升级预检仅支持 GET" });
-          try {
-            const url = new URL(req.url || "/", "http://127.0.0.1");
-            const invalid =
-              (req.url || "").length > 2048 ||
-              [...url.searchParams.keys()].some(
-                (k) => !["targetVersion", "currentVersion"].includes(k),
-              );
-            const out = await serveUpgradePreview(state, {
-              targetVersion: url.searchParams.get("targetVersion"),
-              currentVersion: url.searchParams.get("currentVersion"),
-              invalidRequest: invalid ? "升级预检请求参数无效" : null,
-            });
-            send(200, out);
-          } catch (error) {
-            send(500, {
-              error: "升级预检无法完成，请在本机核对插件与宿主版本",
-            });
-          }
-        },
-      });
-    } catch (error) {
-      log("Upgrade preview route registration failed: " + errText(error));
-    }
-  });
+function registerUpgradeRoute(...args) {
+  return createHttpRuntimeInstance.registerUpgradeRoute(...args);
 }
 
 /** Human review is an independently loaded sidecar, never a verdict override. */
-async function attachFindingReviews(state, out, key, kernel) {
-  try {
-    const store = await import(
-      pathToFileURL(join(kernel, "lib", "finding-review-store.mjs")).href
-    );
-    const inputIdentity = state.reportService.identityForReport(
-      key,
-      out.report,
-    );
-    if (typeof inputIdentity !== "string")
-      throw new Error("当前报告缺少可绑定的分析输入身份");
-    const sourceIdentity = createHash("sha256")
-      .update(inputIdentity)
-      .digest("hex");
-    const context = await store.reviewContext(out.report, {
-      nodeModules: out.nodeModules,
-      sourceIdentity,
-      rulesIdentity: out.analysisIdentity?.rulesSha256,
-      catalogIdentity: out.report.catalog?.sha256,
-      toolVersion: out.toolVersion,
-    });
-    const { bounded } = await import(
-      pathToFileURL(join(kernel, "lib", "async-boundary.mjs")).href
-    );
-    const reviews = await bounded(() => store.readReviews(context), {
-      timeoutMs: 5000,
-      signal: state.reportService.states.get(key)?.controller.signal,
-      label: "人工处置记录读取",
-    });
-    if (state.disposed)
-      return failureEnvelope("Plugin generation disposed / 已卸载", out);
-    if (
-      state.reportService.identityForReport(key, out.report) !== inputIdentity
-    )
-      throw new Error("报告缓存已回收或变化，请刷新后操作");
-    state.reviewTargets ||= new Map();
-    state.reviewTargets.set(context.contextToken, {
-      context,
-      key,
-      report: out.report,
-      nodeModules: out.nodeModules,
-      store,
-    });
-    while (state.reviewTargets.size > 32)
-      state.reviewTargets.delete(state.reviewTargets.keys().next().value);
-    return { ...out, reviews };
-  } catch (error) {
-    return {
-      ...out,
-      reviews: {
-        schemaVersion: 1,
-        contextToken: null,
-        revision: null,
-        items: [],
-        history: [],
-        error: "人工处置记录不可用：" + errText(error),
-      },
-    };
-  }
+function attachFindingReviews(...args) {
+  return createReviewRuntimeInstance.attachFindingReviews(...args);
 }
 
-function readReviewRequest(req, signal) {
-  return new Promise((resolve, reject) => {
-    const maxBytes = 16384,
-      chunks = [];
-    let bytes = 0,
-      settled = false;
-    const finish = (error, value) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      req.removeListener("data", data);
-      req.removeListener("end", end);
-      req.removeListener("error", errorEvent);
-      req.removeListener("aborted", abort);
-      signal.removeEventListener("abort", abort);
-      if (error) {
-        req.pause?.();
-        reject(error);
-      } else resolve(value);
-    };
-    const invalid = (message, status) =>
-      Object.assign(new Error(message), { status });
-    const data = (chunk) => {
-      const buffer = Buffer.from(chunk);
-      bytes += buffer.length;
-      if (bytes > maxBytes)
-        return finish(invalid("人工处置请求超过大小限制", 413));
-      chunks.push(buffer);
-    };
-    const end = () => {
-      try {
-        finish(
-          null,
-          JSON.parse(
-            new TextDecoder("utf-8", { fatal: true }).decode(
-              Buffer.concat(chunks),
-            ),
-          ),
-        );
-      } catch {
-        finish(invalid("人工处置请求不是有效JSON", 400));
-      }
-    };
-    const errorEvent = () => finish(invalid("人工处置请求读取失败", 400));
-    const abort = () => finish(invalid("人工处置请求已取消或插件已卸载", 409));
-    const timer = setTimeout(
-      () => finish(invalid("人工处置请求读取超时", 408)),
-      5000,
-    );
-    timer.unref?.();
-    req.on("data", data);
-    req.once("end", end);
-    req.once("error", errorEvent);
-    req.once("aborted", abort);
-    signal.addEventListener("abort", abort, { once: true });
-    if (signal.aborted) abort();
-    const length = req.headers?.["content-length"];
-    if (
-      length !== undefined &&
-      (!/^\d+$/.test(String(length)) || Number(length) > maxBytes)
-    )
-      finish(invalid("人工处置请求超过大小限制", 413));
-  });
+function readReviewRequest(...args) {
+  return createReviewRuntimeInstance.readReviewRequest(...args);
 }
-function registerFindingReviewRoute(ctx, state) {
-  if (typeof ctx.inject !== "function") return;
-  ctx.inject(["webServer"], (scope) => {
-    try {
-      return scope.webServer.register({
-        name: "dsh-plugin-compat-check/reviews",
-        kind: "exact",
-        path: "/plugin-compat-check/reviews",
-        handler: async (req, res) => {
-          const send = (status, body) => {
-            res.writeHead(status, {
-              "content-type": "application/json; charset=utf-8",
-              "cache-control": "no-store",
-            });
-            res.end(JSON.stringify(body));
-          };
-          const rejection = requestRejection(ctx, req);
-          if (rejection !== null)
-            return send(rejection, {
-              ok: false,
-              error: "请求未通过宿主身份与同源校验；请重新打开宿主登录页面",
-            });
-          if (req.method !== "POST")
-            return send(405, { ok: false, error: "人工处置仅支持POST" });
-          if (
-            !/^application\/json(?:\s*;|$)/i.test(
-              req.headers?.["content-type"] || "",
-            )
-          )
-            return send(415, {
-              ok: false,
-              error: "人工处置需要application/json",
-            });
-          if (state.disposed)
-            return send(409, {
-              ok: false,
-              error: "Plugin generation disposed / 已卸载",
-            });
-          const controller = new AbortController();
-          state.reviewRequests ||= new Set();
-          state.reviewRequests.add(controller);
-          try {
-            const body = await readReviewRequest(req, controller.signal);
-            const target = state.reviewTargets?.get(body?.contextToken);
-            if (!target)
-              return send(409, {
-                ok: false,
-                error: "报告已变化，请重新检查后核实此发现",
-              });
-            const canCommit = async () => {
-              if (state.disposed || controller.signal.aborted) return false;
-              const current = resolveNodeModules();
-              if (
-                !current.dir ||
-                path.resolve(current.dir) !== path.resolve(target.nodeModules)
-              )
-                return false;
-              return state.reportService.isCurrent(target.key, target.report);
-            };
-            if (!(await canCommit()))
-              return send(409, {
-                ok: false,
-                error: "体检输入已变化，请重新检查后核实此发现",
-              });
-            const reviews = await target.store.saveReview(
-              target.context,
-              body,
-              { canCommit },
-            );
-            send(200, { ok: true, reviews });
-          } catch (error) {
-            const status =
-              error.status ||
-              (error.code === "REVIEW_STALE" || error.code === "REVIEW_BUSY"
-                ? 409
-                : error.code === "REVIEW_STORAGE"
-                  ? 422
-                  : 400);
-            send(status, { ok: false, error: errText(error) });
-          } finally {
-            state.reviewRequests.delete(controller);
-          }
-        },
-      });
-    } catch (error) {
-      log("Review route registration failed: " + errText(error));
-    }
-  });
+function registerFindingReviewRoute(...args) {
+  return createReviewRuntimeInstance.registerFindingReviewRoute(...args);
 }
 
 const TOOL_SERVICES = ["tools", "agents"];
@@ -2306,86 +1512,7 @@ export function apply(ctx) {
     // webServer 缺席时（headless / CLI 形态）这一段根本不注册，
     // 本插件的 fiber 也不会去等一个不存在的服务 —— `inject` 保持 []，
     // 与本文件的整体设计一致（见文件头）。
-    try {
-      if (typeof ctx.inject === "function") {
-        ctx.inject(["webServer"], (scope) => {
-          try {
-            const dispose = scope.webServer.register({
-              name: "dsh-plugin-compat-check",
-              kind: "exact",
-              path: "/plugin-compat-check/report",
-              handler: async (req, res) => {
-                // 体检结论是本机信息（装了哪些插件、用了哪些 API），
-                // 不该被这台机器上的任意页面读到。
-                const rejection = requestRejection(ctx, req);
-                if (rejection !== null) {
-                  res.writeHead(rejection, {
-                    "content-type": "application/json; charset=utf-8",
-                    "cache-control": "no-store",
-                  });
-                  res.end(
-                    JSON.stringify({
-                      error:
-                        "请求未通过宿主身份与同源校验；请重新打开宿主登录页面",
-                    }),
-                  );
-                  return;
-                }
-                if (req.method !== "GET") {
-                  res.writeHead(405, {
-                    "content-type": "application/json; charset=utf-8",
-                    "cache-control": "no-store",
-                  });
-                  res.end(JSON.stringify({ error: "体检报告仅支持 GET" }));
-                  return;
-                }
-                try {
-                  const url = new URL(req.url || "/", "http://127.0.0.1");
-                  const force = url.searchParams.get("refresh") === "1";
-                  const out = await serveReport(state, ctx, force);
-                  res.writeHead(200, {
-                    "content-type": "application/json; charset=utf-8",
-                    "cache-control": "no-store",
-                  });
-                  res.end(
-                    JSON.stringify(
-                      url.searchParams.get("metadata") === "1" && out.ok
-                        ? {
-                            kind: "plugin-compat-check/report-metadata",
-                            ok: true,
-                            computedAt: out.computedAt,
-                            nodeModules: out.nodeModules,
-                            dshVersion: out.report.dshVersion,
-                            cache: out.cache || null,
-                            reviewsRevision: out.reviews?.revision || null,
-                            reviewsError: out.reviews?.error || null,
-                            reviewsContextToken:
-                              out.reviews?.contextToken || null,
-                          }
-                        : out,
-                    ),
-                  );
-                } catch (error) {
-                  // 连处理器里都不抛：把错误变成一条可读的 JSON，而不是 500 空响应。
-                  res.writeHead(200, {
-                    "content-type": "application/json; charset=utf-8",
-                  });
-                  res.end(JSON.stringify(failureEnvelope(errText(error))));
-                }
-              },
-            });
-            log("C2 route registered: GET /plugin-compat-check/report");
-            return dispose;
-          } catch (error) {
-            log(`WARN C2 route registration failed: ${errText(error)}`);
-          }
-        });
-      } else {
-        log("C2 route skipped: ctx.inject is not a function");
-      }
-    } catch (error) {
-      log(`WARN C2 route setup threw: ${errText(error)}`);
-    }
+    registerReportRoute(ctx, state);
 
     // E1：注册随包的 skill。**失败只留日志，绝不抛** —— 见文件顶部硬规矩。
     try {
@@ -2552,6 +1679,7 @@ export function apply(ctx) {
             state.disposed = true;
             for (const request of state.reviewRequests || []) request.abort();
             state.reviewTargets?.clear();
+            state.reviewSidecars?.dispose();
             state.reportService?.dispose();
             state.lastReport = null;
             state.lastReportAt = 0;

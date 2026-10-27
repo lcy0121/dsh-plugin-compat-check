@@ -10,6 +10,10 @@ import * as localRequest from "../../plugin/lib/local-request.js";
 import * as hostResources from "../../plugin/lib/host-resources.js";
 import * as reportContract from "../../plugin/lib/report-contract.js";
 import * as upgradeContract from "../../plugin/lib/upgrade-contract.js";
+import { createReportRuntime } from "../../plugin/lib/host-reports.js";
+import { createReviewRuntime } from "../../plugin/lib/host-reviews.js";
+import { createUpgradeRuntime } from "../../plugin/lib/host-upgrade.js";
+import { createHttpRuntime } from "../../plugin/lib/host-http.js";
 const nodeRequire = createRequire(import.meta.url);
 const HOST = path.join(REPO, "plugin/index.js");
 const SRC = fs.readFileSync(HOST, "utf8");
@@ -72,6 +76,10 @@ export function loadHost(env = {}) {
   // 把 ESM 的 import 换成受控替身；导出换成赋值
   const cjs = hostVmSource(SRC);
   sandbox.__modules = {
+    "./lib/host-http.js": { createHttpRuntime },
+    "./lib/host-upgrade.js": { createUpgradeRuntime },
+    "./lib/host-reviews.js": { createReviewRuntime },
+    "./lib/host-reports.js": { createReportRuntime },
     "node:fs": nodeRequire("node:fs"),
     "node:os": nodeRequire("node:os"),
     "node:path": nodeRequire("node:path"),

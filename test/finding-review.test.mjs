@@ -468,14 +468,28 @@ test("review editors page large finding sets while preserving all rows in the si
     props = { report: f.report, reviews, onSave: async () => reviews };
   const ui = mountPanel(props);
   assert.equal(reviews.items.length, 45);
-  assert.equal(ui.nodes().filter((n) => n.type === "select").length, 20);
+  assert.equal(
+    ui
+      .nodes()
+      .filter(
+        (n) => n.type === "select" && n.props["aria-label"] !== "筛选人工状态",
+      ).length,
+    20,
+  );
   const more = ui
     .nodes()
     .find((n) => n.type === "button" && ui.text(n).includes("显示更多"));
   assert.ok(more);
   more.props.onClick();
   ui.render();
-  assert.equal(ui.nodes().filter((n) => n.type === "select").length, 40);
+  assert.equal(
+    ui
+      .nodes()
+      .filter(
+        (n) => n.type === "select" && n.props["aria-label"] !== "筛选人工状态",
+      ).length,
+    40,
+  );
 });
 
 test("real panel event handlers save explicit changes, show failures, and reset stale review input", async (t) => {
@@ -496,7 +510,9 @@ test("real panel event handlers save explicit changes, show failures, and reset 
   const ui = mountPanel(props),
     note = "<script>window.reviewExecuted=true</script> onClick=run";
   ui.nodes()
-    .find((n) => n.type === "select")
+    .find(
+      (n) => n.type === "select" && n.props["aria-label"] !== "筛选人工状态",
+    )
     .props.onChange({ target: { value: "reviewed" } });
   ui.nodes()
     .find((n) => n.type === "textarea")
@@ -537,7 +553,11 @@ test("real panel event handlers save explicit changes, show failures, and reset 
   ui.render({ ...props, report, reviews: changed });
   assert.match(ui.text(), /待重审/);
   assert.equal(
-    ui.nodes().find((n) => n.type === "select").props.value,
+    ui
+      .nodes()
+      .find(
+        (n) => n.type === "select" && n.props["aria-label"] !== "筛选人工状态",
+      ).props.value,
     "pending",
   );
   assert.equal(ui.nodes().find((n) => n.type === "textarea").props.value, "");

@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-26T19:30:21.391Z",
-  "testFiles": 75,
-  "tests": 1186,
+  "recordedAt": "2026-10-27T08:22:01.242Z",
+  "testFiles": 77,
+  "tests": 1197,
   "repositoryFiles": {
-    "total": 354,
+    "total": 366,
     "fixtures": 99,
-    "other": 255
+    "other": 267
   },
   "verification": {
     "platform": "darwin",
@@ -26,7 +26,7 @@
     "sourceContext": {
       "versionSource": "lib/version.mjs",
       "integrationTarget": "main",
-      "scope": "Unpublished 0.1.8 UI, P1 recovery/drafts and P2 redaction/authentication/list/sampling hardening in current source. Version remains 0.1.7; publication fields describe historical published 0.1.7 only."
+      "scope": "Unpublished 0.1.8 UI, recovery/drafts, privacy/authentication/list/sampling and metadata cache/review navigation/CI/module split in current source. Version remains 0.1.7; publication fields describe historical published 0.1.7 only."
     },
     "publication": {
       "releaseTarget": "0.1.7",
@@ -57,7 +57,12 @@
     "history": {
       "commit": "f5ec0d0",
       "path": "docs/current-state.json",
-      "scope": "Historical 0.1.7 release and UI P1 acceptance records, upstream state and earlier pointers. Does not certify this unpublished P2 candidate."
+      "scope": "Historical 0.1.7 release and UI P1 acceptance records, upstream state and earlier pointers. Does not certify this unpublished P2 candidate.",
+      "previousDevelopment": {
+        "commit": "6c68ef1",
+        "path": "docs/current-state.json",
+        "scope": "Historical UI/P1/P2 acceptance and same-tgz identities before metadata cache, review navigation, UI CI and module split. Not certification of the current candidate."
+      }
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -87,233 +92,115 @@
         "url": "https://github.com/0xsline/awesome-deepseek-harness/pull/717"
       }
     },
-    "ui018P2Local20261026": {
-      "scope": "Local macOS arm64 only. Synthetic fixtures, not general plugin business certification. No remote CI, publication or Windows claim. Existing Card/Fold/component styles retained.",
+    "ui018WorkflowsLocal20261027": {
+      "scope": "Local macOS arm64, DSH0.2.1-rc.3, controlled inactive fixtures only. Linux workflow implemented; first matching remote run remains pending. No push, release, Windows or general business certification.",
+      "metadataCache": {
+        "findings": 1500,
+        "records": 770,
+        "sidecarBytes": 949961,
+        "warmPolls": 20,
+        "warmDocumentReads": 0,
+        "warmContextDerivations": 0,
+        "boundaries": "Per-report/input/target context; per-poll safe directory/file fingerprint; same-size edits, replacement, corruption/permissions/symlink and recovery, singleflight/cancel/eviction/unload; transient read errors retried even without a fingerprint change. Save always verifies current inputs and re-reads under lock."
+      },
+      "manualReview": "Category/API/source/saved rationale, plugin/status filters preserving dirty drafts, context+findingID main/review navigation across both pages. First unvisited panel activates and focuses finding123 with at most21 editors. Original risks/report/baseline unchanged; stale drafts retain original details and cannot jump into a new identity.",
+      "moduleSplit": {
+        "host": "Entry retains lifecycle/slots/tool/skill orchestration; report/review/HTTP/upgrade factories preserve public VM wrappers and contracts.",
+        "client": "Entry retains subscription/slots; shared report presentation and ordinary/upgrade panels split behind the same generated ModuleLoader bundle.",
+        "delivery": "Private npm prepack stages canonical kernel, browser code bundled once; independent tgz must contain all imported host modules and cache."
+      },
+      "ci": "tools/ci-ui018.mjs builds one tgz, installs those exact bytes, requires7flags, full UI behavior gates and PNG evidence; writes source commit/dirty flag/file hashes, host, logs and SHA256SUMS. Linuxrc.3 step runs before tests create untracked repository artifacts; runner-temp evidence uploaded on success/failure. Local run is not Linux evidence.",
+      "review": "One fresh-context whole-diff review found2Important: first-mount focus overwritten and transient error memoization. Both reproduced RED and fixed with focused regressions; no Critical/Minor.",
       "defaultSuite": {
-        "tests": 1156,
-        "pass": 1148,
+        "tests": 1197,
+        "pass": 1189,
         "skip": 8,
         "fail": 0
       },
-      "baselineCopy": "Separate missing, first-saved, incomplete, preview and retained-history messages; persistence policy unchanged.",
-      "subscription": "One report chain per route/target; pause and abort without visible subscribers or in hidden document; coalesced force refresh, metadata reuse, target isolation and late response rejection.",
-      "rendering": {
-        "mainAndRelationshipPageSize": 50,
-        "readOnlyDisclosures": "Unmount when closed; format only opened page.",
-        "forms": "Mount at first opening, retain on collapse.",
-        "auxiliary": "Initialize near viewport, retain visited editors; memoize stable report-derived work."
-      },
-      "delivery": {
-        "removedHostCopies": 4,
-        "sharedHostContracts": 3,
-        "kernel": "Three thin re-exports share host implementations; remove CLI/browser-only modules; retain full browser validation, MIT notices, host React and independent archive execution."
-      },
-      "sizes": {
-        "records": [
-          {
-            "ref": "3a5075",
-            "archive": 267685,
-            "unpacked": 982299,
-            "files": 71,
-            "client": {
-              "raw": 195983,
-              "gzip": 46076
-            }
-          },
-          {
-            "ref": "f5ec0d0",
-            "archive": 293914,
-            "unpacked": 1193311,
-            "files": 72,
-            "client": {
-              "raw": 295221,
-              "gzip": 56756
-            }
-          },
-          {
-            "ref": "current",
-            "archive": 237781,
-            "unpacked": 888630,
-            "files": 61,
-            "client": {
-              "raw": 166780,
-              "gzip": 46518
-            }
-          }
-        ],
-        "artifact": {
-          "path": "tmp/p2-018-20261026/dsh-plugin-compat-check-0.1.7.tgz",
-          "sha256": "67003287a601abf58eaff32a134aeffda696723af9254f001ce017e503e0b1d6"
-        },
-        "method": "npm pack; unpacked/file counts from npm manifest; client gzip=Node zlib.gzipSync default options. Baselines rebuilt from immutable commits with real prepack. 3a5075 unpacked size matches published 0.1.7. Current version remains 0.1.7, unpublished."
-      },
-      "syntheticPerformance": {
-        "baseline": "f5ec0d0",
-        "plugins": 1000,
-        "environment": {
-          "node": "v26.12.1",
-          "platform": "darwin",
-          "arch": "arm64"
-        },
-        "scope": "Synthetic persistent-hook harness using the actual generated clients. Elements are rendered host-element trees, not browser layout. Mean render time is diagnostic, not a timing gate or user-perceived latency.",
-        "before": {
-          "initialElements": 36114,
-          "visiblePluginRows": 1000,
-          "hiddenContentElements": 18011,
-          "meanRenderMs": 22.694127099999996,
-          "expandedLoaderRows": 1000,
-          "expandedElements": 40124
-        },
-        "after": {
-          "initialElements": 1010,
-          "visiblePluginRows": 50,
-          "hiddenContentElements": 0,
-          "meanRenderMs": 1.8409020999999997,
-          "expandedLoaderRows": 50,
-          "expandedElements": 1225
-        }
-      },
-      "actualHost": {
+      "actualAcceptance": {
+        "ok": true,
         "dshVersion": "0.2.1-rc.3",
-        "artifactSha256": "67003287a601abf58eaff32a134aeffda696723af9254f001ce017e503e0b1d6",
-        "realBrowser": true,
-        "syntheticPlugins": 120,
-        "completeInventory": 128,
-        "mainPageSize": 50,
-        "loaderPageSize": 50,
-        "allFixturePagesVisited": true,
-        "filteringResetsPage": true,
-        "fullExport": true,
-        "inactiveFixtures": true,
-        "initialDOM": {
-          "order": true,
-          "rows": 8,
-          "domElements": 217,
-          "collapsed": true,
-          "styles": 1
+        "platform": "darwin",
+        "arch": "arm64",
+        "artifactSha256": "621cc8ad3d3204220a25df2fd2d8d326a01c5ff67ce04434377880a31264e666",
+        "sourceBaseCommit": "6c68ef1b121c2849c3689ed2f21282351bc15738",
+        "sourceSnapshotDirty": true,
+        "sourceManifestSha256": "332fa25ef1cef4fbc551f2ef2178cc3062deb1106789fb152f0e41f04c0bdd8d",
+        "sourceScope": "Accepted source snapshot based on this commit plus working changes; source manifest and same-tgz receipts retained locally. Post-run documentation record is outside the runtime package; all67 shipped files matched current sources or specified shared-contract wrappers. Not a clean-commit Linux run.",
+        "ui": {
+          "available": true,
+          "navigation": "Account menu > Settings > Built-in plugins > Compatibility",
+          "tabCount": 1,
+          "reenabled": true,
+          "httpRestored": true,
+          "scope": "Actual DOM report plus manager disable/re-enable and route removal/recovery; not a business-function certification."
         },
-        "themeAndColumns": true,
-        "keyboard": true,
-        "stylesUnloadAndRecovery": true,
-        "manualReviewAndUpgrade": true,
-        "futureProbeRejectionAndRecovery": true,
+        "reviewNavigation": {
+          "realBrowser": true,
+          "bidirectional": true,
+          "identityBound": true,
+          "filters": true,
+          "keyboardFocus": true,
+          "originalReportUnchanged": true,
+          "targetFindingIndex": 122,
+          "maxMountedEditors": 21
+        },
+        "recovery": {
+          "realBrowser": true,
+          "sameVersionSourceChange": true,
+          "draftPreserved": true,
+          "editorIdentityAndFocusPreserved": true,
+          "staleSaveDisabled": true,
+          "copyAndDiscard": true
+        },
+        "metadataCache": "Large-sidecar fixture measured separately by review-sidecar-cache.test.mjs; real browser exercises actual installed cached route.",
+        "httpAuth": {
+          "realHost": true,
+          "missingAndForgedDenied": true,
+          "launchBearerAndQueryNotBypasses": true,
+          "officialSignedCookieExpiry": true,
+          "expiryClock": "Controlled synchronous +31 days in owned test fixture, restored immediately",
+          "sameOriginCookieRecovery": true
+        },
+        "largeLists": {
+          "realBrowser": true,
+          "syntheticPlugins": 120,
+          "completeInventory": 128,
+          "mainPageSize": 50,
+          "loaderPageSize": 50,
+          "allFixturePagesVisited": true,
+          "filteringResetsPage": true,
+          "fullExport": true,
+          "inactiveFixtures": true
+        },
+        "denseLists": {
+          "realBrowser": true,
+          "inactiveSyntheticPlugins": 124,
+          "findings": 123,
+          "findingPageSize": 50,
+          "finalFindingPage": 23,
+          "addedRiskCount": 124,
+          "addedRiskPageSize": 50,
+          "versionPluginPageSize": 50,
+          "elements": 1883,
+          "completeExport": true,
+          "actualSamplingTruncation": true,
+          "propertyValuesAbsent": true
+        },
         "productionRequests": 0,
-        "privateRootRemoved": true
+        "cleanup": {
+          "privateRootRemoved": true
+        },
+        "localEvidence": "tmp/p2-018-workflows/final-acceptance/summary.json, live.json, source.json, payload-proof.json, SHA256SUMS and screenshots/"
       },
-      "evidence": {
-        "directory": "tmp/p2-018-20261026",
-        "sha256": {
-          "full.tap": "3e605d0c8e71ccf84974a15c0239f6af8c8f837177f0eae32a9c217aee2d90ee",
-          "check.log": "8c8527d7fc71136a7db6d3b7459ccd4b335a3bf893dcce7444158831fecda086",
-          "prepublish.tap": "d585ca92638a5bf3d3c2e550ec0af58903bf6e1bcba84e1c495dc0a15e025be6",
-          "prepublish.log": "79c9bda041489375ff2da3b8a730619d7d99830731d2892f4276b30beb15e231",
-          "live.json": "df76e3e3012153d694419168d7d849ee2db9eb2f3778d81ff184c43a61a5316a",
-          "sizes.json": "965ff217803825776121fdc1064ea72eb00a99b0556c65601596f69ce1adf3bb",
-          "performance.json": "d00d736099e279d6ffcdbc512a9cf8a73f29939b1c7138ca9113699f98d4d2cd",
-          "package-green.tap": "adaab9b37b095f577b7226de6341589a73cd9d08410d0f70c040a188e35ccaa6",
-          "preview.png": "2658b07e39a9b1c7ba9dded3c99330af441f30e605546930c2d6f210f7d71102"
-        }
-      },
-      "independentReview": "Fresh-context read-only review found no blocking defects or new critical verification gaps.",
-      "preview": {
-        "url": "http://127.0.0.1:50251/",
-        "sameAcceptedArchive": true,
-        "clientSha256": "266054a728b8d910699a5fb7dfcb71e6dd73d51bb16be1464bd104a61b4a695b",
-        "proofSha256": "2658b07e39a9b1c7ba9dded3c99330af441f30e605546930c2d6f210f7d71102"
+      "gates": {
+        "defaultSuite": true,
+        "maintainedChecks": true,
+        "localPrepublishOnly": true,
+        "oneFreshContextReviewFixed": true,
+        "noPushOrPublication": true,
+        "firstMatchingLinuxRun": "pending authorized push"
       }
-    },
-    "ui018P1RecoveryLocal20261027": {
-      "scope": "Local macOS arm64, unpublished working tree based on c1fed46. Existing UI architecture preserved; no remote CI, publication or Windows claim.",
-      "defaultSuite": {
-        "tests": 1170,
-        "pass": 1162,
-        "skip": 8,
-        "testFiles": 74
-      },
-      "budgetsMs": {
-        "hostListing": 1500,
-        "identity": 12000,
-        "reportFlight": 45000,
-        "reviewRead": 5000,
-        "clientRequest": 50000
-      },
-      "regressions": [
-        "Cold/forced hung host service reports failure, retains prior report/baseline and recovers; ignored-abort late compute cannot publish or commit.",
-        "Client deadline covers fetch and JSON decoding, coalesced retry and lifecycle cancellation.",
-        "Dirty drafts retain original context and finding across revision/context/unavailable data; stale saves disabled, explicit copy/discard, late context and same-context revision responses cannot clear drafts.",
-        "Final review fixes: synchronous lifecycle/generation fence after asynchronous freshness check; empty, non-Error and unreadable rejection reasons cannot become success or leave a request pending."
-      ],
-      "realHost": {
-        "dsh": "0.2.1-rc.3",
-        "artifactSha256": "c72082b04b09e82893d4495442a81102b13338fd66bef74cc6a8b0d5f4b59f54",
-        "sameVersionSourceChange": true,
-        "draftAndEditorIdentityAndFocusPreserved": true,
-        "copyAndDiscard": true,
-        "previousUiAndPaginationRegression": true,
-        "productionRequests": 0,
-        "privateRootRemoved": true
-      },
-      "limits": "Drafts are in-memory for the mounted page session; no automatic migration or persistence across page reload. Per-flight report deadline, at most three rounds for continually changing input; client independently bounds its whole request. Ignored cancellation cannot forcibly stop arbitrary host promises, but late results are discarded."
-    },
-    "ui018P2HardeningLocal20261027": {
-      "scope": "Local macOS arm64 and DSH0.2.1-rc.3 only, candidate based on54f719c; no remote CI, release, older-host auth rerun or Windows/Linux-browser certification.",
-      "defaultSuite": {
-        "tests": 1186,
-        "pass": 1178,
-        "skip": 8,
-        "testFiles": 75
-      },
-      "artifactSha256": "36d9217cd280f0219ef57a03c199b6932f5f5739799d7594295f5115115793fe",
-      "redaction": "Quoted/single/nested/case/escaped/unicode/entity labelled credentials hide the whole description; CLI share output matches panel preview/copy; safe identity/location retained. No universal or raw-JSON redaction claim.",
-      "auth": {
-        "realHost": true,
-        "missingAndForgedDenied": true,
-        "launchBearerAndQueryNotBypasses": true,
-        "officialSignedCookieExpiry": true,
-        "expiryClock": "Controlled synchronous +31 days in owned test fixture, restored immediately",
-        "sameOriginCookieRecovery": true
-      },
-      "lists": {
-        "realBrowser": true,
-        "inactiveSyntheticPlugins": 124,
-        "findings": 123,
-        "findingPageSize": 50,
-        "finalFindingPage": 23,
-        "addedRiskCount": 124,
-        "addedRiskPageSize": 50,
-        "versionPluginPageSize": 50,
-        "elements": 1809,
-        "completeExport": true,
-        "actualSamplingTruncation": true,
-        "propertyValuesAbsent": true
-      },
-      "syntheticHarness": {
-        "upgradePlugins": 123,
-        "visibleRiskEntries": 50,
-        "renderedElements": 465,
-        "createdElements": 605,
-        "scope": "Actual generated client in hook harness; not browser layout/latency."
-      },
-      "sampling": {
-        "perService": {
-          "properties": 1000,
-          "methods": 200,
-          "prototypeDepth": 12,
-          "jsonBytes": 65536,
-          "cooperativeMs": 25
-        },
-        "wholeRound": {
-          "services": 1000,
-          "propertyVisits": 10000,
-          "jsonBytes": 1048576,
-          "cooperativeMs": 100,
-          "inputEntries": 50000
-        },
-        "scope": "Names, identity, wanted and metadata counted; skipped services unknown, unrelated captured evidence retains coverage. No native-reflection/ctx.get preemption or intermediate RSS guarantee."
-      },
-      "review": "One independent read-only review; aggregate sampling finding reproduced then fixed via RED/GREEN global bytes/count/properties/time and scoped-coverage regressions, followed by fullsuite.",
-      "productionRequests": 0,
-      "privateRootRemoved": true
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

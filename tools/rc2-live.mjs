@@ -6,6 +6,7 @@ import {
   verifyUi018Hardening,
 } from "./ui018-hardening.mjs";
 import { ownedHostHeaders } from "./owned-host-session.mjs";
+import { verifyReviewNavigation } from "./ui018-review-navigation.mjs";
 import { verifyUi018 } from "./ui018-acceptance.mjs";
 import { verifyRc3Navigation } from "./rc3-navigation.mjs";
 import { installRc3Fixture } from "./rc3-fixture.mjs";
@@ -1426,7 +1427,7 @@ try {
       );
       await chrome.send("Input.insertText", { text: reviewNote });
       await evalx(
-        `document.querySelector('[data-review-finding] button').click()`,
+        `[...document.querySelector('[data-review-finding]').querySelectorAll('button')].find(b=>b.innerText==='保存人工处置').click()`,
       );
       await poll(
         async () =>
@@ -1735,6 +1736,14 @@ try {
                 : response.body,
             );
           },
+          screenshotDir: process.env.DSC_UI018_SCREENSHOTS,
+        });
+      if (process.env.DSC_UI018_REVIEW_NAVIGATION === "1")
+        result.reviewNavigation = await verifyReviewNavigation({
+          chrome,
+          evalx,
+          poll,
+          readReport: ordinary,
           screenshotDir: process.env.DSC_UI018_SCREENSHOTS,
         });
       if (process.env.DSC_RC2_SCREENSHOT) {

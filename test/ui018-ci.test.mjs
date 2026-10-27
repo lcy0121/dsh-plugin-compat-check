@@ -1,0 +1,140 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import YAML from "yaml";
+import { validateUi018Evidence } from "../tools/ci-ui018.mjs";
+function complete() {
+  return {
+    ok: true,
+    applicable: true,
+    dshVersion: "0.2.1-rc.3",
+    artifactSha256: "a".repeat(64),
+    ui: { available: true, reenabled: true, httpRestored: true },
+    cleanup: { privateRootRemoved: true },
+    networkGuard: { productionRequests: 0 },
+    ui018: {
+      initial: { order: true, collapsed: true, styles: 1 },
+      layout: { first: 240, second: 280 },
+      keyboard: true,
+      stylesRemovedAndRecovered: true,
+      colors: { light: "white", dark: "black" },
+    },
+    httpAuth: {
+      realHost: true,
+      missingAndForgedDenied: true,
+      launchBearerAndQueryNotBypasses: true,
+      officialSignedCookieExpiry: true,
+      sameOriginCookieRecovery: true,
+    },
+    ui018Recovery: {
+      realBrowser: true,
+      draftPreserved: true,
+      editorIdentityAndFocusPreserved: true,
+      staleSaveDisabled: true,
+      copyAndDiscard: true,
+    },
+    ui018P2: {
+      realBrowser: true,
+      mainPageSize: 50,
+      loaderPageSize: 50,
+      allFixturePagesVisited: true,
+      filteringResetsPage: true,
+      fullExport: true,
+    },
+    ui018Hardening: {
+      realBrowser: true,
+      findingPageSize: 50,
+      completeExport: true,
+      actualSamplingTruncation: true,
+      propertyValuesAbsent: true,
+    },
+    reviewNavigation: {
+      realBrowser: true,
+      bidirectional: true,
+      identityBound: true,
+      filters: true,
+      keyboardFocus: true,
+      originalReportUnchanged: true,
+    },
+  };
+}
+test("UI CI evidence gate rejects unavailable, incomplete, wrong-host and wrong-artifact acceptance", () => {
+  const good = complete();
+  assert.equal(validateUi018Evidence(good, "a".repeat(64)), true);
+  for (const patch of [
+    { ok: false },
+    { applicable: false },
+    { dshVersion: "0.2.1-rc.2" },
+    { artifactSha256: "b".repeat(64) },
+    { ui: { available: false } },
+    { ui018P2: undefined },
+    { reviewNavigation: undefined },
+    { networkGuard: { productionRequests: 1 } },
+  ])
+    assert.throws(() =>
+      validateUi018Evidence({ ...good, ...patch }, "a".repeat(64)),
+    );
+  for (const key of [
+    "ui018",
+    "httpAuth",
+    "ui018Recovery",
+    "ui018P2",
+    "ui018Hardening",
+    "reviewNavigation",
+    "cleanup",
+  ]) {
+    const value = structuredClone(good);
+    value[key] = {};
+    assert.throws(() => validateUi018Evidence(value, "a".repeat(64)), key);
+  }
+});
+test("rc.3 Linux workflow runs all UI acceptance through a single-artifact evidence gate and archives failures", () => {
+  const workflow = YAML.parse(
+      fs.readFileSync(
+        new URL("../.github/workflows/test.yml", import.meta.url),
+        "utf8",
+      ),
+    ),
+    job = workflow.jobs["linux-live"];
+  const step = job.steps.find((step) =>
+    step.run?.includes("tools/ci-ui018.mjs"),
+  );
+  assert(step);
+  assert.match(step.if, /0\.2\.1-rc\.3/);
+  assert.match(step.run, /linux-ui018/);
+  assert(
+    job.steps.indexOf(step) <
+      job.steps.findIndex((s) => s.run?.includes("linux-chrome-startup.tap")),
+  );
+  const preparation = job.steps.find((s) =>
+    s.name?.startsWith("Prepare preinstalled"),
+  );
+  assert.match(preparation.run, /RUNNER_TEMP\/linux-chrome-preparation/);
+  const upload = job.steps.find((step) =>
+    step.uses?.startsWith("actions/upload-artifact"),
+  );
+  assert.equal(upload.if, "always()");
+  assert.match(upload.with.path, /linux-ui018\//);
+});
+
+test("npm pack metadata survives lifecycle hook stdout without accepting ambiguous artifacts", async () => {
+  const { packedFilename } = await import("../tools/ci-ui018.mjs");
+  const metadata = JSON.stringify(
+    [{ filename: "dsh-plugin-compat-check-0.1.7.tgz" }],
+    null,
+    2,
+  );
+  assert.equal(
+    packedFilename(
+      "[stage-skill] unchanged\n[unstage-kernel] removed\n" + metadata,
+    ),
+    "dsh-plugin-compat-check-0.1.7.tgz",
+  );
+  for (const value of [
+    "not-json",
+    "[]",
+    JSON.stringify([{ filename: "../escape.tgz" }]),
+    JSON.stringify([{ filename: "one.tgz" }, { filename: "two.tgz" }]),
+  ])
+    assert.throws(() => packedFilename(value));
+});
