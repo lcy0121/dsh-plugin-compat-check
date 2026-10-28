@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (file) =>
   JSON.parse(fs.readFileSync(path.join(root, file), "utf8"));
@@ -13,6 +14,18 @@ const rows = Object.entries(lock.packages)
   .filter(([file]) => file)
   .map(([file, entry]) => {
     const esbuildPlatform = /^node_modules\/@esbuild\/[^/]+$/.test(file);
+    const fsevents = file === "node_modules/fsevents";
+    if (
+      fsevents &&
+      (entry.version !== "2.3.3" ||
+        entry.license !== "MIT" ||
+        entry.optional !== true ||
+        entry.dev !== true ||
+        JSON.stringify(entry.os) !== '["darwin"]' ||
+        entry.integrity !==
+          "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==")
+    )
+      throw Error("Unexpected optional fsevents metadata: " + file);
     if (
       esbuildPlatform &&
       (!entry.optional ||
@@ -22,7 +35,7 @@ const rows = Object.entries(lock.packages)
       throw Error("Unexpected esbuild platform package metadata: " + file);
     const meta = fs.existsSync(path.join(root, file, "package.json"))
       ? read(`${file}/package.json`)
-      : esbuildPlatform
+      : esbuildPlatform || fsevents
         ? {
             name: file.slice("node_modules/".length),
             version: entry.version,
@@ -38,11 +51,27 @@ const rows = Object.entries(lock.packages)
         `Installed dependency differs from lock: ${file}; run npm ci --ignore-scripts`,
       );
     const licenseRoot = esbuildPlatform ? "node_modules/esbuild" : file;
-    const licenseFile = fs
-      .readdirSync(path.join(root, licenseRoot))
-      .find((name) => /^licen[sc]e(?:[-.].*)?$/i.test(name));
+    const licenseFile = (
+      fsevents ? [] : fs.readdirSync(path.join(root, licenseRoot))
+    ).find((name) => /^licen[sc]e(?:[-.].*)?$/i.test(name));
     let license;
-    if (licenseFile)
+    if (fsevents) {
+      // Exact published license bytes, available even when npm omits Darwin-only inputs.
+      const snapshot = fs.readFileSync(
+        path.join(root, "tools/licenses/fsevents-2.3.3.LICENSE"),
+      );
+      if (
+        createHash("sha256").update(snapshot).digest("hex") !==
+        "2a8a5d6197bb97a018b8a190dd3ed853d750ca87c8e80c17aad41d6c6ff448e1"
+      )
+        throw Error("Altered optional fsevents license snapshot");
+      if (
+        fs.existsSync(path.join(root, file, "package.json")) &&
+        !fs.readFileSync(path.join(root, file, "LICENSE")).equals(snapshot)
+      )
+        throw Error("Installed fsevents license differs from snapshot");
+      license = snapshot.toString("utf8").trim();
+    } else if (licenseFile)
       license = fs
         .readFileSync(path.join(root, licenseRoot, licenseFile), "utf8")
         .trim();
@@ -164,6 +193,7 @@ const sections = [
   "## Development-only dependencies",
   table(development.filter((row) => !bundledNames.has(row.meta.name))),
   "Optional esbuild platform binaries are inventoried from the frozen lock and share the matching esbuild package's MIT license; only the current platform is installed. dlv@1.1.3 declares MIT through its package metadata and README license link.",
+  "Darwin-only optional fsevents@2.3.3 is inventoried on every platform using its exact published MIT license snapshot. The lock version, integrity, platform and license digest are pinned; when installed, its license bytes must also match. Missing ordinary dependencies still fail verification.",
   "## Client-bundled dependencies and component sources",
   "These packages are build inputs bundled into the precompiled client, not additional npm runtime installs. React remains host-provided.",
   table(bundled),

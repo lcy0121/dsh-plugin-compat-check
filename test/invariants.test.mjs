@@ -30,6 +30,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 import { optionalProfiles } from './support/profile-snapshot.mjs'
+import { packageFixture, fixtureCatalog } from './fixture-utils.mjs'
 
 import { extractWithProvenance } from '../lib/extract.mjs'
 import { buildVerdicts } from '../lib/verdict.mjs'
@@ -382,30 +383,26 @@ describe('不变式（补）：覆盖与授权，而不是子集', () => {
  */
 describe('不变式的有效性自证：人为清空必须被抓到', () => {
   test('清空某个插件的 calls/callSites 会让「每个服务都有去处」失败', () => {
-    const prof = profiles.find((p) => p.name === 'parityfix') || profiles[0]
-    if (!prof) return
-    const r = extractWithProvenance(prof.nm, { catalog })
-    const victim = Object.keys(r.report.perPlugin)
-      .find((n) => Object.keys(r.report.perPlugin[n].calls || {}).length > 0)
-    assert.ok(victim, '需要一个至少有调用点的插件来构造变异')
-    const mut = JSON.parse(JSON.stringify(r.report))
-    mut.perPlugin[victim].calls = {}
-    mut.perPlugin[victim].callSites = []
-    const v = buildVerdicts({ report: mut, hostSurface: null, rules, catalog, dshVersion: 'test' })
-    const svcs = mut.perPlugin[victim].services
-    const resolved = new Set(Object.keys(v.plugins[victim].resolved || {}))
-    const missing = svcs.filter((s) => !resolved.has(s))
-    // 变异后这些服务**仍然**被交代了（走了 no-calls 兜底），所以不变式不会因此变红 ——
-    // 这本身是正确的：清空 calls 之后它们确实「没有可归属的调用点」。
-    // 真正该被抓住的是**结论从 partial 翻成 ok 而没有交代**这个更强的事实，
-    // 所以这里断言「翻转发生时，被清空的插件必须留下 no-calls 记录」。
-    assert.equal(v.plugins[victim].verdict, 'ok', '清空调用点后结论应变可用（这是变异的目的）')
-    const noCalls = Object.values(v.plugins[victim].resolved || {}).filter((c) => c.disposition === 'no-calls')
-    assert.ok(noCalls.length > 0 || missing.length === 0,
-      `结论翻转了却没有任何痕迹 —— 这正是那类静默回归。missing=${JSON.stringify(missing)}`)
-    // 而快照层必须能看见它（见 snapshot.test.mjs）：这里只确认判定层留下了痕迹
-    assert.ok(v.plugins[victim].vacuous || noCalls.length > 0,
-      '结论变 ok 却既不是 vacuous 也没有 no-calls 记录 —— 翻转无痕')
+    // A fixed call-only input isolates this mutation from independent inject risks.
+    const fixture = packageFixture('export function apply(ctx){ctx.settings.missing()}')
+    try {
+      const r = extractWithProvenance(fixture.nm, { catalog: fixtureCatalog })
+      const before = buildVerdicts({ report: r.report, hostSurface: null, rules: {}, catalog: fixtureCatalog, dshVersion: 'test' })
+      assert.equal(before.plugins.sample.verdict, 'partial', '样本必须先有调用风险')
+      const mut = JSON.parse(JSON.stringify(r.report))
+      mut.perPlugin.sample.calls = {}
+      mut.perPlugin.sample.callSites = []
+      const v = buildVerdicts({ report: mut, hostSurface: null, rules: {}, catalog: fixtureCatalog, dshVersion: 'test' })
+      const svcs = mut.perPlugin.sample.services
+      const resolved = new Set(Object.keys(v.plugins.sample.resolved || {}))
+      const missing = svcs.filter((service) => !resolved.has(service))
+      assert.equal(v.plugins.sample.verdict, 'ok', '清空调用点后结论应变可用（这是变异的目的）')
+      const noCalls = Object.values(v.plugins.sample.resolved || {}).filter((c) => c.disposition === 'no-calls')
+      assert.ok(noCalls.length > 0 || missing.length === 0,
+        `结论翻转了却没有任何痕迹。missing=${JSON.stringify(missing)}`)
+      assert.ok(v.plugins.sample.vacuous || noCalls.length > 0,
+        '结论变 ok 却既不是 vacuous 也没有 no-calls 记录 —— 翻转无痕')
+    } finally { fixture.cleanup() }
   })
 })
 

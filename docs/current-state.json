@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-28T11:17:24.851Z",
-  "testFiles": 81,
-  "tests": 1237,
+  "recordedAt": "2026-10-28T14:20:42.869Z",
+  "testFiles": 82,
+  "tests": 1241,
   "repositoryFiles": {
-    "total": 387,
+    "total": 389,
     "fixtures": 99,
-    "other": 288
+    "other": 290
   },
   "verification": {
     "platform": "darwin",

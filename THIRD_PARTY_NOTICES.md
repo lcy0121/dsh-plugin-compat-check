@@ -137,6 +137,8 @@ These packages support repository-only tools and are not declared as npm plugin 
 
 Optional esbuild platform binaries are inventoried from the frozen lock and share the matching esbuild package's MIT license; only the current platform is installed. dlv@1.1.3 declares MIT through its package metadata and README license link.
 
+Darwin-only optional fsevents@2.3.3 is inventoried on every platform using its exact published MIT license snapshot. The lock version, integrity, platform and license digest are pinned; when installed, its license bytes must also match. Missing ordinary dependencies still fail verification.
+
 ## Client-bundled dependencies and component sources
 
 These packages are build inputs bundled into the precompiled client, not additional npm runtime installs. React remains host-provided.
