@@ -116,6 +116,8 @@ DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 DSC_REQUIRE_RC2_UI=1 DSC_RC2_ARTIFACT=<确
 4. 取得正式发布授权后才发布验收过的**同一tgz**、Git tag及Release附件；核对npm版本/integrity/shasum、附件SHA-256和tag提交，再从公共registry实际安装核验。`node tools/meta-check.mjs --json`只读检查公开信息；本地领先属于提示，取数失败不是发布成功。
 5. 将实际时间、提交、制品及公共安装结果写入[current-state](current-state.json)。历史回执移至Git指针；不得预写published状态、发布时间、未执行CI或未经验证的摘要。
 
+GitHub简介/topics可独立于Git提交更新；npm简介/搜索关键词分别取`plugin/package.json`的description/keywords，正式发布新版本后再核对公开值。两者共用产品主旨，但不是同一组平台字段；npm dist-tags是版本渠道，不能拿它替代搜索关键词。发布前本地与registry的版本、正文及元数据差异须记录，不能宣称已上线。字段含义见[npm package.json文档](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/#description)。
+
 ## 参数语义基线维护
 
 `rules/severity.json.apiSemantics`只登记0.2.1-rc.2/rc.3客户端语义，不改变三版API目录认证。修改前锁定官方tag/归档，逐文件核对哈希、公开契约、实现及真实行为；归档只读，不执行目标。参数事实、弃用标记和所有权前提分别审查；clearPreviousDraft是兼容选项，新字段出现不表示它弃用。

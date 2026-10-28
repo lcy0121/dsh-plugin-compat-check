@@ -1,7 +1,7 @@
 {
   "name": "dsh-plugin-compat-check",
   "version": "0.2.0",
-  "description": "Checks installed DSH plugins and previews upgrade risks, with source locations, dependency views, review records and evidence limits. Includes a panel and agent tool.",
+  "description": "Checks installed DSH plugins and static upgrade risks, with source evidence and coverage limits. Multilingual UI, agent tool, dependency views, manual reviews and local report history.",
   "license": "MIT",
   "type": "module",
   "main": "index.js",
@@ -54,7 +54,10 @@
     "agent-skills",
     "static-analysis",
     "dependency-analysis",
-    "upgrade"
+    "upgrade",
+    "i18n",
+    "manual-review",
+    "report-history"
   ],
   "repository": {
     "type": "git",
