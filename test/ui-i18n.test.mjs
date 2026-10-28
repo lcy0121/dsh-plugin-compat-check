@@ -376,6 +376,7 @@ test("all producer-owned graph explanations and upgrade limitations have transla
     if (
       node.type === "CallExpression" &&
       (node.callee.name === "limit" ||
+        node.callee.name === "translate" ||
         (node.callee.object?.name === "reasons" &&
           node.callee.property?.name === "add"))
     ) {
@@ -396,6 +397,15 @@ test("all producer-owned graph explanations and upgrade limitations have transla
     }
   }
   visit(ast);
+  visit(
+    parse(
+      fs.readFileSync(
+        new URL("../lib/issue-report.mjs", import.meta.url),
+        "utf8",
+      ),
+      { sourceType: "module" },
+    ),
+  );
   const { UPGRADE_PREVIEW_LIMITATIONS } = await import(
     "../lib/upgrade-contract.mjs"
   );
@@ -404,4 +414,66 @@ test("all producer-owned graph explanations and upgrade limitations have transla
       assert(messages[language][value], `${language}: ${value}`);
       assert.doesNotMatch(messages[language][value], /[\p{Script=Han}]/u);
     }
+});
+
+test("diagnostic preview and copied report follow locale while preserving redaction, commands and raw evidence", async () => {
+  const { renderIssueReport } = await import("../lib/issue-report.mjs");
+  const data = sample();
+  const finding = Object.values(data.report.plugins).flatMap(
+    (p) => p.findings,
+  )[0];
+  finding.basis = "原始依据不会被改写";
+  finding.impact = "token=secret-must-stay-hidden";
+  Object.values(data.report.plugins)[0].coverage.limitations.push(
+    "settings 客户端尚未验证",
+  );
+  data.issueReport = renderIssueReport(data.report);
+  const before = JSON.stringify(data),
+    copied = [];
+  const h = await panelHarness(data, {
+    clipboard: { writeText: async (text) => copied.push(text) },
+  });
+  try {
+    h.nodes()
+      .find((n) => n.type === "button" && h.text(n) === "预览故障报告")
+      .props.onClick();
+    await h.settle();
+    for (const locale of ["en", "ko", "zh"]) {
+      h.nodes()
+        .find((n) => n.props["data-ui-language"] !== undefined)
+        .props.onChange({ target: { value: locale } });
+      await h.settle();
+      const vocabulary = (await load()).messages[locale];
+      const output = h.field(vocabulary["故障报告预览"]).props.value;
+      assert(
+        output.startsWith(
+          locale === "en"
+            ? "# DSH plugin compatibility diagnostic report"
+            : locale === "ko"
+              ? "# DSH 플러그인 호환성 진단 보고서"
+              : "# DSH 插件兼容性故障报告",
+        ),
+      );
+      assert(output.includes("原始依据不会被改写"));
+      assert(!output.includes("secret-must-stay-hidden"));
+      if (locale !== "zh") {
+        assert(!output.includes("settings 客户端尚未验证"));
+        assert(!output.includes("本次探针明确记录该服务不存在"));
+      }
+      assert.deepEqual(
+        output.match(/```sh\n[\s\S]*?\n```/g),
+        data.issueReport.match(/```sh\n[\s\S]*?\n```/g),
+      );
+      const copy = h
+        .nodes()
+        .find(
+          (n) => n.type === "button" && h.text(n) === vocabulary["复制报告"],
+        );
+      await copy.props.onClick();
+      assert.equal(copied.at(-1), output);
+    }
+    assert.equal(JSON.stringify(data), before);
+  } finally {
+    h.dispose();
+  }
 });

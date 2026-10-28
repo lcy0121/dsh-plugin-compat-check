@@ -1,8 +1,8 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-28T10:22:51.052Z",
+  "recordedAt": "2026-10-28T11:17:24.851Z",
   "testFiles": 81,
-  "tests": 1236,
+  "tests": 1237,
   "repositoryFiles": {
     "total": 387,
     "fixtures": 99,
@@ -237,24 +237,24 @@
     },
     "uiFeedbackLocal20261028": {
       "scope": "macOS arm64 / actual DSH0.2.1-rc.3 / owned fixtures and one tgz; no Linux, Windows or business acceptance claim.",
-      "artifactSha256": "2a7b9f5fa3b7d962a33596422a970d6e7e778d678f271db0d7447f477a8c4b8e",
-      "sourceBaseCommit": "8e0104b0c0bac68d2bf0ea6601e745764a6f343a",
-      "sourceManifestSha256": "a862194d9cf296fe3cef2e576c363fb7f2c431ac44c9c282cc827e3995b099aa",
+      "artifactSha256": "9f57a7d7288f2d0da640e6b992cf630119636507fede4b69f104883114f710f2",
+      "sourceBaseCommit": "a01a40dd17ca59b0a16dd12b2a00b603db47b08a",
+      "sourceManifestSha256": "280e596141acd45fc16bc0462ba1a75ddf032a0666738caae3a42600ebd092b1",
       "binding": "Accepted dirty working-source snapshot; documentation receipts added after execution. Runtime code unchanged afterward.",
       "languages": [
         "zh",
         "en",
         "ko"
       ],
-      "messages": 516,
-      "verified": "Known dependency/coverage/preview/sampling/profile/baseline explanations translated; identifiers/raw evidence unchanged. File controls follow locale. All173 visible disclosure headings per locale centered within0.01px; consistent16px framed insets; note gap7px, save gap12px; export separated from table. Draft/focus, filters, import/export, themes and narrow containers retained.",
+      "messages": 575,
+      "verified": "Three-language labels and producer explanations; diagnostic template/safety notes/known fixed impact and basis/verification suggestions and copied text follow UI language through the same safe renderer, generated only when opened. Original evidence, commands and JSON unchanged. Headings aligned; sibling dependency cards and upgrade/snapshot input-to-button gaps all exactly12px in all3 locales. Draft/focus, import/export, theme/narrow checks retained.",
       "defaultSuite": {
-        "tests": 1236,
-        "pass": 1228,
+        "tests": 1237,
+        "pass": 1229,
         "skip": 8,
         "fail": 0
       },
-      "receipts": "tmp/ui-feedback-20261028-accepted/{summary.json,live.json,SHA256SUMS,screenshots/}; ignored local receipts, screenshots manually reviewed.",
+      "receipts": "tmp/ui-report-spacing-20261028-final/{summary.json,live.json,SHA256SUMS,screenshots/}; ignored local receipts; earlier acceptance:a01a40d:docs/current-state.json",
       "cleanup": "Owned private root removed; no production/model requests."
     }
   },

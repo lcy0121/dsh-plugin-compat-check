@@ -4,7 +4,14 @@ import {
   profileSource,
 } from "../i18n/presentation.mjs";
 import { LanguageSelect } from "../i18n/locale.jsx";
-import { t, builtin, uiMessage, messageText } from "../i18n/runtime.mjs";
+import {
+  t,
+  builtin,
+  uiMessage,
+  messageText,
+  localeStore,
+} from "../i18n/runtime.mjs";
+import { renderIssueReport } from "../../../lib/issue-report.mjs";
 import { HistoryTools } from "./history.jsx";
 /** Ordinary report layout, filters, export and auxiliary panels. */
 import * as React from "react";
@@ -41,8 +48,21 @@ export function createReportPanels({
   function ReportPreview(p) {
     var shown = React.useState(false),
       copied = React.useState("");
-    var text =
-      typeof p.data.issueReport === "string" ? p.data.issueReport : null;
+    const text = useMemo(() => {
+      const original =
+        typeof p.data.issueReport === "string" ? p.data.issueReport : null;
+      if (!shown[0] || original === null) return null;
+      if (
+        localeStore.locale() === "zh" ||
+        !original.startsWith("# DSH 插件兼容性故障报告\n")
+      )
+        return original;
+      return renderIssueReport(p.data.report, {
+        translate: t,
+        explain: evidenceNote,
+        findingText: builtin,
+      });
+    }, [shown[0], p.data.issueReport, p.data.report]);
     return h(
       "div",
       { className: "compat-report-export" },

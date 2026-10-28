@@ -663,31 +663,35 @@ function ReportHistoryContent({ data }) {
         "仅在点击保存时保留完整快照。历史快照不认证当前目标，摘要校验不是签名；静态/宿主观测和业务健康是不同证据。身份不相同时中性展示，证据减少不代表修复。",
       ),
     ),
-    h("input", {
-      "aria-label": t("快照备注"),
-      value: label,
-      maxLength: REPORT_HISTORY_LIMITS.label,
-      placeholder: t("例如：更新前、更新后"),
-      onChange: (e) => setLabel(e.target.value),
-    }),
     h(
-      "button",
-      {
-        type: "button",
-        disabled: session.busy,
-        onClick: () =>
-          session.run({ action: "snapshot-save", label }, setState),
-      },
-      t("保存当前报告快照"),
-    ),
-    h(
-      "button",
-      {
-        type: "button",
-        disabled: session.busy,
-        onClick: () => session.run({ action: "snapshot-list" }, setState),
-      },
-      t("加载历史报告"),
+      "div",
+      { className: "compat-control-group" },
+      h("input", {
+        "aria-label": t("快照备注"),
+        value: label,
+        maxLength: REPORT_HISTORY_LIMITS.label,
+        placeholder: t("例如：更新前、更新后"),
+        onChange: (e) => setLabel(e.target.value),
+      }),
+      h(
+        "button",
+        {
+          type: "button",
+          disabled: session.busy,
+          onClick: () =>
+            session.run({ action: "snapshot-save", label }, setState),
+        },
+        t("保存当前报告快照"),
+      ),
+      h(
+        "button",
+        {
+          type: "button",
+          disabled: session.busy,
+          onClick: () => session.run({ action: "snapshot-list" }, setState),
+        },
+        t("加载历史报告"),
+      ),
     ),
     session.status,
     state

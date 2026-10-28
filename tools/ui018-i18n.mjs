@@ -123,6 +123,53 @@ export async function verifyUiI18n({
         () => evalx(`!!document.querySelector('.compat-file-upload')`),
         "Advanced file controls did not mount",
       );
+      await evalx(`(()=>{
+        const button=[...document.querySelectorAll('[data-advanced-tools] button')].find(b=>b.getAttribute('aria-label')===${JSON.stringify(vocabulary["展开{p0}"].replace("{p0}", vocabulary["本地历史报告与趋势"]))});button?.click();
+        document.querySelector('[data-upgrade-preview] > .compat-fold-header button[aria-expanded="false"]')?.click();
+        document.querySelectorAll('.compat-dependency-panel > .compat-fold > .compat-fold-header button[aria-expanded="true"]').forEach(b=>b.click());
+        if(!document.querySelector('.compat-report-export textarea'))document.querySelector('.compat-report-export > button').click();
+      })()`);
+      await poll(
+        () =>
+          evalx(
+            `!!document.querySelector('.compat-report-export textarea') && !!document.querySelector('[data-upgrade-preview] .compat-control-group') && document.querySelectorAll('.compat-control-group').length>=2`,
+          ),
+        "Export or form controls did not mount",
+      );
+      const spacingAndReport = await evalx(`(()=>{
+        const folds=[...document.querySelectorAll('.compat-dependency-panel > .compat-fold')];
+        const cardGap=folds[1].getBoundingClientRect().top-folds[0].getBoundingClientRect().bottom;
+        const formGaps=[...document.querySelectorAll('.compat-control-group')].map(g=>g.querySelector('button').getBoundingClientRect().top-g.querySelector('input').getBoundingClientRect().bottom);
+        return {cardGap,formGaps,report:document.querySelector('.compat-report-export textarea').value};
+      })()`);
+      requireTrue(
+        Math.abs(spacingAndReport.cardGap - 12) <= 1 &&
+          spacingAndReport.formGaps.length >= 2 &&
+          spacingAndReport.formGaps.every((g) => Math.abs(g - 12) <= 1),
+        "Adjacent cards or form actions lack shared spacing: " +
+          JSON.stringify({
+            cardGap: spacingAndReport.cardGap,
+            formGaps: spacingAndReport.formGaps,
+          }),
+      );
+      requireTrue(
+        spacingAndReport.report.startsWith(
+          vocabulary["# DSH 插件兼容性故障报告"],
+        ),
+        "Diagnostic report did not follow UI language",
+      );
+      requireTrue(
+        JSON.stringify(
+          spacingAndReport.report.match(/```sh\n[\s\S]*?\n```/g),
+        ) === JSON.stringify(before.issueReport.match(/```sh\n[\s\S]*?\n```/g)),
+        "Localized diagnostic changed reproduction commands",
+      );
+      metrics.push({
+        locale,
+        cardGap: spacingAndReport.cardGap,
+        formGaps: spacingAndReport.formGaps,
+        diagnosticReportTranslated: true,
+      });
       const layout = await evalx(`(()=>{
         const graph=document.querySelector('[aria-label=${JSON.stringify(vocabulary["依赖关系与潜在影响"])}]');
         const paragraphs=[...graph.querySelectorAll(':scope > p')].map(p=>p.textContent);

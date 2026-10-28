@@ -6,6 +6,7 @@
   --dsc-font-heading: 14px;
   --dsc-font-small: 12px;
   --dsc-card-inset: 16px;
+  --dsc-section-gap: 12px;
   --dsc-background: 0 0% 100%;
   --dsc-foreground: 240 10% 12%;
   --dsc-card: 0 0% 100%;
@@ -195,6 +196,24 @@
 .dsc-ui .compat-fold {
   min-width: 0;
   margin: 0;
+}
+.dsc-ui .compat-dependency-panel > .compat-fold + .compat-fold {
+  margin-block-start: var(--dsc-section-gap);
+}
+.dsc-ui .compat-control-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dsc-section-gap);
+}
+.dsc-ui .compat-control-group > input {
+  flex: 1 1 100%;
+}
+.dsc-ui .compat-control-group > button + button {
+  margin-inline-start: 0;
+}
+.dsc-ui .compat-report-export textarea + button {
+  margin-block-start: var(--dsc-section-gap);
 }
 .dsc-ui .compat-fold-header {
   display: grid;

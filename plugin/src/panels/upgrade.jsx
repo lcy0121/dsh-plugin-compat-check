@@ -323,26 +323,30 @@ function UpgradePreview(p) {
         },
       ),
     ),
-    h("input", {
-      "aria-label": t("目标 DSH 版本"),
-      placeholder: t("输入精确目标版本"),
-      value: target[0],
-      style: styles.btn,
-      onChange: function (event) {
-        generation.current++;
-        target[1](event.target.value);
-        state[1]({ phase: "idle" });
-      },
-    }),
     h(
-      "button",
-      {
-        type: "button",
+      "div",
+      { className: "compat-control-group" },
+      h("input", {
+        "aria-label": t("目标 DSH 版本"),
+        placeholder: t("输入精确目标版本"),
+        value: target[0],
         style: styles.btn,
-        disabled: state[0].phase === "loading" || !String(target[0]).trim(),
-        onClick: run,
-      },
-      t("运行升级预检"),
+        onChange: function (event) {
+          generation.current++;
+          target[1](event.target.value);
+          state[1]({ phase: "idle" });
+        },
+      }),
+      h(
+        "button",
+        {
+          type: "button",
+          style: styles.btn,
+          disabled: state[0].phase === "loading" || !String(target[0]).trim(),
+          onClick: run,
+        },
+        t("运行升级预检"),
+      ),
     ),
     state[0].phase === "loading"
       ? h("p", { role: "status" }, t("正在捕获相同制品并比较静态风险……"))
