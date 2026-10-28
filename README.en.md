@@ -6,7 +6,7 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-**0.1.7** includes rc.3 adaptation, upgrade preview, parameter semantics and boundary hardening. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2`. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2 and 0.2.1-rc.3**; the minimum does not certify future hosts.
+**0.2.0** (unpublished development version) combines a unified UI, Chinese/English/Korean localization, reduced overhead, review archives and report history, retaining rc.3 adaptation, upgrade preview, parameter semantics and boundary hardening. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2`. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2 and 0.2.1-rc.3**; the minimum does not certify future hosts.
 
 The npm plugin provides a compatibility page, details/badges, `compat_check` and a skill. Repository-only CLI, install checks, static batches, author CI and health executor share the kernel. The npm package has no CLI bin; `npx dsh-plugin-compat-check` is unsupported. [Plan](docs/Plan.md) tracks contracts and tasks; [docs/current-state.json](docs/current-state.json) records scoped verification.
 
@@ -31,7 +31,7 @@ After installing, open the DSH instance using that profile, then navigate to:
 
 ### Using each panel
 
-This describes the repository's **unpublished 0.1.8 development UI**. Layout and buttons in the published 0.1.7 may differ.
+This describes the repository's **unpublished 0.2.0 development UI**. Layout and buttons in the published 0.1.7 may differ.
 
 The UI supports Chinese, English and Korean. By default it follows the host document language, recognizing BCP 47 language tags with `zh`, `en` or `ko` as the primary language; an unsupported host language falls back to English. Use **Interface language** in the main results to choose **Follow host** (auto), **中文**, **English** or **한국어**. The preference is saved locally. Diagnostic report headings, explanations and verification suggestions follow the UI language; copied text matches the preview. Raw findings, diagnostics, user notes and exported JSON retain their original text; switching language changes presentation only, not report data, evidence or identities.
 

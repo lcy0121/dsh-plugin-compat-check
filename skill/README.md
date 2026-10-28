@@ -1,6 +1,6 @@
 # skill交付与注册
 
-本文对应**0.1.7**。[Plan](../docs/Plan.md)维护契约，[current-state](../docs/current-state.json)记录限定验收及实际发布状态。
+本文对应**0.2.0**。[Plan](../docs/Plan.md)维护契约，[current-state](../docs/current-state.json)记录限定验收及实际发布状态。
 
 ## 真源与安装
 

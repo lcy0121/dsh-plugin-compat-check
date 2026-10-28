@@ -1,6 +1,6 @@
 {
-  "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-28T14:41:36.490Z",
+  "toolVersion": "0.2.0",
+  "recordedAt": "2026-10-28T15:02:20.115Z",
   "testFiles": 82,
   "tests": 1241,
   "repositoryFiles": {
@@ -26,7 +26,7 @@
     "sourceContext": {
       "versionSource": "lib/version.mjs",
       "integrationTarget": "main",
-      "scope": "Unpublished 0.1.8 candidate including Chinese/English/Korean UI, consolidated advanced tools, local review archives/history, supervised host verdict/report computation, semantic/transfer budgets and auxiliary terminal escaping. Version remains0.1.7; published0.1.7 metadata is historical only."
+      "scope": "Unpublished0.2.0 candidate: unified Chinese/English/Korean UI, reduced overhead, archives/history and safety/recovery work. Source/plugin/probe version is0.2.0; published0.1.7 metadata and pre-bump receipts remain historical. Fresh local0.2.0 artifact acceptance is recorded below; exact-commit Linux CI and formal publication remain separate."
     },
     "publication": {
       "releaseTarget": "0.1.7",
@@ -66,7 +66,7 @@
       "localHistoryPredecessor": {
         "commit": "56accb0",
         "path": "docs/current-state.json",
-        "scope": "Previous 0.1.8 metadata cache/review navigation/UI CI/module split acceptance; does not certify new archive/snapshot functionality."
+        "scope": "Earlier development-line metadata cache/review navigation/UI CI/module split acceptance; does not certify new archive/snapshot functionality."
       },
       "uiHistoryPredecessor": {
         "commit": "a355e2d",
@@ -242,7 +242,18 @@
         }
       },
       "fixes": "83b76db: platform-independent optional-license verification and fixed mutation-proof input.361c74b: intrinsic metric sizing/whole labels and runner CJK fonts. Existing UI/deadline assertions retained.",
-      "scope": "First full0.1.8 UI Linux acceptance on the recorded clean commit and tgz only. Docs-only completion follows this evidence. No Windows, general business certification, npm publish or release claim."
+      "scope": "First full UI Linux acceptance for the development line now targeted at0.2.0, on the recorded clean commit and toolVersion0.1.7 tgz only. This historical receipt does not certify the bumped0.2.0 artifact. No Windows, general business certification or new publication claim."
+    },
+    "version020Local20261028": {
+      "toolVersion": "0.2.0",
+      "host": "0.2.1-rc.3",
+      "platform": "darwin",
+      "arch": "arm64",
+      "artifactSha256": "bc4d604b963bfb8eed2f17fe5f2da83a20362ef649d4b7475c6e42f08ed35f0d",
+      "sourceBaseCommit": "bb1f6a46fdae85de08884ad33fe639e5afb00211",
+      "sourceManifestSha256": "00fa86fcc3375004bbe0ef74843f376ab226c5a1bfd27fddf9568bc5286c5ddb",
+      "validation": "Fresh independent0.2.0 tgz installed in owned host; all nine UI/auth/history/i18n acceptance sections passed. CLI --version, plugin/probe manifests, skill copies, generated client and maintained docs agree. Default1241 tests:1233pass/8skip/0fail; local prepublish gate passed.",
+      "scope": "Local dirty working-source snapshot; receipts added afterward. No remote push, release, npm publication or Linux acceptance claim for bumped artifact. Prior clean Linux receipts retain original0.1.7 artifact identity."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

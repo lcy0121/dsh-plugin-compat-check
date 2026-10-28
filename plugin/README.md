@@ -4,7 +4,7 @@
 
 [简体中文](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/README.md) | [English](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/README.en.md) | [한국어](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/README.ko.md)
 
-**0.1.7**提供rc.3适配、升级预检、参数语义与边界加固。Node `^22.19.0 || >=24`，宿主声明`>=0.2.0-rc.2`；已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3**，最低版本声明不认证未来宿主。
+**0.2.0**（开发中，尚未发布）整合统一界面、中英韩国际化、轻量化、人工处置归档及历史对照，保留rc.3适配、升级预检、参数语义与边界加固。Node `^22.19.0 || >=24`，宿主声明`>=0.2.0-rc.2`；已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3**，最低版本声明不认证未来宿主。
 
 ![历史详情页示例，不代表当前制品或业务验收](https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/main/plugin/assets/compat-detail-partial.png)
 
@@ -22,7 +22,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 ### 界面各板块怎么用
 
-以下按仓库中**尚未发布的0.1.8开发界面**说明；已发布0.1.7的布局和按钮可能不同。
+以下按仓库中**尚未发布的0.2.0开发界面**说明；已发布0.1.7的布局和按钮可能不同。
 
 界面支持**中文、English、한국어**，默认跟随宿主语言；主结果标题旁的“界面语言”可切换或恢复“跟随宿主”，偏好仅保存在本机本插件中，不修改宿主语言。未支持的宿主语言回退英文。按钮、状态和无障碍标签随语言更新；原始发现、诊断、人工依据及导出内容保留原文，切换语言不会重置筛选或草稿。
 

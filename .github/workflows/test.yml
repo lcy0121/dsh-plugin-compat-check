@@ -103,7 +103,7 @@ jobs:
             fc-match --format '%{family}: %{file}\n' ":lang=$language" >> "$RUNNER_TEMP/linux-ui-fonts.txt"
           done
           cat "$RUNNER_TEMP/linux-ui-fonts.txt"
-      - name: Complete 0.1.8 UI acceptance on one independent package
+      - name: Complete 0.2.0 UI acceptance on one independent package
         if: matrix.dsh == '0.2.1-rc.3'
         run: node tools/ci-ui018.mjs "$RUNNER_TEMP/linux-ui018"
       - name: Real Linux Chrome startup and failure evidence
