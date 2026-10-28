@@ -4,6 +4,7 @@
  * File mode requires paired --probe and --labels artifacts from the same sample.
  */
 import fs from "node:fs";
+import { terminalText } from "../lib/contracts.mjs";
 import { failureDiagnostic } from "../lib/owned-process.mjs";
 import os from "node:os";
 import path from "node:path";
@@ -111,11 +112,11 @@ function show(report, json) {
     return;
   }
   if (report.error) {
-    console.error(`标注集测量失败：${report.error}\n${USAGE}`);
+    console.error(`标注集测量失败：${terminalText(report.error)}\n${USAGE}`);
     return;
   }
   console.log(
-    `标注集对账 — DSH ${report.dshVersion}\n覆盖：${report.coveredLayer}\n不覆盖：${report.notCovered.join("、")}`,
+    `标注集对账 — DSH ${terminalText(report.dshVersion)}\n覆盖：${report.coveredLayer}\n不覆盖：${report.notCovered.join("、")}`,
   );
   console.log("预测仅使用源码和服务观测；独立loader标签不进入判定器。");
   console.log(
@@ -126,7 +127,7 @@ function show(report, json) {
   );
   for (const row of report.rows)
     console.log(
-      `${row.verdict} ${row.plugin} loader=${row.labelState ?? "无标签"} fatal=${row.fatalCount}${row.reason ? " " + row.reason : ""}`,
+      `${row.verdict} ${terminalText(row.plugin)} loader=${row.labelState ?? "无标签"} fatal=${row.fatalCount}${row.reason ? " " + row.reason : ""}`,
     );
 }
 async function main() {

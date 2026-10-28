@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-27T14:36:48.306Z",
-  "testFiles": 79,
-  "tests": 1226,
+  "recordedAt": "2026-10-28T09:08:15.119Z",
+  "testFiles": 81,
+  "tests": 1233,
   "repositoryFiles": {
-    "total": 382,
+    "total": 386,
     "fixtures": 99,
-    "other": 283
+    "other": 287
   },
   "verification": {
     "platform": "darwin",
@@ -26,7 +26,7 @@
     "sourceContext": {
       "versionSource": "lib/version.mjs",
       "integrationTarget": "main",
-      "scope": "Unpublished 0.1.8 candidate including Chinese/English/Korean UI, consolidated advanced tools, local review archives and opt-in report snapshots/trends. Version remains0.1.7; published0.1.7 metadata is historical only."
+      "scope": "Unpublished 0.1.8 candidate including Chinese/English/Korean UI, consolidated advanced tools, local review archives/history, supervised host verdict/report computation, semantic/transfer budgets and auxiliary terminal escaping. Version remains0.1.7; published0.1.7 metadata is historical only."
     },
     "publication": {
       "releaseTarget": "0.1.7",
@@ -173,6 +173,58 @@
         "previewUrl": "http://127.0.0.1:50251/"
       },
       "ci": "tools/ci-ui018.mjs requires the three-language and narrow/theme screenshots plus all nine evidence sections. First matching Linux run remains pending authorized push."
+    },
+    "upstreamStatus20261028": {
+      "checkedAt": "2026-10-28T09:02:51Z",
+      "scope": "Read-only GitHub issue/PR, source and adjacent tag comparisons; no posts, target installation or actual Desktop interrupted-update acceptance.",
+      "market928": {
+        "state": "open",
+        "reply": "https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6459488744",
+        "mergeCommit": "258f9d8334ce541515f159f81ba36eabbc2befac",
+        "mergedAt": "2026-10-21T18:33:25Z",
+        "tagEvidence": "v1.66.46 is one commit before the merge; v1.66.47 contains the merge (two commits after).",
+        "sourceEvidence": [
+          "https://github.com/dsh-market/dsh-market/blob/258f9d8334ce541515f159f81ba36eabbc2befac/src/official-desktop.ts#L278-L302",
+          "https://github.com/dsh-market/dsh-market/blob/258f9d8334ce541515f159f81ba36eabbc2befac/src/pending-updates.ts#L294-L328",
+          "https://github.com/dsh-market/dsh-market/blob/258f9d8334ce541515f159f81ba36eabbc2befac/tests/pending-updates.spec.ts#L98",
+          "https://github.com/dsh-market/dsh-market/blob/258f9d8334ce541515f159f81ba36eabbc2befac/tests/pending-updates.spec.ts#L182",
+          "https://github.com/dsh-market/dsh-market/blob/v1.66.44/src/official-desktop.ts#L169-L195"
+        ],
+        "verified": "Journal begin precedes remove; repair enumerates existing same-profile records. Source tests cover removal before install and on-disk but undeclared builds; inspected, not executed.",
+        "limits": "Requires a pre-existing journal from a market-initiated update. Does not reconstruct old-version or non-market removals. Old manager remove awaits without a deadline; missing terminal logs alone cannot exclude an unresolved wait or lost log, so process termination is not independently established.",
+        "remaining": "Owned temporary Desktop profile: controlled interruption/restart, journal order, dependency/bundle/disk/log consistency, retained record on repair failure. Headless is not equivalent; no user profile is modified."
+      },
+      "market932": {
+        "state": "closed",
+        "remaining": "Full-packument fallback is the maintainer-reported 1.66.43 change; both-lookups-fail behavior still needs acceptance."
+      },
+      "store22": {
+        "state": "open",
+        "remaining": "No new maintainer reply; usable npm method and fresh install remain unverified."
+      },
+      "awesome717": {
+        "state": "open",
+        "merged": false,
+        "remaining": "No new discussion comment; merge pending."
+      }
+    },
+    "hostIsolationLocal20261028": {
+      "scope": "Local macOS arm64; owned synthetic inputs and trusted stress workers. Does not certify Linux, Windows, actual ecosystem-scale pause duration or general business behavior.",
+      "validation": "Default suite: 1233 tests, 1225 pass, 8 optional skips; npm run check and local prepublish gate passed. Existing package test packs/installs an independent tgz and executes its host report/tool/preview paths. No push or publication.",
+      "regressions": [
+        "Dependency-access counts at 250/500/1000 service entries stay linear; old implementation read 250000 dependency keys for 500 services.",
+        "Started post-extraction CPU worker hits its deadline while host heartbeat continues; worker is reclaimed before its supervisor settles. Started cancellation also stops a shared counter.",
+        "Timeout and semantic budget failure retain the last successful cache and unchanged baseline; later computation recovers.",
+        "Labels matched/no-label and direct-extraction success/error output escape C0/C1/bidi controls; JSON original identity and process exit code remain unchanged. Arrival summaries use the same output boundary."
+      ],
+      "limits": {
+        "plugins": 2000,
+        "services": 20000,
+        "dependencies": 50000,
+        "callSites": 50000,
+        "transferBytes": 8388608,
+        "hostComputeWorkerMs": 10000
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

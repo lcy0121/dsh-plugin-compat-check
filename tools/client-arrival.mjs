@@ -9,6 +9,7 @@ import {
 } from "../lib/owned-process.mjs";
 import { launchChromePipe } from "../lib/debugger.mjs";
 import { command } from "../lib/probe-runner.mjs";
+import { terminalText } from "../lib/contracts.mjs";
 import { compatibilityText } from "./arrival-text.mjs";
 import { randomUUID } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
@@ -71,7 +72,7 @@ function parseArgs(argv) {
 
 /** cdp 的最小封装：够用就好，零依赖 */
 function log(msg, quiet) {
-  if (!quiet) process.stderr.write(`${msg}\n`);
+  if (!quiet) process.stderr.write(`${terminalText(msg)}\n`);
 }
 
 async function main() {
@@ -80,7 +81,7 @@ async function main() {
     throw new Error("Invalid profile name");
   const base = path.join(HOME, "profiles", opts.profile);
   if (!fs.existsSync(base) && opts.profile !== "web") {
-    process.stderr.write(`基准 profile 不存在：${base}\n`);
+    process.stderr.write(`基准 profile 不存在：${terminalText(base)}\n`);
     process.exit(3);
   }
   if (!fs.existsSync(CHROME)) {
@@ -316,13 +317,13 @@ async function main() {
         process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
       } else {
         process.stdout.write(
-          `客户端到货对账 —— ${opts.profile}${opts.breakClient ? " + 已知会坏的客户端插件" : ""}\n\n`,
+          `客户端到货对账 —— ${terminalText(opts.profile)}${opts.breakClient ? " + 已知会坏的客户端插件" : ""}\n\n`,
         );
         process.stdout.write(
           `  宿主没有启动（${payload.expected ? "预期负向对照" : "非预期失败"}）\n\n`,
         );
         for (const line of payload.hostError.split("\n"))
-          process.stdout.write(`    ${line}\n`);
+          process.stdout.write(`    ${terminalText(line)}\n`);
         process.stdout.write("\n");
         if (payload.expected) {
           process.stdout.write(
@@ -470,7 +471,10 @@ async function main() {
       const target = new URL("/plugin-compat-check/report?refresh=1", url);
       const token = new URL(url).searchParams.get("token");
       const response = await fetch(target, {
-        headers: { Authorization: `Bearer ${token}`, "X-DSH-Compat-Request": "1" },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-DSH-Compat-Request": "1",
+        },
         signal: AbortSignal.timeout(15000),
       });
       if (!response.ok)
@@ -512,7 +516,7 @@ async function main() {
       process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
     } else {
       process.stdout.write(
-        `客户端到货对账 —— ${opts.profile}${opts.withPlugin ? " + 本插件" : ""}${opts.breakClient ? " + 已知会坏的客户端插件" : ""}\n\n`,
+        `客户端到货对账 —— ${terminalText(opts.profile)}${opts.withPlugin ? " + 本插件" : ""}${opts.breakClient ? " + 已知会坏的客户端插件" : ""}\n\n`,
       );
       process.stdout.write(
         `  计划加载    ${rows.length} 条条目 / ${batches.length} 个批次（__DSH_BOOT__）\n`,
@@ -529,7 +533,7 @@ async function main() {
       );
       if (errorScreen !== null)
         process.stdout.write(
-          `  ❌ 错误屏    ${String(errorScreen).replace(/\s+/g, " ").slice(0, 120)}\n`,
+          `  ❌ 错误屏    ${terminalText(String(errorScreen).replace(/\s+/g, " ").slice(0, 120))}\n`,
         );
       if (ourEntry)
         process.stdout.write(
@@ -541,12 +545,12 @@ async function main() {
       );
       for (const b of batches) {
         process.stdout.write(
-          `    ${b.arrived ? "✅" : "❌"} ${String(b.phase).padEnd(12)} ${String(b.entries).padStart(3)} 条  rev=${String(b.rev).slice(0, 12)}${b.error ? `  error=${b.error}` : ""}\n`,
+          `    ${b.arrived ? "✅" : "❌"} ${terminalText(String(b.phase)).padEnd(12)} ${terminalText(String(b.entries)).padStart(3)} 条  rev=${terminalText(String(b.rev)).slice(0, 12)}${b.error ? `  error=${terminalText(b.error)}` : ""}\n`,
         );
       }
       for (const m of missing.slice(0, 10)) {
         process.stdout.write(
-          `\n  ❌ ${m.id}\n       phase=${m.phase} error=${m.error ?? "-"}\n`,
+          `\n  ❌ ${terminalText(m.id)}\n       phase=${terminalText(m.phase)} error=${terminalText(m.error ?? "-")}\n`,
         );
       }
     }

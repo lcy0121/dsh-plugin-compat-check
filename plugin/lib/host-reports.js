@@ -13,6 +13,7 @@ export function createReportRuntime({
   log,
   errText,
   attachFindingReviews,
+  analysisWorkerOptions = {},
 }) {
   async function hostPluginListing(ctx, kernel, signal) {
     const { bounded } = await import(
@@ -267,11 +268,8 @@ export function createReportRuntime({
         return out;
       }
 
-      const { extractInWorker } = await import(
+      const { extractInWorker, computeHostReportInWorker } = await import(
         pathToFileURL(join(kernel, "lib", "worker-analysis.mjs")).href
-      );
-      const { buildVerdicts } = await import(
-        pathToFileURL(join(kernel, "lib", "verdict.mjs")).href
       );
 
       const { loadCatalog } = await import(
@@ -312,9 +310,12 @@ export function createReportRuntime({
       }
       out.surfaceWhy = surfaceWhy;
 
-      const extracted = await extractInWorker(nm.dir, { catalog }, 10000, {
-        signal: options._cacheGuard?.signal,
-      });
+      const extracted = await extractInWorker(
+        nm.dir,
+        { catalog, analysisLimits: analysisWorkerOptions.limits },
+        analysisWorkerOptions.timeoutMs ?? 10000,
+        { signal: options._cacheGuard?.signal },
+      );
       if (state.disposed)
         return failureEnvelope("Plugin generation disposed / 已卸载");
       if (options._cacheInputs)
@@ -366,17 +367,32 @@ export function createReportRuntime({
         pathToFileURL(join(kernel, "lib", "profile-compatibility.mjs")).href
       );
       const compatibility = readProfileCompatibility(nm.dir);
-      const verdict = buildVerdicts({
-        report: extracted.report,
-        hostSurface,
-        rules,
-        catalog,
-        dshVersion: resolveDshVersion(),
-        entryStates: loaderState.rows,
-        observationTarget: { profileId: nm.dir, maxAgeMs: 24 * 60 * 60 * 1000 },
-        compatibilityExemptions: compatibility.exemptions,
-        compatibilityNotes: compatibility.notes,
-      });
+      const { canonical, snapshot, issueReport } =
+        await computeHostReportInWorker(
+          {
+            extracted,
+            hostSurface,
+            rules,
+            catalog,
+            catalogEvidence,
+            dshVersion: resolveDshVersion(),
+            entryStates: loaderState.rows,
+            observationTarget: {
+              profileId: nm.dir,
+              maxAgeMs: 24 * 60 * 60 * 1000,
+            },
+            compatibilityExemptions: compatibility.exemptions,
+            compatibilityNotes: compatibility.notes,
+            inputs: {
+              nodeModules: nm.dir,
+              catalog: catalogPath,
+              rules: rulesPath,
+            },
+          },
+          { ...analysisWorkerOptions, signal: options._cacheGuard?.signal },
+        );
+      if (state.disposed)
+        return failureEnvelope("Plugin generation disposed / 已卸载");
 
       // ── C4：基线差分 ──
       // 用**与 CLI 完全相同**的 lib/baseline.mjs。面板说"变差了"而命令行说"没变"
@@ -384,27 +400,14 @@ export function createReportRuntime({
       let baseline = null,
         finalizeBaseline = null;
       try {
-        const { snapshotForBaseline, diffAgainstBaseline, badgeFor } =
-          await import(pathToFileURL(join(kernel, "lib", "baseline.mjs")).href);
         const store = await import(
           pathToFileURL(join(kernel, "lib", "state-store.mjs")).href
         );
-        const identity = store.baselineIdentity(
-          nm.dir,
-          verdict.observation.mode,
-          rules,
-          catalog,
-        );
-        const snap = snapshotForBaseline(
-          verdict,
-          resolveDshVersion(),
-          identity,
-        );
-        const bfile = store.baselinePath(nm.dir, verdict.observation.mode);
+        const bfile = store.baselinePath(nm.dir, canonical.observation.mode);
         if (state.disposed)
           return failureEnvelope("Plugin generation disposed / 已卸载");
         finalizeBaseline = () =>
-          store.baselineTransaction(bfile, snap, {
+          store.baselineTransaction(bfile, snapshot, {
             advance: extracted.report.scanComplete,
             skipReason: "incomplete",
           });
@@ -452,43 +455,24 @@ export function createReportRuntime({
         out.itemsError = errText(error);
       }
 
-      const { toJSON } = await import(
-        pathToFileURL(join(kernel, "lib", "report.mjs")).href
-      );
-      const { renderIssueReport } = await import(
-        pathToFileURL(join(kernel, "lib", "issue-report.mjs")).href
-      );
       if (state.disposed)
         return failureEnvelope("Plugin generation disposed / 已卸载");
-      const canonical = toJSON({
-        error: null,
-        extract: extracted,
-        verdict,
-        entryStates: loaderState.rows,
-        baseline,
-        catalog: catalogEvidence,
-        inputs: {
-          nodeModules: nm.dir,
-          hasRuntimeSurface: verdict.observation.usable,
-          catalog: catalogPath,
-          rules: rulesPath,
-        },
-      });
+      canonical.baseline = baseline;
       if (options._cacheGuard && finalizeBaseline)
         options._cacheGuard.commit(() => {
           baseline = finalizeBaseline();
           canonical.baseline = baseline;
           out.baseline = baseline;
           out.report.baseline = baseline;
-          out.issueReport = renderIssueReport(canonical);
         });
-      out.issueReport = renderIssueReport(canonical);
+      // Share view intentionally excludes baseline; it was rendered in the worker.
+      out.issueReport = issueReport;
       out.baseline = canonical.baseline;
       out.dshVersion = canonical.dshVersion;
       out.exitCode = canonical.exitCode;
       out.report = {
         ...canonical,
-        hasRuntimeSurface: verdict.observation.usable,
+        hasRuntimeSurface: canonical.observation.usable,
         loaderCoverage: out.loaderCoverage,
         surfaceWhy,
         items: out.items || [],

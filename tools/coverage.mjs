@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /** AST rule inventory. Historical regex artifact lists never filter current calls. */
 import fs from "node:fs";
+import { terminalText } from "../lib/contracts.mjs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -186,12 +187,12 @@ function main() {
     if (options.json) console.log(JSON.stringify(measured, null, 2));
     else
       console.log(
-        `AST规则库存 DSH=${measured._dshVersion || "未知"} ${measured.scanComplete ? "扫描完整" : "扫描不完整"}\n插件${measured.manifests}，服务${measured.usedServices}，分端方法对${measured.pairs}，有对应规则${measured.coveredPairs}\n规则命中${measured.engineRuleHit}，默认影响${measured.engineUnknownImpact}，类别发现${measured.engineCategoryFindings}\n观测${measured.observation.mode}；仅描述本次输入，不是生态准确率。`,
+        `AST规则库存 DSH=${terminalText(measured._dshVersion || "未知")} ${measured.scanComplete ? "扫描完整" : "扫描不完整"}\n插件${measured.manifests}，服务${measured.usedServices}，分端方法对${measured.pairs}，有对应规则${measured.coveredPairs}\n规则命中${measured.engineRuleHit}，默认影响${measured.engineUnknownImpact}，类别发现${measured.engineCategoryFindings}\n观测${measured.observation.mode}；仅描述本次输入，不是生态准确率。`,
       );
   } catch (error) {
     if (options?.json || process.argv.includes("--json"))
       console.log(JSON.stringify({ error: error.message }));
-    else console.error(error.message);
+    else console.error(terminalText(error.message));
     process.exitCode = 3;
   }
 }
