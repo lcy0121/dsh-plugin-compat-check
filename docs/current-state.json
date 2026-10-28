@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-28T09:08:15.119Z",
+  "recordedAt": "2026-10-28T09:53:21.597Z",
   "testFiles": 81,
   "tests": 1233,
   "repositoryFiles": {
-    "total": 386,
+    "total": 387,
     "fixtures": 99,
-    "other": 287
+    "other": 288
   },
   "verification": {
     "platform": "darwin",
@@ -225,6 +225,56 @@
         "transferBytes": 8388608,
         "hostComputeWorkerMs": 10000
       }
+    },
+    "upstreamExecutionLocal20261028": {
+      "recordedAt": "2026-10-28T09:51:18Z",
+      "report": "docs/upstream-verification.md",
+      "artifact": {
+        "package": "dshmarket",
+        "version": "1.73.1",
+        "tgzSha256": "69c34d25dee1d9c4a86fe2d4ce8e0a6946bc7913beeb49406934e69ed37241bf",
+        "integrity": "sha512-mnDEDq743YH2xuLU2qgmssnSiuet5VxS8Bsbggnyez2OfzSnOtIhmnufpe+fA/m+UQr7qI6PkHGCnzW/550tfQ=="
+      },
+      "environment": "macOS arm64; installed official Desktop Host0.2.1-rc.3 IPC entry, real PluginManager, bundled pnpm11.28.5 and owned Chrome. Local registry/fixture packages/private HOME/DSH_HOME. No Electron GUI-shell or ordinary CLI/headless-profile equivalence claim.",
+      "market928": {
+        "acceptance": "not-passed",
+        "fullInterruption": "Real update route journals before manager removal. Live reload did not settle within45s before pnpm remove; original remove-complete/add-not-started chain was not fully reproduced.",
+        "seededRestartCases": [
+          {
+            "input": "package and both declarations missing, journal present",
+            "dependency": "2.0.0",
+            "onDisk": "2.0.0",
+            "bundles": 0,
+            "runtimeService": null,
+            "pendingRecords": 0,
+            "accepted": false
+          },
+          {
+            "input": "on-disk build survives, both declarations missing, journal present",
+            "dependency": "2.0.0",
+            "onDisk": "2.0.0",
+            "bundles": 0,
+            "runtimeService": null,
+            "pendingRecords": 0,
+            "accepted": false
+          }
+        ],
+        "controls": "Unavailable target9.0.0 retains journal and increments attempts; absent journal does not resurrect missing package.",
+        "independentFunctionControl": "Unmodified published repair function given failed application plus target bytes/dependency but no bundle clears journal and records reinstalled; failed-without-bytes retains record; applied-and-enabled clears correctly.",
+        "remaining": "Follow up in original#928 with postcondition evidence; do not infer the user process-termination cause or classify a general Desktop HMR defect from this harness."
+      },
+      "market932": {
+        "metadataControls": [
+          "latest healthy: one request, exact2.0.0",
+          "latest429/HTML plus healthy packument: two requests, exact2.0.0",
+          "both429/HTML: null latest, actual mounted route passes bare package name",
+          "explicit2.0.0 with both lookups failing: exact version preserved"
+        ],
+        "boundary": "Package-manager replacement records argv and deliberately stops before install. HTTP502/exit77 is controlled; no actual old-version install or GUI-warning claim.",
+        "remaining": "Separate improvement issue for explicit unpinned-target warning or maintainer-agreed safe failure; no PR until desired policy is established."
+      },
+      "cleanup": "Recorded16 owned Host PIDs confirmed exited; owned Chrome cleanup awaited. No user profile changed, no account/model credentials used, no upstream post/PR/push.",
+      "scope": "Only upstream verification receipts and documentation changed in this follow-up. Earlier product test results remain historical, not rerun by this record."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
