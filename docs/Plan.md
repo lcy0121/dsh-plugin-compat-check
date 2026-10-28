@@ -72,7 +72,7 @@ UI固定文案及已知依赖/覆盖/预检/采样说明集中为中英韩词典
 
 ## 4. 验收范围
 
-以[current-state](current-state.json)的精确输入、版本、制品及平台为限，不外推生态/业务或Windows认证。0.1.8本轮验收为macOS arm64、DSH 0.2.1-rc.3及同一tgz，合成性能表征不代替真实试用；复核缺陷见§6。历史见`f5ec0d0:docs/current-state.json`及前序指针；正式发布须核对同一验收tgz、registry及release附件。
+以[current-state](current-state.json)的精确输入、版本、制品及平台为限，不外推生态/业务或Windows认证。0.1.8专项UI已在macOS arm64及[Linux x64首次实跑](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40706851821)通过DSH 0.2.1-rc.3验收，各次绑定精确源码与各自同一tgz。Linux全六项作业通过，已核对源码/包/上传归档摘要、九项开关及21张截图；证据见current-state。合成样例不代替真实试用；复核缺陷见§6。历史见`f5ec0d0:docs/current-state.json`及前序指针；正式发布须核对同一验收tgz、registry及release附件。
 
 ## 5. 验证入口
 
@@ -83,6 +83,5 @@ UI固定文案及已知依赖/覆盖/预检/采样说明集中为中英韩词典
 仅列未完成事项，优先级不是漏洞评级；现行UI见§2.4。2026-10-28安全修复并入§2.3，资源上限及平台限制见[指南](guide.md#日常检查与源码交付)。P3为后续扩展，不默认纳入0.1.8发布范围。
 
 1. **P1：继续交互评测与小规模真实用户试用。** 闭环定位、字体/字色、展开、主题及窄容器反馈，记录安装→理解→定位的误读、失败、误报、分享障碍与耗时。合成样例不代替真实试用，保留coverage/vacuous；联系、收集、公开分别授权，不默认遥测。
-2. **P2：0.1.8专项UI持续验收的首次Linux实跑。** 已接入rc.3真实浏览器CI：主题/列宽/键盘/卸载恢复、大列表/完整导出、草稿/处置双向定位、历史归档/快照对照、语言切换/草稿保留/窄容器及HTTP鉴权均由同一tgz入口验收，记录提交/源码摘要、宿主、包摘要和截图。授权推送后核对首个对应提交的Linux报告及上传证据；本地macOS通过不冒充Linux实跑，不扩大业务或平台认证。
-3. **P2：跟进上游验收。** 2026-10-28对市场1.73.1的[实跑记录](upstream-verification.md)：[market#928](https://github.com/dsh-market/dsh-market/issues/928)完整中断路径停在真实管理器live reload，未到pnpm remove，不冒充端到端通过；半卸载状态重启实跑及独立函数对照发现“目标文件/依赖已恢复但bundle未恢复、服务未激活，journal却清空并报reinstalled”。已在[原帖补充实跑及对照](https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6466100240)，等待处理；修复后复验加载声明/实际激活、失败保留及无journal边界，仍不外推完整Electron壳或用户故障根因。[market#932](https://github.com/dsh-market/dsh-market/issues/932)单失败回退通过，双失败仍向安装边界传裸包名且无专门警告，显式版本对照正常；已提交[提示/安全失败改进#1047](https://github.com/dsh-market/dsh-market/issues/1047)，等待策略确认后再决定PR，不声称已实装旧版。[1024#22](https://github.com/imsai-sh/dsh-1024store/issues/22)仍待npm安装方式及新装验收；[awesome#717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)仍未合并。本轮两项反馈已获授权并发出；后续反馈另取授权，不重复发帖。
-4. **P2：Windows真实验收（依环境条件暂缓）。** 条件具备后验证路径、安装、回收、权限、打包/诊断及自有资源清理；此前保持未验收。
+2. **P2：跟进上游验收。** 2026-10-28对市场1.73.1的[实跑记录](upstream-verification.md)：[market#928](https://github.com/dsh-market/dsh-market/issues/928)完整中断路径停在真实管理器live reload，未到pnpm remove，不冒充端到端通过；半卸载状态重启实跑及独立函数对照发现“目标文件/依赖已恢复但bundle未恢复、服务未激活，journal却清空并报reinstalled”。已在[原帖补充实跑及对照](https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6466100240)，等待处理；修复后复验加载声明/实际激活、失败保留及无journal边界，仍不外推完整Electron壳或用户故障根因。[market#932](https://github.com/dsh-market/dsh-market/issues/932)单失败回退通过，双失败仍向安装边界传裸包名且无专门警告，显式版本对照正常；已提交[提示/安全失败改进#1047](https://github.com/dsh-market/dsh-market/issues/1047)，等待策略确认后再决定PR，不声称已实装旧版。[1024#22](https://github.com/imsai-sh/dsh-1024store/issues/22)仍待npm安装方式及新装验收；[awesome#717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)仍未合并。本轮两项反馈已获授权并发出；后续反馈另取授权，不重复发帖。
+3. **P2：Windows真实验收（依环境条件暂缓）。** 条件具备后验证路径、安装、回收、权限、打包/诊断及自有资源清理；此前保持未验收。

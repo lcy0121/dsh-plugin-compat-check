@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-28T14:20:42.869Z",
+  "recordedAt": "2026-10-28T14:41:36.490Z",
   "testFiles": 82,
   "tests": 1241,
   "repositoryFiles": {
@@ -72,6 +72,11 @@
         "commit": "a355e2d",
         "path": "docs/current-state.json",
         "scope": "Historical archive/report-history implementation and eight-flag local same-tgz acceptance. Does not certify later i18n/layout changes."
+      },
+      "upstreamPredecessor": {
+        "commit": "83b76db",
+        "path": "docs/current-state.json",
+        "scope": "Earlier2026-10-25/28 upstream issue snapshots and source/tag review. Later actual execution and authorized feedback remain recorded below."
       }
     },
     "limitations": [
@@ -80,28 +85,6 @@
       "Private execution profiles are not OS sandboxes; account/model execution needs its own authorization.",
       "CI applies to the exact GitHub commit; formal publication must use the accepted archive."
     ],
-    "upstreamStatus20261025": {
-      "checkedAt": "2026-10-25T04:18:16.864505+00:00",
-      "scope": "GitHub issue/PR states refreshed on 2026-10-25 only; maintainer notes remain historical. No source-handler, npm-method or real-install acceptance.",
-      "market932": {
-        "state": "closed",
-        "updatedAt": "2026-10-19T16:56:25Z",
-        "remaining": "Maintainer confirmed 1.66.43 adds full-packument fallback; warning or safe failure when both lookups fail remains a separate change.",
-        "url": "https://github.com/dsh-market/dsh-market/issues/932"
-      },
-      "store22": {
-        "state": "open",
-        "updatedAt": "2026-10-19T06:14:20Z",
-        "remaining": "Await a usable npm installation method, then verify a fresh install.",
-        "url": "https://github.com/imsai-sh/dsh-1024store/issues/22"
-      },
-      "awesome717": {
-        "state": "open",
-        "merged": false,
-        "updatedAt": "2026-10-17T12:54:55Z",
-        "url": "https://github.com/0xsline/awesome-deepseek-harness/pull/717"
-      }
-    },
     "ui018I18nLocal20261027": {
       "scope": "Local macOS arm64/DSH0.2.1-rc.3, owned profiles/fixtures, independent tgz. No push/release, first corresponding Linux run, Windows or general business-health certification.",
       "defaultSuite": {
@@ -130,40 +113,6 @@
         "previewUrl": "http://127.0.0.1:50251/"
       },
       "history": "Earlier localization/layout implementation and review details:8e0104b:docs/current-state.json"
-    },
-    "upstreamStatus20261028": {
-      "checkedAt": "2026-10-28T09:02:51Z",
-      "scope": "Read-only GitHub issue/PR, source and adjacent tag comparisons; no posts, target installation or actual Desktop interrupted-update acceptance.",
-      "market928": {
-        "state": "open",
-        "reply": "https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6459488744",
-        "mergeCommit": "258f9d8334ce541515f159f81ba36eabbc2befac",
-        "mergedAt": "2026-10-21T18:33:25Z",
-        "tagEvidence": "v1.66.46 is one commit before the merge; v1.66.47 contains the merge (two commits after).",
-        "sourceEvidence": [
-          "https://github.com/dsh-market/dsh-market/blob/258f9d8334ce541515f159f81ba36eabbc2befac/src/official-desktop.ts#L278-L302",
-          "https://github.com/dsh-market/dsh-market/blob/258f9d8334ce541515f159f81ba36eabbc2befac/src/pending-updates.ts#L294-L328",
-          "https://github.com/dsh-market/dsh-market/blob/258f9d8334ce541515f159f81ba36eabbc2befac/tests/pending-updates.spec.ts#L98",
-          "https://github.com/dsh-market/dsh-market/blob/258f9d8334ce541515f159f81ba36eabbc2befac/tests/pending-updates.spec.ts#L182",
-          "https://github.com/dsh-market/dsh-market/blob/v1.66.44/src/official-desktop.ts#L169-L195"
-        ],
-        "verified": "Journal begin precedes remove; repair enumerates existing same-profile records. Source tests cover removal before install and on-disk but undeclared builds; inspected, not executed.",
-        "limits": "Requires a pre-existing journal from a market-initiated update. Does not reconstruct old-version or non-market removals. Old manager remove awaits without a deadline; missing terminal logs alone cannot exclude an unresolved wait or lost log, so process termination is not independently established.",
-        "remaining": "Owned temporary Desktop profile: controlled interruption/restart, journal order, dependency/bundle/disk/log consistency, retained record on repair failure. Headless is not equivalent; no user profile is modified."
-      },
-      "market932": {
-        "state": "closed",
-        "remaining": "Full-packument fallback is the maintainer-reported 1.66.43 change; both-lookups-fail behavior still needs acceptance."
-      },
-      "store22": {
-        "state": "open",
-        "remaining": "No new maintainer reply; usable npm method and fresh install remain unverified."
-      },
-      "awesome717": {
-        "state": "open",
-        "merged": false,
-        "remaining": "No new discussion comment; merge pending."
-      }
     },
     "hostIsolationLocal20261028": {
       "scope": "Local macOS arm64; owned synthetic inputs and trusted stress workers. Does not certify Linux, Windows, actual ecosystem-scale pause duration or general business behavior.",
@@ -256,6 +205,44 @@
       },
       "receipts": "tmp/ui-report-spacing-20261028-final/{summary.json,live.json,SHA256SUMS,screenshots/}; ignored local receipts; earlier acceptance:a01a40d:docs/current-state.json",
       "cleanup": "Owned private root removed; no production/model requests."
+    },
+    "ui018LinuxFirst20261028": {
+      "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40706851821",
+      "commit": "361c74bfda4191213ae782db14d88bbf26b8620a",
+      "allJobs": "6/6 success: Node22.19.0/24 default gates; dependency-security; actual Linux0.2.0-rc.2/0.2.1-rc.2/0.2.1-rc.3 integration.",
+      "environment": {
+        "platform": "linux",
+        "arch": "x64",
+        "node": "24.22.1",
+        "chrome": "156.0.8078.47",
+        "dsh": "0.2.1-rc.3",
+        "fonts": "fonts-noto-cjk1:20230817+repack1-3; SC/KR glyphs visually reviewed"
+      },
+      "sourceDirty": false,
+      "sourceManifestSha256": "a48bcab4902854967b56978e5977f6494f81e182994321a77a62119a0bf743cc",
+      "tgzSha256": "bf55dca4d9507268d19d76b592121863c8d14e48fdf025925d8899db80357898",
+      "githubArtifact": {
+        "id": 12824542424,
+        "name": "linux-live-evidence-0.2.1-rc.3",
+        "zipSha256": "997519a22386d4ff1941d074d33aebaf70b273ef2b1d4d2479ca779bc2227c6e"
+      },
+      "evidence": "Verified all389 source files, all30 SHA256SUMS entries and installed tgz identity; nine flags/complete UI validator passed,21 PNGs retained. Three-language cards/form gaps12px; drafts/focus, theme/narrow layout, list bounds/full exports, recovery, reviews/history and HTTP auth passed. Private root removed; zero production/model requests.",
+      "additionalRc3Tests": {
+        "chromeStartup": {
+          "tests": 35,
+          "pass": 35,
+          "skip": 0,
+          "fail": 0
+        },
+        "liveIntegration": {
+          "tests": 63,
+          "pass": 63,
+          "skip": 0,
+          "fail": 0
+        }
+      },
+      "fixes": "83b76db: platform-independent optional-license verification and fixed mutation-proof input.361c74b: intrinsic metric sizing/whole labels and runner CJK fonts. Existing UI/deadline assertions retained.",
+      "scope": "First full0.1.8 UI Linux acceptance on the recorded clean commit and tgz only. Docs-only completion follows this evidence. No Windows, general business certification, npm publish or release claim."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
