@@ -1,8 +1,8 @@
 {
   "toolVersion": "0.1.7",
-  "recordedAt": "2026-10-28T09:53:21.597Z",
+  "recordedAt": "2026-10-28T10:22:51.052Z",
   "testFiles": 81,
-  "tests": 1233,
+  "tests": 1236,
   "repositoryFiles": {
     "total": 387,
     "fixtures": 99,
@@ -104,29 +104,12 @@
     },
     "ui018I18nLocal20261027": {
       "scope": "Local macOS arm64/DSH0.2.1-rc.3, owned profiles/fixtures, independent tgz. No push/release, first corresponding Linux run, Windows or general business-health certification.",
-      "localization": {
-        "languages": [
-          "zh",
-          "en",
-          "ko"
-        ],
-        "messages": 438,
-        "host": "Follow host document.lang primary BCP47 language; optional plugin-local stored override; unsupported language falls back English. No host preference mutation.",
-        "preservation": "Fixed labels, status, ARIA and tagged operation confirmations update in place. Raw findings, diagnostics, user notes and complete exports remain verbatim. Stable fold IDs preserve expansion/page state; imported health status updates without reimport.",
-        "delivery": "No additional i18n runtime dependency. Source dictionaries use readable gettext keys; build compacts repeated keys and emits UTF-8."
-      },
-      "layout": "Results first; diagnostic export and collapsed evidence notes inside primary; dependencies, manual review, static upgrade preview follow. Review archives, snapshots/trends and external health import share a default-closed advanced group; metadata footer is folded. Existing data capabilities, explicit actions and draft protection retained.",
-      "review": {
-        "status": "Completed independent fresh-context review and author screenshot/behavior verification",
-        "fixes": "Stable dependency fold identities, reactive health status, translated review filter options, provider/client-package branch arguments, locale-aware operation confirmations; regression coverage retained."
-      },
       "defaultSuite": {
         "tests": 1226,
         "pass": 1218,
         "skip": 8,
         "fail": 0
       },
-      "gates": "npm run check and local-only prepublish gate passed. A timing-sensitive preexisting debugger fixture timed out during a concurrent full UI run; isolated and subsequent serial full gate passed without weakening deadlines/assertions.",
       "actualAcceptance": {
         "ok": true,
         "host": "0.2.1-rc.3",
@@ -136,32 +119,6 @@
         "sourceBaseCommit": "a355e2d55da4247e91a981c4ddbd87b963d2f26d",
         "sourceSnapshotDirty": true,
         "sourceManifestSha256": "1a81c38fe9af67005e929d88fd8c6b260e68f34f6c787e3f8be856caf33c4557",
-        "binding": "Accepted working-source snapshot; final documentation evidence recorded after execution. All72 runtime files matched source/shared-contract wrappers. Not a clean-commit/Linux claim.",
-        "uiI18n": {
-          "realBrowser": true,
-          "hostLanguage": true,
-          "threeLanguages": true,
-          "draftPreserved": true,
-          "identityPreserved": true,
-          "narrowAndTheme": true,
-          "canonicalReportUnchanged": true,
-          "metrics": [
-            {
-              "locale": "en",
-              "width": 355,
-              "scroll": 355,
-              "theme": "rgb(31, 31, 35)",
-              "buttonWrap": true
-            },
-            {
-              "locale": "ko",
-              "width": 355,
-              "scroll": 355,
-              "theme": "rgb(31, 31, 35)",
-              "buttonWrap": true
-            }
-          ]
-        },
         "existingFlows": "All nine same-artifact CI flags passed: original UI/theme/keyboard/unload, P2 lists/export, recovery/drafts, HTTP auth, hardening, review navigation, local history and i18n. New summary badge boundaries and short-English-word readability checked in real geometry.",
         "networkGuard": {
           "productionRequests": 0
@@ -172,7 +129,7 @@
         "payloadFiles": 72,
         "previewUrl": "http://127.0.0.1:50251/"
       },
-      "ci": "tools/ci-ui018.mjs requires the three-language and narrow/theme screenshots plus all nine evidence sections. First matching Linux run remains pending authorized push."
+      "history": "Earlier localization/layout implementation and review details:8e0104b:docs/current-state.json"
     },
     "upstreamStatus20261028": {
       "checkedAt": "2026-10-28T09:02:51Z",
@@ -261,7 +218,8 @@
         ],
         "controls": "Unavailable target9.0.0 retains journal and increments attempts; absent journal does not resurrect missing package.",
         "independentFunctionControl": "Unmodified published repair function given failed application plus target bytes/dependency but no bundle clears journal and records reinstalled; failed-without-bytes retains record; applied-and-enabled clears correctly.",
-        "remaining": "Follow up in original#928 with postcondition evidence; do not infer the user process-termination cause or classify a general Desktop HMR defect from this harness."
+        "remaining": "Authorized feedback posted and public receipt verified on2026-10-28. Await upstream handling and repeat the same postcondition checks; no inference of the original process-termination cause or general Desktop HMR defect.",
+        "feedback": "https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6466100240"
       },
       "market932": {
         "metadataControls": [
@@ -271,10 +229,33 @@
           "explicit2.0.0 with both lookups failing: exact version preserved"
         ],
         "boundary": "Package-manager replacement records argv and deliberately stops before install. HTTP502/exit77 is controlled; no actual old-version install or GUI-warning claim.",
-        "remaining": "Separate improvement issue for explicit unpinned-target warning or maintainer-agreed safe failure; no PR until desired policy is established."
+        "remaining": "Authorized separate improvement issue posted and public receipt verified on2026-10-28. Await warning-versus-failure policy before a PR.",
+        "feedback": "https://github.com/dsh-market/dsh-market/issues/1047"
       },
-      "cleanup": "Recorded16 owned Host PIDs confirmed exited; owned Chrome cleanup awaited. No user profile changed, no account/model credentials used, no upstream post/PR/push.",
+      "cleanup": "Recorded16 owned Host PIDs confirmed exited; owned Chrome cleanup awaited. No user profile changed, no account/model credentials used, verification itself did not publish. Two later authorized upstream feedbacks are linked above; no PR or repository push.",
       "scope": "Only upstream verification receipts and documentation changed in this follow-up. Earlier product test results remain historical, not rerun by this record."
+    },
+    "uiFeedbackLocal20261028": {
+      "scope": "macOS arm64 / actual DSH0.2.1-rc.3 / owned fixtures and one tgz; no Linux, Windows or business acceptance claim.",
+      "artifactSha256": "2a7b9f5fa3b7d962a33596422a970d6e7e778d678f271db0d7447f477a8c4b8e",
+      "sourceBaseCommit": "8e0104b0c0bac68d2bf0ea6601e745764a6f343a",
+      "sourceManifestSha256": "a862194d9cf296fe3cef2e576c363fb7f2c431ac44c9c282cc827e3995b099aa",
+      "binding": "Accepted dirty working-source snapshot; documentation receipts added after execution. Runtime code unchanged afterward.",
+      "languages": [
+        "zh",
+        "en",
+        "ko"
+      ],
+      "messages": 516,
+      "verified": "Known dependency/coverage/preview/sampling/profile/baseline explanations translated; identifiers/raw evidence unchanged. File controls follow locale. All173 visible disclosure headings per locale centered within0.01px; consistent16px framed insets; note gap7px, save gap12px; export separated from table. Draft/focus, filters, import/export, themes and narrow containers retained.",
+      "defaultSuite": {
+        "tests": 1236,
+        "pass": 1228,
+        "skip": 8,
+        "fail": 0
+      },
+      "receipts": "tmp/ui-feedback-20261028-accepted/{summary.json,live.json,SHA256SUMS,screenshots/}; ignored local receipts, screenshots manually reviewed.",
+      "cleanup": "Owned private root removed; no production/model requests."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

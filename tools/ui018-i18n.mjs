@@ -1,6 +1,7 @@
 /** Real shipped UI acceptance. Uses owned report/host only; never saves the draft. */
 import fs from "node:fs";
 import path from "node:path";
+import { messages } from "../plugin/src/i18n/runtime.mjs";
 export async function verifyUiI18n({
   chrome,
   evalx,
@@ -111,6 +112,75 @@ export async function verifyUiI18n({
           ),
           "Short verdict word was split across lines",
         );
+      const vocabulary = messages[locale];
+      await evalx(
+        `document.querySelector('[data-advanced-tools] > .compat-fold-header button[aria-expanded="false"]')?.click()`,
+      );
+      await evalx(
+        `document.querySelector('[data-advanced-tools]').scrollIntoView({block:'end'})`,
+      );
+      await poll(
+        () => evalx(`!!document.querySelector('.compat-file-upload')`),
+        "Advanced file controls did not mount",
+      );
+      const layout = await evalx(`(()=>{
+        const graph=document.querySelector('[aria-label=${JSON.stringify(vocabulary["依赖关系与潜在影响"])}]');
+        const paragraphs=[...graph.querySelectorAll(':scope > p')].map(p=>p.textContent);
+        const headers=[...document.querySelectorAll('.dsc-ui .compat-fold-header')].filter(h=>h.getBoundingClientRect().height>0).map(h=>{
+          const title=h.querySelector('.compat-fold-title').getBoundingClientRect(),toggle=h.querySelector('button').getBoundingClientRect(),fold=h.parentElement,r=fold.getBoundingClientRect();
+          return {centerDelta:Math.abs((title.top+title.bottom-toggle.top-toggle.bottom)/2),inset:title.left-r.left,expectedInset:16+parseFloat(getComputedStyle(fold).borderLeftWidth),framed:!fold.classList.contains('compat-disclosure')};
+        });
+        const editor=document.querySelector('[data-review-finding] textarea'),label=editor.parentElement,row=editor.closest('[data-review-finding]'),save=[...row.querySelectorAll('button')].find(b=>b.textContent.trim()===${JSON.stringify(vocabulary["保存人工处置"])});
+        const range=document.createRange();range.selectNode(label.firstChild);const labelRect=range.getBoundingClientRect(),editRect=editor.getBoundingClientRect();
+        const output=document.querySelector('.compat-report-export'),table=document.querySelector('.compat-primary [data-slot="table-container"]');
+        return {paragraphs,headers,noteGap:editRect.top-labelRect.bottom,saveGap:save.getBoundingClientRect().top-editRect.bottom,exportGap:output.getBoundingClientRect().top-table.getBoundingClientRect().bottom,fileLabels:[...document.querySelectorAll('.compat-file-upload')].map(e=>e.textContent)};
+      })()`);
+      requireTrue(
+        layout.headers.length >= 8 &&
+          layout.headers.every(
+            (h) =>
+              h.centerDelta <= 1.5 &&
+              (!h.framed || Math.abs(h.inset - h.expectedInset) <= 1.5),
+          ),
+        "Disclosure headings have inconsistent alignment: " +
+          JSON.stringify(layout.headers),
+      );
+      requireTrue(
+        layout.noteGap >= 6 && layout.saveGap >= 10 && layout.exportGap >= 12,
+        "Form or report controls touch adjacent content: " +
+          JSON.stringify(layout),
+      );
+      requireTrue(
+        layout.fileLabels.every((label) =>
+          label.includes(vocabulary["选择文件"]),
+        ) &&
+          layout.fileLabels.some((label) =>
+            label.includes(vocabulary["未选择文件"]),
+          ),
+        "File control follows browser language instead of plugin language: " +
+          JSON.stringify(layout.fileLabels),
+      );
+      if (locale !== "zh")
+        requireTrue(
+          layout.paragraphs.every((p) => !/[\p{Script=Han}]/u.test(p)),
+          "Dependency explanations retain untranslated built-in Chinese",
+        );
+      metrics.push({ locale, alignmentAndSpacing: layout });
+      await evalx(
+        `document.querySelector('[aria-label=${JSON.stringify(vocabulary["依赖关系与潜在影响"])}]').scrollIntoView({block:'start'})`,
+      );
+      await screenshot("ui-dependencies-" + locale);
+      await evalx(
+        `document.querySelector('[data-review-finding]').scrollIntoView({block:'start'})`,
+      );
+      await screenshot("ui-review-spacing-" + locale);
+      await evalx(
+        `document.querySelector('[data-advanced-tools]').scrollIntoView({block:'start'})`,
+      );
+      await screenshot("ui-section-alignment-" + locale);
+      await evalx(
+        `document.querySelector('.compat-primary').scrollIntoView({block:'start'})`,
+      );
       await screenshot("ui-language-" + locale);
       if (locale !== "zh") {
         const narrow = await evalx(

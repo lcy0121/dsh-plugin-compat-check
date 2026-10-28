@@ -78,7 +78,7 @@ describe('文档信息：可复算的数字必须与仓库一致', () => {
   test('public documentation has a compact structure and valid current links', async () => {
     const { checkDocumentLinks } = await import('../tools/doc-check.mjs')
     assert.deepEqual(fs.readdirSync(path.join(REPO, 'docs')).sort(),
-      ['Plan.md', 'author-ci.md', 'current-state.json', 'guide.md', 'maintaining.md'])
+      ['Plan.md', 'author-ci.md', 'current-state.json', 'guide.md', 'maintaining.md', 'upstream-verification.md'])
     assert.deepEqual(checkDocumentLinks(REPO, [...new Set(DOCS)]), [])
     for (const rel of ['docs/Plan.md', 'docs/guide.md', 'docs/maintaining.md']) {
       assert.match(read(rel), /current-state(?:\.json)?/, rel)

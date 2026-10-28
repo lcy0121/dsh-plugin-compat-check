@@ -5,6 +5,7 @@
   --dsc-font-body: 13px;
   --dsc-font-heading: 14px;
   --dsc-font-small: 12px;
+  --dsc-card-inset: 16px;
   --dsc-background: 0 0% 100%;
   --dsc-foreground: 240 10% 12%;
   --dsc-card: 0 0% 100%;
@@ -91,7 +92,7 @@
   min-width: 0;
 }
 .dsc-ui .compat-primary {
-  padding: 20px;
+  padding: var(--dsc-card-inset);
   min-width: 0;
 }
 .dsc-ui .compat-heading {
@@ -164,7 +165,6 @@
 }
 .dsc-ui .compat-report-information {
   min-width: 0;
-  padding: 16px;
   overflow-wrap: anywhere;
 }
 .dsc-ui .compat-results {
@@ -187,22 +187,22 @@
   gap: 12px;
   min-width: 0;
 }
-.dsc-ui .compat-auxiliary > section,
-.dsc-ui .compat-panel-mount > section {
-  padding: 16px;
+.dsc-ui .compat-auxiliary > section:not(.compat-fold),
+.dsc-ui .compat-panel-mount > section:not(.compat-fold) {
+  padding: var(--dsc-card-inset);
   min-width: 0;
 }
 .dsc-ui .compat-fold {
   min-width: 0;
-  margin: 12px 0;
+  margin: 0;
 }
 .dsc-ui .compat-fold-header {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 16px var(--dsc-card-inset);
 }
 .dsc-ui .compat-fold-title {
   display: flex;
@@ -212,13 +212,24 @@
   font-weight: 600;
   min-width: 0;
 }
+.dsc-ui .compat-fold-label {
+  min-width: 0;
+}
+.dsc-ui .compat-fold-toggle {
+  min-inline-size: 6.5em;
+  align-self: center;
+}
+.dsc-ui .compat-fold-toggle > span {
+  inline-size: 1em;
+  text-align: center;
+}
 .dsc-ui .compat-count {
   font-size: var(--dsc-font-body);
   font-weight: 400;
   color: hsl(var(--dsc-muted-foreground));
 }
 .dsc-ui .compat-fold-content {
-  padding: 0 16px 16px;
+  padding: 0 var(--dsc-card-inset) var(--dsc-card-inset);
   min-width: 0;
 }
 .dsc-ui .compat-relation-table {
@@ -275,7 +286,7 @@
 }
 @media (max-width: 640px) {
   .dsc-ui .compat-primary {
-    padding: 14px;
+    padding: var(--dsc-card-inset);
   }
   .dsc-ui .compat-title {
     font-size: var(--dsc-font-heading);
@@ -298,14 +309,17 @@
   font-size: var(--dsc-font-heading);
 }
 .dsc-ui .compat-disclosure {
-  margin: 8px 0;
+  margin: 12px 0;
 }
 .dsc-ui .compat-disclosure > .compat-fold-header {
   padding: 0;
   gap: 8px;
 }
 .dsc-ui .compat-disclosure > .compat-fold-content {
-  padding: 8px 0 0;
+  padding: 12px 0 0;
+}
+.dsc-ui .compat-upgrade-card > .compat-disclosure {
+  margin: 0;
 }
 .dsc-ui [data-slot="collapsible-content"][hidden] {
   display: none;
@@ -313,6 +327,57 @@
 
 .dsc-ui .compat-fold-header > button {
   margin-left: auto;
+}
+.dsc-ui .compat-auxiliary > .compat-fold,
+.dsc-ui .compat-panel-mount > .compat-fold {
+  padding: 0;
+}
+.dsc-ui .compat-report-export {
+  margin-block: 16px;
+}
+.dsc-ui .compat-review-item > label {
+  display: grid;
+  gap: 8px;
+  margin-block: 12px;
+}
+.dsc-ui .compat-review-item > label:has(select) {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+}
+.dsc-ui .compat-review-item > button {
+  margin-inline-end: 8px;
+}
+.dsc-ui .compat-review-item p {
+  margin-block: 10px;
+}
+.dsc-ui .compat-fold-content > :first-child {
+  margin-top: 0;
+}
+.dsc-ui .compat-fold-content > :last-child {
+  margin-bottom: 0;
+}
+.dsc-ui .compat-file-upload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid hsl(var(--dsc-input));
+  border-radius: 6px;
+  min-width: 0;
+}
+.dsc-ui .compat-file-upload > span {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.dsc-ui button + button {
+  margin-inline-start: 8px;
+}
+.dsc-ui [data-advanced-tools] label:has(input) {
+  display: grid;
+  gap: 8px;
+  margin-block: 12px;
 }
 .dsc-ui .compat-count {
   white-space: nowrap;

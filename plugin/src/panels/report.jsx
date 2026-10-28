@@ -1,4 +1,8 @@
-import { catalogueLines } from "../i18n/presentation.mjs";
+import {
+  catalogueLines,
+  evidenceNote,
+  profileSource,
+} from "../i18n/presentation.mjs";
 import { LanguageSelect } from "../i18n/locale.jsx";
 import { t, builtin, uiMessage, messageText } from "../i18n/runtime.mjs";
 import { HistoryTools } from "./history.jsx";
@@ -41,7 +45,7 @@ export function createReportPanels({
       typeof p.data.issueReport === "string" ? p.data.issueReport : null;
     return h(
       "div",
-      null,
+      { className: "compat-report-export" },
       h(
         "button",
         {
@@ -607,7 +611,10 @@ export function createReportPanels({
         ),
         h(
           Card,
-          { "aria-label": t("升级前兼容性预检") },
+          {
+            "aria-label": t("升级前兼容性预检"),
+            className: "compat-upgrade-card",
+          },
           h(UpgradePreview, { data: data }),
         ),
         h(
@@ -645,6 +652,7 @@ export function createReportPanels({
         Fold,
         {
           title: t("报告说明与检查信息"),
+          heading: true,
           className: "compat-report-information",
           "aria-label": t("报告说明与检查信息"),
           keepMounted: true,
@@ -666,13 +674,15 @@ export function createReportPanels({
           h(
             "div",
             { style: styles.annotationParagraph },
-            ((report.observation && report.observation.notes) || []).join("；"),
+            ((report.observation && report.observation.notes) || [])
+              .map(evidenceNote)
+              .join("；"),
           ),
           h(
             "div",
             { style: styles.annotationParagraph },
             t("对象来源：{p0}{p1}", {
-              p0: data.nodeModulesWhy || t("未提供"),
+              p0: profileSource(data.nodeModulesWhy) || t("未提供"),
               p1:
                 data.elapsedMs !== undefined
                   ? t(" · 耗时 {p0}ms", { p0: data.elapsedMs })

@@ -3,6 +3,7 @@ import { t, builtin, localeStore } from "../i18n/runtime.mjs";
 import * as React from "react";
 import { ui, Pager, Fold, Badge as StatusBadge } from "./ui/index.jsx";
 import { nextSteps } from "../../../lib/finding-guidance.mjs";
+import { evidenceNote } from "../i18n/presentation.mjs";
 const FindingGuidance = { nextSteps };
 const h = (type, props, ...children) =>
   React.createElement(ui[type] || type, props, ...children);
@@ -155,7 +156,11 @@ function Coverage(p) {
             t("覆盖限制（{p0}）", { p0: c.limitations.length }),
           ),
           c.limitations.map(function (note, i) {
-            return h("div", { key: i }, t("覆盖限制：{p0}", { p0: note }));
+            return h(
+              "div",
+              { key: i },
+              t("覆盖限制：{p0}", { p0: evidenceNote(note) }),
+            );
           }),
         )
       : null,

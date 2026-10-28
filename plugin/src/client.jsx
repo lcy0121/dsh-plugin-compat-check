@@ -1,5 +1,6 @@
 import {
   baselineText,
+  evidenceNote,
   baselineDetail,
   baselineBadge,
 } from "./i18n/presentation.mjs";
@@ -325,7 +326,7 @@ function Badge(p) {
         "→" +
         (e.versionTo || "?") +
         "：" +
-        e.reason,
+        evidenceNote(e.reason),
     );
     (e.newFindings || []).forEach(function (f) {
       lines.push(
@@ -334,7 +335,7 @@ function Badge(p) {
     });
   });
   (diff.improved || []).forEach(function (e) {
-    lines.push("↑ " + e.name + "：" + e.reason);
+    lines.push("↑ " + e.name + "：" + evidenceNote(e.reason));
   });
   (diff.added || []).forEach(function (e) {
     lines.push("+ " + e.name + "@" + e.version);

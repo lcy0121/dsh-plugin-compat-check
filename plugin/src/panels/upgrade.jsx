@@ -1,4 +1,5 @@
 import { t } from "../i18n/runtime.mjs";
+import { evidenceNote } from "../i18n/presentation.mjs";
 /** Explicit static upgrade comparison, isolated from ordinary report state. */
 import * as React from "react";
 import {
@@ -226,7 +227,7 @@ function UpgradeDetails(p) {
             }),
           ),
           r.limitations.map((note, i) =>
-            h("div", { key: i, style: styles.paragraph }, note),
+            h("div", { key: i, style: styles.paragraph }, evidenceNote(note)),
           ),
         ),
     ),

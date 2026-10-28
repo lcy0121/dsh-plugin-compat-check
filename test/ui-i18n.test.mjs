@@ -294,3 +294,114 @@ test("shipped locale dictionaries avoid repeating Chinese keys in every translat
   visit(parse(source, { sourceType: "script" }));
   assert.equal(duplicated, false);
 });
+
+test("dependency descriptions and coverage explanations translate in the shipped English and Korean panels", async () => {
+  const data = sample(),
+    before = JSON.stringify(data);
+  const h = await panelHarness(data);
+  try {
+    for (const locale of ["en", "ko"]) {
+      h.nodes()
+        .find((n) => n.props["data-ui-language"] !== undefined)
+        .props.onChange({ target: { value: locale } });
+      await h.settle();
+      const title = (await load()).messages[locale]["依赖关系与潜在影响"];
+      const panel = h.nodes().find((n) => n.props["aria-label"] === title);
+      assert(panel, title);
+      assert.doesNotMatch(h.text(panel), /[\p{Script=Han}]/u);
+    }
+    assert.equal(
+      JSON.stringify(data),
+      before,
+      "Presentation must not translate canonical evidence",
+    );
+  } finally {
+    h.dispose();
+  }
+});
+
+test("known coverage message templates translate without changing identifiers or arbitrary evidence", async () => {
+  const { evidenceNote, profileSource } = await import(
+    "../plugin/src/i18n/presentation.mjs"
+  );
+  const { localeStore } = await load();
+  try {
+    for (const locale of ["en", "ko"]) {
+      localeStore.setPreference(locale);
+      for (const text of [
+        "settings 客户端尚未验证",
+        "settings Context 绑定仅由语法推断",
+        "Loader 有 3 个条目无法映射到包名",
+        "结论从「ok」变为「broken」",
+        "已有发现的严重度或证据确定性提高了",
+      ]) {
+        assert.doesNotMatch(evidenceNote(text), /[\p{Script=Han}]/u);
+      }
+      const raw = "用户说明：settings 客户端尚未验证";
+      assert.equal(evidenceNote(raw), raw);
+      assert.doesNotMatch(
+        profileSource("process.argv 的 --profile ui-preview"),
+        /[\p{Script=Han}]/u,
+      );
+      assert(
+        profileSource(
+          "process.argv 里的 profile 路径 /tmp/中文/profiles/example",
+        ).includes("/tmp/中文/profiles/example"),
+      );
+      assert.equal(profileSource("自定义来源"), "自定义来源");
+      assert.equal(
+        evidenceNote("中文服务名 客户端尚未验证").includes("中文服务名"),
+        true,
+      );
+    }
+  } finally {
+    localeStore.setPreference("auto");
+  }
+});
+
+test("all producer-owned graph explanations and upgrade limitations have translations", async () => {
+  const fs = await import("node:fs");
+  const { parse } = await import("@babel/parser");
+  const { messages } = await load();
+  const literals = [];
+  const ast = parse(
+    fs.readFileSync(
+      new URL("../lib/dependency-graph.mjs", import.meta.url),
+      "utf8",
+    ),
+    { sourceType: "module" },
+  );
+  function visit(node) {
+    if (!node || typeof node !== "object") return;
+    if (
+      node.type === "CallExpression" &&
+      (node.callee.name === "limit" ||
+        (node.callee.object?.name === "reasons" &&
+          node.callee.property?.name === "add"))
+    ) {
+      for (const arg of node.arguments)
+        if (arg.type === "StringLiteral") literals.push(arg.value);
+    }
+    if (
+      node.type === "ObjectProperty" &&
+      node.key.name === "notes" &&
+      node.value.type === "ArrayExpression"
+    ) {
+      for (const value of node.value.elements)
+        if (value.type === "StringLiteral") literals.push(value.value);
+    }
+    for (const value of Object.values(node)) {
+      if (Array.isArray(value)) value.forEach(visit);
+      else if (value && typeof value === "object") visit(value);
+    }
+  }
+  visit(ast);
+  const { UPGRADE_PREVIEW_LIMITATIONS } = await import(
+    "../lib/upgrade-contract.mjs"
+  );
+  for (const language of ["en", "ko"])
+    for (const value of [...literals, ...UPGRADE_PREVIEW_LIMITATIONS]) {
+      assert(messages[language][value], `${language}: ${value}`);
+      assert.doesNotMatch(messages[language][value], /[\p{Script=Han}]/u);
+    }
+});

@@ -1,5 +1,6 @@
 import { useLocale } from "../../i18n/locale.jsx";
 import { t, localeStore, uiMessage, messageText } from "../../i18n/runtime.mjs";
+import { evidenceNote } from "../../i18n/presentation.mjs";
 // Adapted from shadcn/ui (MIT), new-york registry. See PROVENANCE.md.
 import * as React from "react";
 import { cva } from "class-variance-authority";
@@ -86,6 +87,7 @@ export function Badge({ className, tone = "neutral", ...props }) {
   );
 }
 export function Input({ className, type, ...props }) {
+  if (type === "file") return <FileInput className={className} {...props} />;
   return (
     <input
       type={type}
@@ -96,6 +98,40 @@ export function Input({ className, type, ...props }) {
       )}
       {...props}
     />
+  );
+}
+function FileInput({ className, onChange, disabled, ...props }) {
+  useLocale();
+  const input = React.useRef(null);
+  const [filename, setFilename] = React.useState("");
+  return (
+    <div className={cn("compat-file-upload", className)}>
+      <input
+        {...props}
+        ref={input}
+        type="file"
+        className="sr-only"
+        tabIndex={-1}
+        disabled={disabled}
+        onChange={(event) => {
+          setFilename(
+            Array.from(event.target.files || [], (file) => file.name).join(
+              ", ",
+            ),
+          );
+          onChange?.(event);
+        }}
+      />
+      <Button
+        type="button"
+        disabled={disabled}
+        aria-label={t("选择文件：{p0}", { p0: props["aria-label"] || "" })}
+        onClick={() => input.current?.click()}
+      >
+        {t("选择文件")}
+      </Button>
+      <span role="status">{filename || t("未选择文件")}</span>
+    </div>
   );
 }
 export function Textarea({ className, ...props }) {
@@ -228,11 +264,11 @@ export function Fold({
     >
       <div className="compat-fold-header">
         <Heading className="compat-fold-title">
-          {title}
+          <span className="compat-fold-label">{title}</span>
           {count != null ? <span className="compat-count">{count}</span> : null}
         </Heading>
         <Button
-          className="shrink-0"
+          className="compat-fold-toggle shrink-0"
           aria-label={t(open ? "收起{p0}" : "展开{p0}", {
             p0: titleText(title),
           })}
@@ -509,4 +545,5 @@ export const ui = {
   locale: localeStore.locale,
   uiMessage,
   messageText,
+  evidenceNote,
 };
