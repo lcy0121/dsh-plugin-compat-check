@@ -82,7 +82,7 @@ const targets = [
   {
     name: 'parityfix',
     nm: parityfix?.nm ?? null,
-    surface: path.join(REPO, 'tools/parity/fixtures/host-surface-parityfix.json'),
+    surface: path.join(REPO, 'test/fixtures/host-surface-parityfix.json'),
     why: '真实插件 + 真实运行时面：三个回归基准的现场',
     optional: true,
   },

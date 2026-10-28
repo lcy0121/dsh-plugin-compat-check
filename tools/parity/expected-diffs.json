@@ -1,5 +1,0 @@
-{
-  "_note": "Node 版与 python 真源之间**已知且有意**的差异。对拍脚本会把这些单独列为『预期差异』，只有列表之外的差异才会失败。加条目时必须写清原因，并尽量说明为什么它不影响判定——否则这个列表会慢慢变成掩盖问题的地方。",
-  "_scope": "注意：对拍现在**只严格比** manifests / fallbackPackages。（早先这里写的是「manifests / services / fallbackPackages」，而 STRICT 里从来没有 services —— 文件与代码互相矛盾，读到哪一句全看运气。现在按代码更正。）calls 与 clientHints 只并排打印数量，不作断言（python 侧在这两项上有跨插件污染与顺序相关缺陷）；services 同理不严比（python 看不见 ctx.inject 这种作用域注入）。所以这个列表只管严格项。",
-  "allow": []
-}

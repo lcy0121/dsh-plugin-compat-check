@@ -345,3 +345,30 @@ for(const [label,source] of [
 test('a closure eval cannot leave implicit require proof in sibling consumers',()=>{
  scan("const file='./worker.js';function replace(){eval('require=()=>({wire(){}})')}replace();exports.apply=ctx=>require(file).wire(ctx)",{files:{'worker.js':'exports.wire=ctx=>ctx.settings.absent()'}},p=>{assert(p.diagnostics.some(d=>d.kind==='module-path-uncertain'));assert(!p.files['host-entry'].includes('worker.js'));});
 });
+
+// Replaces the retired Python parity hang-cycle fixture with current AST behavior.
+// Removing graph de-duplication must fail the bounded child, not hang the test runner.
+test('self-import graphs terminate and extensionless ESM paths remain unresolved', () => {
+  for (const [suffix, files] of [['', ['index.js']], ['.js', ['a.js', 'b.js', 'index.js']]]) {
+    const f = packageFixture(`import x from './b${suffix}';export function apply(ctx){ctx.settings.known()}`, {
+      files: {
+        'a.js': `import y from './a${suffix}';export default y;throw Error('INSPECTED_CODE_EXECUTED')`,
+        'b.js': `import z from './a${suffix}';export default z`,
+      },
+    });
+    try {
+      const script = `import {extractWithProvenance} from ${JSON.stringify(new URL('../lib/extract.mjs', import.meta.url).href)};const r=extractWithProvenance(${JSON.stringify(f.nm)}, {catalog:${JSON.stringify(catalog)}}).report;console.log(JSON.stringify({count:r.manifests.length,plugin:r.perPlugin.sample}));`;
+      const result = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
+        encoding: 'utf8', timeout: 5000,
+      });
+      assert.equal(result.status, 0, result.error?.message || result.stderr);
+      const {count, plugin} = JSON.parse(result.stdout);
+      assert.equal(count, 1);
+      assert.deepEqual(plugin.files['host-entry'], files);
+      assert.deepEqual(plugin.calls.settings, ['known']);
+      assert.equal(plugin.callSites.length, 1);
+      assert.equal(plugin.diagnostics.some(d => d.kind === 'source-unresolved'), suffix === '');
+      assert(!plugin.diagnostics.some(d => /budget|timeout/.test(d.kind)));
+    } finally { f.cleanup(); }
+  }
+});

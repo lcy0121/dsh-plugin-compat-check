@@ -33,7 +33,7 @@ node tools/ci-ui018.mjs <自有输出目录>
 
 `test/fixtures/syntax-matrix.json`与`tools/syntax-matrix.mjs`分别记录并执行supported / inferred / abstained / excluded病例。每例核验包名、精确调用对/跨度、确定性或诊断，不以解析成功代替结论。扩展语法须增加正反例，并保留动态/超限限制；矩阵与真实业务标签独立，不能调严重度求绿。
 
-已完成的A4b排除实验、旧槽位探测和逐轮维护日志保留在`39d9f1a`的相应路径。冻结Python对拍仅作历史比较，当前AST、语法矩阵、到货/实机诊断及行为回归是维护入口；历史参考不是分析真值。
+已完成的A4b排除实验、旧槽位探测和逐轮维护日志保留在`39d9f1a`的相应路径。移植阶段Python提取器/对拍及其专属样例已移除，历史见`26fdbf4:tools/parity/`；当前AST文件图/自循环/精确路径、语法矩阵及快照回归承担验证。仍使用的历史宿主观测原字节迁入`test/fixtures/host-surface-parityfix.json`。独立正则枚举仅供候选复核，不是判定真值。
 
 ## API目录候选审查
 

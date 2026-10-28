@@ -1,3 +1,4 @@
+import { withReviewItems } from "./fixture-utils.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
@@ -229,23 +230,7 @@ test("an older slow health import cannot replace the last selected evidence", as
 
 test("shared history disclosure updates the controlled review history and hides it on collapse", async () => {
   const data = sample();
-  data.reviews.items = Object.entries(data.report.plugins).flatMap(
-    ([pluginName, plugin]) =>
-      plugin.findings.map((finding, findingIndex) => ({
-        findingId: createHash("sha256")
-          .update(pluginName + findingIndex)
-          .digest("hex"),
-        pluginName,
-        pluginVersion: plugin.version,
-        findingIndex,
-        status: "pending",
-        note: "",
-        record: null,
-        history: [],
-        historyCount: 0,
-        reviewReason: null,
-      })),
-  );
+  withReviewItems(data);
   data.reviews.history = [
     {
       findingId: "b".repeat(64),
@@ -274,26 +259,6 @@ test("shared history disclosure updates the controlled review history and hides 
   }
 });
 
-function withReviewItems(data) {
-  data.reviews.items = Object.entries(data.report.plugins).flatMap(
-    ([pluginName, plugin]) =>
-      plugin.findings.map((_, findingIndex) => ({
-        findingId: createHash("sha256")
-          .update(pluginName + findingIndex)
-          .digest("hex"),
-        pluginName,
-        pluginVersion: plugin.version,
-        findingIndex,
-        status: "pending",
-        note: "",
-        record: null,
-        history: [],
-        historyCount: 0,
-        reviewReason: null,
-      })),
-  );
-  return data;
-}
 test("polling retains dirty drafts under original context, copy and discard are explicit, and new findings stay clean", async () => {
   let data = withReviewItems(sample()),
     copied;

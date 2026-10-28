@@ -7,7 +7,7 @@ import {serviceShape} from '../lib/observation.mjs'
  * `probe/index.mjs` 的 `dumpShape` 曾经除了枚举方法名，还会收集一份 `data`：
  * 把所有非函数属性的**字面值**原样写进探针报告。于是 `credentials` 服务的
  * `text` 属性 —— 就是**整份凭据文件**，含 `DEEPSEEK_API_KEY` 与若干 session
- * token —— 被写进了 `tools/parity/fixtures/host-surface-parityfix.json` 并提交。
+ * token —— 被写进了 `test/fixtures/host-surface-parityfix.json` 并提交。
  *
  * 三个让这件事特别难看的细节：
  *
@@ -154,7 +154,7 @@ describe('安全：仓库里不许出现凭据', () => {
   })
 
   test('提交进来的探针报告里不带 data 字段', () => {
-    const p = path.join(REPO, 'tools', 'parity', 'fixtures', 'host-surface-parityfix.json')
+    const p = path.join(REPO, 'test', 'fixtures', 'host-surface-parityfix.json')
     const d = JSON.parse(fs.readFileSync(p, 'utf8'))
     const offenders = Object.entries(d.root || {})
       .filter(([, v]) => v && typeof v === 'object' && 'data' in v)

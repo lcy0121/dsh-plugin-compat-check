@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.2.0",
-  "recordedAt": "2026-10-28T15:23:26.634Z",
+  "recordedAt": "2026-10-28T15:46:39.396Z",
   "testFiles": 82,
-  "tests": 1241,
+  "tests": 1242,
   "repositoryFiles": {
-    "total": 389,
-    "fixtures": 99,
-    "other": 290
+    "total": 380,
+    "fixtures": 100,
+    "other": 280
   },
   "verification": {
     "platform": "darwin",
@@ -138,9 +138,36 @@
       },
       "metadataObservedAt": "2026-10-28T15:17:53.255Z",
       "metadataCheck": "GitHub/npm read-only check: no errors or skipped sources; local version and README differ from the observed public package, as expected before publication.",
-      "fileReview": "lib/test/tools:313 tracked files reviewed for literal references and byte-identical/empty files. No proven disposable files removed; repeated patch files belong to independent fixtures. Required generated copies, frozen reference, workers and regression evidence retained.",
+      "fileReview": "Documentation-preparation snapshot only:313 tracked lib/test/tools files reviewed for references and byte duplication. Later function-level cleanup is recorded separately below.",
       "receipts": "tmp/release-preparation-020-20261028/{summary.json,source.json,live.json,SHA256SUMS,screenshots/}",
       "scope": "Local working-source/artifact acceptance only. This receipt/count update was added afterward; runtime, packaged README and skill bytes unchanged afterward. No push, remote CI for this commit, tag, release or npm publication performed. Formal publication and public-install verification remain separate; historical Linux receipt above applies only to its original bytes."
+    },
+    "functionalCleanup020Local20261028": {
+      "scope": "Repository-only cleanup after26fdbf4. Runtime lib/plugin/skill/rules and dependencies unchanged; no push or publication.",
+      "removed": "Nine obsolete migration-only files: Python reference extractor, parity shell runner/expected-diff list and dedicated hang-cycle package/docs. Historical source:26fdbf4:tools/parity/.",
+      "retained": "Still-consumed host observation moved byte-for-byte to test/fixtures/host-surface-parityfix.json; SHA-256 a169f3cf0b35481ab5c1b38c85c059edc474ae3ea52711b9eb6f5bc68c418fd8. Active lib modules and independent regex candidate enumeration retained.",
+      "tests": "Repeated manual-review inputs consolidated in test/fixture-utils.mjs; distinct assertions retained. Old cycle fixture replaced by current AST self-import/exact-path regression in a bounded child, including no target-code execution. In a throwaway source copy, removing graph de-duplication makes that test fail; production files were never mutated.",
+      "validation": {
+        "defaultSuite": {
+          "tests": 1242,
+          "pass": 1234,
+          "skip": 8,
+          "fail": 0
+        },
+        "affectedSuite": {
+          "tests": 295,
+          "pass": 294,
+          "skip": 1,
+          "fail": 0
+        },
+        "maintenanceCheck": "passed",
+        "artifact": {
+          "version": "0.2.0",
+          "sha256": "659e75efc363488cdcf559a984f909ae8a71d59cd80f66e0fe17c7cc9824a85b",
+          "identicalToAcceptedPackage": true
+        }
+      },
+      "evidence": "/tmp/dsc-020-dedup-{before,after,full,cycle,cycle-mutant}.tap; /tmp/dsc-020-dedup-package.json. Local temporary receipts only; same tgz digest preserves the previous real-host acceptance identity."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

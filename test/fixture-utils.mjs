@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -27,3 +28,25 @@ export function packageFixture(source, { meta = {}, files = {} } = {}) {
 export const fixtureCatalog = { host: {
   settings: { methods: ['known'] }, tools: { methods: ['register'] }, jobs: { methods: ['list'] },
 }, client: {} };
+
+/** Shared review input only; assertions stay in the individual behavior tests. */
+export function withReviewItems(data) {
+  data.reviews.items = Object.entries(data.report.plugins).flatMap(
+    ([pluginName, plugin]) =>
+      plugin.findings.map((_, findingIndex) => ({
+        findingId: createHash("sha256")
+          .update(pluginName + findingIndex)
+          .digest("hex"),
+        pluginName,
+        pluginVersion: plugin.version,
+        findingIndex,
+        status: "pending",
+        note: "",
+        record: null,
+        history: [],
+        historyCount: 0,
+        reviewReason: null,
+      })),
+  );
+  return data;
+}

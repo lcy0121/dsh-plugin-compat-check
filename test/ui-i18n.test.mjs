@@ -1,3 +1,4 @@
+import { withReviewItems } from "./fixture-utils.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
@@ -91,7 +92,6 @@ test("all messages have English and Korean translations with identical interpola
 });
 
 import path from "node:path";
-import { createHash } from "node:crypto";
 import { run } from "../bin/compat-check.mjs";
 import { toJSON } from "../lib/report.mjs";
 import { panelHarness } from "./support/panel-harness.mjs";
@@ -146,23 +146,7 @@ test("overview keeps results first, groups occasional tools behind one closed co
 test("language override updates controls and status labels while preserving filter, exports and report bytes", async () => {
   const data = sample(),
     before = JSON.stringify(data);
-  data.reviews.items = Object.entries(data.report.plugins).flatMap(
-    ([pluginName, plugin]) =>
-      plugin.findings.map((finding, findingIndex) => ({
-        findingId: createHash("sha256")
-          .update(pluginName + findingIndex)
-          .digest("hex"),
-        pluginName,
-        pluginVersion: plugin.version,
-        findingIndex,
-        status: "pending",
-        note: "",
-        record: null,
-        history: [],
-        historyCount: 0,
-        reviewReason: null,
-      })),
-  );
+  withReviewItems(data);
   const canonical = JSON.stringify(data);
   const h = await panelHarness(data, {
     clipboard: { writeText: async () => {} },

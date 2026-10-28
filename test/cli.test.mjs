@@ -33,7 +33,7 @@ import { renderUpgradePreview } from '../lib/upgrade-preview.mjs'
 const CLI = path.join(REPO, 'bin', 'compat-check.mjs')
 const MICRO = path.join(REPO, 'test/fixtures/micro/node_modules')
 const MICRO_SURFACE = path.join(REPO, 'test/fixtures/micro/host-surface.json')
-const BASELINE_SURFACE = path.join(REPO, 'tools/parity/fixtures/host-surface-parityfix.json')
+const BASELINE_SURFACE = path.join(REPO, 'test/fixtures/host-surface-parityfix.json')
 const LABELS = path.join(REPO, 'test/fixtures/labels')
 const PARITYFIX = optionalProfiles().find(p => p.name === 'parityfix')?.nm
 
