@@ -11,15 +11,25 @@ npm test -- --test-reporter=tap > /tmp/dsc-tests.tap
 
 check验证格式、文档/版本/链接、skill/契约副本、第三方说明、可执行语法矩阵及目录登记；不递归跑测试、不联网、不执行目标或改源码。矩阵仅创建/清理自有合成输入。成功TAP交给doc-check核对计数，远端状态及真实宿主另验。
 
-宿主`plugin/index.js`保留加载/资源编排，报告、人工处置、HTTP及预检分别在`plugin/lib/host-{reports,reviews,http,upgrade}.js`；内核处置派生缓存为`lib/review-sidecar-cache.mjs`，不授权保存。客户端入口保留订阅及槽位，普通报告/预检在`plugin/src/panels/`，共用展示在`plugin/src/components/report-common.jsx`。客户端UI真源为`plugin/src/client.jsx`、`plugin/src/components/ui/`和`plugin/src/styles.css`；纯契约及workflow仍由`lib/*.mjs`共享。先`npm ci --ignore-scripts`，再`npm run build:client`生成宿主可加载的预编译客户端；`npm run check:client`只检查可复现字节，`stage-contract`生成3份启动必需的宿主契约和客户端，prepack会调用它；打包内核的对应模块重导出宿主契约，避免第二份实现。浏览器直接按需打包真源，JS/CSS压缩产物由生成校验管理，格式检查针对手写源；移除未用宿主副本及CLI/浏览器专用内核文件时，须复验独立tgz安装、worker、普通/升级tool。React由宿主提供，Tailwind不启用preflight，规则、主题及样式生命周期限定于插件容器；新增组件须同步来源/MIT、主题、键盘及窄容器验收，不能直接改`plugin/lib/client.js`。
+宿主`plugin/index.js`编排加载/资源，`plugin/lib/host-{reports,reviews,http,upgrade,history}.js`分管各接口；`lib/review-sidecar-cache.mjs`仅缓存已校验派生上下文，不授权保存。客户端真源为`plugin/src/client.jsx`、`panels/`、`components/`和`styles.css`，纯契约/workflow共享`lib/*.mjs`。
 
-UI词典位于`plugin/src/i18n/{zh,en,ko}.json`，用可读原文作为消息键，插值必须保持`{pN}`及重复次数；构建将各语言的重复键替换为短ID，保留中文原文供内置状态映射。`runtime.mjs`共享宿主lang观察和本地偏好，`locale.jsx`使各槽位及memo面板更新；不得按语言设置React key或重建编辑器。只对固定UI/已知内置状态调用翻译，发现、用户依据和导出不得按词典全局替换。新增文案须补齐三词典、ARIA及覆盖测试，不能更改后端契约或结论。
+`npm ci --ignore-scripts`后运行`npm run build:client`，`check:client`核对可复现字节。prepack调用stage-contract生成3份启动契约及客户端，打包内核以重导出共用宿主契约。不要直接改`plugin/lib/client.js`；移除模块须复验独立tgz、worker及普通/升级tool。React来自宿主，Tailwind禁preflight、样式限定`.dsc-ui`；组件改动同步[来源/MIT](../plugin/src/components/ui/PROVENANCE.md)、主题/键盘/窄容器验收。
 
-真实验收/到货工具通过`tools/owned-package-source.mjs`准备私有构建副本，核对manifest、lock和已安装构建依赖版本，复制自有依赖闭包，不向源码、用户profile或npm运行包注入工具链。构建工具不作为插件运行依赖发布。selector-parser覆盖固定为已修复的7.1.6；修改Tailwind或该覆盖后须重建、复验列宽/主题及运行依赖审计，不能忽略开发闭包公告。
+UI词典位于`plugin/src/i18n/{zh,en,ko}.json`，用可读原文作为消息键，插值必须保持`{pN}`及重复次数；构建将各语言的重复键替换为短ID，保留中文原文供内置状态映射。`runtime.mjs`共享宿主lang观察和本地偏好，`locale.jsx`使各槽位及memo面板更新；不得按语言设置React key或重建编辑器。只对固定UI/已知内置状态调用翻译，原始发现、用户依据、命令和JSON不得按词典全局替换；故障报告仅翻译共享渲染器的模板、已知固定说明及核实建议。新增文案须补齐三词典、ARIA及覆盖测试，不能更改后端契约或结论。
 
-三项UI验收在原有同一tgz命令上增加`DSC_UI018_ACCEPTANCE=1`，可用`DSC_UI018_SCREENSHOTS=<自有目录>`保存截图。实际安装界面核对主表顺序、初始表格DOM、键盘展开/收起、深浅色、列宽及卸载/恢复；长名称窄容器截图来自明确标记的临时CSS夹具，不冒充真实安装插件。组件测试另覆盖三个槽位、筛选/导出、共享请求/可见性和旧请求拒绝。增加`DSC_UI018_P2=1`会在同一自有profile追加120个非激活合成插件，验主表/loader每页50、跨页完整性、筛选重置和完整导出。`node tools/ui018-performance.mjs`对比固定提交与当前客户端的1000插件元素树、隐藏内容及渲染耗时；这是合成hook测试，耗时不作性能门禁或浏览器延迟承诺。
+真实验收/到货工具经`tools/owned-package-source.mjs`核对manifest/lock/构建依赖，复制自有闭包到私有构建目录，不向源码、用户profile或运行包注入工具链。selector-parser固定覆盖7.1.6；更新Tailwind/覆盖后须重建、复验布局/主题及开发/运行两图审计。
 
-`node tools/ci-ui018.mjs <自有输出目录>`构建一个独立tgz并以全部0.2.0开关运行真实DSH 0.2.1-rc.3/Chrome；不读取账户或调用模型。输出含源码提交/dirty标志/逐文件摘要、tgz摘要、完整报告、日志、主题/窄列/大列表/处置跳转截图及SHA256SUMS。可用仓库忽略的tmp目录或仓库外私有目录，避免将证据本身计入源码身份；CI要求干净检出。全部证据门禁通过才成功；失败同样保存日志。`.github/workflows/test.yml`的Linux rc.3作业运行同一入口并上传证据，rc.2分支继续原有验收。接入CI不表示最新提交已在Linux执行，须核对对应提交的实际运行结果。新增`DSC_UI018_REVIEW_NAVIGATION=1`检查第123条发现的双向定位/筛选/键盘焦点，须与`DSC_UI018_HARDENING=1`的自有密集夹具一起运行；其他开关见入口源码。`ui018`文件名、`DSC_UI018_*`开关及证据字段为兼容现有脚本继续沿用，不表示交付版本仍是原计划编号。Windows、真实用户试用及一般业务健康仍独立验收。
+完整UI验收使用同一独立tgz及自有DSH 0.2.1-rc.3/Chrome：
+
+```sh
+node tools/ci-ui018.mjs <自有输出目录>
+```
+
+入口统一启用九项验收：原面板、布局/主题/键盘、分页/完整导出、超时恢复/草稿、HTTP会话、复杂度/采样、处置定位、历史管理和中英韩国际化。检查第123条发现的双向定位/筛选/焦点、12px间距、短结论不折字、历史显式操作及报告/基线不变；密集数据来自明确标记的非激活合成插件。截图中的窄列CSS夹具不冒充真实插件布局。开关依赖以入口源码为准，单跑处置定位须同时启用hardening。
+
+输出含提交/dirty/逐文件摘要、tgz摘要、完整报告、日志、截图及SHA256SUMS，缺结果/截图或清理失败均不得通过。使用忽略的tmp或仓库外目录，避免证据进入源码身份；CI要求干净检出。Linux rc.3作业执行同一入口并上传证据，其他两宿主继续集成验收；具体平台结果须对应实际提交，不由接入CI推定。`ui018`文件名、`DSC_UI018_*`及证据字段沿用以兼容脚本，不代表产品版本。Windows、真实用户和一般业务另验。
+
+组件回归另测三槽位、共享订阅/可见性及迟到响应。`node tools/ui018-performance.mjs`比较固定提交与当前客户端的1000插件元素树及隐藏内容；它是合成hook测量，耗时不作浏览器性能门禁。
 
 `test/fixtures/syntax-matrix.json`与`tools/syntax-matrix.mjs`分别记录并执行supported / inferred / abstained / excluded病例。每例核验包名、精确调用对/跨度、确定性或诊断，不以解析成功代替结论。扩展语法须增加正反例，并保留动态/超限限制；矩阵与真实业务标签独立，不能调严重度求绿。
 
@@ -50,7 +60,7 @@ node tools/catalog-review.mjs --before rules/dsh-api-catalog-0.2.1-rc.3.json --c
 
 工具不改输入或支持范围：JSON各2MiB、ASAR4GiB/头8MiB、三个选定packed条目各8MiB；拒绝链接、FIFO、特殊文件及越界。Python隔离子进程10秒、输出1MiB，回收后清自有临时目录。前后身份不是原子快照、签名、防协同篡改、硬实时或RSS保证；使用稳定归档。
 
-保存来源、差分、语义结论、审查人/日期及真实验收范围到稳定存档，分享前检查隐私。登记后`npm run check:catalogs`核对已登记字节、选择策略、预检版本集合及语义记录；未登记候选不自动认证。失败保持未认证；回退须恢复旧pins/范围并重测提示与拒绝行为。
+保存来源/差分/语义结论、审查人/日期及验收范围，分享前检查隐私。`npm run check:catalogs`核对登记字节、选择策略、预检集合及语义结构，不自动认证候选；回退恢复旧pins/范围并重测提示/拒绝行为。
 
 ## 依赖公告与CI供应链
 
@@ -91,13 +101,20 @@ node tools/business-labels.mjs --live --suite holdout-todo --observe-services --
 
 rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.json)。三处更多、插件主列表、空白复用及preset/草稿策略有实际驱动；模型列表用私有环境、只请求受控loopback列表，不继承密钥，失败/超时不等于模型不可用。0.2.0-rc.2保留其它真实门禁，rc.2/rc.3执行完整面板；显式宿主不符为错误，不以缺浏览器跳过求绿。
 
-同一tgz发布验收：
+## 同一制品发布核对
+
+文档以0.2.0功能描述为准；只有日期、版本、提交与哈希明确的回执可证明执行过。发布时依次完成：
+
+1. 本地运行`npm run check`和`node plugin/scripts/prepublish-check.mjs`（只验证，不发布）；成功TAP通过`tools/update-current-state.mjs --test-summary <日志>`更新计数。核对生成副本及许可证，不改快照掩盖失败。
+2. 经授权推送后等待**所选发布提交**全部Actions成功；历史CI不认证新提交。明确Windows、用户试用及业务样本的未验范围。
+3. 从该源码构建一次独立tgz，记录SHA-256，并将同一文件安装到自有profile验收。`tools/ci-ui018.mjs`会产出自己的归档及证据，不可用后来重打的包替代。
 
 ```sh
 DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 DSC_REQUIRE_RC2_UI=1 DSC_RC2_ARTIFACT=<确切tgz绝对路径> node tools/rc2-live.mjs
 ```
 
-未设制品时会重新打包源码；发布必须使用验收过的同一文件。实际平台/版本和CI以[current-state](current-state.json)及对应提交Actions为准。
+4. 取得正式发布授权后才发布验收过的**同一tgz**、Git tag及Release附件；核对npm版本/integrity/shasum、附件SHA-256和tag提交，再从公共registry实际安装核验。`node tools/meta-check.mjs --json`只读检查公开信息；本地领先属于提示，取数失败不是发布成功。
+5. 将实际时间、提交、制品及公共安装结果写入[current-state](current-state.json)。历史回执移至Git指针；不得预写published状态、发布时间、未执行CI或未经验证的摘要。
 
 ## 参数语义基线维护
 
@@ -115,12 +132,10 @@ check:catalogs验证schema、登记版本及来源引用结构，不能代替语
 - 探针仅采样点名服务，不执行getter、不复制属性值/凭据/用户内容。现代文件绑定profile/DSH/时间，24小时有效、未来容差5分钟（含边界）；无效时撤回该文件服务/loader证据，独立进程内证据另判。旧格式仅认显式键；boot失败清自有资源。
 - 输入、缓存身份、作者快照、升级捕获/验证共用有界枚举与非阻塞文件核验；缓存淘汰/卸载取消在途任务，共享worker队列检验并发、排队超时/取消及恢复。诊断只写自有私有目录，输出/启动失败明确报告，不用空结果掩盖。
 
-每项修改补能拦误报与漏报的行为正反例，清理断言只检查本次拥有的资源。敏感值守卫同时验证真实命中及占位说明不命中；历史性能数字、缺陷编号和Python参考不构成当前准确率或性能承诺。
+修改补行为正反例，清理仅核自有资源；敏感值守卫同时测真实命中与占位说明。历史性能数字/缺陷编号/Python参考不构成当前准确率或性能承诺。
 
 ## 本地历史管理维护
 
 归档在`lib/review-archive.mjs`，复用活动review路径/锁/有界读取；不可将归档记录直接合并成当前已复核。快照契约与中性比较为`lib/report-history-contract.mjs`，落盘为`lib/report-history.mjs`，共用`lib/local-history-store.mjs`的私有目录、不可覆盖内容对象和限额。新HTTP入口为`plugin/lib/host-history.js`，UI为`plugin/src/panels/history.jsx`；沿用Card/Fold/Pager及原报告/草稿状态。不得为历史功能提高活动sidecar上限或改变基线/判定标准。
 
-CI同一tgz入口现增加`DSC_UI018_HISTORY=1`，验证显式快照、容量释放、参考导入、完整导出预览、相容/不相容对照、显式删除、普通报告及基线不变，并保存`local-history.png`。完整入口开关共8项；本地macOS通过不表示对应Linux提交已跑过。历史对象摘要仅用于损坏检测，不是签名；导入报告的自报身份不能当作真实采样证明。
-
-多语言验收增加`DSC_UI018_I18N=1`：实际安装界面验证宿主lang变化、中英韩标签、同一编辑器/原始草稿、报告及基线不变，并保存三语截图和英韩窄容器深色CSS夹具。`tools/ci-ui018.mjs`统一启用该项并拒绝缺失结果/截图；本地macOS实跑不等同Linux CI。
+历史对象摘要仅用于损坏检测，不是签名；导入报告的自报身份不能当真实采样证明。历史/三语真实界面验收统一由上方九项入口执行，保持编辑器、原始草稿、报告及基线身份，保留三语及窄容器/深色截图。

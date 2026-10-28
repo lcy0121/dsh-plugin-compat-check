@@ -6,7 +6,7 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-**0.2.0** (unpublished development version) combines a unified UI, Chinese/English/Korean localization, reduced overhead, review archives and report history, retaining rc.3 adaptation, upgrade preview, parameter semantics and boundary hardening. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2`. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2 and 0.2.1-rc.3**; the minimum does not certify future hosts.
+**0.2.0** combines a unified UI, Chinese/English/Korean localization, reduced overhead, review archives and report history, retaining rc.3 adaptation, upgrade preview, parameter semantics and boundary hardening. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2`. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2 and 0.2.1-rc.3**; the minimum does not certify future hosts.
 
 The npm plugin provides a compatibility page, details/badges, `compat_check` and a skill. Repository-only CLI, install checks, static batches, author CI and health executor share the kernel. The npm package has no CLI bin; `npx dsh-plugin-compat-check` is unsupported. [Plan](docs/Plan.md) tracks contracts and tasks; [docs/current-state.json](docs/current-state.json) records scoped verification.
 
@@ -31,45 +31,30 @@ After installing, open the DSH instance using that profile, then navigate to:
 
 ### Using each panel
 
-This describes the repository's **unpublished 0.2.0 development UI**. Layout and buttons in the published 0.1.7 may differ.
+Choose **Interface language → Follow host / 中文 / English / 한국어** in the main results. The default follows the host's `zh`/`en`/`ko` language tag; unsupported languages fall back to English. Your preference stays local. Fixed labels, known built-in explanations and diagnostic report templates/suggestions are translated; copied text matches the preview. Raw evidence, user notes, commands and JSON retain their original text. Switching language preserves filters and drafts.
 
-The UI supports Chinese, English and Korean. By default it follows the host document language, recognizing BCP 47 language tags with `zh`, `en` or `ko` as the primary language; an unsupported host language falls back to English. Use **Interface language** in the main results to choose **Follow host** (auto), **中文**, **English** or **한국어**. The preference is saved locally. Diagnostic report headings, explanations and verification suggestions follow the UI language; copied text matches the preview. Raw findings, diagnostics, user notes and exported JSON retain their original text; switching language changes presentation only, not report data, evidence or identities.
-
-The page order is **main results → dependencies → manual review → static upgrade preview → Advanced tools**. Diagnostic report preview/copy is inside the main results. Report/evidence notes are collapsed there, while report and sampling information is collapsed at the page footer. Advanced tools starts collapsed; all data and actions remain available when expanded.
-
-| Panel or location | Purpose and actions |
+| Panel (page order) | Purpose and actions |
 |---|---|
-| **Main results — Compatibility check / 兼容性检查** | Check verdict counts, the profile/target DSH, report time and cache status. Use **Check again** to update the report; search and combine verdict/certainty/verification filters, then expand a row's findings/unverified items and coverage limits to read source locations, evidence and next steps. Main results show 50 rows per page with **Previous**/**Next** controls. Choose **Preview diagnostic report**, inspect sensitive information, then **Copy report** and share it yourself. Filters and pagination preserve the complete export; nothing is posted automatically. Expand **Report and evidence notes** for certainty, measured/inferred impact and coverage boundaries. Catalogue/source details expose catalogue identity; uncertified targets display a warning directly. |
-| **Dependencies and potential impact / 依赖关系与潜在影响** | Expand plugin/loader entries, service dependencies, candidate providers or impact paths as needed. Large tables show 50 rows per page. These are investigation clues; declarations, loader states and paths do not prove service availability or actual failure propagation. |
-| **Manual review of findings / 发现的人工处置** | Select a status for a finding you investigated, fill in **Verification evidence**, and choose **Save manual review**. Track investigation progress, false-positive reasons or repair verification; see the steps below. |
-| **Pre-upgrade compatibility check (static) / 升级前兼容性预检（静态）** | Expand, enter an exact target DSH version, and choose **Run upgrade check**. Read added/worsened risks, existing issues and coverage limits. This is static prediction: it does not install or upgrade DSH, and no new risks does not certify business functionality. |
-| **Advanced tools / 高级工具** | Starts collapsed. Expand to access review archive management, local report history/trends and imported functional health records. Checks, saves, imports, exports and archive changes require explicit actions; opening this section does not run checks. |
-| **Advanced tools → Manage manual review records / 人工处置记录管理** | Load capacity on demand, preview/export, then explicitly archive historical or all saved reviews. Imported/restored archives remain references; current findings require a new manual review. |
-| **Advanced tools → Local report history and trends / 本地历史报告与趋势** | Explicitly save before/after snapshots; search notes, times, versions, targets or plugins, inspect full reports, and compare matching criteria. |
-| **Advanced tools → Functional health check (independent measurement record) / 功能健康检查（独立实测记录）** | Generate JSON with the repository health executor, then choose **Import functional health check record** to inspect historical results and artifact identity. Skip this if you have no record. The panel only reads the file; it does not execute checks, install plugins or upload records. |
-| **Footer — Report notes and check information / 报告说明与检查信息** | Starts collapsed. Expand it, then **View sampling and check information**, to inspect observations, tool information and target provenance. |
+| **Main results — Compatibility check** | Check target/profile, time, cache and verdicts; choose **Check again**, search/filter, then expand findings, coverage limits and next steps. **Preview diagnostic report** lets you inspect and copy the complete report; **Report and evidence notes** explains certainty and measured/inferred impact. Uncertified targets display a warning. |
+| **Dependencies and potential impact** | Expand plugin/loader entries, dependencies, candidate providers and paths. Declarations, loader states and cycles/paths are investigation clues, not proof of availability or failure propagation. |
+| **Manual review of findings** | Choose **Verification and manual review** beside a finding, document status/evidence and save. **Back to main results** opens the corresponding finding. Skip this panel if you only need current results. |
+| **Pre-upgrade compatibility check (static)** | Expand, enter an exact target DSH version, then choose **Run upgrade check**. This does not install/upgrade DSH; no new risks does not certify business functionality. |
+| **Advanced tools (initially collapsed)** | Load review capacity/archives, save/search/compare report snapshots, or import functional-health JSON. Actions are explicit; opening the section does not collect history, run checks, install plugins or upload records. |
+| **Report notes and check information (collapsed footer)** | Inspect tool version, sampling and target provenance. Catalogue identity is in the main results. |
 
-Auxiliary tables start collapsed; use the labelled **Expand**/**Collapse** buttons. Sections load as they approach the viewport, and wide tables scroll horizontally inside narrow containers. Plugin details/badges show individual results; the Compatibility tab contains the full list and filters.
+Use labelled **Expand/Collapse** buttons for auxiliary tables. Results, dependencies, findings and upgrade details show 50 items per page; wide tables scroll in narrow containers. Filters/pages never trim complete exports. Plugin details/badges show individual results; the Compatibility tab contains the full list. If authentication fails, reopen the host-provided login URL; never share it or cookies. New-risk filters require comparable history: no baseline or no verified calls (`vacuous`) does not mean no risk.
 
-The **New risks in this check** filter requires comparable history. A first or incomplete check may have no saved history; this does not mean there is no risk. An **Available** verdict with no verified calls does not certify business functionality either.
+### Manual review and history
 
-Finding lists, upgrade risk groups, both version inventories and input artifacts use 50-item pages. Added/worsened risks start expanded; other read-only details load on demand. Pagination preserves the complete export. The UI uses the host login session; if authentication fails, reopen the host-provided login URL. Never include that URL or cookies in a report.
+1. Expand a finding and investigate its source location/next steps, then choose **Verification and manual review**. Filter by plugin/status; links use report/finding identity, independent of sorting and pagination.
+2. Select **Unconfirmed / Reviewed / False positive / Fixed**, record steps, actual results and evidence, then choose **Save manual review** and wait for confirmation. Reviewed means investigated, not passed. Use **Show more reviews** or expand prior evidence when needed.
+3. Recheck after code/configuration changes. Manual statuses never hide risks, change verdicts/exit codes/baselines or grant exemptions; changed identities require re-review.
 
-### Saving a manual review
+Drafts stay in the current page session, including during filtering and same-report polling. Changed report identities mark them expired and block saving onto new findings; copy and investigate again, or discard. Save/copy before reload, navigation or unload: drafts are not written to disk.
 
-1. Expand a finding in the main results and investigate its source location and suggested next steps.
-2. Choose **Verification and manual review** (核实与人工处置) on an expanded finding to focus its editor. Filter by plugin (筛选处置插件) or manual status (筛选人工状态); each entry shows category, API, source location and a saved-evidence summary. **Back to main results** (返回主结果) clears main filters and opens the correct plugin/finding page. Links use report/finding identities, independent of sorting or pagination. Choose **Unconfirmed / Reviewed / False positive / Fixed**, then document the evidence: test steps and actual behavior for a false positive, or the change and retest result for a fix. Reviewed means a person investigated it, not that it passed.
-3. Choose **Save manual review** (保存人工处置) and wait for the saved confirmation. Use Show more reviews (显示更多处置) for additional entries. Filters keep unsaved drafts visible and never hide risks in the main report. Expand prior-review summaries or the full review history when you need earlier evidence.
+Advanced tools load on demand. Active reviews allow 1 MiB/1000 records; archival requires confirmation and a complete backup first. Archive-all also removes saved current statuses. Each target allows 100 archives; imports/restores are references requiring a new current review. Explicitly save snapshots before/after updates and select two to compare. Target/original path, DSH, tool, sampling mode, rules and catalogue must match for a directional comparison; weaker evidence is not a repair. Limits are 20 snapshots/target, 8 MiB/file and 64 MiB total. Export then explicitly delete when full; no automatic pruning. Preview exports for sensitive paths/evidence. Hashes are not signatures, and history does not certify current business behavior.
 
-Unsaved input stays as a draft for the current page session. When a background refresh changes the report identity, the old draft is marked expired and cannot be saved onto a new finding. Choose Copy draft (复制草稿), investigate the current finding again and paste/save explicitly, or Discard draft (放弃草稿). Updates to records within the same report keep your input. Save or copy before reloading, leaving the page or unloading the plugin; drafts are not written to disk.
-
-Records are stored locally. Changes to source, versions or evidence may require re-review, while old evidence remains in history. **Marking a finding false positive or fixed does not hide it, alter verdicts/exit codes/baselines or grant an exemption.** Choose **Check again** after changing code or configuration. You can skip manual review when you only need the current results.
-
-Both history panels are inside **Advanced tools**, start closed and never collect automatically. Active reviews remain limited to 1 MiB/1000 records; archival first creates a complete backup and requires confirmation. Archive-all also clears saved current statuses; unsaved drafts remain. Up to 100 archives are retained per target, with explicit export/delete when full. Restore/import never grants a current reviewed status: copy old evidence, investigate the current finding, then save explicitly.
-
-Save report snapshots before/after an update and select two to compare. The target/path, DSH, tool, sampling mode, rules and catalogue must match; otherwise both full reports remain available with a neutral explanation. Weaker evidence is not a repair. Limits are 20 snapshots/target, 8 MiB/file and 64 MiB total, with no silent pruning. Export requires a preview and explicit download; inspect paths and evidence before sharing. Hashes detect content changes, not authenticity. History never certifies current compatibility or business health.
-
-See the [guide](docs/guide.md) for detailed operations, evidence boundaries and budgets.
+See the [guide](docs/guide.md) for storage paths, operations and budgets.
 
 ## Repository CLI
 

@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.2.0",
-  "recordedAt": "2026-10-28T15:02:20.115Z",
+  "recordedAt": "2026-10-28T15:23:26.634Z",
   "testFiles": 82,
   "tests": 1241,
   "repositoryFiles": {
@@ -26,58 +26,7 @@
     "sourceContext": {
       "versionSource": "lib/version.mjs",
       "integrationTarget": "main",
-      "scope": "Unpublished0.2.0 candidate: unified Chinese/English/Korean UI, reduced overhead, archives/history and safety/recovery work. Source/plugin/probe version is0.2.0; published0.1.7 metadata and pre-bump receipts remain historical. Fresh local0.2.0 artifact acceptance is recorded below; exact-commit Linux CI and formal publication remain separate."
-    },
-    "publication": {
-      "releaseTarget": "0.1.7",
-      "status": "published",
-      "npm": {
-        "latest": "0.1.7",
-        "publishedAt": "2026-10-25T06:25:21.798Z",
-        "integrity": "sha512-yYKcIOYu5DVVdDbEFU1LTx3pnGcWWb72D8R4X/xB88uCVtoSQiPkxl0cC0o4/OrePrIfavGD6lJy2nBq0HpNFg==",
-        "shasum": "ccea783d4f1e76ea82f07b6727668de5efa63025",
-        "fileCount": 71,
-        "unpackedSize": 982299
-      },
-      "githubRelease": {
-        "tag": "v0.1.7",
-        "publishedAt": "2026-10-25T06:25:23Z",
-        "tagCommit": "3a5075ec63e51df9502517a144408e362ad983be",
-        "assets": [
-          "dsh-plugin-compat-check-0.1.7.tgz",
-          "RELEASE-VERIFICATION.json",
-          "SHA256SUMS"
-        ]
-      },
-      "observedOn": "2026-10-26",
-      "performedByThisTask": false,
-      "artifactMatch": "npm dist.integrity and dist.shasum equal the accepted archive, whose sha256 6e98965fb7c1658300e522247ff48039520b0388ce9ac796103cec8204477168 is the one listed in RELEASE-VERIFICATION.json and SHA256SUMS.",
-      "scope": "Registry and release existence plus archive identity only. Not a claim that 0.1.7 is installed on any profile, that the panel renders, or that any plugin judgement was accepted; each remains a separate verification."
-    },
-    "history": {
-      "commit": "f5ec0d0",
-      "path": "docs/current-state.json",
-      "scope": "Historical 0.1.7 release and UI P1 acceptance records, upstream state and earlier pointers. Does not certify this unpublished P2 candidate.",
-      "previousDevelopment": {
-        "commit": "6c68ef1",
-        "path": "docs/current-state.json",
-        "scope": "Historical UI/P1/P2 acceptance and same-tgz identities before metadata cache, review navigation, UI CI and module split. Not certification of the current candidate."
-      },
-      "localHistoryPredecessor": {
-        "commit": "56accb0",
-        "path": "docs/current-state.json",
-        "scope": "Earlier development-line metadata cache/review navigation/UI CI/module split acceptance; does not certify new archive/snapshot functionality."
-      },
-      "uiHistoryPredecessor": {
-        "commit": "a355e2d",
-        "path": "docs/current-state.json",
-        "scope": "Historical archive/report-history implementation and eight-flag local same-tgz acceptance. Does not certify later i18n/layout changes."
-      },
-      "upstreamPredecessor": {
-        "commit": "83b76db",
-        "path": "docs/current-state.json",
-        "scope": "Earlier2026-10-25/28 upstream issue snapshots and source/tag review. Later actual execution and authorized feedback remain recorded below."
-      }
+      "scope": "0.2.0 delivery: unified Chinese/English/Korean UI, reduced overhead, review archives/report history and safety/recovery work. Source, plugin and probe share this version. Dated artifact/CI receipts certify only their recorded bytes and platform; product documentation does not assert registry publication."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -85,127 +34,6 @@
       "Private execution profiles are not OS sandboxes; account/model execution needs its own authorization.",
       "CI applies to the exact GitHub commit; formal publication must use the accepted archive."
     ],
-    "ui018I18nLocal20261027": {
-      "scope": "Local macOS arm64/DSH0.2.1-rc.3, owned profiles/fixtures, independent tgz. No push/release, first corresponding Linux run, Windows or general business-health certification.",
-      "defaultSuite": {
-        "tests": 1226,
-        "pass": 1218,
-        "skip": 8,
-        "fail": 0
-      },
-      "actualAcceptance": {
-        "ok": true,
-        "host": "0.2.1-rc.3",
-        "platform": "darwin",
-        "arch": "arm64",
-        "artifactSha256": "43a479d2f6429862b61b7def694ba7b69d5815937e127d23ebbc4bea17f307e8",
-        "sourceBaseCommit": "a355e2d55da4247e91a981c4ddbd87b963d2f26d",
-        "sourceSnapshotDirty": true,
-        "sourceManifestSha256": "1a81c38fe9af67005e929d88fd8c6b260e68f34f6c787e3f8be856caf33c4557",
-        "existingFlows": "All nine same-artifact CI flags passed: original UI/theme/keyboard/unload, P2 lists/export, recovery/drafts, HTTP auth, hardening, review navigation, local history and i18n. New summary badge boundaries and short-English-word readability checked in real geometry.",
-        "networkGuard": {
-          "productionRequests": 0
-        },
-        "cleanup": {
-          "privateRootRemoved": true
-        },
-        "payloadFiles": 72,
-        "previewUrl": "http://127.0.0.1:50251/"
-      },
-      "history": "Earlier localization/layout implementation and review details:8e0104b:docs/current-state.json"
-    },
-    "hostIsolationLocal20261028": {
-      "scope": "Local macOS arm64; owned synthetic inputs and trusted stress workers. Does not certify Linux, Windows, actual ecosystem-scale pause duration or general business behavior.",
-      "validation": "Default suite: 1233 tests, 1225 pass, 8 optional skips; npm run check and local prepublish gate passed. Existing package test packs/installs an independent tgz and executes its host report/tool/preview paths. No push or publication.",
-      "regressions": [
-        "Dependency-access counts at 250/500/1000 service entries stay linear; old implementation read 250000 dependency keys for 500 services.",
-        "Started post-extraction CPU worker hits its deadline while host heartbeat continues; worker is reclaimed before its supervisor settles. Started cancellation also stops a shared counter.",
-        "Timeout and semantic budget failure retain the last successful cache and unchanged baseline; later computation recovers.",
-        "Labels matched/no-label and direct-extraction success/error output escape C0/C1/bidi controls; JSON original identity and process exit code remain unchanged. Arrival summaries use the same output boundary."
-      ],
-      "limits": {
-        "plugins": 2000,
-        "services": 20000,
-        "dependencies": 50000,
-        "callSites": 50000,
-        "transferBytes": 8388608,
-        "hostComputeWorkerMs": 10000
-      }
-    },
-    "upstreamExecutionLocal20261028": {
-      "recordedAt": "2026-10-28T09:51:18Z",
-      "report": "docs/upstream-verification.md",
-      "artifact": {
-        "package": "dshmarket",
-        "version": "1.73.1",
-        "tgzSha256": "69c34d25dee1d9c4a86fe2d4ce8e0a6946bc7913beeb49406934e69ed37241bf",
-        "integrity": "sha512-mnDEDq743YH2xuLU2qgmssnSiuet5VxS8Bsbggnyez2OfzSnOtIhmnufpe+fA/m+UQr7qI6PkHGCnzW/550tfQ=="
-      },
-      "environment": "macOS arm64; installed official Desktop Host0.2.1-rc.3 IPC entry, real PluginManager, bundled pnpm11.28.5 and owned Chrome. Local registry/fixture packages/private HOME/DSH_HOME. No Electron GUI-shell or ordinary CLI/headless-profile equivalence claim.",
-      "market928": {
-        "acceptance": "not-passed",
-        "fullInterruption": "Real update route journals before manager removal. Live reload did not settle within45s before pnpm remove; original remove-complete/add-not-started chain was not fully reproduced.",
-        "seededRestartCases": [
-          {
-            "input": "package and both declarations missing, journal present",
-            "dependency": "2.0.0",
-            "onDisk": "2.0.0",
-            "bundles": 0,
-            "runtimeService": null,
-            "pendingRecords": 0,
-            "accepted": false
-          },
-          {
-            "input": "on-disk build survives, both declarations missing, journal present",
-            "dependency": "2.0.0",
-            "onDisk": "2.0.0",
-            "bundles": 0,
-            "runtimeService": null,
-            "pendingRecords": 0,
-            "accepted": false
-          }
-        ],
-        "controls": "Unavailable target9.0.0 retains journal and increments attempts; absent journal does not resurrect missing package.",
-        "independentFunctionControl": "Unmodified published repair function given failed application plus target bytes/dependency but no bundle clears journal and records reinstalled; failed-without-bytes retains record; applied-and-enabled clears correctly.",
-        "remaining": "Authorized feedback posted and public receipt verified on2026-10-28. Await upstream handling and repeat the same postcondition checks; no inference of the original process-termination cause or general Desktop HMR defect.",
-        "feedback": "https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6466100240"
-      },
-      "market932": {
-        "metadataControls": [
-          "latest healthy: one request, exact2.0.0",
-          "latest429/HTML plus healthy packument: two requests, exact2.0.0",
-          "both429/HTML: null latest, actual mounted route passes bare package name",
-          "explicit2.0.0 with both lookups failing: exact version preserved"
-        ],
-        "boundary": "Package-manager replacement records argv and deliberately stops before install. HTTP502/exit77 is controlled; no actual old-version install or GUI-warning claim.",
-        "remaining": "Authorized separate improvement issue posted and public receipt verified on2026-10-28. Await warning-versus-failure policy before a PR.",
-        "feedback": "https://github.com/dsh-market/dsh-market/issues/1047"
-      },
-      "cleanup": "Recorded16 owned Host PIDs confirmed exited; owned Chrome cleanup awaited. No user profile changed, no account/model credentials used, verification itself did not publish. Two later authorized upstream feedbacks are linked above; no PR or repository push.",
-      "scope": "Only upstream verification receipts and documentation changed in this follow-up. Earlier product test results remain historical, not rerun by this record."
-    },
-    "uiFeedbackLocal20261028": {
-      "scope": "macOS arm64 / actual DSH0.2.1-rc.3 / owned fixtures and one tgz; no Linux, Windows or business acceptance claim.",
-      "artifactSha256": "9f57a7d7288f2d0da640e6b992cf630119636507fede4b69f104883114f710f2",
-      "sourceBaseCommit": "a01a40dd17ca59b0a16dd12b2a00b603db47b08a",
-      "sourceManifestSha256": "280e596141acd45fc16bc0462ba1a75ddf032a0666738caae3a42600ebd092b1",
-      "binding": "Accepted dirty working-source snapshot; documentation receipts added after execution. Runtime code unchanged afterward.",
-      "languages": [
-        "zh",
-        "en",
-        "ko"
-      ],
-      "messages": 575,
-      "verified": "Three-language labels and producer explanations; diagnostic template/safety notes/known fixed impact and basis/verification suggestions and copied text follow UI language through the same safe renderer, generated only when opened. Original evidence, commands and JSON unchanged. Headings aligned; sibling dependency cards and upgrade/snapshot input-to-button gaps all exactly12px in all3 locales. Draft/focus, import/export, theme/narrow checks retained.",
-      "defaultSuite": {
-        "tests": 1237,
-        "pass": 1229,
-        "skip": 8,
-        "fail": 0
-      },
-      "receipts": "tmp/ui-report-spacing-20261028-final/{summary.json,live.json,SHA256SUMS,screenshots/}; ignored local receipts; earlier acceptance:a01a40d:docs/current-state.json",
-      "cleanup": "Owned private root removed; no production/model requests."
-    },
     "ui018LinuxFirst20261028": {
       "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40706851821",
       "commit": "361c74bfda4191213ae782db14d88bbf26b8620a",
@@ -242,18 +70,77 @@
         }
       },
       "fixes": "83b76db: platform-independent optional-license verification and fixed mutation-proof input.361c74b: intrinsic metric sizing/whole labels and runner CJK fonts. Existing UI/deadline assertions retained.",
-      "scope": "First full UI Linux acceptance for the development line now targeted at0.2.0, on the recorded clean commit and toolVersion0.1.7 tgz only. This historical receipt does not certify the bumped0.2.0 artifact. No Windows, general business certification or new publication claim."
+      "scope": "Historical first full UI Linux run: recorded clean commit and toolVersion0.1.7 tgz. It does not certify the0.2.0 artifact, later source, Windows or general business behavior."
     },
-    "version020Local20261028": {
+    "history": {
+      "commit": "0f518df",
+      "path": "docs/current-state.json",
+      "scope": "Full predecessor receipts: historical0.1.7 publication, earlier local UI/hardening and first0.2.0 artifact acceptance, upstream controls and previous history pointers. These are not the current source version or a0.2.0 publication claim."
+    },
+    "upstreamExecutionLocal20261028": {
+      "recordedAt": "2026-10-28T09:51:18Z",
+      "report": "docs/upstream-verification.md",
+      "artifact": {
+        "package": "dshmarket",
+        "version": "1.73.1",
+        "tgzSha256": "69c34d25dee1d9c4a86fe2d4ce8e0a6946bc7913beeb49406934e69ed37241bf",
+        "integrity": "sha512-mnDEDq743YH2xuLU2qgmssnSiuet5VxS8Bsbggnyez2OfzSnOtIhmnufpe+fA/m+UQr7qI6PkHGCnzW/550tfQ=="
+      },
+      "scope": "macOS arm64/Desktop Host0.2.1-rc.3 owned execution and controlled local registry only. Full interruption stopped before pnpm remove; seeded restart recovery did not restore bundles/services. Double metadata failure reached an unpinned install boundary; no real old-version install or full Electron GUI certification.",
+      "feedback": {
+        "market928": "https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6466100240",
+        "market1047": "https://github.com/dsh-market/dsh-market/issues/1047"
+      },
+      "remaining": "Await upstream recovery postconditions and unpinned-target policy; repeat after a fix. Other issue snapshots remain dated; no new outbound feedback in this preparation."
+    },
+    "releasePreparation020Local20261028": {
       "toolVersion": "0.2.0",
-      "host": "0.2.1-rc.3",
       "platform": "darwin",
       "arch": "arm64",
-      "artifactSha256": "bc4d604b963bfb8eed2f17fe5f2da83a20362ef649d4b7475c6e42f08ed35f0d",
-      "sourceBaseCommit": "bb1f6a46fdae85de08884ad33fe639e5afb00211",
-      "sourceManifestSha256": "00fa86fcc3375004bbe0ef74843f376ab226c5a1bfd27fddf9568bc5286c5ddb",
-      "validation": "Fresh independent0.2.0 tgz installed in owned host; all nine UI/auth/history/i18n acceptance sections passed. CLI --version, plugin/probe manifests, skill copies, generated client and maintained docs agree. Default1241 tests:1233pass/8skip/0fail; local prepublish gate passed.",
-      "scope": "Local dirty working-source snapshot; receipts added afterward. No remote push, release, npm publication or Linux acceptance claim for bumped artifact. Prior clean Linux receipts retain original0.1.7 artifact identity."
+      "node": "v26.12.1",
+      "host": "0.2.1-rc.3",
+      "sourceBaseCommit": "0f518df883110f1fc127aecc23c4c43d7c742f06",
+      "sourceSnapshotDirty": true,
+      "sourceManifestSha256": "164dca5a4270434c072337245149f4718c5710cef130e41346f719bf2c635cce",
+      "artifact": {
+        "filename": "dsh-plugin-compat-check-0.2.0.tgz",
+        "sha256": "659e75efc363488cdcf559a984f909ae8a71d59cd80f66e0fe17c7cc9824a85b"
+      },
+      "payloadFiles": 74,
+      "validation": {
+        "defaultSuite": {
+          "tests": 1241,
+          "pass": 1233,
+          "skip": 8,
+          "fail": 0
+        },
+        "documentAndSkillTests": {
+          "tests": 39,
+          "pass": 39,
+          "skip": 0,
+          "fail": 0
+        },
+        "maintenanceCheck": "passed: format/generated client/docs/links/syntax/catalogues",
+        "prepublishGate": "passed; validation only",
+        "dependencyAudit": [
+          {
+            "target": "workspace-lock",
+            "status": "clean",
+            "vulnerabilities": 0
+          },
+          {
+            "target": "plugin-runtime",
+            "status": "clean",
+            "vulnerabilities": 0
+          }
+        ],
+        "actualHost": "All nine UI/auth/recovery/review/history/i18n sections passed on the same independent tgz;21 PNGs and30 checksum entries verified. Packaged README/skill match canonical files. Owned private root removed; zero production/model requests."
+      },
+      "metadataObservedAt": "2026-10-28T15:17:53.255Z",
+      "metadataCheck": "GitHub/npm read-only check: no errors or skipped sources; local version and README differ from the observed public package, as expected before publication.",
+      "fileReview": "lib/test/tools:313 tracked files reviewed for literal references and byte-identical/empty files. No proven disposable files removed; repeated patch files belong to independent fixtures. Required generated copies, frozen reference, workers and regression evidence retained.",
+      "receipts": "tmp/release-preparation-020-20261028/{summary.json,source.json,live.json,SHA256SUMS,screenshots/}",
+      "scope": "Local working-source/artifact acceptance only. This receipt/count update was added afterward; runtime, packaged README and skill bytes unchanged afterward. No push, remote CI for this commit, tag, release or npm publication performed. Formal publication and public-install verification remain separate; historical Linux receipt above applies only to its original bytes."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
