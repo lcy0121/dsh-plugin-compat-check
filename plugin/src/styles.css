@@ -130,8 +130,9 @@
   margin: 16px 0;
 }
 .dsc-ui .compat-metrics > div {
-  flex: 1;
-  min-width: 116px;
+  flex: 1 1 116px;
+  min-width: min-content;
+  max-width: 100%;
   padding: 10px;
   border: 1px solid hsl(var(--dsc-border));
   border-radius: 8px;
@@ -444,6 +445,6 @@
 }
 .dsc-ui .compat-metrics [data-slot="badge"] {
   max-width: 100%;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow-wrap: normal;
 }

@@ -92,6 +92,17 @@ jobs:
                                 milliseconds=(time.monotonic()-started)*1000, chromeLaunches=0, rows=rows)))
           PY
           node -e 'const x=require(process.env.RUNNER_TEMP+"/linux-chrome-preparation.json");console.log(JSON.stringify({complete:x.complete,files:x.files,bytes:x.bytes,milliseconds:x.milliseconds,chromeLaunches:x.chromeLaunches}))'
+      - name: Install CJK fonts for multilingual UI acceptance
+        if: matrix.dsh == '0.2.1-rc.3'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends fonts-noto-cjk
+          dpkg-query -W fonts-noto-cjk > "$RUNNER_TEMP/linux-ui-fonts.txt"
+          for language in zh-cn en ko; do
+            fc-match --format '%{family}: %{file}\n' ":lang=$language" >> "$RUNNER_TEMP/linux-ui-fonts.txt"
+          done
+          cat "$RUNNER_TEMP/linux-ui-fonts.txt"
       - name: Complete 0.1.8 UI acceptance on one independent package
         if: matrix.dsh == '0.2.1-rc.3'
         run: node tools/ci-ui018.mjs "$RUNNER_TEMP/linux-ui018"
@@ -134,6 +145,7 @@ jobs:
           path: |
             linux-execution-diagnostics/
             ${{ runner.temp }}/linux-chrome-preparation.json
+            ${{ runner.temp }}/linux-ui-fonts.txt
             linux-live.tap
             linux-chrome-startup.tap
             linux-chrome-environment.txt
