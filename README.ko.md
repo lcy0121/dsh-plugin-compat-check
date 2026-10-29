@@ -23,6 +23,8 @@ npm 플러그인은 호환성 페이지, 상세/배지, `compat_check`와 skill�
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
+이 버전을 고정하려면 `dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0`을 사용하세요. 버전을 생략하면 registry의 현재 버전을 설치합니다.
+
 설치한 profile을 사용하는 DSH에서 다음 경로로 이동하세요.
 
 **왼쪽 아래 더보기(⋯) 또는 사용자 아바타(계정 메뉴) → 설정 → 내장 플러그인 → 호환성(兼容性)**.

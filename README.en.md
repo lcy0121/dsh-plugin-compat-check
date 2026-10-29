@@ -23,6 +23,8 @@ Historical examples of presentation, not acceptance of current source or busines
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
+To pin this release, use `dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0`; an unversioned command follows the registry version.
+
 After installing, open the DSH instance using that profile, then navigate to:
 
 **Bottom-left More (⋯) or user avatar (account menu) → Settings → Built-in plugins → Compatibility (兼容性)**.

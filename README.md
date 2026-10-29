@@ -23,6 +23,8 @@ npm插件提供兼容性页、详情/角标、`compat_check`与skill。仓库另
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
+固定安装本版可使用`dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0`；不带版本时安装registry当前版本。
+
 安装后，在使用该profile的DSH主界面中打开：
 
 **左下角“更多”（⋯）或用户头像（账号菜单） → 设置 → 内置插件 → 兼容性**。

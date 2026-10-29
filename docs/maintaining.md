@@ -113,7 +113,7 @@ rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.j
 DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 DSC_REQUIRE_RC2_UI=1 DSC_RC2_ARTIFACT=<确切tgz绝对路径> node tools/rc2-live.mjs
 ```
 
-4. 取得正式发布授权后才发布验收过的**同一tgz**、Git tag及Release附件；核对npm版本/integrity/shasum、附件SHA-256和tag提交，再从公共registry实际安装核验。`node tools/meta-check.mjs --json`只读检查公开信息；本地领先属于提示，取数失败不是发布成功。
+4. 取得正式发布授权后才发布验收过的**同一tgz**、Git tag及Release附件；npm直接发布该归档，不从源码重新打包；Release同时附SHA256SUMS及限定验收回执。核对npm版本/integrity/shasum、附件SHA-256和tag提交，再从公共registry实际安装核验。`node tools/meta-check.mjs --json`只读检查公开信息；本地领先属于提示，取数失败不是发布成功。
 5. 将实际时间、提交、制品及公共安装结果写入[current-state](current-state.json)。历史回执移至Git指针；不得预写published状态、发布时间、未执行CI或未经验证的摘要。
 
 GitHub简介/topics可独立于Git提交更新；npm简介/搜索关键词分别取`plugin/package.json`的description/keywords，正式发布新版本后再核对公开值。两者共用产品主旨，但不是同一组平台字段；npm dist-tags是版本渠道，不能拿它替代搜索关键词。发布前本地与registry的版本、正文及元数据差异须记录，不能宣称已上线。字段含义见[npm package.json文档](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/#description)。

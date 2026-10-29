@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.2.0",
-  "recordedAt": "2026-10-29T09:24:02Z",
+  "recordedAt": "2026-10-29T09:31:12.169Z",
   "testFiles": 82,
   "tests": 1242,
   "repositoryFiles": {
@@ -82,173 +82,23 @@
       "scope": "Historical dshmarket1.73.1 execution, artifact and two authorized feedback receipts. Superseded for current follow-up by the separately pinned1.73.3 verification below; not retroactively accepted."
     },
     "releasePreparation020Local20261028": {
-      "toolVersion": "0.2.0",
-      "platform": "darwin",
-      "arch": "arm64",
-      "node": "v26.12.1",
-      "host": "0.2.1-rc.3",
-      "sourceBaseCommit": "0f518df883110f1fc127aecc23c4c43d7c742f06",
-      "sourceSnapshotDirty": true,
-      "sourceManifestSha256": "164dca5a4270434c072337245149f4718c5710cef130e41346f719bf2c635cce",
-      "artifact": {
-        "filename": "dsh-plugin-compat-check-0.2.0.tgz",
-        "sha256": "659e75efc363488cdcf559a984f909ae8a71d59cd80f66e0fe17c7cc9824a85b"
-      },
-      "payloadFiles": 74,
-      "validation": {
-        "defaultSuite": {
-          "tests": 1241,
-          "pass": 1233,
-          "skip": 8,
-          "fail": 0
-        },
-        "documentAndSkillTests": {
-          "tests": 39,
-          "pass": 39,
-          "skip": 0,
-          "fail": 0
-        },
-        "maintenanceCheck": "passed: format/generated client/docs/links/syntax/catalogues",
-        "prepublishGate": "passed; validation only",
-        "dependencyAudit": [
-          {
-            "target": "workspace-lock",
-            "status": "clean",
-            "vulnerabilities": 0
-          },
-          {
-            "target": "plugin-runtime",
-            "status": "clean",
-            "vulnerabilities": 0
-          }
-        ],
-        "actualHost": "All nine UI/auth/recovery/review/history/i18n sections passed on the same independent tgz;21 PNGs and30 checksum entries verified. Packaged README/skill match canonical files. Owned private root removed; zero production/model requests."
-      },
-      "metadataObservedAt": "2026-10-28T15:17:53.255Z",
-      "metadataCheck": "GitHub/npm read-only check: no errors or skipped sources; local version and README differ from the observed public package, as expected before publication.",
-      "fileReview": "Documentation-preparation snapshot only:313 tracked lib/test/tools files reviewed for references and byte duplication. Later function-level cleanup is recorded separately below.",
-      "receipts": "tmp/release-preparation-020-20261028/{summary.json,source.json,live.json,SHA256SUMS,screenshots/}",
-      "scope": "Local working-source/artifact acceptance only. This receipt/count update was added afterward; runtime, packaged README and skill bytes unchanged afterward. No push, remote CI for this commit, tag, release or npm publication performed. Formal publication and public-install verification remain separate; historical Linux receipt above applies only to its original bytes."
+      "history": "b1c6809:docs/current-state.json",
+      "scope": "Historical local preparation/cleanup receipt; original source and artifact boundaries retained in Git. Superseded for formal release by a fresh selected-commit and same-archive verification."
     },
     "functionalCleanup020Local20261028": {
-      "scope": "Repository-only cleanup after26fdbf4. Runtime lib/plugin/skill/rules and dependencies unchanged; no push or publication.",
-      "removed": "Nine obsolete migration-only files: Python reference extractor, parity shell runner/expected-diff list and dedicated hang-cycle package/docs. Historical source:26fdbf4:tools/parity/.",
-      "retained": "Still-consumed host observation moved byte-for-byte to test/fixtures/host-surface-parityfix.json; SHA-256 a169f3cf0b35481ab5c1b38c85c059edc474ae3ea52711b9eb6f5bc68c418fd8. Active lib modules and independent regex candidate enumeration retained.",
-      "tests": "Repeated manual-review inputs consolidated in test/fixture-utils.mjs; distinct assertions retained. Old cycle fixture replaced by current AST self-import/exact-path regression in a bounded child, including no target-code execution. In a throwaway source copy, removing graph de-duplication makes that test fail; production files were never mutated.",
-      "validation": {
-        "defaultSuite": {
-          "tests": 1242,
-          "pass": 1234,
-          "skip": 8,
-          "fail": 0
-        },
-        "affectedSuite": {
-          "tests": 295,
-          "pass": 294,
-          "skip": 1,
-          "fail": 0
-        },
-        "maintenanceCheck": "passed",
-        "artifact": {
-          "version": "0.2.0",
-          "sha256": "659e75efc363488cdcf559a984f909ae8a71d59cd80f66e0fe17c7cc9824a85b",
-          "identicalToAcceptedPackage": true
-        }
-      },
-      "evidence": "/tmp/dsc-020-dedup-{before,after,full,cycle,cycle-mutant}.tap; /tmp/dsc-020-dedup-package.json. Local temporary receipts only; same tgz digest preserves the previous real-host acceptance identity."
+      "history": "b1c6809:docs/current-state.json",
+      "scope": "Historical local preparation/cleanup receipt; original source and artifact boundaries retained in Git. Superseded for formal release by a fresh selected-commit and same-archive verification."
     },
     "metadataPreparation020Local20261028": {
-      "sourceBaseCommit": "dbc4861d76d5748c3ab9cc25f5b38b5eb39bad0e",
-      "sourceSnapshotDirty": true,
-      "sourceManifestSha256": "c0666687588bb0218bb71711b567c841bfac5c4823cf606dddd5a2b81eb147b3",
-      "documentReview": "All15 maintained Markdown documents checked: release/tool/catalogue versions, local links/anchors, CLI flags, generated skill/contracts/client and current counts agree. Deleted tool paths occur only in explicitly pinned history; current observation fixture references use test/fixtures/. GitHub About/topics and npm package fields now have distinct update/effectivity instructions in docs/maintaining.md.",
-      "github": {
-        "observedAt": "2026-10-28T15:52:27.000Z",
-        "description": "检查已安装 DSH 插件与静态升级风险，提供源码依据、覆盖限制、多语言界面、agent 工具、依赖视图、人工复核和本地报告历史。Checks installed DSH plugins and static upgrade risks, with source evidence, coverage limits, multilingual UI, agent tool, dependency views, manual reviews and local report history.",
-        "topics": [
-          "agent-skills",
-          "compatibility",
-          "cordis",
-          "deepseek",
-          "deepseek-harness",
-          "dependency-analysis",
-          "developer-tools",
-          "dsh",
-          "dsh-plugin",
-          "health-check",
-          "i18n",
-          "manual-review",
-          "report-history",
-          "static-analysis",
-          "upgrade"
-        ],
-        "updated": true,
-        "readbackMatches": true
-      },
-      "npm": {
-        "observedAt": "2026-10-28T15:52:27.000Z",
-        "observedPublicVersion": "0.1.7",
-        "preparedVersion": "0.2.0",
-        "description": "Checks installed DSH plugins and static upgrade risks, with source evidence and coverage limits. Multilingual UI, agent tool, dependency views, manual reviews and local report history.",
-        "keywords": [
-          "dsh",
-          "deepseek",
-          "deepseek-harness",
-          "dsh-plugin",
-          "plugin",
-          "compatibility",
-          "health-check",
-          "cordis",
-          "agent-skills",
-          "static-analysis",
-          "dependency-analysis",
-          "upgrade",
-          "i18n",
-          "manual-review",
-          "report-history"
-        ],
-        "scope": "Prepared plugin/package.json fields only. Live registry metadata and dist-tags were not changed; these package fields take effect with a separately authorized publication."
-      },
-      "validation": {
-        "tests": 1242,
-        "pass": 1234,
-        "skip": 8,
-        "fail": 0,
-        "metadataAndDocumentTests": "33/33 passed",
-        "prepublishGate": "passed; does not publish",
-        "maintenanceCheck": "passed",
-        "dependencyAudit": [
-          {
-            "target": "workspace-lock",
-            "status": "clean",
-            "vulnerabilities": 0
-          },
-          {
-            "target": "plugin-runtime",
-            "status": "clean",
-            "vulnerabilities": 0
-          }
-        ],
-        "actualHost": {
-          "host": "0.2.1-rc.3",
-          "platform": "darwin",
-          "arch": "arm64",
-          "node": "v26.12.1",
-          "nineAcceptanceSections": true,
-          "checksumEntries": 30,
-          "screenshots": 21,
-          "privateRootRemoved": true,
-          "productionRequests": 0
-        }
-      },
+      "history": "b1c6809:docs/current-state.json",
       "artifact": {
-        "filename": "dsh-plugin-compat-check-0.2.0.tgz",
-        "sha256": "8120dc77b580fb02d9952a580d65a0c03813790f75b6d4b4a10b8bc15a5103f5"
+        "version": "0.2.0",
+        "sha256": "8120dc77b580fb02d9952a580d65a0c03813790f75b6d4b4a10b8bc15a5103f5",
+        "payloadFiles": 74
       },
-      "payloadFiles": 74,
-      "payloadDelta": "Only package/package.json differs from the previously accepted659e75ef archive; runtime, UI, README and skill bytes are unchanged. New tgz was independently installed and passed all nine actual-host sections.",
-      "receipts": "tmp/metadata-preparation-020-20261028/{summary.json,source.json,live.json,SHA256SUMS,screenshots/}",
-      "scope": "Authorized GitHub description/topics edits only; no messages, Git push, merge, tag, release or npm publication. Acceptance binds the recorded local source snapshot and new tgz; this evidence/count update follows it. Corresponding remote CI and public-install verification still belong to formal release."
+      "validation": "Historical1242 tests:1234 pass/8 skip/0 fail; all nine actual-host UI sections on macOS arm64/Host0.2.1-rc.3,21 PNGs/30 checksums. GitHub metadata updated and read back; npm then observed0.1.7.",
+      "receipts": "tmp/metadata-preparation-020-20261028/",
+      "scope": "Dated local acceptance only; not a formal0.2.0 publication or certification of later README changes."
     },
     "upstreamExecutionLocal20261029": {
       "report": "docs/upstream-verification.md",
@@ -271,6 +121,22 @@
       "receipts": "tmp/upstream-20261029/{artifact-proof,repair-result,desktop-result,warning-result,update-warning-result,client-branch-result,posted-1047,posted-928,readback-1047,readback-928}.json",
       "scope": "Upstream-only verification, no product/runtime changes. Existing1242-test/full product artifact receipts above were not rerun by this follow-up; old successful CI applies only to its recorded commit.",
       "documentValidation": "13/13 document tests and npm run check passed; full1242-test product suite not rerun for this docs-only follow-up."
+    },
+    "releaseCandidate02020261029": {
+      "status": "preparing; not yet published",
+      "documentReview": "All maintained Markdown entry points, translations, rules, skill copies, provenance and docs checked against code/contracts. Four install guides now show an exact0.2.0 command. Historical versions, platform limitations and upstream pending work remain explicitly dated.",
+      "publicStateBeforeRelease": "GitHub latest v0.1.7; npm latest0.1.7. Fresh read-only metadata check found only expected local-ahead notices, no errors or skipped sources.",
+      "scope": "User authorized local commit, push/monitor all checks, then GitHub/npm release in that order. CI, archive and publication receipts must be filled only after verification.",
+      "localValidation": {
+        "tests": 1242,
+        "pass": 1234,
+        "skip": 8,
+        "fail": 0,
+        "maintenanceCheck": "npm run check passed",
+        "prepublishGate": "passed; credential scanner retained; only owned stale upstream-test credential file removed before rerun",
+        "remoteCi": "pending push of selected commit",
+        "publication": "not performed"
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
