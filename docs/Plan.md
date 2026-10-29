@@ -4,6 +4,8 @@
 
 ## 1. 项目定位与交付状态
 
+**0.2.0已于2026-10-29发布到[GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.0)及[npm](https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.0)**；同一制品、精确提交与平台回执见[current-state](current-state.json)。
+
 检查已安装DSH插件，提供源码位置、依据和覆盖限制。声明放行、激活、无发现及覆盖完整均不等于业务验收。npm交付面板、`compat_check`、skill和共享内核，无CLI bin、不支持npx；CLI、安装检查、批量、作者CI及健康执行器从private仓库工作区运行。源码安装须[构建完整tgz](../plugin/README.md#从源码构建安装)。
 
 ## 2. 现行判定与集成契约

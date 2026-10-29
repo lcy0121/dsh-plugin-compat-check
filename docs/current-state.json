@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.2.0",
-  "recordedAt": "2026-10-29T09:31:12.169Z",
+  "recordedAt": "2026-10-29T09:57:03.749Z",
   "testFiles": 82,
   "tests": 1242,
   "repositoryFiles": {
@@ -26,7 +26,7 @@
     "sourceContext": {
       "versionSource": "lib/version.mjs",
       "integrationTarget": "main",
-      "scope": "0.2.0 delivery: unified Chinese/English/Korean UI, reduced overhead, review archives/report history and safety/recovery work. Source, plugin and probe share this version. Dated artifact/CI receipts certify only their recorded bytes and platform; product documentation does not assert registry publication."
+      "scope": "0.2.0 delivery: unified Chinese/English/Korean UI, reduced overhead, review archives/report history and safety/recovery work. Source, plugin and probe share this version. Publication and platform acceptance bind only the exact commits and archives in the dated release receipt below."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -122,21 +122,117 @@
       "scope": "Upstream-only verification, no product/runtime changes. Existing1242-test/full product artifact receipts above were not rerun by this follow-up; old successful CI applies only to its recorded commit.",
       "documentValidation": "13/13 document tests and npm run check passed; full1242-test product suite not rerun for this docs-only follow-up."
     },
-    "releaseCandidate02020261029": {
-      "status": "preparing; not yet published",
+    "release02020261029": {
+      "status": "published and independently verified on npm and GitHub",
+      "source": {
+        "commit": "cb59b211a2ed2312e0ba6e167a7e0f50751706bf",
+        "manifestSha256": "1b64471d8aaff7da32c22ba8bbe774c411e752706bc0cbf5fabe923c609fef62",
+        "files": 380,
+        "dirty": false
+      },
       "documentReview": "All maintained Markdown entry points, translations, rules, skill copies, provenance and docs checked against code/contracts. Four install guides now show an exact0.2.0 command. Historical versions, platform limitations and upstream pending work remain explicitly dated.",
-      "publicStateBeforeRelease": "GitHub latest v0.1.7; npm latest0.1.7. Fresh read-only metadata check found only expected local-ahead notices, no errors or skipped sources.",
-      "scope": "User authorized local commit, push/monitor all checks, then GitHub/npm release in that order. CI, archive and publication receipts must be filled only after verification.",
       "localValidation": {
         "tests": 1242,
         "pass": 1234,
         "skip": 8,
         "fail": 0,
-        "maintenanceCheck": "npm run check passed",
-        "prepublishGate": "passed; credential scanner retained; only owned stale upstream-test credential file removed before rerun",
-        "remoteCi": "pending push of selected commit",
-        "publication": "not performed"
-      }
+        "maintenanceCheck": "passed",
+        "prepublishGate": "passed",
+        "documentMetadataSkillTests": "59/59 passed"
+      },
+      "ci": {
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40850800297",
+        "conclusion": "success",
+        "jobs": [
+          {
+            "name": "dependency-security",
+            "conclusion": "success"
+          },
+          {
+            "name": "test (22.19.0)",
+            "conclusion": "success"
+          },
+          {
+            "name": "test (24)",
+            "conclusion": "success"
+          },
+          {
+            "name": "linux-live (0.2.0-rc.2)",
+            "conclusion": "success"
+          },
+          {
+            "name": "linux-live (0.2.1-rc.3)",
+            "conclusion": "success"
+          },
+          {
+            "name": "linux-live (0.2.1-rc.2)",
+            "conclusion": "success"
+          }
+        ]
+      },
+      "artifact": {
+        "filename": "dsh-plugin-compat-check-0.2.0.tgz",
+        "sha256": "4cc5f8b87ec4519209c8f9589af65af235035183b0806c924a5ec65c64d47ecd",
+        "sha1": "76126d1840f8802642766a8c9e4ce5d574619735",
+        "integrity": "sha512-IB0uQkmg2YNbveSe+05tcJjm9Y5FjxB45JGTyZDc7tqFvh238ZI5ha4OxP+msuWDQX5d1kUwomyWfyow8cNTvQ==",
+        "bytes": 316013,
+        "payloadFiles": 74
+      },
+      "actualHost": {
+        "linux": {
+          "artifactId": 12887351392,
+          "artifactZipSha256": "a08538a3f6f5703359ff418f9957cfa4943cd41843db1e121206d4d793a17f83",
+          "host": "0.2.1-rc.3",
+          "allNineSections": true,
+          "screenshots": 21,
+          "checksumEntries": 30,
+          "privateRootRemoved": true
+        },
+        "mac": {
+          "platform": "darwin",
+          "arch": "arm64",
+          "node": "v26.12.1",
+          "host": "0.2.1-rc.3",
+          "allNineSections": true,
+          "screenshots": 21,
+          "privateRootRemoved": true,
+          "artifactSha256": "4cc5f8b87ec4519209c8f9589af65af235035183b0806c924a5ec65c64d47ecd"
+        }
+      },
+      "github": {
+        "release": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.0",
+        "tag": "v0.2.0",
+        "tagCommit": "cb59b211a2ed2312e0ba6e167a7e0f50751706bf",
+        "publishedAt": "2026-10-29T09:48:59Z",
+        "allThreeDownloadedAssetsByteIdentical": true
+      },
+      "npm": {
+        "version": "0.2.0",
+        "latest": "0.2.0",
+        "verifiedAt": "2026-10-29T09:51:09.784Z",
+        "integrityMatches": true,
+        "shasumMatches": true,
+        "downloadByteIdentical": true,
+        "metadataProblems": 0,
+        "metadataSkipped": 0,
+        "readmeMatches": true
+      },
+      "publicInstall": {
+        "spec": "dsh-plugin-compat-check@0.2.0",
+        "status": "checked",
+        "exitCode": 0,
+        "toolVersion": "0.2.0",
+        "dshVersion": "0.2.1-rc.3",
+        "tempProfileRemoved": true,
+        "scope": "Actual public-registry isolated install and host observation; not general business/UI acceptance."
+      },
+      "additionalTagCi": {
+        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40852588842",
+        "conclusion": "success",
+        "allJobs": "6/6 success; additional tag-triggered gate on same release commit"
+      },
+      "receipts": "tmp/release-020-20261029/; durable artifact and bounded acceptance summary attached to GitHub Release.",
+      "scope": "Same CI-built tgz accepted on Linux/macOS and published unchanged to npm/GitHub. This documentation receipt follows release and does not change archive payload. Windows/real-user acceptance and upstream pending work remain separate."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
