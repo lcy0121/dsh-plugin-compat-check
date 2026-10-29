@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.2.0",
-  "recordedAt": "2026-10-28T15:54:20.550Z",
+  "recordedAt": "2026-10-29T09:24:02Z",
   "testFiles": 82,
   "tests": 1242,
   "repositoryFiles": {
@@ -78,20 +78,8 @@
       "scope": "Full predecessor receipts: historical0.1.7 publication, earlier local UI/hardening and first0.2.0 artifact acceptance, upstream controls and previous history pointers. These are not the current source version or a0.2.0 publication claim."
     },
     "upstreamExecutionLocal20261028": {
-      "recordedAt": "2026-10-28T09:51:18Z",
-      "report": "docs/upstream-verification.md",
-      "artifact": {
-        "package": "dshmarket",
-        "version": "1.73.1",
-        "tgzSha256": "69c34d25dee1d9c4a86fe2d4ce8e0a6946bc7913beeb49406934e69ed37241bf",
-        "integrity": "sha512-mnDEDq743YH2xuLU2qgmssnSiuet5VxS8Bsbggnyez2OfzSnOtIhmnufpe+fA/m+UQr7qI6PkHGCnzW/550tfQ=="
-      },
-      "scope": "macOS arm64/Desktop Host0.2.1-rc.3 owned execution and controlled local registry only. Full interruption stopped before pnpm remove; seeded restart recovery did not restore bundles/services. Double metadata failure reached an unpinned install boundary; no real old-version install or full Electron GUI certification.",
-      "feedback": {
-        "market928": "https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6466100240",
-        "market1047": "https://github.com/dsh-market/dsh-market/issues/1047"
-      },
-      "remaining": "Await upstream recovery postconditions and unpinned-target policy; repeat after a fix. Other issue snapshots remain dated; no new outbound feedback in this preparation."
+      "history": "a489891:docs/current-state.json",
+      "scope": "Historical dshmarket1.73.1 execution, artifact and two authorized feedback receipts. Superseded for current follow-up by the separately pinned1.73.3 verification below; not retroactively accepted."
     },
     "releasePreparation020Local20261028": {
       "toolVersion": "0.2.0",
@@ -261,6 +249,28 @@
       "payloadDelta": "Only package/package.json differs from the previously accepted659e75ef archive; runtime, UI, README and skill bytes are unchanged. New tgz was independently installed and passed all nine actual-host sections.",
       "receipts": "tmp/metadata-preparation-020-20261028/{summary.json,source.json,live.json,SHA256SUMS,screenshots/}",
       "scope": "Authorized GitHub description/topics edits only; no messages, Git push, merge, tag, release or npm publication. Acceptance binds the recorded local source snapshot and new tgz; this evidence/count update follows it. Corresponding remote CI and public-install verification still belong to formal release."
+    },
+    "upstreamExecutionLocal20261029": {
+      "report": "docs/upstream-verification.md",
+      "artifact": {
+        "package": "dshmarket",
+        "version": "1.73.3",
+        "tagCommit": "2211d46e0feba2b56d26e3f60b95aeffb8ed4547",
+        "tgzSha256": "97fada3db48e83afc3705e522d1a5f8ba4369fa5a6297412a127510447899233",
+        "all116PublishedFilesUnchanged": true
+      },
+      "recovery": "Original repair-function controls passed. Actual Desktop Host0.2.1-rc.3 IPC/PluginManager/bundled pnpm11.28.5 and owned Chrome: two missing-bundle restarts retained journal, attempts1/2, bundle0/service null. False completion fixed; self-healing remains absent. No full Electron GUI or remove/SIGKILL reproduction.",
+      "notAccepted": "Manual uninstall HTTP timed out at45s after isolated disk removal/journal clearing; reinstall never started. Desktop experiment overall not green; stopped four owned Host processes and Chrome. Controlled failed-manager result loses specific error code/message.",
+      "warning": "Original install route with controlled package-manager writes: double429/HTML returns200/ok and bare target without warning/versionUnverified. Healthy/fallback/explicit-version controls passed. CLI-runner update route warns; original client classification handles zh/en/ja. Desktop maturity409 retained. No real install/old-version/pnpm-policy/DOM acceptance claim.",
+      "otherUpstreams": "1024#22 open, public detail still GitHub-only/unknown/not_checked/null checkedAt; no npm/new-install acceptance. Awesome#717 open/unmerged, no new replies. Gmail unavailable: reauthentication required; mail not checked.",
+      "feedback": {
+        "market1047": "https://github.com/dsh-market/dsh-market/issues/1047#issuecomment-6492914395",
+        "market928": "https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6492917994",
+        "scope": "Only these two comments authorized and posted; readback exactly matches approved drafts. No new issue/PR, push or release."
+      },
+      "receipts": "tmp/upstream-20261029/{artifact-proof,repair-result,desktop-result,warning-result,update-warning-result,client-branch-result,posted-1047,posted-928,readback-1047,readback-928}.json",
+      "scope": "Upstream-only verification, no product/runtime changes. Existing1242-test/full product artifact receipts above were not rerun by this follow-up; old successful CI applies only to its recorded commit.",
+      "documentValidation": "13/13 document tests and npm run check passed; full1242-test product suite not rerun for this docs-only follow-up."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

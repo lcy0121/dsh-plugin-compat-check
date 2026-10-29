@@ -79,5 +79,5 @@ UI沿用shadcn派生Card/Fold：主结果→依赖关系→人工处置→升级
 仅列未完成事项，优先级不是漏洞评级；功能/资源边界见前文及指南。
 
 1. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题及窄容器，记录安装→理解→定位的误读、失败、误报、分享障碍与耗时。合成样例不代替真实试用；联系、收集、公开分别授权，不默认遥测。
-2. **P2：跟进上游验收。** 按[2026-10-28实跑记录](upstream-verification.md)跟进[market#928恢复后置条件](https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6466100240)及[#1047双查询失败策略](https://github.com/dsh-market/dsh-market/issues/1047)，等待处理后复验，不将半卸载构造/安装边界替身称为完整中断或真实旧版安装。[1024#22](https://github.com/imsai-sh/dsh-1024store/issues/22)待npm安装方式及新装验收；[awesome#717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)截至该记录未合并。后续反馈另取授权，不重复发帖。
+2. **P2：跟进上游验收。** 按[2026-10-29复验](upstream-verification.md)：[market#928](https://github.com/dsh-market/dsh-market/issues/928)的1.73.3误清journal修复通过，缺bundle两次重启仍未自愈，错误细节丢失及自救流程继续跟进，限定复验已[追加原帖](https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6492917994)；[market#1047](https://github.com/dsh-market/dsh-market/issues/1047)虽已关闭，更新分支有警告，但原新装分支仍无警告/版本未核实标记，已[追加原帖](https://github.com/dsh-market/dsh-market/issues/1047#issuecomment-6492914395)，等待补齐，不重复开issue。[1024#22](https://github.com/imsai-sh/dsh-1024store/issues/22)仍无npm方法、新装未验收；[awesome#717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)仍未合并，二者无新回复。后续反馈另取授权。
 3. **P2：Windows真实验收（依环境条件暂缓）。** 条件具备后验证路径、安装、回收、权限、打包/诊断及自有资源清理；此前保持未验收。
