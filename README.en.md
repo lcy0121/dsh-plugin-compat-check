@@ -6,7 +6,7 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-**0.2.1** provides exact DSH rc.5 catalogues, parameter/slot semantics, upgrade preview and author CI, plus a Chinese/English/Korean UI, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3 and 0.2.1-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
+**0.2.2** provides exact DSH rc.5 catalogues, parameter/slot semantics, upgrade preview and author CI, plus a Chinese/English/Korean UI, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3 and 0.2.1-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
 
 macOS/Linux rc.5 acceptance binds each exact commit and archive; [docs/current-state.json](docs/current-state.json) records its commit and scope. Later sources/packages require fresh verification. The npm plugin provides the page, details/badges, `compat_check` and skill. CLI, install checks, batches, author CI and health executor are repository tools. There is no npm CLI bin or `npx dsh-plugin-compat-check` support.
 
@@ -14,9 +14,9 @@ macOS/Linux rc.5 acceptance binds each exact commit and archive; [docs/current-s
 
 ```sh
 # Install this exact version
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.1
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.2
 # Verify the digest before using a local archive
-dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.1.tgz
+dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.2.tgz
 ```
 
 In the DSH instance using that profile, open **bottom-left More (⋯)/avatar → Settings → Built-in plugins → Compatibility (兼容性)**. Do not assume desktop. Agents can call `compat_check`; source installations require a [complete tgz](plugin/README.md#从源码构建安装).
@@ -46,7 +46,7 @@ Archival requires confirmation and a backup; restored/imported records are refer
 
 ## Screenshots
 
-Historical **0.2.0 / DSH 0.2.1-rc.3** captures from 2026-10-29, not 0.2.1 acceptance evidence. Counts describe that check; upgrade/history images show forms without an executed comparison/save. Overview is English; workflow captures are Chinese.
+Historical **0.2.0 / DSH 0.2.1-rc.3** captures from 2026-10-29, interface examples only, not acceptance evidence for the current artifact. Counts describe that check; upgrade/history images show forms without an executed comparison/save. Overview is English; workflow captures are Chinese.
 
 ![0.2.0 English overview and evidence limits](plugin/assets/compat-overview-en-0.2.0.png)
 ![0.2.0 manual review entry](plugin/assets/compat-review-0.2.0.png)

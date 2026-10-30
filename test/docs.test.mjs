@@ -226,10 +226,23 @@ test('release document facts reject stale product versions and development-only 
  const {checkReleaseFacts}=await import('../tools/doc-check.mjs');
  assert.equal(typeof checkReleaseFacts,'function');assert.deepEqual(checkReleaseFacts(REPO),[]);
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'dsc-release-docs-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
- const files=['README.md','README.en.md','README.ko.md','plugin/README.md','docs/Plan.md','docs/guide.md','docs/maintaining.md','docs/author-ci.md','rules/README.md','skill/README.md'];
+ const files=['README.md','README.en.md','README.ko.md','plugin/README.md','docs/Plan.md','docs/guide.md','docs/maintaining.md','docs/author-ci.md','docs/upstream-verification.md','rules/README.md','skill/README.md','skill/SKILL.md','plugin/skill/SKILL.md'];
  for(const f of files){fs.mkdirSync(path.dirname(path.join(root,f)),{recursive:true});fs.copyFileSync(path.join(REPO,f),path.join(root,f));}
  assert.deepEqual(checkReleaseFacts(root),[]);
  for(const f of files){const original=fs.readFileSync(path.join(root,f),'utf8');fs.writeFileSync(path.join(root,f),original.replace(/\*\*\d+\.\d+\.\d+\*\*/,'**0.0.1**'));assert.ok(checkReleaseFacts(root).some(p=>p.startsWith(f+':')),f);fs.writeFileSync(path.join(root,f),original);}
  fs.appendFileSync(path.join(root,'README.md'),'\nUse 0.1.7-dev; no npm release yet.\n');
  assert.ok(checkReleaseFacts(root).some(p=>p.startsWith('README.md:')));
+ // These were missed by the delivery heading check and froze into the release tag.
+ for(const [file,claim] of [
+  ['docs/Plan.md','0.2.1是未发布候选。'],
+  ['docs/maintaining.md','0.2.1仍为未发布候选。'],
+  ['README.en.md','dsh plugin --profile <profile> add dsh-plugin-compat-check@0.0.1'],
+  ['plugin/README.md','dsh plugin --profile <profile> add file:/tmp/dsh-plugin-compat-check-0.0.1.tgz'],
+  ['skill/SKILL.md','工具版本: 0.0.1    证据覆盖有限: 4 个插件'],
+ ]){
+  const original=fs.readFileSync(path.join(root,file),'utf8');
+  fs.appendFileSync(path.join(root,file),'\n'+claim+'\n');
+  assert.ok(checkReleaseFacts(root).some(p=>p.startsWith(file+':')),file+': '+claim);
+  fs.writeFileSync(path.join(root,file),original);
+ }
 });

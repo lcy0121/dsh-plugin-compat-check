@@ -169,8 +169,11 @@ export function checkReleaseFacts(root) {
     "docs/guide.md",
     "docs/maintaining.md",
     "docs/author-ci.md",
+    "docs/upstream-verification.md",
     "rules/README.md",
     "skill/README.md",
+    "skill/SKILL.md",
+    "plugin/skill/SKILL.md",
   ]) {
     const text = fs.readFileSync(path.join(root, rel), "utf8");
     const version = /\*\*(\d+\.\d+\.\d+)\*\*/.exec(text)?.[1];
@@ -182,6 +185,20 @@ export function checkReleaseFacts(root) {
       )
     )
       problems.push(`${rel}: stale development-only delivery description`);
+    if (/\d+\.\d+\.\d+(?:是|仍为?|为)未发布候选/.test(text))
+      problems.push(
+        `${rel}: publication-dependent candidate status in delivery document`,
+      );
+    for (const match of text.matchAll(
+      /(?:dsh-plugin-compat-check@|dsh-plugin-compat-check-)(\d+\.\d+\.\d+)(?=\s|\.tgz|$)/gm,
+    )) {
+      if (match[1] !== TOOL_VERSION)
+        problems.push(`${rel}: install example must use ${TOOL_VERSION}`);
+    }
+    for (const match of text.matchAll(/工具版本:\s*(\d+\.\d+\.\d+)/g)) {
+      if (match[1] !== TOOL_VERSION)
+        problems.push(`${rel}: output example must use ${TOOL_VERSION}`);
+    }
   }
   return problems;
 }

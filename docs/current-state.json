@@ -1,6 +1,6 @@
 {
-  "toolVersion": "0.2.1",
-  "recordedAt": "2026-10-30T12:50:08.891Z",
+  "toolVersion": "0.2.2",
+  "recordedAt": "2026-10-30T22:59:05.499Z",
   "testFiles": 83,
   "tests": 1273,
   "repositoryFiles": {
@@ -26,7 +26,7 @@
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
-      "scope": "0.2.1 published from9beaa5a. Post-release documentation does not alter the published tgz; newer source/packages require their own gates."
+      "scope": "Documentation describes this checkout version and capabilities independently of publication time. Registry/release observations and acceptance receipts are dated evidence, never inferred from the delivery version."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -34,63 +34,6 @@
       "Private execution profiles are not OS sandboxes; account/model execution needs its own authorization.",
       "CI applies to the exact GitHub commit; formal publication must use the accepted archive."
     ],
-    "publicState20261030": {
-      "observedAt": "2026-10-30T12:49:44.326Z",
-      "npm": "0.2.0",
-      "githubRelease": "v0.2.0",
-      "scope": "Read-only metadata checks had no errors/skipped sources; candidate version/README/description differences are expected pending-publication notices. No0.2.1 release performed."
-    },
-    "release02020261029": {
-      "status": "published and independently verified on npm and GitHub",
-      "commit": "cb59b211a2ed2312e0ba6e167a7e0f50751706bf",
-      "artifact": {
-        "filename": "dsh-plugin-compat-check-0.2.0.tgz",
-        "sha256": "4cc5f8b87ec4519209c8f9589af65af235035183b0806c924a5ec65c64d47ecd",
-        "sha1": "76126d1840f8802642766a8c9e4ce5d574619735",
-        "integrity": "sha512-IB0uQkmg2YNbveSe+05tcJjm9Y5FjxB45JGTyZDc7tqFvh238ZI5ha4OxP+msuWDQX5d1kUwomyWfyow8cNTvQ==",
-        "bytes": 316013,
-        "payloadFiles": 74
-      },
-      "ci": {
-        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40850800297",
-        "conclusion": "success",
-        "jobs": "6/6"
-      },
-      "platforms": "Same archive accepted on macOS arm64/Linux x64 with DSH0.2.1-rc.3; nine sections,21 screenshots each.",
-      "github": {
-        "release": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.0",
-        "tag": "v0.2.0",
-        "tagCommit": "cb59b211a2ed2312e0ba6e167a7e0f50751706bf",
-        "publishedAt": "2026-10-29T09:48:59Z",
-        "allThreeDownloadedAssetsByteIdentical": true
-      },
-      "npm": {
-        "version": "0.2.0",
-        "latest": "0.2.0",
-        "verifiedAt": "2026-10-29T09:51:09.784Z",
-        "integrityMatches": true,
-        "shasumMatches": true,
-        "downloadByteIdentical": true,
-        "metadataProblems": 0,
-        "metadataSkipped": 0,
-        "readmeMatches": true
-      },
-      "publicInstall": {
-        "spec": "dsh-plugin-compat-check@0.2.0",
-        "status": "checked",
-        "exitCode": 0,
-        "toolVersion": "0.2.0",
-        "dshVersion": "0.2.1-rc.3",
-        "tempProfileRemoved": true,
-        "scope": "Actual public-registry isolated install and host observation; not general business/UI acceptance."
-      },
-      "details": "10213c0:docs/current-state.json; durable archive/checksums/receipt on GitHub Release."
-    },
-    "history": {
-      "commit": "10213c0",
-      "path": "docs/current-state.json",
-      "scope": "Full predecessor acceptance, release preparation, screenshot digests, source semantics and upstream controls. Historical evidence is not a current source or publication claim."
-    },
     "business02120261030": {
       "host": "0.2.1-rc.5",
       "status": "passed",
@@ -116,141 +59,22 @@
       "scope": "Historical fixed24-case run before documentation/skill compression; expectations and kernel unchanged, no rerun claimed for the new tgz. Green retained12 unflagged failures; not general business certification.",
       "receipts": "tmp/release-021-20261030/business-final/"
     },
-    "preReleaseHistory": {
-      "commit": "9beaa5a",
-      "path": "docs/current-state.json",
-      "scope": "Dated pre-release candidates and documentation gates; not the final release archive."
+    "historicalRelease021": {
+      "scope": "Historical 0.2.1 publication and same-archive acceptance only; not current registry state or acceptance of 0.2.2.",
+      "sourceCommit": "9beaa5a9174237d09844ea961e574827279bbae8",
+      "githubRelease": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.1",
+      "npmPackage": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.1",
+      "githubPublishedAt": "2026-10-30T18:17:05Z",
+      "npmPublishedAt": "2026-10-30T18:12:54.228Z",
+      "archiveSha256": "cdb256e475dd3fa003b639b835d4f0301454f77b5c09fa2946a83b23de33bb09",
+      "acceptance": "Exact 0.2.1 archive passed rc.5 macOS arm64/Linux x64 nine-section UI gates and public-registry isolated installation; limitations retained.",
+      "ci": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41101651183",
+      "details": "0d6187bcbcc6dbf11f1985de9e6e34515c9be3e2:docs/current-state.json; RELEASE-VERIFICATION.json and SHA256SUMS on the linked release."
     },
-    "release02120261031": {
-      "status": "published and independently verified on npm and GitHub",
-      "source": {
-        "commit": "9beaa5a9174237d09844ea961e574827279bbae8",
-        "manifestSha256": "528408f2743d3fca1a3c133b7e1a9ca8de271d7446658c3380ae7086bc91a44e",
-        "dirty": false
-      },
-      "ci": {
-        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41101651183",
-        "conclusion": "success",
-        "jobs": [
-          {
-            "name": "dependency-security",
-            "conclusion": "success"
-          },
-          {
-            "name": "test (22.19.0)",
-            "conclusion": "success"
-          },
-          {
-            "name": "test (24)",
-            "conclusion": "success"
-          },
-          {
-            "name": "candidate",
-            "conclusion": "success"
-          },
-          {
-            "name": "linux-live (0.2.1-rc.2)",
-            "conclusion": "success"
-          },
-          {
-            "name": "linux-live (0.2.1-rc.3)",
-            "conclusion": "success"
-          },
-          {
-            "name": "linux-live (0.2.1-rc.5)",
-            "conclusion": "success"
-          },
-          {
-            "name": "linux-live (0.2.0-rc.2)",
-            "conclusion": "success"
-          }
-        ]
-      },
-      "artifact": {
-        "filename": "dsh-plugin-compat-check-0.2.1.tgz",
-        "sha256": "cdb256e475dd3fa003b639b835d4f0301454f77b5c09fa2946a83b23de33bb09",
-        "sha1": "863d622d78ed990a558735a99ce50e7da6232936",
-        "integrity": "sha512-iF9YGTzGVrFPmkPx5AeDWxzoo9bCNPlyI5lTa4aOOV1TmI+QV17f2lqtkCVBHWthuHk5mCLY5NpKslJkaxvECw==",
-        "bytes": 316460,
-        "payloadFiles": 76
-      },
-      "actualHost": {
-        "mac": {
-          "platform": "darwin",
-          "arch": "arm64",
-          "node": "v26.13.0",
-          "dshVersion": "0.2.1-rc.5",
-          "allNineSections": true,
-          "screenshots": 21,
-          "privateRootRemoved": true,
-          "sameArchive": true,
-          "checksumManifestVerified": true
-        },
-        "linux": {
-          "platform": "linux",
-          "arch": "x64",
-          "node": "v24.22.1",
-          "dshVersion": "0.2.1-rc.5",
-          "allNineSections": true,
-          "screenshots": 21,
-          "privateRootRemoved": true,
-          "sameArchive": true,
-          "checksumManifestVerified": true
-        }
-      },
-      "localValidation": {
-        "tests": 1273,
-        "pass": 1265,
-        "skip": 8,
-        "fail": 0,
-        "maintenanceCheck": "passed",
-        "prepublishGate": "passed"
-      },
-      "github": {
-        "release": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.1",
-        "tag": "v0.2.1",
-        "tagCommit": "9beaa5a9174237d09844ea961e574827279bbae8",
-        "publishedAt": "2026-10-30T18:17:05Z",
-        "allThreeDownloadedAssetsByteIdentical": true
-      },
-      "npm": {
-        "version": "0.2.1",
-        "latest": "0.2.1",
-        "verifiedAt": "2026-10-30T18:14:48.639786+00:00",
-        "publishedAt": "2026-10-30T18:12:54.228Z",
-        "integrityMatches": true,
-        "shasumMatches": true,
-        "downloadByteIdentical": true,
-        "metadataMatches": true,
-        "readmeMatches": true,
-        "metadataProblems": 0,
-        "metadataSkipped": 0
-      },
-      "publicInstall": {
-        "spec": "dsh-plugin-compat-check@0.2.1",
-        "status": "checked",
-        "exitCode": 0,
-        "toolVersion": "0.2.1",
-        "dshVersion": "0.2.1-rc.5",
-        "tempProfileRemoved": true,
-        "catalogueSha256": "63ee5a2963bb35eb1425c78cda1d3eafb2e153a959b69003abfcaf543cde043a",
-        "summary": {
-          "limited": 2,
-          "vacuousOk": 1,
-          "ok": 2,
-          "partial": 0,
-          "broken": 0,
-          "unknown": 0
-        },
-        "scope": "Actual public-registry isolated installation and host observation; limited/vacuous coverage retained. Full UI belongs to the separate same-archive acceptance, not this install check."
-      },
-      "receipts": "tmp/release-021-20261031/; durable tgz, SHA256SUMS and RELEASE-VERIFICATION.json on GitHub Release.",
-      "scope": "Same CI-built archive accepted on macOS/Linux and published unchanged. Historical business misses, Windows/user-study and upstream pending work remain separate.",
-      "publicMetadataCheck": {
-        "observedAt": "2026-10-30T18:20:02.169Z",
-        "problems": 0,
-        "skipped": 0
-      }
+    "history": {
+      "commit": "0d6187bcbcc6dbf11f1985de9e6e34515c9be3e2",
+      "path": "docs/current-state.json",
+      "scope": "Detailed 0.2.0/0.2.1 publication, pre-release and public metadata observations. Historical evidence never certifies a newer version."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

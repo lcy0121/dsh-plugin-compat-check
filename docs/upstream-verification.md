@@ -1,12 +1,12 @@
 # 上游跟进与限定核验
 
-2026-10-30再次只读核对GitHub、npm和1024公共详情：dshmarket latest仍为1.73.5，以下事项状态未变。功能结果来自同日已完成的受控实验，本次文档整理没有重跑Desktop或真实pnpm。项目版本/制品回执见[current-state](current-state.json)。
+本文对应**0.2.2**。2026-10-31只读复核：npm的dshmarket latest为**1.73.6**；下列GitHub事项状态及最新回复未变。1024公共详情本次返回HTTP403，不能确认当前安装方法。下文功能结果仅来自2026-10-30的1.73.5受控实验，未重跑1.73.6、Desktop或真实pnpm。项目版本/制品回执见[current-state](current-state.json)。
 
 | 上游 | 已核状态 | 剩余事项 |
 |---|---|---|
-| [market#928](https://github.com/dsh-market/dsh-market/issues/928) | open；[最新回复](https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6512186435)指出详细reason和用户出口缺口 | 缺bundle时保留journal已复核；具体错误码/消息仍丢失，调用方只打印数量。组合自愈、用户可见诊断及真实桌面自救待验 |
-| [market#1047](https://github.com/dsh-market/dsh-market/issues/1047) | closed；[新装遗漏反馈](https://github.com/dsh-market/dsh-market/issues/1047#issuecomment-6492914395)后无新回复 | 1.73.5仍是update有警告、install遗漏；关闭不等于原诉求完成 |
-| [1024#22](https://github.com/imsai-sh/dsh-1024store/issues/22) | open，无新回复；[详情](https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin)仅GitHub安装方法，unknown/not_checked、checkedAt=null | 等正确npm方法后另做新装；本次未运行安装 |
+| [market#928](https://github.com/dsh-market/dsh-market/issues/928) | open；[最新回复](https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6512186435)指出详细reason和用户出口缺口 | 1.73.5缺bundle时保留journal已复核，但reason/用户出口仍不足；1.73.6及组合自愈、真实桌面自救另验 |
+| [market#1047](https://github.com/dsh-market/dsh-market/issues/1047) | closed；[新装遗漏反馈](https://github.com/dsh-market/dsh-market/issues/1047#issuecomment-6492914395)后无新回复 | 1.73.5是update有警告、install遗漏；1.73.6尚未复验，关闭不等于原诉求完成 |
+| [1024#22](https://github.com/imsai-sh/dsh-1024store/issues/22) | open，无新回复；[详情](https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin)本次HTTP403；2026-10-30记录仅GitHub方法、unknown/not_checked、checkedAt=null | 当前映射未核实；可访问后确认npm方法，再另做新装 |
 | [awesome#717](https://github.com/0xsline/awesome-deepseek-harness/pull/717) | open、未合并，无讨论回复 | 等维护者处理，未催帖 |
 
 ## 1.73.5受控复核
@@ -18,4 +18,4 @@
 
 2026-10-29的1.73.3真实Desktop两次重启未自愈，“移除→重装”在卸载HTTP45秒未返回；这些不能升级为1.73.5结论。完整实验、来源及当时反馈见`10213c0:docs/upstream-verification.md`，原始证据在`tmp/rc5-review-20261030/`。
 
-继续等#928详细原因/出口及组合恢复、#1047覆盖新装后，再按实际范围复验；1024和awesome另跟进。上游消息/新issue/PR须另取授权，本次未发送；未检查邮件。状态关闭、源码修复和端到端验收分别记录。
+先复核1.73.6是否改变#928原因/出口、组合恢复及#1047新装路径，再按实际范围验收；1024公共详情恢复可读后核映射，awesome另跟进。上游消息/新issue/PR须另取授权，本次未发送；未检查邮件。状态关闭、源码修复和端到端验收分别记录。

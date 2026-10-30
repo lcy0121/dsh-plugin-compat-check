@@ -1,10 +1,10 @@
 # 开发计划与维护约定
 
-本文对应**0.2.1**。版本真源为`lib/version.mjs`；[README](../README.md)讲入口，[指南](guide.md)列操作/预算，[维护指南](maintaining.md)列实现与验证，[docs/current-state.json](current-state.json)保存带日期的限定回执。
+本文对应**0.2.2**。版本真源为`lib/version.mjs`；[README](../README.md)讲入口，[指南](guide.md)列操作/预算，[维护指南](maintaining.md)列实现与验证，[docs/current-state.json](current-state.json)保存带日期的限定回执。
 
 ## 1. 项目定位与交付状态
 
-检查已安装DSH插件，提供源码位置、依据和覆盖限制；声明放行、激活或无发现不等于业务正常。**0.2.1已于2026-10-31发布到[GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.1)及[npm](https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.1)**，包含rc.5适配；精确提交、同一归档双平台验收及公共安装回执见current-state。历史0.2.0记录单列，旧回执不认证后续制品。
+检查已安装DSH插件，提供源码位置、依据和覆盖限制；声明放行、激活或无发现不等于业务正常。本版**0.2.2**统一版本与交付文档，保留rc.5适配及现有功能。文档按本版能力描述，不嵌入“未发布候选”等随发布失效的状态；公开版本与安装可用性以[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub Releases](https://github.com/lcy0121/dsh-plugin-compat-check/releases)实际记录为准。限定验收及带日期的历史回执见current-state，旧回执不认证当前制品。
 
 npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin、不支持npx。CLI、安装检查、批量、作者CI和健康执行器从private仓库运行；源码安装须[构建完整tgz](../plugin/README.md#从源码构建安装)。
 
@@ -70,7 +70,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ## 4. 验收范围
 
-[current-state](current-state.json)按提交、归档和平台记录结果。发布提交`9beaa5a`[CI八项通过](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41101651183)，同一tgz通过rc.5 macOS/Linux九项UI及公共registry安装核验。此前固定业务期望复现但仍有12项未识别故障，未宣称新包已重跑该队列。新源码/skill/README或重打包不继承此归档验收。Windows、用户试用和一般业务保持未验收；合成病例不替代真实试用。
+[current-state](current-state.json)按提交、归档和平台记录结果；正式发布须使用通过所选提交CI及同一tgz的rc.5 macOS/Linux九项UI验收的文件，并核验公共安装。历史0.2.1回执不认证0.2.2或后续重打包；固定24项业务样本仍保留12项未识别故障。Windows、用户试用和一般业务保持未验收；合成病例不替代真实试用。
 
 ## 5. 验证入口
 
@@ -81,5 +81,5 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 仅列未完成事项，优先级不是漏洞评级。
 
 1. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题/窄容器及误读、失败、误报与操作耗时；联系、收集、公开分别授权，不默认遥测。
-2. **P2：跟进上游验收。** [2026-10-30复核](upstream-verification.md)：market#928的journal保留修复成立，详细reason、用户出口和组合自愈仍待补；#1047新装仍遗漏。1024#22无npm方法，awesome#717未合并。均未完成端到端新装/桌面自救验收，后续反馈另取授权。
+2. **P2：跟进上游验收。** [2026-10-31只读复核](upstream-verification.md)：dshmarket已到1.73.6，尚须复验#928诊断/恢复及#1047新装；1.73.5结果保留为历史。1024#22无新回复、公共详情本次403，当前npm映射未核实；awesome#717未合并。端到端新装/桌面自救仍未验收，后续反馈另取授权。
 3. **P2：Windows真实验收（依环境条件暂缓）。** 验证路径、安装、回收、权限、打包/诊断和自有资源清理；此前保持未验收。

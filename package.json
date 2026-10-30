@@ -40,5 +40,5 @@
   "overrides": {
     "postcss-selector-parser": "7.1.6"
   },
-  "version": "0.2.1"
+  "version": "0.2.2"
 }

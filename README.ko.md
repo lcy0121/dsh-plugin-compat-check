@@ -6,7 +6,7 @@
 
 ## 버전과 진입점
 
-**0.2.1**은 DSH rc.5의 정확한 카탈로그, 매개변수/슬롯 의미, 업그레이드 사전 검사 및 작성자 CI를 지원하며, 중·영·한 UI, 의존 관계, 수동 검토, 로컬 보고서 이력을 제공합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
+**0.2.2**는 DSH rc.5의 정확한 카탈로그, 매개변수/슬롯 의미, 업그레이드 사전 검사 및 작성자 CI를 지원하며, 중·영·한 UI, 의존 관계, 수동 검토, 로컬 보고서 이력을 제공합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
 
 macOS/Linux rc.5 검수는 정확한 커밋과 아카이브에 연결됩니다. 범위는 [docs/current-state.json](docs/current-state.json)에 기록하며, 이후 소스/패키지는 다시 확인해야 합니다. npm 패키지는 화면, 상세/배지, `compat_check`, skill을 제공합니다. CLI·설치 검사·배치·작성자 CI·건강 실행기는 저장소 전용이며 npm CLI bin과 `npx dsh-plugin-compat-check`는 지원하지 않습니다.
 
@@ -14,9 +14,9 @@ macOS/Linux rc.5 검수는 정확한 커밋과 아카이브에 연결됩니다. 
 
 ```sh
 # 이 정확한 버전 설치
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.1
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.2
 # 로컬 아카이브 사용 전 해시 확인
-dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.1.tgz
+dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.2.tgz
 ```
 
 설치한 profile을 사용하는 DSH에서 **왼쪽 아래 더 보기(⋯)/아바타 → 설정 → 내장 플러그인 → 호환성(兼容性)**을 엽니다. desktop으로 가정하지 마세요. 에이전트는 `compat_check`를 호출할 수 있습니다. 소스 설치에는 [완전한 tgz](plugin/README.md#从源码构建安装)가 필요합니다.
@@ -46,7 +46,7 @@ dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0
 
 ## 화면 예시
 
-2026-10-29의 **0.2.0 / DSH 0.2.1-rc.3 과거 화면**이며 0.2.1 검수 증거가 아닙니다. 수치는 당시 검사만 나타냅니다. 사전 검사/이력 이미지는 비교·저장을 실행하지 않은 입력 화면입니다. 캡처 언어는 중국어입니다.
+2026-10-29의 **0.2.0 / DSH 0.2.1-rc.3 과거 화면**이며 현재 배포물의 검수 증거가 아닌 화면 예시입니다. 수치는 당시 검사만 나타냅니다. 사전 검사/이력 이미지는 비교·저장을 실행하지 않은 입력 화면입니다. 캡처 언어는 중국어입니다.
 
 ![0.2.0 주 결과와 근거 한계](plugin/assets/compat-overview-0.2.0.png)
 ![0.2.0 수동 검토 진입점](plugin/assets/compat-review-0.2.0.png)

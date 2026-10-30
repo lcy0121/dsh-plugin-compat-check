@@ -1,6 +1,6 @@
 # 维护指南
 
-本文维护**0.2.1**的目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
+本文维护**0.2.2**的目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
 
 ## 维护入口与语法覆盖
 
@@ -103,9 +103,9 @@ rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.j
 
 ## 同一制品发布核对
 
-0.2.1发布回执见current-state；已完成记录与当前源码分开核验，历史CI不认证新提交。发布依次完成：
+本版0.2.2的发布文档使用不依赖发布时点的能力描述；不把历史公开版本写成当前版本，也不预写成功时间、摘要或“已发布”。带日期的公开状态与验收回执单列在current-state，历史CI不认证新提交。发布依次完成：
 
-1. 运行check与prepublish-check（不发布），用成功TAP更新current-state计数，核生成副本、许可证和公开元数据。
+1. 先统一版本真源、manifest/lock、各版README、skill及示例；冻结到tag的文档不得保留“本版未发布”等即时状态。运行check与prepublish-check（不发布），用成功TAP更新current-state计数，核生成副本、许可证和公开元数据。
 2. 授权推送后等待所选提交全部Actions通过。CI candidate job只构建一次；rc.5 job下载同一归档/回执，运行完整UI并上传证据。
 3. 下载CI归档，核来源、提交、dirty及SHA-256；Mac使用该文件和构建回执重跑。若平台归档不同，即使内部文件相同也不能借旧文件验收。构建及重用命令见下方。
 4. 另取正式发布授权后，npm发布同一tgz，Git tag/Release附该文件、SHA256SUMS及限定验收回执；不从源码重打包。
@@ -153,4 +153,4 @@ DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_RC2_ARTIFACT=<候选tgz绝对路径> D
 
 rc.5额外要求独立ACP stdout JSON-RPC、stderr目录诊断、MCP能力、受控模型列表及导航语义回执。rc5-acp-stdout只用私有DSH_HOME、合成凭据、loopback列表/两轮模型响应和tools-only MCP；无resources能力不请求资源。失败/超时/清理不确认均失败，只保存计数与断言，不保存对话正文。模型列表另验首次等待、失败/超时回退及无凭据不请求；没有生产账户/模型调用。
 
-0.2.1正式归档在macOS/Linux通过同一文件验收，细节见current-state；后续包仍须按来源和摘要重核。固定业务五suite/24项仅证明期望重现，不能称全部功能通过。rules/dsh-0.2.1-rc.5-review.json的integrationAcceptance保留目录登记时基础快照，不追写历史归档。
+历史0.2.1归档的同一文件macOS/Linux验收见current-state；当前制品须独立核对来源、摘要及平台，不继承旧包结果。固定业务五suite/24项仅证明期望重现，不能称全部功能通过。rules/dsh-0.2.1-rc.5-review.json的integrationAcceptance保留目录登记时基础快照，不追写历史归档。

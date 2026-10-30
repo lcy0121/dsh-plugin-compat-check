@@ -1,6 +1,6 @@
 # 规则与固定源码参考
 
-本文维护**0.2.1**的规则。契约见[Plan](../docs/Plan.md)，维护见[流程](../docs/maintaining.md)，限定证据/实际发布状态见[current-state](../docs/current-state.json)。
+本文维护**0.2.2**的规则。契约见[Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，维护见[流程](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md)，限定证据/实际发布状态见[current-state](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。
 
 ## 文件与消费者
 
@@ -34,7 +34,7 @@ summary/basis/evidence/knownGoneIn/needsReview是解释与维护资料。knownEx
 
 ## 更新与度量
 
-先核对调用点、端侧、目标版本及真实描述符/官方源码，再改规则并加行为回归；不能仅凭目录变化新增严重度。新版本目录、语义基线及来源验证按[维护流程](../docs/maintaining.md#api目录候选审查)分别审查，保留旧基线。
+先核对调用点、端侧、目标版本及真实描述符/官方源码，再改规则并加行为回归；不能仅凭目录变化新增严重度。新版本目录、语义基线及来源验证按[维护流程](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md#api目录候选审查)分别审查，保留旧基线。
 
 ```sh
 npm run check:catalogs
@@ -46,4 +46,4 @@ node tools/coverage.mjs --nm <目录> --dsh-version <精确版本> --write --all
 
 coverage按AST调用点分host/client/shared统计规则命中及默认影响；不借异profile探针。不完整扫描默认拒绝写库存，写入须合法精确DSH版本，坏版本不覆盖旧文件。文件树/AST摘要不是原子快照或包签名。
 
-库存是2026-10-15、DSH0.2.0-rc.2的desktop历史部分样本；规则复核、旧覆盖率和方法决定可在`39d9f1a:rules/README.md`及severity.json的reviewed/evidence追溯。它们不代表当前生态准确率。真实业务标签、静态/service-only预测和驱动错误独立计分，不借业务答案调严重度；[复现](../docs/maintaining.md#真实插件回归)。
+库存是2026-10-15、DSH0.2.0-rc.2的desktop历史部分样本；规则复核、旧覆盖率和方法决定可在`39d9f1a:rules/README.md`及severity.json的reviewed/evidence追溯。它们不代表当前生态准确率。真实业务标签、静态/service-only预测和驱动错误独立计分，不借业务答案调严重度；[复现](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md#真实插件回归)。
