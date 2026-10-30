@@ -140,3 +140,8 @@ describe('面板报告也带版本', () => {
       '面板报告里没有正确的 toolVersion —— 用户从界面上看到的结论就无法追溯了')
   })
 })
+
+test('private workspace and lock root carry the same delivery version as plugin and probe',()=>{
+ assert.equal(readJSON('package.json').version,TOOL_VERSION);
+ const lock=readJSON('package-lock.json');assert.equal(lock.version,TOOL_VERSION);assert.equal(lock.packages[''].version,TOOL_VERSION);
+});

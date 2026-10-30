@@ -1,10 +1,10 @@
 # 开发计划与维护约定
 
-本文对应**0.2.0**。版本真源为`lib/version.mjs`；[docs/current-state.json](current-state.json)记录限定验收与发布回执。[README](../README.md)讲入口，[指南](guide.md)讲操作和预算，[维护指南](maintaining.md)讲实现与验证；本计划只保留核心契约及待办。
+本文对应**0.2.1**。版本真源为`lib/version.mjs`；[docs/current-state.json](current-state.json)记录限定验收与发布回执。[README](../README.md)讲入口，[指南](guide.md)讲操作和预算，[维护指南](maintaining.md)讲实现与验证；本计划只保留核心契约及待办。
 
 ## 1. 项目定位与交付状态
 
-**0.2.0已于2026-10-29发布到[GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.0)及[npm](https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.0)**；同一制品、精确提交与平台回执见[current-state](current-state.json)。
+0.2.1为本地候选，尚待当前提交Linux CI及发布授权。**0.2.0已于2026-10-29发布到[GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.0)及[npm](https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.0)**；同一制品、精确提交与平台回执见[current-state](current-state.json)。
 
 检查已安装DSH插件，提供源码位置、依据和覆盖限制。声明放行、激活、无发现及覆盖完整均不等于业务验收。npm交付面板、`compat_check`、skill和共享内核，无CLI bin、不支持npx；CLI、安装检查、批量、作者CI及健康执行器从private仓库工作区运行。源码安装须[构建完整tgz](../plugin/README.md#从源码构建安装)。
 
@@ -84,10 +84,10 @@ UI沿用shadcn派生Card/Fold：主结果→依赖关系→人工处置→升级
 
 ### 6.1 P0：0.2.1开发首要任务——适配DSH 0.2.1-rc.5
 
-产品目标为0.2.1，当前产品版本仍为0.2.0。第1–4项来源/语义、目录/预检/作者CI及真实验收入口已完成，能力归入§2及[维护指南](maintaining.md#rc5验收入口)。rc.5独立目录已登记，macOS基础集成通过；Linux、完整九项UI及真实业务仍待下项，不把目录认证扩大为一般业务验收。
+当前源码/候选版本为0.2.1，公开0.2.0发布回执保持历史事实。第1–4项来源/语义、目录/预检/作者CI及真实验收入口已完成，能力归入§2及[维护指南](maintaining.md#rc5验收入口)。rc.5独立目录已登记，0.2.1候选macOS完整九项UI已通过；当前候选Linux实跑仍待下项，不把目录认证扩大为一般业务验收。
 
-5. [ ] **完成同一制品的macOS/Linux验收。** 在`.github/workflows/test.yml`新增精确rc.5真实集成，并为它运行完整九项UI门禁（含CJK字体、证据上传），保留三版旧门禁。用同一tgz、自有profile/Chrome验证三槽位、三语/主题/窄容器、草稿/定位、分页/完整导出、HTTP拒绝、超时恢复、升级预检、归档/历史及资源回收。为`tools/real-regression.mjs`增加rc.5独立固定制品清单，执行五suite/24项期望及适用holdout；预测先封存，HTTP/DOM/磁盘独立核真值，驱动错误不算业务通过。推理显示测试用合成输入/本地mock，不继承真实账户或调用模型；Windows保持未验收。
-6. [ ] **收敛0.2.1交付与文档。** 实现就绪后统一`lib/version.mjs`、plugin/probe版本及lock，更新精确版本范围、规则说明、README三语、指南/维护/作者CI/skill和示例；通过`npm test`、`npm run check`、`node plugin/scripts/prepublish-check.mjs`，以新TAP更新计数。`docs/current-state.json`另记rc.5的提交、制品摘要、平台与实际验收回执，保留旧发布回执。推送/合并/发布分别另取授权，遵循[同一tgz核对](maintaining.md#同一制品发布核对)。
+5. [ ] **完成同一制品的macOS/Linux验收（待Linux实跑）。** rc.5四版矩阵、CJK字体/九项UI、同一归档下载及源码回执绑定已接入；macOS完整九项已通过，固定五suite/24项期望的本轮结果见[current-state](current-state.json)。本地没有Linux运行时；取得当次推送授权后，核对所选提交全部CI及同一tgz摘要。若CI归档不同，下载该文件重跑Mac，不能借旧回执。Windows保持未验收。
+6. [ ] **完成0.2.1交付的远端核对。** 源码/插件/probe/lock已统一0.2.1，文档和本地候选已收敛；本地测试/维护及发布前门禁结果按实际回执记录。剩余步骤：授权推送后核所选提交CI与Linux制品，再单独取得合并/正式发布授权。发布只使用最终双平台接受的同一归档，核registry/tag/release附件及公共安装；不预写已发布状态。
 
 ### 6.2 其余待办
 

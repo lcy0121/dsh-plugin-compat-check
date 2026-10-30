@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-compat-check",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Checks installed DSH plugins and static upgrade risks, with source evidence and coverage limits. Multilingual UI, agent tool, dependency views, manual reviews and local report history.",
   "license": "MIT",
   "type": "module",

@@ -246,3 +246,70 @@ test("rc.5 evidence cannot omit extended navigation and exact-version semantic c
     validateUi018Evidence(good, "a".repeat(64), "0.2.1-rc.5"),
   );
 });
+
+test("candidate receipt admission binds identical archive bytes to the selected source and commit", async () => {
+  const { validateCandidateReceipt } = await import("../tools/ci-ui018.mjs");
+  const source = {
+    sha256: "a".repeat(64),
+    commit: "b".repeat(40),
+    dirty: false,
+  };
+  const receipt = {
+    ok: true,
+    buildOnly: true,
+    sourceSha256: source.sha256,
+    sourceCommit: source.commit,
+    sourceDirty: false,
+    artifact: { sha256: "c".repeat(64), filename: "candidate.tgz" },
+  };
+  assert.equal(validateCandidateReceipt(receipt, source, "c".repeat(64)), true);
+  for (const patch of [
+    { ok: false },
+    { sourceSha256: "d".repeat(64) },
+    { sourceCommit: "e".repeat(40) },
+    { sourceDirty: true },
+    { artifact: { sha256: "f".repeat(64) } },
+  ])
+    assert.throws(() =>
+      validateCandidateReceipt(
+        { ...receipt, ...patch },
+        source,
+        "c".repeat(64),
+      ),
+    );
+});
+
+test("rc.5 Linux plan preserves old targets and consumes one candidate built by its prerequisite job", () => {
+  const w = YAML.parse(
+    fs.readFileSync(
+      new URL("../.github/workflows/test.yml", import.meta.url),
+      "utf8",
+    ),
+  );
+  const job = w.jobs["linux-live"];
+  assert.deepEqual(job.strategy.matrix.dsh, [
+    "0.2.0-rc.2",
+    "0.2.1-rc.2",
+    "0.2.1-rc.3",
+    "0.2.1-rc.5",
+  ]);
+  assert(job.needs.includes("candidate"));
+  const download = job.steps.find((s) =>
+    s.uses?.startsWith("actions/download-artifact@"),
+  );
+  assert.equal(download.with.name, "candidate-package");
+  assert.equal(download.with["digest-mismatch"], "error");
+  const ui = job.steps.find((s) => s.run?.includes("tools/ci-ui018.mjs"));
+  assert.match(ui.if, /rc\.5/);
+  assert.equal(ui.env.DSC_ACCEPTANCE_DSH_VERSION, "${{ matrix.dsh }}");
+  assert(job.steps.indexOf(download) < job.steps.indexOf(ui));
+  const build = w.jobs.candidate.steps.find((s) =>
+    s.run?.includes("--build-only"),
+  );
+  assert(build);
+  assert(
+    job.steps.some(
+      (s) => s.name?.startsWith("Install CJK") && s.if.includes("rc.5"),
+    ),
+  );
+});

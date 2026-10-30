@@ -7,6 +7,9 @@ import os from "node:os";
 import { createHash } from "node:crypto";
 import { execFileSync, spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { readStaticFile } from "../lib/static-input.mjs";
+import { verifyFunctionalArtifactInWorker } from "./functional-artifact.mjs";
+import { TOOL_VERSION } from "../lib/version.mjs";
 import { prepareOwnedPackageSource } from "./owned-package-source.mjs";
 const repo = fileURLToPath(new URL("..", import.meta.url));
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
@@ -239,7 +242,20 @@ async function run(command, args, options) {
     });
   });
 }
-export async function runUi018Ci(output) {
+/** Receipt identity is enforced before a supplied candidate may reach a host. */
+export function validateCandidateReceipt(receipt, source, artifactSha256) {
+  if (
+    receipt?.ok !== true ||
+    receipt.buildOnly !== true ||
+    receipt.sourceSha256 !== source.sha256 ||
+    receipt.sourceCommit !== source.commit ||
+    receipt.sourceDirty !== source.dirty ||
+    receipt.artifact?.sha256 !== artifactSha256
+  )
+    throw Error("Candidate archive/source receipt mismatch");
+  return true;
+}
+export async function runUi018Ci(output, { buildOnly = false } = {}) {
   const expectedVersion = uiAcceptanceVersion(
     process.env.DSC_ACCEPTANCE_DSH_VERSION,
   );
@@ -268,34 +284,73 @@ export async function runUi018Ci(output) {
   try {
     if (process.env.GITHUB_ACTIONS === "true" && source.dirty)
       throw Error("CI requires a clean, exact checkout");
-    staging = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-ui018-ci-"));
-    const packageSource = path.join(staging, "source");
-    prepareOwnedPackageSource(repo, packageSource);
-    const packed = await run(
-      "npm",
-      [
-        "pack",
-        path.join(packageSource, "plugin"),
-        "--json",
-        "--pack-destination",
-        output,
-      ],
-      {
-        env: {
-          ...process.env,
-          npm_config_cache: path.join(staging, "npm-cache"),
+    let artifact, artifactSha256;
+    if (process.env.DSC_RC2_ARTIFACT) {
+      if (buildOnly) throw Error("Cannot rebuild a supplied candidate");
+      if (!process.env.DSC_RC2_ARTIFACT_RECEIPT)
+        throw Error("Supplied candidate requires its source receipt");
+      const selected = path.resolve(process.env.DSC_RC2_ARTIFACT);
+      const receipt = JSON.parse(
+        readStaticFile(process.env.DSC_RC2_ARTIFACT_RECEIPT, 512 * 1024),
+      );
+      artifactSha256 = digest(readStaticFile(selected, 32 * 1024 * 1024));
+      validateCandidateReceipt(receipt, source, artifactSha256);
+      const bytes = await verifyFunctionalArtifactInWorker(selected, {
+        name: "dsh-plugin-compat-check",
+        version: TOOL_VERSION,
+        sha256: artifactSha256,
+      });
+      artifact = path.join(output, path.basename(selected));
+      if (artifact === selected)
+        throw Error("Candidate output must differ from supplied archive");
+      fs.writeFileSync(artifact, bytes, { mode: 0o600, flag: "wx" });
+    } else {
+      staging = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-ui018-ci-"));
+      const packageSource = path.join(staging, "source");
+      prepareOwnedPackageSource(repo, packageSource);
+      const packed = await run(
+        "npm",
+        [
+          "pack",
+          path.join(packageSource, "plugin"),
+          "--json",
+          "--pack-destination",
+          output,
+        ],
+        {
+          env: {
+            ...process.env,
+            npm_config_cache: path.join(staging, "npm-cache"),
+          },
         },
-      },
-    );
-    write("pack.stderr", packed.stderr);
-    write("pack.stdout", packed.stdout);
-    if (packed.code !== 0) throw Error("Independent package build failed");
-    const filename = packedFilename(packed.stdout);
-    if (path.basename(filename) !== filename || !filename.endsWith(".tgz"))
-      throw Error("Unexpected npm pack file");
-    const artifact = path.join(output, filename),
+      );
+      write("pack.stderr", packed.stderr);
+      write("pack.stdout", packed.stdout);
+      if (packed.code !== 0) throw Error("Independent package build failed");
+      const filename = packedFilename(packed.stdout);
+      if (path.basename(filename) !== filename || !filename.endsWith(".tgz"))
+        throw Error("Unexpected npm pack file");
+      artifact = path.join(output, filename);
       artifactSha256 = digest(fs.readFileSync(artifact));
-    summary.artifact = { filename, sha256: artifactSha256 };
+      await verifyFunctionalArtifactInWorker(artifact, {
+        name: "dsh-plugin-compat-check",
+        version: TOOL_VERSION,
+        sha256: artifactSha256,
+      });
+    }
+    summary.artifact = {
+      filename: path.basename(artifact),
+      sha256: artifactSha256,
+    };
+    if (buildOnly) {
+      if (sourceIdentity().sha256 !== source.sha256)
+        throw Error("Source changed during candidate build");
+      summary.ok = true;
+      summary.buildOnly = true;
+      summary.scope =
+        "Build/provenance only; no host, UI or business acceptance.";
+      return summary;
+    }
     const flags = Object.fromEntries(
       [
         "DSC_REQUIRE_RC2_UI",
@@ -382,8 +437,11 @@ if (
     console.log(
       JSON.stringify(
         await runUi018Ci(
-          process.argv[2] ||
+          (process.argv[2] === "--build-only"
+            ? process.argv[3]
+            : process.argv[2]) ||
             fs.mkdtempSync(path.join(os.tmpdir(), "dsc-ui018-evidence-")),
+          { buildOnly: process.argv[2] === "--build-only" },
         ),
         null,
         2,

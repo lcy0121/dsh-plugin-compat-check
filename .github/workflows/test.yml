@@ -35,14 +35,36 @@ jobs:
             prepublish.tap
             prepublish.tap.stderr
           retention-days: 7
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: test
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Build one source-bound candidate archive without claiming host acceptance
+        run: node tools/ci-ui018.mjs --build-only "$RUNNER_TEMP/candidate"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: candidate-package
+          path: ${{ runner.temp }}/candidate/
+          if-no-files-found: error
+          retention-days: 7
   linux-live:
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    needs: test
+    needs: [test, candidate]
     strategy:
       fail-fast: false
       matrix:
-        dsh: ["0.2.0-rc.2", "0.2.1-rc.2", "0.2.1-rc.3"]
+        dsh: ["0.2.0-rc.2", "0.2.1-rc.2", "0.2.1-rc.3", "0.2.1-rc.5"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -93,7 +115,7 @@ jobs:
           PY
           node -e 'const x=require(process.env.RUNNER_TEMP+"/linux-chrome-preparation.json");console.log(JSON.stringify({complete:x.complete,files:x.files,bytes:x.bytes,milliseconds:x.milliseconds,chromeLaunches:x.chromeLaunches}))'
       - name: Install CJK fonts for multilingual UI acceptance
-        if: matrix.dsh == '0.2.1-rc.3'
+        if: matrix.dsh == '0.2.1-rc.3' || matrix.dsh == '0.2.1-rc.5'
         shell: bash
         run: |
           sudo apt-get update
@@ -103,8 +125,32 @@ jobs:
             fc-match --format '%{family}: %{file}\n' ":lang=$language" >> "$RUNNER_TEMP/linux-ui-fonts.txt"
           done
           cat "$RUNNER_TEMP/linux-ui-fonts.txt"
-      - name: Complete 0.2.0 UI acceptance on one independent package
-        if: matrix.dsh == '0.2.1-rc.3'
+      - name: Download the same source-bound candidate for rc.5
+        if: matrix.dsh == '0.2.1-rc.5'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: candidate-package
+          path: ${{ runner.temp }}/candidate
+          digest-mismatch: error
+      - name: Bind supplied candidate and source receipt
+        if: matrix.dsh == '0.2.1-rc.5'
+        run: |
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const root = path.join(process.env.RUNNER_TEMP, 'candidate');
+          const receipt = JSON.parse(fs.readFileSync(path.join(root, 'summary.json')));
+          if (path.basename(receipt.artifact.filename) !== receipt.artifact.filename) throw Error('Unsafe candidate filename');
+          fs.appendFileSync(process.env.GITHUB_ENV, [
+            `DSC_RC2_ARTIFACT=${path.join(root, receipt.artifact.filename)}`,
+            `DSC_RC2_ARTIFACT_RECEIPT=${path.join(root, 'summary.json')}`,
+            '',
+          ].join(String.fromCharCode(10)));
+          JS
+      - name: Complete selected-host UI acceptance on one independent package
+        if: matrix.dsh == '0.2.1-rc.3' || matrix.dsh == '0.2.1-rc.5'
+        env:
+          DSC_ACCEPTANCE_DSH_VERSION: ${{ matrix.dsh }}
         run: node tools/ci-ui018.mjs "$RUNNER_TEMP/linux-ui018"
       - name: Real Linux Chrome startup and failure evidence
         shell: bash

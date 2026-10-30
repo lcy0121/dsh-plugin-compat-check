@@ -359,7 +359,6 @@
   "显示 {p0} / {p1} 个插件；筛选仅改变呈现。": "Showing {p0} / {p1} plugins; filters only change presentation.",
   "显示更多历史处置": "Show more historical reviews",
   "显示更多处置（已显示 {p0} / {p1}）": "Show more reviews ({p0} / {p1} shown)",
-  "普通体检按目标版本选择已知目录：0.2.1-rc.2及以后用rc.2目录，其余/未知用旧目录；显式--catalog优先，未来版本未经认证。声明从0.2.1-rc.1起优先engines.dsh，否则回退官方peer；旧目标保留旧规则。精确豁免只表示声明获准，不证明业务成功；请以实际宿主复核。": "Regular checks select a known catalogue by target version: rc.2 for 0.2.1-rc.2 and later, the older catalogue otherwise or when unknown. Explicit --catalog takes priority; future versions remain uncertified. From 0.2.1-rc.1, declarations prefer engines.dsh and fall back to the official peer; older targets retain older rules. Exact-version exemptions permit declarations, not business success. Verify in the actual host.",
   "更新 {p0}": "Updated {p0}",
   "最近刷新失败，保留上次成功报告：{p0}": "Latest refresh failed; retaining the last successful report: {p0}",
   "有待验证部分": "Some parts await verification",
@@ -578,5 +577,6 @@
   "槽位目标未能静态确定；动态、展开、访问器或逃逸值不证明槽位身份，回调 props 未验证。": "Slot target cannot be determined statically; dynamic, spread, accessor or escaped values do not prove slot identity. Callback props are unverified.",
   "槽位语义未审查；不借用邻近版本的 text/rawText 契约，回调 props 未验证。": "Slot semantics are unreviewed; do not borrow adjacent-version text/rawText contracts. Callback props are unverified.",
   "槽位语义提示：{p0}；{p1}": "Slot semantics advisory: {p0}; {p1}",
-  "槽位覆盖限制：{p0}；{p1}": "Slot coverage limit: {p0}; {p1}"
+  "槽位覆盖限制：{p0}；{p1}": "Slot coverage limit: {p0}; {p1}",
+  "普通体检按目标版本选择已登记目录或带未认证提示的参考目录；显式--catalog优先，目录匹配不等于业务验收。声明从0.2.1-rc.1起优先engines.dsh，否则回退官方peer；旧目标保留旧规则。精确豁免只表示声明获准，不证明业务成功；请以实际宿主复核。": "Regular checks select a registered catalogue or an uncertified reference with a warning. Explicit --catalog takes priority; a catalogue match does not prove business behavior. From 0.2.1-rc.1, declarations prefer engines.dsh and fall back to the official peer; older targets retain older rules. Exact-version exemptions permit declarations, not business success. Verify in the actual host."
 }

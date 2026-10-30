@@ -4,7 +4,7 @@
 
 [简体中文](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/README.md) | [English](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/README.en.md) | [한국어](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/README.ko.md)
 
-**0.2.0**整合统一界面、中英韩国际化、轻量化、人工处置归档及历史对照，保留rc.3适配、升级预检、参数语义与边界加固。Node `^22.19.0 || >=24`，宿主声明`>=0.2.0-rc.2`；已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5**，最低版本声明不认证未来宿主。 rc.5登记与基础集成属于当前开发源码；已发布0.2.0制品仍仅包含前三版目录。
+**0.2.1**新增DSH rc.5精确目录/语义、升级预检/作者CI和验收入口，保留统一界面、中英韩国际化、轻量化、人工处置归档及历史对照，保留rc.3适配、升级预检、参数语义与边界加固。Node `^22.19.0 || >=24`，宿主声明`>=0.2.0-rc.2`；已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5**，最低版本声明不认证未来宿主。 当前为本地0.2.1候选，实际发布状态见current-state；已发布0.2.0制品仍仅包含前三版目录。
 
 ## 界面示例
 
@@ -32,7 +32,9 @@
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
-固定安装本版可使用`dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0`；不带版本时安装registry当前版本。安装后，在使用该profile的DSH主界面中打开：
+安装当前公开0.2.0可使用`dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0`；不带版本时安装registry当前版本。0.2.1候选请使用本次验收的归档：`dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.1.tgz`；不要将后续重打包视为已验收的同一文件。
+
+安装后，在使用该profile的DSH主界面中打开：
 
 **左下角“更多”（⋯）或用户头像（账号菜单） → 设置 → 内置插件 → 兼容性**。
 

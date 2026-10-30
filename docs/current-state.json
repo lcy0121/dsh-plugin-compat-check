@@ -1,12 +1,12 @@
 {
-  "toolVersion": "0.2.0",
-  "recordedAt": "2026-10-30T09:46:01.696Z",
+  "toolVersion": "0.2.1",
+  "recordedAt": "2026-10-30T12:04:31.039Z",
   "testFiles": 83,
-  "tests": 1269,
+  "tests": 1273,
   "repositoryFiles": {
-    "total": 389,
+    "total": 390,
     "fixtures": 100,
-    "other": 289
+    "other": 290
   },
   "verification": {
     "platform": "darwin",
@@ -22,12 +22,12 @@
         "0.2.1-rc.3",
         "0.2.1-rc.5"
       ],
-      "scope": "Reviewed exact catalogue bytes and version-specific integration. rc.5 macOS basic integration is recorded below; its Linux/full UI/business acceptance remains pending. Historical rc.3 macOS/Linux receipts retain their exact scope."
+      "scope": "Reviewed exact catalogue bytes and version-specific integration. rc.5 macOS full nine-section UI passed for the local0.2.1 candidate below; Linux/Windows for that candidate remain unverified. Historical rc.3 macOS/Linux receipts retain their exact scope."
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
       "integrationTarget": "main",
-      "scope": "0.2.0 delivery: unified Chinese/English/Korean UI, reduced overhead, review archives/report history and safety/recovery work. Source, plugin and probe share this version. Publication and platform acceptance bind only the exact commits and archives in the dated release receipt below."
+      "scope": "0.2.1 local candidate: rc.5 exact catalogues/semantics, static upgrade/author CI, source-bound package reuse and acceptance drivers. Publication/platform claims bind only actual dated receipts; published0.2.0 receipt remains historical."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -102,26 +102,9 @@
       "scope": "Dated local acceptance only; not a formal0.2.0 publication or certification of later README changes."
     },
     "upstreamExecutionLocal20261029": {
+      "history": "386b273:docs/current-state.json",
       "report": "docs/upstream-verification.md",
-      "artifact": {
-        "package": "dshmarket",
-        "version": "1.73.3",
-        "tagCommit": "2211d46e0feba2b56d26e3f60b95aeffb8ed4547",
-        "tgzSha256": "97fada3db48e83afc3705e522d1a5f8ba4369fa5a6297412a127510447899233",
-        "all116PublishedFilesUnchanged": true
-      },
-      "recovery": "Original repair-function controls passed. Actual Desktop Host0.2.1-rc.3 IPC/PluginManager/bundled pnpm11.28.5 and owned Chrome: two missing-bundle restarts retained journal, attempts1/2, bundle0/service null. False completion fixed; self-healing remains absent. No full Electron GUI or remove/SIGKILL reproduction.",
-      "notAccepted": "Manual uninstall HTTP timed out at45s after isolated disk removal/journal clearing; reinstall never started. Desktop experiment overall not green; stopped four owned Host processes and Chrome. Controlled failed-manager result loses specific error code/message.",
-      "warning": "Original install route with controlled package-manager writes: double429/HTML returns200/ok and bare target without warning/versionUnverified. Healthy/fallback/explicit-version controls passed. CLI-runner update route warns; original client classification handles zh/en/ja. Desktop maturity409 retained. No real install/old-version/pnpm-policy/DOM acceptance claim.",
-      "otherUpstreams": "1024#22 open, public detail still GitHub-only/unknown/not_checked/null checkedAt; no npm/new-install acceptance. Awesome#717 open/unmerged, no new replies. Gmail unavailable: reauthentication required; mail not checked.",
-      "feedback": {
-        "market1047": "https://github.com/dsh-market/dsh-market/issues/1047#issuecomment-6492914395",
-        "market928": "https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6492917994",
-        "scope": "Only these two comments authorized and posted; readback exactly matches approved drafts. No new issue/PR, push or release."
-      },
-      "receipts": "tmp/upstream-20261029/{artifact-proof,repair-result,desktop-result,warning-result,update-warning-result,client-branch-result,posted-1047,posted-928,readback-1047,readback-928}.json",
-      "scope": "Upstream-only verification, no product/runtime changes. Existing1242-test/full product artifact receipts above were not rerun by this follow-up; old successful CI applies only to its recorded commit.",
-      "documentValidation": "13/13 document tests and npm run check passed; full1242-test product suite not rerun for this docs-only follow-up."
+      "scope": "Historical1.73.3 Desktop/repair/warning verification and two authorized comments. Full exact receipts retained in Git; latest1.73.5 follow-up is separately dated in the report."
     },
     "release02020261029": {
       "status": "published and independently verified on npm and GitHub",
@@ -256,22 +239,66 @@
       "scope": "Historical source/semantic-only receipt, before rc.5 registration. Superseded for integration by the separate local receipt below; not retroactively upgraded."
     },
     "rc5Integration20261030": {
-      "status": "local basic integration passed; full UI/Linux/business pending",
-      "platform": "darwin arm64",
-      "sourceBase": "781137b; development working tree, not a published artifact",
-      "host": "0.2.1-rc.5",
-      "artifactSha256": "0a89737d59bbc295246d25a67a4e0f2ddb390eff667c8347110cdfd656bcd8a5",
-      "evidence": "Independent package installed in owned profile; HTTP/tool/skill, source metadata, three slots/navigation/draft semantics, upgrade static isolation and disable/re-enable passed. Private root removed. ACP stdout9 frames, loopback catalog1 GET and mock model2 requests; diagnostics on stderr. No production model/account use.",
-      "receipts": "tmp/rc5-integration-20261030/final-live.{json,stdout,stderr}; acp.json; full-tests.tap",
-      "scope": "Basic local Web/ACP driver acceptance only. Does not certify full nine-section UI, Linux, Windows, real business samples or formal publication.",
+      "history": "386b273:docs/current-state.json",
+      "scope": "Historical0.2.0 development-source rc.5 basic integration. Does not certify the0.2.1 candidate or full UI/Linux."
+    },
+    "candidate02120261030": {
+      "status": "local candidate; publication and Linux CI pending authorization",
+      "sourceBase": "386b273d0bbb8bfd88cd85706d6dec8417a40ab7",
+      "sourceDirty": true,
+      "sourceManifestSha256": "87b462ff37ca7375a780a8b21c2366e8555a4d01ae2a0ecbd7113cdae99dd4df",
+      "artifact": {
+        "filename": "dsh-plugin-compat-check-0.2.1.tgz",
+        "sha256": "51233a1950fcb32ef99f9c9a0fa450f4a39e0491b21754faed7fe61241edd7b5"
+      },
+      "mac": {
+        "host": "0.2.1-rc.5",
+        "platform": "darwin arm64",
+        "node": "v26.13.0",
+        "nineSections": true,
+        "screenshots": 21,
+        "privateRootRemoved": true,
+        "scope": "One build-only tgz supplied with its source receipt; copied unchanged and accepted by the full UI evidence gate. Dark/Korean narrow captures visually inspected."
+      },
+      "linux": {
+        "workflow": "candidate job builds once; rc.5 Linux downloads archive/receipt, binds source/commit/hash, runs nine-section UI with fonts and uploads evidence",
+        "executed": false,
+        "scope": "No local Linux runtime. Push approval and an actual selected-commit CI result required; compare its tgz to the Mac hash, otherwise reaccept the CI archive on Mac."
+      },
       "validation": {
-        "tests": 1269,
-        "pass": 1261,
+        "tests": 1273,
+        "pass": 1265,
         "skip": 8,
         "fail": 0,
         "maintenanceCheck": "passed",
-        "acpReceipt": "final-acp.json; completed resources tool required",
-        "prepublishGate": "passed; independent1269-test run"
+        "prepublishGate": "passed; fresh1273-test TAP and documentation facts; no publication"
+      },
+      "publicMetadata": "Read-only check: npm0.2.0; only expected local-version/README notices, no lookup skipped. No push/merge/publish or upstream message.",
+      "receipts": "tmp/release-021-20261030/",
+      "scope": "Candidate and local platform evidence only. Fixed business regression and Linux results stay separate; Windows unverified.0.2.0 release receipts are historical.",
+      "business": {
+        "host": "0.2.1-rc.5",
+        "status": "passed",
+        "manifestSha256": "539846b7aacba184b320b6f796aef2b35723431246248c95724091ef3d895bed",
+        "suites": 5,
+        "summary": {
+          "independentPackageFamilies": 4,
+          "pinnedArtifacts": 5,
+          "holdoutPackageFamilies": 2,
+          "holdoutPinnedArtifacts": 2,
+          "distinctPlannedCases": 24,
+          "knownOutcomeCases": 24,
+          "staticIdentifiedFailures": 0,
+          "serviceOnlyIdentifiedFailures": 0,
+          "unflaggedNaturalFailures": 2,
+          "unflaggedBusinessOrClientFailures": 10,
+          "driverErrors": 0,
+          "validationErrors": 0
+        },
+        "modelCalls": 0,
+        "accountCalls": 0,
+        "replay": "passed; historical evidence validation only",
+        "scope": "Fixed 24 normal/failure/recovery expectations reproduced; 12 unflagged failures retained (2 natural,10 business/client). Green does not mean all business functions passed or ecosystem accuracy. Separate from the accepted UI tgz."
       }
     }
   },

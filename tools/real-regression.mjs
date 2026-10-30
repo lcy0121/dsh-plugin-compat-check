@@ -12,13 +12,15 @@ import { holdoutPostconditions } from "./business-holdout.mjs";
 import { stopOwnedChild } from "../lib/owned-process.mjs";
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 export function createRegression(version = "0.2.1-rc.2") {
-  if (!["0.2.1-rc.2", "0.2.1-rc.3"].includes(version))
+  if (!["0.2.1-rc.2", "0.2.1-rc.3", "0.2.1-rc.5"].includes(version))
     throw Error("Regression requires a reviewed exact version");
   const manifestPath = path.join(
     repo,
-    version === "0.2.1-rc.3"
-      ? "tools/real-regression-manifest-rc3.json"
-      : "tools/real-regression-manifest.json",
+    version === "0.2.1-rc.5"
+      ? "tools/real-regression-manifest-rc5.json"
+      : version === "0.2.1-rc.3"
+        ? "tools/real-regression-manifest-rc3.json"
+        : "tools/real-regression-manifest.json",
   );
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   const sha = (value) =>

@@ -1,6 +1,6 @@
 # 插件作者CI
 
-本文对应**0.2.0**的仓库工具，npm插件包不提供此CLI。它对**同一已构建插件目录**建立只读快照并比较API目录；不安装依赖、执行目标、启动DSH、联网或读取用户profile。目标须含第三方npm包名、精确版本、对象形式的`dsh`及实际交付代码，拒绝夹带`node_modules`、链接和特殊文件。
+本文对应**0.2.1**的仓库工具，npm插件包不提供此CLI。它对**同一已构建插件目录**建立只读快照并比较API目录；不安装依赖、执行目标、启动DSH、联网或读取用户profile。目标须含第三方npm包名、精确版本、对象形式的`dsh`及实际交付代码，拒绝夹带`node_modules`、链接和特殊文件。
 
 ```sh
 node tools/author-ci.mjs --package ./dist-plugin > compatibility.json

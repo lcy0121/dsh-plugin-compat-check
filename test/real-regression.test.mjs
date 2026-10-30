@@ -770,3 +770,23 @@ test("rc.3 uses an independent fixed cohort and rejects rc.2 evidence", () => {
   }
   assert.throws(() => api.createRegression("latest"), /exact/);
 });
+
+test("rc.5 fixed regression uses its own reviewed host/catalogue and rejects old observations", () => {
+  const current = api.createRegression("0.2.1-rc.5");
+  assert.equal(current.manifest.dshVersion, "0.2.1-rc.5");
+  assert.equal(current.manifest.suites.length, 5);
+  assert.equal(
+    current.manifest.suites.reduce((n, s) => n + s.cases.length, 0),
+    24,
+  );
+  const f = fixture();
+  try {
+    assert.throws(
+      () => current.validateCohort(f.dir || f, "sidebar-ui-previous"),
+      /catalogue|target/,
+    );
+  } finally {
+    fs.rmSync(f.dir || f, { recursive: true, force: true });
+  }
+  assert.throws(() => api.createRegression("0.2.1-rc.6"), /exact/);
+});

@@ -1,0 +1,432 @@
+{
+  "schemaVersion": 1,
+  "kind": "plugin-compat-check/real-regression-manifest",
+  "dshVersion": "0.2.1-rc.5",
+  "catalogueFile": "rules/dsh-api-catalog-0.2.1-rc.5.json",
+  "catalogueHash": "63ee5a2963bb35eb1425c78cda1d3eafb2e153a959b69003abfcaf543cde043a",
+  "budgets": {
+    "defaultRepeats": 2,
+    "maxRepeats": 2,
+    "suiteWallMs": 600000,
+    "cleanupGraceMs": 15000,
+    "commandOutputBytes": 1048576,
+    "modelCalls": 0,
+    "accountCalls": 0,
+    "maxEvidenceFiles": 64,
+    "maxFileBytes": 8388608,
+    "maxJsonBytes": 2097152,
+    "maxCohortBytes": 33554432,
+    "maxIndexBytes": 262144
+  },
+  "expectedSource": "Hand-reviewed published-plugin business contracts: 0.26.1 file-tree HTTP405 natural failure; 0.28.0 exact BOM/encoding/CRLF editor save and recovery; 1.66.37 target-card HTTP/DOM/durable-state faults and recovery. Expectations are fixed independently of measurement.json and do not prescribe predictor warnings.",
+  "suites": [
+    {
+      "suite": "sidebar-ui-previous",
+      "package": "dsh-better-sidebar",
+      "version": "0.26.1",
+      "files": 460,
+      "digest": "a262b6ef39c7bed72e6ebb47ac2d1c0f0f82544eb36966bb69494f2d1f059562",
+      "publishedTarballSha256": "cd2d3d85d3d4a2d54c36b8bf86a24f2ec099f85a2936a72ef83edf7612c7402a",
+      "publishedIntegrity": "sha512-0/BXLEAqFJnd3SI/aryQVFHayrjE+RHcFgWIy57GrCYUeppEFTujfQOkO4U9V4QRd3qTVHFE7DZzNzUyU+kscw==",
+      "suiteId": "dsh-better-sidebar-0.26.1-editor-actions-v1",
+      "observeServices": true,
+      "cases": [
+        {
+          "caseId": "sidebar.editor.utf8-bom.healthy",
+          "featureId": "sidebar.editor.utf8-bom",
+          "control": "none",
+          "outcome": "failed",
+          "boundary": "natural-service-dependency",
+          "observed": {
+            "actionAvailable": false,
+            "persisted": false,
+            "uiAfterReload": false
+          }
+        },
+        {
+          "caseId": "sidebar.editor.utf16le.healthy",
+          "featureId": "sidebar.editor.utf16le",
+          "control": "none",
+          "outcome": "failed",
+          "boundary": "natural-service-dependency",
+          "observed": {
+            "actionAvailable": false,
+            "persisted": false,
+            "uiAfterReload": false
+          }
+        }
+      ]
+    },
+    {
+      "suite": "sidebar-ui",
+      "package": "dsh-better-sidebar",
+      "version": "0.28.0",
+      "files": 471,
+      "digest": "2c3b5619b4a8ee9ab87ea179b0163a1230dbbb63e8cdbea3de8b08f9147d6892",
+      "publishedTarballSha256": "40b7ce32a6d90bff069b3bb4d0e5dd692281e0ac0598163196b816ac12335b6f",
+      "publishedIntegrity": "sha512-x7+/YmH/HrSlXWOBZkhL7qQqcDgZEnDcWrhR5GlizzUZjz+w84FbQ6jo8trJC9tyaQxMaNvXVnXwDxn4I330Ew==",
+      "suiteId": "dsh-better-sidebar-0.28.0-editor-actions-v1",
+      "observeServices": true,
+      "cases": [
+        {
+          "caseId": "sidebar.editor.utf8-bom.healthy",
+          "featureId": "sidebar.editor.utf8-bom",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "sidebar.editor.utf8-bom.blocked",
+          "featureId": "sidebar.editor.utf8-bom",
+          "control": "http-503",
+          "outcome": "failed",
+          "boundary": "controlled-http-business",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": false,
+            "uiAfterReload": false,
+            "requestStatus": 503
+          }
+        },
+        {
+          "caseId": "sidebar.editor.utf8-bom.recovered",
+          "featureId": "sidebar.editor.utf8-bom",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "sidebar.editor.utf16le.healthy",
+          "featureId": "sidebar.editor.utf16le",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "sidebar.editor.utf16le.blocked",
+          "featureId": "sidebar.editor.utf16le",
+          "control": "http-503",
+          "outcome": "failed",
+          "boundary": "controlled-http-business",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": false,
+            "uiAfterReload": false,
+            "requestStatus": 503
+          }
+        },
+        {
+          "caseId": "sidebar.editor.utf16le.recovered",
+          "featureId": "sidebar.editor.utf16le",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        }
+      ]
+    },
+    {
+      "suite": "market",
+      "package": "dshmarket",
+      "version": "1.66.37",
+      "files": 182,
+      "digest": "a26339e13c9adcff506c1d0c00842d0e6cf104226c5a1954a5e091c40dd6f583",
+      "publishedTarballSha256": "8b29d156e3ea45330623b4cd66736992456f5ef4c92c8fb00243ccc3b101f188",
+      "publishedIntegrity": "sha512-6sr+x6W6PppAtygJra/khU1ehK8bmjmfVnFgmPyHixx3GzIXGX/iW04CoeqlExFpsyTWXnM2W/X7JLU78dHJLA==",
+      "suiteId": "dshmarket-1.66.37-actions-v2",
+      "observeServices": false,
+      "cases": [
+        {
+          "caseId": "market.note.healthy",
+          "featureId": "market.note",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "market.note.blocked",
+          "featureId": "market.note",
+          "control": "http-503",
+          "outcome": "failed",
+          "boundary": "controlled-http-business",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": false,
+            "uiAfterReload": false,
+            "requestStatus": 503
+          }
+        },
+        {
+          "caseId": "market.note.missing-after",
+          "featureId": "market.note",
+          "control": "dom-control-missing",
+          "outcome": "failed",
+          "boundary": "controlled-client-dom",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": false,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "market.note.missing-before",
+          "featureId": "market.note",
+          "control": "dom-control-missing",
+          "outcome": "failed",
+          "boundary": "controlled-client-dom",
+          "observed": {
+            "actionAvailable": false,
+            "persisted": false,
+            "uiAfterReload": false
+          }
+        },
+        {
+          "caseId": "market.note.recovered",
+          "featureId": "market.note",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "market.favorite.healthy",
+          "featureId": "market.favorite",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "market.favorite.blocked",
+          "featureId": "market.favorite",
+          "control": "http-503",
+          "outcome": "failed",
+          "boundary": "controlled-http-business",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": false,
+            "uiAfterReload": false,
+            "requestStatus": 503
+          }
+        },
+        {
+          "caseId": "market.favorite.missing-after",
+          "featureId": "market.favorite",
+          "control": "dom-control-missing",
+          "outcome": "failed",
+          "boundary": "controlled-client-dom",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": false,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "market.favorite.missing-before",
+          "featureId": "market.favorite",
+          "control": "dom-control-missing",
+          "outcome": "failed",
+          "boundary": "controlled-client-dom",
+          "observed": {
+            "actionAvailable": false,
+            "persisted": false,
+            "uiAfterReload": false
+          }
+        },
+        {
+          "caseId": "market.favorite.recovered",
+          "featureId": "market.favorite",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        }
+      ]
+    },
+    {
+      "suite": "holdout-pomodoro",
+      "package": "dsh-pomodoro",
+      "version": "0.5.5",
+      "files": 9,
+      "digest": "8946b1a6dbd69aec2a860240e6b10f1bc5218e324358efa58ed7d8a623f0f2a0",
+      "publishedTarballSha256": "7331ead0d7a850f91cd20d687bcd8b689ce70e0a46822d319da3647c233956a1",
+      "publishedIntegrity": "sha512-YkyxlkSNTrfOmD1ecYtVzqeowT+0ybYWNjLAf5kBt2pZI7OYSmccj9rvDlcQawnEW6pCaQCgHhDnhLQDzAg7Wg==",
+      "sourceHashes": {
+        "lib/client.js": "d5a64d83b7c46c9f8f49fef175bed8379f0a37ce78a168a004c7bb8697414662",
+        "lib/index.js": "2165dcd7850f37768014fc04e68278aa57507bce9e679a5d29dcd153d79465fd",
+        "lib/migrate-settings.js": "345c2f4a7f63d852d669316ceb432cdcd164606b6f377b423a77f3438dee0233"
+      },
+      "suiteId": "dsh-pomodoro-0.5.5-holdout-actions-v1",
+      "observeServices": true,
+      "holdout": true,
+      "cases": [
+        {
+          "caseId": "pomodoro.timer.start.healthy",
+          "featureId": "pomodoro.timer.start",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "pomodoro.timer.start.blocked",
+          "featureId": "pomodoro.timer.start",
+          "control": "dom-control-missing",
+          "outcome": "failed",
+          "boundary": "controlled-client-dom",
+          "observed": {
+            "actionAvailable": false,
+            "persisted": false,
+            "uiAfterReload": false
+          }
+        },
+        {
+          "caseId": "pomodoro.timer.start.recovered",
+          "featureId": "pomodoro.timer.start",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        }
+      ]
+    },
+    {
+      "suite": "holdout-todo",
+      "package": "dsh-global-todo",
+      "version": "0.13.2",
+      "files": 55,
+      "digest": "7c86460b51b9080e674205ebb7c6ff516534f28200d48e840d4abcf12cea461e",
+      "publishedTarballSha256": "f872d67d7ba27f073e444f88cd00facf6825320b67f22fc68a4ef1f4c201eda7",
+      "publishedIntegrity": "sha512-iN3gTYqruAF4lXoX/EIzqCHot/tWmi45a1EVC4H8/amord0tvhXXxkkV3UQCbBfOAHsYDDoW1a7haWnTWmNoyw==",
+      "sourceHashes": {
+        "lib/atomic.js": "c03a11845cf4ae7e550c6636cc13bdf63db3abb8a1c2f5f1ccdb0a9384febcd8",
+        "lib/capture.js": "12ffa900b64c887864b963f499e5cbc7896aa4231fac9d2f9cbd2435c0d2ebde",
+        "lib/client.js": "74de128226d15cd80aa4eb1b7830d72e1c7ad4527f9a2e44dba49603f62382e5",
+        "lib/completion.js": "74083fe39470448d1fb94f9a08931c93006aad8197ea5f3cee9526ef0ea8e567",
+        "lib/diagnostics.js": "4db3f9bfccd73807672f9d7991592f76e00f1e8add707afa82b5622b43486921",
+        "lib/dispatch.js": "652d9fd97fe3962daba955a92352cd0243f67c85fe382d5946206baa1392e00b",
+        "lib/errors.js": "1c38df0559b239760147f606b751a82298887834b931ce9637a1e7982e398e31",
+        "lib/index.js": "fa30dea3419aa32aa86fb7619ba5b0fb2f7ffaa8fcbe56ed4b841a53160ea82d",
+        "lib/ingest.js": "7d6d35e25c5456c6cd9de48495a31530a63aa3b8784498d97bc2cfe70611e03c",
+        "lib/links.js": "e5003e793726aa04e733449de6c0d637b10eaf840a1f719ba4b9152de9149195",
+        "lib/markdown.js": "553186994edcbc00ad61ab9d42d4515f4d2a6b2221af94c56d3e893a8a61e9d3",
+        "lib/metrics.js": "25aecea6072fabd4807125592d49218c34bd317b2514fea38da03f555eff40ad",
+        "lib/model.js": "5372896c31ef8dab75848ce69f136c9ba5fd6793133763b6870096c15fcff39c",
+        "lib/reminders.js": "e3547bc1e1fb8332354201e1d989295870e6d5e05ba0273dfae1d104f46fcb4f",
+        "lib/report.js": "c2fc2b353e89c0fd14d5032084e8b086659b0d5ee31f1510870ae6c91c979d14",
+        "lib/routes.js": "35b2c675868b023eebd2ad0cbbb4d4361467ff44181f6f77571280004eb39ee5",
+        "lib/service.js": "3440ac6f8a805475aed893ec1d8d01c6f0ac387a360444ead1ec10e4fe20d44a",
+        "lib/settings.js": "7b3b8ce315b6eb95eeeeb6007c65b884f8a6c4c6c8722be5b4c19bd8d1ac3ac7",
+        "lib/store.js": "0804eb1872dabba67d9b1990295868319a71f0f394828f68c32b3eaa29721e4a",
+        "lib/tools.js": "6cbaeda5e0c168b623c69e0557228f89d1f04289ad389a68e5c93bb22aa65493",
+        "lib/weight.js": "abbbd4ce8cd64f70c421863159e2ca89f2aef7d340acba8c712fdc13b228bce9"
+      },
+      "suiteId": "dsh-global-todo-0.13.2-holdout-actions-v1",
+      "observeServices": true,
+      "holdout": true,
+      "cases": [
+        {
+          "caseId": "todo.create.healthy",
+          "featureId": "todo.create",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        },
+        {
+          "caseId": "todo.create.blocked",
+          "featureId": "todo.create",
+          "control": "http-503",
+          "outcome": "failed",
+          "boundary": "controlled-http-business",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": false,
+            "uiAfterReload": false,
+            "requestStatus": 503
+          }
+        },
+        {
+          "caseId": "todo.create.recovered",
+          "featureId": "todo.create",
+          "control": "none",
+          "outcome": "passed",
+          "boundary": "healthy-or-recovery",
+          "observed": {
+            "actionAvailable": true,
+            "persisted": true,
+            "uiAfterReload": true,
+            "requestStatus": 200
+          }
+        }
+      ]
+    }
+  ],
+  "holdoutSelection": {
+    "selectedAt": "2026-10-22",
+    "source": "https://cdn.jsdelivr.net/npm/dsh-plugin-catalog/index.json",
+    "basis": "Two public third-party families not used in prior rule tuning; bounded manual productivity actions without accounts or model calls. Selection based on auditable behavior and contrasting declaration/source shapes, before predictions or live outcomes.",
+    "rulesAdjustedForSamples": false
+  }
+}

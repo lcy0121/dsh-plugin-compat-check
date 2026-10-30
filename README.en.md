@@ -6,7 +6,7 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-**0.2.0** combines a unified UI, Chinese/English/Korean localization, reduced overhead, review archives and report history, retaining rc.3 adaptation, upgrade preview, parameter semantics and boundary hardening. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2`. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3 and 0.2.1-rc.5**; the minimum does not certify future hosts. The rc.5 registration and basic integration apply to this development source; published 0.2.0 artifacts contain only the preceding three catalogues.
+**0.2.1** adds exact DSH rc.5 catalogues/semantics, upgrade/author-CI support and acceptance entry points while retaining a unified UI, Chinese/English/Korean localization, reduced overhead, review archives and report history, retaining rc.3 adaptation, upgrade preview, parameter semantics and boundary hardening. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2`. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3 and 0.2.1-rc.5**; the minimum does not certify future hosts. This is a local 0.2.1 candidate; current-state records actual publication. Published 0.2.0 artifacts contain only the preceding three catalogues.
 
 The npm plugin provides a compatibility page, details/badges, `compat_check` and a skill. Repository-only CLI, install checks, static batches, author CI and health executor share the kernel. The npm package has no CLI bin; `npx dsh-plugin-compat-check` is unsupported. [Plan](docs/Plan.md) tracks contracts and tasks; [docs/current-state.json](docs/current-state.json) records scoped verification.
 
@@ -36,7 +36,9 @@ Local history lets you explicitly save/load snapshots and select reports for com
 dsh plugin --profile <profile> add dsh-plugin-compat-check
 ```
 
-To pin this release, use `dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0`; an unversioned command follows the registry version.
+To install the currently published 0.2.0, use `dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0`; an unversioned command follows the registry version.
+
+Install the accepted 0.2.1 candidate archive with `dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.1.tgz`. A later rebuild does not inherit its acceptance.
 
 After installing, open the DSH instance using that profile, then navigate to:
 

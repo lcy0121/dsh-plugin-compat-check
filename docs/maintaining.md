@@ -1,6 +1,6 @@
 # 维护指南
 
-本文维护**0.2.0**的目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
+本文维护**0.2.1**的目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
 
 ## 维护入口与语法覆盖
 
@@ -151,6 +151,21 @@ DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_REQUIRE_RC2_UI=1 node tools/rc2-live.m
 DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 node tools/ci-ui018.mjs <自有输出目录>
 ```
 
-基础入口验证同一独立tgz的HTTP/tool、声明、预检、语义、三槽位、导航及恢复/清理；完整入口仍要求九项结果、截图、来源及制品摘要。目标、浏览器、断言/结果、同一制品或清理缺失均不得通过。rc.5完整证据额外要求导航/草稿、精确语义、受控模型列表及独立ACP回执；Linux工作流接入、九项UI与业务样本留在Plan第5项。
+基础入口验证同一独立tgz的HTTP/tool、声明、预检、语义、三槽位、导航及恢复/清理；完整入口仍要求九项结果、截图、来源及制品摘要。目标、浏览器、断言/结果、同一制品或清理缺失均不得通过。rc.5完整证据额外要求导航/草稿、精确语义、受控模型列表及独立ACP回执；Linux实跑及同一制品核对留在Plan第5项。
 
 `tools/rc5-acp-stdout.mjs`对实际ACP仅使用私有DSH_HOME、合成凭据、loopback目录/两轮模型响应和tools-only MCP。每行stdout必须是完整JSON-RPC，目录诊断须在stderr且不带凭据；不具备resources能力时不向MCP发资源请求。超时/异常/清理失败即失败，输出只保留计数与断言，不保存对话正文。它与Web/Desktop结果分别记录；受控模型列表另验首次等待、失败/超时回退及无凭据不请求。
+
+## 0.2.1候选与同一归档验收
+
+CI的candidate job只构建一次归档，保存源码清单/摘要、提交、dirty及制品摘要；rc.5 Linux job下载同一workflow归档，以摘要错误即失败的方式接收。完整UI驱动读取提供的归档及构建回执，核对源码/提交/dirty/归档摘要和包名/版本后复制验收，不重新打包：
+
+```sh
+node tools/ci-ui018.mjs --build-only <自有候选目录>
+DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_RC2_ARTIFACT=<候选tgz绝对路径> DSC_RC2_ARTIFACT_RECEIPT=<候选目录/summary.json> node tools/ci-ui018.mjs <另一自有验收目录>
+```
+
+build-only只证明构建与来源，不算宿主通过。来源回执须与当前源码完全一致；缺回执、错误提交、源码/归档变化或坏包都在启动宿主前失败。保留旧rc.3独立构建门禁。Mac/Linux最终须核对同一tgz摘要；若CI重建结果与本地候选不同，必须从CI下载该文件重跑Mac，不能借旧回执。发布仍另取授权。
+
+rc.5固定业务清单为`tools/real-regression-manifest-rc5.json`，沿用独立封存的五个制品及24项期望（含Pomodoro/Todo holdout），只替换已审查的宿主/目录身份，拒绝旧版观测。执行和回放均显式指定`DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5`；不根据实测结果调整规则或改写期望。Linux workflow已接入rc.5字体、九项UI及失败证据上传；是否执行成功以当前候选提交的实际CI为准。
+
+`rules/dsh-0.2.1-rc.5-review.json`的integrationAcceptance保留目录登记时的基础集成快照；完整UI、业务和发布结果按实际制品分别记入current-state，不追写原归档或把旧回执升级为新验收。
