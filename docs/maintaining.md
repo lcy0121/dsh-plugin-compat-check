@@ -120,9 +120,9 @@ GitHub简介/topics可独立于Git提交更新；npm简介/搜索关键词分别
 
 ## 参数语义基线维护
 
-`rules/severity.json.apiSemantics`只登记0.2.1-rc.2/rc.3客户端语义，不改变三版API目录认证。修改前锁定官方tag/归档，逐文件核对哈希、公开契约、实现及真实行为；归档只读，不执行目标。参数事实、弃用标记和所有权前提分别审查；clearPreviousDraft是兼容选项，新字段出现不表示它弃用。
+`rules/severity.json.apiSemantics`登记0.2.1-rc.2/rc.3/rc.5客户端语义，与三版API目录认证独立。修改前锁定官方tag/归档，逐文件核对哈希、公开契约、实现及真实行为；归档只读，不执行目标。参数事实、弃用标记和所有权前提分别审查；clearPreviousDraft是兼容选项，新字段出现不表示它弃用。
 
-check:catalogs验证schema、登记版本及来源引用结构，不能代替语义审查。补类型/枚举、别名/改写、闭包副作用及跨版本正反例，验收同一tgz的HTTP/面板。静态验收夹具只放自有profile，保持未激活；提醒不证明泄漏/移除或业务失败。同步指导副本，保留旧语义基线，不自动认证未来、宿主同名、Windows或模型场景。
+`lib/api-semantics.mjs.SEMANTIC_VERSIONS`单独限制语义版本，不能从目录登记或规则自报版本扩大。rc.5候选/完整来源审查见`rules/dsh-0.2.1-rc.5-review.json`；未进入CATALOG_REFERENCES。check:catalogs验证schema、登记版本及来源引用结构，不能代替语义审查。补类型/枚举、别名/改写、闭包副作用及跨版本正反例，验收同一tgz的HTTP/面板。静态验收夹具只放自有profile，保持未激活；提醒不证明泄漏/移除或业务失败。同步指导副本，保留旧语义基线，不自动认证未来、宿主同名、Windows或模型场景。
 
 ## 提取器与探针维护
 

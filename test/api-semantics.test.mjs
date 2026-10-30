@@ -368,3 +368,153 @@ test("shipped panel renders parameter risks and maintenance notices from the can
     f.cleanup();
   }
 });
+
+// A missing rc.5 baseline must not silently skip known parameter risks.
+test("rc.5 reviewed semantics apply without certifying its fallback catalogue", () => {
+  const { p } = evaluate(
+    "export function apply(ctx){ctx.uiWorkspace.startSession(undefined,{whenDraftExists:'bad'});ctx.timer.setTimeout(()=>{},1);ctx.sessions.retain('private')}",
+    { version: "0.2.1-rc.5" },
+  );
+  assert.equal(invalid(p).length, 1);
+  assert.match(notes(p), /弃用/);
+  assert.match(notes(p), /生命周期/);
+  assert.equal(loadCatalog(root, "0.2.1-rc.5").evidence.verified, false);
+});
+
+test("reasoning slot migration is a located coverage advisory, not a field-use error", () => {
+  for (const body of [
+    "ctx.slots.register({name:'conversation.chat.reasoning.body'},props=>props.text)",
+    "const s=ctx.slots;const o={name:'conversation.chat.reasoning.body'};s.register(o,({rawText})=>rawText)",
+    "ctx.slots.register({name:'conversation.chat.reasoning.body'},({text,running})=>running?text:text)",
+  ]) {
+    const { p, extraction } = evaluate(`export function apply(ctx){${body}}`, {
+      version: "0.2.1-rc.5",
+    });
+    assert.match(notes(p), /槽位语义提示.*client.js:1/);
+    assert.match(notes(p), /rawText.*Content Factory/);
+    assert.match(notes(p), /props.*未验证/);
+    assert.equal(p.findings.length, 0);
+    assert.equal(
+      extraction.report.perPlugin.sample.callSites.find(
+        (s) => s.method === "register",
+      ).semanticArguments.kind,
+      "reasoning-body",
+    );
+  }
+});
+
+test("unknown slot targets abstain without copying arbitrary slot names or callback text", () => {
+  for (const body of [
+    "ctx.slots.register(options,()=>{})",
+    "ctx.slots.register({...options,name:'conversation.chat.reasoning.body'},()=>{})",
+    "const o={name:'conversation.chat.reasoning.body'};external(o);ctx.slots.register(o,()=>{})",
+    "ctx.slots.register({get name(){throw Error('never execute')}},()=>{})",
+  ]) {
+    const { p } = evaluate(`export function apply(ctx){${body}}`, {
+      version: "0.2.1-rc.5",
+    });
+    assert.match(notes(p), /槽位.*未能静态确定/);
+    assert.equal(p.findings.length, 0);
+  }
+  const { p, extraction } = evaluate(
+    "export function apply(ctx){ctx.slots.register({name:'private-slot-secret'},()=> 'private-body-secret')}",
+    { version: "0.2.1-rc.5" },
+  );
+  assert.doesNotMatch(notes(p), /槽位语义提示/);
+  assert.doesNotMatch(
+    JSON.stringify(extraction.report.perPlugin.sample.callSites),
+    /private-slot-secret|private-body-secret/,
+  );
+});
+
+test("slot advisories never borrow rc.5 props semantics for old, future or host calls", () => {
+  const source =
+    "export function apply(ctx){ctx.slots.register({name:'conversation.chat.reasoning.body'},p=>p.text)}";
+  for (const version of [
+    "0.2.1-rc.2",
+    "0.2.1-rc.3",
+    "0.2.1-rc.4",
+    "0.2.1-rc.6",
+    null,
+  ]) {
+    const { p } = evaluate(source, { version });
+    assert.doesNotMatch(notes(p), /槽位语义提示/);
+    assert.match(notes(p), /槽位.*未审查/);
+  }
+  const { p } = evaluate(source, { version: "0.2.1-rc.5", side: "host" });
+  assert.doesNotMatch(notes(p), /槽位语义提示/);
+});
+
+test("rc.5 slot coverage advice translates in the shipped presentation while preserving raw identity", async () => {
+  const { evidenceNote } = await import("../plugin/src/i18n/presentation.mjs");
+  const { localeStore } = await import("../plugin/src/i18n/runtime.mjs");
+  const { p } = evaluate(
+    "export function apply(ctx){ctx.slots.register({name:'conversation.chat.reasoning.body'},p=>p.text)}",
+    { version: "0.2.1-rc.5" },
+  );
+  const original = notes(p)
+    .split("\n")
+    .find((n) => n.startsWith("槽位语义提示"));
+  try {
+    for (const lang of ["en", "ko"]) {
+      localeStore.setPreference(lang);
+      const text = evidenceNote(original);
+      assert.doesNotMatch(text, /[\p{Script=Han}]/u);
+      assert.match(text, /client.js:1/);
+      assert.match(text, /rawText/);
+      assert.equal(
+        evidenceNote("用户原始说明 " + original),
+        "用户原始说明 " + original,
+      );
+    }
+  } finally {
+    localeStore.setPreference("auto");
+  }
+  assert.equal(
+    notes(p)
+      .split("\n")
+      .find((n) => n.startsWith("槽位语义提示")),
+    original,
+  );
+});
+
+test("slot proof is withdrawn by mutations, call argument effects and ambiguous helpers", () => {
+  for (const body of [
+    "const o={name:'conversation.chat.reasoning.body'};ctx.slots.register(o,mutate(o))",
+    "const o={name:'conversation.chat.reasoning.body'};o.name=dynamic;ctx.slots.register(o,()=>{})",
+    "function bind(o){ctx.slots.register(o,()=>{})}bind({name:'conversation.chat.reasoning.body'});bind({name:'other'})",
+  ]) {
+    const { p } = evaluate(`export function apply(ctx){${body}}`, {
+      version: "0.2.1-rc.5",
+    });
+    assert.match(notes(p), /槽位.*未能静态确定/);
+    assert.doesNotMatch(notes(p), /槽位语义提示/);
+  }
+  const { p } = evaluate(
+    "export function apply(ctx){const slots={register(){}};slots.register({name:'conversation.chat.reasoning.body'},()=>{})}",
+    { version: "0.2.1-rc.5" },
+  );
+  assert.doesNotMatch(notes(p), /槽位语义提示/);
+});
+
+test("malformed rc.5 props provenance abstains for all semantic decisions", async () => {
+  const { validateSemanticBaselines } = await import(
+    "../lib/api-semantics.mjs"
+  );
+  for (const change of [
+    (b) => delete b.reasoningBody,
+    (b) => (b.reasoningBody.rawField = "text"),
+    (b) => (b.reasoningBody.displaySource = "missing.ts"),
+  ]) {
+    const copy = structuredClone(rules);
+    change(copy.apiSemantics.baselines["0.2.1-rc.5"]);
+    assert.ok(validateSemanticBaselines(copy).length);
+    const { p } = evaluate(
+      "export function apply(ctx){ctx.slots.register({name:'conversation.chat.reasoning.body'},()=>{});ctx.uiWorkspace.startSession(undefined,{whenDraftExists:'bad'})}",
+      { version: "0.2.1-rc.5", customRules: copy },
+    );
+    assert.equal(invalid(p).length, 0);
+    assert.match(notes(p), /槽位语义未审查/);
+    assert.doesNotMatch(notes(p), /槽位语义提示/);
+  }
+});

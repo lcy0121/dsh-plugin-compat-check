@@ -6,11 +6,13 @@
 
 ## 参数与生命周期语义
 
-0.2.1-rc.2/rc.3的客户端语义参考在`rules/severity.json.apiSemantics`，记录固定tag、源码归档及四个文件的SHA-256；独立于方法名目录。旧版、未来/未知版或坏语义记录显示“语义未审查”，不借邻近版本认证。
+0.2.1-rc.2/rc.3/rc.5的客户端语义参考在`rules/severity.json.apiSemantics`，记录固定tag、源码归档及所审查文件的SHA-256；独立于方法名目录。旧版、未来/未知版或坏语义记录显示“语义未审查”，不借邻近版本认证。
 
-- `uiWorkspace.startSession`检查`prompt / agentPreset / clearPreviousDraft`已知原始类型及rc.3的`whenDraftExists=keep / replace / append`；rc.2未使用该新选项。类型/枚举不符是非致命静态风险，影响仍为推断。方法存在或可选调用守卫不验证参数；弱Context只给疑似结论，本项不单独触发声明不符。
-- rc.3显式`whenDraftExists`优先，省略时通常保留已有草稿，`clearPreviousDraft:true`选择replace。后者仍受支持，不是弃用接口。`startSession`可复用同工作区未归档空白会话，指定preset跳过其它preset的空白；选项不证明新建或发送成功。
-- 两版`ctx.timer.setTimeout / setInterval`有官方弃用标记但仍保留，提示审阅`ctx.timeout / interval`契约后迁移。`sessions.retain`提示引用所有权、按需等待ready及作用域结束时release/disposal；不证明释放路径已验证或发生泄漏。两类提醒只进入覆盖说明，不单独改变等级。
+- `uiWorkspace.startSession`检查`prompt / agentPreset / clearPreviousDraft`已知原始类型及rc.3/rc.5的`whenDraftExists=keep / replace / append`；rc.2未使用该新选项。类型/枚举不符是非致命静态风险，影响仍为推断。方法存在或可选调用守卫不验证参数；弱Context只给疑似结论，本项不单独触发声明不符。
+- rc.3/rc.5显式`whenDraftExists`优先，省略时通常保留已有草稿，`clearPreviousDraft:true`选择replace。后者仍受支持，不是弃用接口。`startSession`可复用同工作区未归档空白会话，指定preset跳过其它preset的空白；选项不证明新建或发送成功。
+- 三版`ctx.timer.setTimeout / setInterval`有官方弃用标记但仍保留，提示审阅`ctx.timeout / interval`契约后迁移。`sessions.retain`提示引用所有权、按需等待ready及作用域结束时release/disposal；不证明释放路径已验证或发生泄漏。两类提醒只进入覆盖说明，不单独改变等级。
+
+rc.5的`conversation.chat.reasoning.body`提供原始输出`rawText`及显示文本`text`；普通渲染、翻译和未翻译视图继续读`text`，确需原始输出才读`rawText`。Content Factory仍只需`text/running/labels`，不重复剥离签名。静态分析仅定位`slots.register`目标并提示迁移；回调props用途、渲染/翻译与流式时序均未验证。动态、展开、访问器、逃逸及多实参合并弃权；不复制自定义槽位名/思考正文，不新增发现或提高已验证调用数。rc.5目录仍未认证，普通检查回退rc.3，预检仍拒绝rc.5；已审查语义不改变这个边界。
 
 只收集四个字段的类型/有限枚举标签，不执行代码、不保存prompt或任意枚举文本。常量别名与直接可知改写可分析；未知调用/闭包副作用撤回旧事实。动态、展开、访问器、逃逸及不同helper实参合并保留未核实。未覆盖完整签名、参数数量、深层对象、异步时序、宿主同名接口或所有权证明，不增加已验证调用数。JSON、CLI、面板、预检及作者CI共用判定。
 

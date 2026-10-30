@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "dshVersion": "0.2.1-rc.5",
+  "upstream": {
+    "tag": "dsh-v0.2.1-rc.5",
+    "commit": "b830ec950faba0a46dda564be3e2d854afed94f1",
+    "release": "https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.5",
+    "sourceArchiveUrl": "https://codeload.github.com/deepseek-ai/deepseek-harness/tar.gz/refs/tags/dsh-v0.2.1-rc.5",
+    "sourceArchiveSha256": "a2b94ff1183a87bb1f1d898c6274ae5f8b78accc38931594afd97b58cf0db81f",
+    "previousSourceArchiveSha256": "79b0da4ded4f675cfd086d07fbf530a203455b7300034322d7e14e4f6b0d7494",
+    "sourceFiles": 16339,
+    "previousSourceFiles": 16333,
+    "changedFiles": 388,
+    "archiveScope": "These codeload tag archive digests identify this download; previous rc.3 receipt used another archive representation. Compare extracted bytes, not compressed archive equality.",
+    "npm": {
+      "tarball": "https://registry.npmjs.org/@deepseek-ai/dsh/-/dsh-0.2.1-rc.5.tgz",
+      "integrity": "sha512-WkyJZv4zl9sCAxSzRctGm58m0rilGqwR6pniBiLOz5CPDfHfDuAUicg0AAazXI7oj/Cph6/cjNTncA/rpLTXpw==",
+      "shasum": "8e1bfd31869414f7a5ec10c34403a852ac9c3dc7",
+      "sha256": "60987566f19e0ded1f7918c00a65c19c56ea25f5977ee0bfd5697c5c113ec4e1",
+      "files": 20,
+      "integrityVerified": true,
+      "scope": "CLI archive metadata/bytes verified; not an installed dependency closure or runtime acceptance."
+    }
+  },
+  "asar": {
+    "sha256": "8dad52f295bdbe9fa71948fdf38ac2ce3c910213d3b89c37174b2af77db9fb31",
+    "bytes": 182804145,
+    "scope": "Installed official macOS archive; packed catalogue entries re-read with ASAR entry integrity checks. No whole-app signature attestation or host execution."
+  },
+  "catalogue": {
+    "file": "dsh-api-catalog-0.2.1-rc.5.json",
+    "sha256": "63ee5a2963bb35eb1425c78cda1d3eafb2e153a959b69003abfcaf543cde043a",
+    "sourceVerified": true,
+    "counts": {
+      "hostServices": 98,
+      "hostMethods": 291,
+      "clientServices": 8,
+      "clientMethods": 43
+    },
+    "diff": {
+      "host": {
+        "servicesAdded": [],
+        "servicesRemoved": [],
+        "methodsAdded": [],
+        "methodsRemoved": []
+      },
+      "client": {
+        "servicesAdded": [],
+        "servicesRemoved": [],
+        "methodsAdded": [],
+        "methodsRemoved": []
+      }
+    },
+    "registered": false
+  },
+  "signatureReview": {
+    "host": {
+      "signaturesEqual": true,
+      "sourceMatchesAsar": true,
+      "signatures": 616,
+      "sourceSha256": "c67bebd4f8f017fb6f36361a1c0c1b942dd062cefb03532fdc12e94cb5d49918"
+    },
+    "client": {
+      "signaturesEqual": true,
+      "sourceMatchesAsar": true,
+      "signatures": 56,
+      "sourceSha256": "149a0799c8f032243aa1f3d02b4d72ffa720e9f218a939524663e52f9c5eca41"
+    }
+  },
+  "implementationReview": {
+    "boot": {
+      "filesCompared": 28,
+      "identical": true,
+      "changed": []
+    },
+    "moduleLoader": {
+      "filesCompared": 8,
+      "identical": true,
+      "changed": []
+    },
+    "toolSkill": {
+      "filesCompared": 68,
+      "identical": true,
+      "changed": []
+    },
+    "http": {
+      "filesCompared": 20,
+      "identical": true,
+      "changed": []
+    },
+    "semantic": {
+      "filesCompared": 47,
+      "identical": true,
+      "changed": []
+    }
+  },
+  "semanticSources": {
+    "packages/client/ui-workspace/src/client/navigation.ts": "e85db0304cc7f9fa61dc0e2b34e420dbcaea62478eefcb223af3da4af0a26076",
+    "packages/client/ui-conversation/src/client/contract/input.ts": "74c6f9b4bff213f735ae0a52b993b633b3f1e978152357aa67e4a274ab3380be",
+    "packages/extensions/cordis-client-runner/src/client/timer.ts": "be0996dd6a6a96682a87156943911b8436791da40edcc961f3f5ecd58042c4c0",
+    "packages/api/session-controller/src/client/contract/sessions.ts": "85725b6a54d662c54a5eb6f8f59fe3dfe4069e974a0eaa8b4e81d508742acf7d",
+    "packages/client/ui-chat/src/client/contract/slots.ts": "cf29c7cea66ef3528fbed07387a06c986e6087289a52fe4a9946ea41e3c3275d",
+    "packages/client/ui-chat/src/client/reasoning-text.ts": "e65bed4c7627f02ed2f1db4595cbeca24d767c4c23da517d1bb262995a1bdb17"
+  },
+  "semanticReview": {
+    "reviewedAt": "2026-10-30",
+    "reviewer": "Codex",
+    "startSession": "navigation.ts and input.ts unchanged from rc.3: keep default; replace/append explicit; whenDraftExists takes precedence over compatible clearPreviousDraft. Blank-session reuse/preset selection unchanged.",
+    "lifetime": "timer deprecations remain forwarding APIs; sessions.retain ownership/ready/release contracts unchanged. Reminders do not prove ownership analysis or leaks.",
+    "reasoningBody": {
+      "slot": "conversation.chat.reasoning.body",
+      "rawField": "rawText",
+      "displayField": "text",
+      "contentFactory": "conversation.chat.reasoning.content still accepts text/running/optional labels. It does not inherit the Body rawText requirement.",
+      "display": "Leading signature block is hidden; incomplete signature prefix/content has no display text; after closing delimiter consecutive LF/CRLF are removed. Other text remains unchanged.",
+      "migration": "Normal render, translation request and untranslated view keep text. Only consumers requiring complete model output use rawText. Do not sanitize a second time.",
+      "introducedBy": "534dac8c81662689169fcca12c52066c59a57058",
+      "guidePath": "docs/upgrade-guide/v0.2.1-rc.4/reasoning-body-props/guide.zh.md",
+      "guideScope": "Directory is named rc.4; full tag diff proves this guide and props change entered with rc.5.",
+      "analysisScope": "Recognize statically proven slots.register target only. Callback props use, field intent and rendering/translation behavior remain unverified; dynamic registrations abstain. Notices are coverage limitations, not findings.",
+      "syntheticPureFunctionChecks": {
+        "pass": 9,
+        "scope": "Reviewed upstream reasoningText with plain/partial signature/closed signature/LF/CRLF/other markup synthetic cases; no renderer, translation or real-host acceptance."
+      }
+    },
+    "acp": "MCP resources capability guard returns empty list/template pages without SDK console.debug; model-catalog info uses console.error. Resources/read/disconnect errors retained; no missing API rule.",
+    "navigation": "Only overflowing view labels get tooltip; More conversation views tooltip is fixed, distinct from settings/plugin menus.",
+    "declarationsAndIntegration": "Source files for boot/HMR, package-meta/plugin-compatibility, ModuleLoader, tool/skill and HTTP/connection are unchanged except release metadata. engines-first/peer fallback/exact exemptions retained. Runtime integration remains pending.",
+    "rulesDecision": "No service/method/signature removals. Add rc.5 exact parameter/lifetime baseline and reasoning-slot coverage advice, no new fatal rules."
+  },
+  "integrationAcceptance": "pending",
+  "certification": "not-granted",
+  "scope": "Source/provenance/semantic review only. Candidate is not in CATALOG_REFERENCES or upgrade/author default versions; no macOS/Linux business/UI acceptance claim. Detailed reproducible comparison receipts in tmp/rc5-review-20261030/."
+}

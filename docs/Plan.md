@@ -14,6 +14,8 @@
 
 AST按host/client/shared记录Context、服务和真实位置；入口遵循宿主、不猜路径。动态、变异、遮蔽、逃逸、异步及超限保守推断或弃权；能力守卫须控制调用，try/catch不是证明。不执行目标，不保存prompt/任意枚举；[语义范围](guide.md#参数与生命周期语义)和[提取规则](maintaining.md#提取器与探针维护)分别维护。
 
+rc.5的来源/目录候选及语义审查见[固定记录](../rules/dsh-0.2.1-rc.5-review.json)：相对rc.3无服务/方法/生成签名变化，完整归档388个文件差分已核对。rc.2/rc.3/rc.5参数与生命周期按精确源码独立判定；语义审查不授予目录/真实宿主认证。rc.5新增推理正文Slot的`rawText`，`text`改为显示文本；可定位注册仅提示迁移与props覆盖限制，动态注册弃权，不把旧`text`使用报错。详见[语义指南](guide.md#参数与生命周期语义)。
+
 ### 2.2 结论、影响与基线
 
 certainty与impactBasis独立；无已验证调用的ok标vacuous并保留coverage。未观测不等于缺失，provide仅是候选；必需inject须合格同目标absent才推断激活障碍，启用且可靠映射的FAILED/PENDING才构成对应fatal实测发现。采样不执行getter或记录属性值，超限保留截断及未知；精确豁免不放行非法字段。
@@ -80,6 +82,19 @@ UI沿用shadcn派生Card/Fold：主结果→依赖关系→人工处置→升级
 
 仅列未完成事项，优先级不是漏洞评级；功能/资源边界见前文及指南。
 
+### 6.1 P0：0.2.1开发首要任务——适配DSH 0.2.1-rc.5
+
+产品目标为0.2.1，当前实现/已发布制品仍为0.2.0。以下均为待办，**尚未认证rc.5**：普通检查对它回退rc.3目录并提示未认证，升级预检拒绝该目标。
+
+来源与语义两项已完成并归入[审查记录](../rules/dsh-0.2.1-rc.5-review.json)及§2.1：完整tag归档/官方npm/本机ASAR已核验，候选目录独立保存。登记与真实集成仍待完成，不扩大认证范围。
+
+3. [ ] **接入目录、预检和作者CI。** 来源/语义审查及真实集成通过后，联动`lib/catalog.mjs`、`lib/contracts.mjs.CATALOG_REFERENCES`、`lib/upgrade-contract.mjs.SUPPORTED_PREVIEW_VERSIONS`登记精确rc.5及摘要；作者CI默认版本由登记表派生，复核预算/策略/导出。覆盖rc.3→rc.5、rc.5→rc.3、同版、非法/未知版本、自定义目录和篡改字节；未知未来版仍回退且未认证，预检仍在读输入前拒绝未支持版本。保留旧版与状态身份隔离。
+4. [ ] **打通rc.5真实验收入口。** 改`tools/acceptance-target.mjs`、`tools/rc2-live.mjs`、`tools/ci-ui018.mjs`及相关`ui018-*`驱动中的rc.3专用目标/夹具/断言，按已审查的精确版本选择能力；补`test/rc5-adaptation.test.mjs`和既有目录、语义、预检/作者CI回归。指定rc.5却运行旧宿主、缺浏览器、缺断言/结果或清理失败必须失败，不能以skip或`applicable:false`通过。受控模型列表覆盖GET成功/失败/超时与stderr日志；ACP stdout可解析性用官方固定测试或私有mock复核，结果与Web/Desktop集成分别记录。
+5. [ ] **完成同一制品的macOS/Linux验收。** 在`.github/workflows/test.yml`新增精确rc.5真实集成，并为它运行完整九项UI门禁（含CJK字体、证据上传），保留三版旧门禁。用同一tgz、自有profile/Chrome验证三槽位、三语/主题/窄容器、草稿/定位、分页/完整导出、HTTP拒绝、超时恢复、升级预检、归档/历史及资源回收。为`tools/real-regression.mjs`增加rc.5独立固定制品清单，执行五suite/24项期望及适用holdout；预测先封存，HTTP/DOM/磁盘独立核真值，驱动错误不算业务通过。推理显示测试用合成输入/本地mock，不继承真实账户或调用模型；Windows保持未验收。
+6. [ ] **收敛0.2.1交付与文档。** 实现就绪后统一`lib/version.mjs`、plugin/probe版本及lock，更新精确版本范围、规则说明、README三语、指南/维护/作者CI/skill和示例；通过`npm test`、`npm run check`、`node plugin/scripts/prepublish-check.mjs`，以新TAP更新计数。`docs/current-state.json`另记rc.5的提交、制品摘要、平台与实际验收回执，保留旧发布回执。推送/合并/发布分别另取授权，遵循[同一tgz核对](maintaining.md#同一制品发布核对)。
+
+### 6.2 其余待办
+
 1. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题及窄容器，记录安装→理解→定位的误读、失败、误报、分享障碍与耗时。合成样例不代替真实试用；联系、收集、公开分别授权，不默认遥测。
-2. **P2：跟进上游验收。** 按[2026-10-29复验](upstream-verification.md)：[market#928](https://github.com/dsh-market/dsh-market/issues/928)的1.73.3误清journal修复通过，缺bundle两次重启仍未自愈，错误细节丢失及自救流程继续跟进，限定复验已[追加原帖](https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6492917994)；[market#1047](https://github.com/dsh-market/dsh-market/issues/1047)虽已关闭，更新分支有警告，但原新装分支仍无警告/版本未核实标记，已[追加原帖](https://github.com/dsh-market/dsh-market/issues/1047#issuecomment-6492914395)，等待补齐，不重复开issue。[1024#22](https://github.com/imsai-sh/dsh-1024store/issues/22)仍无npm方法、新装未验收；[awesome#717](https://github.com/0xsline/awesome-deepseek-harness/pull/717)仍未合并，二者无新回复。后续反馈另取授权。
+2. **P2：跟进上游验收。** [2026-10-30复核](upstream-verification.md)：dshmarket1.73.5的#928保留journal修复仍成立，组合自愈/详细原因及用户出口仍待补；#1047更新有警告，新装仍遗漏。1024#22仍无npm方法，awesome#717仍未合并。均未完成端到端新装/桌面自救验收，后续反馈另取授权。
 3. **P2：Windows真实验收（依环境条件暂缓）。** 条件具备后验证路径、安装、回收、权限、打包/诊断及自有资源清理；此前保持未验收。

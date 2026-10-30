@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.2.0",
-  "recordedAt": "2026-10-30T06:00:54.198Z",
+  "recordedAt": "2026-10-30T09:26:38.446Z",
   "testFiles": 82,
-  "tests": 1242,
+  "tests": 1249,
   "repositoryFiles": {
-    "total": 385,
+    "total": 387,
     "fixtures": 100,
-    "other": 285
+    "other": 287
   },
   "verification": {
     "platform": "darwin",
@@ -248,6 +248,28 @@
       "scope": "Real native desktop captures, cropped only; no substituted text or synthetic report data. Overview/review/upgrade/history replace obsolete detail images in all four READMEs and the screenshot index. English README uses the English overview; other workflow captures are explicitly Chinese. Precheck/history are entry forms, not executed comparisons or saved snapshots.",
       "validation": "13/13 document tests and npm run check passed; verified five PNG signatures/digests, all four README image sets and the screenshot index. Existing1242-test/full release receipts retained without claiming a rerun. No runtime changes, push or publication.",
       "legacyAssets": "Retained old image URLs because the already-published npm0.2.0 README references raw main paths. Current repository READMEs/index use the new images; npm page body changes require a later authorized publication."
+    },
+    "rc5SourceSemantics20261030": {
+      "review": "rules/dsh-0.2.1-rc.5-review.json",
+      "candidateRegistered": false,
+      "integrationAcceptance": "pending",
+      "scope": "Source/provenance and exact semantics only; catalogue/upgrade/author defaults retain three certified versions. No rc.5 real-host acceptance.",
+      "upstream": "dshmarket1.73.5 integrity verified; six original repair-function controls and eight original mounted-route controls reproduce retained-journal behavior, lost diagnostic details and install-warning omission. No real manager/Desktop execution; 1024 still GitHub-only, awesome717 open/unmerged.",
+      "receipts": "tmp/rc5-review-20261030/",
+      "validation": {
+        "tests": 1249,
+        "pass": 1241,
+        "skip": 8,
+        "fail": 0,
+        "focused": {
+          "tests": 74,
+          "pass": 74,
+          "fail": 0
+        },
+        "maintenanceCheck": "passed",
+        "scope": "Default suite with required loopback/process permissions and an owned npm cache; source-reviewed rc.5 semantics only, no rc.5 host/platform acceptance.",
+        "prepublishGate": "passed; independent 1249-test run, 1241 pass/8 skip/0 fail"
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

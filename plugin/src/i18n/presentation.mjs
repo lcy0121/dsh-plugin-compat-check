@@ -1,3 +1,8 @@
+import {
+  REASONING_SLOT_NOTICE,
+  SLOT_UNKNOWN_NOTICE,
+  SLOT_UNREVIEWED_NOTICE,
+} from "../../../lib/finding-guidance.mjs";
 /** Only known producer-owned status fields are localized; arbitrary diagnostics remain verbatim. */
 import { t, builtin } from "./runtime.mjs";
 // Only producer-owned explanation fields use this formatter. Finding text,
@@ -49,6 +54,18 @@ const explanationPatterns = [
 ];
 export function evidenceNote(value) {
   if (typeof value !== "string") return value;
+  for (const label of ["槽位语义提示", "槽位覆盖限制"]) {
+    for (const notice of [
+      REASONING_SLOT_NOTICE,
+      SLOT_UNKNOWN_NOTICE,
+      SLOT_UNREVIEWED_NOTICE,
+    ]) {
+      if (value.startsWith(label + "：") && value.endsWith("；" + notice)) {
+        const context = value.slice(label.length + 1, -(notice.length + 1));
+        return t(label + "：{p0}；{p1}", { p0: context, p1: builtin(notice) });
+      }
+    }
+  }
   for (const [pattern, key] of explanationPatterns) {
     const match = value.match(pattern);
     if (match)
