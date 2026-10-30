@@ -4,7 +4,7 @@
 
 ## 1. 项目定位与交付状态
 
-0.2.1为本地候选，尚待当前提交Linux CI及发布授权。**0.2.0已于2026-10-29发布到[GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.0)及[npm](https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.0)**；同一制品、精确提交与平台回执见[current-state](current-state.json)。
+0.2.1候选已完成同一制品macOS/Linux验收，尚未正式发布。**0.2.0已于2026-10-29发布到[GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.0)及[npm](https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.0)**；同一制品、精确提交与平台回执见[current-state](current-state.json)。
 
 检查已安装DSH插件，提供源码位置、依据和覆盖限制。声明放行、激活、无发现及覆盖完整均不等于业务验收。npm交付面板、`compat_check`、skill和共享内核，无CLI bin、不支持npx；CLI、安装检查、批量、作者CI及健康执行器从private仓库工作区运行。源码安装须[构建完整tgz](../plugin/README.md#从源码构建安装)。
 
@@ -72,7 +72,7 @@ UI沿用shadcn派生Card/Fold：主结果→依赖关系→人工处置→升级
 
 ## 4. 验收范围
 
-[current-state](current-state.json)按精确源码、制品和平台记录验收；合成样例不代替真实试用，macOS/Linux记录不认证Windows或一般业务。升版前Linux与本地0.2.0制品回执分开保留。正式发布须重新核对所选提交CI及同一tgz安装验收，再核registry/tag/release附件；文档版本不构成发布成功证明。
+[current-state](current-state.json)按精确源码、制品和平台记录验收；合成样例不代替真实试用，macOS/Linux记录不认证Windows或一般业务。历史0.2.0与当前0.2.1制品回执分开保留。当前候选提交`1a84561`的[CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41054118165)八项job全过；rc.5在macOS/Linux对同一CI归档完成九项UI验收及摘要核对，细节见current-state。正式发布须重新核对所选提交CI及同一tgz安装验收，再核registry/tag/release附件；文档版本不构成发布成功证明。
 
 ## 5. 验证入口
 
@@ -84,10 +84,9 @@ UI沿用shadcn派生Card/Fold：主结果→依赖关系→人工处置→升级
 
 ### 6.1 P0：0.2.1开发首要任务——适配DSH 0.2.1-rc.5
 
-当前源码/候选版本为0.2.1，公开0.2.0发布回执保持历史事实。第1–4项来源/语义、目录/预检/作者CI及真实验收入口已完成，能力归入§2及[维护指南](maintaining.md#rc5验收入口)。rc.5独立目录已登记，0.2.1候选macOS完整九项UI已通过；当前候选Linux实跑仍待下项，不把目录认证扩大为一般业务验收。
+第1–5项开发与验收已完成，能力/限定回执归入§2、§4及[维护指南](maintaining.md#rc5验收入口)。源码/插件/probe/lock及文档统一0.2.1；固定业务回归保留漏报与覆盖限制，不把目录认证或UI通过扩大为一般业务验收。
 
-5. [ ] **完成同一制品的macOS/Linux验收（待Linux实跑）。** rc.5四版矩阵、CJK字体/九项UI、同一归档下载及源码回执绑定已接入；macOS完整九项已通过，固定五suite/24项期望的本轮结果见[current-state](current-state.json)。本地没有Linux运行时；取得当次推送授权后，核对所选提交全部CI及同一tgz摘要。若CI归档不同，下载该文件重跑Mac，不能借旧回执。Windows保持未验收。
-6. [ ] **完成0.2.1交付的远端核对。** 源码/插件/probe/lock已统一0.2.1，文档和本地候选已收敛；本地测试/维护及发布前门禁结果按实际回执记录。剩余步骤：授权推送后核所选提交CI与Linux制品，再单独取得合并/正式发布授权。发布只使用最终双平台接受的同一归档，核registry/tag/release附件及公共安装；不预写已发布状态。
+6. [ ] **正式发布0.2.1（待合并/发布授权）。** 已完成候选CI、同一归档双平台验收和本地发布前门禁。发布前另取当次合并/正式发布授权，核对最终所选提交CI；使用双平台已接受的同一归档，核registry/tag/release附件及公共安装。不预写已发布状态。
 
 ### 6.2 其余待办
 

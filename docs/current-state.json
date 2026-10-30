@@ -22,12 +22,12 @@
         "0.2.1-rc.3",
         "0.2.1-rc.5"
       ],
-      "scope": "Reviewed exact catalogue bytes and version-specific integration. rc.5 macOS full nine-section UI passed for the local0.2.1 candidate below; Linux/Windows for that candidate remain unverified. Historical rc.3 macOS/Linux receipts retain their exact scope."
+      "scope": "Reviewed exact catalogues and version-specific integration; rc.5 full UI passed on macOS/Linux for the same0.2.1 CI tgz below. Windows/general business remain unverified; earlier receipts keep their historical scope."
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
       "integrationTarget": "main",
-      "scope": "0.2.1 local candidate: rc.5 exact catalogues/semantics, static upgrade/author CI, source-bound package reuse and acceptance drivers. Publication/platform claims bind only actual dated receipts; published0.2.0 receipt remains historical."
+      "scope": "0.2.1 candidate: rc.5 exact catalogues/semantics, static upgrade/author CI and same-archive macOS/Linux acceptance. Unpublished; published0.2.0 receipt remains historical."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -243,13 +243,13 @@
       "scope": "Historical0.2.0 development-source rc.5 basic integration. Does not certify the0.2.1 candidate or full UI/Linux."
     },
     "candidate02120261030": {
-      "status": "local candidate; publication and Linux CI pending authorization",
-      "sourceBase": "386b273d0bbb8bfd88cd85706d6dec8417a40ab7",
-      "sourceDirty": true,
-      "sourceManifestSha256": "87b462ff37ca7375a780a8b21c2366e8555a4d01ae2a0ecbd7113cdae99dd4df",
+      "status": "CI and same-archive macOS/Linux acceptance passed; unpublished",
+      "sourceDirty": false,
+      "sourceManifestSha256": "afa48b109d0dd03acfd1b3267bede4f4408f869daf3559d62264064ff1d85e8b",
       "artifact": {
         "filename": "dsh-plugin-compat-check-0.2.1.tgz",
-        "sha256": "51233a1950fcb32ef99f9c9a0fa450f4a39e0491b21754faed7fe61241edd7b5"
+        "sha256": "33135d71ad5cb6290bd96c5719e062977dac3f92027a789b04e62b4cc95aa6d9",
+        "ciArtifactId": 12976630605
       },
       "mac": {
         "host": "0.2.1-rc.5",
@@ -258,12 +258,17 @@
         "nineSections": true,
         "screenshots": 21,
         "privateRootRemoved": true,
-        "scope": "One build-only tgz supplied with its source receipt; copied unchanged and accepted by the full UI evidence gate. Dark/Korean narrow captures visually inspected."
+        "scope": "Downloaded CI archive/receipt reused unchanged; full evidence gate and checksum manifest passed. Dark/Korean narrow captures inspected."
       },
       "linux": {
-        "workflow": "candidate job builds once; rc.5 Linux downloads archive/receipt, binds source/commit/hash, runs nine-section UI with fonts and uploads evidence",
-        "executed": false,
-        "scope": "No local Linux runtime. Push approval and an actual selected-commit CI result required; compare its tgz to the Mac hash, otherwise reaccept the CI archive on Mac."
+        "executed": true,
+        "host": "0.2.1-rc.5",
+        "platform": "linux x64",
+        "node": "v24.22.1",
+        "nineSections": true,
+        "screenshots": 21,
+        "evidenceArtifactId": 12976412082,
+        "scope": "Same source/commit/tgz as Mac; full evidence gate and checksum manifest verified from downloaded CI evidence. Korean narrow capture inspected; private root removed."
       },
       "validation": {
         "tests": 1273,
@@ -273,9 +278,9 @@
         "maintenanceCheck": "passed",
         "prepublishGate": "passed; fresh1273-test TAP and documentation facts; no publication"
       },
-      "publicMetadata": "Read-only check: npm0.2.0; only expected local-version/README notices, no lookup skipped. No push/merge/publish or upstream message.",
-      "receipts": "tmp/release-021-20261030/",
-      "scope": "Candidate and local platform evidence only. Fixed business regression and Linux results stay separate; Windows unverified.0.2.0 release receipts are historical.",
+      "publicMetadata": "Before push: npm0.2.0; only expected candidate-version/README notices, no lookup skipped. Push completed; no merge/publish or upstream message.",
+      "receipts": "tmp/push-021-20261030/; fixed business: tmp/release-021-20261030/business-final/",
+      "scope": "CI-built tgz is the final dual-platform candidate. Earlier local tgz had identical76 file payloads but different archive bytes; Mac was rerun on the CI bytes. Business results remain separate; Windows unverified.",
       "business": {
         "host": "0.2.1-rc.5",
         "status": "passed",
@@ -299,6 +304,13 @@
         "accountCalls": 0,
         "replay": "passed; historical evidence validation only",
         "scope": "Fixed 24 normal/failure/recovery expectations reproduced; 12 unflagged failures retained (2 natural,10 business/client). Green does not mean all business functions passed or ecosystem accuracy. Separate from the accepted UI tgz."
+      },
+      "history": "1a84561:docs/current-state.json preserves the earlier dirty-source/local-tgz receipt",
+      "sourceCommit": "1a84561bbaca5ad2728f56a326059b8d59a16e9a",
+      "ci": {
+        "run": 41054118165,
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41054118165",
+        "jobs": "8/8 success: Node22.19.0/24 gates, dependency-security, candidate, four Linux exact hosts"
       }
     }
   },
