@@ -26,7 +26,7 @@
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
-      "scope": "0.2.1 source candidate, unpublished. README/skill/description edits change the package; rerun selected-commit CI and same-archive acceptance before release."
+      "scope": "0.2.1 published from9beaa5a. Post-release documentation does not alter the published tgz; newer source/packages require their own gates."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -86,70 +86,10 @@
       },
       "details": "10213c0:docs/current-state.json; durable archive/checksums/receipt on GitHub Release."
     },
-    "candidate02120261030": {
-      "status": "Documentation-compressed0.2.1 candidate accepted on macOS/Linux; unpublished",
-      "sourceDirty": false,
-      "sourceManifestSha256": "1da4b78798eef293d159455658372277d8834069a4f32107bfd22d15bac18753",
-      "artifact": {
-        "filename": "dsh-plugin-compat-check-0.2.1.tgz",
-        "sha256": "134916eadf38095322e776820fcb502aacd6bce0cbe8200e6863500c3df601c4",
-        "ciArtifactId": 12977094636
-      },
-      "mac": {
-        "host": "0.2.1-rc.5",
-        "platform": "darwin arm64",
-        "node": "v26.13.0",
-        "nineSections": true,
-        "screenshots": 21,
-        "privateRootRemoved": true,
-        "scope": "Downloaded CI archive/receipt reused unchanged; full evidence gate and checksum manifest passed. Dark/Korean narrow captures inspected."
-      },
-      "linux": {
-        "executed": true,
-        "host": "0.2.1-rc.5",
-        "platform": "linux x64",
-        "node": "v24.22.1",
-        "nineSections": true,
-        "screenshots": 21,
-        "evidenceArtifactId": 12978348201,
-        "scope": "Same source/commit/tgz as Mac; full evidence gate and checksum manifest verified from downloaded CI evidence. Korean narrow capture inspected; private root removed."
-      },
-      "validation": {
-        "tests": 1273,
-        "pass": 1265,
-        "skip": 8,
-        "fail": 0,
-        "maintenanceCheck": "passed",
-        "prepublishGate": "passed; fresh1273-test TAP and documentation facts; no publication"
-      },
-      "receipts": "tmp/docs-021-final/",
-      "scope": "New README/skill/description bytes were packaged once by CI and the same archive accepted on Mac/Linux. Payload README/skill/description and both checksum manifests verified. Later source/packages, Windows and general business remain separate.",
-      "sourceCommit": "711deec972716c4d04aa9b27bd35550ffd0cc641",
-      "ci": {
-        "run": 41058580488,
-        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41058580488",
-        "jobs": "8/8 success: Node22.19.0/24 gates, dependency-security, candidate, four Linux exact hosts"
-      },
-      "previousReceipt": "10213c0:docs/current-state.json"
-    },
     "history": {
       "commit": "10213c0",
       "path": "docs/current-state.json",
       "scope": "Full predecessor acceptance, release preparation, screenshot digests, source semantics and upstream controls. Historical evidence is not a current source or publication claim."
-    },
-    "documentationReview20261030": {
-      "scope": "Flat Plan section6; translated READMEs, guides, skill and package descriptions reviewed against code and dated receipts. Historical logs reduced to Git pointers; licences retained.",
-      "validation": {
-        "tests": 1273,
-        "pass": 1265,
-        "skip": 8,
-        "fail": 0,
-        "check": "passed",
-        "prepublish": "passed",
-        "docsSkillCatalogTests": "53/53 passed"
-      },
-      "metadata": "npm0.2.0; only candidate version/description/README notices, no errors or skipped lookups.",
-      "publication": "0.2.1 remains unpublished. New packaged documentation/skill accepted in the dated candidate receipt; final integration CI must match the selected commit."
     },
     "business02120261030": {
       "host": "0.2.1-rc.5",
@@ -175,6 +115,142 @@
       "replay": "passed; historical evidence validation only",
       "scope": "Historical fixed24-case run before documentation/skill compression; expectations and kernel unchanged, no rerun claimed for the new tgz. Green retained12 unflagged failures; not general business certification.",
       "receipts": "tmp/release-021-20261030/business-final/"
+    },
+    "preReleaseHistory": {
+      "commit": "9beaa5a",
+      "path": "docs/current-state.json",
+      "scope": "Dated pre-release candidates and documentation gates; not the final release archive."
+    },
+    "release02120261031": {
+      "status": "published and independently verified on npm and GitHub",
+      "source": {
+        "commit": "9beaa5a9174237d09844ea961e574827279bbae8",
+        "manifestSha256": "528408f2743d3fca1a3c133b7e1a9ca8de271d7446658c3380ae7086bc91a44e",
+        "dirty": false
+      },
+      "ci": {
+        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41101651183",
+        "conclusion": "success",
+        "jobs": [
+          {
+            "name": "dependency-security",
+            "conclusion": "success"
+          },
+          {
+            "name": "test (22.19.0)",
+            "conclusion": "success"
+          },
+          {
+            "name": "test (24)",
+            "conclusion": "success"
+          },
+          {
+            "name": "candidate",
+            "conclusion": "success"
+          },
+          {
+            "name": "linux-live (0.2.1-rc.2)",
+            "conclusion": "success"
+          },
+          {
+            "name": "linux-live (0.2.1-rc.3)",
+            "conclusion": "success"
+          },
+          {
+            "name": "linux-live (0.2.1-rc.5)",
+            "conclusion": "success"
+          },
+          {
+            "name": "linux-live (0.2.0-rc.2)",
+            "conclusion": "success"
+          }
+        ]
+      },
+      "artifact": {
+        "filename": "dsh-plugin-compat-check-0.2.1.tgz",
+        "sha256": "cdb256e475dd3fa003b639b835d4f0301454f77b5c09fa2946a83b23de33bb09",
+        "sha1": "863d622d78ed990a558735a99ce50e7da6232936",
+        "integrity": "sha512-iF9YGTzGVrFPmkPx5AeDWxzoo9bCNPlyI5lTa4aOOV1TmI+QV17f2lqtkCVBHWthuHk5mCLY5NpKslJkaxvECw==",
+        "bytes": 316460,
+        "payloadFiles": 76
+      },
+      "actualHost": {
+        "mac": {
+          "platform": "darwin",
+          "arch": "arm64",
+          "node": "v26.13.0",
+          "dshVersion": "0.2.1-rc.5",
+          "allNineSections": true,
+          "screenshots": 21,
+          "privateRootRemoved": true,
+          "sameArchive": true,
+          "checksumManifestVerified": true
+        },
+        "linux": {
+          "platform": "linux",
+          "arch": "x64",
+          "node": "v24.22.1",
+          "dshVersion": "0.2.1-rc.5",
+          "allNineSections": true,
+          "screenshots": 21,
+          "privateRootRemoved": true,
+          "sameArchive": true,
+          "checksumManifestVerified": true
+        }
+      },
+      "localValidation": {
+        "tests": 1273,
+        "pass": 1265,
+        "skip": 8,
+        "fail": 0,
+        "maintenanceCheck": "passed",
+        "prepublishGate": "passed"
+      },
+      "github": {
+        "release": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.1",
+        "tag": "v0.2.1",
+        "tagCommit": "9beaa5a9174237d09844ea961e574827279bbae8",
+        "publishedAt": "2026-10-30T18:17:05Z",
+        "allThreeDownloadedAssetsByteIdentical": true
+      },
+      "npm": {
+        "version": "0.2.1",
+        "latest": "0.2.1",
+        "verifiedAt": "2026-10-30T18:14:48.639786+00:00",
+        "publishedAt": "2026-10-30T18:12:54.228Z",
+        "integrityMatches": true,
+        "shasumMatches": true,
+        "downloadByteIdentical": true,
+        "metadataMatches": true,
+        "readmeMatches": true,
+        "metadataProblems": 0,
+        "metadataSkipped": 0
+      },
+      "publicInstall": {
+        "spec": "dsh-plugin-compat-check@0.2.1",
+        "status": "checked",
+        "exitCode": 0,
+        "toolVersion": "0.2.1",
+        "dshVersion": "0.2.1-rc.5",
+        "tempProfileRemoved": true,
+        "catalogueSha256": "63ee5a2963bb35eb1425c78cda1d3eafb2e153a959b69003abfcaf543cde043a",
+        "summary": {
+          "limited": 2,
+          "vacuousOk": 1,
+          "ok": 2,
+          "partial": 0,
+          "broken": 0,
+          "unknown": 0
+        },
+        "scope": "Actual public-registry isolated installation and host observation; limited/vacuous coverage retained. Full UI belongs to the separate same-archive acceptance, not this install check."
+      },
+      "receipts": "tmp/release-021-20261031/; durable tgz, SHA256SUMS and RELEASE-VERIFICATION.json on GitHub Release.",
+      "scope": "Same CI-built archive accepted on macOS/Linux and published unchanged. Historical business misses, Windows/user-study and upstream pending work remain separate.",
+      "publicMetadataCheck": {
+        "observedAt": "2026-10-30T18:20:02.169Z",
+        "problems": 0,
+        "skipped": 0
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
