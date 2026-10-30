@@ -70,7 +70,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ## 4. 验收范围
 
-[current-state](current-state.json)按提交、归档和平台记录结果。已封存的候选提交`1a84561`[CI八项通过](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41054118165)，同一CI tgz通过rc.5 macOS/Linux九项UI；固定业务期望复现但仍有12项未识别故障。新源码/skill/README或重打包不继承此归档验收。Windows、用户试用和一般业务保持未验收；合成病例不替代真实试用。
+[current-state](current-state.json)按提交、归档和平台记录结果。文档压缩后的候选提交`711deec`[CI八项通过](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41058580488)，同一CI tgz通过rc.5 macOS/Linux九项UI；此前固定业务期望复现但仍有12项未识别故障，未宣称新包已重跑该队列。新源码/skill/README或重打包不继承此归档验收。Windows、用户试用和一般业务保持未验收；合成病例不替代真实试用。
 
 ## 5. 验证入口
 

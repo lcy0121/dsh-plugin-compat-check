@@ -153,4 +153,4 @@ DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_RC2_ARTIFACT=<候选tgz绝对路径> D
 
 rc.5额外要求独立ACP stdout JSON-RPC、stderr目录诊断、MCP能力、受控模型列表及导航语义回执。rc5-acp-stdout只用私有DSH_HOME、合成凭据、loopback列表/两轮模型响应和tools-only MCP；无resources能力不请求资源。失败/超时/清理不确认均失败，只保存计数与断言，不保存对话正文。模型列表另验首次等待、失败/超时回退及无凭据不请求；没有生产账户/模型调用。
 
-已封存的1a84561候选在macOS/Linux通过同一CI归档验收，细节见current-state；本轮文档/skill更新后的包须重验。固定业务五suite/24项仅证明期望重现，不能称全部功能通过。rules/dsh-0.2.1-rc.5-review.json的integrationAcceptance保留目录登记时基础快照，不追写历史归档。
+文档压缩后的711deec候选在macOS/Linux通过同一CI归档验收，细节见current-state；后续包仍须按来源和摘要重核。固定业务五suite/24项仅证明期望重现，不能称全部功能通过。rules/dsh-0.2.1-rc.5-review.json的integrationAcceptance保留目录登记时基础快照，不追写历史归档。

@@ -87,13 +87,13 @@
       "details": "10213c0:docs/current-state.json; durable archive/checksums/receipt on GitHub Release."
     },
     "candidate02120261030": {
-      "status": "Historical accepted0.2.1 candidate; later documentation/skill packaging requires fresh acceptance",
+      "status": "Documentation-compressed0.2.1 candidate accepted on macOS/Linux; unpublished",
       "sourceDirty": false,
-      "sourceManifestSha256": "afa48b109d0dd03acfd1b3267bede4f4408f869daf3559d62264064ff1d85e8b",
+      "sourceManifestSha256": "1da4b78798eef293d159455658372277d8834069a4f32107bfd22d15bac18753",
       "artifact": {
         "filename": "dsh-plugin-compat-check-0.2.1.tgz",
-        "sha256": "33135d71ad5cb6290bd96c5719e062977dac3f92027a789b04e62b4cc95aa6d9",
-        "ciArtifactId": 12976630605
+        "sha256": "134916eadf38095322e776820fcb502aacd6bce0cbe8200e6863500c3df601c4",
+        "ciArtifactId": 12977094636
       },
       "mac": {
         "host": "0.2.1-rc.5",
@@ -111,7 +111,7 @@
         "node": "v24.22.1",
         "nineSections": true,
         "screenshots": 21,
-        "evidenceArtifactId": 12976412082,
+        "evidenceArtifactId": 12978348201,
         "scope": "Same source/commit/tgz as Mac; full evidence gate and checksum manifest verified from downloaded CI evidence. Korean narrow capture inspected; private root removed."
       },
       "validation": {
@@ -122,38 +122,15 @@
         "maintenanceCheck": "passed",
         "prepublishGate": "passed; fresh1273-test TAP and documentation facts; no publication"
       },
-      "receipts": "tmp/push-021-20261030/; fixed business: tmp/release-021-20261030/business-final/",
-      "scope": "Same CI-built tgz passed Mac/Linux; fixed business results separate. Does not certify later source/packages, Windows or general business. Earlier local archive had equal76 file payloads but different archive bytes, so Mac was rerun on CI bytes.",
-      "business": {
-        "host": "0.2.1-rc.5",
-        "status": "passed",
-        "manifestSha256": "539846b7aacba184b320b6f796aef2b35723431246248c95724091ef3d895bed",
-        "suites": 5,
-        "summary": {
-          "independentPackageFamilies": 4,
-          "pinnedArtifacts": 5,
-          "holdoutPackageFamilies": 2,
-          "holdoutPinnedArtifacts": 2,
-          "distinctPlannedCases": 24,
-          "knownOutcomeCases": 24,
-          "staticIdentifiedFailures": 0,
-          "serviceOnlyIdentifiedFailures": 0,
-          "unflaggedNaturalFailures": 2,
-          "unflaggedBusinessOrClientFailures": 10,
-          "driverErrors": 0,
-          "validationErrors": 0
-        },
-        "modelCalls": 0,
-        "accountCalls": 0,
-        "replay": "passed; historical evidence validation only",
-        "scope": "Fixed 24 normal/failure/recovery expectations reproduced; 12 unflagged failures retained (2 natural,10 business/client). Green does not mean all business functions passed or ecosystem accuracy. Separate from the accepted UI tgz."
-      },
-      "sourceCommit": "1a84561bbaca5ad2728f56a326059b8d59a16e9a",
+      "receipts": "tmp/docs-021-final/",
+      "scope": "New README/skill/description bytes were packaged once by CI and the same archive accepted on Mac/Linux. Payload README/skill/description and both checksum manifests verified. Later source/packages, Windows and general business remain separate.",
+      "sourceCommit": "711deec972716c4d04aa9b27bd35550ffd0cc641",
       "ci": {
-        "run": 41054118165,
-        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41054118165",
+        "run": 41058580488,
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41058580488",
         "jobs": "8/8 success: Node22.19.0/24 gates, dependency-security, candidate, four Linux exact hosts"
-      }
+      },
+      "previousReceipt": "10213c0:docs/current-state.json"
     },
     "history": {
       "commit": "10213c0",
@@ -172,7 +149,32 @@
         "docsSkillCatalogTests": "53/53 passed"
       },
       "metadata": "npm0.2.0; only candidate version/description/README notices, no errors or skipped lookups.",
-      "publication": "0.2.1 remains unpublished; selected-commit CI and the new package acceptance are recorded separately from older receipts."
+      "publication": "0.2.1 remains unpublished. New packaged documentation/skill accepted in the dated candidate receipt; final integration CI must match the selected commit."
+    },
+    "business02120261030": {
+      "host": "0.2.1-rc.5",
+      "status": "passed",
+      "manifestSha256": "539846b7aacba184b320b6f796aef2b35723431246248c95724091ef3d895bed",
+      "suites": 5,
+      "summary": {
+        "independentPackageFamilies": 4,
+        "pinnedArtifacts": 5,
+        "holdoutPackageFamilies": 2,
+        "holdoutPinnedArtifacts": 2,
+        "distinctPlannedCases": 24,
+        "knownOutcomeCases": 24,
+        "staticIdentifiedFailures": 0,
+        "serviceOnlyIdentifiedFailures": 0,
+        "unflaggedNaturalFailures": 2,
+        "unflaggedBusinessOrClientFailures": 10,
+        "driverErrors": 0,
+        "validationErrors": 0
+      },
+      "modelCalls": 0,
+      "accountCalls": 0,
+      "replay": "passed; historical evidence validation only",
+      "scope": "Historical fixed24-case run before documentation/skill compression; expectations and kernel unchanged, no rerun claimed for the new tgz. Green retained12 unflagged failures; not general business certification.",
+      "receipts": "tmp/release-021-20261030/business-final/"
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
