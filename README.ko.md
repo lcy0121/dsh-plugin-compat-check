@@ -6,16 +6,16 @@
 
 ## 버전과 진입점
 
-**0.2.1**은 미출시 후보입니다. DSH rc.5의 정확한 카탈로그, 매개변수/슬롯 의미, 업그레이드 사전 검사 및 작성자 CI를 지원하며, 중·영·한 UI, 의존 관계, 수동 검토, 로컬 보고서 이력을 제공합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
+**0.2.1**은 DSH rc.5의 정확한 카탈로그, 매개변수/슬롯 의미, 업그레이드 사전 검사 및 작성자 CI를 지원하며, 중·영·한 UI, 의존 관계, 수동 검토, 로컬 보고서 이력을 제공합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
 
-동일한 CI 0.2.1 아카이브가 macOS/Linux의 rc.5 검수를 통과했습니다. 커밋과 범위는 [docs/current-state.json](docs/current-state.json)에 기록하며, 이후 소스/패키지는 다시 확인해야 합니다. 공개 npm/GitHub Release는 여전히 0.2.0으로 앞의 세 카탈로그만 포함합니다. npm 패키지는 화면, 상세/배지, `compat_check`, skill을 제공합니다. CLI·설치 검사·배치·작성자 CI·건강 실행기는 저장소 전용이며 npm CLI bin과 `npx dsh-plugin-compat-check`는 지원하지 않습니다.
+macOS/Linux rc.5 검수는 정확한 커밋과 아카이브에 연결됩니다. 범위는 [docs/current-state.json](docs/current-state.json)에 기록하며, 이후 소스/패키지는 다시 확인해야 합니다. npm 패키지는 화면, 상세/배지, `compat_check`, skill을 제공합니다. CLI·설치 검사·배치·작성자 CI·건강 실행기는 저장소 전용이며 npm CLI bin과 `npx dsh-plugin-compat-check`는 지원하지 않습니다.
 
 ## 설치와 사용
 
 ```sh
-# 현재 공개 버전; 이번 작업에서 0.2.1은 출시하지 않습니다
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0
-# 검수한 후보 아카이브
+# 이 정확한 버전 설치
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.1
+# 로컬 아카이브 사용 전 해시 확인
 dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.1.tgz
 ```
 

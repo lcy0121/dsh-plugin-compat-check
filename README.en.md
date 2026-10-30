@@ -6,16 +6,16 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-**0.2.1** is an unpublished candidate with exact DSH rc.5 catalogues, parameter/slot semantics, upgrade preview and author CI, plus a Chinese/English/Korean UI, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3 and 0.2.1-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
+**0.2.1** provides exact DSH rc.5 catalogues, parameter/slot semantics, upgrade preview and author CI, plus a Chinese/English/Korean UI, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3 and 0.2.1-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
 
-One CI-built 0.2.1 archive passed macOS/Linux rc.5 acceptance; [docs/current-state.json](docs/current-state.json) records its commit and scope. Later sources/packages require fresh verification. Public npm/GitHub Releases remain at 0.2.0, with only the first three catalogues. The npm plugin provides the page, details/badges, `compat_check` and skill. CLI, install checks, batches, author CI and health executor are repository tools. There is no npm CLI bin or `npx dsh-plugin-compat-check` support.
+macOS/Linux rc.5 acceptance binds each exact commit and archive; [docs/current-state.json](docs/current-state.json) records its commit and scope. Later sources/packages require fresh verification. The npm plugin provides the page, details/badges, `compat_check` and skill. CLI, install checks, batches, author CI and health executor are repository tools. There is no npm CLI bin or `npx dsh-plugin-compat-check` support.
 
 ## Install and use
 
 ```sh
-# Currently published version; this work does not publish 0.2.1
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0
-# Accepted candidate archive
+# Install this exact version
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.1
+# Verify the digest before using a local archive
 dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.1.tgz
 ```
 

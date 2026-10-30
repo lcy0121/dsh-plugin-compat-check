@@ -6,16 +6,16 @@
 
 ## 版本与入口
 
-**0.2.1**为未发布候选，支持DSH rc.5精确目录、参数/槽位语义、升级预检和作者CI；提供中英韩界面、依赖关系、人工处置及本地报告历史。已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
+**0.2.1**支持DSH rc.5精确目录、参数/槽位语义、升级预检和作者CI；提供中英韩界面、依赖关系、人工处置及本地报告历史。已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
 
-0.2.1已有同一CI归档的macOS/Linux rc.5验收，范围和提交见[docs/current-state.json](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)；后续源码/打包须重新核对。公开npm/GitHub Release仍为0.2.0，仅含前三版目录。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
+macOS/Linux rc.5验收按精确提交及归档记录于[docs/current-state.json](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)；后续源码/打包须重新核对。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
 
 ## 安装与使用
 
 ```sh
-# registry当前版本；本轮不发布0.2.1
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0
-# 验收过的候选文件
+# 固定安装本版
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.1
+# 使用本地归档前核对摘要
 dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.1.tgz
 ```
 
