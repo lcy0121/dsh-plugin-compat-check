@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { uiAcceptanceVersion } from "./acceptance-target.mjs";
 /** One private tgz, one actual-host UI run, and provenance-bound CI evidence. */
 import fs from "node:fs";
 import path from "node:path";
@@ -9,7 +10,11 @@ import { fileURLToPath } from "node:url";
 import { prepareOwnedPackageSource } from "./owned-package-source.mjs";
 const repo = fileURLToPath(new URL("..", import.meta.url));
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
-export function validateUi018Evidence(result, artifactSha256) {
+export function validateUi018Evidence(
+  result,
+  artifactSha256,
+  expectedVersion = "0.2.1-rc.3",
+) {
   const expect = (value, label) => {
     if (!value) throw Error("Incomplete UI acceptance: " + label);
   };
@@ -17,7 +22,57 @@ export function validateUi018Evidence(result, artifactSha256) {
     result?.ok === true && result.applicable === true,
     "actual applicable host",
   );
-  expect(result.dshVersion === "0.2.1-rc.3", "exact rc.3 host");
+  expect(
+    result.dshVersion === uiAcceptanceVersion(expectedVersion),
+    "exact requested host",
+  );
+  if (expectedVersion === "0.2.1-rc.5") {
+    for (const key of [
+      "actualAcp",
+      "catalogDiagnosticsStderr",
+      "mcpResources",
+      "stdoutJsonRpc",
+      "cleaned",
+    ])
+      expect(result.rc5Protocol?.[key] === true, "rc5Protocol." + key);
+    for (const key of [
+      "firstUseWait",
+      "failureFallback",
+      "lastGoodRetained",
+      "deadline",
+    ])
+      expect(result.modelListing?.[key] === true, "modelListing." + key);
+    expect(
+      result.modelListing.productionRequests === 0 &&
+        result.modelListing.modelCalls === 0,
+      "owned model listing only",
+    );
+    expect(result.noCredentialDiscovery === true, "no credential discovery");
+    for (const key of [
+      "blankReuse",
+      "presetIsolation",
+      "defaultKeep",
+      "append",
+      "legacyReplace",
+      "explicitPolicyPrecedence",
+      "detailAndBadge",
+      "createDraftOnly",
+    ])
+      expect(result.rc3Navigation?.[key] === true, "navigation." + key);
+    expect(
+      result.rc3Navigation.menus?.length === 3 &&
+        result.rc3Navigation.menus.every(
+          (m) => m.browseMainList && m.createDraftOnly,
+        ),
+      "all navigation menus",
+    );
+    expect(
+      result.apiSemantics?.exactVersion === expectedVersion &&
+        result.apiSemantics.realBrowser === true &&
+        result.apiSemantics.installedArtifact === true,
+      "version-bound semantics",
+    );
+  }
   expect(
     /^[a-f0-9]{64}$/.test(artifactSha256) &&
       result.artifactSha256 === artifactSha256,
@@ -185,6 +240,9 @@ async function run(command, args, options) {
   });
 }
 export async function runUi018Ci(output) {
+  const expectedVersion = uiAcceptanceVersion(
+    process.env.DSC_ACCEPTANCE_DSH_VERSION,
+  );
   output = path.resolve(output);
   fs.mkdirSync(output, { recursive: true, mode: 0o700 });
   const write = (name, value) =>
@@ -256,7 +314,7 @@ export async function runUi018Ci(output) {
       env: {
         ...process.env,
         ...flags,
-        DSC_ACCEPTANCE_DSH_VERSION: "0.2.1-rc.3",
+        DSC_ACCEPTANCE_DSH_VERSION: expectedVersion,
         DSC_RC2_ARTIFACT: artifact,
         DSC_UI018_SCREENSHOTS: path.join(output, "screenshots"),
         DSC_RC2_LIVE_LOG: path.join(output, "live.json"),
@@ -269,7 +327,7 @@ export async function runUi018Ci(output) {
         "Actual UI acceptance failed; inspect live.json and live.stderr",
       );
     const result = JSON.parse(acceptance.stdout);
-    validateUi018Evidence(result, artifactSha256);
+    validateUi018Evidence(result, artifactSha256, expectedVersion);
     for (const name of [
       "overview-light.png",
       "overview-dark.png",

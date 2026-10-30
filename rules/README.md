@@ -10,10 +10,10 @@
 | dsh-api-catalog.json | 固定0.2.0-rc.2目录 |
 | dsh-api-catalog-0.2.1-rc.2.json / dsh-api-catalog-0.2.1-rc.3.json | 两个独立精确版本目录；不能因方法名相同而互相认证 |
 | dsh-0.2.1-rc.3-review.json | 固定来源、摘要、签名与语义审查 |
-| dsh-api-catalog-0.2.1-rc.5.json / dsh-0.2.1-rc.5-review.json | 来源已核验的候选与语义审查；未登记、不授予宿主认证 |
+| dsh-api-catalog-0.2.1-rc.5.json / dsh-0.2.1-rc.5-review.json | 已登记精确目录与固定来源/语义审查；平台/业务范围见current-state |
 | usage-inventory.json | 带日期、版本、profile和完整性标记的历史AST库存，不是当前覆盖率 |
 
-普通检查对DSH≥0.2.1-rc.3选rc.3参考，≥0.2.1-rc.2选rc.2，其余/未知选旧目录，显式覆盖优先。登记字节与认证集合以`lib/contracts.mjs.CATALOG_REFERENCES`为准；升级预检接受三个登记精确版本，拒绝未知/范围。回退和自定义目录不认证未来宿主。
+普通检查对DSH≥0.2.1-rc.5选rc.5参考，≥0.2.1-rc.3选rc.3参考，≥0.2.1-rc.2选rc.2，其余/未知选旧目录，显式覆盖优先。登记字节与认证集合以`lib/contracts.mjs.CATALOG_REFERENCES`为准；升级预检接受四个登记精确版本，拒绝未知/范围。回退和自定义目录不认证未来宿主。
 
 ## 判定与解释
 

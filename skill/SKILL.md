@@ -9,7 +9,7 @@ description: 当用户询问已安装DSH插件是否适配当前版本、升级�
 
 判定内核只有一处实现（`lib/verdict.mjs`，经 `bin/compat-check.mjs` 暴露），插件 / 脚本 / 本 skill 三个入口共用它。只有相同目标、版本、规则与采样证据才应得到相同结果。默认 CLI 用静态证据，当前宿主插件使用进程内观测，两者结论和基线模式可以不同；先核对证据，不把差异直接当缺陷。
 
-rc.5已有独立源码语义审查，但目录/真实集成仍未认证，升级预检继续拒绝。推理正文槽位的`text`是显示文本，`rawText`是原始输出；普通渲染/翻译继续用`text`，Content Factory仍接收text/running/labels。槽位提示只定位注册并说明迁移，回调props用途、签名流式/完成态及业务未验证；动态注册弃权，不将使用text认定为错误，不采集真实思考正文。
+rc.5已有固定源码语义审查、独立登记目录及macOS基础集成，升级预检与作者CI接受该精确版本；完整UI/Linux/业务验收仍另记。推理正文槽位的`text`是显示文本，`rawText`是原始输出；普通渲染/翻译继续用`text`，Content Factory仍接收text/running/labels。槽位提示只定位注册并说明迁移，回调props用途、签名流式/完成态及业务未验证；动态注册弃权，不将使用text认定为错误，不采集真实思考正文。
 
 ## 先看能不能直接调工具
 
@@ -23,7 +23,7 @@ rc.5已有独立源码语义审查，但目录/真实集成仍未认证，升级
 node <repo>/bin/compat-check.mjs --nm <profile或node_modules目录> --dsh-version 0.2.1-rc.2 --upgrade-to 0.2.1-rc.3 --json
 ```
 
-此模式的 `--dsh-version` 是**当前精确版本**，`--upgrade-to` 是目标精确版本；当前已认证目录仅为 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`。未知版本或版本范围返回 `status=unsupported-version`、退出3并标明未认证，不能用邻近目录替代。普通文本输出省略 `--json`；此模式不接受 `--quiet`、探针/启动参数、规则/目录覆盖、基线参数或故障报告，可带无操作的 `--no-baseline`。
+此模式的 `--dsh-version` 是**当前精确版本**，`--upgrade-to` 是目标精确版本；当前已认证目录仅为 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`。未知版本或版本范围返回 `status=unsupported-version`、退出3并标明未认证，不能用邻近目录替代。普通文本输出省略 `--json`；此模式不接受 `--quiet`、探针/启动参数、规则/目录覆盖、基线参数或故障报告，可带无操作的 `--no-baseline`。
 
 JSON 使用独立的 `schemaVersion=1 / kind=plugin-compat-check/upgrade-preview`；读取 `currentReport`、`targetReport`、带插件身份的 `changes`、`summary` 与 `limitations`。它对**同一份已安装制品**做静态版本对比：不执行插件、不启动或升级宿主，不读取旁置/环境探针、profile豁免、基线或缓存，也不写状态。新增/恶化风险含致命项时退出2，其余新增/恶化风险退出1，无新增/恶化风险退出0；输入/扫描失败或未认证版本为3。保留提取不完整、coverage/vacuous和客户端未验证限制；0仍可能有未变化的旧问题。差异是目录与声明策略下的预测，不能据此认定升级后业务通过，也不能代替目标宿主的运行时与业务验收。
 
@@ -188,7 +188,7 @@ DSH 0.2.1-rc.3的UI入口为“左下角账号菜单 → 设置 → 内置插件
 
 只读目标node_modules同级的独立`compatibility.json`，形如`{"sample@1.0.0":["0.2.1-rc.2"]}`。只有插件名、插件精确版本与DSH精确版本全匹配才豁免范围冲突；不使用包内兼容声明代替授权。无效记录整条忽略（其它有效记录仍用）并限制覆盖；缺文件为空豁免，可读性/JSON错误、非普通文件或超过64KiB则豁免未观测。不得代用户写豁免，豁免不绕过非法字段，也不证明API或业务成功。
 
-普通体检中，CLI的`--dsh-version`及probe-boot采集值、宿主自己的DSH版本用于目录选择：DSH≥0.2.1-rc.3使用独立rc.3目录，≥0.2.1-rc.2使用rc.2目录，其余/未知使用旧0.2.0-rc.2目录，显式`--catalog`优先。未知版本不猜声明，未来DSH未经认证。单独文件probe不自动补目标版本，需给`--dsh-version`。目录不等于运行时面。当前契约/验收/后续见仓库docs/Plan.md，统计见docs/current-state.json；公开安装以npm registry为准。
+普通体检中，CLI的`--dsh-version`及probe-boot采集值、宿主自己的DSH版本用于目录选择：DSH≥0.2.1-rc.5使用独立rc.5目录，≥0.2.1-rc.3使用独立rc.3目录，≥0.2.1-rc.2使用rc.2目录，其余/未知使用旧0.2.0-rc.2目录，显式`--catalog`优先。未知版本不猜声明，未来DSH未经认证。单独文件probe不自动补目标版本，需给`--dsh-version`。目录不等于运行时面。当前契约/验收/后续见仓库docs/Plan.md，统计见docs/current-state.json；公开安装以npm registry为准。
 
 普通报告另有 `catalog`：目标版本、参考目录版本、SHA-256、selection、verified、certifiedVersions及warning。转述时同时给出目标与目录身份；fallback/override、未知身份和未认证提示不得省略，verified仅表示内置目录与已验收精确版本匹配，不是业务认证。内置目录摘要不符、同名插件重复安装（含alias及不同版本）会明确无法判定，不允许转述为无冲突；普通报告失败不推进基线。YAML解析器是npm插件运行依赖；依赖图以plugin/package.json为准，不能把根工作区开发依赖等同于运行依赖。新目录治理流程见仓库 `docs/maintaining.md#api目录候选审查`。
 

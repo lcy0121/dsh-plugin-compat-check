@@ -161,3 +161,88 @@ test("npm pack metadata survives lifecycle hook stdout without accepting ambiguo
   ])
     assert.throws(() => packedFilename(value));
 });
+
+test("rc.5 UI gate binds the requested host and requires separate protocol and model evidence", () => {
+  const good = {
+    ...complete(),
+    dshVersion: "0.2.1-rc.5",
+    noCredentialDiscovery: true,
+    rc3Navigation: {
+      blankReuse: true,
+      presetIsolation: true,
+      defaultKeep: true,
+      append: true,
+      legacyReplace: true,
+      explicitPolicyPrecedence: true,
+      detailAndBadge: true,
+      createDraftOnly: true,
+      menus: [0, 1, 2].map(() => ({
+        browseMainList: true,
+        createDraftOnly: true,
+      })),
+    },
+    apiSemantics: {
+      exactVersion: "0.2.1-rc.5",
+      realBrowser: true,
+      installedArtifact: true,
+    },
+    rc5Protocol: {
+      actualAcp: true,
+      catalogDiagnosticsStderr: true,
+      mcpResources: true,
+      stdoutJsonRpc: true,
+      cleaned: true,
+    },
+    modelListing: {
+      firstUseWait: true,
+      failureFallback: true,
+      lastGoodRetained: true,
+      deadline: true,
+      productionRequests: 0,
+      modelCalls: 0,
+    },
+  };
+  assert.equal(validateUi018Evidence(good, "a".repeat(64), "0.2.1-rc.5"), true);
+  for (const patch of [
+    { dshVersion: "0.2.1-rc.3" },
+    { rc5Protocol: undefined },
+    { modelListing: undefined },
+    { apiSemantics: undefined },
+    { rc3Navigation: undefined },
+    { noCredentialDiscovery: false },
+    { cleanup: { privateRootRemoved: false } },
+  ])
+    assert.throws(() =>
+      validateUi018Evidence(
+        { ...good, ...patch },
+        "a".repeat(64),
+        "0.2.1-rc.5",
+      ),
+    );
+  assert.throws(() => validateUi018Evidence(good, "a".repeat(64), "latest"));
+});
+
+test("rc.5 evidence cannot omit extended navigation and exact-version semantic checks", () => {
+  const good = {
+    ...complete(),
+    dshVersion: "0.2.1-rc.5",
+    rc5Protocol: {
+      actualAcp: true,
+      catalogDiagnosticsStderr: true,
+      mcpResources: true,
+      stdoutJsonRpc: true,
+      cleaned: true,
+    },
+    modelListing: {
+      firstUseWait: true,
+      failureFallback: true,
+      lastGoodRetained: true,
+      deadline: true,
+      productionRequests: 0,
+      modelCalls: 0,
+    },
+  };
+  assert.throws(() =>
+    validateUi018Evidence(good, "a".repeat(64), "0.2.1-rc.5"),
+  );
+});

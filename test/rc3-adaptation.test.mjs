@@ -330,7 +330,12 @@ for (const preference of [undefined, "default-ptc"])
     assert.equal(h.references(), 0);
   });
 
-for (const version of ["0.2.0-rc.2", "0.2.1-rc.2", "0.2.1-rc.3"]) {
+for (const version of [
+  "0.2.0-rc.2",
+  "0.2.1-rc.2",
+  "0.2.1-rc.3",
+  "0.2.1-rc.5",
+]) {
   for (const [label, client, entry, ok] of [
     ["string", "./bundle.js", "./bundle.js", true],
     [

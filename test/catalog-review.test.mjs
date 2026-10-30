@@ -24,7 +24,7 @@ test("registry maintenance checks exact pinned catalogues without granting new c
   assert.equal(result.kind, "plugin-compat-check/catalog-registry-check");
   assert.deepEqual(
     result.entries.map((entry) => entry.version),
-    ["0.2.0-rc.2", "0.2.1-rc.2", "0.2.1-rc.3"],
+    ["0.2.0-rc.2", "0.2.1-rc.2", "0.2.1-rc.3", "0.2.1-rc.5"],
   );
   assert.ok(result.entries.every((entry) => entry.verified === true));
   assert.equal(result.certification, "unchanged");
@@ -50,6 +50,7 @@ test("registry maintenance rejects changed pinned bytes and ignores unregistered
     "dsh-api-catalog.json",
     "dsh-api-catalog-0.2.1-rc.2.json",
     "dsh-api-catalog-0.2.1-rc.3.json",
+    "dsh-api-catalog-0.2.1-rc.5.json",
   ])
     fs.copyFileSync(path.join("rules", file), path.join(root, "rules", file));
   const mod = await import("../tools/catalog-review.mjs");

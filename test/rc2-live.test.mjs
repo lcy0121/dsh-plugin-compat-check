@@ -18,7 +18,7 @@ describe(
         assert.notEqual(process.env.DSC_ACCEPTANCE_DSH_VERSION, "0.2.1-rc.3");
         return;
       }
-      if (value.dshVersion === "0.2.1-rc.3") {
+      if (["0.2.1-rc.3", "0.2.1-rc.5"].includes(value.dshVersion)) {
         assert.equal(value.ui.available, true);
         assert.equal(value.noCredentialDiscovery, true);
         for (const key of [

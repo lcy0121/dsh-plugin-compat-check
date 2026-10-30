@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { verifyRc5AcpStdout } from "./rc5-acp-stdout.mjs";
 import { verifyUiI18n } from "./ui018-i18n.mjs";
 import { verifyLocalHistory } from "./ui018-history.mjs";
 /** Owned real-host acceptance: declaration gates, metadata, actual settings UI and reload. */
@@ -14,6 +15,7 @@ import { verifyRc3Navigation } from "./rc3-navigation.mjs";
 import { installRc3Fixture } from "./rc3-fixture.mjs";
 import {
   acceptanceTarget,
+  extendedAcceptance,
   assertBrowserAcceptance,
 } from "./acceptance-target.mjs";
 import { isolatedEnvironment } from "../lib/execution-environment.mjs";
@@ -360,7 +362,7 @@ try {
       "Actual subpath metadata check failed",
     );
     result.subpathMetadata = true;
-    if (version === "0.2.1-rc.3") {
+    if (extendedAcceptance(version)) {
       const official = pathToFileURL(
         path.resolve(
           path.dirname(driver.module),
@@ -379,6 +381,9 @@ try {
       );
       result.modelListing = JSON.parse(output.trim().split("\n").at(-1));
     }
+
+    if (version === "0.2.1-rc.5")
+      result.rc5Protocol = await verifyRc5AcpStdout();
 
     // Install either the selected release bytes or an independently packed checkout.
     const profile = await init("rc2-ui");
@@ -513,7 +518,7 @@ try {
       path.join(upgradeFixture, "index.js"),
       "export function apply(){}\n",
     );
-    if (version === "0.2.1-rc.3") installRc3Fixture(profile);
+    if (extendedAcceptance(version)) installRc3Fixture(profile);
     const futureProbeFile = path.join(root, "future-probe.json");
     const host = await boot("rc2-ui", { DSC_PROBE_REPORT: futureProbeFile });
     requireTrue(
@@ -530,7 +535,7 @@ try {
       "Candidate startup scans and initial report did not complete: " +
         redact(host.output).slice(-2200),
     );
-    if (version === "0.2.1-rc.3") {
+    if (extendedAcceptance(version)) {
       await poll(
         () => host.output.includes("RC3_NO_CREDENTIAL_DISCOVERY_PASS"),
         "No-credential model discovery failed: " +
@@ -787,7 +792,7 @@ try {
       );
       await evalx(`${welcome}.click()`);
       await poll(() => evalx(`!${welcome}`), "Welcome dialog did not close");
-      if (version === "0.2.1-rc.3") {
+      if (extendedAcceptance(version)) {
         const workspace = path.join(profile, "rc3-workspace");
         fs.mkdirSync(workspace);
         result.rc3Navigation = await verifyRc3Navigation(
@@ -884,7 +889,7 @@ try {
       requireTrue(
         semanticReport?.findings.length === 1 &&
           semanticReport.findings[0].category ===
-            (version === "0.2.1-rc.3"
+            (extendedAcceptance(version)
               ? "api-argument-invalid"
               : "api-option-unsupported") &&
           semanticReport.findings[0].severity === "degraded" &&
@@ -911,7 +916,7 @@ try {
       await poll(
         () =>
           evalx(
-            `(()=>{const text=document.querySelector('[data-compat-plugin="@acceptance/api-semantics"]').innerText;return text.includes(${JSON.stringify(version === "0.2.1-rc.3" ? "API参数不符" : "版本选项未支持")})&&text.includes('生命周期')&&text.includes('弃用')&&text.includes('未实测业务失败')})()`,
+            `(()=>{const text=document.querySelector('[data-compat-plugin="@acceptance/api-semantics"]').innerText;return text.includes(${JSON.stringify(extendedAcceptance(version) ? "API参数不符" : "版本选项未支持")})&&text.includes('生命周期')&&text.includes('弃用')&&text.includes('未实测业务失败')})()`,
           ),
         "Semantic evidence not rendered in actual browser",
       );
@@ -1808,12 +1813,12 @@ try {
         reason: "No Chrome binary; browser acceptance not performed.",
       };
     assertBrowserAcceptance(
-      process.env.DSC_ACCEPTANCE_DSH_VERSION,
+      version,
       process.env.DSC_REQUIRE_RC2_UI === "1",
       result.ui.available,
     );
     await stop(host);
-    if (version === "0.2.1-rc.3") {
+    if (extendedAcceptance(version)) {
       const guard = JSON.parse(
         fs.readFileSync(path.join(profile, "rc3-network.json"), "utf8"),
       );

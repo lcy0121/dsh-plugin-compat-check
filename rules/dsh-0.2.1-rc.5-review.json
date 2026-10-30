@@ -51,7 +51,7 @@
         "methodsRemoved": []
       }
     },
-    "registered": false
+    "registered": true
   },
   "signatureReview": {
     "host": {
@@ -128,7 +128,7 @@
     "declarationsAndIntegration": "Source files for boot/HMR, package-meta/plugin-compatibility, ModuleLoader, tool/skill and HTTP/connection are unchanged except release metadata. engines-first/peer fallback/exact exemptions retained. Runtime integration remains pending.",
     "rulesDecision": "No service/method/signature removals. Add rc.5 exact parameter/lifetime baseline and reasoning-slot coverage advice, no new fatal rules."
   },
-  "integrationAcceptance": "pending",
-  "certification": "not-granted",
-  "scope": "Source/provenance/semantic review only. Candidate is not in CATALOG_REFERENCES or upgrade/author default versions; no macOS/Linux business/UI acceptance claim. Detailed reproducible comparison receipts in tmp/rc5-review-20261030/."
+  "integrationAcceptance": "macOS basic Web/ACP passed; full UI/Linux/business pending",
+  "certification": "exact-catalogue-and-basic-integration",
+  "scope": "Reviewed exact catalogue bytes/semantics and local macOS basic integration; registered for ordinary reports, static upgrade and author defaults. Full UI/Linux/Windows/business acceptance and publication remain separate in docs/current-state.json. Historical source/provenance-only receipt:781137b."
 }

@@ -370,7 +370,7 @@ test("shipped panel renders parameter risks and maintenance notices from the can
 });
 
 // A missing rc.5 baseline must not silently skip known parameter risks.
-test("rc.5 reviewed semantics apply without certifying its fallback catalogue", () => {
+test("rc.5 reviewed semantics use the registered exact catalogue", () => {
   const { p } = evaluate(
     "export function apply(ctx){ctx.uiWorkspace.startSession(undefined,{whenDraftExists:'bad'});ctx.timer.setTimeout(()=>{},1);ctx.sessions.retain('private')}",
     { version: "0.2.1-rc.5" },
@@ -378,7 +378,7 @@ test("rc.5 reviewed semantics apply without certifying its fallback catalogue", 
   assert.equal(invalid(p).length, 1);
   assert.match(notes(p), /弃用/);
   assert.match(notes(p), /生命周期/);
-  assert.equal(loadCatalog(root, "0.2.1-rc.5").evidence.verified, false);
+  assert.equal(loadCatalog(root, "0.2.1-rc.5").evidence.verified, true);
 });
 
 test("reasoning slot migration is a located coverage advisory, not a field-use error", () => {

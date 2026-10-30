@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.2.0",
-  "recordedAt": "2026-10-30T09:26:38.446Z",
-  "testFiles": 82,
-  "tests": 1249,
+  "recordedAt": "2026-10-30T09:46:01.696Z",
+  "testFiles": 83,
+  "tests": 1269,
   "repositoryFiles": {
-    "total": 387,
+    "total": 389,
     "fixtures": 100,
-    "other": 287
+    "other": 289
   },
   "verification": {
     "platform": "darwin",
@@ -19,9 +19,10 @@
       "certifiedExactVersions": [
         "0.2.0-rc.2",
         "0.2.1-rc.2",
-        "0.2.1-rc.3"
+        "0.2.1-rc.3",
+        "0.2.1-rc.5"
       ],
-      "scope": "Reviewed exact catalogue bytes and version-specific integration; rc.3 accepted on macOS locally and Linux at the recorded commit. Not general business-health certification."
+      "scope": "Reviewed exact catalogue bytes and version-specific integration. rc.5 macOS basic integration is recorded below; its Linux/full UI/business acceptance remains pending. Historical rc.3 macOS/Linux receipts retain their exact scope."
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
@@ -250,25 +251,27 @@
       "legacyAssets": "Retained old image URLs because the already-published npm0.2.0 README references raw main paths. Current repository READMEs/index use the new images; npm page body changes require a later authorized publication."
     },
     "rc5SourceSemantics20261030": {
+      "history": "781137b:docs/current-state.json",
       "review": "rules/dsh-0.2.1-rc.5-review.json",
-      "candidateRegistered": false,
-      "integrationAcceptance": "pending",
-      "scope": "Source/provenance and exact semantics only; catalogue/upgrade/author defaults retain three certified versions. No rc.5 real-host acceptance.",
-      "upstream": "dshmarket1.73.5 integrity verified; six original repair-function controls and eight original mounted-route controls reproduce retained-journal behavior, lost diagnostic details and install-warning omission. No real manager/Desktop execution; 1024 still GitHub-only, awesome717 open/unmerged.",
-      "receipts": "tmp/rc5-review-20261030/",
+      "scope": "Historical source/semantic-only receipt, before rc.5 registration. Superseded for integration by the separate local receipt below; not retroactively upgraded."
+    },
+    "rc5Integration20261030": {
+      "status": "local basic integration passed; full UI/Linux/business pending",
+      "platform": "darwin arm64",
+      "sourceBase": "781137b; development working tree, not a published artifact",
+      "host": "0.2.1-rc.5",
+      "artifactSha256": "0a89737d59bbc295246d25a67a4e0f2ddb390eff667c8347110cdfd656bcd8a5",
+      "evidence": "Independent package installed in owned profile; HTTP/tool/skill, source metadata, three slots/navigation/draft semantics, upgrade static isolation and disable/re-enable passed. Private root removed. ACP stdout9 frames, loopback catalog1 GET and mock model2 requests; diagnostics on stderr. No production model/account use.",
+      "receipts": "tmp/rc5-integration-20261030/final-live.{json,stdout,stderr}; acp.json; full-tests.tap",
+      "scope": "Basic local Web/ACP driver acceptance only. Does not certify full nine-section UI, Linux, Windows, real business samples or formal publication.",
       "validation": {
-        "tests": 1249,
-        "pass": 1241,
+        "tests": 1269,
+        "pass": 1261,
         "skip": 8,
         "fail": 0,
-        "focused": {
-          "tests": 74,
-          "pass": 74,
-          "fail": 0
-        },
         "maintenanceCheck": "passed",
-        "scope": "Default suite with required loopback/process permissions and an owned npm cache; source-reviewed rc.5 semantics only, no rc.5 host/platform acceptance.",
-        "prepublishGate": "passed; independent 1249-test run, 1241 pass/8 skip/0 fail"
+        "acpReceipt": "final-acp.json; completed resources tool required",
+        "prepublishGate": "passed; independent1269-test run"
       }
     }
   },

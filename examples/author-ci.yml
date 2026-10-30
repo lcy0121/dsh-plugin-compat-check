@@ -1,4 +1,4 @@
-# Default reviewed source matrix: 0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3; not host execution.
+# Default reviewed source matrix: 0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5; not host execution.
 # Copy into the plugin author's .github/workflows/ after reviewing this file.
 # Required: publish/review a tool commit containing --report/HTML; supply its full SHA.
 # Adapt npm run build and SELECTED_PACKAGE to the SAME built directory you distribute.

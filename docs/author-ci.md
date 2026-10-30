@@ -4,12 +4,12 @@
 
 ```sh
 node tools/author-ci.mjs --package ./dist-plugin > compatibility.json
-node tools/author-ci.mjs --package ./dist-plugin --versions 0.2.0-rc.2,0.2.1-rc.2,0.2.1-rc.3 --format sarif > compatibility.sarif
+node tools/author-ci.mjs --package ./dist-plugin --versions 0.2.0-rc.2,0.2.1-rc.2,0.2.1-rc.3,0.2.1-rc.5 --format sarif > compatibility.sarif
 node tools/author-ci.mjs --package ./dist-plugin --format junit > compatibility.xml
 node tools/author-ci.mjs --report compatibility.json --format html > compatibility.html
 ```
 
-默认矩阵包含已认证的 `0.2.0-rc.2`、`0.2.1-rc.2` 和 `0.2.1-rc.3`。未知版本以工具错误阻断，不回退目录。矩阵只做静态比较，不表示实际启动过这些版本或完成业务验收；每cell保留canonical report、内核退出码及工具/规则/目录/源码身份。
+默认矩阵包含已认证的 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3` 和 `0.2.1-rc.5`。未知版本以工具错误阻断，不回退目录。矩阵只做静态比较，不表示实际启动过这些版本或完成业务验收；每cell保留canonical report、内核退出码及工具/规则/目录/源码身份。
 
 ## 门禁策略
 

@@ -4,7 +4,7 @@
 
 [简体中文](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/README.md) | [English](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/README.en.md) | [한국어](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/README.ko.md)
 
-**0.2.0**整合统一界面、中英韩国际化、轻量化、人工处置归档及历史对照，保留rc.3适配、升级预检、参数语义与边界加固。Node `^22.19.0 || >=24`，宿主声明`>=0.2.0-rc.2`；已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3**，最低版本声明不认证未来宿主。
+**0.2.0**整合统一界面、中英韩国际化、轻量化、人工处置归档及历史对照，保留rc.3适配、升级预检、参数语义与边界加固。Node `^22.19.0 || >=24`，宿主声明`>=0.2.0-rc.2`；已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5**，最低版本声明不认证未来宿主。 rc.5登记与基础集成属于当前开发源码；已发布0.2.0制品仍仅包含前三版目录。
 
 ## 界面示例
 
@@ -67,7 +67,7 @@ dsh plugin --profile <profile> add dsh-plugin-compat-check
 
 ## 升级前兼容性预检
 
-输入目标版本或调用`compat_check({"upgradeTo":"0.2.1-rc.3"})`；当前版本取宿主，返回upgradePreview、普通report为null。三个登记精确版本可任意比较，未知版本/范围退出3，不借邻近目录认证。
+输入目标版本或调用`compat_check({"upgradeTo":"0.2.1-rc.3"})`；当前版本取宿主，返回upgradePreview、普通report为null。四个登记精确版本可任意比较，未知版本/范围退出3，不借邻近目录认证。
 
 只静态比较同组私有字节，不安装/升级宿主或使用运行时、probe、豁免、普通缓存/基线。**0/1/2表示无/非致命/致命新增或变重风险，3表示无法预检**；0仍可有旧问题。[完整契约](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md#27-升级前静态预检契约)。
 

@@ -2,7 +2,7 @@
 
 本指南对应**0.2.0**。面板、tool和skill随npm插件交付；CLI、健康执行器与作者CI从仓库运行，源码构建见[打包说明](../plugin/README.md#从源码构建安装)。声明放行、激活或无发现不等于业务验收。实际发布及限定证据见[current-state](current-state.json)。
 
-已认证精确目录为`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`。最低宿主声明不认证未来版本。rc.3入口：左下角账号菜单→设置→内置插件→兼容性；选择实际profile，不默认desktop。折叠/空标题不代表激活失败。
+已认证精确目录为`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`。最低宿主声明不认证未来版本。rc.3入口：左下角账号菜单→设置→内置插件→兼容性；选择实际profile，不默认desktop。折叠/空标题不代表激活失败。
 
 ## 参数与生命周期语义
 
@@ -12,7 +12,7 @@
 - rc.3/rc.5显式`whenDraftExists`优先，省略时通常保留已有草稿，`clearPreviousDraft:true`选择replace。后者仍受支持，不是弃用接口。`startSession`可复用同工作区未归档空白会话，指定preset跳过其它preset的空白；选项不证明新建或发送成功。
 - 三版`ctx.timer.setTimeout / setInterval`有官方弃用标记但仍保留，提示审阅`ctx.timeout / interval`契约后迁移。`sessions.retain`提示引用所有权、按需等待ready及作用域结束时release/disposal；不证明释放路径已验证或发生泄漏。两类提醒只进入覆盖说明，不单独改变等级。
 
-rc.5的`conversation.chat.reasoning.body`提供原始输出`rawText`及显示文本`text`；普通渲染、翻译和未翻译视图继续读`text`，确需原始输出才读`rawText`。Content Factory仍只需`text/running/labels`，不重复剥离签名。静态分析仅定位`slots.register`目标并提示迁移；回调props用途、渲染/翻译与流式时序均未验证。动态、展开、访问器、逃逸及多实参合并弃权；不复制自定义槽位名/思考正文，不新增发现或提高已验证调用数。rc.5目录仍未认证，普通检查回退rc.3，预检仍拒绝rc.5；已审查语义不改变这个边界。
+rc.5的`conversation.chat.reasoning.body`提供原始输出`rawText`及显示文本`text`；普通渲染、翻译和未翻译视图继续读`text`，确需原始输出才读`rawText`。Content Factory仍只需`text/running/labels`，不重复剥离签名。静态分析仅定位`slots.register`目标并提示迁移；回调props用途、渲染/翻译与流式时序均未验证。动态、展开、访问器、逃逸及多实参合并弃权；不复制自定义槽位名/思考正文，不新增发现或提高已验证调用数。rc.5已登记独立目录并接入普通检查、预检与作者CI；回退/自定义目录不授予未来宿主认证，业务与完整平台验收另记。
 
 只收集四个字段的类型/有限枚举标签，不执行代码、不保存prompt或任意枚举文本。常量别名与直接可知改写可分析；未知调用/闭包副作用撤回旧事实。动态、展开、访问器、逃逸及不同helper实参合并保留未核实。未覆盖完整签名、参数数量、深层对象、异步时序、宿主同名接口或所有权证明，不增加已验证调用数。JSON、CLI、面板、预检及作者CI共用判定。
 

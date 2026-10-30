@@ -120,9 +120,9 @@ GitHub简介/topics可独立于Git提交更新；npm简介/搜索关键词分别
 
 ## 参数语义基线维护
 
-`rules/severity.json.apiSemantics`登记0.2.1-rc.2/rc.3/rc.5客户端语义，与三版API目录认证独立。修改前锁定官方tag/归档，逐文件核对哈希、公开契约、实现及真实行为；归档只读，不执行目标。参数事实、弃用标记和所有权前提分别审查；clearPreviousDraft是兼容选项，新字段出现不表示它弃用。
+`rules/severity.json.apiSemantics`登记0.2.1-rc.2/rc.3/rc.5客户端语义，与四版API目录认证独立。修改前锁定官方tag/归档，逐文件核对哈希、公开契约、实现及真实行为；归档只读，不执行目标。参数事实、弃用标记和所有权前提分别审查；clearPreviousDraft是兼容选项，新字段出现不表示它弃用。
 
-`lib/api-semantics.mjs.SEMANTIC_VERSIONS`单独限制语义版本，不能从目录登记或规则自报版本扩大。rc.5候选/完整来源审查见`rules/dsh-0.2.1-rc.5-review.json`；未进入CATALOG_REFERENCES。check:catalogs验证schema、登记版本及来源引用结构，不能代替语义审查。补类型/枚举、别名/改写、闭包副作用及跨版本正反例，验收同一tgz的HTTP/面板。静态验收夹具只放自有profile，保持未激活；提醒不证明泄漏/移除或业务失败。同步指导副本，保留旧语义基线，不自动认证未来、宿主同名、Windows或模型场景。
+`lib/api-semantics.mjs.SEMANTIC_VERSIONS`单独限制语义版本，不能从目录登记或规则自报版本扩大。rc.5固定目录/完整来源审查见`rules/dsh-0.2.1-rc.5-review.json`；已进入CATALOG_REFERENCES，仍不认证一般业务。check:catalogs验证schema、登记版本及来源引用结构，不能代替语义审查。补类型/枚举、别名/改写、闭包副作用及跨版本正反例，验收同一tgz的HTTP/面板。静态验收夹具只放自有profile，保持未激活；提醒不证明泄漏/移除或业务失败。同步指导副本，保留旧语义基线，不自动认证未来、宿主同名、Windows或模型场景。
 
 ## 提取器与探针维护
 
@@ -141,3 +141,16 @@ GitHub简介/topics可独立于Git提交更新；npm简介/搜索关键词分别
 归档在`lib/review-archive.mjs`，复用活动review路径/锁/有界读取；不可将归档记录直接合并成当前已复核。快照契约与中性比较为`lib/report-history-contract.mjs`，落盘为`lib/report-history.mjs`，共用`lib/local-history-store.mjs`的私有目录、不可覆盖内容对象和限额。新HTTP入口为`plugin/lib/host-history.js`，UI为`plugin/src/panels/history.jsx`；沿用Card/Fold/Pager及原报告/草稿状态。不得为历史功能提高活动sidecar上限或改变基线/判定标准。
 
 历史对象摘要仅用于损坏检测，不是签名；导入报告的自报身份不能当真实采样证明。历史/三语真实界面验收统一由上方九项入口执行，保持编辑器、原始草稿、报告及基线身份，保留三语及窄容器/深色截图。
+
+## rc.5验收入口
+
+`tools/acceptance-target.mjs`按精确版本选择能力，rc.3/rc.5复用已核对的导航、草稿和模型列表契约；rc.2保留原路径。显式目标与实际可执行文件不符即失败；rc.3/rc.5缺浏览器不能skip成功。完整九项UI入口可显式选择rc.5，默认仍为rc.3以保持旧CI：
+
+```sh
+DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_REQUIRE_RC2_UI=1 node tools/rc2-live.mjs
+DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 node tools/ci-ui018.mjs <自有输出目录>
+```
+
+基础入口验证同一独立tgz的HTTP/tool、声明、预检、语义、三槽位、导航及恢复/清理；完整入口仍要求九项结果、截图、来源及制品摘要。目标、浏览器、断言/结果、同一制品或清理缺失均不得通过。rc.5完整证据额外要求导航/草稿、精确语义、受控模型列表及独立ACP回执；Linux工作流接入、九项UI与业务样本留在Plan第5项。
+
+`tools/rc5-acp-stdout.mjs`对实际ACP仅使用私有DSH_HOME、合成凭据、loopback目录/两轮模型响应和tools-only MCP。每行stdout必须是完整JSON-RPC，目录诊断须在stderr且不带凭据；不具备resources能力时不向MCP发资源请求。超时/异常/清理失败即失败，输出只保留计数与断言，不保存对话正文。它与Web/Desktop结果分别记录；受控模型列表另验首次等待、失败/超时回退及无凭据不请求。

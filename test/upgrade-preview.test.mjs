@@ -436,9 +436,9 @@ test("duplicate installed alias identities cannot hide a risk behind a healthy p
   assert.equal(result.artifact, null);
 });
 
-test("three reviewed versions compare every direction against one immutable input", async (t) => {
+test("four reviewed versions compare every direction against one immutable input", async (t) => {
   const f = fixture(t, { range: ">=0.2.1-rc.3 <0.3.0" });
-  const versions = ["0.2.0-rc.2", "0.2.1-rc.2", "0.2.1-rc.3"];
+  const versions = ["0.2.0-rc.2", "0.2.1-rc.2", "0.2.1-rc.3", "0.2.1-rc.5"];
   for (const currentVersion of versions)
     for (const targetVersion of versions) {
       if (currentVersion === targetVersion) continue;
