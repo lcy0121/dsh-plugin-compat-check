@@ -12,10 +12,23 @@ npm插件提供兼容性页、详情/角标、`compat_check`与skill。仓库另
 
 ## 界面示例
 
-历史截图展示呈现方式，不代表当前源码或业务已验收：
+以下为**0.2.0**在DSH **0.2.1-rc.3**中的真实界面截图（2026-10-29）。数字与发现仅代表当次本机检查，不是相关插件的通用兼容性结论；预检和历史图展示操作入口，未执行版本比较或保存快照。
 
-![部分可用：源码位置、影响与依据](plugin/assets/compat-detail-partial.png)
-![声明冲突：区分工具推断与宿主提示](plugin/assets/compat-detail-declared.png)
+主结果概览：结论前置，并保留无已验证调用及覆盖限制提示。
+
+![0.2.0主结果：结论概览与证据边界](plugin/assets/compat-overview-0.2.0.png)
+
+人工核实：按源码位置记录状态与依据；图中条目仍待确认。
+
+![0.2.0人工处置：源码定位与核实依据](plugin/assets/compat-review-0.2.0.png)
+
+静态预检：输入目标DSH精确版本；不自动安装或升级宿主。
+
+![0.2.0升级前静态预检入口](plugin/assets/compat-upgrade-0.2.0.png)
+
+本地历史：显式保存、加载报告快照，再选择报告对照。
+
+![0.2.0本地报告历史入口](plugin/assets/compat-history-0.2.0.png)
 
 ## 安装与使用
 

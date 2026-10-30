@@ -12,10 +12,23 @@ The npm plugin provides a compatibility page, details/badges, `compat_check` and
 
 ## Screenshots
 
-Historical examples of presentation, not acceptance of current source or business functionality:
+Actual **0.2.0** UI in DSH **0.2.1-rc.3**, captured on 2026-10-29. Counts and findings describe that local check, not general compatibility verdicts for the pictured plugins. Upgrade/history images show entry forms; no version comparison or snapshot save was performed. The overview is in English; the workflow images show the Chinese UI.
 
-![Partial compatibility: source location, impact and evidence](plugin/assets/compat-detail-partial.png)
-![Declaration conflict: tool inference and host notice](plugin/assets/compat-detail-declared.png)
+Main results put conclusions first while retaining evidence limits and the no-verified-calls warning.
+
+![0.2.0 English overview: conclusions and evidence limits](plugin/assets/compat-overview-en-0.2.0.png)
+
+Manual review links source locations to status and evidence; the pictured finding remains unconfirmed.
+
+![0.2.0 manual review: source location and verification evidence](plugin/assets/compat-review-0.2.0.png)
+
+Static upgrade preview accepts an exact target DSH version without installing or upgrading the host.
+
+![0.2.0 static upgrade preview entry](plugin/assets/compat-upgrade-0.2.0.png)
+
+Local history lets you explicitly save/load snapshots and select reports for comparison.
+
+![0.2.0 local report history entry](plugin/assets/compat-history-0.2.0.png)
 
 ## Install and use
 

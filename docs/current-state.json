@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.2.0",
-  "recordedAt": "2026-10-29T09:57:03.749Z",
+  "recordedAt": "2026-10-30T06:00:54.198Z",
   "testFiles": 82,
   "tests": 1242,
   "repositoryFiles": {
-    "total": 380,
+    "total": 385,
     "fixtures": 100,
-    "other": 280
+    "other": 285
   },
   "verification": {
     "platform": "darwin",
@@ -233,6 +233,21 @@
       },
       "receipts": "tmp/release-020-20261029/; durable artifact and bounded acceptance summary attached to GitHub Release.",
       "scope": "Same CI-built tgz accepted on Linux/macOS and published unchanged to npm/GitHub. This documentation receipt follows release and does not change archive payload. Windows/real-user acceptance and upstream pending work remain separate."
+    },
+    "readmeScreenshots02020261030": {
+      "capturedAt": "2026-10-29",
+      "toolVersion": "0.2.0",
+      "hostVersion": "0.2.1-rc.3",
+      "assets": {
+        "compat-overview-0.2.0.png": "5e7e12fe8ce20481536e9f3d6de8eb85aa8bed33871191730a74ef403233829c",
+        "compat-review-0.2.0.png": "48b8e19d2888cabbda600872084744d42e75394ae1094fe03974ea2aae88d753",
+        "compat-upgrade-0.2.0.png": "6b5539ee51d51dc7c9b7b0264a78cca1823f7f4a0c472adbd70a1ad8bbe4913f",
+        "compat-history-0.2.0.png": "54c6121a9f2ca03131502214283241ffdbb76a8289e04331b59a1fc396cc6a70",
+        "compat-overview-en-0.2.0.png": "0b1fb49f050e95bf51c12c25ec6050fd5dc995ee2c9d3baf082af9ff85405409"
+      },
+      "scope": "Real native desktop captures, cropped only; no substituted text or synthetic report data. Overview/review/upgrade/history replace obsolete detail images in all four READMEs and the screenshot index. English README uses the English overview; other workflow captures are explicitly Chinese. Precheck/history are entry forms, not executed comparisons or saved snapshots.",
+      "validation": "13/13 document tests and npm run check passed; verified five PNG signatures/digests, all four README image sets and the screenshot index. Existing1242-test/full release receipts retained without claiming a rerun. No runtime changes, push or publication.",
+      "legacyAssets": "Retained old image URLs because the already-published npm0.2.0 README references raw main paths. Current repository READMEs/index use the new images; npm page body changes require a later authorized publication."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
