@@ -1,95 +1,86 @@
 # 开发计划与维护约定
 
-本文对应**0.2.1**。版本真源为`lib/version.mjs`；[docs/current-state.json](current-state.json)记录限定验收与发布回执。[README](../README.md)讲入口，[指南](guide.md)讲操作和预算，[维护指南](maintaining.md)讲实现与验证；本计划只保留核心契约及待办。
+本文对应**0.2.1**。版本真源为`lib/version.mjs`；[README](../README.md)讲入口，[指南](guide.md)列操作/预算，[维护指南](maintaining.md)列实现与验证，[docs/current-state.json](current-state.json)保存带日期的限定回执。
 
 ## 1. 项目定位与交付状态
 
-0.2.1候选已完成同一制品macOS/Linux验收，尚未正式发布。**0.2.0已于2026-10-29发布到[GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.0)及[npm](https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.0)**；同一制品、精确提交与平台回执见[current-state](current-state.json)。
+检查已安装DSH插件，提供源码位置、依据和覆盖限制；声明放行、激活或无发现不等于业务正常。0.2.1是未发布候选，已完成rc.5适配及一个CI归档的macOS/Linux验收。公开0.2.0于2026-10-29发布到[GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.0)及[npm](https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.0)，仅含前三版目录；旧回执不认证后续制品。
 
-检查已安装DSH插件，提供源码位置、依据和覆盖限制。声明放行、激活、无发现及覆盖完整均不等于业务验收。npm交付面板、`compat_check`、skill和共享内核，无CLI bin、不支持npx；CLI、安装检查、批量、作者CI及健康执行器从private仓库工作区运行。源码安装须[构建完整tgz](../plugin/README.md#从源码构建安装)。
+npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin、不支持npx。CLI、安装检查、批量、作者CI和健康执行器从private仓库运行；源码安装须[构建完整tgz](../plugin/README.md#从源码构建安装)。
 
 ## 2. 现行判定与集成契约
 
 ### 2.1 证据与分析边界
 
-AST按host/client/shared记录Context、服务和真实位置；入口遵循宿主、不猜路径。动态、变异、遮蔽、逃逸、异步及超限保守推断或弃权；能力守卫须控制调用，try/catch不是证明。不执行目标，不保存prompt/任意枚举；[语义范围](guide.md#参数与生命周期语义)和[提取规则](maintaining.md#提取器与探针维护)分别维护。
+AST按host/client/shared记录Context、服务及真实位置，入口遵循宿主解析。动态、变异、遮蔽、逃逸、异步及超限保守推断或弃权；能力守卫须控制调用，try/catch不是能力证明。不执行目标，不保存prompt或任意枚举；[语义范围](guide.md#参数与生命周期语义)与[提取规则](maintaining.md#提取器与探针维护)分别维护。
 
-rc.5的来源/目录候选及语义审查见[固定记录](../rules/dsh-0.2.1-rc.5-review.json)：相对rc.3无服务/方法/生成签名变化，完整归档388个文件差分已核对。rc.2/rc.3/rc.5参数与生命周期按精确源码独立判定；语义审查本身不授予目录/真实宿主认证。rc.5新增推理正文Slot的`rawText`，`text`改为显示文本；可定位注册仅提示迁移与props覆盖限制，动态注册弃权，不把旧`text`使用报错。详见[语义指南](guide.md#参数与生命周期语义)。
+rc.5[来源审查](../rules/dsh-0.2.1-rc.5-review.json)核对完整归档388文件差分，相对rc.3无服务/方法/生成签名变化；语义仍按精确版本独立审查。推理正文Slot新增rawText，text为显示文本；静态提示只定位注册和迁移限制，不验证props用途或流式行为，不把text使用报错。目录、语义、实际宿主及业务验收分别记录。
 
 ### 2.2 结论、影响与基线
 
-certainty与impactBasis独立；无已验证调用的ok标vacuous并保留coverage。未观测不等于缺失，provide仅是候选；必需inject须合格同目标absent才推断激活障碍，启用且可靠映射的FAILED/PENDING才构成对应fatal实测发现。采样不执行getter或记录属性值，超限保留截断及未知；精确豁免不放行非法字段。
+certainty与impactBasis独立；ok且无已验证调用标vacuous，保留coverage。未观测不等于缺失，provide只是候选；必需inject须同目标合格absent才推断激活障碍，启用且可靠映射的FAILED/PENDING才构成相应fatal实测发现。采样不执行getter或保存属性值，超限保留未知；精确豁免不放行非法字段。
 
-[基线schema2](../lib/baseline.mjs)按目标及判定身份隔离，锁内比较、原子写入；失败、不完整、取消或卸载不推进，身份变化中性，证据减弱不称修复。坏/旧原件保留，无历史与未保存原因分别提示。[锁恢复](guide.md#本地状态锁恢复)须显式确认并证明持有者退出。
+[基线schema2](../lib/baseline.mjs)按目标及判定身份隔离，锁内比较、原子写入；失败、不完整、取消或卸载不推进。身份不相容中性显示，证据减弱不称修复，坏/旧原件保留。[锁恢复](guide.md#本地状态锁恢复)须显式确认并证明持有者退出。
 
 ### 2.3 报告结构与兼容策略
 
-[报告schema1](../lib/contracts.mjs)：CLI kind=`plugin-compat-check/result`，HTTP kind=`plugin-compat-check/report`，tool保留summary/text及report/baseline/cache；不兼容变更升schema。普通退出码：**0未发现冲突、1部分可用或未知、2不兼容、3工具/输入错误**。
+[报告schema1](../lib/contracts.mjs)：CLI kind=`plugin-compat-check/result`，HTTP kind=`plugin-compat-check/report`；tool保留summary/text及report/baseline/cache。不兼容变更升schema，普通退出码为**0未发现冲突、1部分可用或未知、2不兼容、3工具/输入错误**。
 
-缓存按目标/输入/观测身份隔离，single-flight及worker队列有界；失效结果不得发布或写基线，失败保留旧成功及错误，卸载回收。宿主提取与纯计算各由独立worker监督，返回后重核身份再提交；超限报工具错误，不裁证据为成功。[资源/超时/采样预算](guide.md#日常检查与源码交付)统一维护。
+缓存按目标/输入/观测身份隔离，有界single-flight及worker队列；失效结果不得发布或写基线，刷新失败保留旧成功及错误。提取与计算受独立worker监督，返回后重核身份再提交；超限报工具错误，不裁证据求成功。[资源预算](guide.md#日常检查与源码交付)集中维护。
 
-筛选不裁剪[完整导出](guide.md#面板与报告核实)，issue-report禁读写基线；低信任终端字段转义，JSON保留原身份。故障报告只显式预览/复制，常见凭据字段隐藏仍不保证完全脱敏，不自动发帖。
+筛选/分页不裁完整导出；issue-report禁读写基线。低信任终端字段转义，JSON保留原身份；故障报告须预览后复制，常见凭据隐藏不保证完全脱敏，不自动发帖。
 
 ### 2.4 DSH接入要点
 
-槽位为`settings.plugins.tab`、`plugins.detail.section / .badge`；无可靠身份不作包级判断。客户端用ModuleLoader id/factory，tool required为顶层数组，skill由provider注册。[入口](../README.md#界面各板块怎么用)为左下角“更多”/用户头像→设置→内置插件→兼容性。
+三槽位为`settings.plugins.tab`、`plugins.detail.section / .badge`；无可靠身份不作包级判断。客户端用ModuleLoader id/factory，tool required为顶层数组，skill经provider注册。界面入口见[README](../README.md#界面各板块怎么用)，UI真源/组件来源见[维护指南](maintaining.md#维护入口与语法覆盖)。
 
-UI沿用shadcn派生Card/Fold：主结果→依赖关系→人工处置→升级预检；故障报告/证据说明并入主结果，归档/历史/健康导入归默认收起的高级工具，元信息页尾折叠。辅助表默认收起，主表/关系/发现/预检明细每页50项；完整筛选/导出、覆盖/截断/未认证警告保留。标题与展开按钮对齐，卡片内边距16px、同类卡片/表单间距12px，字号/颜色/主题一致；loader前两列至少240/280px，窄容器横滚。
+主结果→依赖→人工处置→升级预检，高级工具和辅助说明默认收起，明细每页50项。中英韩固定文案/无障碍/故障模板同步，原始证据、用户依据、命令和JSON不翻译；切换不重建草稿。三槽位共享可见性轮询，隐藏暂停/取消，迟到结果丢弃。
 
-中英韩固定文案、已知内置说明、无障碍标签及故障报告模板同步翻译；原始证据、用户依据、标识符、命令和JSON不替换。默认跟随宿主，本机可覆盖，未知语言回退英文；切换不重建草稿或改变判定。三槽位按目标共享2秒可见性轮询，隐藏暂停/取消，迟到结果丢弃；辅助面板近视区初始化，已访问编辑区保留，只读明细收起卸载。宿主React、预编译JS/CSS及共享契约的[真源与组件来源](maintaining.md#维护入口与语法覆盖)集中维护，样式限定插件容器。
-
-[HTTP](guide.md#本地http边界)先检查本地/完整同源及请求标记，再调用宿主`connection.requestRejection`：无效会话401、鉴权不可用503，拒绝早于计算/写入。私有profile不是OS沙箱；只认证登记的精确宿主版本/目录字节，[新增目录](maintaining.md#api目录候选审查)另审另验。
+[HTTP](guide.md#本地http边界)先核本地/完整同源和请求标记，再调用宿主connection.requestRejection；未认证401、鉴权不可用503，拒绝早于计算/写入。私有profile不是OS沙箱，只认证登记的精确版本/目录；[新目录](maintaining.md#api目录候选审查)须另审另验。
 
 ### 2.5 有限静态批量契约
 
-[批量](guide.md#升级预检与有限批量)只扫1–16项锁定版本/摘要的第三方本地包副本，不下载/执行，不借probe、豁免、基线或跨样本服务。拒绝链接/特殊文件/官方包；保留完整发现和诊断，总码先3再最重0/1/2，previous须重扫且身份相容。手动Action仅扫固定合成样本。
+[批量](guide.md#升级预检与有限批量)只扫1–16项固定版本/摘要的第三方本地包，不下载/执行，不借probe、豁免或基线。拒绝链接/特殊文件/官方包，保留全部发现与诊断；总码先3再最重0/1/2，previous须重扫且身份相容。手动Action只扫固定合成样本。
 
 ### 2.6 真实故障回归与呈现
 
-[固定回归](maintaining.md#真实插件回归)锁定DSH/目录、五个制品及24项期望，先封存预测，再取独立HTTP/DOM/磁盘真值；静态、自然/受控故障及驱动错误分列，核身份/时序/清理。hash不是签名，固定样本不外推生态准确率；下一步不猜替代API或修复版本。
+[固定回归](maintaining.md#真实插件回归)锁定精确DSH/目录、五个制品及24项期望，先封存预测，再取独立HTTP/DOM/磁盘真值，核身份/时序/清理。静态/service-only、自然/受控、FP/FN及驱动错误分列；绿色只表示期望重现，不是全部业务通过或生态准确率。hash不是签名，不猜替代API或修复版本。
 
 ### 2.7 升级前静态预检契约
 
-`runUpgradePreview`仅支持精确**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5**，其余读输入前退出3。同组私有字节分版本判定，捕获/分析/清理受监督，清理失败不成功；不安装/升级/执行宿主，不借运行时、豁免、缓存或基线。
+`runUpgradePreview`仅支持精确**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5**，其余读输入前退出3。对同组私有字节分别判定，捕获/分析/清理受监督，清理失败不成功；不安装/升级/执行宿主，不借运行时、豁免、普通缓存或基线。
 
-[预检schema1](../lib/upgrade-contract.mjs)退出码：**0/1/2表示无/非致命/致命新增或变重风险，3表示无法预检**；旧风险及coverage/vacuous保留。CLI须nm/当前版本/upgrade-to，agent取当前宿主版本，返回upgradePreview、普通report为null。正文/目标/输入变化撤销旧比较，纯缓存/人工修订不撤销，过时响应丢弃；[参数与预算](guide.md#升级预检与有限批量)集中维护。
+[预检schema1](../lib/upgrade-contract.mjs)：**0/1/2为无/非致命/致命新增或变重风险，3为无法预检**；旧风险及coverage/vacuous保留。CLI给nm/当前版本/upgrade-to，agent当前版本取宿主；返回upgradePreview，普通report为null。输入/目标/身份变化撤销旧比较，过时响应丢弃；[参数与预算](guide.md#升级预检与有限批量)统一维护。
 
-### 2.8 健康检查、依赖关系与人工处置
+### 2.8 健康检查、人工处置与历史
 
-[健康执行器](guide.md#可选功能健康检查)默认review，授权run才安装验真制品并启动自有DSH/Chrome；只允许有预算的同源GET/只读DOM断言，不接作者脚本或账户/模型配置。面板仅导入历史JSON，不认证当前制品。[依赖图](guide.md#依赖关系与潜在影响)只表示分端声明、候选及潜在路径。
+[健康执行器](guide.md#可选功能健康检查)默认review；授权run才安装验真制品并启动自有DSH/Chrome，只接受有预算的同源GET/只读DOM断言，无作者脚本或账户/模型配置。面板只导入历史JSON，不认证当前制品。[依赖图](guide.md#依赖关系与潜在影响)只表示声明、候选及潜在路径。
 
-[人工处置](guide.md#发现的人工处置)绑定目标/源码/版本/判定身份，变化待重审；双向定位及筛选不隐藏原风险或未保存草稿。身份变化保留旧草稿、禁陈旧保存，可复制或放弃；草稿只驻留当前页面。保存须当前令牌，锁内重读/合并、原子替换；派生缓存仍核私有目录和文件指纹，不授权保存。坏记录保留原件，不改判定/基线或授予豁免。
+[人工处置](guide.md#发现的人工处置)绑定目标/源码/版本/判定身份，变化待重审，不隐藏原风险或改变基线/豁免。草稿只驻当前页面，过期禁保存，可复制或放弃；保存须当前令牌，锁内重读合并/原子替换，派生缓存不授权保存。坏文件保留。
 
-[归档与历史](guide.md#人工处置归档与本地历史报告)只由显式动作触发，归档先完整备份，导入仅供参考；满额须导出/移除，无自动轮转。历史同身份才判方向，证据减弱中性，不推进基线或自动收集。
+[归档/历史](guide.md#人工处置归档与本地历史报告)须显式操作，归档先完整备份；恢复只供参考，满额先导出再删除，无自动轮转/采集。历史同身份才判方向，证据减弱中性，不推进基线。
 
 ### 2.9 插件作者CI
 
-默认矩阵包含`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`，只读快照同一构建包。默认阻断全部发现/未知/覆盖不足/vacuous；显式策略不放行工具错误，new须身份相容的已审查JSON。JSON/SARIF/JUnit/HTML保留完整证据，超限不截断成功；策略码与内核码分开，0只表示策略满足。见[作者流程](author-ci.md)。
+默认矩阵包含`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`，只读快照同一构建包。默认阻断全部发现、未知、覆盖不足及vacuous；显式策略不放行工具错误，new须已审查且身份相容的JSON。JSON/SARIF/JUnit/HTML保留完整证据，超限不截断成功；策略码与内核码分开，0仅表示满足策略。见[作者流程](author-ci.md)。
 
 ## 3. 开发与文档维护约定
 
-先复现再修，保留行为正反例，不重建快照求绿；`test/__baseline-versions.json`判据变更单独审查/提交。默认测试用只读profile副本，真实执行只清自有目录/PID组；账户、模型及外部写入分别授权。§6只列未完成事项，完成后合并到相应文档，历史明细留Git。运行文件只在确认职责已被替代后删除；移植阶段Python对拍已移除，循环/文件图交由当前AST回归覆盖，保留许可证、有效观测夹具和独立证据实现。
+先复现再修，保留正反例，不重建快照求绿；`test/__baseline-versions.json`判据变更单独审查/提交。默认测试用只读profile副本，真实执行只清自有目录/PID组，账户/模型/外部写入分别授权。§6仅列待办，完成能力归入相应文档，历史细节留Git。移除运行文件前确认职责已替代，保留许可证和有效夹具。
 
 ## 4. 验收范围
 
-[current-state](current-state.json)按精确源码、制品和平台记录验收；合成样例不代替真实试用，macOS/Linux记录不认证Windows或一般业务。历史0.2.0与当前0.2.1制品回执分开保留。当前候选提交`1a84561`的[CI](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41054118165)八项job全过；rc.5在macOS/Linux对同一CI归档完成九项UI验收及摘要核对，细节见current-state。正式发布须重新核对所选提交CI及同一tgz安装验收，再核registry/tag/release附件；文档版本不构成发布成功证明。
+[current-state](current-state.json)按提交、归档和平台记录结果。已封存的候选提交`1a84561`[CI八项通过](https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41054118165)，同一CI tgz通过rc.5 macOS/Linux九项UI；固定业务期望复现但仍有12项未识别故障。新源码/skill/README或重打包不继承此归档验收。Windows、用户试用和一般业务保持未验收；合成病例不替代真实试用。
 
 ## 5. 验证入口
 
-运行`npm test`、`npm run check`、`node plugin/scripts/prepublish-check.mjs`；发布前检查不发布。成功TAP交给`tools/update-current-state.mjs --test-summary`更新计数。`tools/meta-check.mjs --json`只读查实际GitHub/npm，取数失败不算通过；[发布核对顺序](maintaining.md#同一制品发布核对)集中维护。
+运行`npm test`、`npm run check`和`node plugin/scripts/prepublish-check.mjs`；发布前门禁不发布。成功TAP交给update-current-state更新计数。meta-check只读核对实际GitHub/npm，取数失败不算通过；[发布核对顺序](maintaining.md#同一制品发布核对)集中维护。
 
 ## 6. 后续工作
 
-仅列未完成事项，优先级不是漏洞评级；功能/资源边界见前文及指南。
+仅列未完成事项，优先级不是漏洞评级。
 
-### 6.1 P0：0.2.1开发首要任务——适配DSH 0.2.1-rc.5
-
-第1–5项开发与验收已完成，能力/限定回执归入§2、§4及[维护指南](maintaining.md#rc5验收入口)。源码/插件/probe/lock及文档统一0.2.1；固定业务回归保留漏报与覆盖限制，不把目录认证或UI通过扩大为一般业务验收。
-
-6. [ ] **正式发布0.2.1（待合并/发布授权）。** 已完成候选CI、同一归档双平台验收和本地发布前门禁。发布前另取当次合并/正式发布授权，核对最终所选提交CI；使用双平台已接受的同一归档，核registry/tag/release附件及公共安装。不预写已发布状态。
-
-### 6.2 其余待办
-
-1. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题及窄容器，记录安装→理解→定位的误读、失败、误报、分享障碍与耗时。合成样例不代替真实试用；联系、收集、公开分别授权，不默认遥测。
-2. **P2：跟进上游验收。** [2026-10-30复核](upstream-verification.md)：dshmarket1.73.5的#928保留journal修复仍成立，组合自愈/详细原因及用户出口仍待补；#1047更新有警告，新装仍遗漏。1024#22仍无npm方法，awesome#717仍未合并。均未完成端到端新装/桌面自救验收，后续反馈另取授权。
-3. **P2：Windows真实验收（依环境条件暂缓）。** 条件具备后验证路径、安装、回收、权限、打包/诊断及自有资源清理；此前保持未验收。
+1. **P0：正式发布0.2.1（待另行授权）。** 最终提交CI与同一归档双平台验收通过后，使用该文件发布，核registry、tag、Release附件及公共安装；不预写发布成功。
+2. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题/窄容器及误读、失败、误报与操作耗时；联系、收集、公开分别授权，不默认遥测。
+3. **P2：跟进上游验收。** [2026-10-30复核](upstream-verification.md)：market#928的journal保留修复成立，详细reason、用户出口和组合自愈仍待补；#1047新装仍遗漏。1024#22无npm方法，awesome#717未合并。均未完成端到端新装/桌面自救验收，后续反馈另取授权。
+4. **P2：Windows真实验收（依环境条件暂缓）。** 验证路径、安装、回收、权限、打包/诊断和自有资源清理；此前保持未验收。

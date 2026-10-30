@@ -61,16 +61,6 @@ HTML独立、无脚本/网络资源或动态链接，包名、位置和消息均
 
 示例仅workflow_dispatch、contents:read，checkout不保存凭据，Actions固定完整commit；工具依赖按冻结lock安装且禁用lifecycle。没有pull_request_target、写token或自动基线。其它触发器需先审查构建代码、策略和基线来源；分享前检查报告中包名、位置及业务说明。
 
-无Actions时可在构建后执行：
-
-```sh
-code=0
-node tools/author-ci.mjs --package ./dist-plugin > compatibility.json 2> scan.stderr.log || code=$?
-render_code=0
-node tools/author-ci.mjs --report compatibility.json --format html > compatibility.html 2> render.stderr.log || render_code=$?
-# 此处按需要归档JSON、HTML和日志。
-if [ "$render_code" -ne "$code" ]; then exit 3; fi
-exit "$code"
-```
+无Actions时运行同样的扫描/HTML命令，分别保存退出码；渲染码须等于JSON gate码，否则按工具错误3阻断。完整JSON是后续new策略输入，不能用HTML或截断输出替代。
 
 本仓库未启用作者示例工作流；本地受控接入回归不能代替作者远端CI或业务验收。项目当前验收及实际发布状态见[current-state](current-state.json)。

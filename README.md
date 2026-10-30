@@ -1,130 +1,96 @@
 # dsh-plugin-compat-check
 
-检查**已安装的DSH插件**与目标版本的兼容性，提供源码位置、依据和覆盖限制。声明放行、激活或无发现不等于业务正常。欢迎 [Star ⭐](https://github.com/lcy0121/dsh-plugin-compat-check)。
+检查**已安装的DSH插件**与目标版本的兼容性，提供源码位置、依据和覆盖限制。声明放行、激活或无发现不等于业务正常。[Star ⭐](https://github.com/lcy0121/dsh-plugin-compat-check)
 
 **简体中文** | [English](README.en.md) | [한국어](README.ko.md)
 
 ## 版本与入口
 
-**0.2.1**新增DSH rc.5精确目录/语义、升级预检/作者CI和验收入口，保留统一界面、中英韩国际化、轻量化、人工处置归档及历史对照，保留rc.3适配、升级预检、参数语义与边界加固。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5**，最低版本声明不认证未来宿主。 当前为本地0.2.1候选，实际发布状态见current-state；已发布0.2.0制品仍仅包含前三版目录。
+**0.2.1**为未发布候选，支持DSH rc.5精确目录、参数/槽位语义、升级预检和作者CI；提供中英韩界面、依赖关系、人工处置及本地报告历史。已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
 
-npm插件提供兼容性页、详情/角标、`compat_check`与skill。仓库另有CLI、安装检查、静态批量、作者CI和健康执行器，共享内核。npm包无CLI bin，不支持`npx dsh-plugin-compat-check`。[Plan](docs/Plan.md)维护契约与待办，[docs/current-state.json](docs/current-state.json)记录限定验证。
-
-## 界面示例
-
-以下为**0.2.0**在DSH **0.2.1-rc.3**中的真实界面截图（2026-10-29）。数字与发现仅代表当次本机检查，不是相关插件的通用兼容性结论；预检和历史图展示操作入口，未执行版本比较或保存快照。
-
-主结果概览：结论前置，并保留无已验证调用及覆盖限制提示。
-
-![0.2.0主结果：结论概览与证据边界](plugin/assets/compat-overview-0.2.0.png)
-
-人工核实：按源码位置记录状态与依据；图中条目仍待确认。
-
-![0.2.0人工处置：源码定位与核实依据](plugin/assets/compat-review-0.2.0.png)
-
-静态预检：输入目标DSH精确版本；不自动安装或升级宿主。
-
-![0.2.0升级前静态预检入口](plugin/assets/compat-upgrade-0.2.0.png)
-
-本地历史：显式保存、加载报告快照，再选择报告对照。
-
-![0.2.0本地报告历史入口](plugin/assets/compat-history-0.2.0.png)
+0.2.1已有同一CI归档的macOS/Linux rc.5验收，范围和提交见[docs/current-state.json](docs/current-state.json)；后续源码/打包须重新核对。公开npm/GitHub Release仍为0.2.0，仅含前三版目录。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
 
 ## 安装与使用
 
-```bash
-dsh plugin --profile <profile> add dsh-plugin-compat-check
+```sh
+# registry当前版本；本轮不发布0.2.1
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0
+# 验收过的候选文件
+dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.1.tgz
 ```
 
-安装当前公开0.2.0可使用`dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0`；不带版本时安装registry当前版本。
-
-0.2.1候选请使用本次验收的归档：`dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.1.tgz`；不要将后续重打包视为已验收的同一文件。
-
-安装后，在使用该profile的DSH主界面中打开：
-
-**左下角“更多”（⋯）或用户头像（账号菜单） → 设置 → 内置插件 → 兼容性**。
-
-“更多”指左下角的账号入口；进入“内置插件”后选择“兼容性”页签。请确认正在使用安装本插件的profile，不默认是desktop。agent也可调用`compat_check`。
+在安装所用profile的DSH中打开：**左下角“更多”（⋯）/用户头像 → 设置 → 内置插件 → 兼容性**。不默认是desktop；agent可调用`compat_check`。源码安装须[构建完整tgz](plugin/README.md#从源码构建安装)。
 
 ### 界面各板块怎么用
 
-界面支持**中文、English、한국어**，默认跟随宿主；在主结果的“界面语言”中切换或恢复“跟随宿主”，偏好仅存本机，未知语言回退英文。固定文案、已知内置说明及故障报告模板/核实建议同步翻译，复制与预览一致；原始证据、人工依据、命令和JSON保留原文，切换不重置筛选或草稿。
+界面语言默认跟随宿主，可切换中文/English/한국어；未知语言回退英文，偏好仅存本机。切换保留筛选与草稿，原始证据、人工依据、命令及JSON不翻译。
 
-| 板块（从上到下） | 用途与操作 |
+| 板块 | 操作 |
 |---|---|
-| **兼容性检查（主结果）** | 核对对象/目标DSH、时间、缓存及结论，点“重新检查”更新；搜索/组合筛选后展开发现、覆盖限制和下一步。“预览故障报告”供检查敏感信息后复制分享；“报告与证据说明”解释确定性及实测/推断。未认证警告直接显示。 |
-| **依赖关系与潜在影响** | 按需展开插件/loader、服务依赖、候选提供者及路径；声明、loader状态、环/路径仅供排查，不证明服务可用或故障传播。 |
-| **发现的人工处置** | 从发现旁“核实与人工处置”定位编辑区，填写状态与依据并保存；“返回主结果”跳回对应发现。只看本次结果时可跳过。 |
-| **升级前兼容性预检（静态）** | 展开，输入目标DSH精确版本，再点“运行升级预检”；不安装或升级DSH，无新增风险不代表业务通过。 |
-| **高级工具（默认收起）** | “人工处置记录管理”加载容量/归档；“本地历史报告与趋势”保存、检索及对照快照；“功能健康检查”导入外部JSON。均须显式操作，不自动采集、执行、安装或上传。 |
-| **报告说明与检查信息（页尾折叠）** | 查看工具版本、采样和对象来源；目录身份在主结果中核对。 |
+| 主结果 | 核对目标、时间/缓存及目录，重新检查、搜索/筛选并展开发现。故障报告先预览再复制，保留覆盖限制和未认证提示。 |
+| 依赖关系与潜在影响 | 展开服务依赖、候选提供者和路径；声明/loader状态不证明实际提供或故障传播。 |
+| 发现的人工处置 | 从发现定位编辑区，填写状态和依据并显式保存；可返回对应发现。 |
+| 升级前兼容性预检（静态） | 输入精确目标版本运行比较，不安装或升级宿主。 |
+| 高级工具 | 按需加载处置归档、保存/对照历史报告或导入健康JSON；不自动执行、采集或上传。 |
+| 页尾检查信息 | 查看工具版本、采样与对象来源。 |
 
-辅助表默认收起，使用带文字的“展开/收起”；主表、关系表、发现及预检明细每页50项，窄容器横滚，筛选/分页不裁剪完整导出。详情/角标显示单插件，完整列表在兼容性页。身份校验失败时重开宿主提供的登录入口，勿分享登录URL/Cookie。“本次新增风险”须有可比基线；首次/不完整检查无基线不等于无风险，vacuous也不等于业务通过。
+辅助内容默认收起，主表/关系/发现/预检每页50项，窄容器横滚；筛选/分页不裁剪完整导出。详情/角标只显示单插件。401时重开宿主登录入口，不分享登录URL/Cookie。
 
 ### 人工处置与历史记录
 
-1. 展开发现，按源码位置及“下一步核实”调查，再点“核实与人工处置”。可按插件/人工状态筛选；关联按报告/发现身份，不依赖排序或页码。
-2. 选择**待确认 / 已复核 / 误报 / 已修复**，写清步骤、实际结果和依据，点“保存人工处置”并等待成功提示。已复核仅表示人工检查过。条目较多时点“显示更多处置”，旧依据可展开查看。
-3. 修改代码/配置后重新检查。人工状态不隐藏风险、不改结论/退出码/基线，也不授予豁免；身份变化后的旧记录需要重审。
+1. 按真实源码位置和“下一步”核实，选择待确认/已复核/误报/已修复，写明步骤、结果和依据后保存。
+2. 代码、目标或证据变化后重新检查并重审；人工状态不隐藏风险、不改判定/退出码/基线，也不授予豁免。
+3. 草稿只在当前页面保留；身份变化后禁陈旧保存，可复制后重核或放弃。重载/离开前先保存或复制。
 
-未保存草稿仅保留当前页面会话，筛选/同报告轮询不清空输入；身份变化标为过期并禁止保存，可复制后重核或放弃。刷新网页/离开/卸载前先保存或复制，草稿不落盘。
+归档先确认并备份，恢复/导入只供参考。历史快照须显式保存、选择两份比较；身份不相容时中性显示，证据减弱不称修复。满额先导出再删除，无自动轮转。[指南](docs/guide.md)集中维护路径、容量和边界。
 
-高级工具按需加载：活动处置限1 MiB/1000条，归档需确认且先完整备份；归档全部也移走当前已保存状态。每目标最多100份，导入/恢复只供参考，核实当前发现后另存。历史快照在更新前后显式保存、选择两份对照；目标/原路径、DSH、工具、采样、规则及目录一致才判方向，证据减弱不称修复。每目标20份、单份8 MiB、总64 MiB；满额先导出再显式删除，无自动轮转。导出先预览，路径/依据可能敏感，摘要不是签名，历史不认证当前业务。
+## 界面示例
 
-[使用指南](docs/guide.md)集中列出存储路径、操作边界和预算。
+以下是2026-10-29的**0.2.0 / DSH 0.2.1-rc.3历史截图**，不冒充0.2.1验收。数字只代表当次检查；预检/历史图展示入口，未执行比较或保存。
+
+![0.2.0主结果与证据边界](plugin/assets/compat-overview-0.2.0.png)
+![0.2.0人工处置入口](plugin/assets/compat-review-0.2.0.png)
+![0.2.0静态升级预检入口](plugin/assets/compat-upgrade-0.2.0.png)
+![0.2.0本地历史入口](plugin/assets/compat-history-0.2.0.png)
 
 ## 仓库CLI
 
-仓库工具从源码运行：
-
-```bash
+```sh
 git clone --branch main https://github.com/lcy0121/dsh-plugin-compat-check.git
 cd dsh-plugin-compat-check
 npm ci --ignore-scripts
 node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
-node bin/compat-check.mjs --help
 ```
 
 | 选项 | 作用 |
 |---|---|
-| `--nm <dir>` | 目标profile或node_modules；必需 |
-| `--dsh-version <v>` | 目标DSH版本；预检中为当前版本 |
+| `--nm <dir>` | profile或node_modules，必需 |
+| `--dsh-version <v>` | 目标DSH；预检时为当前版本 |
 | `--probe <json>` / `--probe-boot` | 读取观测 / 经授权启动临时宿主 |
 | `--json` / `--quiet` | 完整JSON / 总结行 |
 | `--no-baseline` / `--dry-run` | 禁读写基线 / 比较但不写 |
-| `--baseline-file <path>` | 自定义基线位置 |
-| `--issue-report` | 可分享Markdown；预览后自行分享 |
+| `--baseline-file <path>` | 自定义基线路径 |
+| `--issue-report` | 生成供预览分享的Markdown |
 | `--rules <json>` / `--catalog <json>` | 覆盖规则 / 参考目录 |
 | `--help` / `--version` | 完整帮助 / 工具版本 |
 
-静态检查不执行目标或联网，普通检查写自身基线；no-baseline禁读写，不完整扫描不推进。probe-boot/安装检查会执行目标，须相应授权；临时profile不是OS沙箱。
+普通静态检查不执行目标或联网，默认写自身基线；不完整扫描不推进，坏原件保留。probe-boot、安装检查及健康run会执行目标，须相应授权；私有profile不是OS沙箱。
 
-## 升级预检与作者工具
+## 升级预检与验证
 
-面板输入目标版本，或调用`compat_check({"upgradeTo":"0.2.1-rc.3"})`；agent当前版本取宿主，结果为`upgradePreview`。CLI须提供两个精确版本：
+工具调用`compat_check({"upgradeTo":"0.2.1-rc.5"})`，当前版本取宿主，返回`upgradePreview`；CLI显式给两个精确版本：
 
-```bash
-node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --dsh-version 0.2.1-rc.2 --upgrade-to 0.2.1-rc.3 --json
-```
-
-四个精确版本可任意比较，未知版本退出3。只静态比较同组私有字节，不升级/执行宿主或借用probe、豁免、普通基线。**0/1/2表示无/非致命/致命新增或变重风险，3表示无法预检**；0仍可有旧风险。见[契约](docs/Plan.md#27-升级前静态预检契约)。
-
-[作者CI](docs/author-ci.md)提供矩阵、门禁及JSON/SARIF/JUnit/HTML；[指南](docs/guide.md#升级预检与有限批量)提供静态批量。健康执行器默认review，run须授权。另见[skill](skill/README.md)与[完整tgz构建](plugin/README.md#从源码构建安装)。
-
-## 结果与验证
-
-普通退出码：**0未发现冲突、1部分可用或未知、2不兼容、3工具/输入错误**。保留certainty/impactBasis/coverage/vacuous，未观测不是缺失；坏基线保留原件。客户端业务另验收，分享前预览，导出不自动发帖。
-
-```bash
+```sh
+node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.3 --upgrade-to 0.2.1-rc.5 --json
 npm test
 npm run check
 node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-默认测试不启动真实DSH/模型，打包回归需要registry；`check`核对格式、文档/生成副本、语法与目录。发布前检查不发布；元数据核验需gh/npm和网络，取数失败不算通过。macOS/Linux仅有记录范围内证据，Windows未真实验收。
+四个登记版本可任意比较；未知版本退出3。预检只静态比较同组私有字节，不借probe、豁免或普通基线。预检0/1/2为无/非致命/致命新增或变重风险，3为无法预检；0仍可有旧风险。普通退出码为**0未发现冲突、1部分可用或未知、2不兼容、3工具/输入错误**。
 
-[规则](rules/README.md) · [维护与目录治理](docs/maintaining.md) · [当前证据](docs/current-state.json)。
+默认测试不启动真实DSH/模型，打包回归需要registry；发布前检查不发布，元数据核验取数失败不算通过。Windows和一般业务未获认证。详见[Plan](docs/Plan.md)、[使用指南](docs/guide.md)、[维护流程](docs/maintaining.md)、[作者CI](docs/author-ci.md)、[规则](rules/README.md)与[skill](skill/README.md)。
 
 ## License
 

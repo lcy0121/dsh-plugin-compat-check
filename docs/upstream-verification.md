@@ -1,45 +1,21 @@
 # 上游跟进与限定核验
 
-本文记录2026-10-30只读跟进及受控复核；0.2.0发布/平台回执见[current-state](current-state.json)。2026-10-29对1.73.3的完整Desktop Host实验及已授权两条反馈保留于`91b4b2d:docs/upstream-verification.md`，不由本轮追认端到端通过。
+2026-10-30再次只读核对GitHub、npm和1024公共详情：dshmarket latest仍为1.73.5，以下事项状态未变。功能结果来自同日已完成的受控实验，本次文档整理没有重跑Desktop或真实pnpm。项目版本/制品回执见[current-state](current-state.json)。
 
-| 上游 | 当前状态 | 本轮成果与未完成项 |
+| 上游 | 已核状态 | 剩余事项 |
 |---|---|---|
-| [market#928](https://github.com/dsh-market/dsh-market/issues/928) | open；[10月30日新回复](https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6512186435)指出reason内容及用户出口两层缺口 | 发布版1.73.5函数对照仍保留缺bundle的journal；诊断具体code/message仍丢失。启动调用点只打印恢复/待处理数量，未输出每包reason。自愈、真实桌面自救流程仍未验收 |
-| [market#1047](https://github.com/dsh-market/dsh-market/issues/1047) | closed；[我们的新装遗漏反馈](https://github.com/dsh-market/dsh-market/issues/1047#issuecomment-6492914395)后无新回复 | 1.73.5受控路由复核仍是update有警告、install遗漏。关闭状态不等于原诉求已完成 |
-| [1024#22](https://github.com/imsai-sh/dsh-1024store/issues/22) | open，无新回复 | [公共详情](https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin)仍只有GitHub方法，unknown/not_checked、checkedAt=null；无npm方法，未运行新装 |
-| [awesome#717](https://github.com/0xsline/awesome-deepseek-harness/pull/717) | open、未合并，无讨论回复 | 等待维护者处理；未修改或催帖 |
+| [market#928](https://github.com/dsh-market/dsh-market/issues/928) | open；[最新回复](https://github.com/dsh-market/dsh-market/issues/928#issuecomment-6512186435)指出详细reason和用户出口缺口 | 缺bundle时保留journal已复核；具体错误码/消息仍丢失，调用方只打印数量。组合自愈、用户可见诊断及真实桌面自救待验 |
+| [market#1047](https://github.com/dsh-market/dsh-market/issues/1047) | closed；[新装遗漏反馈](https://github.com/dsh-market/dsh-market/issues/1047#issuecomment-6492914395)后无新回复 | 1.73.5仍是update有警告、install遗漏；关闭不等于原诉求完成 |
+| [1024#22](https://github.com/imsai-sh/dsh-1024store/issues/22) | open，无新回复；[详情](https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin)仅GitHub安装方法，unknown/not_checked、checkedAt=null | 等正确npm方法后另做新装；本次未运行安装 |
+| [awesome#717](https://github.com/0xsline/awesome-deepseek-harness/pull/717) | open、未合并，无讨论回复 | 等维护者处理，未催帖 |
 
-## dshmarket 1.73.5来源与验证边界
+## 1.73.5受控复核
 
-公共npm latest为1.73.5，tag [v1.73.5](https://github.com/dsh-market/dsh-market/tree/v1.73.5)指向`d797f38834c53a97a5827651f60ab35a461b44d3`。官方tgz SHA-256为`b6fc317d4bc4d982aeeaab7d9f1647cece36c50f25ce796150074c8ccd75ccec`，npm integrity/shasum均校验通过。测试调用原始发布文件；依赖复用先前隔离运行时，不改发布文件。所有profile、journal、合成包及loopback服务在本轮自有目录，不读取真实账户，不调用真实包管理器。
+固定tag[v1.73.5](https://github.com/dsh-market/dsh-market/tree/v1.73.5)指向`d797f38834c53a97a5827651f60ab35a461b44d3`。官方tgz SHA-256为`b6fc317d4bc4d982aeeaab7d9f1647cece36c50f25ce796150074c8ccd75ccec`，integrity/shasum通过。调用未经修改的发布文件，复用隔离依赖；profile、journal、合成包和loopback均为自有，不使用真实账户或包管理器。
 
-### #928：误清修复保持，诊断及出口缺口仍在
+- **#928六组函数对照：** failed但已写文件/依赖、以及缺bundle行均保留journal，后者两次attempts为1、2；client-only无需bundle、完整组合可结束，无journal不调用manager。具体ERR_PNPM_UNEXPECTED_STORE/message仍退化成refused the reinstall (failed)。pending-updates未用failureDetail，index只打印恢复/待处理总数，不输出每包reason。这是函数/源码核对，不是启动日志或界面验收。
+- **#1047八组路由对照：** install/update分别测试latest成功、latest失败但packument成功、两次失败、失败但显式版本。前两组精确2.0.0无多余警告；两次失败时install裸包名且无versionUnverified/warn，update使用@latest并记录warn；显式版本均保留。请求次数、传参和profile等待策略不变。真值来自loopback及写合成2.0.0的受控边界，不代表实际旧版安装、等待期或GUI验收。
 
-对未经修改的`repairInterruptedUpdates`注入明确标记的受控manager结果，六组对照通过：
+2026-10-29的1.73.3真实Desktop两次重启未自愈，“移除→重装”在卸载HTTP45秒未返回；这些不能升级为1.73.5结论。完整实验、来源及当时反馈见`10213c0:docs/upstream-verification.md`，原始证据在`tmp/rc5-review-20261030/`。
 
-- failed但已写文件/依赖，以及文件/依赖存在但缺bundle行，都保留journal；后者连续两次调用attempts为1、2。
-- client-only不要求bundle行；完整组合可结束；无journal不调用manager。
-- failed且带`ERR_PNPM_UNEXPECTED_STORE`和具体message，reason仍仅为`refused the reinstall (failed)`，不含具体错误。
-
-发布产物`lib/pending-updates.js`仍未用`failureDetail`；`lib/index.js`的修复定时器只打印汇总计数，未输出`report.failed`的包名/reason；`official-desktop.js`只转交报告。新回复所述两层缺口得到源码与函数级独立复核；这不是实际启动日志/界面验收。
-
-先前1.73.3真实Desktop Host两次重启已证明缺bundle形状不能自愈；当时“移除→重装”卸载HTTP45秒未返回，未进入重装。本轮没有重跑Desktop、SIGKILL或真实pnpm，不将这些历史边界升级为1.73.5已验证结论。
-
-### #1047：原新装路径仍遗漏
-
-原始`fetchNpmLatest`和完整挂载路由使用自有loopback registry；包管理器边界仅写合法合成2.0.0并返回exit0。install/update分别核对四种条件：
-
-| 元数据条件 | install新装 | update更新（CLI-runner对照） |
-|---|---|---|
-| latest成功 | 精确2.0.0，无多余警告 | 同左 |
-| latest429/HTML、packument成功 | 精确2.0.0，无多余警告 | 同左 |
-| 两次429/HTML | 裸包名、200/ok，仍无versionUnverified及专门warn | `@latest`、200/ok，返回installed=2.0.0并记warn |
-| 两次失败但显式版本 | body.version保留精确2.0.0 | compatVersion保留精确2.0.0 |
-
-八组路由对照及请求次数、传参、profile等待策略文件不变的断言均通过，证明缺口仍在；没有实际安装旧版本、pnpm等待期或GUI验收。没有放宽桌面成熟版本门禁来触发警告。
-
-## 下一步与证据
-
-继续跟进#928的详细reason与用户出口、组合恢复及自救范围；#1047等待明确覆盖install的新装修复后重跑。1024须出现正确npm方法后另做新装，awesome等待维护者。后续发帖、邮件、PR或推送分别取当次授权；本轮未发送消息或修改远端，也未检查邮件。
-
-原始元数据、发布包、六组repair/八组路由结果及脚本在`tmp/rc5-review-20261030/`；完整来源审查另见[rc.5记录](../rules/dsh-0.2.1-rc.5-review.json)。本轮结果只认证所述函数/受控路由，不认证实际Desktop或一般业务。
+继续等#928详细原因/出口及组合恢复、#1047覆盖新装后，再按实际范围复验；1024和awesome另跟进。上游消息/新issue/PR须另取授权，本次未发送；未检查邮件。状态关闭、源码修复和端到端验收分别记录。

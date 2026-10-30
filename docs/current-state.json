@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.2.1",
-  "recordedAt": "2026-10-30T12:04:31.039Z",
+  "recordedAt": "2026-10-30T12:50:08.891Z",
   "testFiles": 83,
   "tests": 1273,
   "repositoryFiles": {
@@ -22,12 +22,11 @@
         "0.2.1-rc.3",
         "0.2.1-rc.5"
       ],
-      "scope": "Reviewed exact catalogues and version-specific integration; rc.5 full UI passed on macOS/Linux for the same0.2.1 CI tgz below. Windows/general business remain unverified; earlier receipts keep their historical scope."
+      "scope": "Exact catalogue bytes only; dated host/artifact acceptance below. No future-host or general-business certification."
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
-      "integrationTarget": "main",
-      "scope": "0.2.1 candidate: rc.5 exact catalogues/semantics, static upgrade/author CI and same-archive macOS/Linux acceptance. Unpublished; published0.2.0 receipt remains historical."
+      "scope": "0.2.1 source candidate, unpublished. README/skill/description edits change the package; rerun selected-commit CI and same-archive acceptance before release."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -35,125 +34,15 @@
       "Private execution profiles are not OS sandboxes; account/model execution needs its own authorization.",
       "CI applies to the exact GitHub commit; formal publication must use the accepted archive."
     ],
-    "ui018LinuxFirst20261028": {
-      "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40706851821",
-      "commit": "361c74bfda4191213ae782db14d88bbf26b8620a",
-      "allJobs": "6/6 success: Node22.19.0/24 default gates; dependency-security; actual Linux0.2.0-rc.2/0.2.1-rc.2/0.2.1-rc.3 integration.",
-      "environment": {
-        "platform": "linux",
-        "arch": "x64",
-        "node": "24.22.1",
-        "chrome": "156.0.8078.47",
-        "dsh": "0.2.1-rc.3",
-        "fonts": "fonts-noto-cjk1:20230817+repack1-3; SC/KR glyphs visually reviewed"
-      },
-      "sourceDirty": false,
-      "sourceManifestSha256": "a48bcab4902854967b56978e5977f6494f81e182994321a77a62119a0bf743cc",
-      "tgzSha256": "bf55dca4d9507268d19d76b592121863c8d14e48fdf025925d8899db80357898",
-      "githubArtifact": {
-        "id": 12824542424,
-        "name": "linux-live-evidence-0.2.1-rc.3",
-        "zipSha256": "997519a22386d4ff1941d074d33aebaf70b273ef2b1d4d2479ca779bc2227c6e"
-      },
-      "evidence": "Verified all389 source files, all30 SHA256SUMS entries and installed tgz identity; nine flags/complete UI validator passed,21 PNGs retained. Three-language cards/form gaps12px; drafts/focus, theme/narrow layout, list bounds/full exports, recovery, reviews/history and HTTP auth passed. Private root removed; zero production/model requests.",
-      "additionalRc3Tests": {
-        "chromeStartup": {
-          "tests": 35,
-          "pass": 35,
-          "skip": 0,
-          "fail": 0
-        },
-        "liveIntegration": {
-          "tests": 63,
-          "pass": 63,
-          "skip": 0,
-          "fail": 0
-        }
-      },
-      "fixes": "83b76db: platform-independent optional-license verification and fixed mutation-proof input.361c74b: intrinsic metric sizing/whole labels and runner CJK fonts. Existing UI/deadline assertions retained.",
-      "scope": "Historical first full UI Linux run: recorded clean commit and toolVersion0.1.7 tgz. It does not certify the0.2.0 artifact, later source, Windows or general business behavior."
-    },
-    "history": {
-      "commit": "0f518df",
-      "path": "docs/current-state.json",
-      "scope": "Full predecessor receipts: historical0.1.7 publication, earlier local UI/hardening and first0.2.0 artifact acceptance, upstream controls and previous history pointers. These are not the current source version or a0.2.0 publication claim."
-    },
-    "upstreamExecutionLocal20261028": {
-      "history": "a489891:docs/current-state.json",
-      "scope": "Historical dshmarket1.73.1 execution, artifact and two authorized feedback receipts. Superseded for current follow-up by the separately pinned1.73.3 verification below; not retroactively accepted."
-    },
-    "releasePreparation020Local20261028": {
-      "history": "b1c6809:docs/current-state.json",
-      "scope": "Historical local preparation/cleanup receipt; original source and artifact boundaries retained in Git. Superseded for formal release by a fresh selected-commit and same-archive verification."
-    },
-    "functionalCleanup020Local20261028": {
-      "history": "b1c6809:docs/current-state.json",
-      "scope": "Historical local preparation/cleanup receipt; original source and artifact boundaries retained in Git. Superseded for formal release by a fresh selected-commit and same-archive verification."
-    },
-    "metadataPreparation020Local20261028": {
-      "history": "b1c6809:docs/current-state.json",
-      "artifact": {
-        "version": "0.2.0",
-        "sha256": "8120dc77b580fb02d9952a580d65a0c03813790f75b6d4b4a10b8bc15a5103f5",
-        "payloadFiles": 74
-      },
-      "validation": "Historical1242 tests:1234 pass/8 skip/0 fail; all nine actual-host UI sections on macOS arm64/Host0.2.1-rc.3,21 PNGs/30 checksums. GitHub metadata updated and read back; npm then observed0.1.7.",
-      "receipts": "tmp/metadata-preparation-020-20261028/",
-      "scope": "Dated local acceptance only; not a formal0.2.0 publication or certification of later README changes."
-    },
-    "upstreamExecutionLocal20261029": {
-      "history": "386b273:docs/current-state.json",
-      "report": "docs/upstream-verification.md",
-      "scope": "Historical1.73.3 Desktop/repair/warning verification and two authorized comments. Full exact receipts retained in Git; latest1.73.5 follow-up is separately dated in the report."
+    "publicState20261030": {
+      "observedAt": "2026-10-30T12:49:44.326Z",
+      "npm": "0.2.0",
+      "githubRelease": "v0.2.0",
+      "scope": "Read-only metadata checks had no errors/skipped sources; candidate version/README/description differences are expected pending-publication notices. No0.2.1 release performed."
     },
     "release02020261029": {
       "status": "published and independently verified on npm and GitHub",
-      "source": {
-        "commit": "cb59b211a2ed2312e0ba6e167a7e0f50751706bf",
-        "manifestSha256": "1b64471d8aaff7da32c22ba8bbe774c411e752706bc0cbf5fabe923c609fef62",
-        "files": 380,
-        "dirty": false
-      },
-      "documentReview": "All maintained Markdown entry points, translations, rules, skill copies, provenance and docs checked against code/contracts. Four install guides now show an exact0.2.0 command. Historical versions, platform limitations and upstream pending work remain explicitly dated.",
-      "localValidation": {
-        "tests": 1242,
-        "pass": 1234,
-        "skip": 8,
-        "fail": 0,
-        "maintenanceCheck": "passed",
-        "prepublishGate": "passed",
-        "documentMetadataSkillTests": "59/59 passed"
-      },
-      "ci": {
-        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40850800297",
-        "conclusion": "success",
-        "jobs": [
-          {
-            "name": "dependency-security",
-            "conclusion": "success"
-          },
-          {
-            "name": "test (22.19.0)",
-            "conclusion": "success"
-          },
-          {
-            "name": "test (24)",
-            "conclusion": "success"
-          },
-          {
-            "name": "linux-live (0.2.0-rc.2)",
-            "conclusion": "success"
-          },
-          {
-            "name": "linux-live (0.2.1-rc.3)",
-            "conclusion": "success"
-          },
-          {
-            "name": "linux-live (0.2.1-rc.2)",
-            "conclusion": "success"
-          }
-        ]
-      },
+      "commit": "cb59b211a2ed2312e0ba6e167a7e0f50751706bf",
       "artifact": {
         "filename": "dsh-plugin-compat-check-0.2.0.tgz",
         "sha256": "4cc5f8b87ec4519209c8f9589af65af235035183b0806c924a5ec65c64d47ecd",
@@ -162,27 +51,12 @@
         "bytes": 316013,
         "payloadFiles": 74
       },
-      "actualHost": {
-        "linux": {
-          "artifactId": 12887351392,
-          "artifactZipSha256": "a08538a3f6f5703359ff418f9957cfa4943cd41843db1e121206d4d793a17f83",
-          "host": "0.2.1-rc.3",
-          "allNineSections": true,
-          "screenshots": 21,
-          "checksumEntries": 30,
-          "privateRootRemoved": true
-        },
-        "mac": {
-          "platform": "darwin",
-          "arch": "arm64",
-          "node": "v26.12.1",
-          "host": "0.2.1-rc.3",
-          "allNineSections": true,
-          "screenshots": 21,
-          "privateRootRemoved": true,
-          "artifactSha256": "4cc5f8b87ec4519209c8f9589af65af235035183b0806c924a5ec65c64d47ecd"
-        }
+      "ci": {
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40850800297",
+        "conclusion": "success",
+        "jobs": "6/6"
       },
+      "platforms": "Same archive accepted on macOS arm64/Linux x64 with DSH0.2.1-rc.3; nine sections,21 screenshots each.",
       "github": {
         "release": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.0",
         "tag": "v0.2.0",
@@ -210,40 +84,10 @@
         "tempProfileRemoved": true,
         "scope": "Actual public-registry isolated install and host observation; not general business/UI acceptance."
       },
-      "additionalTagCi": {
-        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/40852588842",
-        "conclusion": "success",
-        "allJobs": "6/6 success; additional tag-triggered gate on same release commit"
-      },
-      "receipts": "tmp/release-020-20261029/; durable artifact and bounded acceptance summary attached to GitHub Release.",
-      "scope": "Same CI-built tgz accepted on Linux/macOS and published unchanged to npm/GitHub. This documentation receipt follows release and does not change archive payload. Windows/real-user acceptance and upstream pending work remain separate."
-    },
-    "readmeScreenshots02020261030": {
-      "capturedAt": "2026-10-29",
-      "toolVersion": "0.2.0",
-      "hostVersion": "0.2.1-rc.3",
-      "assets": {
-        "compat-overview-0.2.0.png": "5e7e12fe8ce20481536e9f3d6de8eb85aa8bed33871191730a74ef403233829c",
-        "compat-review-0.2.0.png": "48b8e19d2888cabbda600872084744d42e75394ae1094fe03974ea2aae88d753",
-        "compat-upgrade-0.2.0.png": "6b5539ee51d51dc7c9b7b0264a78cca1823f7f4a0c472adbd70a1ad8bbe4913f",
-        "compat-history-0.2.0.png": "54c6121a9f2ca03131502214283241ffdbb76a8289e04331b59a1fc396cc6a70",
-        "compat-overview-en-0.2.0.png": "0b1fb49f050e95bf51c12c25ec6050fd5dc995ee2c9d3baf082af9ff85405409"
-      },
-      "scope": "Real native desktop captures, cropped only; no substituted text or synthetic report data. Overview/review/upgrade/history replace obsolete detail images in all four READMEs and the screenshot index. English README uses the English overview; other workflow captures are explicitly Chinese. Precheck/history are entry forms, not executed comparisons or saved snapshots.",
-      "validation": "13/13 document tests and npm run check passed; verified five PNG signatures/digests, all four README image sets and the screenshot index. Existing1242-test/full release receipts retained without claiming a rerun. No runtime changes, push or publication.",
-      "legacyAssets": "Retained old image URLs because the already-published npm0.2.0 README references raw main paths. Current repository READMEs/index use the new images; npm page body changes require a later authorized publication."
-    },
-    "rc5SourceSemantics20261030": {
-      "history": "781137b:docs/current-state.json",
-      "review": "rules/dsh-0.2.1-rc.5-review.json",
-      "scope": "Historical source/semantic-only receipt, before rc.5 registration. Superseded for integration by the separate local receipt below; not retroactively upgraded."
-    },
-    "rc5Integration20261030": {
-      "history": "386b273:docs/current-state.json",
-      "scope": "Historical0.2.0 development-source rc.5 basic integration. Does not certify the0.2.1 candidate or full UI/Linux."
+      "details": "10213c0:docs/current-state.json; durable archive/checksums/receipt on GitHub Release."
     },
     "candidate02120261030": {
-      "status": "CI and same-archive macOS/Linux acceptance passed; unpublished",
+      "status": "Historical accepted0.2.1 candidate; later documentation/skill packaging requires fresh acceptance",
       "sourceDirty": false,
       "sourceManifestSha256": "afa48b109d0dd03acfd1b3267bede4f4408f869daf3559d62264064ff1d85e8b",
       "artifact": {
@@ -278,9 +122,8 @@
         "maintenanceCheck": "passed",
         "prepublishGate": "passed; fresh1273-test TAP and documentation facts; no publication"
       },
-      "publicMetadata": "Before push: npm0.2.0; only expected candidate-version/README notices, no lookup skipped. Push completed; no merge/publish or upstream message.",
       "receipts": "tmp/push-021-20261030/; fixed business: tmp/release-021-20261030/business-final/",
-      "scope": "CI-built tgz is the final dual-platform candidate. Earlier local tgz had identical76 file payloads but different archive bytes; Mac was rerun on the CI bytes. Business results remain separate; Windows unverified.",
+      "scope": "Same CI-built tgz passed Mac/Linux; fixed business results separate. Does not certify later source/packages, Windows or general business. Earlier local archive had equal76 file payloads but different archive bytes, so Mac was rerun on CI bytes.",
       "business": {
         "host": "0.2.1-rc.5",
         "status": "passed",
@@ -305,13 +148,31 @@
         "replay": "passed; historical evidence validation only",
         "scope": "Fixed 24 normal/failure/recovery expectations reproduced; 12 unflagged failures retained (2 natural,10 business/client). Green does not mean all business functions passed or ecosystem accuracy. Separate from the accepted UI tgz."
       },
-      "history": "1a84561:docs/current-state.json preserves the earlier dirty-source/local-tgz receipt",
       "sourceCommit": "1a84561bbaca5ad2728f56a326059b8d59a16e9a",
       "ci": {
         "run": 41054118165,
         "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41054118165",
         "jobs": "8/8 success: Node22.19.0/24 gates, dependency-security, candidate, four Linux exact hosts"
       }
+    },
+    "history": {
+      "commit": "10213c0",
+      "path": "docs/current-state.json",
+      "scope": "Full predecessor acceptance, release preparation, screenshot digests, source semantics and upstream controls. Historical evidence is not a current source or publication claim."
+    },
+    "documentationReview20261030": {
+      "scope": "Flat Plan section6; translated READMEs, guides, skill and package descriptions reviewed against code and dated receipts. Historical logs reduced to Git pointers; licences retained.",
+      "validation": {
+        "tests": 1273,
+        "pass": 1265,
+        "skip": 8,
+        "fail": 0,
+        "check": "passed",
+        "prepublish": "passed",
+        "docsSkillCatalogTests": "53/53 passed"
+      },
+      "metadata": "npm0.2.0; only candidate version/description/README notices, no errors or skipped lookups.",
+      "publication": "0.2.1 remains unpublished; selected-commit CI and the new package acceptance are recorded separately from older receipts."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

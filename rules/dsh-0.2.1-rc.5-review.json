@@ -125,10 +125,10 @@
     },
     "acp": "MCP resources capability guard returns empty list/template pages without SDK console.debug; model-catalog info uses console.error. Resources/read/disconnect errors retained; no missing API rule.",
     "navigation": "Only overflowing view labels get tooltip; More conversation views tooltip is fixed, distinct from settings/plugin menus.",
-    "declarationsAndIntegration": "Source files for boot/HMR, package-meta/plugin-compatibility, ModuleLoader, tool/skill and HTTP/connection are unchanged except release metadata. engines-first/peer fallback/exact exemptions retained. Runtime integration remains pending.",
+    "declarationsAndIntegration": "Source files for boot/HMR, package-meta/plugin-compatibility, ModuleLoader, tool/skill and HTTP/connection are unchanged except release metadata. engines-first/peer fallback/exact exemptions retained. Runtime was pending at this source-review stage; later acceptance is separate.",
     "rulesDecision": "No service/method/signature removals. Add rc.5 exact parameter/lifetime baseline and reasoning-slot coverage advice, no new fatal rules."
   },
-  "integrationAcceptance": "macOS basic Web/ACP passed; full UI/Linux/business pending",
+  "integrationAcceptance": "Historical registration snapshot: macOS basic Web/ACP passed. Subsequent full UI/Linux and business receipts are recorded separately in docs/current-state.json.",
   "certification": "exact-catalogue-and-basic-integration",
   "scope": "Reviewed exact catalogue bytes/semantics and local macOS basic integration; registered for ordinary reports, static upgrade and author defaults. Full UI/Linux/Windows/business acceptance and publication remain separate in docs/current-state.json. Historical source/provenance-only receipt:781137b."
 }

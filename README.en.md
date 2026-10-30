@@ -1,131 +1,97 @@
 # dsh-plugin-compat-check
 
-Checks **installed DSH plugins** against a target version, with source locations, evidence and coverage limits. Declaration acceptance, activation or no findings does not prove business functionality. [Star ⭐](https://github.com/lcy0121/dsh-plugin-compat-check) if useful.
+Checks **installed DSH plugins** against a target version, with source locations, evidence and coverage limits. Declaration acceptance, activation or no findings does not prove business functionality. [Star ⭐](https://github.com/lcy0121/dsh-plugin-compat-check)
 
 [简体中文](README.md) | **English** | [한국어](README.ko.md)
 
 ## Versions and entry points
 
-**0.2.1** adds exact DSH rc.5 catalogues/semantics, upgrade/author-CI support and acceptance entry points while retaining a unified UI, Chinese/English/Korean localization, reduced overhead, review archives and report history, retaining rc.3 adaptation, upgrade preview, parameter semantics and boundary hardening. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2`. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3 and 0.2.1-rc.5**; the minimum does not certify future hosts. This is a local 0.2.1 candidate; current-state records actual publication. Published 0.2.0 artifacts contain only the preceding three catalogues.
+**0.2.1** is an unpublished candidate with exact DSH rc.5 catalogues, parameter/slot semantics, upgrade preview and author CI, plus a Chinese/English/Korean UI, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3 and 0.2.1-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
 
-The npm plugin provides a compatibility page, details/badges, `compat_check` and a skill. Repository-only CLI, install checks, static batches, author CI and health executor share the kernel. The npm package has no CLI bin; `npx dsh-plugin-compat-check` is unsupported. [Plan](docs/Plan.md) tracks contracts and tasks; [docs/current-state.json](docs/current-state.json) records scoped verification.
-
-## Screenshots
-
-Actual **0.2.0** UI in DSH **0.2.1-rc.3**, captured on 2026-10-29. Counts and findings describe that local check, not general compatibility verdicts for the pictured plugins. Upgrade/history images show entry forms; no version comparison or snapshot save was performed. The overview is in English; the workflow images show the Chinese UI.
-
-Main results put conclusions first while retaining evidence limits and the no-verified-calls warning.
-
-![0.2.0 English overview: conclusions and evidence limits](plugin/assets/compat-overview-en-0.2.0.png)
-
-Manual review links source locations to status and evidence; the pictured finding remains unconfirmed.
-
-![0.2.0 manual review: source location and verification evidence](plugin/assets/compat-review-0.2.0.png)
-
-Static upgrade preview accepts an exact target DSH version without installing or upgrading the host.
-
-![0.2.0 static upgrade preview entry](plugin/assets/compat-upgrade-0.2.0.png)
-
-Local history lets you explicitly save/load snapshots and select reports for comparison.
-
-![0.2.0 local report history entry](plugin/assets/compat-history-0.2.0.png)
+One CI-built 0.2.1 archive passed macOS/Linux rc.5 acceptance; [docs/current-state.json](docs/current-state.json) records its commit and scope. Later sources/packages require fresh verification. Public npm/GitHub Releases remain at 0.2.0, with only the first three catalogues. The npm plugin provides the page, details/badges, `compat_check` and skill. CLI, install checks, batches, author CI and health executor are repository tools. There is no npm CLI bin or `npx dsh-plugin-compat-check` support.
 
 ## Install and use
 
-```bash
-dsh plugin --profile <profile> add dsh-plugin-compat-check
+```sh
+# Currently published version; this work does not publish 0.2.1
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0
+# Accepted candidate archive
+dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.1.tgz
 ```
 
-To install the currently published 0.2.0, use `dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.0`; an unversioned command follows the registry version.
-
-Install the accepted 0.2.1 candidate archive with `dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.1.tgz`. A later rebuild does not inherit its acceptance.
-
-After installing, open the DSH instance using that profile, then navigate to:
-
-**Bottom-left More (⋯) or user avatar (account menu) → Settings → Built-in plugins → Compatibility (兼容性)**.
-
-“More” means the bottom-left account entry. Select the Compatibility tab inside Built-in plugins, and verify that this is the profile where you installed the plugin; do not assume desktop. Agents can also call `compat_check`.
+In the DSH instance using that profile, open **bottom-left More (⋯)/avatar → Settings → Built-in plugins → Compatibility (兼容性)**. Do not assume desktop. Agents can call `compat_check`; source installations require a [complete tgz](plugin/README.md#从源码构建安装).
 
 ### Using each panel
 
-Choose **Interface language → Follow host / 中文 / English / 한국어** in the main results. The default follows the host's `zh`/`en`/`ko` language tag; unsupported languages fall back to English. Your preference stays local. Fixed labels, known built-in explanations and diagnostic report templates/suggestions are translated; copied text matches the preview. Raw evidence, user notes, commands and JSON retain their original text. Switching language preserves filters and drafts.
+The UI follows the host language; choose Chinese/English/Korean or restore Follow host. Unsupported languages fall back to English. Preferences stay local; switching preserves filters/drafts. Raw evidence, user notes, commands and JSON are not translated.
 
-| Panel (page order) | Purpose and actions |
+| Panel | Actions |
 |---|---|
-| **Main results — Compatibility check** | Check target/profile, time, cache and verdicts; choose **Check again**, search/filter, then expand findings, coverage limits and next steps. **Preview diagnostic report** lets you inspect and copy the complete report; **Report and evidence notes** explains certainty and measured/inferred impact. Uncertified targets display a warning. |
-| **Dependencies and potential impact** | Expand plugin/loader entries, dependencies, candidate providers and paths. Declarations, loader states and cycles/paths are investigation clues, not proof of availability or failure propagation. |
-| **Manual review of findings** | Choose **Verification and manual review** beside a finding, document status/evidence and save. **Back to main results** opens the corresponding finding. Skip this panel if you only need current results. |
-| **Pre-upgrade compatibility check (static)** | Expand, enter an exact target DSH version, then choose **Run upgrade check**. This does not install/upgrade DSH; no new risks does not certify business functionality. |
-| **Advanced tools (initially collapsed)** | Load review capacity/archives, save/search/compare report snapshots, or import functional-health JSON. Actions are explicit; opening the section does not collect history, run checks, install plugins or upload records. |
-| **Report notes and check information (collapsed footer)** | Inspect tool version, sampling and target provenance. Catalogue identity is in the main results. |
+| Main results | Verify target, time/cache and catalogue; recheck, search/filter and expand findings. Preview diagnostic reports before copying; retain coverage and uncertified-target warnings. |
+| Dependencies and potential impact | Expand dependencies, candidate providers and paths; declarations/loader states do not prove availability or failure propagation. |
+| Manual review | Navigate from a finding, record status/evidence and explicitly save; return to the corresponding finding. |
+| Static upgrade preview | Enter an exact target version; does not install or upgrade DSH. |
+| Advanced tools | Load review archives, save/compare snapshots or import health JSON on demand; no automatic execution, collection or upload. |
+| Footer information | Inspect tool version, sampling and target provenance. |
 
-Use labelled **Expand/Collapse** buttons for auxiliary tables. Results, dependencies, findings and upgrade details show 50 items per page; wide tables scroll in narrow containers. Filters/pages never trim complete exports. Plugin details/badges show individual results; the Compatibility tab contains the full list. If authentication fails, reopen the host-provided login URL; never share it or cookies. New-risk filters require comparable history: no baseline or no verified calls (`vacuous`) does not mean no risk.
+Auxiliary content starts collapsed. Results/dependencies/findings/upgrade details show 50 items per page; wide tables scroll in narrow containers. Filters/pages never trim full exports. Details/badges show one plugin. On 401, reopen the host login entry; never share login URLs/cookies.
 
 ### Manual review and history
 
-1. Expand a finding and investigate its source location/next steps, then choose **Verification and manual review**. Filter by plugin/status; links use report/finding identity, independent of sorting and pagination.
-2. Select **Unconfirmed / Reviewed / False positive / Fixed**, record steps, actual results and evidence, then choose **Save manual review** and wait for confirmation. Reviewed means investigated, not passed. Use **Show more reviews** or expand prior evidence when needed.
-3. Recheck after code/configuration changes. Manual statuses never hide risks, change verdicts/exit codes/baselines or grant exemptions; changed identities require re-review.
+1. Investigate the actual source location and next steps, select Unconfirmed/Reviewed/False positive/Fixed, document steps/results/evidence and save.
+2. Recheck and re-review after source, target or evidence changes. Manual statuses never hide risks, change verdicts/exit codes/baselines or grant exemptions.
+3. Drafts stay in the current page. Changed identities block stale saves; copy and investigate again or discard. Save/copy before reload or navigation.
 
-Drafts stay in the current page session, including during filtering and same-report polling. Changed report identities mark them expired and block saving onto new findings; copy and investigate again, or discard. Save/copy before reload, navigation or unload: drafts are not written to disk.
+Archival requires confirmation and a backup; restored/imported records are references. Explicitly save snapshots and select two to compare. Incompatible identities produce a neutral comparison; weaker evidence is not a repair. Export then delete when full, with no automatic pruning. The [guide](docs/guide.md) holds paths, limits and boundaries.
 
-Advanced tools load on demand. Active reviews allow 1 MiB/1000 records; archival requires confirmation and a complete backup first. Archive-all also removes saved current statuses. Each target allows 100 archives; imports/restores are references requiring a new current review. Explicitly save snapshots before/after updates and select two to compare. Target/original path, DSH, tool, sampling mode, rules and catalogue must match for a directional comparison; weaker evidence is not a repair. Limits are 20 snapshots/target, 8 MiB/file and 64 MiB total. Export then explicitly delete when full; no automatic pruning. Preview exports for sensitive paths/evidence. Hashes are not signatures, and history does not certify current business behavior.
+## Screenshots
 
-See the [guide](docs/guide.md) for storage paths, operations and budgets.
+Historical **0.2.0 / DSH 0.2.1-rc.3** captures from 2026-10-29, not 0.2.1 acceptance evidence. Counts describe that check; upgrade/history images show forms without an executed comparison/save. Overview is English; workflow captures are Chinese.
+
+![0.2.0 English overview and evidence limits](plugin/assets/compat-overview-en-0.2.0.png)
+![0.2.0 manual review entry](plugin/assets/compat-review-0.2.0.png)
+![0.2.0 static upgrade preview entry](plugin/assets/compat-upgrade-0.2.0.png)
+![0.2.0 local history entry](plugin/assets/compat-history-0.2.0.png)
 
 ## Repository CLI
 
-Run repository tools from source:
-
-```bash
+```sh
 git clone --branch main https://github.com/lcy0121/dsh-plugin-compat-check.git
 cd dsh-plugin-compat-check
 npm ci --ignore-scripts
 node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
-node bin/compat-check.mjs --help
 ```
 
 | Option | Purpose |
 |---|---|
-| `--nm <dir>` | Target profile or node_modules; required |
-| `--dsh-version <v>` | Target DSH version; current version in preview mode |
+| `--nm <dir>` | Profile or node_modules; required |
+| `--dsh-version <v>` | Target DSH; current version in preview mode |
 | `--probe <json>` / `--probe-boot` | Read observations / explicitly launch a temporary host |
-| `--json` / `--quiet` | Full JSON / summary line |
-| `--no-baseline` / `--dry-run` | No baseline reads or writes / compare without writing |
+| `--json` / `--quiet` | Full JSON / summary |
+| `--no-baseline` / `--dry-run` | No baseline reads/writes / compare without writing |
 | `--baseline-file <path>` | Custom baseline path |
-| `--issue-report` | Shareable Markdown; review before sharing |
+| `--issue-report` | Markdown for preview and manual sharing |
 | `--rules <json>` / `--catalog <json>` | Override rules / reference catalogue |
 | `--help` / `--version` | Full help / tool version |
 
-Static checks do not execute targets or use the network. Ordinary checks write a baseline; no-baseline prevents reads/writes, and incomplete scans do not advance it. Probe-boot/install checks execute targets and require authorization. Private profiles are not OS sandboxes.
+Ordinary static checks do not execute targets or use the network, but write their own baseline by default. Incomplete scans do not advance it; invalid originals remain intact. Probe-boot, install checks and health run execute targets and require authorization. Private profiles are not OS sandboxes.
 
-## Upgrade preview and author tools
+## Upgrade preview and verification
 
-Enter a target version in the panel or call `compat_check({"upgradeTo":"0.2.1-rc.3"})`. The agent uses the running host version and returns `upgradePreview`. CLI requires both exact versions:
+Call `compat_check({"upgradeTo":"0.2.1-rc.5"})`; the current version comes from the host and results use `upgradePreview`. CLI requires both exact versions:
 
-```bash
-node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --dsh-version 0.2.1-rc.2 --upgrade-to 0.2.1-rc.3 --json
-```
-
-Compare any pair of the four exact versions; unknown versions exit 3. The same private bytes are compared statically, without host execution/upgrade, probes, exemptions or ordinary baselines. **0/1/2 mean no/nonfatal/fatal added or worsened risks; 3 means unavailable.** Zero may retain old risks. See the [contract](docs/Plan.md#27-升级前静态预检契约).
-
-[Author CI](docs/author-ci.md) provides matrices, gates and JSON/SARIF/JUnit/HTML; the [guide](docs/guide.md#升级预检与有限批量) covers static batches. Health execution defaults to review; run requires authorization. See [skill](skill/README.md) and [complete tgz builds](plugin/README.md#从源码构建安装).
-
-## Results and verification
-
-Ordinary exits: **0 no conflicts found, 1 partial or unknown, 2 incompatible, 3 tool/input error**. Preserve certainty/impactBasis/coverage/vacuous; unobserved is not absent. Damaged baselines are preserved. Client business behavior needs separate acceptance. Review exports before sharing; nothing is posted automatically.
-
-```bash
+```sh
+node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.3 --upgrade-to 0.2.1-rc.5 --json
 npm test
 npm run check
 node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-Default tests do not start real DSH/models; packaging regressions require the registry. `check` validates formatting, docs/generated copies, syntax and catalogues. Prepublish checks do not publish. Metadata checks need gh/npm and networking; unavailable sources are not passes. macOS/Linux evidence applies only to recorded scopes; Windows real-host acceptance is pending.
+Compare any pair of the four registered versions; unknown versions exit 3. Preview statically compares the same private bytes without probes, exemptions or ordinary baselines. Preview codes 0/1/2 mean no/nonfatal/fatal new or worsened risks; 3 means unable to preview. Zero may retain old risks. Ordinary codes are **0 no conflict found, 1 partially usable or unknown, 2 incompatible, 3 tool/input error**.
 
-[Rules](rules/README.md) · [Maintenance and catalogue governance](docs/maintaining.md) · [Current evidence](docs/current-state.json).
+Default tests do not start real DSH/models; packaging tests need the registry. The prepublish gate does not publish, and unavailable metadata is not verification. Windows and general business functionality remain unverified. See [Plan](docs/Plan.md), [guide](docs/guide.md), [maintenance](docs/maintaining.md), [author CI](docs/author-ci.md), [rules](rules/README.md) and [skill](skill/README.md).
 
 ## License
 
-[MIT](LICENSE) · [Third-party dependencies and licences](THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE) · [Third-party dependencies and licenses](THIRD_PARTY_NOTICES.md).

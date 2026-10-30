@@ -379,7 +379,7 @@ describe('脚本：不需要内核的那些入口', () => {
  * 手写示例必然会腐烂，所以这里把它变成**可校验的**：抽出示例块，
  * 与同一输入的真实输出逐行比对。改输出就必须改示例，反之亦然。
  *
- * 当前示例使用仓库固定夹具，包含完整说明，不依赖本机真实profile。
+ * 当前示例仅展示固定夹具输出的前七行；完整报告仍从CLI读取，不依赖本机真实profile。
  */
 describe('skill 的示例输出必须与真实输出一致', () => {
   test('固定夹具示例与实际CLI输出一致，不依赖个人profile', () => {
@@ -390,7 +390,8 @@ describe('skill 的示例输出必须与真实输出一致', () => {
     const r = runCLI(['--nm', path.join(REPO, 'test/fixtures/labels'),
       '--dsh-version', '0.2.1-rc.2', '--no-baseline'])
     assert.equal(r.code, 2)
-    assert.equal(m[1].trimEnd(), r.out.trimEnd(), '固定夹具示例须与当前CLI实际输出一致')
+    assert.equal(m[1].split('\n').length, 7, '固定示例明确只展示前七行');
+    assert.equal(m[1].trimEnd(), r.out.split('\n').slice(0, 7).join('\n').trimEnd(), '固定夹具摘录须与当前CLI实际输出逐行一致')
   })
 })
 

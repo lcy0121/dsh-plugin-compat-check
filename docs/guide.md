@@ -2,7 +2,7 @@
 
 本指南对应**0.2.1**。面板、tool和skill随npm插件交付；CLI、健康执行器与作者CI从仓库运行，源码构建见[打包说明](../plugin/README.md#从源码构建安装)。声明放行、激活或无发现不等于业务验收。实际发布及限定证据见[current-state](current-state.json)。
 
-已认证精确目录为`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`。最低宿主声明不认证未来版本。rc.3入口：左下角账号菜单→设置→内置插件→兼容性；选择实际profile，不默认desktop。折叠/空标题不代表激活失败。
+已认证精确目录为`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`。最低宿主声明不认证未来版本。rc.3/rc.5入口：左下角账号菜单→设置→内置插件→兼容性；选择实际profile，不默认desktop。折叠/空标题不代表激活失败。
 
 ## 参数与生命周期语义
 
@@ -12,7 +12,7 @@
 - rc.3/rc.5显式`whenDraftExists`优先，省略时通常保留已有草稿，`clearPreviousDraft:true`选择replace。后者仍受支持，不是弃用接口。`startSession`可复用同工作区未归档空白会话，指定preset跳过其它preset的空白；选项不证明新建或发送成功。
 - 三版`ctx.timer.setTimeout / setInterval`有官方弃用标记但仍保留，提示审阅`ctx.timeout / interval`契约后迁移。`sessions.retain`提示引用所有权、按需等待ready及作用域结束时release/disposal；不证明释放路径已验证或发生泄漏。两类提醒只进入覆盖说明，不单独改变等级。
 
-rc.5的`conversation.chat.reasoning.body`提供原始输出`rawText`及显示文本`text`；普通渲染、翻译和未翻译视图继续读`text`，确需原始输出才读`rawText`。Content Factory仍只需`text/running/labels`，不重复剥离签名。静态分析仅定位`slots.register`目标并提示迁移；回调props用途、渲染/翻译与流式时序均未验证。动态、展开、访问器、逃逸及多实参合并弃权；不复制自定义槽位名/思考正文，不新增发现或提高已验证调用数。rc.5已登记独立目录并接入普通检查、预检与作者CI；回退/自定义目录不授予未来宿主认证，业务与完整平台验收另记。
+rc.5的`conversation.chat.reasoning.body`提供原始输出`rawText`及显示文本`text`；普通渲染、翻译和未翻译视图继续读`text`，确需原始输出才读`rawText`。Content Factory仍只需`text/running/labels`，不重复剥离签名。静态分析仅定位`slots.register`目标并提示迁移；回调props用途、渲染/翻译与流式时序均未验证。动态、展开、访问器、逃逸及多实参合并弃权；不复制自定义槽位名/思考正文，不新增发现或提高已验证调用数。rc.5已登记独立目录并接入普通检查、预检与作者CI；回退/自定义目录不授予未来宿主认证，平台与业务结果按制品另记于current-state。
 
 只收集四个字段的类型/有限枚举标签，不执行代码、不保存prompt或任意枚举文本。常量别名与直接可知改写可分析；未知调用/闭包副作用撤回旧事实。动态、展开、访问器、逃逸及不同helper实参合并保留未核实。未覆盖完整签名、参数数量、深层对象、异步时序、宿主同名接口或所有权证明，不增加已验证调用数。JSON、CLI、面板、预检及作者CI共用判定。
 
@@ -32,7 +32,7 @@ node tools/functional-health.mjs --manifest <清单.json> --artifact <本地插�
 {
   "schemaVersion": 1,
   "artifact": { "name": "example-plugin", "version": "1.0.0", "sha256": "<tgz字节的64位SHA-256>" },
-  "dshVersion": "0.2.1-rc.3",
+  "dshVersion": "0.2.1-rc.5",
   "checks": [{ "id": "page", "type": "http", "path": "/", "status": 200 }]
 }
 ```
@@ -63,8 +63,6 @@ run会安装并执行所选插件，私有profile不是OS沙箱。只使用自�
 界面步骤见[README](../README.md#人工处置与历史记录)。主结果与处置按context/finding双向定位，显示类别/API/源码及依据摘要；插件/状态筛选不隐藏草稿或原风险。状态为pending/reviewed/false-positive/fixed，必须填写依据并显式保存，不改判定/基线或授予豁免。草稿只驻留当前页面会话：同报告修订不重置输入/焦点，身份变化或处置不可用则保留旧编辑区、标过期、禁保存，可复制后重核或放弃；重载/离开前先保存或复制。坏可选记录仅使本区域不可用，分享前核对敏感信息。
 
 位置为`$DSH_HOME/dsh-plugin-compat-check/reviews.<canonical-node_modules路径SHA256>.json`；未设DSH_HOME时使用`~/.dsh`。记录绑定目标/原观察路径、模式、源码、插件/DSH、工具/规则/目录及finding身份；即使版本/发现文字未变，源码变化仍需重审。旧记录保留为历史，当前显示needs-review。
-
-后端按报告/输入身份缓存处置上下文与已校验文档；每次轮询仍核对私有目录和文件元数据，修订/替换/权限变化、坏文件恢复或卸载会失效，不用旧成功掩盖读取失败。
 
 保存要求当前contextToken、findingId、status和note，不接受HTTP指定路径。单文件1MiB、1000条、每条依据4000字符。陈旧/跨目标/卸载、控制字符及超限输入拒绝；锁内重读合并、临时文件同步后原子替换。坏JSON/结构、链接、特殊或超限文件保留原件，不以刷新覆盖；需核实可信备份。确认重建时先独立备份原件，重建不是风险改善。
 
@@ -100,14 +98,6 @@ review锁使用相同入口。只有同主机/用户、完整匹配元数据且�
 
 正常释放只移除本次持有的同一锁；恢复使用`.lock.recovery-lock`排斥写入。若保护锁遗留，须停用写入者后人工诊断，不递归强清、通配删除或凭时间猜孤锁。恢复不修复目录权限，也不修改JSON；Windows真实恢复未验收。
 
-## 功能回归
-
-```sh
-node --test test/functional-health.test.mjs test/dependency-graph.test.mjs test/finding-review.test.mjs test/p2-workflows-host.test.mjs test/p2-workflows-panel.test.mjs
-```
-
-默认病例是受控输入；`DSC_SLOW=1`浏览器病例只启动自有空Chrome，缺浏览器失败而非略过。真实DSH/制品执行仍按显式授权入口进行，fixture不代替业务证据。[Plan](Plan.md)维护契约及未完成工作。
-
 ## 安装与probe执行环境
 
 仅显式安装检查、probe-boot或健康run才执行目标。其DSH子进程只继承PATH、SystemRoot、COMSPEC、PATHEXT、LANG、LC_ALL、TMPDIR、TEMP、TMP，使用自有0700 HOME/USERPROFILE/XDG/DSH_HOME/DSH_AGENTS_HOME、npm缓存/pnpm store及空0600 npm配置，设置ignore_scripts限制lifecycle。
@@ -120,7 +110,7 @@ node --test test/functional-health.test.mjs test/dependency-graph.test.mjs test/
 
 标记不是密码。通过同源检查后，所有读取/保存入口（含元数据与历史管理）均调用宿主`connection.requestRejection(req)`，沿用宿主签名Cookie、过期及会话策略，不自行解析密钥或另造令牌；未认证/伪造/过期返回401，鉴权服务缺失、异常或不符合同步接口返回503，且不开始计算/读取请求体/写入。无Origin的本机工具也需要标记及有效宿主会话；登录URL令牌先交给宿主根登录入口换取Cookie，不能只附在本插件URL上。界面使用既有同源Cookie；401时重新打开宿主提供的登录入口，不把登录URL/Cookie贴进报告。静态CLI及进程内agent tool不经过HTTP。
 
-这不隔离同一已登录宿主中的可信插件、操作系统用户文件权限或反向代理部署；仍只承诺已登记宿主/本地边界，不外推公网可利用性或未来宿主认证。跨端口图片/同源恢复与未认证拒绝见HTTP回归，真实签名过期使用自有fixture内同步临时推进31天后立即还原时钟核验。
+这不隔离同一已登录宿主中的可信插件、操作系统用户文件权限或反向代理部署；仍只承诺已登记宿主/本地边界，不外推公网可利用性或未来宿主认证。跨端口图片/同源恢复与未认证拒绝见HTTP回归，签名过期在自有fixture内临时推进宿主时钟31天并立即还原，不修改系统时钟。
 
 ## 日常检查与源码交付
 
@@ -161,7 +151,7 @@ node tools/meta-check.mjs --json
 ## 升级预检与有限批量
 
 ```sh
-node bin/compat-check.mjs --nm <profile或node_modules> --dsh-version 0.2.1-rc.2 --upgrade-to 0.2.1-rc.3 --json
+node bin/compat-check.mjs --nm <profile或node_modules> --dsh-version 0.2.1-rc.3 --upgrade-to 0.2.1-rc.5 --json
 node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.json
 node tools/static-batch.mjs --manifest test/fixtures/static-batch.json --previous batch.json
 ```
@@ -179,9 +169,9 @@ node tools/static-batch.mjs --manifest test/fixtures/static-batch.json --previou
 ```sh
 node tools/engineering-check.mjs
 DSC_SLOW=1 node --test test/engineering-live.test.mjs test/profile-lock.test.mjs test/owned-process.test.mjs test/debugger.test.mjs
-DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 DSC_REQUIRE_RC2_UI=1 node tools/rc2-live.mjs
+DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_REQUIRE_RC2_UI=1 node tools/rc2-live.mjs
 ```
 
 真实集成需可信DSH/pnpm、Chrome（DSC_CHROME可指定）及相应网络/执行授权；账户/模型另取授权。只清理自有目录/PID组，不按进程名清场；Darwin负例缺编译器时跳过不算验收。`DSC_EXECUTION_DIAGNOSTICS=<私有目录>`可保留有界启动诊断，不导出argv/env或stderr正文，分享前仍需预览。
 
-发布前设置`DSC_RC2_ARTIFACT=<确切tgz绝对路径>`验收选定归档，并在正式发布时使用**同一文件**；不设置时会重新打包源码。真实插件队列见[维护指南](maintaining.md#真实插件回归)；版本/平台及原始证据身份见[current-state](current-state.json)。
+基础驱动用`DSC_RC2_ARTIFACT=<确切tgz绝对路径>`验收选定归档；完整ci-ui018入口另须DSC_RC2_ARTIFACT_RECEIPT，见维护指南。未指定归档会重新打包，不继承旧包通过记录；正式发布只用双平台已验收的同一文件。真实插件队列见[维护指南](maintaining.md#真实插件回归)；版本/平台及原始证据身份见[current-state](current-state.json)。

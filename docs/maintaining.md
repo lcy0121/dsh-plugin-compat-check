@@ -19,21 +19,21 @@ UI词典位于`plugin/src/i18n/{zh,en,ko}.json`，用可读原文作为消息键
 
 真实验收/到货工具经`tools/owned-package-source.mjs`核对manifest/lock/构建依赖，复制自有闭包到私有构建目录，不向源码、用户profile或运行包注入工具链。selector-parser固定覆盖7.1.6；更新Tailwind/覆盖后须重建、复验布局/主题及开发/运行两图审计。
 
-完整UI验收使用同一独立tgz及自有DSH 0.2.1-rc.3/Chrome：
+完整UI验收使用同一独立tgz及自有DSH/Chrome；默认rc.3，当前rc.5须显式选择：
 
 ```sh
-node tools/ci-ui018.mjs <自有输出目录>
+DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 node tools/ci-ui018.mjs <自有输出目录>
 ```
 
 入口统一启用九项验收：原面板、布局/主题/键盘、分页/完整导出、超时恢复/草稿、HTTP会话、复杂度/采样、处置定位、历史管理和中英韩国际化。检查第123条发现的双向定位/筛选/焦点、12px间距、短结论不折字、历史显式操作及报告/基线不变；密集数据来自明确标记的非激活合成插件。截图中的窄列CSS夹具不冒充真实插件布局。开关依赖以入口源码为准，单跑处置定位须同时启用hardening。
 
-输出含提交/dirty/逐文件摘要、tgz摘要、完整报告、日志、截图及SHA256SUMS，缺结果/截图或清理失败均不得通过。使用忽略的tmp或仓库外目录，避免证据进入源码身份；CI要求干净检出。Linux rc.3作业执行同一入口并上传证据，其他两宿主继续集成验收；具体平台结果须对应实际提交，不由接入CI推定。`ui018`文件名、`DSC_UI018_*`及证据字段沿用以兼容脚本，不代表产品版本。Windows、真实用户和一般业务另验。
+输出含提交/dirty/逐文件摘要、tgz摘要、完整报告、日志、截图及SHA256SUMS，缺结果/截图或清理失败均不得通过。使用忽略的tmp或仓库外目录，避免证据进入源码身份；CI要求干净检出。Linux rc.3/rc.5跑完整入口，另两宿主保留集成门禁；平台结果绑定实际提交和归档，不由接入CI推定。`ui018`文件名、`DSC_UI018_*`及证据字段沿用以兼容脚本，不代表产品版本。Windows、真实用户和一般业务另验。
 
 组件回归另测三槽位、共享订阅/可见性及迟到响应。`node tools/ui018-performance.mjs`比较固定提交与当前客户端的1000插件元素树及隐藏内容；它是合成hook测量，耗时不作浏览器性能门禁。
 
 `test/fixtures/syntax-matrix.json`与`tools/syntax-matrix.mjs`分别记录并执行supported / inferred / abstained / excluded病例。每例核验包名、精确调用对/跨度、确定性或诊断，不以解析成功代替结论。扩展语法须增加正反例，并保留动态/超限限制；矩阵与真实业务标签独立，不能调严重度求绿。
 
-已完成的A4b排除实验、旧槽位探测和逐轮维护日志保留在`39d9f1a`的相应路径。移植阶段Python提取器/对拍及其专属样例已移除，历史见`26fdbf4:tools/parity/`；当前AST文件图/自循环/精确路径、语法矩阵及快照回归承担验证。仍使用的历史宿主观测原字节迁入`test/fixtures/host-surface-parityfix.json`。独立正则枚举仅供候选复核，不是判定真值。
+旧实验/逐轮日志见`10213c0:docs/maintaining.md`，Python对拍已移除，当前由AST文件图、语法矩阵和快照回归覆盖。仍使用的历史观测在test/fixtures/host-surface-parityfix.json；独立正则复核不是判定真值。
 
 ## API目录候选审查
 
@@ -80,15 +80,15 @@ npm audit固定公共registry，任何公告级别（含未知）均阻断，无
 
 ## 真实插件回归
 
-[rc.2清单](../tools/real-regression-manifest.json)及[rc.3清单](../tools/real-regression-manifest-rc3.json)分别锁定DSH/目录、五个npm制品、摘要及每轮24项业务期望，互不借结果。独立holdout为`dsh-pomodoro@0.5.5`与`dsh-global-todo@0.13.2`，先选无需账户/模型且可审阅的操作，再封存预测，不能据结果调规则。重复运行不增加独立样本数。
+[rc.2](../tools/real-regression-manifest.json)、[rc.3](../tools/real-regression-manifest-rc3.json)及[rc.5清单](../tools/real-regression-manifest-rc5.json)分别锁定DSH/目录、五个npm制品、摘要及每轮24项业务期望，互不借结果。独立holdout为`dsh-pomodoro@0.5.5`与`dsh-global-todo@0.13.2`，先选无需账户/模型且可审阅的操作，再封存预测，不能据结果调规则。重复运行不增加独立样本数。
 
 Pomodoro真值来自Start后的localStorage revision/deadline及新文档恢复，受控故障删主按钮；GET config只说明配置就绪。Todo真值来自POST/create、私有JSON精确标题及重载DOM；故障只对该POST返回503，磁盘/DOM均须无标题，恢复另建标题。正常→故障→恢复分组，不调用通知/模型/外部采集。
 
 静态预测在启动前封存，service-only等待官方appReady后采样原始root，在Chrome/动作前封存；不要求所有被测服务存在。receipt记录动作时间、请求/DOM/磁盘后置条件及清理；回放重算标签，不信任保存的布尔值或把hash当签名。静态/service-only、自然/受控、FP/FN和驱动错误分列，clientVerified:false保留。旧sidebar的动态禁用patch不能证明顶层挂载，其两项HTTP405失败保留为limited/FN，不能要求service-only零漏报。绿色只证明固定结果重现，不代表生态准确率。
 
 ```sh
-DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 node tools/real-regression.mjs --live --repeat 1 --out-dir <新空目录>
-DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 node tools/real-regression.mjs --replay <证据根或单队列>
+DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 node tools/real-regression.mjs --live --repeat 1 --out-dir <新空目录>
+DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 node tools/real-regression.mjs --replay <证据根或单队列>
 node tools/business-labels.mjs --live --suite holdout-pomodoro --observe-services --out-dir <新空目录> --json
 node tools/business-labels.mjs --live --suite holdout-todo --observe-services --out-dir <另一新空目录> --json
 ```
@@ -99,22 +99,19 @@ node tools/business-labels.mjs --live --suite holdout-todo --observe-services --
 
 浏览器驱动必须等待独立就绪条件：市场重载等本次GET installed响应及渲染，不以卡片或健康业务值代替；升级面板等loader扫描/F2完成及设置页显式重检；语义提示分别展开覆盖限制和发现区再检查可见文本。失败不放宽后置条件，不保留鉴权或私有报告正文。
 
-rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.json)。三处更多、插件主列表、空白复用及preset/草稿策略有实际驱动；模型列表用私有环境、只请求受控loopback列表，不继承密钥，失败/超时不等于模型不可用。0.2.0-rc.2保留其它真实门禁，rc.2/rc.3执行完整面板；显式宿主不符为错误，不以缺浏览器跳过求绿。
+rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.json)。三处更多、插件主列表、空白复用及preset/草稿策略有实际驱动；模型列表用私有环境、只请求受控loopback列表，不继承密钥，失败/超时不等于模型不可用。0.2.0-rc.2保留其它真实门禁，rc.2/rc.3/rc.5执行面板；显式宿主不符为错误，不以缺浏览器跳过求绿。
 
 ## 同一制品发布核对
 
-文档以0.2.0功能描述为准；只有日期、版本、提交与哈希明确的回执可证明执行过。发布时依次完成：
+0.2.1仍为未发布候选；已完成记录与当前源码分开核验，历史CI不认证新提交。发布依次完成：
 
-1. 本地运行`npm run check`和`node plugin/scripts/prepublish-check.mjs`（只验证，不发布）；成功TAP通过`tools/update-current-state.mjs --test-summary <日志>`更新计数。核对生成副本及许可证，不改快照掩盖失败。
-2. 经授权推送后等待**所选发布提交**全部Actions成功；历史CI不认证新提交。明确Windows、用户试用及业务样本的未验范围。
-3. 从该源码构建一次独立tgz，记录SHA-256，并将同一文件安装到自有profile验收。`tools/ci-ui018.mjs`会产出自己的归档及证据，不可用后来重打的包替代。
+1. 运行check与prepublish-check（不发布），用成功TAP更新current-state计数，核生成副本、许可证和公开元数据。
+2. 授权推送后等待所选提交全部Actions通过。CI candidate job只构建一次；rc.5 job下载同一归档/回执，运行完整UI并上传证据。
+3. 下载CI归档，核来源、提交、dirty及SHA-256；Mac使用该文件和构建回执重跑。若平台归档不同，即使内部文件相同也不能借旧文件验收。构建及重用命令见下方。
+4. 另取正式发布授权后，npm发布同一tgz，Git tag/Release附该文件、SHA256SUMS及限定验收回执；不从源码重打包。
+5. 核npm版本/integrity/shasum、附件SHA-256、tag提交，再实际公共安装。将真实结果记入current-state，不预写published或未经验证的时间/摘要。
 
-```sh
-DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.3 DSC_REQUIRE_RC2_UI=1 DSC_RC2_ARTIFACT=<确切tgz绝对路径> node tools/rc2-live.mjs
-```
-
-4. 取得正式发布授权后才发布验收过的**同一tgz**、Git tag及Release附件；npm直接发布该归档，不从源码重新打包；Release同时附SHA256SUMS及限定验收回执。核对npm版本/integrity/shasum、附件SHA-256和tag提交，再从公共registry实际安装核验。`node tools/meta-check.mjs --json`只读检查公开信息；本地领先属于提示，取数失败不是发布成功。
-5. 将实际时间、提交、制品及公共安装结果写入[current-state](current-state.json)。历史回执移至Git指针；不得预写published状态、发布时间、未执行CI或未经验证的摘要。
+Windows、真实用户与一般业务单列未验范围。取数失败不算通过；本地候选领先registry或README/description差异属于待发布提示。
 
 GitHub简介/topics可独立于Git提交更新；npm简介/搜索关键词分别取`plugin/package.json`的description/keywords，正式发布新版本后再核对公开值。两者共用产品主旨，但不是同一组平台字段；npm dist-tags是版本渠道，不能拿它替代搜索关键词。发布前本地与registry的版本、正文及元数据差异须记录，不能宣称已上线。字段含义见[npm package.json文档](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/#description)。
 
@@ -144,28 +141,16 @@ GitHub简介/topics可独立于Git提交更新；npm简介/搜索关键词分别
 
 ## rc.5验收入口
 
-`tools/acceptance-target.mjs`按精确版本选择能力，rc.3/rc.5复用已核对的导航、草稿和模型列表契约；rc.2保留原路径。显式目标与实际可执行文件不符即失败；rc.3/rc.5缺浏览器不能skip成功。完整九项UI入口可显式选择rc.5，默认仍为rc.3以保持旧CI：
+acceptance-target按精确版本选择能力；rc.3/rc.5复用已核导航/草稿/模型列表契约，rc.2保留原路径。显式目标与实际可执行文件不符即失败，rc.3/rc.5缺浏览器不能skip求绿。
 
 ```sh
 DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_REQUIRE_RC2_UI=1 node tools/rc2-live.mjs
-DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 node tools/ci-ui018.mjs <自有输出目录>
-```
-
-基础入口验证同一独立tgz的HTTP/tool、声明、预检、语义、三槽位、导航及恢复/清理；完整入口仍要求九项结果、截图、来源及制品摘要。目标、浏览器、断言/结果、同一制品或清理缺失均不得通过。rc.5完整证据额外要求导航/草稿、精确语义、受控模型列表及独立ACP回执；Linux实跑及同一制品核对留在Plan第5项。
-
-`tools/rc5-acp-stdout.mjs`对实际ACP仅使用私有DSH_HOME、合成凭据、loopback目录/两轮模型响应和tools-only MCP。每行stdout必须是完整JSON-RPC，目录诊断须在stderr且不带凭据；不具备resources能力时不向MCP发资源请求。超时/异常/清理失败即失败，输出只保留计数与断言，不保存对话正文。它与Web/Desktop结果分别记录；受控模型列表另验首次等待、失败/超时回退及无凭据不请求。
-
-## 0.2.1候选与同一归档验收
-
-CI的candidate job只构建一次归档，保存源码清单/摘要、提交、dirty及制品摘要；rc.5 Linux job下载同一workflow归档，以摘要错误即失败的方式接收。完整UI驱动读取提供的归档及构建回执，核对源码/提交/dirty/归档摘要和包名/版本后复制验收，不重新打包：
-
-```sh
 node tools/ci-ui018.mjs --build-only <自有候选目录>
 DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_RC2_ARTIFACT=<候选tgz绝对路径> DSC_RC2_ARTIFACT_RECEIPT=<候选目录/summary.json> node tools/ci-ui018.mjs <另一自有验收目录>
 ```
 
-build-only只证明构建与来源，不算宿主通过。来源回执须与当前源码完全一致；缺回执、错误提交、源码/归档变化或坏包都在启动宿主前失败。保留旧rc.3独立构建门禁。Mac/Linux最终须核对同一tgz摘要；若CI重建结果与本地候选不同，必须从CI下载该文件重跑Mac，不能借旧回执。发布仍另取授权。
+基础入口验HTTP/tool、声明、预检、精确语义、三槽位及导航恢复；完整UI入口要求九项结果、截图、来源、归档摘要与清理。build-only只证明构建，不算宿主通过；供应归档必须附来源回执，核当前源码/commit/dirty/摘要及包名/版本后复制，不重打包。缺回执、源码变化或坏包在启动前失败。
 
-rc.5固定业务清单为`tools/real-regression-manifest-rc5.json`，沿用独立封存的五个制品及24项期望（含Pomodoro/Todo holdout），只替换已审查的宿主/目录身份，拒绝旧版观测。执行和回放均显式指定`DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5`；不根据实测结果调整规则或改写期望。Linux workflow已接入rc.5字体、九项UI及失败证据上传；是否执行成功以当前候选提交的实际CI为准。
+rc.5额外要求独立ACP stdout JSON-RPC、stderr目录诊断、MCP能力、受控模型列表及导航语义回执。rc5-acp-stdout只用私有DSH_HOME、合成凭据、loopback列表/两轮模型响应和tools-only MCP；无resources能力不请求资源。失败/超时/清理不确认均失败，只保存计数与断言，不保存对话正文。模型列表另验首次等待、失败/超时回退及无凭据不请求；没有生产账户/模型调用。
 
-`rules/dsh-0.2.1-rc.5-review.json`的integrationAcceptance保留目录登记时的基础集成快照；完整UI、业务和发布结果按实际制品分别记入current-state，不追写原归档或把旧回执升级为新验收。
+已封存的1a84561候选在macOS/Linux通过同一CI归档验收，细节见current-state；本轮文档/skill更新后的包须重验。固定业务五suite/24项仅证明期望重现，不能称全部功能通过。rules/dsh-0.2.1-rc.5-review.json的integrationAcceptance保留目录登记时基础快照，不追写历史归档。
