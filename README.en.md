@@ -10,6 +10,8 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 [docs/current-state.json](docs/current-state.json) records acceptance by commit, archive and platform; new artifacts require verification. The npm plugin provides the page, details/badges, `compat_check` and skill. CLI, install checks, batches, author CI and health executor are repository tools. There is no npm CLI bin or `npx dsh-plugin-compat-check` support.
 
+2026-11-05 [upstream verification](docs/upstream-verification.md): dshmarket1.73.10 retains recovery/install-warning gaps; Desktop disk writes do not prove completion. The 1024 catalogue still lists only GitHub source installation. Use npm or a complete tgz below.
+
 ## Install and use
 
 ```sh

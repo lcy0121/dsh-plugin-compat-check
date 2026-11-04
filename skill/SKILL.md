@@ -113,6 +113,8 @@ HTTP/tool的reviews是独立人工记录，pending/reviewed/false-positive/fixed
 
 仓库`tools/functional-health.mjs`默认review；仅在用户授权所选制品安装、执行及HTTP/DOM测量后加run。验USTAR字节SHA-256、包名/版本和本机DSH，不接作者脚本。最多32项、请求/导航3秒、响应64KiB、整轮180秒，只测自有同源GET/只读DOM；超时、取消、断言或清理失败不算成功。导入/清单不构成执行授权，不借用户账户/模型。
 
+市场安装/恢复故障另见docs/upstream-verification.md；本工具结论不能证明市场操作完成，须分别核写盘、HTTP及激活。
+
 ## 故障分享与交付事实
 
 ```sh

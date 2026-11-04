@@ -10,6 +10,8 @@
 
 验收按提交、归档及平台记录于[docs/current-state.json](docs/current-state.json)；新制品须重验。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
 
+2026-11-05[上游复验](docs/upstream-verification.md)：dshmarket1.73.10仍有恢复/新装告警缺口，桌面操作写盘不等于完成；1024仍只列GitHub源码方式。安装本工具请用下方npm或完整tgz。
+
 ## 安装与使用
 
 ```sh

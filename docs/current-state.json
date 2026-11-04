@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.2.3",
-  "recordedAt": "2026-11-04T17:08:51.602Z",
+  "recordedAt": "2026-11-04T17:43:02.115Z",
   "testFiles": 88,
   "tests": 1301,
   "repositoryFiles": {
@@ -74,7 +74,7 @@
     "preparation02320261105": {
       "version": "0.2.3",
       "sourceBase": "b7b37a9e484f67626027ba7ae51e32d7d8972d44",
-      "status": "Local regression and delivery preparation; exact-commit remote CI and same-archive Linux acceptance are required before publication.",
+      "status": "Dated local preparation receipt. Exact-commit remote CI and platform results are recorded by the delivery run, not inferred from this snapshot.",
       "beforeAfter": {
         "beforeCommit": "b188c7919858bf3d00a485869ff24687626e6adc",
         "minimalCases": 4,
@@ -111,7 +111,7 @@
         "fail": 0,
         "officialSourceSha256": "a2b94ff1183a87bb1f1d898c6274ae5f8b78accc38931594afd97b58cf0db81f",
         "freshDownload": "verified",
-        "ci": "Required on Node22/24 before candidate; actual remote run pending."
+        "ci": "Required on Node22/24 before candidate construction; actual run result belongs to its exact commit."
       },
       "checks": [
         "source/generated/docs/links/catalogue registry passed",
@@ -146,12 +146,71 @@
         "githubTag": "v0.2.2",
         "scope": "Dated pre-publication observation, not a product current-version claim. No publication performed."
       },
-      "remaining": [
-        "Push authorization, exact-commit GitHub CI and same-archive Linux acceptance.",
-        "Confirm macOS against the CI candidate if its source receipt or archive differs.",
-        "Windows user-site and general business acceptance remain separate unverified scope."
+      "receipts": "tmp/prep-023-20261105/; checks, original TAP, before-after probes, archive/source/UI/checksums.",
+      "unverifiedScope": [
+        "Windows user-site confirmation",
+        "General business acceptance"
+      ]
+    },
+    "upstream20261105": {
+      "observedOn": "2026-11-05",
+      "marketVersion": "1.73.10",
+      "tagCommit": "5e80c1cc0b6a29de3b87f410445f12a1bb478219",
+      "archiveSha256": "1dbcd14bbf29e503d6881270522dd49a79c8140ac7696ad60e2839cd7b253a9e",
+      "integrityVerified": true,
+      "controlledRepairCases": 6,
+      "controlledInstallUpdateCases": 8,
+      "retryCap": {
+        "managerCallsAcrossFiveStarts": 3,
+        "journalAttempts": 3,
+        "abandonedHint": true,
+        "scope": "Original function with controlled manager, not five real Desktop starts."
+      },
+      "realPnpmInstall": {
+        "installedVersion": "2.0.0",
+        "bundlePresent": true,
+        "releaseAgeUnchanged": true,
+        "versionUnverified": null,
+        "warningLogged": false,
+        "scope": "Original published HTTP install route plus real dsh CLI/pnpm in private profile. Only market lookups fail by request client; pnpm receives an owned synthetic registry. No production registry outage or native GUI claim."
+      },
+      "desktop": {
+        "host": "0.2.1-rc.5",
+        "twoRestartsRestoreComposition": false,
+        "journalAttempts": [
+          1,
+          2
+        ],
+        "manualRemove": "HTTP did not settle within 45s; disk removal completed",
+        "freshInstall": "HTTP did not settle within 45s; package2.0.0 and bundle row written",
+        "liveRecoveryCertified": false,
+        "ownedHostsStopped": 5,
+        "scope": "Real installed Desktop Host IPC entry, PluginManager, bundled pnpm and owned headless Chrome; private profile and synthetic registry. No Electron GUI shell, production profile or full remove/SIGKILL reproduction."
+      },
+      "outcome": "Upstream #928 recovery/diagnostic and #1047 install warning gaps remain. 1024 npm mapping absent; awesome PR unmerged. No upstream messages sent.",
+      "cleanup": {
+        "ownedHostsAndChromeStopped": true,
+        "privateExecutionDirectoriesRemoved": true
+      },
+      "publicEntries": {
+        "store22": "open; HTTP200 but GitHub-only, unknown/not_checked, checkedAt null",
+        "awesome717": "open, unmerged"
+      },
+      "receipts": "tmp/upstream-20261105/"
+    },
+    "delivery023": {
+      "workflow": ".github/workflows/test.yml",
+      "branch": "codex/0.2.3-issue-fixes",
+      "statusSource": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/workflows/test.yml",
+      "gates": [
+        "Node22/24 full tests and mandatory official-validator issue regression",
+        "Frozen dependency audit",
+        "Source-bound candidate archive",
+        "Linux host matrix and rc.5 full UI/issue acceptance",
+        "macOS rc.5 full UI/issue acceptance on the same candidate tgz"
       ],
-      "receipts": "tmp/prep-023-20261105/; checks, original TAP, before-after probes, archive/source/UI/checksums."
+      "artifactRule": "Bind commit, clean source manifest and SHA256; never rebuild the selected CI artifact for platform acceptance.",
+      "scope": "Gate contract only. Actual success requires exact-commit Actions and archive/platform receipts; configuration or historical results do not establish success. No merge or publication is performed by these gates."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

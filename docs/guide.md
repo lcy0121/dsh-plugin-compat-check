@@ -164,6 +164,8 @@ node tools/static-batch.mjs --manifest test/fixtures/static-batch.json --previou
 
 “下一步”由结构化类别/状态生成，不猜替代API/修复版本。搜索、组合筛选、折叠不改报告或完整导出；无可比基线中性提示。目标、时间、缓存状态及覆盖限制须可见。复制前预览；导出保留包内位置而省略原始源码/日志/probe/baseline，不保证完全脱敏，不自动发帖。
 
+市场安装/恢复另见[上游复验](upstream-verification.md)：兼容检查无发现不证明市场操作成功，磁盘写入也不代替HTTP完成或激活。
+
 ## 工程与真实集成
 
 ```sh

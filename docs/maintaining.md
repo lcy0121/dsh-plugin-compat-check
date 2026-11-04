@@ -77,6 +77,8 @@ npm audit固定公共registry，任何公告级别（含未知）均阻断，无
 
 [测试](../.github/workflows/test.yml)和[静态批量](../.github/workflows/static-batch.yml)固定Actions完整commit，checkout不保存凭据、最小权限、job限时、制品7天，不恢复npm缓存。公告审计在独立Node24 job跑一次；静态批量手动触发。Node矩阵独立报告；prepublish通过DSC_TEST_TAP保留完整TAP/stderr，失败看末尾真实错误。更新Action pin须核对官方commit/action.yml运行时及inputs，Action运行时与被测Node分开。其它runner另验收。
 
+上游市场的恢复/安装复验见[独立记录](upstream-verification.md)，来源、受控边界、真实pnpm和Desktop Host结果分列，不借本工具CI替上游认证。
+
 ## 真实插件回归
 
 [rc.2](../tools/real-regression-manifest.json)、[rc.3](../tools/real-regression-manifest-rc3.json)及[rc.5清单](../tools/real-regression-manifest-rc5.json)分别锁定DSH/目录、五个npm制品、摘要及每轮24项业务期望，互不借结果。独立holdout为`dsh-pomodoro@0.5.5`与`dsh-global-todo@0.13.2`，先选无需账户/模型且可审阅的操作，再封存预测，不能据结果调规则。重复运行不增加独立样本数。
@@ -169,4 +171,4 @@ rc.5额外要求独立ACP stdout JSON-RPC、stderr目录诊断、MCP能力、受
 
 `ci-ui018`的rc.5门禁还要求`issues023`回执：独立tgz装入自有profile，每25ms原子写状态期间联合调用无参tool、刷新真实设置页、核目标一致及缓存命中；停写后核显式失败及升级回包。调用经过宿主tools.execute的严格JSON/schema管线；测试桥接路由/定时器仅驻临时profile，随宿主清理，不进入npm产品。预检复制全部输入字节，因此持续写入时拒绝不稳定快照是正确行为，不放宽该守卫。
 
-本地Node22/24、九项UI及问题联合验收见current-state；Windows实机、所选提交远端CI和同一归档双平台回执按Plan继续。源码修复、用户现场确认及公开发行分开记录，不自动关闭issue或联系用户。
+Node22/24、九项UI及问题联合验收按精确提交/归档核对；CI状态见对应Actions运行，同一tgz须有macOS/Linux回执。Windows实机和用户现场确认单列。源码修复、现场复验及公开发行分开记录，issue沟通/关闭按当次授权与证据决定。
