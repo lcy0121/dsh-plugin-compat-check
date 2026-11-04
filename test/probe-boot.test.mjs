@@ -169,7 +169,7 @@ describe(
     );
 
     test(
-      "同一缺失方法从目录疑似变为观测确定，不要求所有推断都变certain",
+      "目录只保留方法覆盖限制，真实probe才能确定同一方法缺失",
       { timeout: 180000 },
       () => {
         const staticResult = cli([]),
@@ -177,11 +177,28 @@ describe(
         assert.equal(staticResult.inputs.hasRuntimeSurface, false);
         const select = (data) =>
           data.plugins["@acceptance/partial"].findings.find(
-            (f) => f.category === "host-method-missing",
+            (f) =>
+              f.category === "host-method-missing" &&
+              f.service === "tools" &&
+              f.method === "dscMissingForLiveAcceptance",
           );
-        assert.equal(select(staticResult).certainty, "suspected");
+        assert.equal(select(staticResult), undefined);
+        const partial = staticResult.plugins["@acceptance/partial"];
+        assert.equal(partial.coverage.status, "limited");
+        const abstained = partial.abstained.find(
+          (site) =>
+            site.service === "tools" &&
+            site.method === "dscMissingForLiveAcceptance",
+        );
+        assert.ok(abstained?.location, "目录弃权仍须保留真实调用位置");
+        assert.ok(
+          partial.coverage.limitations.some((text) =>
+            text.includes("tools.dscMissingForLiveAcceptance"),
+          ),
+        );
         assert.equal(select(runtime).certainty, "certain");
         assert.equal(select(runtime).impactBasis, "inferred");
+        assert.deepEqual(select(runtime).location, abstained.location);
       },
     );
   },

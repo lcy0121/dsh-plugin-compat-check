@@ -165,7 +165,7 @@ rc.5额外要求独立ACP stdout JSON-RPC、stderr目录诊断、MCP能力、受
 | #7：touch目录、原子替换state JSON | 无关状态写入不失效；源码、清单、patch及实际解析候选仍失效，保留提交前复核/预算/基线守卫，不按state目录名排除 | `identity-runtime-state`、`cache`、`input-lifecycle` |
 | #9：缺省字段/非法JSON证据 | 可为空字段显式null，普通/缓存/失败/升级回包通过严格schema；特殊值、循环、访问器、稀疏数组及额外数组属性明确失败，不静默丢证据或增加未声明键 | `tool-json`、`tool-host-validator`、`upgrade-host` |
 | #10：Windows盘符/UNC位置参数 | 显式请求优先；绝对启动路径保持实际根，环境须安装位置印证，冲突/未知关闭推断；不猜desktop或借共享安装冒充身份 | `profile-target`、`cache`、`input-lifecycle` |
-| #8：abstract/@Remote签名被漏过 | 同一固定来源核126/126新增名称，宿主方法291→417；目录缺项改为带方法/位置的覆盖限制，可靠完整运行时证据仍可证明真正缺失 | `catalog-signature-omissions`、`verdict-regressions`、`catalog-governance` |
+| #8：abstract/@Remote签名被漏过 | 同一固定来源核126/126新增名称，宿主方法291→417；目录缺项改为带方法/位置的覆盖限制，可靠完整运行时证据仍可证明真正缺失 | `catalog-signature-omissions`、`verdict-regressions`、`catalog-governance`、`probe-boot` |
 
 表中名称对应`test/<名称>.test.mjs`。身份观察复用有界源码图，任意后缀解析候选的存在性/类型/真实路径也纳入；读取、枚举和时间共享预算。官方校验器测试只执行经摘要校验的原始TypeScript，不复制第三方实现。
 
