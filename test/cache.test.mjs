@@ -269,11 +269,11 @@ describe("F2：profile 判断（环境变量会骗人）", () => {
     assert.equal(r.name, "tui");
   });
 
-  test("没有 argv 时才退回环境变量，且在 why 里**标明它可能是陈的**", () => {
+  test("没有 argv 且环境变量未被安装身份印证时拒绝推断", () => {
     const r = callResolve(["node", "cli.js"], { DSH_PROFILE: "web" });
-    assert.equal(r.name, "web");
+    assert.equal(r.name, null);
     // 这句警示很重要：读 why 的人必须知道这条线索不可靠
-    assert.match(r.why, /可能来自启动 app 的那个 shell|可能.*陈/);
+    assert.match(r.why, /无法确认当前 profile/);
   });
 
   test("DSC_PROFILE 优先于 DSH_PROFILE（给工具/测试一个干净的覆盖点）", () => {
@@ -287,7 +287,7 @@ describe("F2：profile 判断（环境变量会骗人）", () => {
   test("全都没有 → 返回 null（调用方必须要求显式指定）", () => {
     const r = callResolve(["node", "cli.js"], {});
     assert.equal(r.name, null);
-    assert.equal(r.why, "无法判断");
+    assert.match(r.why, /无法确认当前 profile/);
   });
 
   test("`--profile` 后面没跟值时不要吞掉下一个参数", () => {

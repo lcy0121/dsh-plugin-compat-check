@@ -14,9 +14,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -32,9 +30,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -50,9 +46,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -68,9 +62,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -86,9 +78,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -107,9 +97,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -125,9 +113,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -154,9 +140,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -172,9 +156,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -238,9 +220,7 @@
         "diagnostics": [],
         "coverage": "limited",
         "findings": [["host-method-missing", "settings.absent", "suspected"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -256,9 +236,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -360,9 +338,7 @@
         "diagnostics": ["entry-fallback", "entry-resolution-uncertain"],
         "coverage": "limited",
         "findings": [["host-method-missing", "settings.absent", "suspected"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -412,9 +388,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -430,9 +404,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -450,9 +422,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -470,9 +440,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -508,9 +476,7 @@
         "diagnostics": ["module-path-uncertain"],
         "coverage": "limited",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -526,9 +492,7 @@
         "diagnostics": ["module-path-uncertain"],
         "coverage": "limited",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -546,9 +510,7 @@
         "diagnostics": ["source-unresolved"],
         "coverage": "limited",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -568,9 +530,7 @@
         "diagnostics": ["entry-fallback", "source-unresolved"],
         "coverage": "limited",
         "findings": [["host-method-missing", "settings.absent", "suspected"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {
@@ -589,9 +549,7 @@
         "diagnostics": [],
         "coverage": "complete",
         "findings": [["host-method-missing", "settings.absent", "certain"]],
-        "catalogueFindings": [
-          ["host-method-missing", "settings.absent", "suspected"]
-        ]
+        "catalogueFindings": []
       }
     },
     {

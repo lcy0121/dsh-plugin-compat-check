@@ -85,9 +85,7 @@ test("classification preserves weak and partial evidence without claiming runtim
   assert.deepEqual(byId["direct"].actual.findings, [
     ["host-method-missing", "settings.absent", "certain"],
   ]);
-  assert.deepEqual(byId["direct"].actual.catalogueFindings, [
-    ["host-method-missing", "settings.absent", "suspected"],
-  ]);
+  assert.deepEqual(byId["direct"].actual.catalogueFindings, []);
   assert.equal(byId["bare-inferred"].actual.classification, "inferred");
   assert.equal(byId["bare-inferred"].actual.findings[0][2], "suspected");
   assert.equal(

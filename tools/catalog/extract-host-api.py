@@ -71,7 +71,7 @@ def method_names(seg):
         body = seg[pos:end]
         names = []
         for sig in re.findall(r"signature:\s*['\"]([^'\"]+)['\"]", body):
-            mm = re.match(r"\s*(?:async\s+)?([A-Za-z_$][\w$]*)\s*\(", sig)
+            mm = re.match(r"\s*(?:(?:@\w+(?:\([^)]*\))?|abstract|async|public|protected|private|static|override|readonly)\s+)*([A-Za-z_$][\w$]*)\s*\(", sig)
             if mm:
                 names.append(mm.group(1))
         svcs[key] = sorted(set(names))

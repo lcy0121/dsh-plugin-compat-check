@@ -6,7 +6,7 @@
 
 ## 版本与入口
 
-**0.2.2**支持DSH rc.5精确目录、参数/槽位语义、升级预检和作者CI；提供中英韩界面、依赖关系、人工处置及本地报告历史。已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
+**0.2.3**支持DSH rc.5精确目录、参数/槽位语义、升级预检和作者CI；提供中英韩界面、依赖关系、人工处置及本地报告历史。已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
 
 macOS/Linux rc.5验收按精确提交及归档记录于[docs/current-state.json](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)；后续源码/打包须重新核对。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
 
@@ -14,9 +14,9 @@ macOS/Linux rc.5验收按精确提交及归档记录于[docs/current-state.json]
 
 ```sh
 # 固定安装本版
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.2
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.3
 # 使用本地归档前核对摘要
-dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.2.tgz
+dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.3.tgz
 ```
 
 在安装所用profile的DSH中打开：**左下角“更多”（⋯）/用户头像 → 设置 → 内置插件 → 兼容性**。不默认是desktop；agent可调用`compat_check`。源码安装须[构建完整tgz](#从源码构建安装)。

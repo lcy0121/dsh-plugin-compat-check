@@ -102,7 +102,7 @@ test("fallback warning and reference digest remain visible in text, quiet and sa
     assert.match(text, /未认证/);
     assert.match(
       text,
-      /63ee5a2963bb35eb1425c78cda1d3eafb2e153a959b69003abfcaf543cde043a/,
+      /c0ec076da1ab23a76b5e9b877a66c11dd97b13e779aaef4f7bfc94bca627ab15/,
     );
   }
 });
@@ -147,7 +147,7 @@ test("panel displays the actual target, reference digest and fallback warning wi
   assert.match(h.text(), /未认证/);
   assert.match(
     h.text(),
-    /63ee5a2963bb35eb1425c78cda1d3eafb2e153a959b69003abfcaf543cde043a/,
+    /c0ec076da1ab23a76b5e9b877a66c11dd97b13e779aaef4f7bfc94bca627ab15/,
   );
   assert(h.rows().length > 0);
   h.dispose();

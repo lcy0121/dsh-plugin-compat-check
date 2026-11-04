@@ -1,6 +1,6 @@
 # skill交付与注册
 
-对应**0.2.2**；产品/待办见[Plan](../docs/Plan.md)，限定验收与实际发布见[current-state](../docs/current-state.json)。
+对应**0.2.3**；产品/待办见[Plan](../docs/Plan.md)，限定验收与实际发布见[current-state](../docs/current-state.json)。
 
 权威正文为[SKILL.md](SKILL.md)，plugin/skill/SKILL.md为逐字节副本，prepack同步且通过files:skill交付，不含CLI。修改后执行：
 

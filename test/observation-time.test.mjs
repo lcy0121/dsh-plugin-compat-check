@@ -167,9 +167,8 @@ for (const state of ["FAILED", "PENDING"]) {
     const missing = plugin.findings.find(
       (finding) => finding.method === "absent",
     );
-    assert.equal(missing.certainty, "suspected");
-    assert.equal(missing.evidence.methodSource, "目录");
-    assert.equal(missing.impactBasis, "inferred");
+    assert.equal(missing, undefined);
+    assert.equal(plugin.coverage.status, "limited");
 
     input.probedAt = "2026-10-22T00:05:00.000Z";
     const accepted = buildVerdicts({

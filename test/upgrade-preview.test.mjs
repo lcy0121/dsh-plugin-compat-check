@@ -81,7 +81,7 @@ test("known versions compare one frozen artifact with canonical static evidence,
     ),
   );
   assert.ok(
-    result.changes.resolved.some(
+    !result.changes.resolved.some(
       (x) => x.finding.method === "inspectCompositions",
     ),
   );
@@ -124,7 +124,7 @@ test("same-version comparisons preserve existing risks but have neutral exit", a
   });
   assert.equal(result.status, "compared", result.error);
   assert.equal(result.exitCode, 0);
-  assert.ok(result.summary.unchanged > 0);
+  assert.equal(result.summary.unchanged, 0);
   assert.equal(result.summary.added, 0);
   assert.match(renderUpgradePreview(result), /无新增.*静态风险/);
 });
@@ -251,7 +251,7 @@ test("explicit runtime, exemption, cache and rule overrides are rejected", async
 });
 test("comparison keys retain package and source span; certainty can worsen despite severity improvement", async (t) => {
   const f = fixture(t, {
-    code: "export default ctx => {ctx.settings.absentMethod();ctx.settings.absentMethod();};",
+    code: "export default ctx => {ctx.missingOne.absentMethod();ctx.missingTwo.absentMethod();};",
     range: "*",
   });
   const result = await runUpgradePreview({
@@ -338,7 +338,7 @@ test("a captured snapshot owns its bytes and cleanup cannot delete the original 
     "changed",
   );
 });
-test("fixed catalogue pair exposes a removed method as a new suspected static risk", async (t) => {
+test("fixed catalogue pair does not treat unenumerated methods as runtime absence", async (t) => {
   const f = fixture(t, {
     code: "export default ctx => ctx.subagents.start();",
     range: "*",
@@ -356,10 +356,8 @@ test("fixed catalogue pair exposes a removed method as a new suspected static ri
   const change = result.changes.added.find(
     (x) => x.finding.service === "subagents" && x.finding.method === "start",
   );
-  assert.ok(change);
-  assert.equal(change.finding.certainty, "suspected");
-  assert.equal(change.finding.impactBasis, "inferred");
-  assert.ok(result.exitCode > 0);
+  assert.equal(change, undefined);
+  assert.equal(result.exitCode, 0);
 });
 test("preview contract binds all plugin identities and both version reports to the same input", async (t) => {
   const f = fixture(t);
@@ -414,7 +412,9 @@ test("duplicate installed alias identities cannot hide a risk behind a healthy p
     currentVersion,
     targetVersion,
   });
-  assert(positive.changes.added.some((x) => x.finding.service === "subagents"));
+  assert(
+    !positive.changes.added.some((x) => x.finding.service === "subagents"),
+  );
   const alias = path.join(f.nm, "z-safe-alias");
   fs.mkdirSync(alias);
   fs.writeFileSync(

@@ -83,7 +83,27 @@ for (const [label, patch, files, expected] of [
       assert.deepEqual(p.files["host-entry"], expected);
       assert.deepEqual(p.entryFiles, expected);
       assert.equal(report.scanComplete, true, JSON.stringify(p.diagnostics));
-      const v = buildVerdicts({ report, catalog }).plugins.sample;
+      assert.equal(
+        p.callSites.some(
+          (site) => site.service === "settings" && site.method === "absent",
+        ),
+        expected.length > 0,
+      );
+      // Complete synthetic runtime evidence permits an absence finding; catalogue alone does not.
+      const catalogueVerdict = buildVerdicts({ report, catalog }).plugins
+        .sample;
+      assert(
+        !catalogueVerdict.findings.some(
+          (finding) => finding.category === "host-method-missing",
+        ),
+      );
+      const v = buildVerdicts({
+        report,
+        catalog,
+        hostSurface: {
+          root: { settings: { present: true, methods: { known: {} } } },
+        },
+      }).plugins.sample;
       assert.equal(
         v.findings.some(
           (f) => f.service === "settings" && f.method === "absent",
@@ -130,7 +150,13 @@ test("relative insert names are anchored before later name assertions; a mismatc
     assert.deepEqual(p.entryFiles, ["actual.mjs"]);
     assert(p.diagnostics.some((d) => d.kind === "patch-resolution-uncertain"));
     assert(
-      buildVerdicts({ report, catalog }).plugins.sample.findings.some(
+      buildVerdicts({
+        report,
+        catalog,
+        hostSurface: {
+          root: { settings: { present: true, methods: { known: {} } } },
+        },
+      }).plugins.sample.findings.some(
         (f) => f.service === "settings" && f.method === "absent",
       ),
     );

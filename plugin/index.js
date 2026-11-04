@@ -3,6 +3,10 @@ import { createReportRuntime } from "./lib/host-reports.js";
 import { createReviewRuntime } from "./lib/host-reviews.js";
 import { createUpgradeRuntime } from "./lib/host-upgrade.js";
 import { createHttpRuntime } from "./lib/host-http.js";
+import {
+  resolveProfileTarget,
+  resolveProfileIdentity,
+} from "./lib/profile-target.js";
 // Host half of the dsh-plugin-compat-check plugin — loader self-introspection
 // (docs/Plan.md §2.4: read ctx.loader.entries(), recover failure reasons,
 // never throw).
@@ -847,86 +851,22 @@ function resolveDshVersion() {
  * 无法确认时要求显式指定，不猜测 profile。
  */
 function resolveActiveProfile() {
-  // ① 宿主自己的启动参数 —— 最权威。**两种形态都要认**：
-  //
-  //    CLI：     … dsh-desktop-host/lib/cli.js --profile gverify
-  //    桌面 app：… dsh-desktop-host/lib/index.js <dsh 根> /Users/…/profiles/desktop <runtime> …
-  //
-  //    桌面端把 **profile 目录路径按位置传**，没有 `--profile` 标志。
-  //    只认 `--profile` 时，真实 app 里会走"回退到 desktop" —— 幸亏这次的结论恰好
-  //    就是 desktop，否则会把别的 profile 的结论写进 desktop 的基线。**那次是运气，不是正确。**
-  try {
-    const argv = (process.argv || []).map(String);
-    for (let i = argv.length - 1; i >= 0; i--) {
-      const inline = /^--profile=(.+)$/.exec(argv[i]);
-      if (inline)
-        return {
-          name: inline[1],
-          why: `process.argv 的 --profile=${inline[1]}`,
-        };
-      if (
-        argv[i] === "--profile" &&
-        argv[i + 1] &&
-        !argv[i + 1].startsWith("-")
-      ) {
-        return {
-          name: argv[i + 1],
-          why: `process.argv 的 --profile ${argv[i + 1]}`,
-        };
-      }
-    }
-    // 位置形态：任何指向 `<…>/profiles/<名字>`（或它下面的 node_modules）的绝对路径
-    for (const a of argv) {
-      if (!a.startsWith("/")) continue;
-      const m = /\/profiles\/([^/]+)(?:\/|$)/.exec(a);
-      if (m && m[1])
-        return { name: m[1], why: `process.argv 里的 profile 路径 ${a}` };
-    }
-  } catch {
-    /* 继续 */
-  }
-  // ② 显式覆盖（工具/测试用）
-  if (process.env.DSC_PROFILE)
-    return {
-      name: process.env.DSC_PROFILE,
-      why: `DSC_PROFILE=${process.env.DSC_PROFILE}`,
-    };
-  // ③ 环境变量 —— **可能是陈的**，所以带上警示写进 why
-  for (const key of ["DSH_PROFILE", "DSH_ACTIVE_PROFILE", "DSH_PROFILE_NAME"]) {
-    const v = process.env[key];
-    if (v)
-      return {
-        name: v,
-        why: `${key}=${v}（环境变量可能来自启动 app 的那个 shell，未必是当前加载的 profile）`,
-      };
-  }
-  return { name: null, why: "无法判断" };
+  return resolveProfileIdentity({
+    argv: process.argv,
+    env: process.env,
+    platform: process.platform,
+    modulePath: fileURLToPath(import.meta.url),
+  });
 }
 
 function resolveNodeModules(requestedProfile = null) {
-  const dshHome = process.env.DSH_HOME || join(homedir(), ".dsh");
-  const inferred = resolveActiveProfile();
-  const selected = requestedProfile || inferred.name;
-  if (selected) {
-    if (!/^[\w.-]+$/.test(selected) || selected === "." || selected === "..")
-      return { dir: null, why: "profile 名称非法" };
-    const dir = join(dshHome, "profiles", selected, "node_modules");
-    return existsSync(dir)
-      ? {
-          dir,
-          why: requestedProfile
-            ? "请求明确指定的 profile " + selected
-            : inferred.why,
-        }
-      : { dir: null, why: "指定 profile 不存在: " + selected };
-  }
-  if (process.env.DSH_PROFILE_DIR) {
-    const dir = join(process.env.DSH_PROFILE_DIR, "node_modules");
-    return existsSync(dir)
-      ? { dir, why: "显式 DSH_PROFILE_DIR" }
-      : { dir: null, why: "DSH_PROFILE_DIR 不存在" };
-  }
-  return { dir: null, why: "无法确认当前 profile；请显式指定" };
+  return resolveProfileTarget({
+    requestedProfile,
+    argv: process.argv,
+    env: process.env,
+    platform: process.platform,
+    modulePath: fileURLToPath(import.meta.url),
+  });
 }
 
 /**
@@ -1123,17 +1063,69 @@ function registerFindingReviewRoute(...args) {
 
 const TOOL_SERVICES = ["tools", "agents"];
 
+function strictToolJson(value, location = "$", ancestors = new Set()) {
+  const reject = (reason) => {
+    throw new TypeError(`Invalid JSON tool evidence at ${location}: ${reason}`);
+  };
+  if (value === null || typeof value === "string" || typeof value === "boolean")
+    return value;
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) reject("non-finite number");
+    return value;
+  }
+  if (typeof value !== "object") reject(typeof value);
+  if (ancestors.has(value)) reject("cycle");
+  if (
+    !Array.isArray(value) &&
+    Object.prototype.toString.call(value) !== "[object Object]"
+  )
+    reject("special object");
+  if (!Array.isArray(value)) {
+    const proto = Object.getPrototypeOf(value);
+    if (proto !== null && Object.getPrototypeOf(proto) !== null)
+      reject("custom prototype");
+  }
+  ancestors.add(value);
+  const copy = Array.isArray(value) ? [] : {};
+  for (const key of Reflect.ownKeys(value)) {
+    if (Array.isArray(value) && key === "length") continue;
+    if (typeof key !== "string") reject("symbol key");
+    if (
+      Array.isArray(value) &&
+      (!/^(0|[1-9][0-9]*)$/.test(key) ||
+        Number(key) >= value.length ||
+        Number(key) >= 4294967295)
+    )
+      reject("non-index array property");
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor.enumerable || !Object.hasOwn(descriptor, "value"))
+      reject("hidden or accessor property");
+    Object.defineProperty(copy, key, {
+      value: strictToolJson(descriptor.value, `${location}.${key}`, ancestors),
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+  }
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++)
+      if (!Object.hasOwn(value, i)) reject("sparse array");
+  }
+  ancestors.delete(value);
+  return copy;
+}
+
 function toolResult(compat, text) {
   const s = compat.report?.summary || {};
-  return {
+  return strictToolJson({
     schemaVersion: 1,
     kind: "plugin-compat-check/tool-result",
     ok: compat.ok,
-    error: compat.error,
-    toolVersion: compat.toolVersion,
+    error: compat.error ?? null,
+    toolVersion: compat.toolVersion ?? null,
     exitCode: compat.exitCode,
-    report: compat.report,
-    baseline: compat.baseline,
+    report: compat.report ?? null,
+    baseline: compat.baseline ?? null,
     cache: compat.cache || null,
     reviews: compat.reviews || null,
     summary: compat.ok
@@ -1142,7 +1134,7 @@ function toolResult(compat, text) {
     nodeModules: compat.nodeModules || "",
     hasRuntimeSurface: !!compat.report?.hasRuntimeSurface,
     text,
-  };
+  });
 }
 
 function registerTool(ctx, state) {
@@ -1177,7 +1169,7 @@ function registerTool(ctx, state) {
             upgradeTo: {
               type: "string",
               description:
-                "Optional exact target DSH version for static upgrade preflight; known catalogues: 0.2.0-rc.2 and 0.2.1-rc.2. Unknown versions are uncertified.",
+                "Optional exact target DSH version for static upgrade preflight; known catalogues: 0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3 and 0.2.1-rc.5. Unknown versions are uncertified.",
             },
             profile: {
               type: "string",
@@ -1274,14 +1266,16 @@ function registerTool(ctx, state) {
               args &&
               Object.prototype.hasOwnProperty.call(args, "upgradeTo")
             ) {
-              return await upgradeToolResult(state, {
-                profile: wanted,
-                targetVersion: args.upgradeTo,
-                invalidRequest:
-                  typeof args.upgradeTo !== "string"
-                    ? "upgradeTo 必须为确切 DSH 版本"
-                    : null,
-              });
+              return strictToolJson(
+                await upgradeToolResult(state, {
+                  profile: wanted,
+                  targetVersion: args.upgradeTo,
+                  invalidRequest:
+                    typeof args.upgradeTo !== "string"
+                      ? "upgradeTo 必须为确切 DSH 版本"
+                      : null,
+                }),
+              );
             }
             const compat = await serveReport(
               state,

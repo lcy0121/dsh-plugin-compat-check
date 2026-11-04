@@ -42,7 +42,7 @@ test('human report escapes real source filenames and metadata without changing J
  const file='part\u001b[2J\u009b\u202e.js',name='sample\u001b[31m'
  const f=packageFixture(`export {apply} from ${JSON.stringify('./'+file)}`,{meta:{name,version:'1.0.0\u0008'},files:{[file]:'export function apply(ctx){ctx.tools.noSuchCompatMethod()}'}})
  try {
-  const r=run({nm:f.nm,dshVersion:'0.2.1-rc.3',baseline:false,_ignoreAutoProbe:true})
+  const r=run({nm:f.nm,dshVersion:'0.2.1-rc.3',baseline:false,_ignoreAutoProbe:true,_hostSurface:{observationVersion:1,profileId:f.nm,dshVersion:'0.2.1-rc.3',probedAt:new Date().toISOString(),root:{tools:{present:true,methods:{}}}}})
   assert.equal(r.error,null)
   const before=JSON.stringify(toJSON(r)),text=render(r,{})
   assert(!terminalControl.test(text));assert(text.includes('part\\u001b[2J\\u009b\\u202e.js'))

@@ -29,11 +29,11 @@
   },
   "catalogue": {
     "file": "dsh-api-catalog-0.2.1-rc.5.json",
-    "sha256": "63ee5a2963bb35eb1425c78cda1d3eafb2e153a959b69003abfcaf543cde043a",
+    "sha256": "c0ec076da1ab23a76b5e9b877a66c11dd97b13e779aaef4f7bfc94bca627ab15",
     "sourceVerified": true,
     "counts": {
       "hostServices": 98,
-      "hostMethods": 291,
+      "hostMethods": 417,
       "clientServices": 8,
       "clientMethods": 43
     },
@@ -51,7 +51,12 @@
         "methodsRemoved": []
       }
     },
-    "registered": true
+    "registered": true,
+    "extractorCorrection": {
+      "cause": "abstract and @Remote signature prefixes omitted by extractor; upstream generated catalogue includes all three methods",
+      "sourceArchiveSha256": "a2b94ff1183a87bb1f1d898c6274ae5f8b78accc38931594afd97b58cf0db81f",
+      "scope": "Reparsed SHA256-verified preserved host entry; no new runtime certification"
+    }
   },
   "signatureReview": {
     "host": {

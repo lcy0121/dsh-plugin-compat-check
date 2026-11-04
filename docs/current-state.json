@@ -1,12 +1,12 @@
 {
-  "toolVersion": "0.2.2",
-  "recordedAt": "2026-10-30T22:59:05.499Z",
-  "testFiles": 83,
-  "tests": 1273,
+  "toolVersion": "0.2.3",
+  "recordedAt": "2026-11-04T11:15:38.039Z",
+  "testFiles": 88,
+  "tests": 1301,
   "repositoryFiles": {
-    "total": 390,
+    "total": 396,
     "fixtures": 100,
-    "other": 290
+    "other": 296
   },
   "verification": {
     "platform": "darwin",
@@ -26,7 +26,7 @@
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
-      "scope": "Documentation describes this checkout version and capabilities independently of publication time. Registry/release observations and acceptance receipts are dated evidence, never inferred from the delivery version."
+      "scope": "Current 0.2.3 development source. Public registry/release versions require independent verification; dated historical publication receipts do not certify this code."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -75,6 +75,50 @@
       "commit": "0d6187bcbcc6dbf11f1985de9e6e34515c9be3e2",
       "path": "docs/current-state.json",
       "scope": "Detailed 0.2.0/0.2.1 publication, pre-release and public metadata observations. Historical evidence never certifies a newer version."
+    },
+    "issues02320261104": {
+      "status": "source fixes and local regressions complete; public release, new remote CI and real Windows confirmation remain pending",
+      "issues": [
+        7,
+        9,
+        10,
+        8
+      ],
+      "version": "0.2.3",
+      "localTests": {
+        "tests": 1301,
+        "pass": 1293,
+        "skip": 8,
+        "fail": 0,
+        "node": "v26.13.0",
+        "testFiles": 88
+      },
+      "officialHostValidator": "Passed with SHA256-pinned official rc.5 source archive; optional input skip is explicit in other checkouts.",
+      "catalogueAudit": {
+        "version": "0.2.1-rc.5",
+        "hostMethodsBefore": 291,
+        "hostMethodsAfter": 417,
+        "additionsReviewed": 126,
+        "scope": "Abstract/decorated signatures from identical pinned official source bytes; no runtime absence inferred from catalogue omission."
+      },
+      "macOS": {
+        "host": "0.2.1-rc.5",
+        "archiveSha256": "1f9e2211a3aad071c700c06d9a02484d7373e9350726c591edbba0a8d5ff96b4",
+        "sourceManifestSha256": "41e314dd68a78b555e94c32a1b0f837f4905a98d81206b5f09c55989ee01b2ec",
+        "sourceDirty": true,
+        "allNineSections": true,
+        "screenshots": 21,
+        "privateRootRemoved": true,
+        "scope": "Final independently packed archive accepted in owned macOS arm64 host. Source identity predates only this receipt update; not a clean release candidate or Linux/Windows certification.",
+        "checksumManifestVerified": true
+      },
+      "review": "Fresh whole-change review plus scoped array evidence-loss fix review approved.",
+      "limits": [
+        "Windows drive/UNC and isolation behavior tested synthetically; real Windows user startup not run.",
+        "Current Linux CI and same-archive cross-platform publication acceptance are separate pending tasks.",
+        "No issue closed or user contacted; no push, tag or publication."
+      ],
+      "receipts": "tmp/issue-023/; independent review and task evidence in tmp/issue-023/reviews/."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

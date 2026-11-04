@@ -47,10 +47,13 @@ try {
       vacuous: plugin.vacuous,
       coverage: plugin.coverage,
       observation: {
-        ...verdict.observation,
         profileId: null,
         dshVersion: null,
         probedAt: null,
+        notes: verdict.observation.notes,
+        bound: verdict.observation.bound,
+        usable: verdict.observation.usable,
+        mode: verdict.observation.mode,
       },
       scanComplete: extracted.report.scanComplete,
       diagnostics: extracted.report.diagnostics.map((d) => ({

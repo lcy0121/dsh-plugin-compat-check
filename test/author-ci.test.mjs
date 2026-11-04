@@ -303,7 +303,7 @@ test("invalid policies produce replayable error evidence with the last validated
   }
 });
 
-test("dense matrix includes gate reasons and every serialized view in the common output budget", async (t) => {
+test("dense matrix retains bounded tool-error evidence across every serialized view", async (t) => {
   const { authorCI, renderAuthorCI } = await import("../tools/author-ci.mjs");
   const f = fixture(t);
   fs.writeFileSync(
@@ -311,7 +311,7 @@ test("dense matrix includes gate reasons and every serialized view in the common
     'throw Error("never execute");export function apply(ctx){' +
       Array.from(
         { length: 3000 },
-        (_, i) => `ctx.settings.missing${i}();`,
+        (_, i) => `ctx.missingService${i}.call();`,
       ).join("") +
       "}",
   );
@@ -323,7 +323,7 @@ test("dense matrix includes gate reasons and every serialized view in the common
   );
   assert.match(
     out.gate.reasons.map((r) => r.message).join(";"),
-    /output.*budget/i,
+    /output.*budget|exceeded report budget/i,
   );
   for (const format of ["json", "html", "sarif", "junit"])
     assert(
@@ -338,9 +338,10 @@ test("dense accepted JSON can be reused as previous and replayed to HTML without
   fs.writeFileSync(
     path.join(f.source, "index.js"),
     "export function apply(ctx){" +
-      Array.from({ length: 300 }, (_, i) => `ctx.settings.absent${i}();`).join(
-        "",
-      ) +
+      Array.from(
+        { length: 300 },
+        (_, i) => `ctx.missingService${i}.call();`,
+      ).join("") +
       "}",
   );
   const before = run(["--package", f.source]);
@@ -376,9 +377,10 @@ test("JSON fitting the read budget still fails closed when a complete display fo
   fs.writeFileSync(
     path.join(f.source, "index.js"),
     "export function apply(ctx){" +
-      Array.from({ length: 1500 }, (_, i) => `ctx.settings.absent${i}();`).join(
-        "",
-      ) +
+      Array.from(
+        { length: 1500 },
+        (_, i) => `ctx.missingService${i}.call();`,
+      ).join("") +
       "}",
   );
   const result = await authorCI(["--package", f.source]);

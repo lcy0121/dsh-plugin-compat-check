@@ -60,6 +60,7 @@ test("agent display escapes controls while retaining raw report and error identi
   body.plugins["@label/broken-client"].findings[0].basis = "basis\u2066\rspoof";
   const compat = {
     ok: true,
+    exitCode: 0,
     toolVersion: body.toolVersion,
     nodeModules: "owned\u001b[31m",
     report: body,
@@ -74,7 +75,7 @@ test("agent display escapes controls while retaining raw report and error identi
   );
   assert(text.includes("note\\u000aspoof\\u001b[2J"));
   assert.equal(JSON.stringify(compat), before);
-  const failure = { ok: false, error: "error\u001b[2J\nspoof" };
+  const failure = { ok: false, exitCode: 3, error: "error\u001b[2J\nspoof" };
   const rendered = sandbox.renderForModel(failure);
   assert(rendered.includes("error\\u001b[2J\\u000aspoof"));
   assert.equal(sandbox.toolResult(failure, rendered).error, failure.error);
@@ -91,6 +92,7 @@ test("agent文本与摘要保留无已验证调用，并分开标注静态确定
     before = JSON.stringify(body);
   const compat = {
     ok: true,
+    exitCode: 0,
     toolVersion: body.toolVersion,
     report: { ...body, hasRuntimeSurface: false },
     nodeModules: "fixture",

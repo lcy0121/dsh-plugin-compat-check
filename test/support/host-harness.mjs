@@ -1,3 +1,7 @@
+import {
+  resolveProfileTarget,
+  resolveProfileIdentity,
+} from "../../plugin/lib/profile-target.js";
 import { createHistoryRuntime } from "../../plugin/lib/host-history.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -77,6 +81,7 @@ export function loadHost(env = {}) {
   // 把 ESM 的 import 换成受控替身；导出换成赋值
   const cjs = hostVmSource(SRC);
   sandbox.__modules = {
+    "./lib/profile-target.js": { resolveProfileTarget, resolveProfileIdentity },
     "./lib/host-history.js": { createHistoryRuntime },
     "./lib/host-http.js": { createHttpRuntime },
     "./lib/host-upgrade.js": { createUpgradeRuntime },

@@ -1,6 +1,6 @@
 # 维护指南
 
-本文维护**0.2.2**的目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
+本文维护**0.2.3**的目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
 
 ## 维护入口与语法覆盖
 
@@ -103,7 +103,7 @@ rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.j
 
 ## 同一制品发布核对
 
-本版0.2.2的发布文档使用不依赖发布时点的能力描述；不把历史公开版本写成当前版本，也不预写成功时间、摘要或“已发布”。带日期的公开状态与验收回执单列在current-state，历史CI不认证新提交。发布依次完成：
+本版0.2.3的发布文档使用不依赖发布时点的能力描述；不把历史公开版本写成当前版本，也不预写成功时间、摘要或“已发布”。带日期的公开状态与验收回执单列在current-state，历史CI不认证新提交。发布依次完成：
 
 1. 先统一版本真源、manifest/lock、各版README、skill及示例；冻结到tag的文档不得保留“本版未发布”等即时状态。运行check与prepublish-check（不发布），用成功TAP更新current-state计数，核生成副本、许可证和公开元数据。
 2. 授权推送后等待所选提交全部Actions通过。CI candidate job只构建一次；rc.5 job下载同一归档/回执，运行完整UI并上传证据。
@@ -154,3 +154,14 @@ DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_RC2_ARTIFACT=<候选tgz绝对路径> D
 rc.5额外要求独立ACP stdout JSON-RPC、stderr目录诊断、MCP能力、受控模型列表及导航语义回执。rc5-acp-stdout只用私有DSH_HOME、合成凭据、loopback列表/两轮模型响应和tools-only MCP；无resources能力不请求资源。失败/超时/清理不确认均失败，只保存计数与断言，不保存对话正文。模型列表另验首次等待、失败/超时回退及无凭据不请求；没有生产账户/模型调用。
 
 历史0.2.1归档的同一文件macOS/Linux验收见current-state；当前制品须独立核对来源、摘要及平台，不继承旧包结果。固定业务五suite/24项仅证明期望重现，不能称全部功能通过。rules/dsh-0.2.1-rc.5-review.json的integrationAcceptance保留目录登记时基础快照，不追写历史归档。
+
+## 用户issue修订与回归
+
+0.2.3源码修订对应[本仓库#7](https://github.com/lcy0121/dsh-plugin-compat-check/issues/7)、[#9](https://github.com/lcy0121/dsh-plugin-compat-check/issues/9)、[#10](https://github.com/lcy0121/dsh-plugin-compat-check/issues/10)及[#8](https://github.com/lcy0121/dsh-plugin-compat-check/issues/8)，结果绑定实际提交/制品；不推断用户的旧包已修复。
+
+- 缓存身份不取目录时间戳或无关JSON状态内容；保留源码/清单/patch元数据、实际模块解析候选的路径/类型/存在性及规则/目录/探针/豁免身份。复用有界源码图发现任意后缀的解析输入，共享读取、枚举和时间预算，不按`state`目录名排除；身份观察会解析源码图，超限显式失败。发布前复核及基线提交守卫保留。
+- tool按声明构造可为空字段，已知缺省观测用null；递归检查普通/升级结构化回包，对非有限数、undefined证据、特殊对象、循环、访问器及数组额外属性明确报工具错误，不靠JSON往返静默丢信息，不向顶层塞诊断键。固定rc.5官方JSON/schema校验器另作带摘要输入的回归；缺官方输入时明确跳过，不冒充宿主验收。
+- profile解析支持POSIX、Windows盘符/UNC启动路径，显式请求优先，完整启动路径保留实际profile根；过期环境变量不得覆盖它。环境提示须与受约束安装位置相互印证，冲突/身份不足时保持无法判定并提示显式tool/CLI用法；不猜desktop，不把共享安装位置或未验证loader标签视为当前身份。Windows路径模拟不代替Windows真机。
+- rc.5生成目录中的abstract/装饰器方法原本被提取器漏过；同一固定官方来源重新提取并审查126项新增名称，宿主方法291→417，涵盖报告中的三个方法。审查记录、来源摘要及认证引用同步，旧目录保留。目录未收录仅给带方法/位置的覆盖说明，可靠完整运行时描述符才能支持方法缺失结论；现有未知/访问器和能力守卫边界保留。新目录字节与来源审查不继承旧归档的宿主/业务验收。
+
+定向回归见`test/identity-runtime-state.test.mjs`、`test/profile-target.test.mjs`、`test/tool-json.test.mjs`、`test/tool-host-validator.test.mjs`和`test/catalog-signature-omissions.test.mjs`；联合默认套件、独立tgz及真实宿主结果见current-state。Windows现场复现/修复确认、跨平台同一制品验收、CI与公开发行按Plan第六节继续，不自动关闭issue或代用户反馈。

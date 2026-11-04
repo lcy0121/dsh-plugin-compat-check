@@ -44,9 +44,8 @@ function checkRejected(body) {
   const method = body.plugins.sample.findings.find(
     (x) => x.method === "dscFutureMissing",
   );
-  assert(method);
-  assert.equal(method.certainty, "suspected");
-  assert.equal(method.impactBasis, "inferred");
+  assert.equal(method, undefined);
+  assert.equal(body.plugins.sample.coverage.status, "limited");
 }
 test("CLI rejects a future file probe across JSON, text and sanitized issue output", (t) => {
   const f = fixture(t);
@@ -66,7 +65,7 @@ test("CLI rejects a future file probe across JSON, text and sanitized issue outp
       [...args, ...(flag ? [flag] : [])],
       { encoding: "utf8", timeout: 15000 },
     );
-    assert.equal(out.status, 1, out.stdout + out.stderr);
+    assert.equal(out.status, 0, out.stdout + out.stderr);
     if (flag === "--json") checkRejected(JSON.parse(out.stdout));
     else assert.match(out.stdout, /未来|时钟/);
   }

@@ -115,6 +115,9 @@ test("direct compatReport bounds rules and probe files without relying on cache 
         const f = fixture(t),
           kernel = path.join(f.root, "kernel"),
           rulesDir = path.join(kernel, "rules");
+        const profileRoot = path.join(f.root, "profiles", "fixture");
+        fs.mkdirSync(profileRoot, { recursive: true });
+        fs.symlinkSync(f.nm, path.join(profileRoot, "node_modules"));
         fs.mkdirSync(rulesDir, { recursive: true });
         fs.symlinkSync(path.resolve("lib"), path.join(kernel, "lib"));
         for (const name of fs.readdirSync("rules"))
@@ -145,6 +148,7 @@ test("direct compatReport bounds rules and probe files without relying on cache 
           if(changedFile){const inode=fs.statSync(changedFile).ino, read=fs.readSync;
             fs.readSync=(fd,...args)=>{const n=read(fd,...args);if(!swapped && fs.fstatSync(fd).ino===inode){swapped=true;fs.renameSync(changedFile,changedFile+".saved");fs.copyFileSync(changedFile+".saved",changedFile);}return n;};}
           import {apply} from ${JSON.stringify(pathToFileURL(path.resolve("plugin/index.js")).href)};
+      process.argv=[process.execPath,"official-host",${JSON.stringify(profileRoot)}];
       const effects=[];const ctx={get(){},effect(f){const off=f();if(off)effects.push(off)},inject(){}};apply(ctx);
       const out=await globalThis.__DSH_COMPAT_CHECK__.compatReport();for(const off of effects)off();
       console.log('MUTATED:'+swapped);console.log('RESULT:'+JSON.stringify(out));process.exit(0);`;

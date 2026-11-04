@@ -39,7 +39,7 @@ export const CATALOG_REFERENCES = Object.freeze([
   Object.freeze({
     version: "0.2.1-rc.5",
     file: "dsh-api-catalog-0.2.1-rc.5.json",
-    sha256: "63ee5a2963bb35eb1425c78cda1d3eafb2e153a959b69003abfcaf543cde043a",
+    sha256: "c0ec076da1ab23a76b5e9b877a66c11dd97b13e779aaef4f7bfc94bca627ab15",
   }),
 ]);
 export function describeCatalog({

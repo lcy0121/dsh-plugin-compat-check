@@ -387,12 +387,13 @@ describe('不变式的有效性自证：人为清空必须被抓到', () => {
     const fixture = packageFixture('export function apply(ctx){ctx.settings.missing()}')
     try {
       const r = extractWithProvenance(fixture.nm, { catalog: fixtureCatalog })
-      const before = buildVerdicts({ report: r.report, hostSurface: null, rules: {}, catalog: fixtureCatalog, dshVersion: 'test' })
+      const qualified = { observationVersion: 1, profileId: fixture.nm, dshVersion: 'test', probedAt: new Date().toISOString(), root: { settings: { present: true, methods: { known: 'function' }, complete: true } } };
+      const before = buildVerdicts({ report: r.report, hostSurface: qualified, rules: {}, catalog: fixtureCatalog, dshVersion: 'test' })
       assert.equal(before.plugins.sample.verdict, 'partial', '样本必须先有调用风险')
       const mut = JSON.parse(JSON.stringify(r.report))
       mut.perPlugin.sample.calls = {}
       mut.perPlugin.sample.callSites = []
-      const v = buildVerdicts({ report: mut, hostSurface: null, rules: {}, catalog: fixtureCatalog, dshVersion: 'test' })
+      const v = buildVerdicts({ report: mut, hostSurface: qualified, rules: {}, catalog: fixtureCatalog, dshVersion: 'test' })
       const svcs = mut.perPlugin.sample.services
       const resolved = new Set(Object.keys(v.plugins.sample.resolved || {}))
       const missing = svcs.filter((service) => !resolved.has(service))

@@ -190,6 +190,13 @@ test("quoted, escaped, mixed-case and nested credential descriptions are hidden 
         dshVersion: version,
         baseline: false,
         _ignoreAutoProbe: true,
+        _hostSurface: {
+          observationVersion: 1,
+          profileId: fixture.nm,
+          dshVersion: version,
+          probedAt: new Date().toISOString(),
+          root: { settings: { present: true, methods: {} } },
+        },
       }),
     );
     const finding = body.plugins.sample.findings[0];

@@ -233,3 +233,33 @@ test('entry inject objects use Cordis service-map keys rather than required/opti
  assert.ok(p.findings.some(f=>f.service==='required'&&f.severity==='fatal'));
  assert.ok(!p.findings.some(f=>f.service==='missingSvc'));
 });
+
+test("catalogue non-enumeration cannot establish runtime method absence", () => {
+  const p = result("export function apply(ctx){ctx.settings.absent();}", null);
+  assert.ok(!p.findings.some((f) => f.category === "host-method-missing"));
+  assert.equal(p.coverage.status, "limited");
+  const q = result(
+    "export function apply(ctx){ctx.settings.absent();}",
+    present,
+  );
+  assert.ok(
+    q.findings.some(
+      (f) => f.category === "host-method-missing" && f.method === "absent",
+    ),
+  );
+});
+
+test("catalogue abstentions preserve method and source locations for listed and unlisted calls", () => {
+  const p = result(
+    "export function apply(ctx){ctx.settings.known();ctx.settings.absent();}",
+    null,
+  );
+  for (const method of ["known", "absent"]) {
+    const row = p.abstained.find((r) => r.method === method);
+    assert.ok(row.location);
+    // Public coverage always retains per-call explanations, even without runtime findings.
+    assert.ok(
+      p.coverage.limitations.some((s) => s.includes(`settings.${method}`)),
+    );
+  }
+});

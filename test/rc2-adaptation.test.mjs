@@ -264,7 +264,7 @@ test("CLI selects rc.2 API methods without changing the old catalogue or explici
       ),
     );
     assert.ok(
-      call("0.2.0-rc.2").plugins.sample.findings.some(
+      !call("0.2.0-rc.2").plugins.sample.findings.some(
         (f) => f.method === "startActivation",
       ),
     );
@@ -272,7 +272,7 @@ test("CLI selects rc.2 API methods without changing the old catalogue or explici
       call(version, [
         "--catalog",
         path.resolve("rules/dsh-api-catalog.json"),
-      ]).plugins.sample.findings.some((f) => f.method === "startActivation"),
+      ]).plugins.sample.findings.every((f) => f.method !== "startActivation"),
     );
   } finally {
     f.cleanup();
