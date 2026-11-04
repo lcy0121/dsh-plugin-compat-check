@@ -27,6 +27,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { prepareOwnedPackageSource } from "../tools/owned-package-source.mjs";
 
 const REPO = path.resolve(new URL(".", import.meta.url).pathname, "..");
 const PLUGIN = path.join(REPO, "plugin");
@@ -112,21 +113,31 @@ describe("打包自足性：npm pack 出来的包必须自己能算结论", () =
     );
   });
 
-  test("npm pack 产物从空缓存安装后可执行，且暂存目录用完即清", () => {
+  test("npm pack 在私有副本中构建，源文件不改写，空缓存安装后可执行且清理暂存", () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-pack-"));
     try {
+      const client = path.join(PLUGIN, "lib/client.js");
+      const before = fs.statSync(client, { bigint: true });
+      const source = path.join(tmp, "source");
+      prepareOwnedPackageSource(REPO, source);
+      const privatePlugin = path.join(source, "plugin");
       const out = execFileSync("npm", ["pack", "--pack-destination", tmp], {
-        cwd: PLUGIN,
+        cwd: privatePlugin,
         encoding: "utf8",
         timeout: 120000,
       }).trim();
+      assert.equal(
+        fs.statSync(client, { bigint: true }).mtimeNs,
+        before.mtimeNs,
+        "并行读取的源码客户端不应被打包测试重写",
+      );
       const tgz = path.join(tmp, path.basename(out.split("\n").pop()));
       assert.ok(fs.existsSync(tgz), `没打出 tarball：${out}`);
 
       // `postpack` 必须已经清掉暂存的内核副本 —— 它是一份会腐烂的重复实现，
       // 留在工作区里会被下一个人当成真源读到。
       assert.ok(
-        !fs.existsSync(path.join(PLUGIN, "kernel")),
+        !fs.existsSync(path.join(privatePlugin, "kernel")),
         "plugin/kernel/ 在打包后仍然存在 —— postpack 没清，工作区里会留下一份会腐烂的内核副本",
       );
 

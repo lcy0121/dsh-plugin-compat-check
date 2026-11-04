@@ -18,7 +18,7 @@ check离线核格式、文档/版本/链接、生成副本、许可证、语法�
 
 UI词典位于`plugin/src/i18n/{zh,en,ko}.json`，用可读原文作为消息键，插值必须保持`{pN}`及重复次数；构建将各语言的重复键替换为短ID，保留中文原文供内置状态映射。`runtime.mjs`共享宿主lang观察和本地偏好，`locale.jsx`使各槽位及memo面板更新；不得按语言设置React key或重建编辑器。只对固定UI/已知内置状态调用翻译，原始发现、用户依据、命令和JSON不得按词典全局替换；故障报告仅翻译共享渲染器的模板、已知固定说明及核实建议。新增文案须补齐三词典、ARIA及覆盖测试，不能更改后端契约或结论。
 
-真实验收/到货工具经`tools/owned-package-source.mjs`核对manifest/lock/构建依赖，复制自有闭包到私有构建目录，不向源码、用户profile或运行包注入工具链。selector-parser固定覆盖7.1.6；更新Tailwind/覆盖后须重建、复验布局/主题及开发/运行两图审计。
+打包回归与真实验收/到货工具经`tools/owned-package-source.mjs`核对manifest/lock/构建依赖，复制自有闭包到私有构建目录，不向源码、用户profile或运行包注入工具链。打包回归核源码客户端mtime不变，避免prepack重写与并行面板读取竞争。selector-parser固定覆盖7.1.6；更新Tailwind/覆盖后须重建、复验布局/主题及开发/运行两图审计。
 
 完整UI验收使用同一独立tgz及自有DSH/Chrome；默认rc.3，当前rc.5须显式选择：
 
