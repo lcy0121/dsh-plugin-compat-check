@@ -20,13 +20,13 @@
 | 证据 | 处理 |
 |---|---|
 | 可靠映射且启用的FAILED/PENDING loader | fatal、影响measured；禁用/LOADING/无法映射不冒充同一事实 |
-| 必需inject及合格同目标观测明确absent | 可推断激活障碍；仅目录缺项或未采样不证明缺失 |
+| 必需inject及合格同目标观测明确absent | 可推断激活障碍；仅目录缺项或未采样不证明缺失；方法存在于目录也不证明运行时可调用 |
 | 非硬依赖明确absent或有充分方法缺失证据 | 按方法规则/默认档给feature-dead或degraded，影响通常inferred |
 | 声明范围冲突或非法字段 | degraded/推断；有效精确豁免仅消除范围冲突，不放行非法字段或证明业务通过 |
 | 未采样、访问器未知、不可读或源码不完整 | 保留覆盖限制，不用省略键认定不存在 |
 | 固定客户端参数类型/枚举不符 | 非致命静态风险；未知值弃权，弃用/生命周期提醒仅作覆盖说明 |
 
-方法自身layer优先、服务layer回退，客户端规则不能套宿主同名方法。提供方声明只是候选，不能掩盖明确absent；present服务上的方法缺失另判。certainty与impactBasis分别描述证据和影响，弱Context/别名保留suspected。没有语义依据的方法缺失明确“影响面未知”，不猜替代API或修复版本。
+rc.5目录已补齐abstract/装饰器签名漏项，新增126项方法（291→417）；来源审查不等于运行时验收。方法自身layer优先、服务layer回退，客户端规则不能套宿主同名方法。提供方声明只是候选，不能掩盖明确absent；present服务上的方法缺失另判。certainty与impactBasis分别描述证据和影响，弱Context/别名保留suspected。没有语义依据的方法缺失明确“影响面未知”，不猜替代API或修复版本。
 
 DSH≥0.2.1-rc.1优先engines.dsh，缺失回退官方peer，旧目标保留旧策略。独立compatibility.json仅按插件/DSH精确版本豁免；非法字段和无效豁免保留风险/限制。
 

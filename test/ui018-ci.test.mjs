@@ -186,6 +186,18 @@ test("rc.5 UI gate binds the requested host and requires separate protocol and m
       realBrowser: true,
       installedArtifact: true,
     },
+    issues023: {
+      realHost: true,
+      installedArtifact: true,
+      strictToolPipeline: true,
+      noArgumentTool: true,
+      activeProfile: true,
+      settingsProfile: true,
+      cachedWithoutInvalidation: true,
+      explicitFailure: true,
+      staticUpgrade: true,
+      runtimeWrites: 5,
+    },
     rc5Protocol: {
       actualAcp: true,
       catalogDiagnosticsStderr: true,
@@ -206,6 +218,8 @@ test("rc.5 UI gate binds the requested host and requires separate protocol and m
   for (const patch of [
     { dshVersion: "0.2.1-rc.3" },
     { rc5Protocol: undefined },
+    { issues023: undefined },
+    { issues023: { runtimeWrites: 0 } },
     { modelListing: undefined },
     { apiSemantics: undefined },
     { rc3Navigation: undefined },
@@ -226,6 +240,18 @@ test("rc.5 evidence cannot omit extended navigation and exact-version semantic c
   const good = {
     ...complete(),
     dshVersion: "0.2.1-rc.5",
+    issues023: {
+      realHost: true,
+      installedArtifact: true,
+      strictToolPipeline: true,
+      noArgumentTool: true,
+      activeProfile: true,
+      settingsProfile: true,
+      cachedWithoutInvalidation: true,
+      explicitFailure: true,
+      staticUpgrade: true,
+      runtimeWrites: 5,
+    },
     rc5Protocol: {
       actualAcp: true,
       catalogDiagnosticsStderr: true,

@@ -19,6 +19,10 @@ jobs:
           node-version: ${{ matrix.node }}
           package-manager-cache: false
       - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Run mandatory issue regressions with pinned official rc.5 validators
+        run: node tools/issue-regression.mjs "$RUNNER_TEMP/issues023"
+      - name: Keep official validators mandatory in the full suite
+        run: echo "DSC_HOST_SOURCE_ARCHIVE=$RUNNER_TEMP/issues023/rc5-source.tgz" >> "$GITHUB_ENV"
       - name: Check maintained sources, generated copies, syntax matrix and catalogue registry
         run: npm run check
       - run: node plugin/scripts/prepublish-check.mjs
@@ -34,6 +38,9 @@ jobs:
             engineering.json
             prepublish.tap
             prepublish.tap.stderr
+            ${{ runner.temp }}/issues023/issues.tap
+            ${{ runner.temp }}/issues023/issues.stderr
+            ${{ runner.temp }}/issues023/summary.json
           retention-days: 7
   candidate:
     runs-on: ubuntu-latest

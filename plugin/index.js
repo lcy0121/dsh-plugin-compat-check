@@ -830,25 +830,10 @@ function resolveDshVersion() {
   return null;
 }
 
-/**
- * 当前正在跑的是哪个 profile。
- *
- * ## 为什么这里必须小心：环境变量会**主动骗人**
- *
- * 实测（在 `--profile gverify` 下启动宿主，让插件把进程环境打出来）：
- *
- * ```
- * DSH_PROFILE=desktop          ← 过期值！
- * DSH_PROFILE_DIR=…/profiles/desktop
- * process.argv = [ …/dsh-desktop-host/lib/cli.js, "--profile", "gverify" ]
- * ```
- *
- * 那两个 `DSH_PROFILE*` 是从**启动这个 app 的那个 shell** 继承来的，与实际加载的
- * profile 无关。信它们会把 gverify 的结论写进 `baseline.desktop.json`，
- * 于是差分会报出"移除了 17 个插件"这种**完全是编出来的变化**。
- *
- * 所以顺序是：argv（宿主自己声明的）> 显式覆盖 > 环境变量（可能是陈的）。
- * 无法确认时要求显式指定，不猜测 profile。
+/** Resolve the active host profile from startup identity, not an assumed desktop.
+ * Absolute positional paths retain their root (including Windows drive/UNC).
+ * Environment hints need corroboration; explicit tool requests are resolved
+ * separately and take precedence. Unknown or conflicting identity fails closed.
  */
 function resolveActiveProfile() {
   return resolveProfileIdentity({

@@ -6,9 +6,9 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-**0.2.3** provides exact DSH rc.5 catalogues, parameter/slot semantics, upgrade preview and author CI, plus a Chinese/English/Korean UI, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3 and 0.2.1-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
+**0.2.3** fixes report invalidation during runtime writes, strict JSON output, desktop profile resolution and rc.5 catalogue false positives. It includes a Chinese/English/Korean UI, upgrade preview, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3 and 0.2.1-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
 
-macOS/Linux rc.5 acceptance binds each exact commit and archive; [docs/current-state.json](docs/current-state.json) records its commit and scope. Later sources/packages require fresh verification. The npm plugin provides the page, details/badges, `compat_check` and skill. CLI, install checks, batches, author CI and health executor are repository tools. There is no npm CLI bin or `npx dsh-plugin-compat-check` support.
+[docs/current-state.json](docs/current-state.json) records acceptance by commit, archive and platform; new artifacts require verification. The npm plugin provides the page, details/badges, `compat_check` and skill. CLI, install checks, batches, author CI and health executor are repository tools. There is no npm CLI bin or `npx dsh-plugin-compat-check` support.
 
 ## Install and use
 
@@ -38,11 +38,9 @@ Auxiliary content starts collapsed. Results/dependencies/findings/upgrade detail
 
 ### Manual review and history
 
-1. Investigate the actual source location and next steps, select Unconfirmed/Reviewed/False positive/Fixed, document steps/results/evidence and save.
-2. Recheck and re-review after source, target or evidence changes. Manual statuses never hide risks, change verdicts/exit codes/baselines or grant exemptions.
-3. Drafts stay in the current page. Changed identities block stale saves; copy and investigate again or discard. Save/copy before reload or navigation.
+Investigate the source and next steps, choose Unconfirmed/Reviewed/False positive/Fixed, enter evidence and explicitly save. Source, target or evidence changes require re-review; statuses never hide risks, alter verdicts/baselines or grant exemptions. Drafts stay in the current page; stale saves are blocked. Save or copy before reloading.
 
-Archival requires confirmation and a backup; restored/imported records are references. Explicitly save snapshots and select two to compare. Incompatible identities produce a neutral comparison; weaker evidence is not a repair. Export then delete when full, with no automatic pruning. The [guide](docs/guide.md) holds paths, limits and boundaries.
+Confirm and back up before archiving; restores/imports are references. Explicitly save snapshots and select two to compare. Incompatible identities remain neutral; weaker evidence is not a repair. Export before deleting when full; no automatic pruning. The [guide](docs/guide.md) lists paths, limits and boundaries.
 
 ## Screenshots
 

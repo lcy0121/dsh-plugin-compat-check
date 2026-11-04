@@ -1,20 +1,19 @@
 # 使用与验证指南
 
-本指南对应**0.2.3**。面板、tool和skill随npm插件交付；CLI、健康执行器与作者CI从仓库运行，源码构建见[打包说明](../plugin/README.md#从源码构建安装)。声明放行、激活或无发现不等于业务验收。实际发布及限定证据见[current-state](current-state.json)。
+本指南对应**0.2.3**。面板、tool和skill随npm插件交付；CLI、健康执行器与作者CI从仓库运行，源码构建见[打包说明](../plugin/README.md#从源码构建安装)。声明放行、激活或无发现不等于业务验收。限定证据见[current-state](current-state.json)。
 
-已认证精确目录为`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`。最低宿主声明不认证未来版本。rc.3/rc.5入口：左下角账号菜单→设置→内置插件→兼容性；选择实际profile，不默认desktop。折叠/空标题不代表激活失败。
+已认证精确目录为`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`。最低宿主声明不认证未来版本。rc.3/rc.5入口：左下角账号菜单→设置→内置插件→兼容性；无参tool/设置页按宿主启动身份定位；冲突时改用`compat_check({"profile":"my-profile"})`或CLI显式路径，不猜desktop。路径模拟不替代Windows实机。
 
 ## 参数与生命周期语义
 
-0.2.1-rc.2/rc.3/rc.5的客户端语义参考在`rules/severity.json.apiSemantics`，记录固定tag、源码归档及所审查文件的SHA-256；独立于方法名目录。旧版、未来/未知版或坏语义记录显示“语义未审查”，不借邻近版本认证。
+精确语义位于`rules/severity.json.apiSemantics`，独立记录固定tag、归档及所审查文件摘要；旧版、未知版或坏记录显示“语义未审查”，不借邻近版本认证。
 
-- `uiWorkspace.startSession`检查`prompt / agentPreset / clearPreviousDraft`已知原始类型及rc.3/rc.5的`whenDraftExists=keep / replace / append`；rc.2未使用该新选项。类型/枚举不符是非致命静态风险，影响仍为推断。方法存在或可选调用守卫不验证参数；弱Context只给疑似结论，本项不单独触发声明不符。
-- rc.3/rc.5显式`whenDraftExists`优先，省略时通常保留已有草稿，`clearPreviousDraft:true`选择replace。后者仍受支持，不是弃用接口。`startSession`可复用同工作区未归档空白会话，指定preset跳过其它preset的空白；选项不证明新建或发送成功。
-- 三版`ctx.timer.setTimeout / setInterval`有官方弃用标记但仍保留，提示审阅`ctx.timeout / interval`契约后迁移。`sessions.retain`提示引用所有权、按需等待ready及作用域结束时release/disposal；不证明释放路径已验证或发生泄漏。两类提醒只进入覆盖说明，不单独改变等级。
+- `uiWorkspace.startSession`检查已知`prompt / agentPreset / clearPreviousDraft`类型；rc.3/rc.5另检查`whenDraftExists=keep / replace / append`，rc.2未使用它。类型/枚举不符是非致命推断风险，弱Context为疑似，不单独触发声明不符；方法存在或能力守卫不验证参数。
+- rc.3/rc.5显式whenDraftExists优先，省略通常保留草稿，仍支持`clearPreviousDraft:true`选择replace。可复用同工作区未归档空白会话，指定preset隔离其它preset；这些选项不证明新建或发送成功。
+- 三版`ctx.timer.setTimeout / setInterval`仍保留但已弃用；`sessions.retain`提示所有权、按需等待ready及作用域结束时release/disposal。两类只进覆盖说明，不证明泄漏或失败。
+- rc.5的`conversation.chat.reasoning.body`提供原始`rawText`和显示`text`；普通渲染/翻译继续用text，Content Factory仍用text/running/labels。静态提示只定位slots.register和迁移限制，不验证props用途、签名处理或流式时序，不把text使用报错，不新增发现或已验证调用。
 
-rc.5的`conversation.chat.reasoning.body`提供原始输出`rawText`及显示文本`text`；普通渲染、翻译和未翻译视图继续读`text`，确需原始输出才读`rawText`。Content Factory仍只需`text/running/labels`，不重复剥离签名。静态分析仅定位`slots.register`目标并提示迁移；回调props用途、渲染/翻译与流式时序均未验证。动态、展开、访问器、逃逸及多实参合并弃权；不复制自定义槽位名/思考正文，不新增发现或提高已验证调用数。rc.5已登记独立目录并接入普通检查、预检与作者CI；回退/自定义目录不授予未来宿主认证，平台与业务结果按制品另记于current-state。
-
-只收集四个字段的类型/有限枚举标签，不执行代码、不保存prompt或任意枚举文本。常量别名与直接可知改写可分析；未知调用/闭包副作用撤回旧事实。动态、展开、访问器、逃逸及不同helper实参合并保留未核实。未覆盖完整签名、参数数量、深层对象、异步时序、宿主同名接口或所有权证明，不增加已验证调用数。JSON、CLI、面板、预检及作者CI共用判定。
+仅保留四个参数的类型/有限枚举标签，不执行代码或保存prompt/思考正文。常量别名与直接改写可分析；未知副作用、动态、展开、访问器、逃逸及不同helper实参合并弃权。完整签名、实参数量、深层对象、异步时序和所有权证明未覆盖。JSON、CLI、面板、预检及作者CI共用判定，目录/语义/运行时/业务证据分别记录。
 
 ## 可选功能健康检查
 
@@ -81,7 +80,7 @@ run会安装并执行所选插件，私有profile不是OS沙箱。只使用自�
 
 历史读取/导出/差分不受主表筛选影响，明细每页50项；不改普通报告、退出码或基线。导出先预览再下载紧凑JSON，注意路径/依据隐私；满额先导出再显式移除，不自动轮转、上传或遥测。摘要只检损坏，不是签名/当前业务认证，Windows仍待实机验收。
 
-`POST /plugin-compat-check/history`沿用宿主会话、完整同源及请求标记；请求体8 MiB+16 KiB、读取5秒、整次20秒、每代最多2个并行。HTTP不接受状态路径；管理复用已发布报告，不重跑体检。卸载/取消/目标变化不得提交迟到写入。
+`POST /plugin-compat-check/history`沿用宿主会话、完整同源及请求标记；请求体8 MiB+16 KiB、读取5秒、整次20秒、每代最多2个并行。HTTP不接受状态路径；管理复用已生成报告，不重跑体检。卸载/取消/目标变化不得提交迟到写入。
 
 ## 本地状态锁恢复
 
@@ -140,13 +139,14 @@ CLI分析和runAsync由worker监督，10秒、512+64MiB代际预算，回收后�
 npm ci --ignore-scripts --no-audit --no-fund
 npm test -- --test-reporter=tap > /tmp/dsc-tests.tap
 npm run check
+npm run test:issues -- /tmp/dsc-issues
 node tools/update-current-state.mjs --test-summary /tmp/dsc-tests.tap
 node tools/doc-check.mjs --test-summary /tmp/dsc-tests.tap
 node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-仅成功TAP可更新计数；不重建快照求绿。skill/契约修改后同步stage-skill/stage-contract，依赖变化同步第三方说明。默认套件不启动真实DSH/模型，打包测试需要registry；正式发布按[同一制品核对流程](maintaining.md#同一制品发布核对)，推送/发布/外部发帖分别授权。
+test:issues固定官方rc.5源码归档摘要，缺输入时下载并校验后执行，来源不可用/不符或任何跳过均失败；可通过DSC_HOST_SOURCE_ARCHIVE复用本地归档。仅成功TAP可更新计数，不重建快照求绿。skill/契约修改后同步stage-skill/stage-contract，依赖变化同步第三方说明。默认套件不启动真实DSH/模型，打包测试需要registry；正式发布按[同一制品核对流程](maintaining.md#同一制品发布核对)，推送/发布/外部发帖分别授权。
 
 ## 升级预检与有限批量
 

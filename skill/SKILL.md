@@ -1,17 +1,17 @@
 ---
 name: dsh-plugin-compat-check
-description: 0.2.3版，用于检查已安装DSH插件的兼容性、升级前静态对比，以及排查更新后不工作、界面消失、工具无响应、did not activate或engines.dsh/peerDependencies声明问题。Use when checking installed DeepSeek Harness plugins, comparing exact host versions before upgrading, or investigating activation and missing-feature failures. Includes rc.5 catalogue and slot-semantic guidance; findings do not certify business functionality.
+description: 0.2.3版，用于检查已安装DSH插件的兼容性、升级前静态对比，以及排查更新后不工作、界面消失、工具无响应、did not activate或engines.dsh/peerDependencies声明问题。Use when checking installed DeepSeek Harness plugins, comparing exact host versions before upgrading, or investigating activation and missing-feature failures. Covers rc.5 catalogues, strict JSON tools and profile diagnosis; findings do not certify business functionality.
 ---
 
 # dsh-plugin-compat-check
 
-本版**0.2.3**对**已安装DSH插件**给出兼容证据与限制。API源码发现引用真实`file:line`；loader/声明事实说明实际包身份、状态和依据，不补造行号。插件、仓库CLI与skill共用内核，但静态目录与进程内观测可产生不同结论和基线模式；先核目标、版本、规则和采样身份。
+本版**0.2.3**对**已安装DSH插件**给出兼容证据与限制。API发现引用真实`file:line`，loader/声明事实不补造行号。各入口共用内核，静态与进程内观测可有不同结论/基线；先核目标、版本、规则和采样身份。
 
 ## 选择入口
 
 当前会话有`compat_check`时优先调用，返回普通`report`、baseline/cache、toolVersion和exitCode；升级模式返回`upgradePreview`，普通report为null。无工具时定位含`bin/compat-check.mjs`、`lib/`、`rules/`的仓库，npm插件包没有CLI bin，不支持npx。根依赖缺失时在授权范围内运行`npm ci --ignore-scripts`。
 
-用户说“我的插件”时先确定实际profile，不默认desktop。路径为`$DSH_HOME/profiles/<name>`，DSH_HOME默认`~/.dsh`。rc.3/rc.5界面入口：左下角“更多”/用户头像→设置→内置插件→兼容性；折叠不等于激活失败。界面支持中英韩，原始证据和JSON不翻译。
+先核实际profile，不默认desktop；无参tool与设置页按宿主启动身份定位，冲突时用`compat_check({"profile":"my-profile"})`或CLI显式路径。Windows盘符/UNC有路径回归，仍须实机复验。profile位于`${DSH_HOME:-~/.dsh}/profiles/<name>`。rc.3/rc.5界面入口：左下角“更多”/用户头像→设置→内置插件→兼容性；折叠不等于激活失败。界面支持中英韩，原始证据和JSON不翻译。
 
 ```sh
 node <repo>/bin/compat-check.mjs --help
@@ -77,7 +77,7 @@ node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.3 --upgra
 - `impactBasis=measured`须有对应实测依据，inferred仅为推断；certain不表示业务影响已实测，缺字段不视为measured。
 - `vacuous=true`表示未发现冲突且verifiedCalls=0，不表示没有依赖/客户端功能。逐项转述coverage；源码解析、读取、动态绑定和预算诊断不可省略。
 
-API发现说明严重度、类别、API、真实位置、依据和下一步；不猜替代API、修复版本或已执行修复。只有名字无调用点是无证据可判。客户端业务需要实际操作并核对请求/持久化/UI结果，元素出现、声明、激活或日志干净均不是通过证明。
+发现保留严重度、类别、API、真实位置、依据与下一步，不猜替代API或修复版本。名字无调用点不算证据；业务须实际操作并核请求/持久化/UI，元素出现、激活或日志干净不算通过。
 
 ## 运行时、目录与声明
 
@@ -95,11 +95,11 @@ DSH≥0.2.1-rc.1优先自有engines.dsh，仅字段缺失回退官方peer；旧�
 
 ## rc.5语义与槽位
 
-rc.2/rc.3/rc.5的精确语义单独审查，不从同名方法或目录认证借证明。startSession仅检查已知prompt/agentPreset/clearPreviousDraft类型，及rc.3/rc.5的whenDraftExists=keep/replace/append；显式新字段优先，旧clearPreviousDraft仍受支持。空白会话可复用，指定preset隔离；创建草稿不等于发送。三处“更多”区分全局面板/会话/右侧工具区；浏览进主列表，创建只追加草稿。
+精确语义独立于方法名目录：startSession仅核已知prompt/agentPreset/clearPreviousDraft类型及rc.3/rc.5的whenDraftExists=keep/replace/append。新字段优先，旧clearPreviousDraft仍支持；空白会话可复用，preset隔离，创建草稿不等于发送。三处“更多”浏览进主列表、创建只追加草稿。
 
-timer.setTimeout/setInterval弃用提醒和sessions.retain的ready/release/disposal所有权提醒只说明覆盖，不证明泄漏/失败。未知值、展开、访问器、逃逸或跨helper合并弃权，不执行代码或保存prompt。
+timer.setTimeout/setInterval弃用及sessions.retain的ready/release/disposal提醒仅说明覆盖，不证明泄漏。动态、展开、访问器、逃逸和跨helper合并弃权，不执行代码或保存prompt。
 
-rc.5推理正文槽位提供显示text与原始rawText；普通渲染/翻译仍用text，Content Factory仍用text/running/labels。静态提示只定位slots.register并说明迁移，不能验证回调props用途、流式/完成态、签名处理或业务；动态注册弃权，不把text使用报错，也不采集思考正文。模型列表发现须凭据门控；不要为体检访问生产/models或发送模型请求。
+rc.5推理槽位显示/翻译用text，原始输出用rawText；Content Factory仍用text/running/labels。仅定位slots.register及迁移限制，不验证props、流式/完成态或业务，不把text使用报错，不采集思考正文。模型发现须凭据门控，不为体检访问生产/models或发送模型请求。
 
 ## 依赖、人工记录和健康检查
 
@@ -122,4 +122,6 @@ report_status=$?
 
 不额外启动宿主，不读写基线；仍可能读旁置probe。报告省略绝对路径、原始日志/源码/探针/基线，保留包名及包内位置；常见凭据字段隐藏不保证完全脱敏，预览后由用户决定分享。命令占位符须替换，生成文本不授权上传或发帖。
 
-本版0.2.3包含rc.5支持；实际运行版本取toolVersion/CLI version，公开分发状态以registry及GitHub Releases实际记录为准。docs/current-state.json记录精确提交、归档及macOS/Linux限定验收，不认证后续重打包、Windows、真实用户或一般业务；docs/Plan.md维护契约和待办。完整操作/预算见docs/guide.md，目录治理见docs/maintaining.md。YAML为插件运行依赖，根dev依赖不是npm运行功能。
+0.2.3修复缓存抖动、JSON回包、profile定位和rc.5目录漏项。无关运行状态写入不使报告失效，源码/声明变化仍会；非法JSON证据明确报错，不静默丢弃。目录未收录只表示覆盖不足，不能据此称方法缺失。
+
+实际运行版本取toolVersion/CLI version；分发以registry/GitHub Releases为准，docs/current-state.json按提交/归档/平台记录验收，不认证重打包、Windows或一般业务。docs/Plan.md列待办，操作/预算和目录治理见docs/guide.md、docs/maintaining.md。YAML是运行依赖，根dev依赖不随npm提供功能。

@@ -7,9 +7,10 @@
 ```sh
 npm run check
 npm test -- --test-reporter=tap > /tmp/dsc-tests.tap
+npm run test:issues -- /tmp/dsc-issues
 ```
 
-check验证格式、文档/版本/链接、skill/契约副本、第三方说明、可执行语法矩阵及目录登记；不递归跑测试、不联网、不执行目标或改源码。矩阵仅创建/清理自有合成输入。成功TAP交给doc-check核对计数，远端状态及真实宿主另验。
+check离线核格式、文档/版本/链接、生成副本、许可证、语法矩阵及目录登记，不运行完整套件。test:issues必跑#7–#10回归及原始官方JSON/schema校验器，固定rc.5来源URL/SHA256；缺归档时有界下载，坏来源或跳过均失败。DSC_HOST_SOURCE_ARCHIVE可指定已有归档，CI在Node22/24均执行并保留TAP/摘要；成功TAP交给doc-check，宿主另验。
 
 宿主`plugin/index.js`编排加载/资源，`plugin/lib/host-{reports,reviews,http,upgrade,history}.js`分管各接口；`lib/review-sidecar-cache.mjs`仅缓存已校验派生上下文，不授权保存。客户端真源为`plugin/src/client.jsx`、`panels/`、`components/`和`styles.css`，纯契约/workflow共享`lib/*.mjs`。
 
@@ -29,11 +30,9 @@ DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 node tools/ci-ui018.mjs <自有输出目�
 
 输出含提交/dirty/逐文件摘要、tgz摘要、完整报告、日志、截图及SHA256SUMS，缺结果/截图或清理失败均不得通过。使用忽略的tmp或仓库外目录，避免证据进入源码身份；CI要求干净检出。Linux rc.3/rc.5跑完整入口，另两宿主保留集成门禁；平台结果绑定实际提交和归档，不由接入CI推定。`ui018`文件名、`DSC_UI018_*`及证据字段沿用以兼容脚本，不代表产品版本。Windows、真实用户和一般业务另验。
 
-组件回归另测三槽位、共享订阅/可见性及迟到响应。`node tools/ui018-performance.mjs`比较固定提交与当前客户端的1000插件元素树及隐藏内容；它是合成hook测量，耗时不作浏览器性能门禁。
+组件回归覆盖三槽位、共享订阅/可见性及迟到响应；`tools/ui018-performance.mjs`仅测1000插件合成hook树，不是浏览器性能门禁。语法矩阵由`test/fixtures/syntax-matrix.json`和`tools/syntax-matrix.mjs`记录/执行supported、inferred、abstained、excluded，核包名、调用对/跨度、确定性与诊断，不以解析成功代替结论或据业务答案调严重度。
 
-`test/fixtures/syntax-matrix.json`与`tools/syntax-matrix.mjs`分别记录并执行supported / inferred / abstained / excluded病例。每例核验包名、精确调用对/跨度、确定性或诊断，不以解析成功代替结论。扩展语法须增加正反例，并保留动态/超限限制；矩阵与真实业务标签独立，不能调严重度求绿。
-
-旧实验/逐轮日志见`10213c0:docs/maintaining.md`，Python对拍已移除，当前由AST文件图、语法矩阵和快照回归覆盖。仍使用的历史观测在test/fixtures/host-surface-parityfix.json；独立正则复核不是判定真值。
+旧实验见`10213c0:docs/maintaining.md`；Python对拍已由AST图/矩阵/快照替代，历史观测`test/fixtures/host-surface-parityfix.json`仍用于回归。独立正则不是判定真值。
 
 ## API目录候选审查
 
@@ -82,9 +81,9 @@ npm audit固定公共registry，任何公告级别（含未知）均阻断，无
 
 [rc.2](../tools/real-regression-manifest.json)、[rc.3](../tools/real-regression-manifest-rc3.json)及[rc.5清单](../tools/real-regression-manifest-rc5.json)分别锁定DSH/目录、五个npm制品、摘要及每轮24项业务期望，互不借结果。独立holdout为`dsh-pomodoro@0.5.5`与`dsh-global-todo@0.13.2`，先选无需账户/模型且可审阅的操作，再封存预测，不能据结果调规则。重复运行不增加独立样本数。
 
-Pomodoro真值来自Start后的localStorage revision/deadline及新文档恢复，受控故障删主按钮；GET config只说明配置就绪。Todo真值来自POST/create、私有JSON精确标题及重载DOM；故障只对该POST返回503，磁盘/DOM均须无标题，恢复另建标题。正常→故障→恢复分组，不调用通知/模型/外部采集。
+业务真值来自实际动作及独立后置条件：Pomodoro核localStorage revision/deadline与新文档恢复；Todo核POST/create、私有JSON及重载DOM。受控故障分别删主按钮或仅令该POST返回503，恢复另验；GET配置或元素出现不代替功能通过，无通知/模型/外部采集。
 
-静态预测在启动前封存，service-only等待官方appReady后采样原始root，在Chrome/动作前封存；不要求所有被测服务存在。receipt记录动作时间、请求/DOM/磁盘后置条件及清理；回放重算标签，不信任保存的布尔值或把hash当签名。静态/service-only、自然/受控、FP/FN和驱动错误分列，clientVerified:false保留。旧sidebar的动态禁用patch不能证明顶层挂载，其两项HTTP405失败保留为limited/FN，不能要求service-only零漏报。绿色只证明固定结果重现，不代表生态准确率。
+启动前封存静态预测；appReady后、Chrome/动作前封存原始service-only root。回放重算标签及动作时序，不信任保存的布尔值，不据业务/loader答案倒填服务观测。静态/service-only、自然/受控、FP/FN与驱动错误分列，clientVerified:false保留。旧sidebar两项HTTP405与动态patch挂载限制仍为limited/FN；绿色仅表示固定期望重现，不是生态准确率。
 
 ```sh
 DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 node tools/real-regression.mjs --live --repeat 1 --out-dir <新空目录>
@@ -103,7 +102,7 @@ rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.j
 
 ## 同一制品发布核对
 
-本版0.2.3的发布文档使用不依赖发布时点的能力描述；不把历史公开版本写成当前版本，也不预写成功时间、摘要或“已发布”。带日期的公开状态与验收回执单列在current-state，历史CI不认证新提交。发布依次完成：
+本版**0.2.3**以能力描述固定文档；带日期的公开状态和验收单列current-state，不预写发布成功、时间或摘要。发布顺序：
 
 1. 先统一版本真源、manifest/lock、各版README、skill及示例；冻结到tag的文档不得保留“本版未发布”等即时状态。运行check与prepublish-check（不发布），用成功TAP更新current-state计数，核生成副本、许可证和公开元数据。
 2. 授权推送后等待所选提交全部Actions通过。CI candidate job只构建一次；rc.5 job下载同一归档/回执，运行完整UI并上传证据。
@@ -111,7 +110,7 @@ rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.j
 4. 另取正式发布授权后，npm发布同一tgz，Git tag/Release附该文件、SHA256SUMS及限定验收回执；不从源码重打包。
 5. 核npm版本/integrity/shasum、附件SHA-256、tag提交，再实际公共安装。将真实结果记入current-state，不预写published或未经验证的时间/摘要。
 
-Windows、真实用户与一般业务单列未验范围。取数失败不算通过；本地候选领先registry或README/description差异属于待发布提示。
+Windows、真实用户及一般业务单列未验范围；取数失败不算通过，本地版本/README领先registry仅为发布差异提示。
 
 GitHub简介/topics可独立于Git提交更新；npm简介/搜索关键词分别取`plugin/package.json`的description/keywords，正式发布新版本后再核对公开值。两者共用产品主旨，但不是同一组平台字段；npm dist-tags是版本渠道，不能拿它替代搜索关键词。发布前本地与registry的版本、正文及元数据差异须记录，不能宣称已上线。字段含义见[npm package.json文档](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/#description)。
 
@@ -153,15 +152,21 @@ DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_RC2_ARTIFACT=<候选tgz绝对路径> D
 
 rc.5额外要求独立ACP stdout JSON-RPC、stderr目录诊断、MCP能力、受控模型列表及导航语义回执。rc5-acp-stdout只用私有DSH_HOME、合成凭据、loopback列表/两轮模型响应和tools-only MCP；无resources能力不请求资源。失败/超时/清理不确认均失败，只保存计数与断言，不保存对话正文。模型列表另验首次等待、失败/超时回退及无凭据不请求；没有生产账户/模型调用。
 
-历史0.2.1归档的同一文件macOS/Linux验收见current-state；当前制品须独立核对来源、摘要及平台，不继承旧包结果。固定业务五suite/24项仅证明期望重现，不能称全部功能通过。rules/dsh-0.2.1-rc.5-review.json的integrationAcceptance保留目录登记时基础快照，不追写历史归档。
+历史制品回执见current-state，新包须另核来源/摘要/平台。固定五suite/24项仅证明期望重现；rules/dsh-0.2.1-rc.5-review.json的integrationAcceptance是目录登记时快照，不追写历史。
 
 ## 用户issue修订与回归
 
-0.2.3源码修订对应[本仓库#7](https://github.com/lcy0121/dsh-plugin-compat-check/issues/7)、[#9](https://github.com/lcy0121/dsh-plugin-compat-check/issues/9)、[#10](https://github.com/lcy0121/dsh-plugin-compat-check/issues/10)及[#8](https://github.com/lcy0121/dsh-plugin-compat-check/issues/8)，结果绑定实际提交/制品；不推断用户的旧包已修复。
+0.2.3修复本仓库[#7](https://github.com/lcy0121/dsh-plugin-compat-check/issues/7)、[#9](https://github.com/lcy0121/dsh-plugin-compat-check/issues/9)、[#10](https://github.com/lcy0121/dsh-plugin-compat-check/issues/10)、[#8](https://github.com/lcy0121/dsh-plugin-compat-check/issues/8)。同一最小输入对照原始`b188c79`与修复源码，四项均复现旧问题并通过新行为；不执行用户插件，不推断已安装旧包已修复。
 
-- 缓存身份不取目录时间戳或无关JSON状态内容；保留源码/清单/patch元数据、实际模块解析候选的路径/类型/存在性及规则/目录/探针/豁免身份。复用有界源码图发现任意后缀的解析输入，共享读取、枚举和时间预算，不按`state`目录名排除；身份观察会解析源码图，超限显式失败。发布前复核及基线提交守卫保留。
-- tool按声明构造可为空字段，已知缺省观测用null；递归检查普通/升级结构化回包，对非有限数、undefined证据、特殊对象、循环、访问器及数组额外属性明确报工具错误，不靠JSON往返静默丢信息，不向顶层塞诊断键。固定rc.5官方JSON/schema校验器另作带摘要输入的回归；缺官方输入时明确跳过，不冒充宿主验收。
-- profile解析支持POSIX、Windows盘符/UNC启动路径，显式请求优先，完整启动路径保留实际profile根；过期环境变量不得覆盖它。环境提示须与受约束安装位置相互印证，冲突/身份不足时保持无法判定并提示显式tool/CLI用法；不猜desktop，不把共享安装位置或未验证loader标签视为当前身份。Windows路径模拟不代替Windows真机。
-- rc.5生成目录中的abstract/装饰器方法原本被提取器漏过；同一固定官方来源重新提取并审查126项新增名称，宿主方法291→417，涵盖报告中的三个方法。审查记录、来源摘要及认证引用同步，旧目录保留。目录未收录仅给带方法/位置的覆盖说明，可靠完整运行时描述符才能支持方法缺失结论；现有未知/访问器和能力守卫边界保留。新目录字节与来源审查不继承旧归档的宿主/业务验收。
+| issue / 最小复现 | 修复与反例 | 回归入口 |
+|---|---|---|
+| #7：touch目录、原子替换state JSON | 无关状态写入不失效；源码、清单、patch及实际解析候选仍失效，保留提交前复核/预算/基线守卫，不按state目录名排除 | `identity-runtime-state`、`cache`、`input-lifecycle` |
+| #9：缺省字段/非法JSON证据 | 可为空字段显式null，普通/缓存/失败/升级回包通过严格schema；特殊值、循环、访问器、稀疏数组及额外数组属性明确失败，不静默丢证据或增加未声明键 | `tool-json`、`tool-host-validator`、`upgrade-host` |
+| #10：Windows盘符/UNC位置参数 | 显式请求优先；绝对启动路径保持实际根，环境须安装位置印证，冲突/未知关闭推断；不猜desktop或借共享安装冒充身份 | `profile-target`、`cache`、`input-lifecycle` |
+| #8：abstract/@Remote签名被漏过 | 同一固定来源核126/126新增名称，宿主方法291→417；目录缺项改为带方法/位置的覆盖限制，可靠完整运行时证据仍可证明真正缺失 | `catalog-signature-omissions`、`verdict-regressions`、`catalog-governance` |
 
-定向回归见`test/identity-runtime-state.test.mjs`、`test/profile-target.test.mjs`、`test/tool-json.test.mjs`、`test/tool-host-validator.test.mjs`和`test/catalog-signature-omissions.test.mjs`；联合默认套件、独立tgz及真实宿主结果见current-state。Windows现场复现/修复确认、跨平台同一制品验收、CI与公开发行按Plan第六节继续，不自动关闭issue或代用户反馈。
+表中名称对应`test/<名称>.test.mjs`。身份观察复用有界源码图，任意后缀解析候选的存在性/类型/真实路径也纳入；读取、枚举和时间共享预算。官方校验器测试只执行经摘要校验的原始TypeScript，不复制第三方实现。
+
+`ci-ui018`的rc.5门禁还要求`issues023`回执：独立tgz装入自有profile，每25ms原子写状态期间联合调用无参tool、刷新真实设置页、核目标一致及缓存命中；停写后核显式失败及升级回包。调用经过宿主tools.execute的严格JSON/schema管线；测试桥接路由/定时器仅驻临时profile，随宿主清理，不进入npm产品。预检复制全部输入字节，因此持续写入时拒绝不稳定快照是正确行为，不放宽该守卫。
+
+本地Node22/24、九项UI及问题联合验收见current-state；Windows实机、所选提交远端CI和同一归档双平台回执按Plan继续。源码修复、用户现场确认及公开发行分开记录，不自动关闭issue或联系用户。

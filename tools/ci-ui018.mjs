@@ -31,6 +31,19 @@ export function validateUi018Evidence(
   );
   if (expectedVersion === "0.2.1-rc.5") {
     for (const key of [
+      "realHost",
+      "installedArtifact",
+      "strictToolPipeline",
+      "noArgumentTool",
+      "activeProfile",
+      "settingsProfile",
+      "cachedWithoutInvalidation",
+      "explicitFailure",
+      "staticUpgrade",
+    ])
+      expect(result.issues023?.[key] === true, "issues023." + key);
+    expect(result.issues023.runtimeWrites > 0, "actual runtime state writes");
+    for (const key of [
       "actualAcp",
       "catalogDiagnosticsStderr",
       "mcpResources",

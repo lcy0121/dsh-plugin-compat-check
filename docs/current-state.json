@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.2.3",
-  "recordedAt": "2026-11-04T11:15:38.039Z",
+  "recordedAt": "2026-11-04T17:08:51.602Z",
   "testFiles": 88,
   "tests": 1301,
   "repositoryFiles": {
-    "total": 396,
+    "total": 398,
     "fixtures": 100,
-    "other": 296
+    "other": 298
   },
   "verification": {
     "platform": "darwin",
@@ -26,7 +26,7 @@
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
-      "scope": "Current 0.2.3 development source. Public registry/release versions require independent verification; dated historical publication receipts do not certify this code."
+      "scope": "0.2.3 source capabilities. Public distribution is independently verified; dated publication and acceptance receipts certify only their recorded artifacts."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -36,39 +36,19 @@
     ],
     "business02120261030": {
       "host": "0.2.1-rc.5",
-      "status": "passed",
-      "manifestSha256": "539846b7aacba184b320b6f796aef2b35723431246248c95724091ef3d895bed",
-      "suites": 5,
-      "summary": {
-        "independentPackageFamilies": 4,
-        "pinnedArtifacts": 5,
-        "holdoutPackageFamilies": 2,
-        "holdoutPinnedArtifacts": 2,
-        "distinctPlannedCases": 24,
-        "knownOutcomeCases": 24,
-        "staticIdentifiedFailures": 0,
-        "serviceOnlyIdentifiedFailures": 0,
-        "unflaggedNaturalFailures": 2,
-        "unflaggedBusinessOrClientFailures": 10,
-        "driverErrors": 0,
-        "validationErrors": 0
-      },
+      "status": "historical fixed outcomes reproduced",
+      "cases": 24,
+      "unidentifiedFailures": 12,
       "modelCalls": 0,
       "accountCalls": 0,
-      "replay": "passed; historical evidence validation only",
-      "scope": "Historical fixed24-case run before documentation/skill compression; expectations and kernel unchanged, no rerun claimed for the new tgz. Green retained12 unflagged failures; not general business certification.",
-      "receipts": "tmp/release-021-20261030/business-final/"
+      "scope": "2026-10-30 five-suite historical run; not current artifact or general business acceptance. Detailed receipt: b7b37a9:docs/current-state.json."
     },
     "historicalRelease021": {
-      "scope": "Historical 0.2.1 publication and same-archive acceptance only; not current registry state or acceptance of 0.2.2.",
+      "scope": "Historical 0.2.1 publication and same-archive acceptance only; not a current-version claim or acceptance of later artifacts.",
       "sourceCommit": "9beaa5a9174237d09844ea961e574827279bbae8",
       "githubRelease": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.1",
-      "npmPackage": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.1",
-      "githubPublishedAt": "2026-10-30T18:17:05Z",
-      "npmPublishedAt": "2026-10-30T18:12:54.228Z",
       "archiveSha256": "cdb256e475dd3fa003b639b835d4f0301454f77b5c09fa2946a83b23de33bb09",
       "acceptance": "Exact 0.2.1 archive passed rc.5 macOS arm64/Linux x64 nine-section UI gates and public-registry isolated installation; limitations retained.",
-      "ci": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/41101651183",
       "details": "0d6187bcbcc6dbf11f1985de9e6e34515c9be3e2:docs/current-state.json; RELEASE-VERIFICATION.json and SHA256SUMS on the linked release."
     },
     "history": {
@@ -77,48 +57,101 @@
       "scope": "Detailed 0.2.0/0.2.1 publication, pre-release and public metadata observations. Historical evidence never certifies a newer version."
     },
     "issues02320261104": {
-      "status": "source fixes and local regressions complete; public release, new remote CI and real Windows confirmation remain pending",
+      "sourceCommit": "b7b37a9e484f67626027ba7ae51e32d7d8972d44",
       "issues": [
         7,
         9,
         10,
         8
       ],
+      "catalogueMethods": {
+        "before": 291,
+        "after": 417,
+        "sourceBackedAdditions": 126
+      },
+      "scope": "Source fixes and bounded local regressions. Full original receipt: b7b37a9:docs/current-state.json. No Windows or public release certification."
+    },
+    "preparation02320261105": {
       "version": "0.2.3",
-      "localTests": {
-        "tests": 1301,
-        "pass": 1293,
-        "skip": 8,
+      "sourceBase": "b7b37a9e484f67626027ba7ae51e32d7d8972d44",
+      "status": "Local regression and delivery preparation; exact-commit remote CI and same-archive Linux acceptance are required before publication.",
+      "beforeAfter": {
+        "beforeCommit": "b188c7919858bf3d00a485869ff24687626e6adc",
+        "minimalCases": 4,
+        "oldFailuresReproduced": 4,
+        "fixedCasesPassed": 4,
+        "scope": "Same input probes, original source; Windows path synthetic, no user plugin execution."
+      },
+      "nodeMatrix": [
+        {
+          "version": "22.19.0",
+          "platform": "darwin",
+          "arch": "arm64",
+          "tests": 1301,
+          "pass": 1293,
+          "skip": 8,
+          "fail": 0,
+          "prepublish": "passed"
+        },
+        {
+          "version": "24.22.2",
+          "platform": "darwin",
+          "arch": "arm64",
+          "tests": 1301,
+          "pass": 1293,
+          "skip": 8,
+          "fail": 0,
+          "prepublish": "passed"
+        }
+      ],
+      "mandatoryIssues": {
+        "tests": 98,
+        "pass": 98,
+        "skip": 0,
         "fail": 0,
-        "node": "v26.13.0",
-        "testFiles": 88
+        "officialSourceSha256": "a2b94ff1183a87bb1f1d898c6274ae5f8b78accc38931594afd97b58cf0db81f",
+        "freshDownload": "verified",
+        "ci": "Required on Node22/24 before candidate; actual remote run pending."
       },
-      "officialHostValidator": "Passed with SHA256-pinned official rc.5 source archive; optional input skip is explicit in other checkouts.",
-      "catalogueAudit": {
-        "version": "0.2.1-rc.5",
-        "hostMethodsBefore": 291,
-        "hostMethodsAfter": 417,
-        "additionsReviewed": 126,
-        "scope": "Abstract/decorated signatures from identical pinned official source bytes; no runtime absence inferred from catalogue omission."
-      },
+      "checks": [
+        "source/generated/docs/links/catalogue registry passed",
+        "workspace and independent plugin runtime dependency audit passed"
+      ],
       "macOS": {
         "host": "0.2.1-rc.5",
-        "archiveSha256": "1f9e2211a3aad071c700c06d9a02484d7373e9350726c591edbba0a8d5ff96b4",
-        "sourceManifestSha256": "41e314dd68a78b555e94c32a1b0f837f4905a98d81206b5f09c55989ee01b2ec",
+        "archiveSha256": "f5db677fc9d9f5083a23c53311ba6e6596fe61e9550b56f2310ac7cb123145d3",
+        "sourceManifestSha256": "a655b70b95340ae673132258dabb786e70e1073009d62032ce9ce862f651aba9",
         "sourceDirty": true,
         "allNineSections": true,
         "screenshots": 21,
+        "issues023": {
+          "realHost": true,
+          "installedArtifact": true,
+          "strictToolPipeline": true,
+          "noArgumentTool": true,
+          "activeProfile": true,
+          "settingsProfile": true,
+          "runtimeWrites": 37,
+          "cachedWithoutInvalidation": true,
+          "explicitFailure": true,
+          "staticUpgrade": true,
+          "scope": "Owned rc.5 profile and synthetic 25ms state writer; no Windows or user-site confirmation."
+        },
         "privateRootRemoved": true,
-        "scope": "Final independently packed archive accepted in owned macOS arm64 host. Source identity predates only this receipt update; not a clean release candidate or Linux/Windows certification.",
-        "checksumManifestVerified": true
+        "scope": "Frozen source and delivery documents accepted on one independently built tgz. Source snapshot predates only this JSON receipt update and local Git commit; it is not Linux or Windows acceptance."
       },
-      "review": "Fresh whole-change review plus scoped array evidence-loss fix review approved.",
-      "limits": [
-        "Windows drive/UNC and isolation behavior tested synthetically; real Windows user startup not run.",
-        "Current Linux CI and same-archive cross-platform publication acceptance are separate pending tasks.",
-        "No issue closed or user contacted; no push, tag or publication."
+      "datedPublicObservation": {
+        "observedOn": "2026-11-05",
+        "npmLatest": "0.2.2",
+        "githubTag": "v0.2.2",
+        "scope": "Dated pre-publication observation, not a product current-version claim. No publication performed."
+      },
+      "remaining": [
+        "Push authorization, exact-commit GitHub CI and same-archive Linux acceptance.",
+        "Confirm macOS against the CI candidate if its source receipt or archive differs.",
+        "Windows user-site and general business acceptance remain separate unverified scope."
       ],
-      "receipts": "tmp/issue-023/; independent review and task evidence in tmp/issue-023/reviews/."
+      "receipts": "tmp/prep-023-20261105/; checks, original TAP, before-after probes, archive/source/UI/checksums."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

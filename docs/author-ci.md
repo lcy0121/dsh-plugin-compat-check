@@ -9,7 +9,7 @@ node tools/author-ci.mjs --package ./dist-plugin --format junit > compatibility.
 node tools/author-ci.mjs --report compatibility.json --format html > compatibility.html
 ```
 
-默认矩阵包含已认证的 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3` 和 `0.2.1-rc.5`。未知版本以工具错误阻断，不回退目录。矩阵只做静态比较，不表示实际启动过这些版本或完成业务验收；每cell保留canonical report、内核退出码及工具/规则/目录/源码身份。
+默认矩阵包含已认证的 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3` 和 `0.2.1-rc.5`。未知版本以工具错误阻断，不回退目录。矩阵只静态比较；每cell保留完整报告、内核码及判定/源码身份。目录未收录的方法保留位置和覆盖限制，不直接报缺失；默认策略仍阻断覆盖不足。它不证明宿主启动或业务通过。
 
 ## 门禁策略
 

@@ -14,6 +14,10 @@ import { verifyUi018 } from "./ui018-acceptance.mjs";
 import { verifyRc3Navigation } from "./rc3-navigation.mjs";
 import { installRc3Fixture } from "./rc3-fixture.mjs";
 import {
+  installIssue023Fixture,
+  verifyIssue023,
+} from "./issue023-acceptance.mjs";
+import {
   acceptanceTarget,
   extendedAcceptance,
   assertBrowserAcceptance,
@@ -519,6 +523,7 @@ try {
       "export function apply(){}\n",
     );
     if (extendedAcceptance(version)) installRc3Fixture(profile);
+    if (version === "0.2.1-rc.5") installIssue023Fixture(profile);
     const futureProbeFile = path.join(root, "future-probe.json");
     const host = await boot("rc2-ui", { DSC_PROBE_REPORT: futureProbeFile });
     requireTrue(
@@ -1796,6 +1801,16 @@ try {
           readReport: ordinary,
           screenshotDir: process.env.DSC_UI018_SCREENSHOTS,
         });
+      if (version === "0.2.1-rc.5") {
+        result.issues023 = await verifyIssue023({
+          url: host.url,
+          headers,
+          profile,
+          chrome,
+          evalx,
+          poll,
+        });
+      }
       if (process.env.DSC_RC2_SCREENSHOT) {
         const s = await chrome.send("Page.captureScreenshot", {
           format: "png",
