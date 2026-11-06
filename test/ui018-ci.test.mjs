@@ -215,6 +215,25 @@ test("rc.5 UI gate binds the requested host and requires separate protocol and m
     },
   };
   assert.equal(validateUi018Evidence(good, "a".repeat(64), "0.2.1-rc.5"), true);
+  const rc22 = {
+    ...structuredClone(good),
+    dshVersion: "0.2.2-rc.1",
+    runtimeNode: "24.21.0",
+  };
+  rc22.apiSemantics.exactVersion = "0.2.2-rc.1";
+  rc22.modelListing.changeNotifications = 1;
+  rc22.modelListing.settingsReads = 1;
+  assert.throws(
+    () => validateUi018Evidence(rc22, "a".repeat(64), "0.2.2-rc.1"),
+    /locale fallback/,
+  );
+  rc22.uiI18n.hostLocaleFallbacks = ["ja", "es", "fr", "de", "ru", "pt"];
+  assert.equal(validateUi018Evidence(rc22, "a".repeat(64), "0.2.2-rc.1"), true);
+  rc22.modelListing.changeNotifications = 0;
+  assert.throws(
+    () => validateUi018Evidence(rc22, "a".repeat(64), "0.2.2-rc.1"),
+    /change notification/,
+  );
   for (const patch of [
     { dshVersion: "0.2.1-rc.3" },
     { rc5Protocol: undefined },
@@ -318,6 +337,7 @@ test("rc.5 Linux plan preserves old targets and consumes one candidate built by 
     "0.2.1-rc.2",
     "0.2.1-rc.3",
     "0.2.1-rc.5",
+    "0.2.2-rc.1",
   ]);
   assert(job.needs.includes("candidate"));
   const download = job.steps.find((s) =>
@@ -337,5 +357,12 @@ test("rc.5 Linux plan preserves old targets and consumes one candidate built by 
     job.steps.some(
       (s) => s.name?.startsWith("Install CJK") && s.if.includes("rc.5"),
     ),
+  );
+});
+test("rc22 cannot borrow a bare rc3 success without its strict tool and runtime evidence", () => {
+  const r = { ...complete(), dshVersion: "0.2.2-rc.1", runtimeNode: "24.21.0" };
+  assert.throws(
+    () => validateUi018Evidence(r, "a".repeat(64), "0.2.2-rc.1"),
+    /issues023/,
   );
 });

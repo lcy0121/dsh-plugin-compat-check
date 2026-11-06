@@ -518,3 +518,318 @@ test("malformed rc.5 props provenance abstains for all semantic decisions", asyn
     assert.doesNotMatch(notes(p), /槽位语义提示/);
   }
 });
+
+// Removing the exact rc.1 baseline or migration routing must fail these checks.
+test("rc.1 independently certifies draft types and retains timer/ownership/reasoning notices", () => {
+  const { p } = evaluate(
+    "export function apply(ctx){ctx.uiWorkspace.startSession(undefined,{whenDraftExists:'bad',prompt:4});ctx.timer.setTimeout(()=>{},1);ctx.sessions.retain('id',{source:'controllerOperation'});ctx.slots.register({name:'conversation.chat.reasoning.body'},p=>p.text)}",
+    { version: "0.2.2-rc.1" },
+  );
+  assert.equal(invalid(p).length, 2);
+  assert.ok(
+    invalid(p).every(
+      (f) =>
+        f.evidence.sourceArchiveSha256 ===
+          "416750920b64272899259c26b2fa0a4341132c9c19b43337da502ab7ebd599f1" &&
+        f.severity === "degraded",
+    ),
+  );
+  assert.match(notes(p), /定时器.*disposer/);
+  assert.match(notes(p), /ready.*release/);
+  assert.match(notes(p), /rawText.*Content Factory/);
+  assert.match(notes(p), /附件.*保留/);
+});
+
+test("rc.1 host projection and Agent/Session entry calls receive located migration coverage", () => {
+  const { p } = evaluate(
+    "export async function apply(ctx){ctx.sessionProjections.register(def);ctx.sessionProjections.snapshot(session);ctx.sessionProjections.cachedSnapshot(session);ctx.sessionProjections.onEventChanged(listener);ctx.agents.get('id');ctx.sessionController.control(signal);ctx.sessionController.events(request,signal);ctx.sessionController.state(request,signal)}",
+    { version: "0.2.2-rc.1", side: "host" },
+  );
+  assert.equal(p.findings.length, 0);
+  for (const pattern of [
+    /register.*index.js:1.*await/,
+    /snapshot.*asOfSeq/,
+    /cachedSnapshot.*不完整/,
+    /onEventChanged.*changes.*val/,
+    /agent.model.select.*agent\/request/,
+    /control.*changes/,
+    /events.*seq/,
+    /state.*运行状态/,
+  ])
+    assert.match(notes(p), pattern);
+  assert.match(notes(p), /未验证.*await/);
+  assert.match(notes(p), /回调.*未验证/);
+});
+
+test("rc.1 projection validation reports only proven stateVersion failures without definition contents", () => {
+  for (const value of ["-1", "1.5", "'private-version'"]) {
+    const { p, extraction } = evaluate(
+      `export function apply(ctx){ctx.sessionProjections.register({key:'private-key',stateVersion:${value},apply(s){return s}})}`,
+      { version: "0.2.2-rc.1", side: "host" },
+    );
+    assert.equal(invalid(p).length, 1);
+    assert.equal(invalid(p)[0].evidence.option, "stateVersion");
+    assert.doesNotMatch(
+      JSON.stringify(extraction.report.perPlugin.sample.callSites),
+      /private-key|private-version/,
+    );
+  }
+  for (const code of [
+    "ctx.sessionProjections.register({stateVersion:0})",
+    "ctx.sessionProjections.register({...x,stateVersion:-1})",
+    "const d={stateVersion:-1};external(d);ctx.sessionProjections.register(d)",
+    "ctx.sessionProjections.register({get stateVersion(){throw Error()}})",
+  ]) {
+    const { p } = evaluate(`export function apply(ctx){${code}}`, {
+      version: "0.2.2-rc.1",
+      side: "host",
+    });
+    assert.equal(invalid(p).length, 0, code);
+  }
+});
+
+test("new migration contracts are exact version and side bound, leaving local objects alone", () => {
+  const source =
+    "export function apply(ctx){ctx.sessionProjections.cachedSnapshot(session);ctx.agents.get('id')}";
+  for (const version of ["0.2.1-rc.5", "0.2.2-rc.2", null]) {
+    const { p } = evaluate(source, { version, side: "host" });
+    assert.doesNotMatch(notes(p), /agent.model.select|不完整.*baseline/);
+    assert.match(notes(p), /语义未审查/);
+  }
+  const { p } = evaluate(
+    "export function apply(ctx){const sessionProjections={register(){}};sessionProjections.register({stateVersion:-1})}",
+    { version: "0.2.2-rc.1", side: "host" },
+  );
+  assert.equal(invalid(p).length, 0);
+  assert.doesNotMatch(notes(p), /迁移提示/);
+});
+
+test("proven host agent/request registrations get migration advice without inspecting callback mutation", () => {
+  for (const body of [
+    "ctx.on('agent/request',async(p,next)=>({...await next(),provider:'secret-route'}))",
+    "const event='agent/request';ctx.on(event,handler)",
+  ]) {
+    const { p, extraction } = evaluate(`export function apply(ctx){${body}}`, {
+      version: "0.2.2-rc.1",
+      side: "host",
+    });
+    assert.match(notes(p), /agent\/request.*agent.model.select/);
+    assert.match(notes(p), /回调.*未验证/);
+    assert.equal(p.findings.length, 0);
+    assert.doesNotMatch(
+      JSON.stringify(extraction.report.perPlugin.sample.semanticSites),
+      /secret-route/,
+    );
+  }
+  for (const body of [
+    "const ctx={on(){}};ctx.on('agent/request',handler)",
+    "ctx.on(dynamicEvent,handler)",
+    "ctx.on('other-event',handler)",
+  ]) {
+    const { p } = evaluate(`export function apply(root){${body}}`, {
+      version: "0.2.2-rc.1",
+      side: "host",
+    });
+    assert.doesNotMatch(notes(p), /agent.model.select/);
+  }
+  const { p } = evaluate(
+    "export function apply(ctx){ctx.on('agent/request',handler)}",
+    { version: "0.2.1-rc.5", side: "host" },
+  );
+  assert.doesNotMatch(notes(p), /agent.model.select/);
+  assert.match(notes(p), /语义未审查/);
+});
+
+test("rc.1 tool admission is step conditional coverage rather than a fabricated available-tool guarantee", () => {
+  const { p } = evaluate(
+    "export function apply(ctx){ctx.tools.resolve(options);ctx.tools.executable(step,call);ctx.tools.execute(options)}",
+    { version: "0.2.2-rc.1", side: "host" },
+  );
+  assert.equal(p.findings.length, 0);
+  assert.match(notes(p), /tools.resolve.*step/);
+  assert.match(notes(p), /tools.executable.*condition/);
+  assert.match(notes(p), /tools.execute.*批/);
+});
+
+test("semantic hook sites consume the shared callpoint budget", async () => {
+  const { assertAnalysisBudget } = await import("../lib/analysis-budget.mjs");
+  assert.throws(
+    () =>
+      assertAnalysisBudget(
+        { perPlugin: { p: { callSites: [{}], semanticSites: [{}] } } },
+        { callSites: 1 },
+      ),
+    /budget/,
+  );
+});
+
+test("worker CLI and upgrade preview preserve fixed hook migration coverage", (t) => {
+  const f = fixture(
+    "export function apply(ctx){ctx.on('agent/request',handler)}",
+    "host",
+  );
+  t.after(f.cleanup);
+  for (const args of [
+    ["--dsh-version", "0.2.2-rc.1", "--no-baseline"],
+    ["--dsh-version", "0.2.1-rc.5", "--upgrade-to", "0.2.2-rc.1"],
+  ]) {
+    const result = spawnSync(
+      process.execPath,
+      ["bin/compat-check.mjs", "--nm", f.nm, ...args, "--json"],
+      { encoding: "utf8", timeout: 15000 },
+    );
+    assert.notEqual(result.status, 3, result.stderr);
+    const value = JSON.parse(result.stdout),
+      report = value.targetReport || value;
+    assert.match(
+      report.plugins.sample.coverage.limitations.join("\n"),
+      /agent\/request.*agent.model.select/,
+    );
+    assert.equal(report.plugins.sample.findings.length, 0);
+    assert.equal(report.plugins.sample.coverage.verifiedCalls, 0);
+  }
+});
+
+test("rc.1 migration advice translates built-in prose but preserves evidence identity", async () => {
+  const { evidenceNote } = await import("../plugin/src/i18n/presentation.mjs");
+  const { localeStore } = await import("../plugin/src/i18n/runtime.mjs");
+  const { p } = evaluate(
+    "export function apply(ctx){ctx.on('agent/request',handler);ctx.sessionProjections.register({stateVersion:0});ctx.sessionProjections.cachedSnapshot(s);ctx.tools.resolve(o)}",
+    { version: "0.2.2-rc.1", side: "host" },
+  );
+  const raw = p.coverage.limitations.filter((n) => n.startsWith("迁移提示："));
+  try {
+    for (const lang of ["en", "ko"]) {
+      localeStore.setPreference(lang);
+      for (const note of raw) {
+        assert.doesNotMatch(evidenceNote(note), /[\p{Script=Han}]/u);
+        assert.match(evidenceNote(note), /index.js:1/);
+        assert.equal(evidenceNote("用户说明 " + note), "用户说明 " + note);
+      }
+    }
+  } finally {
+    localeStore.setPreference("auto");
+  }
+});
+
+test("Session follow opening snapshots and migration-deferred projection hints remain distinct", () => {
+  const { p } = evaluate(
+    "export function apply(ctx){ctx.sessionController.follow(request,signal);ctx.sessionController.projections(request,signal)}",
+    { version: "0.2.2-rc.1", side: "host" },
+  );
+  assert.match(notes(p), /follow.*快照/);
+  assert.match(notes(p), /projections.*迁移.*缓存提示/);
+});
+
+test("author CI worker retains hook advice without promoting it to a finding", (t) => {
+  const f = fixture(
+    "throw Error('must not execute');export function apply(ctx){ctx.on('agent/request',handler)}",
+    "host",
+  );
+  t.after(f.cleanup);
+  const result = spawnSync(
+    process.execPath,
+    [
+      "tools/author-ci.mjs",
+      "--package",
+      f.nm + "/sample",
+      "--versions",
+      "0.2.2-rc.1",
+    ],
+    { encoding: "utf8", timeout: 20000 },
+  );
+  assert.notEqual(result.status, 3, result.stderr + result.stdout);
+  const value = JSON.parse(result.stdout),
+    p = value.cells[0].report.plugins.sample;
+  assert.match(notes(p), /agent\/request.*agent.model.select/);
+  assert.equal(p.findings.length, 0);
+});
+
+test("malformed rc.1 migration provenance abstains across host and client semantics", async () => {
+  const { validateSemanticBaselines } = await import(
+    "../lib/api-semantics.mjs"
+  );
+  for (const change of [
+    (b) => delete b.migrationNotices["host:tools.resolve"],
+    (b) =>
+      (b.migrationNotices["host:sessionProjections.register"].source =
+        "missing.ts"),
+  ]) {
+    const copy = structuredClone(rules);
+    change(copy.apiSemantics.baselines["0.2.2-rc.1"]);
+    assert.ok(validateSemanticBaselines(copy).length);
+    const { p } = evaluate(
+      "export function apply(ctx){ctx.sessionProjections.register({stateVersion:-1});ctx.on('agent/request',handler)}",
+      { version: "0.2.2-rc.1", side: "host", customRules: copy },
+    );
+    assert.equal(invalid(p).length, 0);
+    assert.match(notes(p), /语义未审查/);
+    assert.doesNotMatch(notes(p), /迁移提示/);
+  }
+});
+
+test("agent/request hook proof is withdrawn after Context mutation, escape or inference", () => {
+  for (const body of [
+    "ctx.on=foreign;ctx.on('agent/request',handler)",
+    "external(ctx);ctx.on('agent/request',handler)",
+    "ctx[dynamic]=foreign;ctx.on('agent/request',handler)",
+    "ctx.on=()=>{};ctx.on('agent/request',handler)",
+    "ctx.on('agent/request',mutate(ctx))",
+  ]) {
+    const { p, extraction } = evaluate(`export function apply(ctx){${body}}`, {
+      version: "0.2.2-rc.1",
+      side: "host",
+    });
+    assert.doesNotMatch(notes(p), /迁移提示：agent\/request/, body);
+    assert.equal(
+      extraction.report.perPlugin.sample.semanticSites?.length || 0,
+      0,
+      body,
+    );
+  }
+  const { p, extraction } = evaluate(
+    "function helper(ctx){ctx.on('agent/request',handler)}export function apply(root){}",
+    { version: "0.2.2-rc.1", side: "host" },
+  );
+  assert.doesNotMatch(notes(p), /迁移提示：agent\/request/);
+  assert.equal(
+    extraction.report.perPlugin.sample.semanticSites?.length || 0,
+    0,
+  );
+});
+
+test("untouched proven Context aliases retain fixed hook migration coverage", () => {
+  const { p } = evaluate(
+    "function helper(owner){const alias=owner;alias.on('agent/request',handler)}export function apply(ctx){helper(ctx)}",
+    { version: "0.2.2-rc.1", side: "host" },
+  );
+  assert.match(notes(p), /迁移提示：agent\/request.*agent.model.select/);
+});
+
+test("new semantic abstention templates translate without changing raw evidence or identities", async () => {
+  const { evidenceNote } = await import("../plugin/src/i18n/presentation.mjs");
+  const { localeStore } = await import("../plugin/src/i18n/runtime.mjs");
+  const examples = [
+    "语义未审查（事件契约）：agent/request @ index.js:7 [DSH 0.2.2-rc.2]；不借用邻近版本的回调契约",
+    "语义未审查（迁移/生命周期）：sessionProjections.snapshot @ host.js:8 [DSH 0.2.2-rc.2]；不借用邻近版本的运行行为",
+    "参数未能静态确定：sessionProjections.register @ host.js:9 [DSH 0.2.2-rc.1] 的 stateVersion；动态、展开、访问器或逃逸值不证明参数正确",
+  ];
+  const snapshot = JSON.stringify(examples);
+  try {
+    for (const lang of ["en", "ko"]) {
+      localeStore.setPreference(lang);
+      for (const value of examples) {
+        const output = evidenceNote(value);
+        assert.doesNotMatch(output, /[\p{Script=Han}]/u);
+        const context = value
+          .slice(value.indexOf("：") + 1, value.indexOf("；"))
+          .replace(/ 的 stateVersion$/, "");
+        assert.ok(output.includes(context));
+        assert.equal(evidenceNote("用户说明 " + value), "用户说明 " + value);
+      }
+    }
+  } finally {
+    localeStore.setPreference("auto");
+  }
+  assert.equal(JSON.stringify(examples), snapshot);
+});

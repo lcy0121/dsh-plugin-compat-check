@@ -76,6 +76,26 @@ export async function verifyUiI18n({
       ),
       "Host locale change reset focus or draft",
     );
+    // rc.1 adds these host locales; this plugin deliberately keeps its existing
+    // English fallback. Exercise the live observer and the same unsaved editor.
+    const hostLocaleFallbacks = [];
+    for (const language of ["ja", "es", "fr", "de", "ru", "pt"]) {
+      await evalx(`document.documentElement.lang=${JSON.stringify(language)}`);
+      await poll(
+        () =>
+          evalx(
+            `document.documentElement.lang===${JSON.stringify(language)} && document.querySelector('.compat-title')?.textContent==='Compatibility check' && document.querySelector('[data-ui-language]')?.value==='auto'`,
+          ),
+        `Host locale ${language} did not retain English fallback`,
+      );
+      requireTrue(
+        await evalx(
+          `window.__dscLocaleEditor===document.querySelector('[data-review-finding] textarea') && document.activeElement===window.__dscLocaleEditor && window.__dscLocaleEditor.value===${JSON.stringify(note)}`,
+        ),
+        `Host locale ${language} reset editor identity, focus or draft`,
+      );
+      hostLocaleFallbacks.push(language);
+    }
     const metrics = [];
     for (const [locale, title] of [
       ["zh", "兼容性检查"],
@@ -255,6 +275,7 @@ export async function verifyUiI18n({
     return {
       realBrowser: true,
       hostLanguage: true,
+      hostLocaleFallbacks,
       threeLanguages: true,
       draftPreserved: true,
       identityPreserved: true,

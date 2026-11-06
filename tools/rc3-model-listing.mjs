@@ -9,6 +9,8 @@ export async function verifyModelListing({
     clock = 0,
     credential,
     calls = 0,
+    changes = 0,
+    settingsReads = 0,
     firstFinished = false,
     release;
   const gate = new Promise((r) => (release = r)),
@@ -38,9 +40,16 @@ export async function verifyModelListing({
   };
   const cache = new ModelListingCache({
     credential: async () => credential,
+    settings: () => {
+      settingsReads++;
+      return settings;
+    },
     load: (url, key, signal) => {
       assert.equal(new URL(url).hostname, "127.0.0.1");
       return requestModelListing(url, { "x-api-key": key }, signal);
+    },
+    changed: () => {
+      changes++;
     },
     now: () => clock,
     info: () => {},
@@ -67,6 +76,8 @@ export async function verifyModelListing({
       await new Promise((r) => setTimeout(r, 10));
     assert.match(warnings.at(-1), /previous catalog/);
     assert.deepEqual(cache.current().listing, good.listing);
+    // Give the owned automatic refresh timer its turn before invalidating it.
+    await new Promise((r) => setTimeout(r, 35));
     cache.invalidate();
     assert.equal((await cache.view(settings)).listing, undefined);
     assert.match(warnings.at(-1), /bundled catalog/);
@@ -82,6 +93,8 @@ export async function verifyModelListing({
     assert.equal(calls, before);
     assert(!warnings.join(" ").includes("owned-test-key"));
     return {
+      settingsReads,
+      changeNotifications: changes,
       noCredentialRequests: 0,
       firstUseWait: true,
       failureFallback: true,
@@ -92,7 +105,7 @@ export async function verifyModelListing({
       productionRequests: 0,
     };
   } finally {
-    cache.dispose();
+    await cache.dispose();
     server.closeAllConnections();
     await new Promise((r) => server.close(r));
   }

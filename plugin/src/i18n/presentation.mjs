@@ -1,4 +1,5 @@
 import {
+  MIGRATION_NOTICES,
   REASONING_SLOT_NOTICE,
   SLOT_UNKNOWN_NOTICE,
   SLOT_UNREVIEWED_NOTICE,
@@ -9,6 +10,18 @@ import { t, builtin } from "./runtime.mjs";
 // source excerpts, user notes and unknown diagnostics are never passed here.
 const service = "([\\p{L}\\p{N}_.$/@:-]+)";
 const explanationPatterns = [
+  [
+    /^语义未审查（事件契约）：(.+)；不借用邻近版本的回调契约$/,
+    "语义未审查（事件契约）：{p0}；不借用邻近版本的回调契约",
+  ],
+  [
+    /^语义未审查（迁移\/生命周期）：(.+)；不借用邻近版本的运行行为$/,
+    "语义未审查（迁移/生命周期）：{p0}；不借用邻近版本的运行行为",
+  ],
+  [
+    /^参数未能静态确定：(.+) 的 stateVersion；动态、展开、访问器或逃逸值不证明参数正确$/,
+    "参数未能静态确定：{p0} 的 stateVersion；动态、展开、访问器或逃逸值不证明参数正确",
+  ],
   [
     /^结论从「(ok|partial|unknown|broken)」变为「(ok|partial|unknown|broken)」$/,
     "结论从「{p0}」变为「{p1}」",
@@ -54,6 +67,12 @@ const explanationPatterns = [
 ];
 export function evidenceNote(value) {
   if (typeof value !== "string") return value;
+  for (const notice of MIGRATION_NOTICES) {
+    if (value.startsWith("迁移提示：") && value.endsWith("；" + notice)) {
+      const context = value.slice("迁移提示：".length, -(notice.length + 1));
+      return t("迁移提示：{p0}；{p1}", { p0: context, p1: builtin(notice) });
+    }
+  }
   for (const label of ["槽位语义提示", "槽位覆盖限制"]) {
     for (const notice of [
       REASONING_SLOT_NOTICE,

@@ -1298,6 +1298,172 @@
           "source": "packages/client/ui-chat/src/client/contract/slots.ts",
           "displaySource": "packages/client/ui-chat/src/client/reasoning-text.ts"
         }
+      },
+      "0.2.2-rc.1": {
+        "sourceTag": "dsh-v0.2.2-rc.1",
+        "sourceArchiveSha256": "416750920b64272899259c26b2fa0a4341132c9c19b43337da502ab7ebd599f1",
+        "sources": {
+          "packages/client/ui-workspace/src/client/navigation.ts": "f9a65b9e80b892219faf1be20631199f9be4f2348a31251167f309e3abcb7018",
+          "packages/client/ui-conversation/src/client/contract/input.ts": "a89548ff9a08d128cd3cc19e28aa58a3d54845eb8499df490f6e84a8788015e7",
+          "packages/api/session-controller/src/client/contract/sessions.ts": "85725b6a54d662c54a5eb6f8f59fe3dfe4069e974a0eaa8b4e81d508742acf7d",
+          "packages/client/ui-chat/src/client/contract/slots.ts": "c1e8b7066f94718487b6015eaf3a4a9f858f74b87d805bea1f4ccdf86886aa99",
+          "packages/client/ui-chat/src/client/reasoning-text.ts": "e65bed4c7627f02ed2f1db4595cbeca24d767c4c23da517d1bb262995a1bdb17",
+          "vendor/timer/src/index.ts": "abea90efa55dadef02ea7ef7810d5f1a578bacf1db78f0d376548efdde4875cc",
+          "packages/client/ui-conversation/src/client/input/facade.ts": "fedc7c707ab6fdbe4899030c17c29ae010e1893badea97fcd964da2b2417925e",
+          "packages/api/session-controller/src/client/contract/session.ts": "299122c2bf5124922717b79997c6eadc13cc7b129548102e1dfdd842121dcbb8",
+          "packages/api/session-controller/src/client/contract/snapshot.ts": "88d14789a831943c5dad608c4ca6bbad8a6c21bd38be87ad28d5b04f88aa570c",
+          "packages/api/session-controller/src/index.ts": "5c6590ca7922fc76ce316a800b91c88560a706f76126422d9e0c3eeb5e4898fd",
+          "packages/api/session-controller/src/types.ts": "30db5e6b66f0bd74180f1cf62bd28c25e1b073b9a2a7aa5621d6e4955aaa90ef",
+          "packages/api/session-controller/src/control.ts": "0044913c1e47bc54fb9b10c5b5c5386456723dce708334031619ca2b50dc64fc",
+          "packages/session/session-projection/src/index.ts": "d82d1fc1f92893d97c9ec729039e7d77fbccb8a7c005a70cfe61c7924c590525",
+          "packages/core/agent/src/runtime-types.ts": "2f7161c634956759bc33285ab1f293443cc30e64826c71c4164977802025f216",
+          "packages/core/agent/src/model-selection.ts": "f32ac9be2d879732073c1194d83807f3e50492f289cb232e60a6ea24c56eb78d",
+          "packages/core/agent-loop/src/agent.ts": "ad9ee0778c0a93dec40363f88b53f442add9b033837b9ff049675a1ada3df61f",
+          "packages/core/tools/src/index.ts": "020c566150cf82dd49d368f5585043c73c191aaeba9103fd77a3efde6ee909dd",
+          "packages/api/session-controller/src/state/controller.ts": "ed543c7c3ddd66b1ce00da7dba792395b5629910622ff9b84aa32c08991bd5c3",
+          "packages/api/session-controller/src/history/controller.ts": "9a982bfa8c9a9ad36c8ae0ffe17c579cabf7956675b5ef7d4fca4883aaa29aec",
+          "packages/api/session-controller/src/client/sessions/session.ts": "4c898a51e46429c313ec8f22f6902c5f29b868075b282e6de0533a34de174a04",
+          "packages/core/agent/src/index.ts": "19c6c34dd4dd63dfa8c3c388bffe0cd4d4f254a1fc564eb52c44ef4321f79b39"
+        },
+        "startSession": {
+          "source": "packages/client/ui-workspace/src/client/navigation.ts",
+          "options": {
+            "prompt": "string",
+            "agentPreset": "string",
+            "clearPreviousDraft": "boolean",
+            "whenDraftExists": "string"
+          }
+        },
+        "notices": {
+          "timer.setTimeout": {
+            "kind": "弃用",
+            "source": "vendor/timer/src/index.ts",
+            "message": "官方标注弃用，接口仍保留；建议审阅 ctx.timeout() 契约后迁移，不代表当前定时器失效。 定时器回调形式返回 callable disposer，归属当前 fiber；未验证回调触发、释放或 Node timer handle 的使用。"
+          },
+          "timer.setInterval": {
+            "kind": "弃用",
+            "source": "vendor/timer/src/index.ts",
+            "message": "官方标注弃用，接口仍保留；建议审阅 ctx.interval() 契约后迁移，不代表当前定时器失效。 定时器回调形式返回 callable disposer，归属当前 fiber；未验证回调触发、释放或 Node timer handle 的使用。"
+          },
+          "sessions.retain": {
+            "kind": "生命周期",
+            "source": "packages/api/session-controller/src/client/contract/sessions.ts",
+            "message": "返回的是持有引用；需要初次打开完成时 await reference.ready，并在自身作用域结束时 release() 或使用显式 disposal；本分析未验证所有权路径，不证明已发生泄漏。"
+          }
+        },
+        "reasoningBody": {
+          "slot": "conversation.chat.reasoning.body",
+          "rawField": "rawText",
+          "displayField": "text",
+          "source": "packages/client/ui-chat/src/client/contract/slots.ts",
+          "displaySource": "packages/client/ui-chat/src/client/reasoning-text.ts"
+        },
+        "migrationNotices": {
+          "host:sessionProjections.register": {
+            "source": "packages/session/session-projection/src/index.ts",
+            "message": "注册是异步交接；发布消费者前 await register() 得到 handle，dispose() 释放注册；遗留 callable 返回值仅兼容。init/apply/wire.view 必须同步，状态为 JSON，stateVersion 为非负安全整数。未验证调用方 await 顺序、回调纯度或所有权路径，不证明泄漏或失败。"
+          },
+          "host:sessionProjections.snapshot": {
+            "source": "packages/session/session-projection/src/index.ts",
+            "message": "snapshot(session, keys) 同步返回 {asOfSeq, values}，仅计算选中的客户端 wire 单元；不含 host-only 状态，不执行持久化加载或证明注册已完成。回调和缓存一致性未验证。"
+          },
+          "host:sessionProjections.cachedSnapshot": {
+            "source": "packages/session/session-projection/src/index.ts",
+            "message": "cachedSnapshot 仍保留但已弃用：只读已物化单元，不折叠新历史，可能返回 undefined 或不完整 baseline；不能据此决定行为。需要完整客户端值时审阅 snapshot(session, keys)，Host 状态使用保留 handle；未验证调用方用途。"
+          },
+          "host:sessionProjections.onChanged": {
+            "source": "packages/session/session-projection/src/index.ts",
+            "message": "onChanged 仍逐 key 通知；onEventChanged 每个已提交事件聚合 changes[{key,val}] 与 seq。Remote control/observeProjections 的 projection 帧改为 changes 数组，不再是顶层 key/value；baseline 与 projections 读取保持独立。回调帧消费及订阅清理未验证。"
+          },
+          "host:sessionProjections.onEventChanged": {
+            "source": "packages/session/session-projection/src/index.ts",
+            "message": "onChanged 仍逐 key 通知；onEventChanged 每个已提交事件聚合 changes[{key,val}] 与 seq。Remote control/observeProjections 的 projection 帧改为 changes 数组，不再是顶层 key/value；baseline 与 projections 读取保持独立。回调帧消费及订阅清理未验证。"
+          },
+          "host:agents.get": {
+            "source": "packages/core/agent/src/runtime-types.ts",
+            "message": "agent.model.current()/agent.model.select() 管理完整 provider/model/reasoningEffort 选路，记录优先于初始 options；step 准备时捕获选择，重试保持该选择。agent/request 已弃用且必须保留选路，不能修改 messages；输出上限用 AgentOptions.maxTokens，其它逐请求控制无替代 API。返回 Agent/model、回调修改及 await 顺序未验证；get 是借用，create/resume 返回拥有 dispose 的 handle，不证明业务成功。"
+          },
+          "host:agents.create": {
+            "source": "packages/core/agent/src/runtime-types.ts",
+            "message": "agent.model.current()/agent.model.select() 管理完整 provider/model/reasoningEffort 选路，记录优先于初始 options；step 准备时捕获选择，重试保持该选择。agent/request 已弃用且必须保留选路，不能修改 messages；输出上限用 AgentOptions.maxTokens，其它逐请求控制无替代 API。返回 Agent/model、回调修改及 await 顺序未验证；get 是借用，create/resume 返回拥有 dispose 的 handle，不证明业务成功。"
+          },
+          "host:agents.resume": {
+            "source": "packages/core/agent/src/runtime-types.ts",
+            "message": "agent.model.current()/agent.model.select() 管理完整 provider/model/reasoningEffort 选路，记录优先于初始 options；step 准备时捕获选择，重试保持该选择。agent/request 已弃用且必须保留选路，不能修改 messages；输出上限用 AgentOptions.maxTokens，其它逐请求控制无替代 API。返回 Agent/model、回调修改及 await 顺序未验证；get 是借用，create/resume 返回拥有 dispose 的 handle，不证明业务成功。"
+          },
+          "host:sessionController.events": {
+            "source": "packages/api/session-controller/src/index.ts",
+            "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+          },
+          "host:sessionController.observeEvent": {
+            "source": "packages/api/session-controller/src/index.ts",
+            "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+          },
+          "host:sessionController.state": {
+            "source": "packages/api/session-controller/src/index.ts",
+            "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+          },
+          "host:sessionController.observeState": {
+            "source": "packages/api/session-controller/src/index.ts",
+            "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+          },
+          "host:sessionController.wait": {
+            "source": "packages/api/session-controller/src/index.ts",
+            "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+          },
+          "host:sessionController.control": {
+            "source": "packages/api/session-controller/src/index.ts",
+            "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+          },
+          "host:sessionController.observeProjections": {
+            "source": "packages/api/session-controller/src/index.ts",
+            "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+          },
+          "host:sessionController.projections": {
+            "source": "packages/api/session-controller/src/index.ts",
+            "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+          },
+          "client:sessions.retain": {
+            "source": "packages/api/session-controller/src/client/contract/sessions.ts",
+            "message": "retain 立即返回拥有 ready/release 的 Client generation 引用；using 在回调结算后释放，binding/sessionOf/scope 仅借用，不延长生命周期或拥有 Host Agent。SessionFace 通过 getSnapshot/subscribe 读快照，prompt/cancel/updateQueue 等为异步控制，RemoteResult 须检查业务结果；cancel 保留队列，接纳不等于执行完成。回调生命周期、订阅清理、await 和运行状态未验证，不证明泄漏。"
+          },
+          "client:sessions.using": {
+            "source": "packages/api/session-controller/src/client/contract/sessions.ts",
+            "message": "retain 立即返回拥有 ready/release 的 Client generation 引用；using 在回调结算后释放，binding/sessionOf/scope 仅借用，不延长生命周期或拥有 Host Agent。SessionFace 通过 getSnapshot/subscribe 读快照，prompt/cancel/updateQueue 等为异步控制，RemoteResult 须检查业务结果；cancel 保留队列，接纳不等于执行完成。回调生命周期、订阅清理、await 和运行状态未验证，不证明泄漏。"
+          },
+          "client:sessions.binding": {
+            "source": "packages/api/session-controller/src/client/contract/sessions.ts",
+            "message": "retain 立即返回拥有 ready/release 的 Client generation 引用；using 在回调结算后释放，binding/sessionOf/scope 仅借用，不延长生命周期或拥有 Host Agent。SessionFace 通过 getSnapshot/subscribe 读快照，prompt/cancel/updateQueue 等为异步控制，RemoteResult 须检查业务结果；cancel 保留队列，接纳不等于执行完成。回调生命周期、订阅清理、await 和运行状态未验证，不证明泄漏。"
+          },
+          "client:sessions.sessionOf": {
+            "source": "packages/api/session-controller/src/client/contract/sessions.ts",
+            "message": "retain 立即返回拥有 ready/release 的 Client generation 引用；using 在回调结算后释放，binding/sessionOf/scope 仅借用，不延长生命周期或拥有 Host Agent。SessionFace 通过 getSnapshot/subscribe 读快照，prompt/cancel/updateQueue 等为异步控制，RemoteResult 须检查业务结果；cancel 保留队列，接纳不等于执行完成。回调生命周期、订阅清理、await 和运行状态未验证，不证明泄漏。"
+          },
+          "client:sessions.scope": {
+            "source": "packages/api/session-controller/src/client/contract/sessions.ts",
+            "message": "retain 立即返回拥有 ready/release 的 Client generation 引用；using 在回调结算后释放，binding/sessionOf/scope 仅借用，不延长生命周期或拥有 Host Agent。SessionFace 通过 getSnapshot/subscribe 读快照，prompt/cancel/updateQueue 等为异步控制，RemoteResult 须检查业务结果；cancel 保留队列，接纳不等于执行完成。回调生命周期、订阅清理、await 和运行状态未验证，不证明泄漏。"
+          },
+          "client:uiWorkspace.startSession": {
+            "source": "packages/client/ui-conversation/src/client/input/facade.ts",
+            "message": "草稿初始化只替换文字和内联引用，附件始终保留；默认 keep，append 追加段落，clearPreviousDraft 仅在 whenDraftExists 缺省时生效。异步导航被取代或输入阻塞可拒绝准备；不证明已提交、新建会话或草稿应用成功。"
+          },
+          "host:tools.resolve": {
+            "source": "packages/core/tools/src/index.ts",
+            "message": "tools.resolve(context) 为当前 step 捕获 condition 准入集合，不修改全局注册；executable(name, scope, toolSet) 检查同一集合，缺少集合时条件工具不可用。tools.execute 是由 Agent 选定执行器执行的批调用，无直接定义执行回退。回调 condition、集合跨 step 复用、参数及运行结果未验证，不证明工具可执行或业务成功。"
+          },
+          "host:tools.executable": {
+            "source": "packages/core/tools/src/index.ts",
+            "message": "tools.resolve(context) 为当前 step 捕获 condition 准入集合，不修改全局注册；executable(name, scope, toolSet) 检查同一集合，缺少集合时条件工具不可用。tools.execute 是由 Agent 选定执行器执行的批调用，无直接定义执行回退。回调 condition、集合跨 step 复用、参数及运行结果未验证，不证明工具可执行或业务成功。"
+          },
+          "host:tools.execute": {
+            "source": "packages/core/tools/src/index.ts",
+            "message": "tools.resolve(context) 为当前 step 捕获 condition 准入集合，不修改全局注册；executable(name, scope, toolSet) 检查同一集合，缺少集合时条件工具不可用。tools.execute 是由 Agent 选定执行器执行的批调用，无直接定义执行回退。回调 condition、集合跨 step 复用、参数及运行结果未验证，不证明工具可执行或业务成功。"
+          },
+          "host:sessionController.follow": {
+            "source": "packages/api/session-controller/src/index.ts",
+            "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+          }
+        }
       }
     }
   }

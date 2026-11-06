@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-import { uiAcceptanceVersion } from "./acceptance-target.mjs";
+import {
+  uiAcceptanceVersion,
+  assertHostRuntime,
+} from "./acceptance-target.mjs";
 /** One private tgz, one actual-host UI run, and provenance-bound CI evidence. */
 import fs from "node:fs";
 import path from "node:path";
@@ -29,7 +32,7 @@ export function validateUi018Evidence(
     result.dshVersion === uiAcceptanceVersion(expectedVersion),
     "exact requested host",
   );
-  if (expectedVersion === "0.2.1-rc.5") {
+  if (["0.2.1-rc.5", "0.2.2-rc.1"].includes(expectedVersion)) {
     for (const key of [
       "realHost",
       "installedArtifact",
@@ -43,14 +46,15 @@ export function validateUi018Evidence(
     ])
       expect(result.issues023?.[key] === true, "issues023." + key);
     expect(result.issues023.runtimeWrites > 0, "actual runtime state writes");
-    for (const key of [
-      "actualAcp",
-      "catalogDiagnosticsStderr",
-      "mcpResources",
-      "stdoutJsonRpc",
-      "cleaned",
-    ])
-      expect(result.rc5Protocol?.[key] === true, "rc5Protocol." + key);
+    if (expectedVersion === "0.2.1-rc.5")
+      for (const key of [
+        "actualAcp",
+        "catalogDiagnosticsStderr",
+        "mcpResources",
+        "stdoutJsonRpc",
+        "cleaned",
+      ])
+        expect(result.rc5Protocol?.[key] === true, "rc5Protocol." + key);
     for (const key of [
       "firstUseWait",
       "failureFallback",
@@ -87,6 +91,25 @@ export function validateUi018Evidence(
         result.apiSemantics.realBrowser === true &&
         result.apiSemantics.installedArtifact === true,
       "version-bound semantics",
+    );
+  }
+  if (expectedVersion === "0.2.2-rc.1") {
+    expect(typeof result.runtimeNode === "string", "actual runtime version");
+    assertHostRuntime(expectedVersion, result.runtimeNode);
+    expect(
+      result.modelListing?.settingsReads > 0,
+      "model listing settings source",
+    );
+    const langs = result.uiI18n?.hostLocaleFallbacks;
+    expect(
+      Array.isArray(langs) &&
+        langs.length === 6 &&
+        ["ja", "es", "fr", "de", "ru", "pt"].every((x) => langs.includes(x)),
+      "host locale fallback evidence",
+    );
+    expect(
+      result.modelListing?.changeNotifications > 0,
+      "model listing change notification",
     );
   }
   expect(

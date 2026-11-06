@@ -2,7 +2,7 @@
 
 本指南对应**0.2.3**。面板、tool和skill随npm插件交付；CLI、健康执行器与作者CI从仓库运行，源码构建见[打包说明](../plugin/README.md#从源码构建安装)。声明放行、激活或无发现不等于业务验收。限定证据见[current-state](current-state.json)。
 
-已认证精确目录为`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`。最低宿主声明不认证未来版本。rc.3/rc.5入口：左下角账号菜单→设置→内置插件→兼容性；无参tool/设置页按宿主启动身份定位；冲突时改用`compat_check({"profile":"my-profile"})`或CLI显式路径，不猜desktop。路径模拟不替代Windows实机。
+已认证精确目录为`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`。最低宿主声明不认证未来版本。rc.3/rc.5/0.2.2-rc.1入口：左下角账号菜单→设置→内置插件→兼容性；无参tool/设置页按宿主启动身份定位；冲突时改用`compat_check({"profile":"my-profile"})`或CLI显式路径，不猜desktop。路径模拟不替代Windows实机。
 
 ## 参数与生命周期语义
 
@@ -14,6 +14,8 @@
 - rc.5的`conversation.chat.reasoning.body`提供原始`rawText`和显示`text`；普通渲染/翻译继续用text，Content Factory仍用text/running/labels。静态提示只定位slots.register和迁移限制，不验证props用途、签名处理或流式时序，不把text使用报错，不新增发现或已验证调用。
 
 仅保留四个参数的类型/有限枚举标签，不执行代码或保存prompt/思考正文。常量别名与直接改写可分析；未知副作用、动态、展开、访问器、逃逸及不同helper实参合并弃权。完整签名、实参数量、深层对象、异步时序和所有权证明未覆盖。JSON、CLI、面板、预检及作者CI共用判定，目录/语义/运行时/业务证据分别记录。
+
+0.2.2-rc.1另对固定agent/request订阅和已证明服务调用给迁移提示，并校验可证明的投影stateVersion；不验证回调、返回对象流或await顺序。动态/逃逸保持未知，未知版本不借语义基线。新宿主执行须Node>=24.9；静态工具仍支持Node22。
 
 ## 可选功能健康检查
 

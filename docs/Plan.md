@@ -14,7 +14,7 @@ npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin�
 
 AST按host/client/shared记录Context、服务及真实位置，入口遵循宿主解析。动态、变异、遮蔽、逃逸、异步及超限保守推断或弃权；能力守卫须控制调用，try/catch不是能力证明。不执行目标，不保存prompt或任意枚举；[语义范围](guide.md#参数与生命周期语义)与[提取规则](maintaining.md#提取器与探针维护)分别维护。
 
-0.2.4开发已增加0.2.2-rc.1[独立审查](../rules/dsh-0.2.2-rc.1-review.json)：宿主107服务/601方法、客户端8服务/46方法；完整签名与固定官方归档/桌面字节对拍，提取器补齐泛型、带引号装饰器、生成器和可选方法。目录差分包含提取修正，不全是上游新增；新参数/生命周期规则仍见§6。
+0.2.4开发已增加0.2.2-rc.1[独立审查](../rules/dsh-0.2.2-rc.1-review.json)：宿主107服务/601方法、客户端8服务/46方法；完整签名与固定官方归档/桌面字节对拍，提取器补齐泛型、带引号装饰器、生成器和可选方法。目录差分包含提取修正，不全是上游新增；新精确语义与迁移范围见[维护指南](maintaining.md#022-rc1语义与宿主验收)。
 
 rc.5[来源审查](../rules/dsh-0.2.1-rc.5-review.json)核对完整归档388文件差分，相对rc.3无服务/方法/生成签名变化；语义仍按精确版本独立审查。推理正文Slot新增rawText，text为显示文本；静态提示只定位注册和迁移限制，不验证props用途或流式行为，不把text使用报错。目录、语义、实际宿主及业务验收分别记录。
 
@@ -70,7 +70,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ## 4. 验收范围
 
-[current-state](current-state.json)按提交、归档和平台记录结果；正式发布须使用通过所选提交CI及同一tgz的rc.5 macOS/Linux九项UI验收的文件，并核验公共安装。历史回执不认证新版本或重打包；固定24项业务样本仍保留12项未识别故障。Windows、用户试用和一般业务保持未验收；合成病例不替代真实试用。
+[current-state](current-state.json)按提交、归档和平台记录结果；正式发布须使用通过所选提交CI及同一tgz的新宿主macOS/Linux九项UI验收的文件，并核验公共安装。历史回执不认证新版本或重打包；固定24项业务样本仍保留12项未识别故障。Windows、用户试用和一般业务保持未验收；合成病例不替代真实试用。
 
 ## 5. 验证入口
 
@@ -80,10 +80,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 仅列未完成事项，优先级不是漏洞评级。0.2.3的#7–#10源码修复、回归矩阵和本地交付检查见[维护指南](maintaining.md#用户issue修订与回归)；2026-11-05只读复核仍为open，待Windows现场复验。远端CI和平台验收只认对应提交与同一归档，不由本地结果推定。
 
-1. **P0：补齐0.2.2-rc.1精确语义与迁移提示。** 独立审查agent.model选路及agent/request限制、Session快照/事件/运行状态接口、异步sessionProjections.register、snapshot/cachedSnapshot和[projection changes帧](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/docs/upgrade-guide/v0.2.2-alpha.2/projection-event-frames/guide.zh.md)，同步核旧startSession/草稿、timer、retain及reasoning槽位契约。按可证明的调用、参数和生命周期设计规则/覆盖提示及跨版本正反例；方法名存在不证明语义兼容，未覆盖动态行为保持弃权，不把发行说明直接转成fatal发现。
-2. **P0：复验新版插件管理与客户端三槽位。** 核富文本详情/导航调整后的settings.plugins.tab、plugins.detail.section/.badge、ModuleLoader、HTTP鉴权和profile定位；覆盖第三方包更新、热更新失败恢复旧版、安装失败与安装后启用失败的区分，以及卸载/重载时订阅、worker和迟到写入清理。更新实际DOM/导航驱动，复验窄屏、主题、键盘与三语草稿；宿主新增语言须验证既有英文回退，不由此扩大本工具翻译范围。桌面启动诊断与上游市场恢复问题分别取证。
-3. **P0：调整新宿主运行时与CI矩阵。** DSH新版本最低Node为24.9，先核本机/私有CLI、桌面内置Node及CI实际运行时，再为新宿主门禁使用满足要求的版本；保留Node22内核/旧宿主覆盖，并据实际代码依赖决定是否调整本工具engines，不将宿主下限直接套到纯静态CLI。扩展acceptance-target、ci-ui018、rc2-live及Linux矩阵，复核官方组合包迁至dsh-official-bundles后的安装/启动来源；固定新宿主校验器来源，旧rc.5校验器通过不能替代新管线验收。
-4. **P0：完成0.2.4同一制品回归与交付记录。** 为新宿主建立独立真实插件清单/预期，重跑#7–#10、普通检查/升级预检/作者CI、HTTP/tool、九项UI及自有资源清理；保留旧四版目录和历史结果，区分固定样本复现、未识别故障及一般业务。运行npm test、npm run check、prepublish和依赖审计，以同一候选tgz取得macOS/Linux新宿主回执；Windows现场另列未验收。实现完成时统一0.2.4版本真源、manifest/lock、三语README、指南、skill/契约副本及current-state，公开发行仍按[同一制品流程](maintaining.md#同一制品发布核对)另行核验。
-5. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题/窄容器及误读、失败、误报与操作耗时；联系、收集、公开分别授权，不默认遥测。
-6. **P2：等待上游修复与发行入口更新。** [1.73.10复验](upstream-verification.md)已完成：恢复细节/新装告警仍有缺口，三次修复上限已核；真实rc.5 Desktop Host的恢复及45秒自救观察未通过。待#928/#1047修复、1024 npm映射或awesome#717状态变化后重验，反馈另取授权。
-7. **P2：Windows真实验收（依环境条件暂缓）。** 优先补#7–#10的Windows10 / DSH rc.5同一制品现场验证，记录版本、路径、启动方式及修复前后结果；同时验证安装、回收、权限、打包/诊断和自有资源清理。路径模拟及其它平台不替代实机结果，环境具备前保持未验收。
+1. **P0：完成0.2.4同一制品回归与交付记录。** 为新宿主建立独立真实插件清单/预期，重跑#7–#10、普通检查/升级预检/作者CI、HTTP/tool、九项UI及自有资源清理；保留旧四版目录和历史结果，区分固定样本复现、未识别故障及一般业务。运行npm test、npm run check、prepublish和依赖审计，以同一候选tgz取得macOS/Linux新宿主回执；Windows现场另列未验收。实现完成时统一0.2.4版本真源、manifest/lock、三语README、指南、skill/契约副本及current-state，公开发行仍按[同一制品流程](maintaining.md#同一制品发布核对)另行核验。
+2. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题/窄容器及误读、失败、误报与操作耗时；联系、收集、公开分别授权，不默认遥测。
+3. **P2：等待上游修复与发行入口更新。** [1.73.12复验](upstream-verification.md)已完成：恢复细节/新装告警缺口仍在；0.2.2-rc.1 Desktop Host两次恢复及45秒手动自救仍未通过。awesome#717已合并，1024仍缺npm映射。待#928/#1047修复或npm映射变化后重验，反馈另取授权。
+4. **P2：Windows真实验收（依环境条件暂缓）。** 优先补#7–#10的Windows10 / DSH rc.5同一制品现场验证，记录版本、路径、启动方式及修复前后结果；同时验证安装、回收、权限、打包/诊断和自有资源清理。路径模拟及其它平台不替代实机结果，环境具备前保持未验收。

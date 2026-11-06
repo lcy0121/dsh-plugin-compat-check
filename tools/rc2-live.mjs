@@ -19,6 +19,7 @@ import {
 } from "./issue023-acceptance.mjs";
 import {
   acceptanceTarget,
+  readHostRuntime,
   extendedAcceptance,
   assertBrowserAcceptance,
 } from "./acceptance-target.mjs";
@@ -209,7 +210,14 @@ for (const signal of ["SIGTERM", "SIGINT"])
   });
 try {
   const version = (await exec("dsh", ["--version"])).trim().split("\n").at(-1);
-  if (!acceptanceTarget(version, process.env.DSC_ACCEPTANCE_DSH_VERSION))
+  const applicable = acceptanceTarget(
+    version,
+    process.env.DSC_ACCEPTANCE_DSH_VERSION,
+  );
+  const runtimeNode = applicable
+    ? await readHostRuntime(version, bootDriver(), exec)
+    : null;
+  if (!applicable)
     result = {
       ok: true,
       applicable: false,
@@ -221,6 +229,8 @@ try {
     result = {
       ok: false,
       applicable: true,
+      runtimeNode,
+      controllerRuntimeNode: process.versions.node,
       dshVersion: version,
       artifactVersion: TOOL_VERSION,
       declarationCases: [],
@@ -523,7 +533,8 @@ try {
       "export function apply(){}\n",
     );
     if (extendedAcceptance(version)) installRc3Fixture(profile);
-    if (version === "0.2.1-rc.5") installIssue023Fixture(profile);
+    if (["0.2.1-rc.5", "0.2.2-rc.1"].includes(version))
+      installIssue023Fixture(profile, { hostVersion: version });
     const futureProbeFile = path.join(root, "future-probe.json");
     const host = await boot("rc2-ui", { DSC_PROBE_REPORT: futureProbeFile });
     requireTrue(
@@ -1801,7 +1812,7 @@ try {
           readReport: ordinary,
           screenshotDir: process.env.DSC_UI018_SCREENSHOTS,
         });
-      if (version === "0.2.1-rc.5") {
+      if (["0.2.1-rc.5", "0.2.2-rc.1"].includes(version)) {
         result.issues023 = await verifyIssue023({
           url: host.url,
           headers,

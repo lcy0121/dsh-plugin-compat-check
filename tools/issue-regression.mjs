@@ -48,6 +48,42 @@ try {
     fs.mkdirSync(path.dirname(archive), { recursive: true });
     fs.writeFileSync(archive, download, { flag: "wx" });
   }
+  const rc22Review = JSON.parse(
+    fs.readFileSync(path.join(root, "rules/dsh-0.2.2-rc.1-review.json")),
+  );
+  const rc22Archive = path.resolve(
+    process.env.DSC_RC22_SOURCE_ARCHIVE || path.join(output, "rc22-source.tgz"),
+  );
+  let rc22Bytes;
+  if (fs.existsSync(rc22Archive)) {
+    const st = fs.lstatSync(rc22Archive);
+    if (!st.isFile() || st.size > limit)
+      throw Error("Expected bounded regular rc22 archive");
+    rc22Bytes = fs.readFileSync(rc22Archive);
+  } else {
+    const response = await fetch(rc22Review.upstream.sourceArchiveUrl, {
+      signal: AbortSignal.timeout(90000),
+    });
+    if (!response.ok)
+      throw Error("Official rc22 source unavailable: " + response.status);
+    const chunks = [];
+    let count = 0;
+    for await (const chunk of response.body) {
+      count += chunk.length;
+      if (count > limit) throw Error("rc22 source exceeds64MiB");
+      chunks.push(chunk);
+    }
+    rc22Bytes = Buffer.concat(chunks);
+  }
+  if (
+    createHash("sha256").update(rc22Bytes).digest("hex") !==
+    rc22Review.upstream.sourceArchiveSha256
+  )
+    throw Error("Official rc22 source SHA256 mismatch");
+  if (!fs.existsSync(rc22Archive)) {
+    fs.mkdirSync(path.dirname(rc22Archive), { recursive: true });
+    fs.writeFileSync(rc22Archive, rc22Bytes, { flag: "wx" });
+  }
   const files = [
     "identity-runtime-state",
     "cache",
@@ -69,7 +105,11 @@ try {
       ["--test", "--test-reporter=tap", ...files],
       {
         cwd: root,
-        env: { ...process.env, DSC_HOST_SOURCE_ARCHIVE: archive },
+        env: {
+          ...process.env,
+          DSC_HOST_SOURCE_ARCHIVE: archive,
+          DSC_RC22_SOURCE_ARCHIVE: rc22Archive,
+        },
         stdio: ["ignore", out, err],
         timeout: 180000,
       },
@@ -91,6 +131,7 @@ try {
     platform: process.platform,
     arch: process.arch,
     sourceArchiveSha256,
+    rc22SourceArchiveSha256: rc22Review.upstream.sourceArchiveSha256,
     files,
     tests: count("tests"),
     pass: count("pass"),

@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.2.3",
-  "recordedAt": "2026-11-06T07:00:26.930Z",
-  "testFiles": 93,
-  "tests": 1308,
+  "recordedAt": "2026-11-06T12:49:36.732Z",
+  "testFiles": 94,
+  "tests": 1329,
   "repositoryFiles": {
-    "total": 407,
+    "total": 409,
     "fixtures": 100,
-    "other": 307
+    "other": 309
   },
   "verification": {
     "platform": "darwin",
@@ -244,7 +244,78 @@
         "explicitActualHostProbe": "11 pass,0 skip,0 fail",
         "scope": "Full fixture suites with explicit empty optional-profile snapshot. Default npm test blocked before suite by local desktop PROFILE_SNAPSHOT_BUDGET."
       }
+    },
+    "upstream20261106": {
+      "observedOn": "2026-11-06",
+      "marketVersion": "1.73.12",
+      "tagCommit": "19641d22a69b63063bb9b67a5f67a0dcb72703a0",
+      "archiveSha256": "f784ce5056df2005b748effb044c57b1447bb45717c44edffea114dcc869f479",
+      "integrityVerified": true,
+      "repairCases": 6,
+      "routeCases": 8,
+      "retryCap": 3,
+      "host": "0.2.2-rc.1",
+      "missingBundleRestartsRestored": false,
+      "manualRemovalHttp": "not settled within45s; disk removal complete",
+      "freshInstall": "not rerun on new host",
+      "awesome717": "merged2026-11-06T07:22:35Z f57ac096f3695ef58a7e038dedee475b0243b76c",
+      "store22": "GitHub-only; npm mapping absent",
+      "cleanup": true,
+      "receipts": "tmp/024-phase2-20261106/upstream-report.md and upstream-live/",
+      "scope": "Owned private DesktopHost/Chrome and controlled registry only; no full nativeGUI/Windows/account/model or remote writes."
+    },
+    "phase202420261106": {
+      "scope": "Exact semantics and configured runtime/CI plus owned rc22 manager/UI development; no remote CI, publication or Windows certification.",
+      "semanticReview": "rules/dsh-0.2.2-rc.1-semantics-review.json",
+      "semanticBaselines": 4,
+      "runtime": "Host>=24.9; Node22 static/old-host regression preserved; actual carrier version separate from controller.",
+      "ci": "Linux five-host matrix, same candidate and rc22 fullUI; pinned old/new source validators mandatory; workflow not remotely executed.",
+      "registryAcceptance": "5 actual cases: initial load, update, enable failure restore, bad tar restore, cancellation restore; exact dependency/lifecycle and cleanup checked.",
+      "upstream": "See upstream20261106",
+      "receipts": "tmp/024-phase2-20261106/",
+      "isolatedTests": {
+        "node": [
+          "22.19.0",
+          "26.13.0"
+        ],
+        "each": {
+          "tests": 1329,
+          "pass": 1320,
+          "skip": 9,
+          "fail": 0
+        },
+        "scope": "Owned empty optional-profile snapshot; default npm test still blocked by local PROFILE_SNAPSHOT_BUDGET."
+      },
+      "frozenUi20261106": {
+        "ok": true,
+        "host": "0.2.2-rc.1",
+        "platform": "darwin-arm64",
+        "gates": 9,
+        "screenshots": 21,
+        "runtimeNode": "24.21.0",
+        "controllerNode": "26.13.0",
+        "localeFallbacks": [
+          "ja",
+          "es",
+          "fr",
+          "de",
+          "ru",
+          "pt"
+        ],
+        "modelSettingsReads": 4,
+        "modelChangeNotifications": 1,
+        "modelCalls": 0,
+        "productionRequests": 0,
+        "privateRootRemoved": true,
+        "sourceBase": "abb051ae1e271721ec3788831ec1aaa64ae4a1ad",
+        "sourceSha256": "0d421577dc22a23d954b353c4283e6b3ce19e55ef60308362080baf66d0ceacc",
+        "artifact": "dsh-plugin-compat-check-0.2.3.tgz",
+        "artifactSha256": "5f2516fb55932e2af819e6ecebe6c79ee62e2128f0f254d146c608c6c7722d43",
+        "receipt": "tmp/024-phase2-20261106/ui-final2/",
+        "scope": "Frozen dirty source before this receipt update/local commit; development acceptance, not final 0.2.4 delivery."
+      },
+      "review": "Fresh whole-delta review: no actionable P1/P2. Final frozen UI success verified separately after review cutoff."
     }
   },
-  "scope": "Counts from the supplied successful isolated full-suite TAP; optional profiles were explicitly excluded. Dated host/artifact acceptance below remains separate; detailed history stays in Git."
+  "scope": "Counts from successful isolated full-suite TAP; optional profiles explicitly excluded. Dated host/artifact/platform receipts remain separate."
 }

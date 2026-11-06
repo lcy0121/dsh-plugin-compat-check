@@ -10,7 +10,7 @@
 
 [docs/current-state.json](docs/current-state.json)은 커밋·아카이브·플랫폼별 검수 범위를 기록하며 새 배포물은 다시 검증해야 합니다. npm 패키지는 화면, 상세/배지, `compat_check`, skill을 제공합니다. CLI·설치 검사·배치·작성자 CI·건강 실행기는 저장소 전용이며 npm CLI bin과 `npx dsh-plugin-compat-check`는 지원하지 않습니다.
 
-2026-11-05 [상위 프로젝트 검증](docs/upstream-verification.md): dshmarket1.73.10에는 복구·신규 설치 경고 누락이 남아 있습니다. Desktop의 파일 쓰기는 작업 완료를 뜻하지 않으며 1024에는 GitHub 소스 설치만 표시됩니다. 아래 npm 또는 완전한 tgz를 사용하세요.
+2026-11-06 [상위 프로젝트 검증](docs/upstream-verification.md): dshmarket1.73.12에는 복구·신규 설치 경고 누락이 남아 있습니다. Desktop의 파일 쓰기는 작업 완료를 뜻하지 않으며 1024에는 GitHub 소스 설치만 표시됩니다. awesome 목록 항목은 병합되었습니다. 아래 npm 또는 완전한 tgz를 사용하세요.
 
 ## 설치와 사용
 
