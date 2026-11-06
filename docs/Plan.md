@@ -1,10 +1,10 @@
 # 开发计划与维护约定
 
-本文对应**0.2.3**。版本真源为`lib/version.mjs`；[README](../README.md)讲入口，[指南](guide.md)列操作/预算，[维护指南](maintaining.md)列实现与验证，[docs/current-state.json](current-state.json)保存带日期的限定回执。
+本文对应**0.2.4**。版本真源为`lib/version.mjs`；[README](../README.md)讲入口，[指南](guide.md)列操作/预算，[维护指南](maintaining.md)列实现与验证，[docs/current-state.json](current-state.json)保存带日期的限定回执。
 
 ## 1. 项目定位与交付状态
 
-检查已安装DSH插件，提供源码位置、依据和覆盖限制。**0.2.3**修复运行状态引起的报告失效、严格JSON回包、桌面profile定位和rc.5目录误报；声明放行、激活或无发现仍不等于业务正常。功能按本版描述，公开分发以[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub Releases](https://github.com/lcy0121/dsh-plugin-compat-check/releases)实际记录为准，限定验收见current-state。
+检查已安装DSH插件，提供源码位置、依据和覆盖限制。**0.2.4**适配0.2.2-rc.1目录/精确语义、Cordis与工具执行作用域，复验插件管理和三槽位；声明放行、激活或无发现仍不等于业务正常。功能按本版描述，公开分发以[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub Releases](https://github.com/lcy0121/dsh-plugin-compat-check/releases)实际记录为准，限定验收见current-state。
 
 npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin、不支持npx。CLI、安装检查、批量、作者CI和健康执行器从private仓库运行；源码安装须[构建完整tgz](../plugin/README.md#从源码构建安装)。
 
@@ -80,7 +80,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 仅列未完成事项，优先级不是漏洞评级。0.2.3的#7–#10源码修复、回归矩阵和本地交付检查见[维护指南](maintaining.md#用户issue修订与回归)；2026-11-05只读复核仍为open，待Windows现场复验。远端CI和平台验收只认对应提交与同一归档，不由本地结果推定。
 
-1. **P0：完成0.2.4同一制品回归与交付记录。** 为新宿主建立独立真实插件清单/预期，重跑#7–#10、普通检查/升级预检/作者CI、HTTP/tool、九项UI及自有资源清理；保留旧四版目录和历史结果，区分固定样本复现、未识别故障及一般业务。运行npm test、npm run check、prepublish和依赖审计，以同一候选tgz取得macOS/Linux新宿主回执；Windows现场另列未验收。实现完成时统一0.2.4版本真源、manifest/lock、三语README、指南、skill/契约副本及current-state，公开发行仍按[同一制品流程](maintaining.md#同一制品发布核对)另行核验。
+1. **P0：完成0.2.4同一制品回归与交付记录。** [本地交付](current-state.json)已完成版本/副本同步、独立rc22五suite/24项回归、#7–#10专项102项、Node22/26各1321通过9跳过、check/prepublish及依赖审计；同一0.2.4候选tgz通过macOS新宿主九项UI、HTTP/tool、预检及清理，保留12项未识别业务故障和作者CI覆盖/预算限制。尚须获授权后推送所选提交，取得真实Linux同包及精确提交CI回执，再由Mac重用CI归档收口；Windows仍未验收，公开发行另循[同一制品流程](maintaining.md#同一制品发布核对)。
 2. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题/窄容器及误读、失败、误报与操作耗时；联系、收集、公开分别授权，不默认遥测。
 3. **P2：等待上游修复与发行入口更新。** [1.73.12复验](upstream-verification.md)已完成：恢复细节/新装告警缺口仍在；0.2.2-rc.1 Desktop Host两次恢复及45秒手动自救仍未通过。awesome#717已合并，1024仍缺npm映射。待#928/#1047修复或npm映射变化后重验，反馈另取授权。
 4. **P2：Windows真实验收（依环境条件暂缓）。** 优先补#7–#10的Windows10 / DSH rc.5同一制品现场验证，记录版本、路径、启动方式及修复前后结果；同时验证安装、回收、权限、打包/诊断和自有资源清理。路径模拟及其它平台不替代实机结果，环境具备前保持未验收。

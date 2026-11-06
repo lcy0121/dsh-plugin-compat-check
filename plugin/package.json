@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-compat-check",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Checks installed DSH plugin compatibility and static upgrade risks, including exact DSH 0.2.1-rc.5 support. Multilingual UI, source evidence, manual reviews and report history.",
   "license": "MIT",
   "type": "module",

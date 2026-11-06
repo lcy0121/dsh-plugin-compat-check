@@ -1,12 +1,12 @@
 {
-  "toolVersion": "0.2.3",
-  "recordedAt": "2026-11-06T12:49:36.732Z",
+  "toolVersion": "0.2.4",
+  "recordedAt": "2026-11-06T19:06:35.984443+00:00",
   "testFiles": 94,
-  "tests": 1329,
+  "tests": 1330,
   "repositoryFiles": {
-    "total": 409,
+    "total": 410,
     "fixtures": 100,
-    "other": 309
+    "other": 310
   },
   "verification": {
     "platform": "darwin",
@@ -27,7 +27,7 @@
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
-      "scope": "0.2.3 source capabilities. Public distribution is independently verified; dated publication and acceptance receipts certify only their recorded artifacts."
+      "scope": "0.2.4 source capabilities. Public distribution and dated artifact/platform acceptance remain independent."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -265,57 +265,30 @@
       "scope": "Owned private DesktopHost/Chrome and controlled registry only; no full nativeGUI/Windows/account/model or remote writes."
     },
     "phase202420261106": {
-      "scope": "Exact semantics and configured runtime/CI plus owned rc22 manager/UI development; no remote CI, publication or Windows certification.",
-      "semanticReview": "rules/dsh-0.2.2-rc.1-semantics-review.json",
-      "semanticBaselines": 4,
-      "runtime": "Host>=24.9; Node22 static/old-host regression preserved; actual carrier version separate from controller.",
-      "ci": "Linux five-host matrix, same candidate and rc22 fullUI; pinned old/new source validators mandatory; workflow not remotely executed.",
-      "registryAcceptance": "5 actual cases: initial load, update, enable failure restore, bad tar restore, cancellation restore; exact dependency/lifecycle and cleanup checked.",
-      "upstream": "See upstream20261106",
+      "scope": "Historical phase2 development receipt, not final 0.2.4 artifact acceptance.",
+      "details": "8d65a0c:docs/current-state.json",
       "receipts": "tmp/024-phase2-20261106/",
-      "isolatedTests": {
-        "node": [
-          "22.19.0",
-          "26.13.0"
-        ],
-        "each": {
-          "tests": 1329,
-          "pass": 1320,
-          "skip": 9,
-          "fail": 0
-        },
-        "scope": "Owned empty optional-profile snapshot; default npm test still blocked by local PROFILE_SNAPSHOT_BUDGET."
+      "result": "Node22/26 isolated suites1320pass/9skip; macOS rc22 nineUI gates/21screenshots; manager5cases. No remoteCI/Windows certification."
+    },
+    "delivery02420261107": {
+      "scope": "Local 0.2.4 development delivery; Linux same-artifact and exact-commit remote CI pending. Not published.",
+      "candidate": {
+        "filename": "dsh-plugin-compat-check-0.2.4.tgz",
+        "sha256": "59ebbd3a9e8a0314700b898f2a8315ee519d0a64242278481c637f25246fc454"
       },
-      "frozenUi20261106": {
-        "ok": true,
-        "host": "0.2.2-rc.1",
-        "platform": "darwin-arm64",
-        "gates": 9,
-        "screenshots": 21,
-        "runtimeNode": "24.21.0",
-        "controllerNode": "26.13.0",
-        "localeFallbacks": [
-          "ja",
-          "es",
-          "fr",
-          "de",
-          "ru",
-          "pt"
-        ],
-        "modelSettingsReads": 4,
-        "modelChangeNotifications": 1,
-        "modelCalls": 0,
-        "productionRequests": 0,
-        "privateRootRemoved": true,
-        "sourceBase": "abb051ae1e271721ec3788831ec1aaa64ae4a1ad",
-        "sourceSha256": "0d421577dc22a23d954b353c4283e6b3ce19e55ef60308362080baf66d0ceacc",
-        "artifact": "dsh-plugin-compat-check-0.2.3.tgz",
-        "artifactSha256": "5f2516fb55932e2af819e6ecebe6c79ee62e2128f0f254d146c608c6c7722d43",
-        "receipt": "tmp/024-phase2-20261106/ui-final2/",
-        "scope": "Frozen dirty source before this receipt update/local commit; development acceptance, not final 0.2.4 delivery."
-      },
-      "review": "Fresh whole-delta review: no actionable P1/P2. Final frozen UI success verified separately after review cutoff."
+      "sourceBase": "8d65a0c5d77998628da0e33909d824d49a361bbb",
+      "sourceDirty": true,
+      "sourceSha256": "1593b8cd9565d87e5c86c0e780baac1e6e11e8d76ac4fc3442dd597a05d623f4",
+      "sourceScope": "Frozen source before only final receipt/Plan edits and local commit; remote CI must build the clean selected commit.",
+      "node22And26": "Each1330tests/1321pass/9skip/0fail; empty private HOME",
+      "checks": "npm test, npm run check, prepublish passed; issue regressions102/102; final workspace/plugin dependency audits clean.",
+      "business": "rc22 manifest: 5 pinned artifacts/24cases, 1repeat, all expected outcomes reproduced; 2 natural+10 controlled faults unflagged, no ecosystem certification.",
+      "staticEntrypoints": "Published sidebar0.28 ordinary check exit0 with vacuous/limited coverage; author CI rejected full sidebar by sample budget. Full pomodoro0.5.5 author matrix rc5/rc22 exits1 for incomplete coverage, as required; no policy weakened.",
+      "macOS": "Same tgz rc22 nineUI/21PNG, actual Node24.21; strict tool/settings/upgrade gates and private-root cleanup passed, no production/model calls.",
+      "linux": "not run: no local Linux environment; remote push/CI requires separate authorization.",
+      "windows": "unverified",
+      "receipts": "tmp/024-delivery-20261107/"
     }
   },
-  "scope": "Counts from successful isolated full-suite TAP; optional profiles explicitly excluded. Dated host/artifact/platform receipts remain separate."
+  "scope": "Successful npm test/prepublish TAP with empty owned HOME; no user-profile acceptance. Dated artifact/platform receipts are independent."
 }

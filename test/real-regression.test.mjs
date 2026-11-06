@@ -790,3 +790,25 @@ test("rc.5 fixed regression uses its own reviewed host/catalogue and rejects old
   }
   assert.throws(() => api.createRegression("0.2.1-rc.6"), /exact/);
 });
+
+test("rc22 owns its catalogue and rejects historical observations", () => {
+  const current = api.createRegression("0.2.2-rc.1");
+  assert.equal(current.manifest.dshVersion, "0.2.2-rc.1");
+  assert.notEqual(
+    current.manifest.catalogueHash,
+    api.createRegression("0.2.1-rc.5").manifest.catalogueHash,
+  );
+  assert.equal(
+    current.manifest.suites.reduce((n, s) => n + s.cases.length, 0),
+    24,
+  );
+  const f = fixture();
+  try {
+    assert.throws(
+      () => current.validateCohort(f.dir || f, "sidebar-ui-previous"),
+      /catalogue|target/,
+    );
+  } finally {
+    fs.rmSync(f.dir || f, { recursive: true, force: true });
+  }
+});

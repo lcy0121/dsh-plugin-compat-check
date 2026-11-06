@@ -1,6 +1,6 @@
 # 规则与固定源码参考
 
-本文维护**0.2.3**的规则。契约见[Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，维护见[流程](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md)，限定证据/实际发布状态见[current-state](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。
+本文维护**0.2.4**的规则。契约见[Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，维护见[流程](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md)，限定证据/实际发布状态见[current-state](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。
 
 ## 文件与消费者
 

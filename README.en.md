@@ -6,7 +6,7 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-**0.2.3** fixes report invalidation during runtime writes, strict JSON output, desktop profile resolution and rc.5 catalogue false positives. It includes a Chinese/English/Korean UI, upgrade preview, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5 and 0.2.2-rc.1**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
+**0.2.4** adapts the exact DSH 0.2.2-rc.1 catalogue and semantics, Cordis and tool execution scopes, with new plugin-manager and three-slot acceptance. It retains cache, strict JSON and profile fixes. It includes a Chinese/English/Korean UI, upgrade preview, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5 and 0.2.2-rc.1**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
 
 [docs/current-state.json](docs/current-state.json) records acceptance by commit, archive and platform; new artifacts require verification. The npm plugin provides the page, details/badges, `compat_check` and skill. CLI, install checks, batches, author CI and health executor are repository tools. There is no npm CLI bin or `npx dsh-plugin-compat-check` support.
 
@@ -16,9 +16,9 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ```sh
 # Install this exact version
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.3
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.4
 # Verify the digest before using a local archive
-dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.3.tgz
+dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.4.tgz
 ```
 
 In the DSH instance using that profile, open **bottom-left More (⋯)/avatar → Settings → Built-in plugins → Compatibility (兼容性)**. Do not assume desktop. Agents can call `compat_check`; source installations require a [complete tgz](plugin/README.md#从源码构建安装).

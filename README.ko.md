@@ -6,7 +6,7 @@
 
 ## 버전과 진입점
 
-**0.2.3**은 실행 상태 쓰기로 인한 보고서 무효화, 엄격한 JSON 응답, 데스크톱 profile 식별 및 rc.5 카탈로그 오탐을 수정합니다. 중·영·한 UI, 업그레이드 사전 검사, 의존 관계, 수동 검토와 보고서 이력을 제공합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
+**0.2.4**는 DSH 0.2.2-rc.1의 정확한 카탈로그와 의미 규칙, Cordis 및 도구 실행 범위를 지원하고 새 플러그인 관리자와 세 슬롯을 검증합니다. 캐시, 엄격한 JSON 및 profile 수정도 유지합니다. 중·영·한 UI, 업그레이드 사전 검사, 의존 관계, 수동 검토와 보고서 이력을 제공합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
 
 [docs/current-state.json](docs/current-state.json)은 커밋·아카이브·플랫폼별 검수 범위를 기록하며 새 배포물은 다시 검증해야 합니다. npm 패키지는 화면, 상세/배지, `compat_check`, skill을 제공합니다. CLI·설치 검사·배치·작성자 CI·건강 실행기는 저장소 전용이며 npm CLI bin과 `npx dsh-plugin-compat-check`는 지원하지 않습니다.
 
@@ -16,9 +16,9 @@
 
 ```sh
 # 이 정확한 버전 설치
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.3
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.4
 # 로컬 아카이브 사용 전 해시 확인
-dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.3.tgz
+dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.4.tgz
 ```
 
 설치한 profile을 사용하는 DSH에서 **왼쪽 아래 더 보기(⋯)/아바타 → 설정 → 내장 플러그인 → 호환성(兼容性)**을 엽니다. desktop으로 가정하지 마세요. 에이전트는 `compat_check`를 호출할 수 있습니다. 소스 설치에는 [완전한 tgz](plugin/README.md#从源码构建安装)가 필요합니다.

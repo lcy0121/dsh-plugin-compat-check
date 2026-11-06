@@ -1,6 +1,6 @@
 # 维护指南
 
-本文维护**0.2.3**的目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
+本文维护**0.2.4**的目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
 
 ## 维护入口与语法覆盖
 
@@ -104,10 +104,10 @@ rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.j
 
 ## 同一制品发布核对
 
-本版**0.2.3**以能力描述固定文档；带日期的公开状态和验收单列current-state，不预写发布成功、时间或摘要。发布顺序：
+本版**0.2.4**以能力描述固定文档；带日期的公开状态和验收单列current-state，不预写发布成功、时间或摘要。发布顺序：
 
 1. 先统一版本真源、manifest/lock、各版README、skill及示例；冻结到tag的文档不得保留“本版未发布”等即时状态。运行check与prepublish-check（不发布），用成功TAP更新current-state计数，核生成副本、许可证和公开元数据。
-2. 授权推送后等待所选提交全部Actions通过。CI candidate job只构建一次；rc.5 job下载同一归档/回执，运行完整UI并上传证据。
+2. 授权推送后等待所选提交全部Actions通过。CI candidate job只构建一次；rc.5及0.2.2-rc.1 job下载同一归档/回执，运行完整UI并上传证据。
 3. 下载CI归档，核来源、提交、dirty及SHA-256；Mac使用该文件和构建回执重跑。若平台归档不同，即使内部文件相同也不能借旧文件验收。构建及重用命令见下方。
 4. 另取正式发布授权后，npm发布同一tgz，Git tag/Release附该文件、SHA256SUMS及限定验收回执；不从源码重打包。
 5. 核npm版本/integrity/shasum、附件SHA-256、tag提交，再实际公共安装。将真实结果记入current-state，不预写published或未经验证的时间/摘要。
@@ -190,3 +190,5 @@ Cordis4.1保留递归entries及0–5状态；未知类型不当FAILED/PENDING，
 新版实际PluginManager通过私有registry验证成功更新、启用失败/下载失败/实际取消后恢复旧版，分别核HTTP结果、依赖版本和apply/dispose记录；磁盘写入不替代激活。九项UI继续要求三槽位、身份、卸载路由/样式撤销后恢复、草稿/焦点、窄屏/主题及完整导出。新增ja/es/fr/de/ru/pt宿主语言均须auto回退英文且保留编辑器；不扩增产品翻译。迟到响应/worker回收由受控生命周期回归补证，不冒称实机精确指令时序验收。
 
 新宿主真实运行要求Node>=24.9；工具纯静态入口和旧宿主继续保留Node22.19覆盖，不提升产品engines。acceptance-target、rc2-live及ci-ui018精确接入0.2.2-rc.1；Linux矩阵保留旧四版，并为新版使用同一CI candidate及完整UI，安装前核运行时。Node22/24.9门禁均执行固定rc.5及rc.22原始JSON/schema校验器，新增DSC_RC22_SOURCE_ARCHIVE控制已核来源，坏摘要/缺源/跳过不转绿。ModelListingCache新版settings/changed回调、自动刷新及异步dispose单独记录，宿主Node由实际carrier查询、控制器版本另列；rc.5协议证据不借给新版。源码/归档变化仍阻断验收，CI配置就绪不表示远端CI已运行，Windows仍未验收。
+
+0.2.4交付使用`tools/real-regression-manifest-rc22.json`独立锁定新宿主目录及五suite/24项发布插件预期，先固定预期再运行`DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.1 node tools/real-regression.mjs --live --out-dir <空目录>`；偏差记失败，不从输出反写预期。完整UI用上方供应归档入口，目标改为0.2.2-rc.1。可用空自有HOME运行npm test/prepublish排除用户profile，回执必须明确此范围，不能声称验证用户现场。

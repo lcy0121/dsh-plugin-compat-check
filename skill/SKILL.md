@@ -1,11 +1,11 @@
 ---
 name: dsh-plugin-compat-check
-description: 0.2.3版，用于检查已安装DSH插件的兼容性、升级前静态对比，以及排查更新后不工作、界面消失、工具无响应、did not activate或engines.dsh/peerDependencies声明问题。Use when checking installed DeepSeek Harness plugins, comparing exact host versions before upgrading, or investigating activation and missing-feature failures. Covers rc.5 catalogues, strict JSON tools and profile diagnosis; findings do not certify business functionality.
+description: 0.2.4版，用于检查已安装DSH插件的兼容性、升级前静态对比，以及排查更新后不工作、界面消失、工具无响应、did not activate或engines.dsh/peerDependencies声明问题。Use when checking installed DeepSeek Harness plugins, comparing exact host versions before upgrading, or investigating activation and missing-feature failures. Covers exact rc.22 catalogues and semantics, Cordis/tool scope migration, strict JSON tools and profile diagnosis; findings do not certify business functionality.
 ---
 
 # dsh-plugin-compat-check
 
-本版**0.2.3**对**已安装DSH插件**给出兼容证据与限制。API发现引用真实`file:line`，loader/声明事实不补造行号。各入口共用内核，静态与进程内观测可有不同结论/基线；先核目标、版本、规则和采样身份。
+本版**0.2.4**对**已安装DSH插件**给出兼容证据与限制。API发现引用真实`file:line`，loader/声明事实不补造行号。各入口共用内核，静态与进程内观测可有不同结论/基线；先核目标、版本、规则和采样身份。
 
 ## 选择入口
 
@@ -58,7 +58,7 @@ node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.3 --upgra
 参考目录：0.2.1-rc.2 · SHA-256：90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743
 目录认证范围：0.2.1-rc.2；仅核验内置目录字节及对应精确版本的集成；不代表业务验收或运行时观测。
 
-工具版本: 0.2.3    证据覆盖有限: 4 个插件
+工具版本: 0.2.4    证据覆盖有限: 4 个插件
 结论: 可用 2    部分可用 1    不兼容 1    （其中 2 个「可用」没有已验证调用，不等于业务通过）
 ```
 
@@ -124,6 +124,6 @@ report_status=$?
 
 不额外启动宿主，不读写基线；仍可能读旁置probe。报告省略绝对路径、原始日志/源码/探针/基线，保留包名及包内位置；常见凭据字段隐藏不保证完全脱敏，预览后由用户决定分享。命令占位符须替换，生成文本不授权上传或发帖。
 
-0.2.3修复缓存抖动、JSON回包、profile定位和rc.5目录漏项。无关运行状态写入不使报告失效，源码/声明变化仍会；非法JSON证据明确报错，不静默丢弃。目录未收录只表示覆盖不足，不能据此称方法缺失。
+0.2.4修复缓存抖动、JSON回包、profile定位和rc.5目录漏项。无关运行状态写入不使报告失效，源码/声明变化仍会；非法JSON证据明确报错，不静默丢弃。目录未收录只表示覆盖不足，不能据此称方法缺失。
 
 实际运行版本取toolVersion/CLI version；分发以registry/GitHub Releases为准，docs/current-state.json按提交/归档/平台记录验收，不认证重打包、Windows或一般业务。docs/Plan.md列待办，操作/预算和目录治理见docs/guide.md、docs/maintaining.md。YAML是运行依赖，根dev依赖不随npm提供功能。
