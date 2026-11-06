@@ -165,7 +165,7 @@ test('owned runner passes inventory to the actual probe and reports mapped loade
  }
  global.setTimeout=fn=>{queueMicrotask(fn);return {unref(){}}};
  const probe=await import('file://'+path.join(process.env.DSC_OUT_DIR,'probe','index.mjs'));
- probe.apply({get:n=>n==='loader'?{entries:()=>[{id:'sample',options:{name:'sample'},fiber:{state:3}}]}:undefined,effect(){}});
+ probe.apply({get:n=>n==='loader'?{entries:()=>[{id:'sample',options:{name:'sample'},disabled:false,fiber:{state:3}}]}:undefined,effect(){}});
  setInterval(()=>{},1000);
  })().catch(e=>{console.error(e);process.exit(1)});`;
  withFakeDsh(fake,({env,scriptPath})=>{

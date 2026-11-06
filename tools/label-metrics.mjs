@@ -106,9 +106,7 @@ export function scoreLabels(tool, labels) {
     ];
     // Check conflicts before filtering to the prediction set: an unknown
     // explicit owner cannot lend its state to a known but different name.
-    let identity = declared.length === 1 ? declared[0] : null;
-    if (!declared.length && typeof entry.id === "string")
-      identity = entry.id.replace(/^include:/, "");
+    const identity = declared.length === 1 ? declared[0] : null;
     if (!identity || !names.has(identity)) {
       unmappedLabels.push(entry);
       continue;

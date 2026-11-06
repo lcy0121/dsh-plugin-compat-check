@@ -288,7 +288,11 @@ function startInjectProbe(ctx, record) {
         record.outcome = `callback threw: ${errText(error)}`;
       }
     });
-    return typeof dispose === "function" ? dispose : null;
+    if (typeof dispose === "function") return dispose;
+    // Core 4.1 returns the child Fiber. Keep its receiver when disposing it.
+    if (typeof dispose?.dispose === "function")
+      return dispose.dispose.bind(dispose);
+    return null;
   } catch (error) {
     record.outcome = `ctx.inject threw: ${errText(error)}`;
     return null;
@@ -357,8 +361,8 @@ function declaredInjectKeys(fiber) {
     const inject = fiber?.inject;
     if (inject === undefined || inject === null) return [];
     if (Array.isArray(inject)) return inject.map(String);
-    if (typeof inject === "object") return Object.keys(inject);
     if (inject instanceof Set) return [...inject].map(String);
+    if (typeof inject === "object") return Object.keys(inject);
     return [];
   } catch (error) {
     return [`<unreadable inject: ${errText(error)}>`];
@@ -446,8 +450,10 @@ async function introspectEntry(entry) {
 
   try {
     const code = fiber.state;
-    row.fiberStateCode = typeof code === "number" ? code : null;
-    row.fiberState = FIBER_STATES[code] ?? `UNKNOWN(${String(code)})`;
+    row.fiberStateCode = Number.isInteger(code) ? code : null;
+    row.fiberState =
+      (Number.isInteger(code) ? FIBER_STATES[code] : null) ??
+      `UNKNOWN(${String(code)})`;
   } catch (error) {
     row.fiberState = "UNREADABLE";
     row.notes.push(`fiber.state threw: ${errText(error)}`);
@@ -468,7 +474,7 @@ async function introspectEntry(entry) {
   }
 
   // Only a fiber that is not ACTIVE can carry an unobserved rejection.
-  if (row.fiberState !== "ACTIVE" && row.fiberState !== "DISPOSED") {
+  if (["PENDING", "LOADING", "FAILED", "UNLOADING"].includes(row.fiberState)) {
     const awaited = await awaitFiber(fiber, AWAIT_TIMEOUT_MS);
     if (awaited.timedOut) {
       row.awaitTimedOut = true;
@@ -1154,7 +1160,7 @@ function registerTool(ctx, state) {
             upgradeTo: {
               type: "string",
               description:
-                "Optional exact target DSH version for static upgrade preflight; known catalogues: 0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3 and 0.2.1-rc.5. Unknown versions are uncertified.",
+                "Optional exact target DSH version for static upgrade preflight; known catalogues: 0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5 and 0.2.2-rc.1. Unknown versions are uncertified.",
             },
             profile: {
               type: "string",

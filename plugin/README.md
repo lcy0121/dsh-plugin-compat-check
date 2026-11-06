@@ -6,7 +6,7 @@
 
 ## 版本与入口
 
-**0.2.3**修复运行状态导致的报告失效、严格JSON回包、桌面profile定位及rc.5目录误报；支持中英韩界面、升级预检、依赖视图、人工处置和报告历史。已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
+**0.2.3**修复运行状态导致的报告失效、严格JSON回包、桌面profile定位及rc.5目录误报；支持中英韩界面、升级预检、依赖视图、人工处置和报告历史。已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
 
 验收按提交、归档及平台记录于[docs/current-state.json](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)；新制品须重验。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
 

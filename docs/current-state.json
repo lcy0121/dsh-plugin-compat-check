@@ -1,26 +1,27 @@
 {
   "toolVersion": "0.2.3",
-  "recordedAt": "2026-11-04T17:43:02.115Z",
-  "testFiles": 88,
-  "tests": 1301,
+  "recordedAt": "2026-11-06T07:00:26.930Z",
+  "testFiles": 93,
+  "tests": 1308,
   "repositoryFiles": {
-    "total": 398,
+    "total": 407,
     "fixtures": 100,
-    "other": 298
+    "other": 307
   },
   "verification": {
     "platform": "darwin",
     "arch": "arm64",
     "optionalProfiles": {
       "parityfix": false,
-      "desktop": true
+      "desktop": false
     },
     "catalogueScope": {
       "certifiedExactVersions": [
         "0.2.0-rc.2",
         "0.2.1-rc.2",
         "0.2.1-rc.3",
-        "0.2.1-rc.5"
+        "0.2.1-rc.5",
+        "0.2.2-rc.1"
       ],
       "scope": "Exact catalogue bytes only; dated host/artifact acceptance below. No future-host or general-business certification."
     },
@@ -211,7 +212,39 @@
       ],
       "artifactRule": "Bind commit, clean source manifest and SHA256; never rebuild the selected CI artifact for platform acceptance.",
       "scope": "Gate contract only. Actual success requires exact-commit Actions and archive/platform receipts; configuration or historical results do not establish success. No merge or publication is performed by these gates."
+    },
+    "testInputs024": {
+      "optionalProfiles": "Explicit empty owned snapshot; fixture-based full suite",
+      "defaultCommand": "npm test could not capture local desktop profile: PROFILE_SNAPSHOT_BUDGET; user files unchanged",
+      "scope": "The supplied successful TAP is the isolated full suite, not current desktop-profile acceptance."
+    },
+    "adaptation02420261106": {
+      "status": "Scoped development: exact source/catalogue, Cordis and tool/Agent migration",
+      "host": "0.2.2-rc.1",
+      "catalogueSha256": "ecad83d5e428e8fd348542e8ddbb83c829ca93f43169e6f37e18e29e599c4024",
+      "catalogueMethods": {
+        "host": 601,
+        "client": 46
+      },
+      "sourceReview": "rules/dsh-0.2.2-rc.1-review.json",
+      "artifactSha256": "62b311addb570db10ad0a4d21676bed2724579800bc1e9f4489f0e8f2ab663d4",
+      "httpAndThreeClientSlots": true,
+      "actualNativeAndPtcBackend": true,
+      "ptcSchemas": [
+        "run_code"
+      ],
+      "noargCacheFailureUpgrade": true,
+      "restart": true,
+      "cleaned": true,
+      "scope": "Same private tgz basic acceptance, not full nine-section UI/Linux/Windows/business/new parameter semantics or publication. Version bump stays with the later0.2.4 delivery task.",
+      "receipts": "tmp/024-development-20261106/{native-live-final,ptc-live-final}.json",
+      "tests": {
+        "node26": "1308 total,1299 pass,9 skip,0 fail",
+        "node22.19.0": "1308 total,1299 pass,9 skip,0 fail",
+        "explicitActualHostProbe": "11 pass,0 skip,0 fail",
+        "scope": "Full fixture suites with explicit empty optional-profile snapshot. Default npm test blocked before suite by local desktop PROFILE_SNAPSHOT_BUDGET."
+      }
     }
   },
-  "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
+  "scope": "Counts from the supplied successful isolated full-suite TAP; optional profiles were explicitly excluded. Dated host/artifact acceptance below remains separate; detailed history stays in Git."
 }

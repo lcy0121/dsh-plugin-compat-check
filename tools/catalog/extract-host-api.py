@@ -70,8 +70,11 @@ def method_names(seg):
         end = marks[idx + 1][0] if idx + 1 < len(marks) else len(seg)
         body = seg[pos:end]
         names = []
-        for sig in re.findall(r"signature:\s*['\"]([^'\"]+)['\"]", body):
-            mm = re.match(r"\s*(?:(?:@\w+(?:\([^)]*\))?|abstract|async|public|protected|private|static|override|readonly)\s+)*([A-Za-z_$][\w$]*)\s*\(", sig)
+        # Generated JS/TS string literals can contain quoted decorator arguments.
+        # Keep escaped quotes inside the literal instead of ending at @Remote('…').
+        for literal in re.finditer(r"signature:\s*(['\"])((?:\\.|(?!\1)[^\\])*)\1", body):
+            sig = re.sub(r"\\(['\"\\])", lambda m: m.group(1), literal.group(2))
+            mm = re.match(r"\s*(?:(?:@\w+(?:\([^)]*\))?|abstract|async|public|protected|private|static|override|readonly)\s+)*\*?\s*([A-Za-z_$][\w$]*)\s*\??\s*(?:\(|<)", sig)
             if mm:
                 names.append(mm.group(1))
         svcs[key] = sorted(set(names))
@@ -121,8 +124,9 @@ def main():
     out = {
         "_note": "从 DSH 桌面端 app.asar 内**官方生成**的 API 目录解析出的服务与方法清单。"
                  "host = Node 宿主侧；client = 浏览器客户端侧。它随 DSH 版本变化 —— 换版本后必须重新生成。"
-                 "⚠️ 注意：目录 ≠ 运行时 API 面。抽象服务（如 host.jobs）在目录里**一个方法都不声明**，"
-                 "但运行时实现有方法；方法级判定必须优先用运行时面（探针），拿目录当运行时面会海量误报。",
+                 "目录不等于运行时 API 面。这里只收录可识别的可调用方法签名；"
+                 "属性类型、动态扩展和实际服务提供仍可能未覆盖。方法级判定优先使用合格运行时观测，"
+                 "目录缺项不能直接证明方法不存在。",
         "_source": {"host": HOST_TARGET, "client": CLIENT_TARGET},
         "_asar": ASAR,
         "_dshVersion": version,

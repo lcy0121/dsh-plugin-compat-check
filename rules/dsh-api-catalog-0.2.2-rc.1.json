@@ -1,0 +1,1121 @@
+{
+ "_note": "从 DSH 桌面端 app.asar 内**官方生成**的 API 目录解析出的服务与方法清单。host = Node 宿主侧；client = 浏览器客户端侧。它随 DSH 版本变化 —— 换版本后必须重新生成。目录不等于运行时 API 面。这里只收录可识别的可调用方法签名；属性类型、动态扩展和实际服务提供仍可能未覆盖。方法级判定优先使用合格运行时观测，目录缺项不能直接证明方法不存在。",
+ "_source": {
+  "host": "dsh/node_modules/@deepseek-ai/dsh-tool-cordis/lib/types/api-catalog.js",
+  "client": "dsh/node_modules/@deepseek-ai/dsh-cordis-client-runner/lib/client.js"
+ },
+ "_asar": "/Applications/DeepSeek Harness.app/Contents/Resources/app.asar",
+ "_dshVersion": "0.2.2-rc.1",
+ "_sourceSha256": {
+  "host": "c3482a44a85471824680d05ba6b993f0abff02026b44acc8e4ec64eeb5f0533a",
+  "client": "5f53838a4d10525bb0770fc52d89c0ea5994d9c6a8e62780e2e829afc9e35942"
+ },
+ "host": {
+  "actionCards": {
+   "methods": [
+    "act",
+    "record",
+    "register",
+    "view"
+   ]
+  },
+  "agentDefaultModel": {
+   "methods": [
+    "currentSelection",
+    "saveSelection"
+   ]
+  },
+  "agentLoop": {
+   "methods": [
+    "create",
+    "createAgent",
+    "resume"
+   ]
+  },
+  "agentPresets": {
+   "methods": [
+    "acquireScope",
+    "composeFrom",
+    "composedPreset",
+    "compositionInventory",
+    "inspectCompositions",
+    "list",
+    "mount",
+    "presetForSession",
+    "readDocument",
+    "recompose",
+    "register",
+    "remoteExportList",
+    "resolve",
+    "select",
+    "serviceFor"
+   ]
+  },
+  "agentTeams": {
+   "methods": [
+    "createTask",
+    "getTask",
+    "interrupt",
+    "listMembers",
+    "listTasks",
+    "membership",
+    "sendMessage",
+    "spawnTeammate",
+    "tryMembership",
+    "updateTask",
+    "waitForChange"
+   ]
+  },
+  "agents": {
+   "methods": [
+    "announce",
+    "create",
+    "currentInitiator",
+    "enter",
+    "get",
+    "isOwnedBy",
+    "list",
+    "register",
+    "requireInitiator",
+    "resume",
+    "roots",
+    "setFactory",
+    "turnBoundaryOf",
+    "withInitiator",
+    "withoutInitiator"
+   ]
+  },
+  "approval": {
+   "methods": [
+    "overrideOf",
+    "request",
+    "setPolicy"
+   ]
+  },
+  "attachments": {
+   "methods": [
+    "admitEncodedFile",
+    "admitPromptContent",
+    "fileHostPath",
+    "imageHostPath",
+    "isAttachmentError",
+    "readFileStream",
+    "readImage",
+    "readImageRequest",
+    "saveFile",
+    "saveFileStream",
+    "saveImage",
+    "saveImages",
+    "validateImage"
+   ]
+  },
+  "authorization": {
+   "methods": [
+    "begin",
+    "cancel",
+    "describe",
+    "list",
+    "registerFlow"
+   ]
+  },
+  "browserUse": {
+   "methods": [
+    "register"
+   ]
+  },
+  "claudeCodeMods": {
+   "methods": [
+    "add",
+    "pressBand",
+    "watchBand"
+   ]
+  },
+  "clientModules": {
+   "methods": [
+    "artifactBaseline",
+    "clientPath",
+    "fetchBundle",
+    "graph",
+    "onGraphChanged",
+    "onRebuilt",
+    "rebuilt"
+   ]
+  },
+  "commands": {
+   "methods": [
+    "execute",
+    "find",
+    "list",
+    "register",
+    "registerFileReceiptResolver"
+   ]
+  },
+  "compaction": {
+   "methods": [
+    "compactIfNeeded",
+    "compactNow",
+    "compactRegion"
+   ]
+  },
+  "computerUse": {
+   "methods": [
+    "register"
+   ]
+  },
+  "configEditor": {
+   "methods": [
+    "configuration",
+    "edit",
+    "entries"
+   ]
+  },
+  "connection": {
+   "methods": [
+    "admit",
+    "admitConnection",
+    "authenticatedUrl",
+    "authorizeIndex",
+    "createPeer",
+    "createSharedFetchHandler",
+    "requestRejection"
+   ]
+  },
+  "cotTranslation": {
+   "methods": [
+    "limits",
+    "translate"
+   ]
+  },
+  "credentials": {
+   "methods": [
+    "deleteRecord",
+    "describe",
+    "describeRecord",
+    "listRecords",
+    "modifyRecord",
+    "readRecord",
+    "resolve",
+    "set",
+    "unset"
+   ]
+  },
+  "credentialsController": {
+   "methods": [
+    "describe",
+    "set",
+    "unset"
+   ]
+  },
+  "cuaAccess": {
+   "methods": [
+    "applicationIcons",
+    "applications",
+    "enablePersistentPtc",
+    "openSettings",
+    "ptcConfiguration",
+    "requestPermission",
+    "retryApproval",
+    "revoke",
+    "systemStatus"
+   ]
+  },
+  "deepseekAccount": {
+   "methods": [
+    "ackBonusNotified",
+    "cancelSignIn",
+    "getBalance",
+    "getDeviceIdentity",
+    "getPlatformSession",
+    "getProfile",
+    "getState",
+    "getUnnotifiedBonuses",
+    "rejectToken",
+    "resolveToken",
+    "signOut",
+    "startSignIn",
+    "watch"
+   ]
+  },
+  "deepseekLlmApiExtensions": {
+   "methods": [
+    "prepare",
+    "register"
+   ]
+  },
+  "directoryPicker": {
+   "methods": [
+    "capability"
+   ]
+  },
+  "directoryPickerController": {
+   "methods": [
+    "createDirectory",
+    "list",
+    "pick"
+   ]
+  },
+  "fileReferences": {
+   "methods": [
+    "list"
+   ]
+  },
+  "fileUploads": {
+   "methods": [
+    "bindPrompt",
+    "registerAgentResolver",
+    "resolve",
+    "retirePrompt",
+    "upload",
+    "uploadImageStream",
+    "uploadStream"
+   ]
+  },
+  "forge": {
+   "methods": [
+    "changeRequestFromUrl",
+    "changeRequestUrl",
+    "diff",
+    "fetchChecks",
+    "fileText",
+    "fileUrl",
+    "findByHead",
+    "latest",
+    "markReady",
+    "merge",
+    "readiness",
+    "refresh",
+    "register",
+    "repositoryFromRemote",
+    "submitReview",
+    "watch"
+   ]
+  },
+  "forgePanel": {
+   "methods": [
+    "branches",
+    "cancelWorktree",
+    "changeRequestChecks",
+    "changeRequestDiff",
+    "changeRequestStates",
+    "changeRequestText",
+    "continueInProject",
+    "dismiss",
+    "follow",
+    "localDiff",
+    "localText",
+    "markReady",
+    "merge",
+    "refresh",
+    "requestWorktree",
+    "restoreWorktree",
+    "retryWorktree",
+    "stopCreation",
+    "submitReview",
+    "track"
+   ]
+  },
+  "forgeSession": {
+   "methods": [
+    "changeRequests",
+    "discoverBranch",
+    "dismiss",
+    "track",
+    "watch"
+   ]
+  },
+  "fs": {
+   "methods": [
+    "contains",
+    "deleteFile",
+    "editText",
+    "fileUrl",
+    "listDir",
+    "lstat",
+    "moveFile",
+    "patchText",
+    "processPath",
+    "processPathFromHostPath",
+    "readByteRange",
+    "readBytes",
+    "readText",
+    "resolve",
+    "stat",
+    "streamText",
+    "watch",
+    "writeText"
+   ]
+  },
+  "goals": {
+   "methods": [
+    "block",
+    "clear",
+    "complete",
+    "create",
+    "disarm",
+    "edit",
+    "get",
+    "pause",
+    "remoteExportCreate",
+    "resume"
+   ]
+  },
+  "headlessStartup": {
+   "methods": []
+  },
+  "hmr": {
+   "methods": [
+    "getLinked",
+    "reconcileProfile",
+    "runExclusive",
+    "watchConfig"
+   ]
+  },
+  "inspector": {
+   "methods": [
+    "publish"
+   ]
+  },
+  "jobController": {
+   "methods": [
+    "follow",
+    "kill",
+    "list"
+   ]
+  },
+  "jobs": {
+   "methods": [
+    "attachController",
+    "get",
+    "kill",
+    "list",
+    "read",
+    "readAt",
+    "remove",
+    "start",
+    "wait"
+   ]
+  },
+  "liveshareShares": {
+   "methods": [
+    "audit",
+    "capabilities",
+    "create",
+    "identity",
+    "list",
+    "relay",
+    "setCapabilities",
+    "setRelay",
+    "stop",
+    "testPublish",
+    "testRelay",
+    "updatePermissions"
+   ]
+  },
+  "llm": {
+   "methods": [
+    "discoverModels",
+    "fileRequestText",
+    "imageRequestPricing",
+    "imageRequestTarget",
+    "listConfigurableProviders",
+    "listModels",
+    "listProviders",
+    "prepareCall",
+    "providerRetryPolicy",
+    "registerAdapter",
+    "registerConfigurableProviders",
+    "registerModelDiscovery",
+    "remoteDiscoverModels",
+    "resolveCallConfig",
+    "resolveModelInfo",
+    "stream"
+   ]
+  },
+  "lsp": {
+   "methods": [
+    "query",
+    "registerProvider"
+   ]
+  },
+  "mcpResources": {
+   "methods": [
+    "register"
+   ]
+  },
+  "messageFeedback": {
+   "methods": [
+    "delete",
+    "list",
+    "put"
+   ]
+  },
+  "officeToPdf": {
+   "methods": [
+    "convert",
+    "getGeneration",
+    "render"
+   ]
+  },
+  "otel": {
+   "methods": [
+    "createEventReporter",
+    "createSessionLogReporter"
+   ]
+  },
+  "permissionPresets": {
+   "methods": [
+    "catalog",
+    "current",
+    "optionOf",
+    "registerAuto",
+    "resolve",
+    "set"
+   ]
+  },
+  "planMode": {
+   "methods": [
+    "get",
+    "set"
+   ]
+  },
+  "pluginManager": {
+   "methods": [
+    "cancelInstall",
+    "inspect",
+    "installBundle",
+    "listBundles",
+    "listPlugins",
+    "listVersionExemptions",
+    "listVersions",
+    "readBundleDetail",
+    "registries",
+    "removeBundle",
+    "setBundleEnabled",
+    "setPluginEnabled",
+    "setVersionExemption",
+    "updateBundle",
+    "waitForInstall"
+   ]
+  },
+  "pluginMarket": {
+   "methods": [
+    "entry",
+    "listIndexes",
+    "readEntryDetail",
+    "search",
+    "setIndexes"
+   ]
+  },
+  "pluginRecommendations": {
+   "methods": [
+    "describe"
+   ]
+  },
+  "pluginRegistryProbe": {
+   "methods": [
+    "fastest"
+   ]
+  },
+  "productAnalytics": {
+   "methods": [
+    "enabled",
+    "report",
+    "watchPolicy"
+   ]
+  },
+  "productTelemetry": {
+   "methods": [
+    "emit"
+   ]
+  },
+  "profileContext": {
+   "methods": []
+  },
+  "ptcRuntime": {
+   "methods": [
+    "release",
+    "resolve",
+    "run"
+   ]
+  },
+  "remoteAccess": {
+   "methods": [
+    "allows",
+    "decide",
+    "follow",
+    "invalidate",
+    "registerPolicy",
+    "snapshotFor"
+   ]
+  },
+  "sandbox": {
+   "methods": [
+    "confine"
+   ]
+  },
+  "sandboxPolicy": {
+   "methods": [
+    "overrideOf",
+    "resolve"
+   ]
+  },
+  "schedule": {
+   "methods": [
+    "catalog",
+    "create",
+    "deleteInactive",
+    "deliveryLimits",
+    "edit",
+    "history",
+    "list",
+    "remoteCreate",
+    "remoteEdit",
+    "remoteHistory",
+    "remoteList",
+    "run",
+    "view"
+   ]
+  },
+  "sessionController": {
+   "methods": [
+    "attachment",
+    "canOpenWorkspacePath",
+    "cancel",
+    "control",
+    "create",
+    "events",
+    "follow",
+    "fork",
+    "initializeDefaultModel",
+    "list",
+    "modelCatalog",
+    "observeEvent",
+    "observeProjections",
+    "observeState",
+    "openWorkspacePath",
+    "projections",
+    "prompt",
+    "rename",
+    "resolveAgent",
+    "search",
+    "selectModel",
+    "state",
+    "updateQueue",
+    "wait",
+    "workspaceDesktop",
+    "workspacePathApplications"
+   ]
+  },
+  "sessionFeedback": {
+   "methods": [
+    "record"
+   ]
+  },
+  "sessionFileReferences": {
+   "methods": [
+    "list"
+   ]
+  },
+  "sessionLogDeepSeek": {
+   "methods": [
+    "registerExclusion"
+   ]
+  },
+  "sessionPersistence": {
+   "methods": [
+    "create",
+    "flush",
+    "list",
+    "open",
+    "stat"
+   ]
+  },
+  "sessionProjectionCache": {
+   "methods": [
+    "cachedPredecessorTitle",
+    "cachedSnapshot",
+    "coldSnapshot",
+    "hydratePrepared",
+    "write"
+   ]
+  },
+  "sessionProjections": {
+   "methods": [
+    "checkpoint",
+    "hydrate",
+    "onChanged",
+    "onEventChanged",
+    "register",
+    "restore",
+    "restoreFloor",
+    "snapshot",
+    "summaryKeys",
+    "viewCheckpoint"
+   ]
+  },
+  "sessionQuery": {
+   "methods": [
+    "filterEvents",
+    "filterSessions",
+    "listEvents",
+    "listSessions",
+    "observeSession",
+    "readEvent",
+    "readSession",
+    "readSurface",
+    "readTitle",
+    "readTitleSnapshot",
+    "readTitleSnapshots",
+    "searchEvents",
+    "searchSessions",
+    "traceEvent",
+    "traceSession"
+   ]
+  },
+  "sessionReferenceResolver": {
+   "methods": [
+    "listCandidates",
+    "prepare",
+    "remoteExportCandidates"
+   ]
+  },
+  "sessionSkillCatalog": {
+   "methods": [
+    "list"
+   ]
+  },
+  "sessionTelemetry": {
+   "methods": [
+    "emit",
+    "flush",
+    "shutdown"
+   ]
+  },
+  "sessionTitle": {
+   "methods": [
+    "get",
+    "refresh",
+    "register",
+    "rename"
+   ]
+  },
+  "sessions": {
+   "methods": [
+    "announce",
+    "create",
+    "enter",
+    "flush",
+    "fork",
+    "get",
+    "list",
+    "prepare",
+    "registerMessageProjection"
+   ]
+  },
+  "settings": {
+   "methods": [
+    "configure",
+    "describe",
+    "mutate",
+    "prepareDocument",
+    "replace",
+    "update"
+   ]
+  },
+  "settingsController": {
+   "methods": [
+    "describe",
+    "mutate",
+    "openSettingsDocument",
+    "replace",
+    "update"
+   ]
+  },
+  "shell": {
+   "methods": [
+    "execute",
+    "resolve"
+   ]
+  },
+  "shellEnv": {
+   "methods": [
+    "collect",
+    "list",
+    "register"
+   ]
+  },
+  "skills": {
+   "methods": [
+    "get",
+    "list",
+    "register",
+    "registerProvider",
+    "snapshot"
+   ]
+  },
+  "speechController": {
+   "methods": [
+    "cancelPreparation",
+    "catalog",
+    "configure",
+    "follow",
+    "prepare",
+    "transcribe"
+   ]
+  },
+  "speechToText": {
+   "methods": [
+    "cancelPreparation",
+    "configure",
+    "follow",
+    "listProviders",
+    "prepare",
+    "register",
+    "resolve",
+    "snapshot",
+    "transcribe"
+   ]
+  },
+  "spillStore": {
+   "methods": [
+    "saveText"
+   ]
+  },
+  "ssh": {
+   "methods": [
+    "connectStream",
+    "dispose",
+    "request"
+   ]
+  },
+  "storage": {
+   "methods": [
+    "form",
+    "mount"
+   ]
+  },
+  "storageDomain": {
+   "methods": [
+    "closeAll",
+    "get",
+    "open"
+   ]
+  },
+  "subagentModelSelection": {
+   "methods": []
+  },
+  "subagents": {
+   "methods": [
+    "drainChildren",
+    "drainDescendants",
+    "getProvider",
+    "interrupt",
+    "interruptByParent",
+    "list",
+    "listChildren",
+    "listDescendants",
+    "prompt",
+    "registerProvider",
+    "resolveMaxDepth",
+    "sendMessage",
+    "startActivation",
+    "waitForChildren"
+   ]
+  },
+  "subprocess": {
+   "methods": [
+    "resolveExecutable",
+    "spawn",
+    "spawnTerminal",
+    "terminalEnvironment"
+   ]
+  },
+  "systemPrompt": {
+   "methods": [
+    "assemble",
+    "context",
+    "getContextOrder",
+    "getSectionOrder",
+    "refreshContext",
+    "section",
+    "suppressRuntimeContext",
+    "tools",
+    "variable"
+   ]
+  },
+  "terminalController": {
+   "methods": [
+    "attach",
+    "close",
+    "create",
+    "environment",
+    "list",
+    "rename",
+    "retain",
+    "shells"
+   ]
+  },
+  "terminals": {
+   "methods": [
+    "hasOwnerActivity",
+    "kill",
+    "list",
+    "listBackends",
+    "read",
+    "registerBackend",
+    "signal",
+    "spawn",
+    "startSend"
+   ]
+  },
+  "timer": {
+   "methods": [
+    "debounce",
+    "interval",
+    "throttle",
+    "timeout"
+   ]
+  },
+  "tokenMeter": {
+   "methods": [
+    "contextPressure",
+    "estimateMessage",
+    "measure"
+   ]
+  },
+  "toolResultPruner": {
+   "methods": [
+    "measureContent",
+    "pruneContent",
+    "pruneSession"
+   ]
+  },
+  "tools": {
+   "methods": [
+    "checkGuards",
+    "definitions",
+    "executable",
+    "execute",
+    "get",
+    "guard",
+    "register",
+    "resolve",
+    "restrict",
+    "schemas",
+    "setExecutor"
+   ]
+  },
+  "translator": {
+   "methods": [
+    "availableProviders",
+    "resolve",
+    "translate"
+   ]
+  },
+  "typert": {
+   "methods": [
+    "get",
+    "getPackage",
+    "list",
+    "listPackages",
+    "register",
+    "resolve",
+    "toJSONSchema"
+   ]
+  },
+  "typertGateway": {
+   "methods": [
+    "getPendingRemoteEvents",
+    "hasLiveClient",
+    "invoke",
+    "registerRemoteEvents",
+    "stream"
+   ]
+  },
+  "userQuestions": {
+   "methods": [
+    "answer",
+    "ask",
+    "askTimed",
+    "attachWait"
+   ]
+  },
+  "web": {
+   "methods": [
+    "fetch",
+    "fetchReady",
+    "registerFetchProvider",
+    "registerSearchProvider",
+    "search",
+    "searchReady"
+   ]
+  },
+  "webApp": {
+   "methods": [
+    "getAdvertisedUrl"
+   ]
+  },
+  "webServer": {
+   "methods": [
+    "applyIndexTaps",
+    "collectIndexInjections",
+    "getOrigin",
+    "readResource",
+    "register",
+    "registerFallback",
+    "registerUpgrade",
+    "renderIndex",
+    "tapIndex"
+   ]
+  },
+  "webhookRuntime": {
+   "methods": [
+    "dispatch",
+    "register"
+   ]
+  },
+  "workflowEngine": {
+   "methods": [
+    "start"
+   ]
+  },
+  "workingDirectory": {
+   "methods": [
+    "ensure",
+    "get",
+    "set"
+   ]
+  },
+  "workspaceChanges": {
+   "methods": [
+    "diff",
+    "summary"
+   ]
+  },
+  "workspaceController": {
+   "methods": [
+    "archiveSession",
+    "create",
+    "delete",
+    "follow",
+    "initializeDefault",
+    "insertBefore",
+    "insertSessionBefore",
+    "pinSession",
+    "rename",
+    "unarchiveSession",
+    "unpinSession"
+   ]
+  },
+  "workspaceFiles": {
+   "methods": [
+    "changes",
+    "list",
+    "read",
+    "readBytes",
+    "stat"
+   ]
+  },
+  "workspaceRegistry": {
+   "methods": [
+    "archiveSession",
+    "create",
+    "delete",
+    "get",
+    "initializeDefault",
+    "insertBefore",
+    "list",
+    "pinSession",
+    "resolveByPath",
+    "unarchiveSession",
+    "unpinSession"
+   ]
+  },
+  "worktrees": {
+   "methods": [
+    "create",
+    "restore"
+   ]
+  }
+ },
+ "client": {
+  "layout": {
+   "methods": [
+    "beginNavigation",
+    "closeRightbar",
+    "openRightbar",
+    "selectPanel",
+    "toggleSidebar"
+   ]
+  },
+  "locale": {
+   "methods": [
+    "addLanguage",
+    "bind",
+    "getLocale",
+    "getSnapshot",
+    "register",
+    "setLocale",
+    "subscribe"
+   ]
+  },
+  "sessions": {
+   "methods": [
+    "binding",
+    "fork",
+    "refreshProjections",
+    "retain",
+    "retainInfo",
+    "scope",
+    "search",
+    "using"
+   ]
+  },
+  "slots": {
+   "methods": [
+    "inject"
+   ]
+  },
+  "theme": {
+   "methods": [
+    "getTheme",
+    "overrideTokens",
+    "register",
+    "setFontSize",
+    "setTheme"
+   ]
+  },
+  "timer": {
+   "methods": [
+    "debounce",
+    "interval",
+    "throttle",
+    "timeout"
+   ]
+  },
+  "uiWorkspace": {
+   "methods": [
+    "archiveSession",
+    "connectWorkspace",
+    "createDirectory",
+    "forkSession",
+    "listDirectory",
+    "openSession",
+    "openWorkspace",
+    "pickDirectory",
+    "startSession",
+    "unarchiveSession"
+   ]
+  },
+  "workspaces": {
+   "methods": [
+    "archiveSession",
+    "create",
+    "delete",
+    "insertSessionBefore",
+    "rename",
+    "unarchiveSession"
+   ]
+  }
+ }
+}

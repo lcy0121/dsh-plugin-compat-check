@@ -1,11 +1,14 @@
-/** Owned rc.5 fixture: continuous runtime writes plus the real tool pipeline. */
+/** Owned host fixture: continuous runtime writes plus the real tool pipeline. */
 import fs from "node:fs";
 import path from "node:path";
 import assert from "node:assert/strict";
 import { refreshVisibleReport } from "./browser-session.mjs";
 import { TOOL_VERSION } from "../lib/version.mjs";
 
-export function installIssue023Fixture(profile) {
+export function installIssue023Fixture(
+  profile,
+  { hostVersion = "0.2.1-rc.5", agentPreset } = {},
+) {
   const dir = path.join(profile, "node_modules/@acceptance/issues023");
   fs.mkdirSync(path.join(dir, "state"), { recursive: true });
   fs.writeFileSync(
@@ -27,12 +30,19 @@ export function installIssue023Fixture(profile) {
     path.join(dir, "cordis.patch.yml"),
     '- insert:\n    - id: acceptance-issues023\n      name: "@acceptance/issues023"\n',
   );
+  fs.copyFileSync(
+    new URL("./owned-tool-invocation.mjs", import.meta.url),
+    path.join(dir, "owned-tool-invocation.mjs"),
+  );
   fs.writeFileSync(
     path.join(dir, "index.js"),
     `import fs from 'node:fs';
-export const inject=['tools','webServer','connection'];
+import {invokeOwnedTool} from './owned-tool-invocation.mjs';
+export const inject=${JSON.stringify(["tools", "webServer", "connection", "agents", ...(agentPreset === undefined ? [] : ["agentPresets"])])};
 export function apply(ctx){
- const root=${JSON.stringify(dir)};let writes=0;
+ const root=${JSON.stringify(dir)};let writes=0;let agentHandle;
+ const ownedAgent=()=>agentHandle??=ctx.agents.create({sessionId:'owned-issue023',meta:${JSON.stringify({ cwd: profile, ...(agentPreset === undefined ? {} : { agentPreset }) })}${agentPreset === undefined ? "" : ",setup:async(agentCtx)=>{await ctx.agentPresets.mount(agentCtx," + JSON.stringify(agentPreset) + ');agentCtx.tools.restrict({allow:["compat_check"]});}'}});
+ ctx.effect(()=>async()=>{if(agentHandle)await (await agentHandle).dispose()});
  const write=()=>{const tmp=root+'/state/next.tmp';fs.writeFileSync(tmp,JSON.stringify({writes:++writes}));fs.renameSync(tmp,root+'/state/video-usage.json')};
  write();let timer;ctx.effect(()=>()=>clearInterval(timer));
  ctx.effect(()=>ctx.webServer.register({kind:'exact',path:'/acceptance/issues023',async handler(req,res){
@@ -40,10 +50,10 @@ export function apply(ctx){
   if(req.method!=='GET'||req.headers['x-dsh-compat-request']!=='1'){res.writeHead(403);res.end('{}');return;}
   const mode=new URL(req.url,'http://localhost').searchParams.get('mode');
   if(mode==='start'||mode==='stop'){clearInterval(timer);if(mode==='start')timer=setInterval(write,25);res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({writes}));return;}
-  if(!['ordinary','failure','upgrade'].includes(mode)){res.writeHead(400);res.end('{}');return;}
+  if(!['noarg','ordinary','failure','upgrade'].includes(mode)){res.writeHead(400);res.end('{}');return;}
   const before=writes;
-  try{const result=await ctx.tools.execute({callId:'issue023-'+mode,name:'compat_check',arguments:mode==='failure'?{profile:'missing-issue023'}:mode==='upgrade'?{upgradeTo:'0.2.1-rc.3'}:{},signal:AbortSignal.timeout(25000),parent:Symbol('owned-acceptance')});
-   res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({before,after:writes,result}));
+  try{const agent=(await ownedAgent()).agent;const executorSchemas=typeof ctx.tools.selectExecutor==='function'?ctx.tools.selectExecutor(agent).describe(ctx.tools.definitions(agent)).schemas.map(s=>s.name):null;const result=await invokeOwnedTool({tools:ctx.tools,hostVersion:${JSON.stringify(hostVersion)},agent,callId:'issue023-'+mode,name:'compat_check',arguments:mode==='noarg'?undefined:mode==='failure'?{profile:'missing-issue023'}:mode==='upgrade'?{upgradeTo:'0.2.1-rc.3'}:{},signal:AbortSignal.timeout(25000)});
+   res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({before,after:writes,executorSchemas,result}));
   }catch(e){res.writeHead(500);res.end(JSON.stringify({error:String(e)}))}
  }}));
 }`,
@@ -86,6 +96,8 @@ export async function verifyIssue023({
   let first, cached;
   await invoke("start");
   try {
+    const noarg = await invoke("noarg");
+    assert.equal(noarg.result.value.ok, true, noarg.result.value.error);
     first = await invoke("ordinary");
     assert.equal(first.result.value.ok, true, first.result.value.error);
     assert.equal(
@@ -128,6 +140,6 @@ export async function verifyIssue023({
     explicitFailure: true,
     staticUpgrade: true,
     scope:
-      "Owned rc.5 profile and synthetic 25ms state writer; no Windows or user-site confirmation.",
+      "Owned private profile and synthetic 25ms state writer; no Windows or user-site confirmation.",
   };
 }

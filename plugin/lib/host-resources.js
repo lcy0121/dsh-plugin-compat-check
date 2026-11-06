@@ -20,18 +20,29 @@ export function loaderObservations(ctx, manifests, items = []) {
       }
       const opts = entry.options || {},
         id = entry.id ?? opts.id;
-      const packageName =
-        [
-          entry.packageName,
-          opts.packageName,
-          opts.name,
-          items.find((i) => i.id === id)?.packageName,
-          id,
-        ].find((v) => typeof v === "string" && names.has(v)) || null;
+      // Nested entry ids are paths, not package names. Require an unambiguous
+      // package identity; never let a colliding local id override module identity.
+      const listing = items.filter((i) => i.id === id);
+      const explicit = [
+        entry.packageName,
+        opts.packageName,
+        ...listing.map((i) => i.packageName),
+      ].filter((v) => typeof v === "string" && v.length > 0);
+      // An explicit identity outside the manifest set is still evidence: do
+      // not discard it and borrow a different package's matching module name.
+      const identities = new Set(explicit);
+      if (typeof opts.name === "string" && names.has(opts.name))
+        identities.add(opts.name);
+      const candidate = identities.size === 1 ? [...identities][0] : null;
+      const packageName = names.has(candidate) ? candidate : null;
+      const code = entry.fiber?.state;
+      const disabled = entry.disabled;
       const state =
-        ["PENDING", "LOADING", "ACTIVE", "FAILED", "DISPOSED", "UNLOADING"][
-          entry.fiber?.state
-        ] || "UNREADABLE";
+        Number.isInteger(code) && typeof disabled === "boolean"
+          ? ["PENDING", "LOADING", "ACTIVE", "FAILED", "DISPOSED", "UNLOADING"][
+              code
+            ] || "UNREADABLE"
+          : "UNREADABLE";
       if (!packageName) {
         unmapped.push(String(id ?? "(unknown)"));
         continue;
@@ -40,7 +51,7 @@ export function loaderObservations(ctx, manifests, items = []) {
         packageName,
         id,
         state,
-        disabled: entry.disabled === true,
+        disabled: disabled === true,
         group: opts.group === true,
       });
     }

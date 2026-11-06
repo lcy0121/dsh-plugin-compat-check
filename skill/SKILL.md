@@ -44,7 +44,7 @@ node <repo>/bin/compat-check.mjs --nm <profile或node_modules> --no-baseline --j
 node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.3 --upgrade-to 0.2.1-rc.5 --json
 ```
 
-当前已认证目录仅为 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`。未知/范围返回unsupported-version及退出3，不能以邻近目录代替。预检不接受quiet、探针/启动、规则/目录覆盖、基线或issue-report参数，可带无操作的no-baseline。
+当前已认证目录仅为 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`。未知/范围返回unsupported-version及退出3，不能以邻近目录代替。预检不接受quiet、探针/启动、规则/目录覆盖、基线或issue-report参数，可带无操作的no-baseline。
 
 读取schema1、kind=`plugin-compat-check/upgrade-preview`的currentReport、targetReport、changes、summary与limitations。只比较同组私有字节，不执行/升级宿主，不借旁置probe、豁免、普通基线或缓存，不写状态。预检退出码0/1/2为无/非致命/致命新增或变重风险，3为无法预检；0仍可有旧问题。保留coverage/vacuous及客户端未验证限制，预测不代替目标版本业务验收。
 
@@ -87,7 +87,7 @@ node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.3 --upgra
 
 可靠映射且启用的FAILED/PENDING loader才构成相应fatal实测发现。必需inject须合格同目标观测明确absent才推断激活障碍；目录缺项或未采样不证明缺失。可选/子作用域不自动阻断整插件；present服务的方法缺失另判。provide只是候选，不借业务/loader答案倒填服务观测，try/catch不是能力证明。
 
-普通检查按目标选择参考目录：≥rc.5取rc.5，≥rc.3取rc.3，≥rc.2取rc.2，其余/未知取0.2.0-rc.2（均指0.2.1的对应rc）；显式catalog优先。报告catalog保留目标/参考版本、摘要、selection、verified、certifiedVersions及warning。未来/回退/覆盖目录未经认证；摘要不符或同名包重复安装明确无法判定。verified只证明登记目录匹配，不是业务认证。
+普通检查按目标选择参考目录：≥0.2.2-rc.1取该版；否则≥rc.5取rc.5，≥rc.3取rc.3，≥rc.2取rc.2，其余/未知取0.2.0-rc.2（均指0.2.1的对应rc）；显式catalog优先。报告catalog保留目标/参考版本、摘要、selection、verified、certifiedVersions及warning。未来/回退/覆盖目录未经认证；摘要不符或同名包重复安装明确无法判定。verified只证明登记目录匹配，不是业务认证。
 
 DSH≥0.2.1-rc.1优先自有engines.dsh，仅字段缺失回退官方peer；旧目标保留peer规则和engines建议。非法/空范围仍报风险，peer的workspace:^/~/*按当前精确版本处理，engines的workspace不放行。声明冲突为推断，不说成实际加载失败。
 

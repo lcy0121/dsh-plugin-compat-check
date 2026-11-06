@@ -1,0 +1,1617 @@
+{
+  "schemaVersion": 1,
+  "dshVersion": "0.2.2-rc.1",
+  "reviewedAt": "2026-11-06",
+  "reviewer": "Codex",
+  "upstream": {
+    "tag": "dsh-v0.2.2-rc.1",
+    "commit": "66491b05e3f05ad35bcdd4f6cd7ed26041d9e3db",
+    "release": "https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-rc.1",
+    "sourceArchiveUrl": "https://codeload.github.com/deepseek-ai/deepseek-harness/tar.gz/refs/tags/dsh-v0.2.2-rc.1",
+    "sourceArchiveSha256": "416750920b64272899259c26b2fa0a4341132c9c19b43337da502ab7ebd599f1",
+    "previousSourceArchiveSha256": "a2b94ff1183a87bb1f1d898c6274ae5f8b78accc38931594afd97b58cf0db81f",
+    "sourceFiles": 20273,
+    "previousSourceFiles": 16339,
+    "changedFiles": 8152,
+    "signaturesMatchOfficialArchive": true,
+    "npm": {
+      "tarball": "https://registry.npmjs.org/@deepseek-ai/dsh/-/dsh-0.2.2-rc.1.tgz",
+      "integrity": "sha512-ijR9UEVYkG15Q/Q79JzvzLBzQOQfc63VLr9n6flpwHPhr5IKn2UxthnSoto/P9l7qGd7pPvI1Ra6TW7LH3oKpg==",
+      "shasum": "95d1cf510061a57c97b4a68d43336658bcec6af1",
+      "sha256": "ad21968aed0337a326b853507a23b30eacbbec4d67ab07f3b6fde69b75b19cd6",
+      "files": 20,
+      "integrityVerified": true,
+      "node": ">=24.9.0",
+      "scope": "Official CLI archive verified; not a runtime dependency closure."
+    }
+  },
+  "asar": {
+    "sha256": "f21d83abfb33d463822a52c439cc9b15c8245dbce4ae4cf9424c90eae8eba94f",
+    "bytes": 213240777,
+    "scope": "Installed official macOS archive; selected packed entries integrity-checked. No whole-app signature attestation."
+  },
+  "catalogue": {
+    "file": "dsh-api-catalog-0.2.2-rc.1.json",
+    "sha256": "ecad83d5e428e8fd348542e8ddbb83c829ca93f43169e6f37e18e29e599c4024",
+    "sourceVerified": true,
+    "counts": {
+      "hostServices": 107,
+      "hostMethods": 601,
+      "clientServices": 8,
+      "clientMethods": 46
+    },
+    "diffAgainstRegisteredRc5": {
+      "host": {
+        "servicesAdded": [
+          "actionCards",
+          "cuaAccess",
+          "forge",
+          "forgePanel",
+          "forgeSession",
+          "headlessStartup",
+          "liveshareShares",
+          "pluginRecommendations",
+          "sessionLogDeepSeek"
+        ],
+        "servicesRemoved": [],
+        "methodsAdded": [
+          {
+            "service": "actionCards",
+            "method": "act"
+          },
+          {
+            "service": "actionCards",
+            "method": "record"
+          },
+          {
+            "service": "actionCards",
+            "method": "register"
+          },
+          {
+            "service": "actionCards",
+            "method": "view"
+          },
+          {
+            "service": "agentPresets",
+            "method": "presetForSession"
+          },
+          {
+            "service": "agentPresets",
+            "method": "readDocument"
+          },
+          {
+            "service": "agentPresets",
+            "method": "remoteExportList"
+          },
+          {
+            "service": "agentPresets",
+            "method": "select"
+          },
+          {
+            "service": "agentPresets",
+            "method": "serviceFor"
+          },
+          {
+            "service": "agents",
+            "method": "turnBoundaryOf"
+          },
+          {
+            "service": "agents",
+            "method": "withInitiator"
+          },
+          {
+            "service": "agents",
+            "method": "withoutInitiator"
+          },
+          {
+            "service": "attachments",
+            "method": "readFileStream"
+          },
+          {
+            "service": "claudeCodeMods",
+            "method": "watchBand"
+          },
+          {
+            "service": "cuaAccess",
+            "method": "applicationIcons"
+          },
+          {
+            "service": "cuaAccess",
+            "method": "applications"
+          },
+          {
+            "service": "cuaAccess",
+            "method": "enablePersistentPtc"
+          },
+          {
+            "service": "cuaAccess",
+            "method": "openSettings"
+          },
+          {
+            "service": "cuaAccess",
+            "method": "ptcConfiguration"
+          },
+          {
+            "service": "cuaAccess",
+            "method": "requestPermission"
+          },
+          {
+            "service": "cuaAccess",
+            "method": "retryApproval"
+          },
+          {
+            "service": "cuaAccess",
+            "method": "revoke"
+          },
+          {
+            "service": "cuaAccess",
+            "method": "systemStatus"
+          },
+          {
+            "service": "deepseekLlmApiExtensions",
+            "method": "register"
+          },
+          {
+            "service": "directoryPickerController",
+            "method": "createDirectory"
+          },
+          {
+            "service": "directoryPickerController",
+            "method": "list"
+          },
+          {
+            "service": "directoryPickerController",
+            "method": "pick"
+          },
+          {
+            "service": "fileUploads",
+            "method": "upload"
+          },
+          {
+            "service": "fileUploads",
+            "method": "uploadImageStream"
+          },
+          {
+            "service": "forge",
+            "method": "changeRequestFromUrl"
+          },
+          {
+            "service": "forge",
+            "method": "changeRequestUrl"
+          },
+          {
+            "service": "forge",
+            "method": "diff"
+          },
+          {
+            "service": "forge",
+            "method": "fetchChecks"
+          },
+          {
+            "service": "forge",
+            "method": "fileText"
+          },
+          {
+            "service": "forge",
+            "method": "fileUrl"
+          },
+          {
+            "service": "forge",
+            "method": "findByHead"
+          },
+          {
+            "service": "forge",
+            "method": "latest"
+          },
+          {
+            "service": "forge",
+            "method": "markReady"
+          },
+          {
+            "service": "forge",
+            "method": "merge"
+          },
+          {
+            "service": "forge",
+            "method": "readiness"
+          },
+          {
+            "service": "forge",
+            "method": "refresh"
+          },
+          {
+            "service": "forge",
+            "method": "register"
+          },
+          {
+            "service": "forge",
+            "method": "repositoryFromRemote"
+          },
+          {
+            "service": "forge",
+            "method": "submitReview"
+          },
+          {
+            "service": "forge",
+            "method": "watch"
+          },
+          {
+            "service": "forgePanel",
+            "method": "branches"
+          },
+          {
+            "service": "forgePanel",
+            "method": "cancelWorktree"
+          },
+          {
+            "service": "forgePanel",
+            "method": "changeRequestChecks"
+          },
+          {
+            "service": "forgePanel",
+            "method": "changeRequestDiff"
+          },
+          {
+            "service": "forgePanel",
+            "method": "changeRequestStates"
+          },
+          {
+            "service": "forgePanel",
+            "method": "changeRequestText"
+          },
+          {
+            "service": "forgePanel",
+            "method": "continueInProject"
+          },
+          {
+            "service": "forgePanel",
+            "method": "dismiss"
+          },
+          {
+            "service": "forgePanel",
+            "method": "follow"
+          },
+          {
+            "service": "forgePanel",
+            "method": "localDiff"
+          },
+          {
+            "service": "forgePanel",
+            "method": "localText"
+          },
+          {
+            "service": "forgePanel",
+            "method": "markReady"
+          },
+          {
+            "service": "forgePanel",
+            "method": "merge"
+          },
+          {
+            "service": "forgePanel",
+            "method": "refresh"
+          },
+          {
+            "service": "forgePanel",
+            "method": "requestWorktree"
+          },
+          {
+            "service": "forgePanel",
+            "method": "restoreWorktree"
+          },
+          {
+            "service": "forgePanel",
+            "method": "retryWorktree"
+          },
+          {
+            "service": "forgePanel",
+            "method": "stopCreation"
+          },
+          {
+            "service": "forgePanel",
+            "method": "submitReview"
+          },
+          {
+            "service": "forgePanel",
+            "method": "track"
+          },
+          {
+            "service": "forgeSession",
+            "method": "changeRequests"
+          },
+          {
+            "service": "forgeSession",
+            "method": "discoverBranch"
+          },
+          {
+            "service": "forgeSession",
+            "method": "dismiss"
+          },
+          {
+            "service": "forgeSession",
+            "method": "track"
+          },
+          {
+            "service": "forgeSession",
+            "method": "watch"
+          },
+          {
+            "service": "fs",
+            "method": "deleteFile"
+          },
+          {
+            "service": "fs",
+            "method": "moveFile"
+          },
+          {
+            "service": "fs",
+            "method": "patchText"
+          },
+          {
+            "service": "goals",
+            "method": "clear"
+          },
+          {
+            "service": "goals",
+            "method": "complete"
+          },
+          {
+            "service": "goals",
+            "method": "edit"
+          },
+          {
+            "service": "goals",
+            "method": "get"
+          },
+          {
+            "service": "goals",
+            "method": "pause"
+          },
+          {
+            "service": "goals",
+            "method": "remoteExportCreate"
+          },
+          {
+            "service": "goals",
+            "method": "resume"
+          },
+          {
+            "service": "hmr",
+            "method": "runExclusive"
+          },
+          {
+            "service": "jobController",
+            "method": "follow"
+          },
+          {
+            "service": "jobController",
+            "method": "kill"
+          },
+          {
+            "service": "jobController",
+            "method": "list"
+          },
+          {
+            "service": "liveshareShares",
+            "method": "audit"
+          },
+          {
+            "service": "liveshareShares",
+            "method": "capabilities"
+          },
+          {
+            "service": "liveshareShares",
+            "method": "create"
+          },
+          {
+            "service": "liveshareShares",
+            "method": "identity"
+          },
+          {
+            "service": "liveshareShares",
+            "method": "list"
+          },
+          {
+            "service": "liveshareShares",
+            "method": "relay"
+          },
+          {
+            "service": "liveshareShares",
+            "method": "setCapabilities"
+          },
+          {
+            "service": "liveshareShares",
+            "method": "setRelay"
+          },
+          {
+            "service": "liveshareShares",
+            "method": "stop"
+          },
+          {
+            "service": "liveshareShares",
+            "method": "testPublish"
+          },
+          {
+            "service": "liveshareShares",
+            "method": "testRelay"
+          },
+          {
+            "service": "liveshareShares",
+            "method": "updatePermissions"
+          },
+          {
+            "service": "llm",
+            "method": "remoteDiscoverModels"
+          },
+          {
+            "service": "messageFeedback",
+            "method": "delete"
+          },
+          {
+            "service": "messageFeedback",
+            "method": "list"
+          },
+          {
+            "service": "messageFeedback",
+            "method": "put"
+          },
+          {
+            "service": "officeToPdf",
+            "method": "getGeneration"
+          },
+          {
+            "service": "permissionPresets",
+            "method": "catalog"
+          },
+          {
+            "service": "pluginManager",
+            "method": "listVersions"
+          },
+          {
+            "service": "pluginManager",
+            "method": "readBundleDetail"
+          },
+          {
+            "service": "pluginManager",
+            "method": "updateBundle"
+          },
+          {
+            "service": "pluginMarket",
+            "method": "readEntryDetail"
+          },
+          {
+            "service": "pluginRecommendations",
+            "method": "describe"
+          },
+          {
+            "service": "productAnalytics",
+            "method": "watchPolicy"
+          },
+          {
+            "service": "remoteAccess",
+            "method": "follow"
+          },
+          {
+            "service": "remoteAccess",
+            "method": "registerPolicy"
+          },
+          {
+            "service": "schedule",
+            "method": "catalog"
+          },
+          {
+            "service": "schedule",
+            "method": "deleteInactive"
+          },
+          {
+            "service": "schedule",
+            "method": "deliveryLimits"
+          },
+          {
+            "service": "schedule",
+            "method": "edit"
+          },
+          {
+            "service": "schedule",
+            "method": "history"
+          },
+          {
+            "service": "schedule",
+            "method": "list"
+          },
+          {
+            "service": "schedule",
+            "method": "remoteCreate"
+          },
+          {
+            "service": "schedule",
+            "method": "remoteEdit"
+          },
+          {
+            "service": "schedule",
+            "method": "remoteHistory"
+          },
+          {
+            "service": "schedule",
+            "method": "remoteList"
+          },
+          {
+            "service": "schedule",
+            "method": "run"
+          },
+          {
+            "service": "schedule",
+            "method": "view"
+          },
+          {
+            "service": "sessionController",
+            "method": "attachment"
+          },
+          {
+            "service": "sessionController",
+            "method": "cancel"
+          },
+          {
+            "service": "sessionController",
+            "method": "control"
+          },
+          {
+            "service": "sessionController",
+            "method": "create"
+          },
+          {
+            "service": "sessionController",
+            "method": "events"
+          },
+          {
+            "service": "sessionController",
+            "method": "follow"
+          },
+          {
+            "service": "sessionController",
+            "method": "fork"
+          },
+          {
+            "service": "sessionController",
+            "method": "list"
+          },
+          {
+            "service": "sessionController",
+            "method": "modelCatalog"
+          },
+          {
+            "service": "sessionController",
+            "method": "observeEvent"
+          },
+          {
+            "service": "sessionController",
+            "method": "observeProjections"
+          },
+          {
+            "service": "sessionController",
+            "method": "observeState"
+          },
+          {
+            "service": "sessionController",
+            "method": "openWorkspacePath"
+          },
+          {
+            "service": "sessionController",
+            "method": "projections"
+          },
+          {
+            "service": "sessionController",
+            "method": "prompt"
+          },
+          {
+            "service": "sessionController",
+            "method": "rename"
+          },
+          {
+            "service": "sessionController",
+            "method": "search"
+          },
+          {
+            "service": "sessionController",
+            "method": "selectModel"
+          },
+          {
+            "service": "sessionController",
+            "method": "state"
+          },
+          {
+            "service": "sessionController",
+            "method": "updateQueue"
+          },
+          {
+            "service": "sessionController",
+            "method": "wait"
+          },
+          {
+            "service": "sessionController",
+            "method": "workspacePathApplications"
+          },
+          {
+            "service": "sessionFeedback",
+            "method": "record"
+          },
+          {
+            "service": "sessionLogDeepSeek",
+            "method": "registerExclusion"
+          },
+          {
+            "service": "sessionProjections",
+            "method": "onEventChanged"
+          },
+          {
+            "service": "sessionProjections",
+            "method": "register"
+          },
+          {
+            "service": "sessionProjections",
+            "method": "summaryKeys"
+          },
+          {
+            "service": "sessionReferenceResolver",
+            "method": "remoteExportCandidates"
+          },
+          {
+            "service": "sessionTelemetry",
+            "method": "flush"
+          },
+          {
+            "service": "speechController",
+            "method": "follow"
+          },
+          {
+            "service": "speechToText",
+            "method": "follow"
+          },
+          {
+            "service": "ssh",
+            "method": "request"
+          },
+          {
+            "service": "storage",
+            "method": "form"
+          },
+          {
+            "service": "storage",
+            "method": "mount"
+          },
+          {
+            "service": "storageDomain",
+            "method": "open"
+          },
+          {
+            "service": "subagents",
+            "method": "interruptByParent"
+          },
+          {
+            "service": "subagents",
+            "method": "prompt"
+          },
+          {
+            "service": "terminalController",
+            "method": "attach"
+          },
+          {
+            "service": "terminalController",
+            "method": "retain"
+          },
+          {
+            "service": "timer",
+            "method": "debounce"
+          },
+          {
+            "service": "timer",
+            "method": "throttle"
+          },
+          {
+            "service": "tokenMeter",
+            "method": "contextPressure"
+          },
+          {
+            "service": "tools",
+            "method": "checkGuards"
+          },
+          {
+            "service": "tools",
+            "method": "definitions"
+          },
+          {
+            "service": "tools",
+            "method": "executable"
+          },
+          {
+            "service": "tools",
+            "method": "resolve"
+          },
+          {
+            "service": "tools",
+            "method": "setExecutor"
+          },
+          {
+            "service": "typertGateway",
+            "method": "getPendingRemoteEvents"
+          },
+          {
+            "service": "userQuestions",
+            "method": "attachWait"
+          },
+          {
+            "service": "web",
+            "method": "fetchReady"
+          },
+          {
+            "service": "web",
+            "method": "searchReady"
+          },
+          {
+            "service": "webServer",
+            "method": "readResource"
+          },
+          {
+            "service": "webhookRuntime",
+            "method": "dispatch"
+          },
+          {
+            "service": "webhookRuntime",
+            "method": "register"
+          },
+          {
+            "service": "workspaceController",
+            "method": "archiveSession"
+          },
+          {
+            "service": "workspaceController",
+            "method": "create"
+          },
+          {
+            "service": "workspaceController",
+            "method": "delete"
+          },
+          {
+            "service": "workspaceController",
+            "method": "follow"
+          },
+          {
+            "service": "workspaceController",
+            "method": "initializeDefault"
+          },
+          {
+            "service": "workspaceController",
+            "method": "insertBefore"
+          },
+          {
+            "service": "workspaceController",
+            "method": "insertSessionBefore"
+          },
+          {
+            "service": "workspaceController",
+            "method": "pinSession"
+          },
+          {
+            "service": "workspaceController",
+            "method": "rename"
+          },
+          {
+            "service": "workspaceController",
+            "method": "unarchiveSession"
+          },
+          {
+            "service": "workspaceController",
+            "method": "unpinSession"
+          },
+          {
+            "service": "workspaceFiles",
+            "method": "changes"
+          },
+          {
+            "service": "worktrees",
+            "method": "restore"
+          }
+        ],
+        "methodsRemoved": [
+          {
+            "service": "sessionController",
+            "method": "inspect"
+          },
+          {
+            "service": "sessionProjections",
+            "method": "cachedSnapshot"
+          },
+          {
+            "service": "subagentModelSelection",
+            "method": "current"
+          },
+          {
+            "service": "tools",
+            "method": "executionMode"
+          },
+          {
+            "service": "tools",
+            "method": "presentAs"
+          }
+        ]
+      },
+      "client": {
+        "servicesAdded": [],
+        "servicesRemoved": [],
+        "methodsAdded": [
+          {
+            "service": "sessions",
+            "method": "using"
+          },
+          {
+            "service": "timer",
+            "method": "debounce"
+          },
+          {
+            "service": "timer",
+            "method": "throttle"
+          }
+        ],
+        "methodsRemoved": []
+      }
+    },
+    "extractorCorrection": {
+      "cause": "Generic parameters, quoted decorator arguments, generators and optional methods were omitted by the previous lexical extractor. Old registered bytes are retained. Catalogue-name differences include extraction corrections and must not be presented as upstream API additions.",
+      "initialHostMethods": 494,
+      "correctedHostMethods": 601,
+      "initialClientMethods": 43,
+      "correctedClientMethods": 46,
+      "independentMethodAudit": {
+        "host": {
+          "verifiedMethods": 601,
+          "manualSignatureCases": [
+            {
+              "key": "fileUploads",
+              "sig": "async uploadStream(request: { readonly sessionId: SessionId readonly data: AsyncIterable<Uint8Array> readonly signal?: AbortSignal readonly name?: string }): Promise<FileUploadValue>",
+              "manualConfirmedMethod": "uploadStream",
+              "reason": "Generated inline object fields omit TS separators; method checked against original signature and implementation"
+            },
+            {
+              "key": "fileUploads",
+              "sig": "async uploadImageStream(request: { readonly sessionId: SessionId readonly data: AsyncIterable<Uint8Array> readonly mediaType: string readonly signal?: AbortSignal readonly name?: string }): Promise<ImageUploadValue>",
+              "manualConfirmedMethod": "uploadImageStream",
+              "reason": "Generated inline object fields omit TS separators; method checked against original signature and implementation"
+            },
+            {
+              "key": "fs",
+              "sig": "abstract moveFile( source: FsTarget, destination: FsTarget, options: { hunks?: readonly PatchHunk[] expectedSource?: { version: FsVersion } expectedDestination?: FsWriteIntent }, signal?: AbortSignal, sandboxPolicy?: SandboxExecutionPolicy, ): Promise<FsMoveOutcome>",
+              "manualConfirmedMethod": "moveFile",
+              "reason": "Generated inline object fields omit TS separators; method checked against original signature and implementation"
+            }
+          ]
+        },
+        "client": {
+          "verifiedMethods": 46,
+          "manualSignatureCases": [
+            {
+              "key": "sessions",
+              "sig": "fork(opts: { sessionId: SessionId atSeq?: number increaseTitle?: boolean onCreated?: (childId: SessionId) => void /** False refuses source migration; omission preserves the Host default. */ allowMigration?: boolean }): Promise<SessionId>",
+              "manualConfirmedMethod": "fork",
+              "reason": "Generated inline object fields omit TS separators; method checked against original signature and implementation"
+            }
+          ]
+        }
+      },
+      "normalizedSourceComparison": {
+        "host": {
+          "beforeMethods": 504,
+          "afterMethods": 601,
+          "added": [
+            [
+              "actionCards",
+              "act"
+            ],
+            [
+              "actionCards",
+              "record"
+            ],
+            [
+              "actionCards",
+              "register"
+            ],
+            [
+              "actionCards",
+              "view"
+            ],
+            [
+              "agentPresets",
+              "presetForSession"
+            ],
+            [
+              "agents",
+              "turnBoundaryOf"
+            ],
+            [
+              "cuaAccess",
+              "applicationIcons"
+            ],
+            [
+              "cuaAccess",
+              "applications"
+            ],
+            [
+              "cuaAccess",
+              "enablePersistentPtc"
+            ],
+            [
+              "cuaAccess",
+              "openSettings"
+            ],
+            [
+              "cuaAccess",
+              "ptcConfiguration"
+            ],
+            [
+              "cuaAccess",
+              "requestPermission"
+            ],
+            [
+              "cuaAccess",
+              "retryApproval"
+            ],
+            [
+              "cuaAccess",
+              "revoke"
+            ],
+            [
+              "cuaAccess",
+              "systemStatus"
+            ],
+            [
+              "fileUploads",
+              "uploadImageStream"
+            ],
+            [
+              "forge",
+              "changeRequestFromUrl"
+            ],
+            [
+              "forge",
+              "changeRequestUrl"
+            ],
+            [
+              "forge",
+              "diff"
+            ],
+            [
+              "forge",
+              "fetchChecks"
+            ],
+            [
+              "forge",
+              "fileText"
+            ],
+            [
+              "forge",
+              "fileUrl"
+            ],
+            [
+              "forge",
+              "findByHead"
+            ],
+            [
+              "forge",
+              "latest"
+            ],
+            [
+              "forge",
+              "markReady"
+            ],
+            [
+              "forge",
+              "merge"
+            ],
+            [
+              "forge",
+              "readiness"
+            ],
+            [
+              "forge",
+              "refresh"
+            ],
+            [
+              "forge",
+              "register"
+            ],
+            [
+              "forge",
+              "repositoryFromRemote"
+            ],
+            [
+              "forge",
+              "submitReview"
+            ],
+            [
+              "forge",
+              "watch"
+            ],
+            [
+              "forgePanel",
+              "branches"
+            ],
+            [
+              "forgePanel",
+              "cancelWorktree"
+            ],
+            [
+              "forgePanel",
+              "changeRequestChecks"
+            ],
+            [
+              "forgePanel",
+              "changeRequestDiff"
+            ],
+            [
+              "forgePanel",
+              "changeRequestStates"
+            ],
+            [
+              "forgePanel",
+              "changeRequestText"
+            ],
+            [
+              "forgePanel",
+              "continueInProject"
+            ],
+            [
+              "forgePanel",
+              "dismiss"
+            ],
+            [
+              "forgePanel",
+              "follow"
+            ],
+            [
+              "forgePanel",
+              "localDiff"
+            ],
+            [
+              "forgePanel",
+              "localText"
+            ],
+            [
+              "forgePanel",
+              "markReady"
+            ],
+            [
+              "forgePanel",
+              "merge"
+            ],
+            [
+              "forgePanel",
+              "refresh"
+            ],
+            [
+              "forgePanel",
+              "requestWorktree"
+            ],
+            [
+              "forgePanel",
+              "restoreWorktree"
+            ],
+            [
+              "forgePanel",
+              "retryWorktree"
+            ],
+            [
+              "forgePanel",
+              "stopCreation"
+            ],
+            [
+              "forgePanel",
+              "submitReview"
+            ],
+            [
+              "forgePanel",
+              "track"
+            ],
+            [
+              "forgeSession",
+              "changeRequests"
+            ],
+            [
+              "forgeSession",
+              "discoverBranch"
+            ],
+            [
+              "forgeSession",
+              "dismiss"
+            ],
+            [
+              "forgeSession",
+              "track"
+            ],
+            [
+              "forgeSession",
+              "watch"
+            ],
+            [
+              "fs",
+              "deleteFile"
+            ],
+            [
+              "fs",
+              "moveFile"
+            ],
+            [
+              "fs",
+              "patchText"
+            ],
+            [
+              "liveshareShares",
+              "audit"
+            ],
+            [
+              "liveshareShares",
+              "capabilities"
+            ],
+            [
+              "liveshareShares",
+              "create"
+            ],
+            [
+              "liveshareShares",
+              "identity"
+            ],
+            [
+              "liveshareShares",
+              "list"
+            ],
+            [
+              "liveshareShares",
+              "relay"
+            ],
+            [
+              "liveshareShares",
+              "setCapabilities"
+            ],
+            [
+              "liveshareShares",
+              "setRelay"
+            ],
+            [
+              "liveshareShares",
+              "stop"
+            ],
+            [
+              "liveshareShares",
+              "testPublish"
+            ],
+            [
+              "liveshareShares",
+              "testRelay"
+            ],
+            [
+              "liveshareShares",
+              "updatePermissions"
+            ],
+            [
+              "pluginManager",
+              "listVersions"
+            ],
+            [
+              "pluginManager",
+              "readBundleDetail"
+            ],
+            [
+              "pluginManager",
+              "updateBundle"
+            ],
+            [
+              "pluginMarket",
+              "readEntryDetail"
+            ],
+            [
+              "pluginRecommendations",
+              "describe"
+            ],
+            [
+              "schedule",
+              "deleteInactive"
+            ],
+            [
+              "schedule",
+              "deliveryLimits"
+            ],
+            [
+              "schedule",
+              "edit"
+            ],
+            [
+              "schedule",
+              "remoteCreate"
+            ],
+            [
+              "schedule",
+              "remoteEdit"
+            ],
+            [
+              "schedule",
+              "remoteHistory"
+            ],
+            [
+              "schedule",
+              "remoteList"
+            ],
+            [
+              "schedule",
+              "run"
+            ],
+            [
+              "schedule",
+              "view"
+            ],
+            [
+              "sessionController",
+              "events"
+            ],
+            [
+              "sessionController",
+              "observeEvent"
+            ],
+            [
+              "sessionController",
+              "observeProjections"
+            ],
+            [
+              "sessionController",
+              "observeState"
+            ],
+            [
+              "sessionController",
+              "state"
+            ],
+            [
+              "sessionController",
+              "wait"
+            ],
+            [
+              "sessionLogDeepSeek",
+              "registerExclusion"
+            ],
+            [
+              "sessionProjections",
+              "onEventChanged"
+            ],
+            [
+              "sessionProjections",
+              "summaryKeys"
+            ],
+            [
+              "tokenMeter",
+              "contextPressure"
+            ],
+            [
+              "tools",
+              "checkGuards"
+            ],
+            [
+              "tools",
+              "definitions"
+            ],
+            [
+              "tools",
+              "executable"
+            ],
+            [
+              "tools",
+              "resolve"
+            ],
+            [
+              "tools",
+              "setExecutor"
+            ],
+            [
+              "typertGateway",
+              "getPendingRemoteEvents"
+            ],
+            [
+              "web",
+              "fetchReady"
+            ],
+            [
+              "web",
+              "searchReady"
+            ],
+            [
+              "webServer",
+              "readResource"
+            ],
+            [
+              "worktrees",
+              "restore"
+            ]
+          ],
+          "removed": [
+            [
+              "schedule",
+              "delete"
+            ],
+            [
+              "schedule",
+              "update"
+            ],
+            [
+              "sessionController",
+              "inspect"
+            ],
+            [
+              "sessionController",
+              "page"
+            ],
+            [
+              "sessionProjections",
+              "cachedSnapshot"
+            ],
+            [
+              "sessionProjections",
+              "stateOf"
+            ],
+            [
+              "subagentModelSelection",
+              "current"
+            ],
+            [
+              "tools",
+              "executionMode"
+            ],
+            [
+              "tools",
+              "presentAs"
+            ]
+          ]
+        },
+        "client": {
+          "beforeMethods": 46,
+          "afterMethods": 46,
+          "added": [],
+          "removed": []
+        }
+      }
+    },
+    "registered": true
+  },
+  "signatureReview": {
+    "host": {
+      "oldSignatures": 616,
+      "signatures": 726,
+      "sourceMatchesAsar": true,
+      "sourceSha256": "2f41b0f3a4c3c613cf759de578ef7ebd14b566390e0499ff0eb81c018e7d0088",
+      "added": 152,
+      "removed": 42
+    },
+    "client": {
+      "oldSignatures": 56,
+      "signatures": 56,
+      "sourceMatchesAsar": true,
+      "sourceSha256": "d5bd07c7a5977b9361ab54ce3ecc2894b120be1e375d25817171a018654c7ced",
+      "added": 3,
+      "removed": 3
+    }
+  },
+  "implementationReview": {
+    "boot": {
+      "filesCompared": 30,
+      "changed": [
+        "packages/boot/app-boot/src/bundle-platform.ts",
+        "packages/boot/app-boot/src/index.ts",
+        "packages/boot/app-boot/src/official-bundle-packages.ts",
+        "packages/boot/app-boot/src/official-bundles.generated.ts",
+        "packages/boot/app-boot/src/official-bundles.ts",
+        "packages/boot/app-boot/src/profile-plugins.ts",
+        "packages/boot/app-boot/src/profile-resolution/resolver.ts",
+        "packages/boot/app-boot/src/profile.ts",
+        "packages/boot/app-boot/src/startup-diagnostics.ts",
+        "packages/boot/hmr/src/index.ts",
+        "packages/boot/hmr/src/package-manifest.ts"
+      ]
+    },
+    "moduleLoader": {
+      "filesCompared": 9,
+      "changed": [
+        "packages/client/modules/src/assets.ts",
+        "packages/client/modules/src/client/entries.ts",
+        "packages/client/modules/src/client/index.ts",
+        "packages/client/modules/src/client/manifest.ts",
+        "packages/client/modules/src/client/system.ts",
+        "packages/client/modules/src/index.ts"
+      ]
+    },
+    "toolSkill": {
+      "filesCompared": 116,
+      "changed": [
+        "packages/core/system-prompt/src/index.ts",
+        "packages/core/tools/src/batch.ts",
+        "packages/core/tools/src/contracts.ts",
+        "packages/core/tools/src/events.ts",
+        "packages/core/tools/src/executor.ts",
+        "packages/core/tools/src/index.ts",
+        "packages/core/tools/src/pipeline.ts",
+        "packages/core/tools/src/ptc-calls.ts",
+        "packages/core/tools/src/ptc.ts",
+        "packages/core/tools/src/py-types.ts",
+        "packages/core/tools/src/schema.ts",
+        "packages/core/tools/src/testing.ts",
+        "packages/core/tools/src/ts-types.ts",
+        "packages/core/tools/src/types.ts",
+        "packages/skill/skill-filesystem/README.i18n.yaml",
+        "packages/skill/skill-filesystem/README.md",
+        "packages/skill/skill-filesystem/README.zh.md",
+        "packages/skill/skill-filesystem/locale/de.json",
+        "packages/skill/skill-filesystem/locale/es.json",
+        "packages/skill/skill-filesystem/locale/fr.json",
+        "packages/skill/skill-filesystem/locale/ja.json",
+        "packages/skill/skill-filesystem/locale/pt.json",
+        "packages/skill/skill-filesystem/locale/ru.json",
+        "packages/skill/skill-filesystem/package.json",
+        "packages/skill/skill-filesystem/src/index.ts",
+        "packages/skill/skill-filesystem/tests/skill-filesystem.spec.ts",
+        "packages/skill/skill-office/README.i18n.yaml",
+        "packages/skill/skill-office/README.md",
+        "packages/skill/skill-office/README.zh.md",
+        "packages/skill/skill-office/assets/office-docx/SKILL.md",
+        "packages/skill/skill-office/locale/de.json",
+        "packages/skill/skill-office/locale/en.json",
+        "packages/skill/skill-office/locale/es.json",
+        "packages/skill/skill-office/locale/fr.json",
+        "packages/skill/skill-office/locale/ja.json",
+        "packages/skill/skill-office/locale/pt.json",
+        "packages/skill/skill-office/locale/ru.json",
+        "packages/skill/skill-office/locale/zh.json",
+        "packages/skill/skill-office/package.json",
+        "packages/skill/skill-office/tests/docx-validation.e2e.ts",
+        "packages/skill/skill-office/tests/fixtures/visual-intent.ts",
+        "packages/skill/skill-office/tests/progressive-loading.spec.ts",
+        "packages/skill/skill-office/tests/render-tools.e2e.ts",
+        "packages/skill/skill-office/tests/visual-intent-docx.e2e.ts",
+        "packages/skill/skill-office/tests/visual-intent-pptx.e2e.ts",
+        "packages/skill/skill-office/tests/visual-intent-xlsx.e2e.ts",
+        "packages/skill/skill-office/tests/visual-intent.e2e.ts",
+        "packages/skill/skill-office/tests/xlsx-validation.e2e.ts",
+        "packages/skill/skill/README.i18n.yaml",
+        "packages/skill/skill/README.md",
+        "packages/skill/skill/README.zh.md",
+        "packages/skill/skill/locale/de.json",
+        "packages/skill/skill/locale/es.json",
+        "packages/skill/skill/locale/fr.json",
+        "packages/skill/skill/locale/ja.json",
+        "packages/skill/skill/locale/pt.json",
+        "packages/skill/skill/locale/ru.json",
+        "packages/skill/skill/package.json",
+        "packages/skill/tool-skill/README.i18n.yaml",
+        "packages/skill/tool-skill/README.md",
+        "packages/skill/tool-skill/README.zh.md",
+        "packages/skill/tool-skill/locale/de.json",
+        "packages/skill/tool-skill/locale/es.json",
+        "packages/skill/tool-skill/locale/fr.json",
+        "packages/skill/tool-skill/locale/ja.json",
+        "packages/skill/tool-skill/locale/pt.json",
+        "packages/skill/tool-skill/locale/ru.json",
+        "packages/skill/tool-skill/package.json",
+        "packages/skill/tool-skill/src/index.ts",
+        "packages/skill/tool-skill/tests/tool-skill.spec.ts",
+        "packages/skill/tool-workspace-dependencies/locale/de.json",
+        "packages/skill/tool-workspace-dependencies/locale/en.json",
+        "packages/skill/tool-workspace-dependencies/locale/es.json",
+        "packages/skill/tool-workspace-dependencies/locale/fr.json",
+        "packages/skill/tool-workspace-dependencies/locale/ja.json",
+        "packages/skill/tool-workspace-dependencies/locale/pt.json",
+        "packages/skill/tool-workspace-dependencies/locale/ru.json",
+        "packages/skill/tool-workspace-dependencies/locale/zh.json",
+        "packages/skill/tool-workspace-dependencies/package.json",
+        "packages/skill/tool-workspace-dependencies/tests/tool-workspace-dependencies.spec.ts"
+      ]
+    },
+    "http": {
+      "filesCompared": 20,
+      "changed": [
+        "packages/client/connection/src/client/index.ts",
+        "packages/host/webserver/src/index.ts"
+      ]
+    },
+    "cordis": {
+      "filesCompared": 35,
+      "changed": [
+        "vendor/cordis/README.md",
+        "vendor/cordis/package.json",
+        "vendor/cordis/src/context.ts",
+        "vendor/cordis/src/events.ts",
+        "vendor/cordis/src/fiber.ts",
+        "vendor/cordis/src/logger.ts",
+        "vendor/cordis/src/reflect.ts",
+        "vendor/cordis/src/utils.ts",
+        "vendor/include/README.md",
+        "vendor/include/package.json",
+        "vendor/include/src/index.ts",
+        "vendor/include/src/journal.ts",
+        "vendor/include/src/patch.ts",
+        "vendor/loader/README.md",
+        "vendor/loader/package.json",
+        "vendor/loader/src/config/entry.ts",
+        "vendor/loader/src/config/group.ts",
+        "vendor/loader/src/config/isolate.ts",
+        "vendor/loader/src/config/tree.ts",
+        "vendor/loader/src/index.ts",
+        "vendor/loader/src/resolve.ts"
+      ]
+    },
+    "semantic": {
+      "filesCompared": 51,
+      "changed": [
+        "packages/api/session-controller/src/client/contract/session.ts",
+        "packages/api/session-controller/src/client/contract/snapshot.ts",
+        "packages/api/session-controller/src/client/sessions/lineage.ts",
+        "packages/api/session-controller/src/client/sessions/manager.ts",
+        "packages/api/session-controller/src/client/sessions/service.ts",
+        "packages/api/session-controller/src/client/sessions/session.ts",
+        "packages/api/session-controller/src/client/transport.ts",
+        "packages/client/ui-conversation/src/client/contract/input.ts",
+        "packages/client/ui-workspace/src/client/WorkspacePicker.module.css",
+        "packages/client/ui-workspace/src/client/WorkspacePicker.tsx",
+        "packages/client/ui-workspace/src/client/contract/slots.ts",
+        "packages/client/ui-workspace/src/client/index.ts",
+        "packages/client/ui-workspace/src/client/locales.ts",
+        "packages/client/ui-workspace/src/client/navigation.ts",
+        "packages/client/ui-workspace/src/client/path-suffix.ts",
+        "packages/client/ui-workspace/src/client/rows/AnimatedRows.module.css",
+        "packages/client/ui-workspace/src/client/rows/AnimatedRows.tsx",
+        "packages/client/ui-workspace/src/client/rows/Rows.module.css",
+        "packages/client/ui-workspace/src/client/rows/Rows.tsx",
+        "packages/client/ui-workspace/src/client/rows/WorkspaceBrowser.module.css",
+        "packages/client/ui-workspace/src/client/rows/WorkspaceBrowser.tsx",
+        "packages/client/ui-workspace/src/client/rows/WorkspaceDialogs.tsx",
+        "packages/client/ui-workspace/src/client/session-actions/ArchiveSession.tsx",
+        "packages/client/ui-workspace/src/client/session-actions/ForkSession.tsx",
+        "packages/client/ui-workspace/src/client/session-actions/PinSession.tsx",
+        "packages/client/ui-workspace/src/client/session-actions/RenameSession.tsx",
+        "packages/client/ui-workspace/src/client/session-actions/SessionId.tsx",
+        "packages/client/ui-workspace/src/client/session-actions/SessionMenu.tsx",
+        "packages/client/ui-workspace/src/client/session-actions/context-menus.tsx",
+        "packages/client/ui-workspace/src/client/shortcuts.ts",
+        "packages/client/ui-workspace/src/client/tree.ts",
+        "packages/extensions/cordis-client-runner/src/client/timer.ts"
+      ]
+    }
+  },
+  "semanticReview": {
+    "catalogueVersusBehavior": "Complete signature and affected implementation review establishes name/signature provenance only; new argument/lifecycle rule certification is deferred to Plan next P0.",
+    "retainedRuntimeAliases": "sessionProjections.cachedSnapshot remains deprecated in implementation although omitted from generated method names. No method-name deletion alone creates a fatal rule.",
+    "cordis": "Core4.1/Loader1.1/Include1.1: recursive entries and numeric states stable; IDs are tree paths, inject returns owned Fiber (also true in rc5), Include clones patch data and persists via commit/journal/flush. Static scanner does not write host configuration.",
+    "tools": "ToolsService.execute is an Agent-selected batch; resolve captures conditional admission, executable checks the same step set, native/PTC providers own presentation and execution. No direct-definition fallback. Legacy rc5 single call retained.",
+    "otherChanges": "Agent model selection, async projection registration, Session state/events/control, inline input contract, timer return types and locale dictionary typing need independent parameter/lifecycle rules; method existence never certifies these semantics.",
+    "bootAndHttp": "Official bundle exports moved to dsh-official-bundles; profile/plugin reconciliation and ESM resolution changed. Current source parsing remains bounded and conservative; real owned package boot, authenticated HTTP, profile identity and three client slot registrations are separately smoke-tested."
+  },
+  "integrationAcceptance": {
+    "status": "passed owned macOS basic same-archive integration",
+    "host": "0.2.2-rc.1",
+    "platform": "darwin",
+    "arch": "arm64",
+    "hostNode": "24.21.0",
+    "artifactSha256": "62b311addb570db10ad0a4d21676bed2724579800bc1e9f4489f0e8f2ab663d4",
+    "checks": [
+      "independent packaged tgz installed into private profile",
+      "authenticated HTTP report and exact catalogue/profile identity",
+      "Chrome DOM and three client slot registrations",
+      "actual native Agent executor and actual PTC run_code backend",
+      "noarg/ordinary/cached/failure/static upgrade strict pipeline",
+      "same-profile host restart preserves report target/catalogue identity",
+      "owned hosts/Chrome/private profiles cleaned"
+    ],
+    "nativeExecutorSchemas": [
+      "compat_check",
+      "working_directory"
+    ],
+    "ptcExecutorSchemas": [
+      "run_code"
+    ],
+    "sourceReviewProtocolProbe": "Actual registry/providers with controlled PTC seam is separate from the actual backend run above.",
+    "scope": "Basic integration only. Full nine-section UI/Linux/Windows/business and new parameter semantics remain separate Plan tasks."
+  },
+  "certification": "exact-catalogue-and-basic-integration",
+  "scope": "0.2.4 development source registration. New semantic rules, full UI/platform matrix and publication remain independent Plan tasks. Source inventory diff is complete; implementation review is scoped to the listed integration contracts, not a security audit of every changed upstream file."
+}

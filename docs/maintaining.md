@@ -118,7 +118,7 @@ GitHub简介/topics可独立于Git提交更新；npm简介/搜索关键词分别
 
 ## 参数语义基线维护
 
-`rules/severity.json.apiSemantics`登记0.2.1-rc.2/rc.3/rc.5客户端语义，与四版API目录认证独立。修改前锁定官方tag/归档，逐文件核对哈希、公开契约、实现及真实行为；归档只读，不执行目标。参数事实、弃用标记和所有权前提分别审查；clearPreviousDraft是兼容选项，新字段出现不表示它弃用。
+`rules/severity.json.apiSemantics`登记0.2.1-rc.2/rc.3/rc.5客户端语义，与五版API目录认证独立。修改前锁定官方tag/归档，逐文件核对哈希、公开契约、实现及真实行为；归档只读，不执行目标。参数事实、弃用标记和所有权前提分别审查；clearPreviousDraft是兼容选项，新字段出现不表示它弃用。
 
 `lib/api-semantics.mjs.SEMANTIC_VERSIONS`单独限制语义版本，不能从目录登记或规则自报版本扩大。rc.5固定目录/完整来源审查见`rules/dsh-0.2.1-rc.5-review.json`；已进入CATALOG_REFERENCES，仍不认证一般业务。check:catalogs验证schema、登记版本及来源引用结构，不能代替语义审查。补类型/枚举、别名/改写、闭包副作用及跨版本正反例，验收同一tgz的HTTP/面板。静态验收夹具只放自有profile，保持未激活；提醒不证明泄漏/移除或业务失败。同步指导副本，保留旧语义基线，不自动认证未来、宿主同名、Windows或模型场景。
 
@@ -172,3 +172,13 @@ rc.5额外要求独立ACP stdout JSON-RPC、stderr目录诊断、MCP能力、受
 `ci-ui018`的rc.5门禁还要求`issues023`回执：独立tgz装入自有profile，每25ms原子写状态期间联合调用无参tool、刷新真实设置页、核目标一致及缓存命中；停写后核显式失败及升级回包。调用经过宿主tools.execute的严格JSON/schema管线；测试桥接路由/定时器仅驻临时profile，随宿主清理，不进入npm产品。预检复制全部输入字节，因此持续写入时拒绝不稳定快照是正确行为，不放宽该守卫。
 
 Node22/24、九项UI及问题联合验收按精确提交/归档核对；CI状态见对应Actions运行，同一tgz须有macOS/Linux回执。Windows实机和用户现场确认单列。源码修复、现场复验及公开发行分开记录，issue沟通/关闭按当次授权与证据决定。
+
+## 0.2.4开发：0.2.2-rc.1来源、Cordis与工具迁移
+
+[0.2.2-rc.1审查](../rules/dsh-0.2.2-rc.1-review.json)锁定官方tag/commit、源码/npm/app.asar摘要和完整文件差分。双端完整签名与原始归档及桌面字节一致；独立AST核方法名，四项压平后缺少类型分隔符的签名另行人工核对。提取器补齐泛型、转义引号装饰器、生成器和可选方法；旧登记字节保持，目录新增不全是上游API新增。新精确目录已接普通报告、双向预检和作者默认五版矩阵；参数语义认证集合仍仅rc.2/rc.3/rc.5。
+
+Cordis4.1保留递归entries及0–5状态；未知类型不当FAILED/PENDING，树内id不能作包身份，显式冲突保持未映射，独立标签评分遵守同一边界。探针按已检查条目计预算，跳过坏形状不绕过上限。ctx.inject返回Fiber，清理保留dispose接收者，同时兼容旧函数disposer；此遗漏在旧宿主也存在。Include1.1的commit/journal/flush与patch克隆已核，静态扫描不写宿主配置，不模拟运行时持久化或热更新回滚。
+
+`tools/owned-tool-invocation.mjs`仅供自有验收fixture：rc.5保留单调用；新宿主通过真实Agent选择执行器，resolve捕获modelSelection/步骤准入，executable和execute使用同一集合并finally释放。PTC经run_code调用能力，不直接绕过执行器；当前桥接限定TypeScript默认函数体模式，不外推Python/VM Script/REPL。`installIssue023Fixture(profile,{hostVersion,agentPreset})`显式选择新宿主及preset，返回executorSchemas作为独立证据；preset须在Agent setup中实际挂载，meta声明本身不证明执行器选择。
+
+`test/owned-tool-host-probe.test.mjs`默认跳过，显式DSC_RC22_HOST_PROBE=1才执行；可通过DSC_HOST_ASAR及DSC_HOST_ELECTRON选择安装归档，核摘要后运行实际ToolsService/native/PTC、条件准入、作用域、提示词、严格JSON与取消；探针的PTC runtime seam是受控夹具，不能代替真实后端。实际私有宿主/Chrome和独立tgz基础回执见current-state；完整九项UI、平台矩阵、现场试用和新语义规则仍待§6，历史rc.5回执不认证新宿主。

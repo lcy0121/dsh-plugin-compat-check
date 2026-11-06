@@ -18,7 +18,7 @@ test("rc.5 uses its own reviewed catalogue; rc.4 and future references remain un
     ["0.2.1-rc.4", "0.2.1-rc.3", false],
     ["0.2.1-rc.5", "0.2.1-rc.5", true],
     ["0.2.1-rc.6", "0.2.1-rc.5", false],
-    ["9.9.9", "0.2.1-rc.5", false],
+    ["9.9.9", "0.2.2-rc.1", false],
   ]) {
     const c = loadCatalog(root, version);
     assert.equal(c.evidence.referenceVersion, reference);
@@ -66,7 +66,7 @@ test("rc.5 preview compares both directions and same version without executing s
     assert.equal(r.exitCode, 3);
   }
 });
-test("rc.5 author default includes a fourth exact cell and all exports preserve its identity", (t) => {
+test("rc.5 author default retains its exact cell in the expanded matrix and all exports preserve its identity", (t) => {
   const f = packageFixture(
     'throw Error("MUST NOT EXECUTE");export function apply(ctx){ctx.tools.register({name:"fixture"})}',
   );
@@ -81,7 +81,7 @@ test("rc.5 author default includes a fourth exact cell and all exports preserve 
     assert.match(r.stdout, /0.2.1-rc.5/);
     if (format === "json") {
       const m = JSON.parse(r.stdout);
-      assert.equal(m.cells.length, 4);
+      assert.equal(m.cells.length, 5);
       const c = m.cells.find((c) => c.dshVersion === "0.2.1-rc.5");
       assert.equal(c.report.catalog.verified, true);
       assert.equal(c.report.observation.mode, "catalogue");

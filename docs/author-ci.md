@@ -4,12 +4,12 @@
 
 ```sh
 node tools/author-ci.mjs --package ./dist-plugin > compatibility.json
-node tools/author-ci.mjs --package ./dist-plugin --versions 0.2.0-rc.2,0.2.1-rc.2,0.2.1-rc.3,0.2.1-rc.5 --format sarif > compatibility.sarif
+node tools/author-ci.mjs --package ./dist-plugin --versions 0.2.0-rc.2,0.2.1-rc.2,0.2.1-rc.3,0.2.1-rc.5,0.2.2-rc.1 --format sarif > compatibility.sarif
 node tools/author-ci.mjs --package ./dist-plugin --format junit > compatibility.xml
 node tools/author-ci.mjs --report compatibility.json --format html > compatibility.html
 ```
 
-默认矩阵包含已认证的 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3` 和 `0.2.1-rc.5`。未知版本以工具错误阻断，不回退目录。矩阵只静态比较；每cell保留完整报告、内核码及判定/源码身份。目录未收录的方法保留位置和覆盖限制，不直接报缺失；默认策略仍阻断覆盖不足。它不证明宿主启动或业务通过。
+默认矩阵包含已认证的 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5` 和 `0.2.2-rc.1`。未知版本以工具错误阻断，不回退目录。矩阵只静态比较；每cell保留完整报告、内核码及判定/源码身份。目录未收录的方法保留位置和覆盖限制，不直接报缺失；默认策略仍阻断覆盖不足。它不证明宿主启动或业务通过。
 
 ## 门禁策略
 
@@ -45,7 +45,7 @@ HTML独立、无脚本/网络资源或动态链接，包名、位置和消息均
 | 资源 | 上限 |
 |---|---|
 | 源码快照 | 4096项、32层、单文件2MiB/总16MiB；内层枚举/读取10秒 |
-| 矩阵 | 最多4个不同精确版本；worker30秒、512+64MiB代际预算 |
+| 矩阵 | 最多5个不同精确版本；worker30秒、512+64MiB代际预算 |
 | 策略 / cell紧凑JSON | 64KiB / 2MiB |
 | 最终JSON及各展示输出、previous/保存报告输入 | 各8MiB，UTF-8字节计数，含末尾换行 |
 

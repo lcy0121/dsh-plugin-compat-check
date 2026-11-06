@@ -28,14 +28,20 @@ export function captureLoaderLabels(ctx, identity) {
       return label;
     }
     label.available = true;
+    let inspected = 0;
     for (const entry of loader.entries()) {
-      if (label.entries.length >= 20000) {
+      if (inspected++ >= 20000) {
         label.complete = false;
         break;
       }
       try {
         const opts = entry.options || {},
-          code = entry.fiber?.state;
+          code = entry.fiber?.state,
+          disabled = entry.disabled;
+        if (typeof disabled !== "boolean") {
+          label.complete = false;
+          continue;
+        }
         label.entries.push({
           id: typeof entry.id === "string" ? entry.id : null,
           name: typeof opts.name === "string" ? opts.name : null,
@@ -47,7 +53,7 @@ export function captureLoaderLabels(ctx, identity) {
                 : null,
           stateCode:
             Number.isInteger(code) && code >= 0 && code <= 5 ? code : null,
-          disabled: entry.disabled === true,
+          disabled,
           group: opts.group === true,
         });
       } catch {
