@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.2.4",
-  "recordedAt": "2026-11-07T03:58:49.665Z",
+  "recordedAt": "2026-11-07T05:02:33.684333+00:00",
   "testFiles": 94,
   "tests": 1330,
   "repositoryFiles": {
@@ -53,87 +53,100 @@
         "phase202420261106"
       ]
     },
-    "publicMetadata20261107": {
-      "scope": "Read-only public snapshot; local version and shipped capability documents remain0.2.4.",
+    "releasePreparation024": {
+      "details": "06b1b2e:docs/current-state.json",
+      "scope": "Historical pre-merge development preparation; official tagged-source/publication evidence follows."
+    },
+    "preflightPublicMetadata20261107": {
+      "scope": "Historical pre-publication snapshot only; current published0.2.4 is recorded below.",
       "npmVersion": "0.2.3",
       "receipt": "tmp/024-finalize-20261107/public-meta.json",
       "publication": "Actual registry/tag/release verification belongs to the separately authorized release operation."
     },
-    "releasePreparation024": {
-      "sourceCommit": "bacdd3f457d9e78b6283aea677bc45285bd01db9",
-      "sourceSha256": "a1a10661202f489334fe949d34ca7345cb10c62681197242a6a2c53ba229c439",
-      "sourceDirty": false,
+    "publication024": {
+      "version": "0.2.4",
+      "tag": "v0.2.4",
+      "sourceCommit": "06b1b2e530c665e19b400bd639269f8a386a7a35",
+      "sourceSha256": "461cd537aedf80f582fd33bd98744090684f779bc5805cbb85c9616b50de9aae",
       "artifact": {
         "filename": "dsh-plugin-compat-check-0.2.4.tgz",
-        "sha256": "85b8b25f171a3dfe5bab834ff42ce3f94887d60f700c7c5978034326bd7e1d81"
+        "sha256": "85b8b25f171a3dfe5bab834ff42ce3f94887d60f700c7c5978034326bd7e1d81",
+        "sha1": "79f9b07874aed0aa14a2670b4e646e99a5df9b51",
+        "integrity": "sha512-PcsOOWkLNR2P0RQfzsLDWPNkSoAJS80S1W1D8FS0rh615LUlGMkpgGfHxXHLBeAtuMgibBVT6xcs1q2VN2/YrA==",
+        "bytes": 345260,
+        "files": 80
       },
       "ci": {
-        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/42335236733",
-        "run": 42335236733,
-        "conclusion": "success",
-        "checks": [
-          {
-            "name": "linux-live (0.2.0-rc.2)",
-            "conclusion": "success"
-          },
-          {
-            "name": "linux-live (0.2.1-rc.2)",
-            "conclusion": "success"
-          },
-          {
-            "name": "linux-live (0.2.1-rc.3)",
-            "conclusion": "success"
-          },
-          {
-            "name": "linux-live (0.2.2-rc.1)",
-            "conclusion": "success"
-          },
-          {
-            "name": "linux-live (0.2.1-rc.5)",
-            "conclusion": "success"
-          },
-          {
-            "name": "candidate",
-            "conclusion": "success"
-          },
-          {
-            "name": "test (24.9.0)",
-            "conclusion": "success"
-          },
-          {
-            "name": "test (22.19.0)",
-            "conclusion": "success"
-          },
-          {
-            "name": "dependency-security",
-            "conclusion": "success"
-          }
-        ],
-        "linuxNodeMatrix": "22.19.0 and24.9.0 each1330tests/1319pass/11skip/0fail"
+        "checks": 27,
+        "allPassed": true,
+        "runs": [
+          "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/42337987285",
+          "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/42337992062",
+          "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/42339643411"
+        ]
       },
-      "platforms": [
-        {
-          "platform": "linux",
-          "arch": "x64",
-          "sourceSha256": "a1a10661202f489334fe949d34ca7345cb10c62681197242a6a2c53ba229c439",
-          "runtimeNode": "24.9.0",
-          "gates": 9,
-          "screenshots": 21,
-          "cleaned": true
+      "hostAcceptance": {
+        "dshVersion": "0.2.2-rc.1",
+        "platforms": [
+          {
+            "platform": "linux",
+            "arch": "x64",
+            "runtimeNode": "24.9.0",
+            "controllerNode": "24.9.0",
+            "gates": 9,
+            "screenshots": 21,
+            "cleanup": {
+              "privateRootRemoved": true
+            },
+            "modelCalls": 0,
+            "productionRequests": 0
+          },
+          {
+            "platform": "darwin",
+            "arch": "arm64",
+            "runtimeNode": "24.21.0",
+            "controllerNode": "26.13.0",
+            "gates": 9,
+            "screenshots": 21,
+            "cleanup": {
+              "privateRootRemoved": true
+            },
+            "modelCalls": 0,
+            "productionRequests": 0
+          }
+        ]
+      },
+      "public": {
+        "github": {
+          "status": "published",
+          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.4",
+          "publishedAt": "2026-11-07T04:42:58Z",
+          "tagCommit": "06b1b2e530c665e19b400bd639269f8a386a7a35",
+          "publicDownloadSha256Verified": true,
+          "latest": "v0.2.4"
         },
-        {
-          "platform": "darwin",
-          "arch": "arm64",
-          "sourceSha256": "a1a10661202f489334fe949d34ca7345cb10c62681197242a6a2c53ba229c439",
-          "runtimeNode": "24.21.0",
-          "gates": 9,
-          "screenshots": 21,
-          "cleaned": true
+        "npm": {
+          "status": "published",
+          "version": "0.2.4",
+          "latest": "0.2.4",
+          "url": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.4",
+          "integrity": "sha512-PcsOOWkLNR2P0RQfzsLDWPNkSoAJS80S1W1D8FS0rh615LUlGMkpgGfHxXHLBeAtuMgibBVT6xcs1q2VN2/YrA==",
+          "shasum": "79f9b07874aed0aa14a2670b4e646e99a5df9b51",
+          "tarball": "https://registry.npmjs.org/dsh-plugin-compat-check/-/dsh-plugin-compat-check-0.2.4.tgz",
+          "publicTarballSha256Verified": true,
+          "observedAt": "2026-11-07T05:02:33.684333+00:00"
+        },
+        "publicInstallation": {
+          "status": "checked",
+          "pluginVersion": "0.2.4",
+          "dshVersion": "0.2.2-rc.1",
+          "tempProfileRemoved": true,
+          "scope": "Public registry fixed-version install and actual private host probe; no production account/model or general-business certification."
         }
-      ],
-      "business": "Dated preparation at79f2f72: 5 pinned artifacts/24 expected outcomes reproduced; 12 unflagged faults retained, not general business certification.",
-      "scope": "Clean selected commit and exact CI archive only; final local Plan/receipt edits do not extend remote-CI certification. Windows/user-site/general business unverified; merge/tag/npm/GitHub release not performed."
+      },
+      "receipt": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/download/v0.2.4/RELEASE-VERIFICATION.json",
+      "scope": "Exact original CI archive on clean tagged source06b1b2e, 27 successful main/dev/tag checks, macOS/Linux actual-host acceptance and verified public GitHub/npm distribution. Post-publication records do not retarget the tag."
     }
   },
-  "scope": "Counts1330 from successful fixture suites; current clean-commit CI and exact-archive platform receipts below. Final receipt-only local commit is separate from the CI commit."
+  "scope": "Published0.2.4 facts and exact tagged-source/archive acceptance; test totals1330 are fixture-suite counts, not user-profile or general-business certification."
 }
