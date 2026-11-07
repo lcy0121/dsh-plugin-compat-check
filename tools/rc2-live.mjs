@@ -166,7 +166,7 @@ async function poll(fn, message, timeout = 20000) {
   } while (Date.now() < until);
   throw Error(message);
 }
-function bootDriver() {
+function bootDriver({ runtimeOnly = false } = {}) {
   const mac = "/Applications/DeepSeek Harness.app/Contents";
   if (
     process.platform === "darwin" &&
@@ -179,6 +179,8 @@ function bootDriver() {
         "/Resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-app-boot/lib/index.js",
       env: { ...env, ELECTRON_RUN_AS_NODE: "1" },
     };
+  // Node CLI and Electron carrier queries do not import the app-boot module.
+  if (runtimeOnly) return { command: process.execPath, env };
   for (const d of process.env.PATH.split(path.delimiter))
     try {
       const cli = fs.realpathSync(path.join(d, "dsh"));
@@ -215,7 +217,7 @@ try {
     process.env.DSC_ACCEPTANCE_DSH_VERSION,
   );
   const runtimeNode = applicable
-    ? await readHostRuntime(version, bootDriver(), exec)
+    ? await readHostRuntime(version, bootDriver({ runtimeOnly: true }), exec)
     : null;
   if (!applicable)
     result = {
