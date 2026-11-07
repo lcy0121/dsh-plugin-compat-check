@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.2.4",
-  "recordedAt": "2026-11-06T19:06:35.984443+00:00",
+  "recordedAt": "2026-11-07T03:58:49.665Z",
   "testFiles": 94,
   "tests": 1330,
   "repositoryFiles": {
@@ -35,29 +35,10 @@
       "Private execution profiles are not OS sandboxes; account/model execution needs its own authorization.",
       "CI applies to the exact GitHub commit; formal publication must use the accepted archive."
     ],
-    "delivery02420261107": {
-      "scope": "Local 0.2.4 development delivery; Linux same-artifact and exact-commit remote CI pending. Not published.",
-      "candidate": {
-        "filename": "dsh-plugin-compat-check-0.2.4.tgz",
-        "sha256": "59ebbd3a9e8a0314700b898f2a8315ee519d0a64242278481c637f25246fc454"
-      },
-      "sourceBase": "8d65a0c5d77998628da0e33909d824d49a361bbb",
-      "sourceDirty": true,
-      "sourceSha256": "1593b8cd9565d87e5c86c0e780baac1e6e11e8d76ac4fc3442dd597a05d623f4",
-      "sourceScope": "Frozen source before only final receipt/Plan edits and local commit; remote CI must build the clean selected commit.",
-      "node22And26": "Each1330tests/1321pass/9skip/0fail; empty private HOME",
-      "checks": "npm test, npm run check, prepublish passed; issue regressions102/102; final workspace/plugin dependency audits clean.",
-      "business": "rc22 manifest: 5 pinned artifacts/24cases, 1repeat, all expected outcomes reproduced; 2 natural+10 controlled faults unflagged, no ecosystem certification.",
-      "staticEntrypoints": "Published sidebar0.28 ordinary check exit0 with vacuous/limited coverage; author CI rejected full sidebar by sample budget. Full pomodoro0.5.5 author matrix rc5/rc22 exits1 for incomplete coverage, as required; no policy weakened.",
-      "macOS": "Same tgz rc22 nineUI/21PNG, actual Node24.21; strict tool/settings/upgrade gates and private-root cleanup passed, no production/model calls.",
-      "linux": "not run: no local Linux environment; remote push/CI requires separate authorization.",
-      "windows": "unverified",
-      "receipts": "tmp/024-delivery-20261107/"
-    },
     "history024Preparation": {
       "commit": "79f2f72",
       "path": "docs/current-state.json",
-      "scope": "Historical releases, upstream checks and 0.2.4 development receipts; none certifies a later archive.",
+      "scope": "Historical releases, upstream checks and 0.2.4 development receipts; none certifies a later archive. Initial0.2.4 local delivery and business/static-entry limitations are recorded there.",
       "records": [
         "business02120261030",
         "historicalRelease021",
@@ -77,7 +58,82 @@
       "npmVersion": "0.2.3",
       "receipt": "tmp/024-finalize-20261107/public-meta.json",
       "publication": "Actual registry/tag/release verification belongs to the separately authorized release operation."
+    },
+    "releasePreparation024": {
+      "sourceCommit": "bacdd3f457d9e78b6283aea677bc45285bd01db9",
+      "sourceSha256": "a1a10661202f489334fe949d34ca7345cb10c62681197242a6a2c53ba229c439",
+      "sourceDirty": false,
+      "artifact": {
+        "filename": "dsh-plugin-compat-check-0.2.4.tgz",
+        "sha256": "85b8b25f171a3dfe5bab834ff42ce3f94887d60f700c7c5978034326bd7e1d81"
+      },
+      "ci": {
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/42335236733",
+        "run": 42335236733,
+        "conclusion": "success",
+        "checks": [
+          {
+            "name": "linux-live (0.2.0-rc.2)",
+            "conclusion": "success"
+          },
+          {
+            "name": "linux-live (0.2.1-rc.2)",
+            "conclusion": "success"
+          },
+          {
+            "name": "linux-live (0.2.1-rc.3)",
+            "conclusion": "success"
+          },
+          {
+            "name": "linux-live (0.2.2-rc.1)",
+            "conclusion": "success"
+          },
+          {
+            "name": "linux-live (0.2.1-rc.5)",
+            "conclusion": "success"
+          },
+          {
+            "name": "candidate",
+            "conclusion": "success"
+          },
+          {
+            "name": "test (24.9.0)",
+            "conclusion": "success"
+          },
+          {
+            "name": "test (22.19.0)",
+            "conclusion": "success"
+          },
+          {
+            "name": "dependency-security",
+            "conclusion": "success"
+          }
+        ],
+        "linuxNodeMatrix": "22.19.0 and24.9.0 each1330tests/1319pass/11skip/0fail"
+      },
+      "platforms": [
+        {
+          "platform": "linux",
+          "arch": "x64",
+          "sourceSha256": "a1a10661202f489334fe949d34ca7345cb10c62681197242a6a2c53ba229c439",
+          "runtimeNode": "24.9.0",
+          "gates": 9,
+          "screenshots": 21,
+          "cleaned": true
+        },
+        {
+          "platform": "darwin",
+          "arch": "arm64",
+          "sourceSha256": "a1a10661202f489334fe949d34ca7345cb10c62681197242a6a2c53ba229c439",
+          "runtimeNode": "24.21.0",
+          "gates": 9,
+          "screenshots": 21,
+          "cleaned": true
+        }
+      ],
+      "business": "Dated preparation at79f2f72: 5 pinned artifacts/24 expected outcomes reproduced; 12 unflagged faults retained, not general business certification.",
+      "scope": "Clean selected commit and exact CI archive only; final local Plan/receipt edits do not extend remote-CI certification. Windows/user-site/general business unverified; merge/tag/npm/GitHub release not performed."
     }
   },
-  "scope": "Successful npm test/prepublish TAP with empty owned HOME; no user-profile acceptance. Dated artifact/platform receipts are independent."
+  "scope": "Counts1330 from successful fixture suites; current clean-commit CI and exact-archive platform receipts below. Final receipt-only local commit is separate from the CI commit."
 }
