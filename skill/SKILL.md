@@ -1,6 +1,6 @@
 ---
 name: dsh-plugin-compat-check
-description: 0.2.4版，用于检查已安装DSH插件的兼容性、升级前静态对比，以及排查更新后不工作、界面消失、工具无响应、did not activate或engines.dsh/peerDependencies声明问题。Use when checking installed DeepSeek Harness plugins, comparing exact host versions before upgrading, or investigating activation and missing-feature failures. Covers exact rc.22 catalogues and semantics, Cordis/tool scope migration, strict JSON tools and profile diagnosis; findings do not certify business functionality.
+description: 0.2.4版，用于检查已安装DSH插件的兼容性、升级前静态对比，以及排查更新后不工作、界面消失、工具无响应、did not activate或engines.dsh/peerDependencies声明问题。Use when checking installed DeepSeek Harness plugins, comparing exact host versions before upgrading, or investigating activation and missing-feature failures. Covers exact DSH 0.2.2-rc.1 catalogues and semantics, Cordis/tool scope migration, strict JSON tools and profile diagnosis; findings do not certify business functionality.
 ---
 
 # dsh-plugin-compat-check
@@ -11,7 +11,7 @@ description: 0.2.4版，用于检查已安装DSH插件的兼容性、升级前�
 
 当前会话有`compat_check`时优先调用，返回普通`report`、baseline/cache、toolVersion和exitCode；升级模式返回`upgradePreview`，普通report为null。无工具时定位含`bin/compat-check.mjs`、`lib/`、`rules/`的仓库，npm插件包没有CLI bin，不支持npx。根依赖缺失时在授权范围内运行`npm ci --ignore-scripts`。
 
-先核实际profile，不默认desktop；无参tool与设置页按宿主启动身份定位，冲突时用`compat_check({"profile":"my-profile"})`或CLI显式路径。Windows盘符/UNC有路径回归，仍须实机复验。profile位于`${DSH_HOME:-~/.dsh}/profiles/<name>`。rc.3/rc.5界面入口：左下角“更多”/用户头像→设置→内置插件→兼容性；折叠不等于激活失败。界面支持中英韩，原始证据和JSON不翻译。
+先核实际profile，不默认desktop；无参tool与设置页按宿主启动身份定位，冲突时用`compat_check({"profile":"my-profile"})`或CLI显式路径。Windows盘符/UNC有路径回归，仍须实机复验。profile位于`${DSH_HOME:-~/.dsh}/profiles/<name>`。rc.3/rc.5/0.2.2-rc.1界面入口：左下角“更多”/用户头像→设置→内置插件→兼容性；折叠不等于激活失败。界面支持中英韩，原始证据和JSON不翻译。
 
 ```sh
 node <repo>/bin/compat-check.mjs --help
@@ -38,10 +38,10 @@ node <repo>/bin/compat-check.mjs --nm <profile或node_modules> --no-baseline --j
 
 ## 升级前静态对比
 
-工具使用`compat_check({"upgradeTo":"0.2.1-rc.5"})`，当前版本取宿主，可按实际目标指定profile；无工具时运行：
+工具使用`compat_check({"upgradeTo":"0.2.2-rc.1"})`，当前版本取宿主，可按实际目标指定profile；无工具时运行：
 
 ```sh
-node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.3 --upgrade-to 0.2.1-rc.5 --json
+node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.5 --upgrade-to 0.2.2-rc.1 --json
 ```
 
 当前已认证目录仅为 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`。未知/范围返回unsupported-version及退出3，不能以邻近目录代替。预检不接受quiet、探针/启动、规则/目录覆盖、基线或issue-report参数，可带无操作的no-baseline。
@@ -93,13 +93,15 @@ DSH≥0.2.1-rc.1优先自有engines.dsh，仅字段缺失回退官方peer；旧�
 
 只读node_modules同级独立compatibility.json，例如`{"sample@1.0.0":["0.2.1-rc.5"]}`。插件名、插件精确版本与DSH全匹配才豁免范围冲突，不绕过非法字段或API检查；不得代用户写豁免。无效项忽略并限制覆盖；坏JSON、非普通文件、不可读或超过64KiB为豁免未观测。包内自报兼容不等于此授权。
 
-## rc.5语义与槽位
+## 精确语义与槽位
 
-精确语义独立于方法名目录：startSession仅核已知prompt/agentPreset/clearPreviousDraft类型及rc.3/rc.5的whenDraftExists=keep/replace/append。新字段优先，旧clearPreviousDraft仍支持；空白会话可复用，preset隔离，创建草稿不等于发送。三处“更多”浏览进主列表、创建只追加草稿。
+精确语义独立于方法名目录：startSession仅核已知prompt/agentPreset/clearPreviousDraft类型及rc.3/rc.5的whenDraftExists=keep/replace/append。新字段优先，旧clearPreviousDraft仍支持；空白会话可复用，preset隔离，创建草稿不等于发送。三处“更多”浏览进主列表、创建只追加草稿；0.2.2-rc.1沿用这些已核语义。
 
 timer.setTimeout/setInterval弃用及sessions.retain的ready/release/disposal提醒仅说明覆盖，不证明泄漏。动态、展开、访问器、逃逸和跨helper合并弃权，不执行代码或保存prompt。
 
 rc.5推理槽位显示/翻译用text，原始输出用rawText；Content Factory仍用text/running/labels。仅定位slots.register及迁移限制，不验证props、流式/完成态或业务，不把text使用报错，不采集思考正文。模型发现须凭据门控，不为体检访问生产/models或发送模型请求。
+
+0.2.2-rc.1另校验可证明的投影stateVersion为非负安全整数，对固定agent/request订阅及已证明服务调用给迁移提示；不证明回调路由、返回对象流、await顺序或业务成功。
 
 ## 依赖、人工记录和健康检查
 
@@ -124,6 +126,6 @@ report_status=$?
 
 不额外启动宿主，不读写基线；仍可能读旁置probe。报告省略绝对路径、原始日志/源码/探针/基线，保留包名及包内位置；常见凭据字段隐藏不保证完全脱敏，预览后由用户决定分享。命令占位符须替换，生成文本不授权上传或发帖。
 
-0.2.4修复缓存抖动、JSON回包、profile定位和rc.5目录漏项。无关运行状态写入不使报告失效，源码/声明变化仍会；非法JSON证据明确报错，不静默丢弃。目录未收录只表示覆盖不足，不能据此称方法缺失。
+0.2.4适配Cordis Core4.1、Loader/Include1.1、Agent工具作用域与新版插件管理；沿用缓存、JSON、profile和rc.5目录修复。无关运行状态写入不使报告失效，源码/声明变化仍会；非法JSON证据明确报错，不静默丢弃。目录未收录只表示覆盖不足，不能据此称方法缺失。
 
 实际运行版本取toolVersion/CLI version；分发以registry/GitHub Releases为准，docs/current-state.json按提交/归档/平台记录验收，不认证重打包、Windows或一般业务。docs/Plan.md列待办，操作/预算和目录治理见docs/guide.md、docs/maintaining.md。YAML是运行依赖，根dev依赖不随npm提供功能。

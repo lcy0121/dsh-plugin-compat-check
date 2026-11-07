@@ -20,7 +20,7 @@ UI词典位于`plugin/src/i18n/{zh,en,ko}.json`，用可读原文作为消息键
 
 打包回归与真实验收/到货工具经`tools/owned-package-source.mjs`核对manifest/lock/构建依赖，复制自有闭包到私有构建目录，不向源码、用户profile或运行包注入工具链。打包回归核源码客户端mtime不变，避免prepack重写与并行面板读取竞争。selector-parser固定覆盖7.1.6；更新Tailwind/覆盖后须重建、复验布局/主题及开发/运行两图审计。
 
-完整UI验收使用同一独立tgz及自有DSH/Chrome；默认rc.3，当前rc.5须显式选择：
+完整UI验收使用同一独立tgz及自有DSH/Chrome；默认rc.3，0.2.2-rc.1须显式选择：
 
 ```sh
 DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 node tools/ci-ui018.mjs <自有输出目录>
@@ -28,11 +28,9 @@ DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 node tools/ci-ui018.mjs <自有输出目�
 
 入口统一启用九项验收：原面板、布局/主题/键盘、分页/完整导出、超时恢复/草稿、HTTP会话、复杂度/采样、处置定位、历史管理和中英韩国际化。检查第123条发现的双向定位/筛选/焦点、12px间距、短结论不折字、历史显式操作及报告/基线不变；密集数据来自明确标记的非激活合成插件。截图中的窄列CSS夹具不冒充真实插件布局。开关依赖以入口源码为准，单跑处置定位须同时启用hardening。
 
-输出含提交/dirty/逐文件摘要、tgz摘要、完整报告、日志、截图及SHA256SUMS，缺结果/截图或清理失败均不得通过。使用忽略的tmp或仓库外目录，避免证据进入源码身份；CI要求干净检出。Linux rc.3/rc.5跑完整入口，另两宿主保留集成门禁；平台结果绑定实际提交和归档，不由接入CI推定。`ui018`文件名、`DSC_UI018_*`及证据字段沿用以兼容脚本，不代表产品版本。Windows、真实用户和一般业务另验。
+输出含提交/dirty/逐文件摘要、tgz摘要、完整报告、日志、截图及SHA256SUMS，缺结果/截图或清理失败均不得通过。使用忽略的tmp或仓库外目录，避免证据进入源码身份；CI要求干净检出。Linux rc.3/rc.5/0.2.2-rc.1跑完整入口，旧两宿主保留集成门禁；平台结果绑定实际提交和归档，不由接入CI推定。`ui018`文件名、`DSC_UI018_*`及证据字段沿用以兼容脚本，不代表产品版本。Windows、真实用户和一般业务另验。
 
 组件回归覆盖三槽位、共享订阅/可见性及迟到响应；`tools/ui018-performance.mjs`仅测1000插件合成hook树，不是浏览器性能门禁。语法矩阵由`test/fixtures/syntax-matrix.json`和`tools/syntax-matrix.mjs`记录/执行supported、inferred、abstained、excluded，核包名、调用对/跨度、确定性与诊断，不以解析成功代替结论或据业务答案调严重度。
-
-旧实验见`10213c0:docs/maintaining.md`；Python对拍已由AST图/矩阵/快照替代，历史观测`test/fixtures/host-surface-parityfix.json`仍用于回归。独立正则不是判定真值。
 
 ## API目录候选审查
 
@@ -81,7 +79,7 @@ npm audit固定公共registry，任何公告级别（含未知）均阻断，无
 
 ## 真实插件回归
 
-[rc.2](../tools/real-regression-manifest.json)、[rc.3](../tools/real-regression-manifest-rc3.json)及[rc.5清单](../tools/real-regression-manifest-rc5.json)分别锁定DSH/目录、五个npm制品、摘要及每轮24项业务期望，互不借结果。独立holdout为`dsh-pomodoro@0.5.5`与`dsh-global-todo@0.13.2`，先选无需账户/模型且可审阅的操作，再封存预测，不能据结果调规则。重复运行不增加独立样本数。
+[rc.2](../tools/real-regression-manifest.json)、[rc.3](../tools/real-regression-manifest-rc3.json)及[rc.5](../tools/real-regression-manifest-rc5.json)及[0.2.2-rc.1清单](../tools/real-regression-manifest-rc22.json)分别锁定DSH/目录、五个npm制品、摘要及每轮24项业务期望，互不借结果。独立holdout为`dsh-pomodoro@0.5.5`与`dsh-global-todo@0.13.2`，先选无需账户/模型且可审阅的操作，再封存预测，不能据结果调规则。重复运行不增加独立样本数。
 
 业务真值来自实际动作及独立后置条件：Pomodoro核localStorage revision/deadline与新文档恢复；Todo核POST/create、私有JSON及重载DOM。受控故障分别删主按钮或仅令该POST返回503，恢复另验；GET配置或元素出现不代替功能通过，无通知/模型/外部采集。
 
@@ -104,7 +102,7 @@ rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.j
 
 ## 同一制品发布核对
 
-本版**0.2.4**以能力描述固定文档；带日期的公开状态和验收单列current-state，不预写发布成功、时间或摘要。发布顺序：
+本版**0.2.4**的能力文档与带日期的发行/验收回执分开维护。发布顺序：
 
 1. 先统一版本真源、manifest/lock、各版README、skill及示例；冻结到tag的文档不得保留“本版未发布”等即时状态。运行check与prepublish-check（不发布），用成功TAP更新current-state计数，核生成副本、许可证和公开元数据。
 2. 授权推送后等待所选提交全部Actions通过。CI candidate job只构建一次；rc.5及0.2.2-rc.1 job下载同一归档/回执，运行完整UI并上传证据。
@@ -154,7 +152,7 @@ DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_RC2_ARTIFACT=<候选tgz绝对路径> D
 
 rc.5额外要求独立ACP stdout JSON-RPC、stderr目录诊断、MCP能力、受控模型列表及导航语义回执。rc5-acp-stdout只用私有DSH_HOME、合成凭据、loopback列表/两轮模型响应和tools-only MCP；无resources能力不请求资源。失败/超时/清理不确认均失败，只保存计数与断言，不保存对话正文。模型列表另验首次等待、失败/超时回退及无凭据不请求；没有生产账户/模型调用。
 
-历史制品回执见current-state，新包须另核来源/摘要/平台。固定五suite/24项仅证明期望重现；rules/dsh-0.2.1-rc.5-review.json的integrationAcceptance是目录登记时快照，不追写历史。
+历史回执及目录登记快照不认证新包；同一制品流程与固定回归边界见上节。
 
 ## 用户issue修订与回归
 
@@ -169,11 +167,11 @@ rc.5额外要求独立ACP stdout JSON-RPC、stderr目录诊断、MCP能力、受
 
 表中名称对应`test/<名称>.test.mjs`。身份观察复用有界源码图，任意后缀解析候选的存在性/类型/真实路径也纳入；读取、枚举和时间共享预算。官方校验器测试只执行经摘要校验的原始TypeScript，不复制第三方实现。
 
-`ci-ui018`的rc.5门禁还要求`issues023`回执：独立tgz装入自有profile，每25ms原子写状态期间联合调用无参tool、刷新真实设置页、核目标一致及缓存命中；停写后核显式失败及升级回包。调用经过宿主tools.execute的严格JSON/schema管线；测试桥接路由/定时器仅驻临时profile，随宿主清理，不进入npm产品。预检复制全部输入字节，因此持续写入时拒绝不稳定快照是正确行为，不放宽该守卫。
+`ci-ui018`的rc.5及0.2.2-rc.1门禁还要求`issues023`回执：独立tgz装入自有profile，每25ms原子写状态期间联合调用无参tool、刷新真实设置页、核目标一致及缓存命中；停写后核显式失败及升级回包。调用经过宿主tools.execute的严格JSON/schema管线；测试桥接路由/定时器仅驻临时profile，随宿主清理，不进入npm产品。预检复制全部输入字节，因此持续写入时拒绝不稳定快照是正确行为，不放宽该守卫。
 
 Node22/24、九项UI及问题联合验收按精确提交/归档核对；CI状态见对应Actions运行，同一tgz须有macOS/Linux回执。Windows实机和用户现场确认单列。源码修复、现场复验及公开发行分开记录，issue沟通/关闭按当次授权与证据决定。
 
-## 0.2.4开发：0.2.2-rc.1来源、Cordis与工具迁移
+## 0.2.4：0.2.2-rc.1来源、Cordis与工具迁移
 
 [0.2.2-rc.1审查](../rules/dsh-0.2.2-rc.1-review.json)锁定官方tag/commit、源码/npm/app.asar摘要和完整文件差分。双端完整签名与原始归档及桌面字节一致；独立AST核方法名，四项压平后缺少类型分隔符的签名另行人工核对。提取器补齐泛型、转义引号装饰器、生成器和可选方法；旧登记字节保持，目录新增不全是上游API新增。新精确目录已接普通报告、双向预检和作者默认五版矩阵；参数语义与迁移范围见下节。
 
@@ -181,7 +179,7 @@ Cordis4.1保留递归entries及0–5状态；未知类型不当FAILED/PENDING，
 
 `tools/owned-tool-invocation.mjs`仅供自有验收fixture：rc.5保留单调用；新宿主通过真实Agent选择执行器，resolve捕获modelSelection/步骤准入，executable和execute使用同一集合并finally释放。PTC经run_code调用能力，不直接绕过执行器；当前桥接限定TypeScript默认函数体模式，不外推Python/VM Script/REPL。`installIssue023Fixture(profile,{hostVersion,agentPreset})`显式选择新宿主及preset，返回executorSchemas作为独立证据；preset须在Agent setup中实际挂载，meta声明本身不证明执行器选择。
 
-`test/owned-tool-host-probe.test.mjs`默认跳过，显式DSC_RC22_HOST_PROBE=1才执行；可通过DSC_HOST_ASAR及DSC_HOST_ELECTRON选择安装归档，核摘要后运行实际ToolsService/native/PTC、条件准入、作用域、提示词、严格JSON与取消；探针的PTC runtime seam是受控夹具，不能代替真实后端。实际私有宿主/Chrome和独立tgz基础回执见current-state；完整九项UI、平台矩阵、现场试用和新语义规则仍待§6，历史rc.5回执不认证新宿主。
+`test/owned-tool-host-probe.test.mjs`默认跳过，显式DSC_RC22_HOST_PROBE=1才执行；可通过DSC_HOST_ASAR及DSC_HOST_ELECTRON选择安装归档，核摘要后运行实际ToolsService/native/PTC、条件准入、作用域、提示词、严格JSON与取消；探针的PTC runtime seam是受控夹具，不能代替真实后端。实际私有宿主/Chrome和独立tgz基础回执见current-state；精确语义与九项UI见下节，平台回执见current-state；现场试用另列§6，历史rc.5回执不认证新宿主。
 
 ## 0.2.2-rc.1语义与宿主验收
 
@@ -189,6 +187,6 @@ Cordis4.1保留递归entries及0–5状态；未知类型不当FAILED/PENDING，
 
 新版实际PluginManager通过私有registry验证成功更新、启用失败/下载失败/实际取消后恢复旧版，分别核HTTP结果、依赖版本和apply/dispose记录；磁盘写入不替代激活。九项UI继续要求三槽位、身份、卸载路由/样式撤销后恢复、草稿/焦点、窄屏/主题及完整导出。新增ja/es/fr/de/ru/pt宿主语言均须auto回退英文且保留编辑器；不扩增产品翻译。迟到响应/worker回收由受控生命周期回归补证，不冒称实机精确指令时序验收。
 
-新宿主真实运行要求Node>=24.9；工具纯静态入口和旧宿主继续保留Node22.19覆盖，不提升产品engines。acceptance-target、rc2-live及ci-ui018精确接入0.2.2-rc.1；Linux矩阵保留旧四版，并为新版使用同一CI candidate及完整UI，安装前核运行时。Node22/24.9门禁均执行固定rc.5及rc.22原始JSON/schema校验器，新增DSC_RC22_SOURCE_ARCHIVE控制已核来源，坏摘要/缺源/跳过不转绿。ModelListingCache新版settings/changed回调、自动刷新及异步dispose单独记录，宿主Node由实际carrier查询、控制器版本另列；rc.5协议证据不借给新版。源码/归档变化仍阻断验收，CI配置就绪不表示远端CI已运行，Windows仍未验收。
+新宿主真实运行要求Node>=24.9；工具纯静态入口和旧宿主继续保留Node22.19覆盖，不提升产品engines。acceptance-target、rc2-live及ci-ui018精确接入0.2.2-rc.1；Linux矩阵保留旧四版，并为新版使用同一CI candidate及完整UI，安装前核运行时。Node22/24.9门禁均执行固定rc.5及0.2.2-rc.1原始JSON/schema校验器，新增DSC_RC22_SOURCE_ARCHIVE控制已核来源，坏摘要/缺源/跳过不转绿。ModelListingCache新版settings/changed回调、自动刷新及异步dispose单独记录，宿主Node由实际carrier查询、控制器版本另列；rc.5协议证据不借给新版。源码/归档变化仍阻断验收，实际CI结论以current-state所录提交为准，Windows仍未验收。
 
 0.2.4交付使用`tools/real-regression-manifest-rc22.json`独立锁定新宿主目录及五suite/24项发布插件预期，先固定预期再运行`DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.1 node tools/real-regression.mjs --live --out-dir <空目录>`；偏差记失败，不从输出反写预期。完整UI用上方供应归档入口，目标改为0.2.2-rc.1。可用空自有HOME运行npm test/prepublish排除用户profile，回执必须明确此范围，不能声称验证用户现场。

@@ -78,10 +78,10 @@ Ordinary static checks do not execute targets or use the network, but write thei
 
 ## Upgrade preview and verification
 
-Call `compat_check({"upgradeTo":"0.2.1-rc.5"})`; the current version comes from the host and results use `upgradePreview`. CLI requires both exact versions:
+Call `compat_check({"upgradeTo":"0.2.2-rc.1"})`; the current version comes from the host and results use `upgradePreview`. CLI requires both exact versions:
 
 ```sh
-node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.3 --upgrade-to 0.2.1-rc.5 --json
+node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.5 --upgrade-to 0.2.2-rc.1 --json
 npm test
 npm run check
 node plugin/scripts/prepublish-check.mjs

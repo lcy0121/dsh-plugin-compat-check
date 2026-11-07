@@ -78,10 +78,10 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 
 ## 업그레이드 사전 검사와 검증
 
-`compat_check({"upgradeTo":"0.2.1-rc.5"})`는 호스트의 현재 버전을 사용하고 `upgradePreview`를 반환합니다. CLI에는 두 정확한 버전을 지정합니다.
+`compat_check({"upgradeTo":"0.2.2-rc.1"})`는 호스트의 현재 버전을 사용하고 `upgradePreview`를 반환합니다. CLI에는 두 정확한 버전을 지정합니다.
 
 ```sh
-node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.3 --upgrade-to 0.2.1-rc.5 --json
+node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.5 --upgrade-to 0.2.2-rc.1 --json
 npm test
 npm run check
 node plugin/scripts/prepublish-check.mjs

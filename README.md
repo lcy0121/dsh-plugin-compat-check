@@ -78,10 +78,10 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 
 ## 升级预检与验证
 
-工具调用`compat_check({"upgradeTo":"0.2.1-rc.5"})`，当前版本取宿主，返回`upgradePreview`；CLI显式给两个精确版本：
+工具调用`compat_check({"upgradeTo":"0.2.2-rc.1"})`，当前版本取宿主，返回`upgradePreview`；CLI显式给两个精确版本：
 
 ```sh
-node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.3 --upgrade-to 0.2.1-rc.5 --json
+node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.5 --upgrade-to 0.2.2-rc.1 --json
 npm test
 npm run check
 node plugin/scripts/prepublish-check.mjs

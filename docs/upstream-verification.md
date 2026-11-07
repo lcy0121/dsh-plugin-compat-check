@@ -2,7 +2,7 @@
 
 本文对应**0.2.4**。2026-11-06已只读复核公共状态、dshmarket **1.73.12**原始发布函数/路由和官方**0.2.2-rc.1 Desktop Host**。与本工具源码修复及兼容性验收分开记录，制品/平台证据见[current-state](current-state.json)。
 
-| 上游 | 当前结果 | 剩余事项 |
+| 上游 | 2026-11-06结果 | 剩余事项 |
 |---|---|---|
 | [market#928](https://github.com/dsh-market/dsh-market/issues/928) | open、11评论，无新维护者回复；恢复reason仍丢失具体错误码，三次修复上限保留 | 补具体原因/用户出口；缺bundle两次真实重启及手动自救仍未通过 |
 | [market#1047](https://github.com/dsh-market/dsh-market/issues/1047) | closed、3评论，原install遗漏反馈后无新回复；双查询失败仍无版本未核实字段/专门warn，update有 | 等install分支补齐；关闭不等于原诉求完成 |
@@ -17,7 +17,7 @@
 - 五次受控调用仅安装3次，attempts停3，之后有abandoned及Settings提示；这是受控manager对照，不是五次实际Desktop启动。
 - install/update共8组原始HTTP路由对照：latest成功查1次，失败后packument成功查2次并固定2.0.0；双429/HTML失败时install用裸包名且无专门warn/versionUnverified，update用@latest并有已装版本和warn。显式版本和minimumReleaseAge不变。包管理器边界是受控落盘，不冒称本轮真实pnpm新装或GUI。
 
-## 当前真实宿主复验
+## 2026-11-06真实宿主复验
 
 实际运行已安装0.2.2-rc.1的Desktop Host IPC入口、PluginManager、随宿主pnpm及自有headless Chrome，使用私有desktop profile和合成registry，无账户/模型。初始合成2.0.0服务加载成功；缺bundle行并写合法journal后，两次实际重启均未恢复：bundle行0、服务null，journal保留，attempts为1、2。
 

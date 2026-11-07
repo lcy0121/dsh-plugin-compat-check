@@ -35,241 +35,6 @@
       "Private execution profiles are not OS sandboxes; account/model execution needs its own authorization.",
       "CI applies to the exact GitHub commit; formal publication must use the accepted archive."
     ],
-    "business02120261030": {
-      "host": "0.2.1-rc.5",
-      "status": "historical fixed outcomes reproduced",
-      "cases": 24,
-      "unidentifiedFailures": 12,
-      "modelCalls": 0,
-      "accountCalls": 0,
-      "scope": "2026-10-30 five-suite historical run; not current artifact or general business acceptance. Detailed receipt: b7b37a9:docs/current-state.json."
-    },
-    "historicalRelease021": {
-      "scope": "Historical 0.2.1 publication and same-archive acceptance only; not a current-version claim or acceptance of later artifacts.",
-      "sourceCommit": "9beaa5a9174237d09844ea961e574827279bbae8",
-      "githubRelease": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.1",
-      "archiveSha256": "cdb256e475dd3fa003b639b835d4f0301454f77b5c09fa2946a83b23de33bb09",
-      "acceptance": "Exact 0.2.1 archive passed rc.5 macOS arm64/Linux x64 nine-section UI gates and public-registry isolated installation; limitations retained.",
-      "details": "0d6187bcbcc6dbf11f1985de9e6e34515c9be3e2:docs/current-state.json; RELEASE-VERIFICATION.json and SHA256SUMS on the linked release."
-    },
-    "history": {
-      "commit": "0d6187bcbcc6dbf11f1985de9e6e34515c9be3e2",
-      "path": "docs/current-state.json",
-      "scope": "Detailed 0.2.0/0.2.1 publication, pre-release and public metadata observations. Historical evidence never certifies a newer version."
-    },
-    "issues02320261104": {
-      "sourceCommit": "b7b37a9e484f67626027ba7ae51e32d7d8972d44",
-      "issues": [
-        7,
-        9,
-        10,
-        8
-      ],
-      "catalogueMethods": {
-        "before": 291,
-        "after": 417,
-        "sourceBackedAdditions": 126
-      },
-      "scope": "Source fixes and bounded local regressions. Full original receipt: b7b37a9:docs/current-state.json. No Windows or public release certification."
-    },
-    "preparation02320261105": {
-      "version": "0.2.3",
-      "sourceBase": "b7b37a9e484f67626027ba7ae51e32d7d8972d44",
-      "status": "Dated local preparation receipt. Exact-commit remote CI and platform results are recorded by the delivery run, not inferred from this snapshot.",
-      "beforeAfter": {
-        "beforeCommit": "b188c7919858bf3d00a485869ff24687626e6adc",
-        "minimalCases": 4,
-        "oldFailuresReproduced": 4,
-        "fixedCasesPassed": 4,
-        "scope": "Same input probes, original source; Windows path synthetic, no user plugin execution."
-      },
-      "nodeMatrix": [
-        {
-          "version": "22.19.0",
-          "platform": "darwin",
-          "arch": "arm64",
-          "tests": 1301,
-          "pass": 1293,
-          "skip": 8,
-          "fail": 0,
-          "prepublish": "passed"
-        },
-        {
-          "version": "24.22.2",
-          "platform": "darwin",
-          "arch": "arm64",
-          "tests": 1301,
-          "pass": 1293,
-          "skip": 8,
-          "fail": 0,
-          "prepublish": "passed"
-        }
-      ],
-      "mandatoryIssues": {
-        "tests": 98,
-        "pass": 98,
-        "skip": 0,
-        "fail": 0,
-        "officialSourceSha256": "a2b94ff1183a87bb1f1d898c6274ae5f8b78accc38931594afd97b58cf0db81f",
-        "freshDownload": "verified",
-        "ci": "Required on Node22/24 before candidate construction; actual run result belongs to its exact commit."
-      },
-      "checks": [
-        "source/generated/docs/links/catalogue registry passed",
-        "workspace and independent plugin runtime dependency audit passed"
-      ],
-      "macOS": {
-        "host": "0.2.1-rc.5",
-        "archiveSha256": "f5db677fc9d9f5083a23c53311ba6e6596fe61e9550b56f2310ac7cb123145d3",
-        "sourceManifestSha256": "a655b70b95340ae673132258dabb786e70e1073009d62032ce9ce862f651aba9",
-        "sourceDirty": true,
-        "allNineSections": true,
-        "screenshots": 21,
-        "issues023": {
-          "realHost": true,
-          "installedArtifact": true,
-          "strictToolPipeline": true,
-          "noArgumentTool": true,
-          "activeProfile": true,
-          "settingsProfile": true,
-          "runtimeWrites": 37,
-          "cachedWithoutInvalidation": true,
-          "explicitFailure": true,
-          "staticUpgrade": true,
-          "scope": "Owned rc.5 profile and synthetic 25ms state writer; no Windows or user-site confirmation."
-        },
-        "privateRootRemoved": true,
-        "scope": "Frozen source and delivery documents accepted on one independently built tgz. Source snapshot predates only this JSON receipt update and local Git commit; it is not Linux or Windows acceptance."
-      },
-      "datedPublicObservation": {
-        "observedOn": "2026-11-05",
-        "npmLatest": "0.2.2",
-        "githubTag": "v0.2.2",
-        "scope": "Dated pre-publication observation, not a product current-version claim. No publication performed."
-      },
-      "receipts": "tmp/prep-023-20261105/; checks, original TAP, before-after probes, archive/source/UI/checksums.",
-      "unverifiedScope": [
-        "Windows user-site confirmation",
-        "General business acceptance"
-      ]
-    },
-    "upstream20261105": {
-      "observedOn": "2026-11-05",
-      "marketVersion": "1.73.10",
-      "tagCommit": "5e80c1cc0b6a29de3b87f410445f12a1bb478219",
-      "archiveSha256": "1dbcd14bbf29e503d6881270522dd49a79c8140ac7696ad60e2839cd7b253a9e",
-      "integrityVerified": true,
-      "controlledRepairCases": 6,
-      "controlledInstallUpdateCases": 8,
-      "retryCap": {
-        "managerCallsAcrossFiveStarts": 3,
-        "journalAttempts": 3,
-        "abandonedHint": true,
-        "scope": "Original function with controlled manager, not five real Desktop starts."
-      },
-      "realPnpmInstall": {
-        "installedVersion": "2.0.0",
-        "bundlePresent": true,
-        "releaseAgeUnchanged": true,
-        "versionUnverified": null,
-        "warningLogged": false,
-        "scope": "Original published HTTP install route plus real dsh CLI/pnpm in private profile. Only market lookups fail by request client; pnpm receives an owned synthetic registry. No production registry outage or native GUI claim."
-      },
-      "desktop": {
-        "host": "0.2.1-rc.5",
-        "twoRestartsRestoreComposition": false,
-        "journalAttempts": [
-          1,
-          2
-        ],
-        "manualRemove": "HTTP did not settle within 45s; disk removal completed",
-        "freshInstall": "HTTP did not settle within 45s; package2.0.0 and bundle row written",
-        "liveRecoveryCertified": false,
-        "ownedHostsStopped": 5,
-        "scope": "Real installed Desktop Host IPC entry, PluginManager, bundled pnpm and owned headless Chrome; private profile and synthetic registry. No Electron GUI shell, production profile or full remove/SIGKILL reproduction."
-      },
-      "outcome": "Upstream #928 recovery/diagnostic and #1047 install warning gaps remain. 1024 npm mapping absent; awesome PR unmerged. No upstream messages sent.",
-      "cleanup": {
-        "ownedHostsAndChromeStopped": true,
-        "privateExecutionDirectoriesRemoved": true
-      },
-      "publicEntries": {
-        "store22": "open; HTTP200 but GitHub-only, unknown/not_checked, checkedAt null",
-        "awesome717": "open, unmerged"
-      },
-      "receipts": "tmp/upstream-20261105/"
-    },
-    "delivery023": {
-      "workflow": ".github/workflows/test.yml",
-      "branch": "codex/0.2.3-issue-fixes",
-      "statusSource": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/workflows/test.yml",
-      "gates": [
-        "Node22/24 full tests and mandatory official-validator issue regression",
-        "Frozen dependency audit",
-        "Source-bound candidate archive",
-        "Linux host matrix and rc.5 full UI/issue acceptance",
-        "macOS rc.5 full UI/issue acceptance on the same candidate tgz"
-      ],
-      "artifactRule": "Bind commit, clean source manifest and SHA256; never rebuild the selected CI artifact for platform acceptance.",
-      "scope": "Gate contract only. Actual success requires exact-commit Actions and archive/platform receipts; configuration or historical results do not establish success. No merge or publication is performed by these gates."
-    },
-    "testInputs024": {
-      "optionalProfiles": "Explicit empty owned snapshot; fixture-based full suite",
-      "defaultCommand": "npm test could not capture local desktop profile: PROFILE_SNAPSHOT_BUDGET; user files unchanged",
-      "scope": "The supplied successful TAP is the isolated full suite, not current desktop-profile acceptance."
-    },
-    "adaptation02420261106": {
-      "status": "Scoped development: exact source/catalogue, Cordis and tool/Agent migration",
-      "host": "0.2.2-rc.1",
-      "catalogueSha256": "ecad83d5e428e8fd348542e8ddbb83c829ca93f43169e6f37e18e29e599c4024",
-      "catalogueMethods": {
-        "host": 601,
-        "client": 46
-      },
-      "sourceReview": "rules/dsh-0.2.2-rc.1-review.json",
-      "artifactSha256": "62b311addb570db10ad0a4d21676bed2724579800bc1e9f4489f0e8f2ab663d4",
-      "httpAndThreeClientSlots": true,
-      "actualNativeAndPtcBackend": true,
-      "ptcSchemas": [
-        "run_code"
-      ],
-      "noargCacheFailureUpgrade": true,
-      "restart": true,
-      "cleaned": true,
-      "scope": "Same private tgz basic acceptance, not full nine-section UI/Linux/Windows/business/new parameter semantics or publication. Version bump stays with the later0.2.4 delivery task.",
-      "receipts": "tmp/024-development-20261106/{native-live-final,ptc-live-final}.json",
-      "tests": {
-        "node26": "1308 total,1299 pass,9 skip,0 fail",
-        "node22.19.0": "1308 total,1299 pass,9 skip,0 fail",
-        "explicitActualHostProbe": "11 pass,0 skip,0 fail",
-        "scope": "Full fixture suites with explicit empty optional-profile snapshot. Default npm test blocked before suite by local desktop PROFILE_SNAPSHOT_BUDGET."
-      }
-    },
-    "upstream20261106": {
-      "observedOn": "2026-11-06",
-      "marketVersion": "1.73.12",
-      "tagCommit": "19641d22a69b63063bb9b67a5f67a0dcb72703a0",
-      "archiveSha256": "f784ce5056df2005b748effb044c57b1447bb45717c44edffea114dcc869f479",
-      "integrityVerified": true,
-      "repairCases": 6,
-      "routeCases": 8,
-      "retryCap": 3,
-      "host": "0.2.2-rc.1",
-      "missingBundleRestartsRestored": false,
-      "manualRemovalHttp": "not settled within45s; disk removal complete",
-      "freshInstall": "not rerun on new host",
-      "awesome717": "merged2026-11-06T07:22:35Z f57ac096f3695ef58a7e038dedee475b0243b76c",
-      "store22": "GitHub-only; npm mapping absent",
-      "cleanup": true,
-      "receipts": "tmp/024-phase2-20261106/upstream-report.md and upstream-live/",
-      "scope": "Owned private DesktopHost/Chrome and controlled registry only; no full nativeGUI/Windows/account/model or remote writes."
-    },
-    "phase202420261106": {
-      "scope": "Historical phase2 development receipt, not final 0.2.4 artifact acceptance.",
-      "details": "8d65a0c:docs/current-state.json",
-      "receipts": "tmp/024-phase2-20261106/",
-      "result": "Node22/26 isolated suites1320pass/9skip; macOS rc22 nineUI gates/21screenshots; manager5cases. No remoteCI/Windows certification."
-    },
     "delivery02420261107": {
       "scope": "Local 0.2.4 development delivery; Linux same-artifact and exact-commit remote CI pending. Not published.",
       "candidate": {
@@ -288,6 +53,30 @@
       "linux": "not run: no local Linux environment; remote push/CI requires separate authorization.",
       "windows": "unverified",
       "receipts": "tmp/024-delivery-20261107/"
+    },
+    "history024Preparation": {
+      "commit": "79f2f72",
+      "path": "docs/current-state.json",
+      "scope": "Historical releases, upstream checks and 0.2.4 development receipts; none certifies a later archive.",
+      "records": [
+        "business02120261030",
+        "historicalRelease021",
+        "history",
+        "issues02320261104",
+        "preparation02320261105",
+        "upstream20261105",
+        "delivery023",
+        "testInputs024",
+        "adaptation02420261106",
+        "upstream20261106",
+        "phase202420261106"
+      ]
+    },
+    "publicMetadata20261107": {
+      "scope": "Read-only public snapshot; local version and shipped capability documents remain0.2.4.",
+      "npmVersion": "0.2.3",
+      "receipt": "tmp/024-finalize-20261107/public-meta.json",
+      "publication": "Actual registry/tag/release verification belongs to the separately authorized release operation."
     }
   },
   "scope": "Successful npm test/prepublish TAP with empty owned HOME; no user-profile acceptance. Dated artifact/platform receipts are independent."

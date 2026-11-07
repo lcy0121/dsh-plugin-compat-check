@@ -63,6 +63,6 @@ HTML独立、无脚本/网络资源或动态链接，包名、位置和消息均
 
 无Actions时运行同样的扫描/HTML命令，分别保存退出码；渲染码须等于JSON gate码，否则按工具错误3阻断。完整JSON是后续new策略输入，不能用HTML或截断输出替代。
 
-本仓库未启用作者示例工作流；本地受控接入回归不能代替作者远端CI或业务验收。项目当前验收及实际发布状态见[current-state](current-state.json)。
+作者示例供第三方仓库接入；本仓库Tests并不替代作者远端CI或业务验收。[current-state](current-state.json)记录项目验收与公开发行。
 
 市场安装/恢复的限定结果见[上游记录](upstream-verification.md)；本门禁的静态通过不认证包管理器、市场HTTP或桌面自救。
