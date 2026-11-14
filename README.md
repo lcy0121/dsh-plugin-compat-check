@@ -6,11 +6,11 @@
 
 ## 版本与入口
 
-**0.2.5**适配DSH 0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3目录与精确语义、Cordis和工具执行作用域，复验新版插件管理与三槽位；保留运行状态缓存、严格JSON及profile修复；支持中英韩界面、升级预检、依赖视图、人工处置和报告历史。已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
+当前版本为**0.2.5**。本版已完成DSH 0.2.2-rc.2/rc.3独立目录、Agent/工具/Session迁移提示及新版插件管理、鉴权和三槽位适配；支持中英韩界面、升级预检、依赖视图、人工处置和报告历史。已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
 
 验收按提交、归档及平台记录于[docs/current-state.json](docs/current-state.json)；新制品须重验。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
 
-2026-11-15[上游复验](docs/upstream-verification.md)：dshmarket1.73.19仍有恢复/新装告警缺口，桌面操作写盘不等于完成；1024仍只列GitHub源码方式，awesome条目已合并。安装本工具请用下方npm或完整tgz。
+市场/发行入口的带日期核验见[上游记录](docs/upstream-verification.md)。安装使用下方npm或完整tgz。
 
 ## 安装与使用
 
@@ -46,12 +46,9 @@ dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.
 
 ## 界面示例
 
-以下是2026-10-29的**0.2.0 / DSH 0.2.1-rc.3历史截图**，仅作界面示例，不代表当前制品验收。数字只代表当次检查；预检/历史图展示入口，未执行比较或保存。
+0.2.5 / DSH 0.2.2-rc.3，2026-11-15自有macOS测试profile实拍（中文界面）。包含明确用于回归的合成插件，数字只代表该次检查，不是生态统计或全部业务通过；验收身份见[current-state](docs/current-state.json)。
 
-![0.2.0主结果与证据边界](plugin/assets/compat-overview-0.2.0.png)
-![0.2.0人工处置入口](plugin/assets/compat-review-0.2.0.png)
-![0.2.0静态升级预检入口](plugin/assets/compat-upgrade-0.2.0.png)
-![0.2.0本地历史入口](plugin/assets/compat-history-0.2.0.png)
+![0.2.5在DSH 0.2.2-rc.3中的主结果与覆盖限制](plugin/assets/compat-overview-0.2.5.png)
 
 ## 仓库CLI
 

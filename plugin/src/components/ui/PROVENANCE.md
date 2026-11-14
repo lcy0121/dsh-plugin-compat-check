@@ -6,16 +6,14 @@ using the [new-york source registry](https://ui.shadcn.com/r/styles/new-york/but
 [Native Select](https://ui.shadcn.com/docs/components/native-select), and
 [Separator](https://ui.shadcn.com/docs/components/separator).
 
-Local adaptations: function components compatible with the host's React;
-unused ref/asChild/portal features removed; semantic status colors; scoped theme
-tokens; native Select and Separator semantics; a disclosure composed from Card and Button with explicit
-expanded state and conditional content. Legacy details/summary markup is adapted
-to the same explicit button controls; review history keeps its controlled state
-and form disclosures retain their mounted content while hidden. No Radix/Base UI or React runtime is
-bundled. The disclosure is a local component, not an unmodified upstream
-Collapsible. Tailwind utilities compile with preflight disabled and every rule
-scoped to `.dsc-ui`. Runtime dependencies are bundled from the frozen root lock;
-build tooling remains repository-only. See the shipped THIRD_PARTY_NOTICES.md.
+Local adaptations use host-compatible React function components, semantic colors,
+scoped theme tokens and native Select/Separator semantics; unused ref/asChild/portal
+features are removed. Card/Button disclosures use explicit expanded state and
+conditional content; review history stays controlled and hidden forms stay mounted.
+This disclosure is local, not upstream Collapsible. No Radix/Base UI or React
+runtime is bundled. Tailwind disables preflight and scopes every rule to `.dsc-ui`.
+Runtime dependencies use the frozen root lock; build tooling stays repository-only.
+See the shipped THIRD_PARTY_NOTICES.md. The upstream MIT notice follows unchanged.
 
 Copyright (c) 2023 shadcn
 

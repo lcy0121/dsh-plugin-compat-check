@@ -1160,7 +1160,7 @@ function registerTool(ctx, state) {
             upgradeTo: {
               type: "string",
               description:
-                "Optional exact target DSH version for static upgrade preflight; known catalogues: 0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5 and 0.2.2-rc.1. Unknown versions are uncertified.",
+                "Optional exact target DSH version for static upgrade preflight; known catalogues: 0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2 and 0.2.2-rc.3. Unknown versions are uncertified.",
             },
             profile: {
               type: "string",

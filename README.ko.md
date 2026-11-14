@@ -6,11 +6,11 @@
 
 ## 버전과 진입점
 
-**0.2.5**는 독립 검토한 DSH 0.2.2-rc.2/rc.3 카탈로그와 Agent·도구·Session 마이그레이션 안내를 추가하며 Cordis 및 엄격한 도구 범위 검사를 유지합니다. 캐시, 엄격한 JSON 및 profile 수정도 유지합니다. 중·영·한 UI, 업그레이드 사전 검사, 의존 관계, 수동 검토와 보고서 이력을 제공합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
+현재 버전은 **0.2.5**입니다. 독립 검토한 DSH 0.2.2-rc.2/rc.3 카탈로그, Agent·도구·Session 마이그레이션 안내, 새 플러그인 관리·인증·세 슬롯 연동을 제공합니다. 중·영·한 UI, 업그레이드 사전 검사, 의존 관계, 수동 검토와 보고서 이력을 지원합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
 
 [docs/current-state.json](docs/current-state.json)은 커밋·아카이브·플랫폼별 검수 범위를 기록하며 새 배포물은 다시 검증해야 합니다. npm 패키지는 화면, 상세/배지, `compat_check`, skill을 제공합니다. CLI·설치 검사·배치·작성자 CI·건강 실행기는 저장소 전용이며 npm CLI bin과 `npx dsh-plugin-compat-check`는 지원하지 않습니다.
 
-2026-11-15 [상위 프로젝트 검증](docs/upstream-verification.md): dshmarket1.73.19에는 복구·신규 설치 경고 누락이 남아 있습니다. Desktop의 파일 쓰기는 작업 완료를 뜻하지 않으며 1024에는 GitHub 소스 설치만 표시됩니다. awesome 목록 항목은 병합되었습니다. 아래 npm 또는 완전한 tgz를 사용하세요.
+마켓·배포 경로의 날짜별 검증은 [상위 프로젝트 기록](docs/upstream-verification.md)을 참고하세요. 아래 npm 또는 완전한 tgz로 설치하세요.
 
 ## 설치와 사용
 
@@ -46,12 +46,9 @@ dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0
 
 ## 화면 예시
 
-2026-10-29의 **0.2.0 / DSH 0.2.1-rc.3 과거 화면**이며 현재 배포물의 검수 증거가 아닌 화면 예시입니다. 수치는 당시 검사만 나타냅니다. 사전 검사/이력 이미지는 비교·저장을 실행하지 않은 입력 화면입니다. 캡처 언어는 중국어입니다.
+0.2.5 / DSH 0.2.2-rc.3을 2026-11-15 자체 macOS 테스트 profile에서 촬영한 중국어 화면입니다. 합성 회귀 플러그인이 포함되어 있으며 수치는 해당 검사만 나타냅니다. 생태계 통계나 전체 기능 성공을 뜻하지 않습니다. 배포물 식별자는 [current-state](docs/current-state.json)에 있습니다.
 
-![0.2.0 주 결과와 근거 한계](plugin/assets/compat-overview-0.2.0.png)
-![0.2.0 수동 검토 진입점](plugin/assets/compat-review-0.2.0.png)
-![0.2.0 정적 업그레이드 사전 검사](plugin/assets/compat-upgrade-0.2.0.png)
-![0.2.0 로컬 이력 진입점](plugin/assets/compat-history-0.2.0.png)
+![DSH 0.2.2-rc.3의 0.2.5 주 결과와 분석 한계](plugin/assets/compat-overview-0.2.5.png)
 
 ## 저장소 CLI
 

@@ -1,12 +1,12 @@
 # 开发计划与维护约定
 
-本文对应**0.2.5**。版本真源为`lib/version.mjs`；[README](../README.md)讲入口，[指南](guide.md)列操作/预算，[维护指南](maintaining.md)列实现与验证，[docs/current-state.json](current-state.json)保存带日期的限定回执。
+当前版本为**0.2.5**，真源为`lib/version.mjs`。本文保留产品契约与待办；操作/预算见[指南](guide.md)，实现/验收见[维护指南](maintaining.md)，带日期的回执见[docs/current-state.json](current-state.json)。
 
 ## 1. 项目定位与交付状态
 
-检查已安装DSH插件，提供源码位置、依据和覆盖限制。**0.2.5**新增0.2.2-rc.2/rc.3独立目录与Agent/工具/Session迁移提示，保留Cordis与严格工具作用域检查；声明放行、激活或无发现仍不等于业务正常。功能按本版描述，公开分发以[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub Releases](https://github.com/lcy0121/dsh-plugin-compat-check/releases)实际记录为准，限定验收见current-state。
+检查已安装DSH插件，提供源码位置、依据和覆盖限制。本版已完成0.2.2-rc.2/rc.3独立目录、Agent/工具/Session迁移提示及管理、鉴权和三槽位适配，保留Cordis与严格工具作用域检查。声明放行、激活或无发现不等于业务正常。正文描述本版能力；实际分发以[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub Releases](https://github.com/lcy0121/dsh-plugin-compat-check/releases)记录为准。
 
-npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin、不支持npx。CLI、安装检查、批量、作者CI和健康执行器从private仓库运行；源码安装须[构建完整tgz](../plugin/README.md#从源码构建安装)。
+npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin、不支持npx。CLI、安装检查、批量、作者CI和健康执行器从仓库工作区运行；源码安装须[构建完整tgz](../plugin/README.md#从源码构建安装)。
 
 ## 2. 现行判定与集成契约
 
@@ -14,9 +14,9 @@ npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin�
 
 AST按host/client/shared记录Context、服务及真实位置，入口遵循宿主解析。动态、变异、遮蔽、逃逸、异步及超限保守推断或弃权；能力守卫须控制调用，try/catch不是能力证明。不执行目标，不保存prompt或任意枚举；[语义范围](guide.md#参数与生命周期语义)与[提取规则](maintaining.md#提取器与探针维护)分别维护。
 
-0.2.5分别登记[rc.2](../rules/dsh-0.2.2-rc.2-review.json)与[rc.3](../rules/dsh-0.2.2-rc.3-review.json)：宿主108服务/639方法与109/640，客户端均8/46。来源固定完整源码/npm/桌面字节及签名，修复反引号和async*提取漏项，旧五版目录保留。目录新增不全是上游API新增；迁移提示与未知对象流/回调/时序边界见[维护指南](maintaining.md#025rc2与rc3独立适配)。
+本版分别登记[rc.2](../rules/dsh-0.2.2-rc.2-review.json)与[rc.3](../rules/dsh-0.2.2-rc.3-review.json)：宿主108服务/639方法与109/640，客户端均8/46。固定完整源码/npm/桌面字节和签名，补反引号/async*提取漏项，保留旧五版目录；目录增项不全是API新增。迁移边界见[维护指南](maintaining.md#025rc2与rc3独立适配)。
 
-rc.5[来源审查](../rules/dsh-0.2.1-rc.5-review.json)核对完整归档388文件差分，相对rc.3无服务/方法/生成签名变化；语义仍按精确版本独立审查。推理正文Slot新增rawText，text为显示文本；静态提示只定位注册和迁移限制，不验证props用途或流式行为，不把text使用报错。目录、语义、实际宿主及业务验收分别记录。
+rc.5[来源审查](../rules/dsh-0.2.1-rc.5-review.json)核对388文件差分，相对rc.3无API名称/生成签名变化，语义仍独立审查。推理Slot的rawText为原始文本、text供显示；只提示迁移，不把text使用报错，不验证props或流式行为。目录、语义、宿主与业务验收分别记录。
 
 ### 2.2 结论、影响与基线
 
@@ -70,7 +70,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ## 4. 验收范围
 
-[current-state](current-state.json)按提交、归档和平台记录结果；正式发布须使用通过所选提交CI及同一tgz的新宿主macOS/Linux九项UI验收的文件，并核验公共安装。历史回执不认证新版本或重打包；固定24项业务样本仍保留12项未识别故障。0.2.4历史回执保留；0.2.5的rc.2/rc.3 macOS/Linux同一CI归档九项UI、鉴权与清理已通过，所选提交11项CI全过，证据见current-state；Windows、用户试用和一般业务保持未验收；合成病例不替代真实试用。
+已有0.2.5 rc.2/rc.3 macOS/Linux同一CI归档的九项UI、鉴权和清理通过记录，提交`8a1edbc`的11项CI全过，身份见[current-state](current-state.json)。文档/工具说明更新会改变归档，既有结果不认证新字节；正式交付须按[同一制品流程](maintaining.md#同一制品发布核对)重核所选提交和文件。固定24项业务样本仍有12项未识别故障；Windows、真实用户试用和一般业务未验收，合成病例不替代真实试用。
 
 ## 5. 验证入口
 
@@ -81,5 +81,5 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 仅列未完成事项，优先级不是漏洞评级。沿用的#7–#10修复与回归见[维护指南](maintaining.md#用户issue修订与回归)；源码修复不替代Windows现场确认。CI和平台验收以对应提交及同一归档为准。
 
 1. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题/窄容器及误读、失败、误报与操作耗时；联系、收集、公开分别授权，不默认遥测。
-2. **P2：等待上游修复与发行入口更新。** 2026-11-15[1.73.19新监测](upstream-verification.md)：#928 open/#1047 closed且均无新回复；原始恢复函数及install/update路由重验仍有恢复细节/新装告警缺口，1024仍缺npm映射，awesome已合并。0.2.2-rc.1 Desktop两次恢复及45秒手动自救为11月6日历史未通过，不冒充rc.2/rc.3复验；待修复/映射变化后重验，反馈另取授权。
+2. **P2：等待上游修复与发行入口更新。** 2026-11-15[监测](upstream-verification.md)：dshmarket1.73.19仍有恢复细节/新装告警缺口；#928 open、#1047 closed，均无新回复；1024缺npm映射，awesome已合并。11月6日rc.1 Desktop恢复/自救未通过属历史，不代表rc.2/rc.3。待修复或映射变化后重验，反馈另取授权。
 3. **P2：Windows真实验收（依环境条件暂缓）。** 优先补#7–#10的Windows10 / DSH rc.5同一制品现场验证，记录版本、路径、启动方式及修复前后结果；同时验证安装、回收、权限、打包/诊断和自有资源清理。路径模拟及其它平台不替代实机结果，环境具备前保持未验收。

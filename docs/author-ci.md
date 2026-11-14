@@ -1,6 +1,6 @@
 # 插件作者CI
 
-本文对应**0.2.5**的仓库工具，npm插件包不提供此CLI。它对**同一已构建插件目录**建立只读快照并比较API目录；不安装依赖、执行目标、启动DSH、联网或读取用户profile。目标须含第三方npm包名、精确版本、对象形式的`dsh`及实际交付代码，拒绝夹带`node_modules`、链接和特殊文件。
+当前版本为**0.2.5**，此CLI随仓库提供。对**同一已构建插件目录**建立只读快照并比较API目录，不安装依赖、执行目标、启动DSH、联网或读取用户profile。目标须含第三方npm包名、精确版本、对象形式的`dsh`及实际交付代码，拒绝夹带`node_modules`、链接和特殊文件。
 
 ```sh
 node tools/author-ci.mjs --package ./dist-plugin > compatibility.json
@@ -9,7 +9,7 @@ node tools/author-ci.mjs --package ./dist-plugin --format junit > compatibility.
 node tools/author-ci.mjs --report compatibility.json --format html > compatibility.html
 ```
 
-默认矩阵包含已认证的 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5` 和 `0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`。未知版本以工具错误阻断，不回退目录。矩阵只静态比较；每cell保留完整报告、内核码及判定/源码身份。目录未收录的方法保留位置和覆盖限制，不直接报缺失；默认策略仍阻断覆盖不足。它不证明宿主启动或业务通过。
+默认矩阵包含已认证的 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`。未知版本以工具错误阻断，不回退目录。各cell保留完整报告、内核码及判定/源码身份。目录未收录的方法保留位置和覆盖限制，不直接报缺失；默认阻断覆盖不足。静态矩阵不证明宿主启动或业务通过。
 
 ## 门禁策略
 
@@ -63,6 +63,4 @@ HTML独立、无脚本/网络资源或动态链接，包名、位置和消息均
 
 无Actions时运行同样的扫描/HTML命令，分别保存退出码；渲染码须等于JSON gate码，否则按工具错误3阻断。完整JSON是后续new策略输入，不能用HTML或截断输出替代。
 
-作者示例供第三方仓库接入；本仓库Tests并不替代作者远端CI或业务验收。[current-state](current-state.json)记录项目验收与公开发行。
-
-市场安装/恢复的限定结果见[上游记录](upstream-verification.md)；本门禁的静态通过不认证包管理器、市场HTTP或桌面自救。
+本仓库Tests不替代作者远端CI或业务验收；静态通过不认证市场安装/恢复。项目限定验收与分发核验见[current-state](current-state.json)，市场边界见[上游记录](upstream-verification.md)。

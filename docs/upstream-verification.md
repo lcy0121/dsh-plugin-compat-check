@@ -1,6 +1,6 @@
 # 上游跟进与限定核验
 
-本文对应**0.2.5**。2026-11-15已只读复核公共状态及dshmarket **1.73.19**原始发布函数/路由；2026-11-06的官方**0.2.2-rc.1 Desktop Host**结果保留为历史。与本工具源码修复及兼容性验收分开记录，制品/平台证据见[current-state](current-state.json)。
+当前版本为**0.2.5**。本页固定2026-11-15的公共状态和dshmarket **1.73.19**原始函数/路由核验，另保留11月6日官方**0.2.2-rc.1 Desktop Host**历史结果；不随文档版本自动更新为上游已修复。工具验收见[current-state](current-state.json)。
 
 | 上游 | 2026-11-15结果 | 剩余事项 |
 |---|---|---|
@@ -11,7 +11,8 @@
 
 ## 1.73.19来源与原始代码复验
 
-固定[v1.73.19](https://github.com/dsh-market/dsh-market/releases/tag/v1.73.19)（11月12日发布），tag commit与npm gitHead均为`da774820fd49f4915461ff2031eedbef9b48dfe7`，tgz SHA-256=`b7bb48acaa3ee0b1e172a007e533f57dd8ac1fc877c023bfa409c39f39e81ebd`；SHA1/shasum及SHA512/integrity均已核，未执行生命周期脚本。pending-updates.js与1.73.12字节一致；index/routes/updates确有变化，已重新执行以下原始函数/路由对照，不能以issue关闭或发版标题认定修复。
+固定[v1.73.19](https://github.com/dsh-market/dsh-market/releases/tag/v1.73.19)（11月12日发布）：tag/npm gitHead=`da774820fd49f4915461ff2031eedbef9b48dfe7`，tgz SHA-256=`b7bb48acaa3ee0b1e172a007e533f57dd8ac1fc877c023bfa409c39f39e81ebd`，shasum/integrity均已核，无生命周期执行。pending-updates.js与1.73.12相同，index/routes/updates有变化，原始函数/路由已重跑；issue关闭或发版标题不是修复证据。
+
 - 恢复6组原始函数对照：failed已写文件、缺bundle、client-only、完整组合、详细错误失败及无journal。缺组合保留记录；详细ERR_PNPM_UNEXPECTED_STORE仍退化为refused the reinstall (failed)。
 - 五次受控调用仅安装3次，attempts停3，之后有abandoned及Settings提示；这是受控manager对照，不是五次实际Desktop启动。
 - install/update共8组原始HTTP路由对照：latest成功查1次，失败后packument成功查2次并固定2.0.0；双429/HTML失败时install用裸包名且无专门warn/versionUnverified，update用@latest并有已装版本和warn。显式版本和minimumReleaseAge不变。包管理器边界是受控落盘，不冒称本轮真实pnpm新装或GUI。
@@ -22,4 +23,4 @@
 
 第四个Host手动移除的HTTP在45秒窗口未返回；磁盘已移除包、依赖、bundle，journal已清空。未继续重装，所以自救端到端仍未通过；没有等到上游300秒deadline，不能称其永不返回或外推完整Electron GUI/Windows。本轮未测试新版fresh install。停止4个自有Host、关闭Chrome后已删除私有执行目录/浏览器缓存；保留脱敏回执与脚本在`tmp/024-phase2-20261106/`。该次未发送上游消息。
 
-2026-11-05的1.73.10/rc.5详细历史见`abb051a:docs/upstream-verification.md`及current-state历史回执，不能直接认证或否定新宿主。本轮证据在`tmp/025-development-20261115/upstream/`；受控route harness使用已核rc.3生产schemastery3.19.0，只模拟包管理器写盘。本轮未重跑市场真实Desktop恢复、未发送上游消息。后续在修复、回复或npm映射变化后重验；反馈/发帖另取授权。
+更早的1.73.10/rc.5记录见`abb051a:docs/upstream-verification.md`，不认证或否定新宿主。11月15日证据在`tmp/025-development-20261115/upstream/`：route harness用rc.3生产schemastery3.19.0，只模拟包管理器写盘，未重跑市场Desktop恢复、未发送消息。修复、回复或npm映射变化后重验，反馈/发帖另取授权。

@@ -6,11 +6,11 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-**0.2.5** adds independently reviewed DSH 0.2.2-rc.2/rc.3 catalogues and bounded Agent, tool and Session migration guidance, retaining Cordis and strict tool-scope checks. It retains cache, strict JSON and profile fixes. It includes a Chinese/English/Korean UI, upgrade preview, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2 and 0.2.2-rc.3**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
+The current version is **0.2.5**. It includes independently reviewed DSH 0.2.2-rc.2/rc.3 catalogues, bounded Agent/tool/Session migration guidance, and updated plugin management, authentication and three-slot integration. It provides a Chinese/English/Korean UI, upgrade preview, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2 and 0.2.2-rc.3**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
 
 [docs/current-state.json](docs/current-state.json) records acceptance by commit, archive and platform; new artifacts require verification. The npm plugin provides the page, details/badges, `compat_check` and skill. CLI, install checks, batches, author CI and health executor are repository tools. There is no npm CLI bin or `npx dsh-plugin-compat-check` support.
 
-2026-11-15 [upstream verification](docs/upstream-verification.md): dshmarket1.73.19 retains recovery/install-warning gaps; Desktop disk writes do not prove completion. The 1024 catalogue still lists only GitHub source installation; the awesome entry has merged. Use npm or a complete tgz below.
+See the dated [upstream record](docs/upstream-verification.md) for market and distribution-entry checks. Install using npm or a complete tgz below.
 
 ## Install and use
 
@@ -46,12 +46,9 @@ Confirm and back up before archiving; restores/imports are references. Explicitl
 
 ## Screenshots
 
-Historical **0.2.0 / DSH 0.2.1-rc.3** captures from 2026-10-29, interface examples only, not acceptance evidence for the current artifact. Counts describe that check; upgrade/history images show forms without an executed comparison/save. Overview is English; workflow captures are Chinese.
+0.2.5 / DSH 0.2.2-rc.3, captured on 2026-11-15 in an owned macOS test profile (Chinese UI). Includes synthetic regression plugins; counts describe that check, not ecosystem statistics or universal business success. Artifact identity is recorded in [current-state](docs/current-state.json).
 
-![0.2.0 English overview and evidence limits](plugin/assets/compat-overview-en-0.2.0.png)
-![0.2.0 manual review entry](plugin/assets/compat-review-0.2.0.png)
-![0.2.0 static upgrade preview entry](plugin/assets/compat-upgrade-0.2.0.png)
-![0.2.0 local history entry](plugin/assets/compat-history-0.2.0.png)
+![0.2.5 main results and coverage limits in DSH 0.2.2-rc.3](plugin/assets/compat-overview-0.2.5.png)
 
 ## Repository CLI
 

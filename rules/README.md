@@ -1,6 +1,6 @@
 # 规则与固定源码参考
 
-本文维护**0.2.5**的规则。契约见[Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，维护见[流程](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md)，限定证据/实际发布状态见[current-state](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。
+当前版本为**0.2.5**。本页说明规则、目录选择和度量；契约见[Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，审查流程见[维护指南](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md)，限定验收/分发核验见[current-state](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。
 
 ## 文件与消费者
 
@@ -15,7 +15,7 @@
 | dsh-api-catalog-0.2.2-rc.2.json / dsh-api-catalog-0.2.2-rc.3.json | 分别对应dsh-0.2.2-rc.2-review.json及rc.3审查；各自semantics-review记录迁移边界，不互借认证 |
 | usage-inventory.json | 带日期、版本、profile和完整性标记的历史AST库存，不是当前覆盖率 |
 
-普通检查对DSH≥0.2.2-rc.3选rc.3参考，≥0.2.2-rc.2选rc.2参考，≥0.2.2-rc.1选0.2.2-rc.1参考，≥0.2.1-rc.5选rc.5参考，≥0.2.1-rc.3选rc.3参考，≥0.2.1-rc.2选rc.2，其余/未知选旧目录，显式覆盖优先。登记字节与认证集合以`lib/contracts.mjs.CATALOG_REFERENCES`为准；升级预检接受七个登记精确版本，拒绝未知/范围。回退和自定义目录不认证未来宿主。
+普通检查从`lib/contracts.mjs.CATALOG_REFERENCES`选不高于目标的最新目录，低于最旧目录或目标未知时取0.2.0-rc.2；显式覆盖优先。0.2.2-rc.2/rc.3各用自己的目录。登记字节与精确认证集合以该常量为准；升级预检仅接受七个登记版本，拒绝未知/范围。回退或自定义目录不认证未来宿主。
 
 ## 判定与解释
 
@@ -48,4 +48,4 @@ node tools/coverage.mjs --nm <目录> --dsh-version <精确版本> --write --all
 
 coverage按AST调用点分host/client/shared统计规则命中及默认影响；不借异profile探针。不完整扫描默认拒绝写库存，写入须合法精确DSH版本，坏版本不覆盖旧文件。文件树/AST摘要不是原子快照或包签名。
 
-库存是2026-10-15、DSH0.2.0-rc.2的desktop历史部分样本；规则复核、旧覆盖率和方法决定可在`39d9f1a:rules/README.md`及severity.json的reviewed/evidence追溯。它们不代表当前生态准确率。真实业务标签、静态/service-only预测和驱动错误独立计分，不借业务答案调严重度；[复现](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md#真实插件回归)。
+库存固定2026-10-15、DSH0.2.0-rc.2的desktop部分样本；旧复核/覆盖率见`39d9f1a:rules/README.md`及severity.json的reviewed/evidence，不代表当前生态。真实业务标签、静态/service-only预测和驱动错误独立计分，不据业务答案调严重度；[复现入口](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md#真实插件回归)。

@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.2.5",
-  "recordedAt": "2026-11-14T17:55:05.630550+00:00",
+  "recordedAt": "2026-11-14T19:05:32.567Z",
   "testFiles": 100,
   "tests": 1359,
   "repositoryFiles": {
-    "total": 430,
+    "total": 431,
     "fixtures": 100,
-    "other": 330
+    "other": 331
   },
   "verification": {
     "platform": "darwin",
@@ -29,7 +29,7 @@
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
-      "scope": "0.2.5 source capabilities; dated preparation/publication histories are separate from selected CI/archive/platform evidence."
+      "scope": "Current 0.2.5 capabilities; immutable acceptance history and dated public observations do not certify later edits."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -61,10 +61,16 @@
         "mandatoryIssueSkip": 0,
         "receiptRoot": "tmp/025-linux-delivery-20261115/fixed-artifacts"
       },
-      "timingFix": "Cold fake-browser fixture startup margin changed1s to2s with matching controlled parent block2.5s; overrun/CPU/ELU assertions retained, production budgets unchanged."
+      "timingFix": "Test-only cold-fixture margin1s to2s; controlled parent block2.5s. Overrun/CPU/ELU assertions and production budgets retained."
     },
     "adaptation025": {
-      "recordedAt": "2026-11-14T17:55:05.625409+00:00",
+      "recordedAt": "2026-11-14T18:10:13.327Z",
+      "detailedHistory": {
+        "commit": "8a1edbc6531e221f5741c1c03ecc1145457bd48b",
+        "path": "docs/current-state.json",
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/blob/8a1edbc6531e221f5741c1c03ecc1145457bd48b/docs/current-state.json",
+        "scope": "Full receipt paths, per-platform hashes, source/semantic reviews, initial failure/fix and prior archive comparison. Immutable history, not acceptance of later documentation or tool-description edits."
+      },
       "sourceReview": [
         "rules/dsh-0.2.2-rc.2-review.json",
         "rules/dsh-0.2.2-rc.3-review.json"
@@ -73,27 +79,23 @@
         "rules/dsh-0.2.2-rc.2-semantics-review.json",
         "rules/dsh-0.2.2-rc.3-semantics-review.json"
       ],
-      "historicalPreparation": {
-        "details": "41291e7:docs/current-state.json",
-        "scope": "Earlier local18cb archive, source/ASAR probes and prior local-only decision; not certification of the selected CI archive."
-      },
       "candidate": {
         "filename": "dsh-plugin-compat-check-0.2.5.tgz",
         "sha256": "3f949b195658daad1296028a51809dbc92b5fac7811d3a6bfa003ad84b52ee95",
-        "sourceCommit": "41291e782943f44b6c1bf3a465ea0cdec4be0e15",
-        "sourceSha256": "d6e42a0c17caf8eeb1fcccbfdafcd74922deffc6342b8858a9c14f5c24ec7555",
+        "sourceCommit": "8a1edbc6531e221f5741c1c03ecc1145457bd48b",
+        "sourceSha256": "8994be936ff43a96e2cba49c2733b8e644516c7e25633b9eef44fe7f3b2f28c0",
         "sourceDirty": false,
-        "receipt": "tmp/025-linux-delivery-20261115/ci-candidate-fixed/summary.json",
-        "artifactId": 14125120394,
-        "zipSha256": "be9984d86e325fc810edaf80c0029aeeaa46c8a7eb4199e6cec8b1ed0869547e"
+        "receipt": "tmp/025-linux-delivery-20261115/ci-candidate-final/summary.json",
+        "scope": "Historical accepted archive. Original macOS/implementation receipts used 41291e7; final CI archive has identical SHA-256."
       },
       "ci": {
-        "runId": 43622332173,
-        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/43622332173",
-        "sourceCommit": "41291e782943f44b6c1bf3a465ea0cdec4be0e15",
+        "observedAt": "2026-11-14T18:10:13.327Z",
+        "runId": 43623926184,
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/43623926184",
+        "sourceCommit": "8a1edbc6531e221f5741c1c03ecc1145457bd48b",
         "conclusion": "success",
-        "checks": 11,
         "successfulChecks": 11,
+        "checks": 11,
         "staticNodes": [
           "22.19.0",
           "24.9.0"
@@ -107,69 +109,20 @@
           "0.2.2-rc.2",
           "0.2.2-rc.3"
         ],
-        "receipt": "tmp/025-linux-delivery-20261115/ci-fixed-success.json",
-        "sha256": "5dc17bcfd0c5d533a06f25e8d68fd46a14311602ed0c7cc7ae54b46d09940ccc",
-        "scope": "Selected implementation checks all passed. No legacy status contexts posted; empty combined-status pending is not a posted check."
+        "receipt": "tmp/025-linux-delivery-20261115/ci-final-success.json"
       },
-      "macOS": [
-        {
-          "version": "0.2.2-rc.2",
-          "summary": "tmp/025-linux-delivery-20261115/mac-fixed-rc2/summary.json",
-          "summarySha256": "c44d7ec182c6f0ef670ce66d2a8eb70d2ba68aa4cfa7ee869dc68a8a17cc2da8",
-          "liveSha256": "ad2edd238a160d1a0cc520e876161a352edb92d75b24a885e3df2b5264ca13b4",
-          "auth": "tmp/025-linux-delivery-20261115/mac-auth-rc2/summary.json",
-          "authSha256": "b72a9f9a84f3db79405da7741202de69a20c29b7948c482862a87bb6861fc5fc"
-        },
-        {
-          "version": "0.2.2-rc.3",
-          "summary": "tmp/025-linux-delivery-20261115/mac-fixed-rc3/summary.json",
-          "summarySha256": "6df7a54dbc03e09bacdeb44e49081fdaabbc38fab7f41291335d383aa34f57d7",
-          "liveSha256": "87e6471234f3ba9980715e7dd8e685baa9c9c2116ac234456ee83c405593173e",
-          "auth": "tmp/025-linux-delivery-20261115/mac-auth-rc3/summary.json",
-          "authSha256": "ed8fe02db886685e8defe2c55608545a2227bacfd341eb3bfb5099312a576861"
-        }
-      ],
-      "linux": [
-        {
-          "version": "0.2.2-rc.2",
-          "summary": "tmp/025-linux-delivery-20261115/fixed-artifacts/linux-live-evidence-0.2.2-rc.2/_temp/linux-ui018/summary.json",
-          "summarySha256": "a7120c6a9aa1c6dec2aaf44e03f1c9711407b3894c1ad82ab5dce305d192498b",
-          "liveSha256": "830454f36858738733bf0d3346ef2b4963e7789ad2a9019a5bd92b2406228b92",
-          "authSha256": "0b51f0fd447960412a1ff348e2f86e312ea627958f9ba5f93d771970a513e6cc",
-          "managerSha256": "68973f31981fb792b83ce073b78e727d06eb80240472a83a933bbe00d0790a0c"
-        },
-        {
-          "version": "0.2.2-rc.3",
-          "summary": "tmp/025-linux-delivery-20261115/fixed-artifacts/linux-live-evidence-0.2.2-rc.3/_temp/linux-ui018/summary.json",
-          "summarySha256": "1e2f877c580c66cc418f40f93b7fd4ea12439909074052574d1df65908fbb185",
-          "liveSha256": "a2e9636ff5807185ade49aad74bf7cb60c61fe8129eb48f22bbce033011c78e0",
-          "authSha256": "597d735e49d2e3104f8302ba699d5ea8b647a8d8f6fbd54a83583018db914900",
-          "managerSha256": "af8c8b7cdd4f8acc23e07454bad37e2995290c336cf4b078bc2e239b41403d77",
-          "importSha256": "a9c20dcb764bde6c4b925edc44165ee491235fddc46ec7e0f969e200ff499eda"
-        }
-      ],
       "platformScope": "Same downloaded CI tgz on exact rc.2/rc.3, macOS/arm64 npm hosts Node26.13.1 and Linux/x64 npm hosts Node24.9.0, real Chrome nine UI suites, three slots, zh/en/ko plus six host-language fallbacks, zoom/pan/scroll, strict tool/profile/upgrade, HTTP and cleanup. ASAR probes separately historical; no full Electron GUI, Windows or general-business certification.",
       "authScope": "Same candidate: unavailable auth returns503 before get/start/Worker/fs-write growth or state-content changes; recovery, persistent same-authority cookie across restart, old launch401/no Set-Cookie, different-authority isolation; owned hosts/roots cleaned.",
+      "receiptRoots": {
+        "macOS": "tmp/025-linux-delivery-20261115/mac-fixed-rc{2,3}/ and mac-auth-rc{2,3}/",
+        "linux": "tmp/025-linux-delivery-20261115/final-artifacts/linux-live-evidence-0.2.2-rc.{2,3}/_temp/",
+        "business": "tmp/025-linux-delivery-20261115/business-fixed-rc{2,3}/regression-report.json"
+      },
       "business": {
         "scope": "Fixed5 artifacts/24 independent pre-run expectations, two repeats per host; green reproduces expected failures, not all business success. Twelve unflagged failures remain per24 cases.",
-        "versions": [
-          {
-            "version": "0.2.2-rc.2",
-            "receipt": "tmp/025-linux-delivery-20261115/business-fixed-rc2/regression-report.json",
-            "sha256": "5f4a981f3ca0c966207105c9a5de2af6571efde5b8fc5e3a2d589bfec2c988c5",
-            "outcomes": 48,
-            "driverErrors": 0,
-            "validationErrors": 0
-          },
-          {
-            "version": "0.2.2-rc.3",
-            "receipt": "tmp/025-linux-delivery-20261115/business-fixed-rc3/regression-report.json",
-            "sha256": "93a0b7edfcd9c86709554a4d0ca19c2e969d77f121ad56ba63c56f4b59cda8a8",
-            "outcomes": 48,
-            "driverErrors": 0,
-            "validationErrors": 0
-          }
-        ]
+        "outcomesPerHost": 48,
+        "driverErrors": 0,
+        "validationErrors": 0
       },
       "staticCandidate": {
         "receipt": "tmp/025-linux-delivery-20261115/static-ci/summary.json",
@@ -189,20 +142,7 @@
           "vacuous"
         ],
         "scope": "Exact CI archive; no findings/tool errors or policy relaxation."
-      },
-      "ciFailureAndFix": {
-        "failedRunId": 43620557878,
-        "failedJobId": 132525898524,
-        "scope": "Initial rc2 note saved with HTTP200/disktrue but screenshot showed host home, not target market. Navigation driver now rechecks target after render and waits new reads; expected values, missing-control/value failures and budgets unchanged.",
-        "fixCommit": "41291e7",
-        "red": "tmp/025-linux-delivery-20261115/market-navigation-red.tap",
-        "green": "tmp/025-linux-delivery-20261115/market-navigation-green.tap"
-      },
-      "archiveDifference": {
-        "receipt": "tmp/025-linux-delivery-20261115/candidate-comparison.json",
-        "scope": "Earlier local18cb and CI3f949 archives differ in LICENSE/patch permissions; 86 file contents match. Both macOS hosts reran the downloaded CI archive; old archive results are not inherited."
-      },
-      "publication": "not performed; branch push only, no merge or release"
+      }
     },
     "upstream20261115": {
       "marketVersion": "1.73.19",
@@ -227,6 +167,41 @@
       "artifactSha256": "85b8b25f171a3dfe5bab834ff42ce3f94887d60f700c7c5978034326bd7e1d81",
       "details": "cdbed0e:docs/current-state.json",
       "scope": "Historical exact0.2.4 public release, macOS/Linux same artifact and CI receipts retained in Git; no certification of0.2.5."
+    },
+    "releasePreparation025": {
+      "baselineCommit": "8a1edbc6531e221f5741c1c03ecc1145457bd48b",
+      "scope": "Local release-facing documentation and tool-parameter description refresh; no push, merge, tag, GitHub release or npm publish in this preparation.",
+      "publicationObservation": {
+        "observedAt": "2026-11-14T18:56:35.795Z",
+        "githubLatestTag": "v0.2.4",
+        "githubReleaseUrl": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.4",
+        "npmLatestVersion": "0.2.4",
+        "metadataErrors": 0,
+        "unavailableSources": [],
+        "receipt": "tmp/025-release-docs-20261115/public-metadata.json",
+        "scope": "Dated public observation only, separate from current product version and capabilities."
+      },
+      "verificationScope": "This preparation changes packed README, skill, notices and tool-description bytes. Historical 3f949 acceptance remains valid for that file only; a new archive requires its own selected-commit CI and same-artifact host verification before publication.",
+      "localValidation": {
+        "node": "26.13.1",
+        "tests": 1359,
+        "pass": 1350,
+        "skip": 9,
+        "fail": 0,
+        "targetedTests": 47,
+        "targetedSkip": 0,
+        "check": "passed",
+        "prepublishGate": "passed; never publishes",
+        "receiptRoot": "tmp/025-release-docs-20261115/",
+        "scope": "Empty owned HOME, no user-profile acceptance; local checks only, no CI or real-host rerun for these changed bytes."
+      },
+      "documentationAudit": {
+        "baselineCommit": "8a1edbc6531e221f5741c1c03ecc1145457bd48b",
+        "maintainedMarkdownFiles": 15,
+        "markdownBytesBefore": 248560,
+        "markdownBytesAfter": 245270,
+        "scope": "All maintained Markdown, including generated notices and skill copy. Legal texts, three Plan follow-ups, workflow steps, schemas and budgets retained; detailed receipt history is recoverable from the immutable Git baseline. Screenshot refreshed separately."
+      }
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

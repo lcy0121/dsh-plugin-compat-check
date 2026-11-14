@@ -1,11 +1,11 @@
 ---
 name: dsh-plugin-compat-check
-description: 0.2.5版，用于检查已安装DSH插件的兼容性、升级前静态对比，以及排查更新后不工作、界面消失、工具无响应、did not activate或engines.dsh/peerDependencies声明问题。Use when checking installed DeepSeek Harness plugins, comparing exact host versions before upgrading, or investigating activation and missing-feature failures. Covers independently reviewed DSH 0.2.2-rc.2/rc.3 catalogues and bounded Agent/tool/Session migration, strict JSON tools and profile diagnosis; findings do not certify business functionality.
+description: 0.2.5：检查已安装DSH插件、升级前静态对比，排查更新后失效、界面消失、工具无响应、did not activate及版本声明问题。Use for installed DeepSeek Harness plugin compatibility, static upgrade comparisons and activation failures. Includes exact DSH 0.2.2-rc.2/rc.3 catalogues and bounded Agent/tool/Session migration guidance; no findings does not certify business functionality.
 ---
 
 # dsh-plugin-compat-check
 
-本版**0.2.5**对**已安装DSH插件**给出兼容证据与限制。API发现引用真实`file:line`，loader/声明事实不补造行号。各入口共用内核，静态与进程内观测可有不同结论/基线；先核目标、版本、规则和采样身份。
+当前版本**0.2.5**对**已安装DSH插件**给出兼容证据与限制。API发现引用真实`file:line`，loader/声明事实不补造行号。各入口共用内核，静态与进程内观测可有不同结论/基线；先核目标、版本、规则和采样身份。
 
 ## 选择入口
 
@@ -87,7 +87,7 @@ node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.2 --upgra
 
 可靠映射且启用的FAILED/PENDING loader才构成相应fatal实测发现。必需inject须合格同目标观测明确absent才推断激活障碍；目录缺项或未采样不证明缺失。可选/子作用域不自动阻断整插件；present服务的方法缺失另判。provide只是候选，不借业务/loader答案倒填服务观测，try/catch不是能力证明。
 
-普通检查按目标选择参考目录：≥0.2.2-rc.1取该版；否则≥rc.5取rc.5，≥rc.3取rc.3，≥rc.2取rc.2，其余/未知取0.2.0-rc.2（均指0.2.1的对应rc）；显式catalog优先。报告catalog保留目标/参考版本、摘要、selection、verified、certifiedVersions及warning。未来/回退/覆盖目录未经认证；摘要不符或同名包重复安装明确无法判定。verified只证明登记目录匹配，不是业务认证。
+普通检查从已登记目录中选不高于目标的最新版本；低于最旧目录或目标未知时取0.2.0-rc.2，显式catalog优先。0.2.2-rc.2/rc.3分别使用自己的目录；未来版本使用参考目录仍属未认证。报告catalog保留目标/参考版本、摘要、selection、verified、certifiedVersions及warning。未来/回退/覆盖目录未经认证；摘要不符或同名包重复安装明确无法判定。verified只证明登记目录匹配，不是业务认证。
 
 DSH≥0.2.1-rc.1优先自有engines.dsh，仅字段缺失回退官方peer；旧目标保留peer规则和engines建议。非法/空范围仍报风险，peer的workspace:^/~/*按当前精确版本处理，engines的workspace不放行。声明冲突为推断，不说成实际加载失败。
 
@@ -95,13 +95,13 @@ DSH≥0.2.1-rc.1优先自有engines.dsh，仅字段缺失回退官方peer；旧�
 
 ## 精确语义与槽位
 
-精确语义独立于方法名目录：startSession仅核已知prompt/agentPreset/clearPreviousDraft类型及rc.3/rc.5的whenDraftExists=keep/replace/append。新字段优先，旧clearPreviousDraft仍支持；空白会话可复用，preset隔离，创建草稿不等于发送。三处“更多”浏览进主列表、创建只追加草稿；0.2.2-rc.1沿用这些已核语义。
+精确语义覆盖0.2.1-rc.2/rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3，独立于方法名目录。startSession核已知prompt/agentPreset/clearPreviousDraft类型；除0.2.1-rc.2外另核whenDraftExists=keep/replace/append，显式新字段优先，旧clearPreviousDraft仍支持。空白会话可复用、preset隔离，创建草稿不等于发送。
 
-timer.setTimeout/setInterval弃用及sessions.retain的ready/release/disposal提醒仅说明覆盖，不证明泄漏。动态、展开、访问器、逃逸和跨helper合并弃权，不执行代码或保存prompt。
+timer弃用及sessions.retain的ready/release/disposal仅提示覆盖，不证明泄漏。0.2.1-rc.5及三个0.2.2版本推理槽位显示/翻译用text、原始输出用rawText，Content Factory仍用text/running/labels；不把text使用报错，不验证props/流式时序或采集思考正文。
 
-rc.5推理槽位显示/翻译用text，原始输出用rawText；Content Factory仍用text/running/labels。仅定位slots.register及迁移限制，不验证props、流式/完成态或业务，不把text使用报错，不采集思考正文。模型发现须凭据门控，不为体检访问生产/models或发送模型请求。
+三个0.2.2版本对固定agent/request订阅及已证明服务调用给迁移提示，并核可证明的投影stateVersion为非负安全整数。rc.2/rc.3另提示Agent caller/initiator与ownerCtx、具名Subagent/Team及interrupt preset、native/PTC/condition与严格true的并行条件、Session.append单事件/数组、AttachmentError、动态MCP及manager更新协议。
 
-0.2.2-rc.1另校验可证明的投影stateVersion为非负安全整数，对固定agent/request订阅及已证明服务调用给迁移提示；不证明回调路由、返回对象流、await顺序或业务成功。
+提示只定位已证明Context入口，不新增fatal或已验证调用；未知、动态、展开、访问器、逃逸及跨helper合并弃权。不证明返回对象流、callback、await/dispose顺序或AgentLoop收敛，不执行代码或保存prompt。模型发现须凭据门控，不为体检访问生产/models或发送请求。
 
 ## 依赖、人工记录和健康检查
 
@@ -126,6 +126,6 @@ report_status=$?
 
 不额外启动宿主，不读写基线；仍可能读旁置probe。报告省略绝对路径、原始日志/源码/探针/基线，保留包名及包内位置；常见凭据字段隐藏不保证完全脱敏，预览后由用户决定分享。命令占位符须替换，生成文本不授权上传或发帖。
 
-0.2.5新增rc.2/rc.3精确目录及Agent所有权、Session重载和管理协议迁移提示；保留Cordis Core4.1、Loader/Include1.1与工具作用域适配；沿用缓存、JSON、profile和rc.5目录修复。无关运行状态写入不使报告失效，源码/声明变化仍会；非法JSON证据明确报错，不静默丢弃。目录未收录只表示覆盖不足，不能据此称方法缺失。
+本版保留Cordis Core4.1、Loader/Include1.1及工具作用域适配。无关状态写入不使缓存失效，源码/声明变化仍会；非法JSON证据明确失败。目录未收录只表示覆盖不足，不据此称方法缺失。
 
 实际运行版本取toolVersion/CLI version；分发以registry/GitHub Releases为准，docs/current-state.json按提交/归档/平台记录验收，不认证重打包、Windows或一般业务。docs/Plan.md列待办，操作/预算和目录治理见docs/guide.md、docs/maintaining.md。YAML是运行依赖，根dev依赖不随npm提供功能。
