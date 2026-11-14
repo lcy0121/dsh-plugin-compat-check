@@ -30,7 +30,7 @@ import path from "node:path";
 import os from "node:os";
 import crypto from "node:crypto";
 import { spawn } from "node:child_process";
-import { createRequire } from "node:module";
+import { hostRuntimeDriver } from "./host-runtime-driver.mjs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { command, stopOwnedChild } from "../lib/probe-runner.mjs";
 import { launchChromePipe } from "../lib/debugger.mjs";
@@ -167,31 +167,9 @@ async function poll(fn, message, timeout = 20000) {
   throw Error(message);
 }
 function bootDriver({ runtimeOnly = false } = {}) {
-  const mac = "/Applications/DeepSeek Harness.app/Contents";
-  if (
-    process.platform === "darwin" &&
-    fs.existsSync(mac + "/Resources/app.asar")
-  )
-    return {
-      command: mac + "/MacOS/DeepSeek Harness",
-      module:
-        mac +
-        "/Resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-app-boot/lib/index.js",
-      env: { ...env, ELECTRON_RUN_AS_NODE: "1" },
-    };
-  // Node CLI and Electron carrier queries do not import the app-boot module.
-  if (runtimeOnly) return { command: process.execPath, env };
-  for (const d of process.env.PATH.split(path.delimiter))
-    try {
-      const cli = fs.realpathSync(path.join(d, "dsh"));
-      return {
-        command: process.execPath,
-        module: createRequire(cli).resolve("@deepseek-ai/dsh-app-boot"),
-        env,
-      };
-    } catch {}
-  throw Error("Cannot locate actual official app-boot module");
+  return hostRuntimeDriver({ env, runtimeOnly });
 }
+
 async function cleanup() {
   cancellation.abort();
   await Promise.allSettled([...commands]);
@@ -372,7 +350,12 @@ try {
       script,
       `import {readPluginMeta} from ${JSON.stringify(pathToFileURL(driver.module).href)};import {pathToFileURL} from 'node:url';const p=pathToFileURL(${JSON.stringify(path.join(metaRoot, "package.json"))}).href;const a=readPluginMeta('@rc2/metadata',p),b=readPluginMeta('@rc2/metadata/sub',p),c=readPluginMeta('@rc2/metadata/plain',p);if(a.description!=='ROOT_ONLY_DESCRIPTION'||b.title.en!=='Scoped subpath'||b.description!==undefined||c!==undefined)throw Error('Subpath borrowed root metadata');console.log('METADATA_PASS');`,
     );
-    const metaOutput = await exec(driver.command, [script], 20000, driver.env);
+    const metaOutput = await exec(
+      driver.command,
+      [...driver.args, script],
+      20000,
+      driver.env,
+    );
     requireTrue(
       metaOutput.includes("METADATA_PASS"),
       "Actual subpath metadata check failed",
@@ -388,6 +371,7 @@ try {
       const output = await exec(
         driver.command,
         [
+          ...driver.args,
           "--input-type=module",
           "-e",
           `import {verifyModelListing} from ${JSON.stringify(pathToFileURL(path.join(repo, "tools/rc3-model-listing.mjs")).href)};console.log(JSON.stringify(await verifyModelListing(await import(${JSON.stringify(official)}))));`,
@@ -535,7 +519,9 @@ try {
       "export function apply(){}\n",
     );
     if (extendedAcceptance(version)) installRc3Fixture(profile);
-    if (["0.2.1-rc.5", "0.2.2-rc.1"].includes(version))
+    if (
+      ["0.2.1-rc.5", "0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"].includes(version)
+    )
       installIssue023Fixture(profile, { hostVersion: version });
     const futureProbeFile = path.join(root, "future-probe.json");
     const host = await boot("rc2-ui", { DSC_PROBE_REPORT: futureProbeFile });
@@ -1814,7 +1800,11 @@ try {
           readReport: ordinary,
           screenshotDir: process.env.DSC_UI018_SCREENSHOTS,
         });
-      if (["0.2.1-rc.5", "0.2.2-rc.1"].includes(version)) {
+      if (
+        ["0.2.1-rc.5", "0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"].includes(
+          version,
+        )
+      ) {
         result.issues023 = await verifyIssue023({
           url: host.url,
           headers,

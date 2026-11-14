@@ -10,12 +10,17 @@ const { createHash } = require("node:crypto");
   const archive =
     process.env.DSC_HOST_ASAR ||
     "/Applications/DeepSeek Harness.app/Contents/Resources/app.asar";
+  const hostVersion = process.env.DSC_ACCEPTANCE_DSH_VERSION || "0.2.2-rc.1";
+  assert(
+    ["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"].includes(hostVersion),
+    "Refusing unreviewed exact host probe target",
+  );
   const review = JSON.parse(
     fs.readFileSync(
-      path.resolve(__dirname, "../rules/dsh-0.2.2-rc.1-review.json"),
+      path.resolve(__dirname, `../rules/dsh-${hostVersion}-review.json`),
     ),
   );
-  assert.equal(review.dshVersion, "0.2.2-rc.1");
+  assert.equal(review.dshVersion, hostVersion);
   const digest = createHash("sha256");
   const physicalFs = process.versions.electron ? require("original-fs") : fs;
   for await (const chunk of physicalFs.createReadStream(archive))
@@ -27,6 +32,11 @@ const { createHash } = require("node:crypto");
     "Refusing unreviewed host ASAR before importing official code",
   );
   const base = archive + "/dsh/node_modules/@deepseek-ai/";
+  assert.equal(
+    JSON.parse(fs.readFileSync(base + "dsh-tools/package.json")).version,
+    hostVersion,
+    "Reviewed archive must contain the selected tools version",
+  );
   const load = (n) => import(pathToFileURL(base + n + "/lib/index.js").href);
   const [
     { Context },
@@ -80,7 +90,7 @@ const { createHash } = require("node:crypto");
     ctx.tools.register(def("probe", () => ({ ok: true })));
     const opts = {
       tools: ctx.tools,
-      hostVersion: "0.2.2-rc.1",
+      hostVersion,
       agent: a,
       callId: "owned",
       name: "probe",
@@ -175,16 +185,214 @@ const { createHash } = require("node:crypto");
       "ABORTED_BEFORE_DISPATCH",
     );
     checks.push("before-dispatch cancellation contract");
+    if (["0.2.2-rc.2", "0.2.2-rc.3"].includes(hostVersion)) {
+      const [
+        { Session, SessionStore },
+        { SessionProjectionRegistry },
+        { AgentRegistry },
+        { AttachmentError, isAttachmentError },
+        { HarnessError },
+      ] = await Promise.all([
+        load("dsh-session"),
+        load("dsh-session-projection"),
+        load("dsh-agent"),
+        load("dsh-attachment"),
+        load("dsh-error"),
+      ]);
+      const detached = Session.create("owned-overloads");
+      detached.append = new Proxy(detached.append.bind(detached), {
+        apply: (target, receiver, args) =>
+          Reflect.apply(target, receiver, args),
+      });
+      assert.equal(detached.append("turn/start", { turn: 1 }).seq, 0);
+      const appended = detached.append([["step/start", { turn: 1, step: 1 }]]);
+      assert(Array.isArray(appended));
+      assert.equal(appended[0].seq, 1);
+      assert.deepEqual(detached.append([]), []);
+      checks.push(
+        "Session.append single/array overloads through Proxy forwarding; detached private Session only",
+      );
+      const attachment = new AttachmentError(
+        "owned attachment failure",
+        "INVALID_IMAGE",
+      );
+      assert(attachment instanceof HarnessError);
+      assert(isAttachmentError(attachment));
+      ctx.tools.register(
+        def("attachment-error", () => {
+          throw attachment;
+        }),
+      );
+      const attachmentResult = await invokeOwnedTool({
+        ...opts,
+        name: "attachment-error",
+      });
+      assert.equal(attachmentResult.isError, true);
+      assert.equal(attachmentResult.error.info.name, "AttachmentError");
+      assert.equal(attachmentResult.error.info.code, "INVALID_IMAGE");
+      checks.push(
+        "real AttachmentError HarnessError inheritance and native tool error structure (non-prefix code)",
+      );
+      let releaseFirst;
+      const firstGate = new Promise((resolve) => {
+        releaseFirst = resolve;
+      });
+      let secondStarted;
+      const secondGate = new Promise((resolve) => {
+        secondStarted = resolve;
+      });
+      const order = [];
+      ctx.tools.register({
+        ...def("parallel-first", async () => {
+          await firstGate;
+          order.push("first");
+          return { ok: true };
+        }),
+        isConcurrencySafe: () => true,
+      });
+      ctx.tools.register({
+        ...def("parallel-second", () => {
+          order.push("second");
+          secondStarted();
+          return { ok: true };
+        }),
+        isConcurrencySafe: () => true,
+      });
+      const parallel = ctx.tools.execute({
+        agent: a,
+        signal,
+        maxParallelToolCalls: 2,
+        calls: [
+          { id: "first", name: "parallel-first", arguments: "" },
+          { id: "second", name: "parallel-second", arguments: "" },
+        ],
+      });
+      await secondGate;
+      releaseFirst();
+      const ordered = await parallel;
+      assert.deepEqual(order, ["second", "first"]);
+      assert.deepEqual(
+        ordered.results.map((r) => r.callId),
+        ["first", "second"],
+      );
+      await assert.rejects(
+        ctx.tools.execute({
+          agent: a,
+          signal,
+          calls: [],
+          maxParallelToolCalls: 0,
+        }),
+        /positive integer/,
+      );
+      checks.push(
+        "real native bounded parallel bodies settle out of order, results remain model-ordered; invalid budget rejected",
+      );
+      const actx = new Context();
+      try {
+        await actx.plugin(SessionStore).await();
+        await actx.plugin(SessionProjectionRegistry).await();
+        await actx.plugin(AgentRegistry).await();
+        const captures = [];
+        const factoryHandle = {
+          agent: { id: "owned-factory" },
+          dispose: async () => {},
+        };
+        actx.agents.setFactory({
+          createAgent(ownerCtx) {
+            captures.push(ownerCtx);
+            return Promise.resolve(factoryHandle);
+          },
+          resume(ownerCtx) {
+            captures.push(ownerCtx);
+            return Promise.resolve(factoryHandle);
+          },
+        });
+        let owner;
+        const ownerFiber = actx.plugin({
+          name: "owned-caller-context",
+          inject: ["agents"],
+          apply(caller) {
+            owner = caller;
+          },
+        });
+        await ownerFiber.await();
+        assert.equal(await owner.agents.create({}), factoryHandle);
+        assert.equal(await owner.agents.resume({}), factoryHandle);
+        assert.equal(captures.length, 2);
+        assert(captures.every((c) => c.fiber === owner.fiber));
+        assert(captures.every((c) => c.fiber !== actx.fiber));
+        assert.equal(actx.agents.get("owned-factory"), undefined);
+        const borrowed = { id: detached.id, session: detached, ctx: actx };
+        const detachBorrowed = actx.agents.enter(borrowed);
+        assert.equal(actx.agents.get(detached.id), borrowed);
+        assert.equal(Object.hasOwn(borrowed, "dispose"), false);
+        detachBorrowed();
+        assert.equal(actx.agents.get(detached.id), undefined);
+        assert.equal(actx.agents.currentInitiator(), undefined);
+        assert.throws(() => actx.agents.requireInitiator());
+        const initiating = { id: "owned-initiator" };
+        const returned = actx.agents.withInitiator(initiating, () => {
+          assert.equal(actx.agents.requireInitiator(), initiating);
+          assert.equal(
+            actx.agents.withoutInitiator(() => actx.agents.currentInitiator()),
+            undefined,
+          );
+          return 42;
+        });
+        assert.equal(returned, 42);
+        await actx.agents.withInitiator(initiating, async () => {
+          await Promise.resolve();
+          assert.equal(actx.agents.currentInitiator(), initiating);
+        });
+        assert.equal(actx.agents.currentInitiator(), undefined);
+        await ownerFiber.dispose();
+        const registry = actx.agents;
+        let finishForeground,
+          registryDisposed = false;
+        const foreground = registry.withInitiator(
+          initiating,
+          () =>
+            new Promise((resolve) => {
+              finishForeground = resolve;
+            }),
+        );
+        const registryDisposal = actx.fiber.dispose().then(() => {
+          registryDisposed = true;
+        });
+        await new Promise((resolve) => setImmediate(resolve));
+        assert.equal(registryDisposed, false);
+        finishForeground("foreground-settled");
+        assert.equal(await foreground, "foreground-settled");
+        await registryDisposal;
+        assert.throws(() => registry.currentInitiator(), /disposed|closing/i);
+        checks.push(
+          "real AgentRegistry forwards caller ownerCtx (controlled factory), borrowed get, sync/async initiator, clearing scopes and disposal drains returned foreground Promise",
+        );
+      } finally {
+        await actx.fiber.dispose();
+      }
+    }
+
     // A separate real ToolsService selects PTC, with an explicit runtime seam.
     const pctx = new Context();
     try {
       await pctx.plugin(SystemPrompt, {}).await();
       await pctx.plugin(ToolsService).await();
+      let releaseCount = 0,
+        failRelease = false,
+        programRuns = 0;
+      const resetNotices = [];
       pctx.provide("ptcRuntime", {
+        retainsState: true,
+        release: async () => {
+          releaseCount++;
+          if (failRelease) throw Error("owned cleanup failure");
+        },
         language: "typescript",
         programFormat: "function-body",
         resolve: (r) => r,
         run: async (r) => {
+          programRuns++;
           const tools = r.bindings.find((x) => x.global === "tools").functions;
           try {
             return {
@@ -206,7 +414,11 @@ const { createHash } = require("node:crypto");
       });
       pctx.provide("workingDirectory", { ensure: async () => process.cwd() });
       await pctx.plugin(native).await();
-      const pa = { id: "owned-ptc", session: { id: "owned-ptc", append() {} } };
+      const pa = {
+        id: "owned-ptc",
+        session: { id: "owned-ptc", append() {} },
+        inject: (message) => resetNotices.push(message),
+      };
       await pctx
         .inject(["tools"], (c) => {
           pa.ctx = createScope(c, pa).ctx;
@@ -269,6 +481,31 @@ const { createHash } = require("node:crypto");
       checks.push(
         "PTC selected transport, nested strict schema, direct-name denial and SDK prompt (controlled runtime seam)",
       );
+      if (["0.2.2-rc.2", "0.2.2-rc.3"].includes(hostVersion)) {
+        const selectedPtc = pctx.tools.selectExecutor(pa);
+        const beforeReset = programRuns;
+        await selectedPtc.reset(pa);
+        assert.equal(programRuns, beforeReset);
+        assert.equal(releaseCount, 1);
+        assert.equal(resetNotices.length, 1);
+        failRelease = true;
+        await assert.rejects(
+          selectedPtc.reset(pa),
+          (error) => error.code === "CODE_RESET_FAILED",
+        );
+        const blocked = await invokeOwnedTool(popts);
+        assert.equal(blocked.isError, true);
+        assert.equal(blocked.error.info.code, "CODE_RUN_FAILED");
+        assert.equal(programRuns, beforeReset);
+        failRelease = false;
+        await selectedPtc.reset(pa);
+        assert.equal(releaseCount, 3);
+        assert.equal(resetNotices.length, 2);
+        assert.equal((await invokeOwnedTool(popts)).value.ok, true);
+        checks.push(
+          "real PTC reset release/no program run, cleanup failure blocks admission and retry recovers (controlled retained runtime seam)",
+        );
+      }
     } finally {
       await pctx.fiber.dispose();
     }
@@ -290,6 +527,15 @@ const { createHash } = require("node:crypto");
       "dsh-tools",
       "dsh-tool-executor-native",
       "dsh-tool-executor-ptc",
+      ...(["0.2.2-rc.2", "0.2.2-rc.3"].includes(hostVersion)
+        ? [
+            "dsh-session",
+            "dsh-session-projection",
+            "dsh-agent",
+            "dsh-attachment",
+            "dsh-error",
+          ]
+        : []),
     ])
       hashes[n] = createHash("sha256")
         .update(fs.readFileSync(base + n + "/lib/index.js"))
@@ -299,6 +545,8 @@ const { createHash } = require("node:crypto");
         {
           ok: true,
           node: process.version,
+          electron: process.versions.electron,
+          carrier: process.execPath,
           version: JSON.parse(fs.readFileSync(base + "dsh-tools/package.json"))
             .version,
           source: archive,

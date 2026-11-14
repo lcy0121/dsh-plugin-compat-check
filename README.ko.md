@@ -6,19 +6,19 @@
 
 ## 버전과 진입점
 
-**0.2.4**는 DSH 0.2.2-rc.1의 정확한 카탈로그와 의미 규칙, Cordis 및 도구 실행 범위를 지원하고 새 플러그인 관리자와 세 슬롯을 검증합니다. 캐시, 엄격한 JSON 및 profile 수정도 유지합니다. 중·영·한 UI, 업그레이드 사전 검사, 의존 관계, 수동 검토와 보고서 이력을 제공합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
+**0.2.5**는 독립 검토한 DSH 0.2.2-rc.2/rc.3 카탈로그와 Agent·도구·Session 마이그레이션 안내를 추가하며 Cordis 및 엄격한 도구 범위 검사를 유지합니다. 캐시, 엄격한 JSON 및 profile 수정도 유지합니다. 중·영·한 UI, 업그레이드 사전 검사, 의존 관계, 수동 검토와 보고서 이력을 제공합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
 
 [docs/current-state.json](docs/current-state.json)은 커밋·아카이브·플랫폼별 검수 범위를 기록하며 새 배포물은 다시 검증해야 합니다. npm 패키지는 화면, 상세/배지, `compat_check`, skill을 제공합니다. CLI·설치 검사·배치·작성자 CI·건강 실행기는 저장소 전용이며 npm CLI bin과 `npx dsh-plugin-compat-check`는 지원하지 않습니다.
 
-2026-11-06 [상위 프로젝트 검증](docs/upstream-verification.md): dshmarket1.73.12에는 복구·신규 설치 경고 누락이 남아 있습니다. Desktop의 파일 쓰기는 작업 완료를 뜻하지 않으며 1024에는 GitHub 소스 설치만 표시됩니다. awesome 목록 항목은 병합되었습니다. 아래 npm 또는 완전한 tgz를 사용하세요.
+2026-11-15 [상위 프로젝트 검증](docs/upstream-verification.md): dshmarket1.73.19에는 복구·신규 설치 경고 누락이 남아 있습니다. Desktop의 파일 쓰기는 작업 완료를 뜻하지 않으며 1024에는 GitHub 소스 설치만 표시됩니다. awesome 목록 항목은 병합되었습니다. 아래 npm 또는 완전한 tgz를 사용하세요.
 
 ## 설치와 사용
 
 ```sh
 # 이 정확한 버전 설치
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.4
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.5
 # 로컬 아카이브 사용 전 해시 확인
-dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.4.tgz
+dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.5.tgz
 ```
 
 설치한 profile을 사용하는 DSH에서 **왼쪽 아래 더 보기(⋯)/아바타 → 설정 → 내장 플러그인 → 호환성(兼容性)**을 엽니다. desktop으로 가정하지 마세요. 에이전트는 `compat_check`를 호출할 수 있습니다. 소스 설치에는 [완전한 tgz](plugin/README.md#从源码构建安装)가 필요합니다.
@@ -78,17 +78,17 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 
 ## 업그레이드 사전 검사와 검증
 
-`compat_check({"upgradeTo":"0.2.2-rc.1"})`는 호스트의 현재 버전을 사용하고 `upgradePreview`를 반환합니다. CLI에는 두 정확한 버전을 지정합니다.
+`compat_check({"upgradeTo":"0.2.2-rc.3"})`는 호스트의 현재 버전을 사용하고 `upgradePreview`를 반환합니다. CLI에는 두 정확한 버전을 지정합니다.
 
 ```sh
-node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.5 --upgrade-to 0.2.2-rc.1 --json
+node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.2 --upgrade-to 0.2.2-rc.3 --json
 npm test
 npm run check
 node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-등록된 다섯 버전의 임의 쌍을 비교하며 미등록 버전은 코드 3입니다. 같은 비공개 바이트만 정적으로 비교하고 probe·예외·일반 기준선을 사용하지 않습니다. 사전 검사 0/1/2는 새로 생기거나 악화된 위험 없음/비치명/치명, 3은 검사 불가이며 0에도 기존 위험이 남을 수 있습니다. 일반 종료 코드는 **0 충돌 미발견, 1 일부 사용 가능 또는 알 수 없음, 2 비호환, 3 도구/입력 오류**입니다.
+등록된 일곱 버전의 임의 쌍을 비교하며 미등록 버전은 코드 3입니다. 같은 비공개 바이트만 정적으로 비교하고 probe·예외·일반 기준선을 사용하지 않습니다. 사전 검사 0/1/2는 새로 생기거나 악화된 위험 없음/비치명/치명, 3은 검사 불가이며 0에도 기존 위험이 남을 수 있습니다. 일반 종료 코드는 **0 충돌 미발견, 1 일부 사용 가능 또는 알 수 없음, 2 비호환, 3 도구/입력 오류**입니다.
 
 기본 테스트는 실제 DSH/모델을 시작하지 않으며 패키징 테스트는 registry가 필요합니다. 출시 전 검사는 출시하지 않고 메타데이터 조회 실패는 검증 성공이 아닙니다. Windows와 일반 업무 기능은 미인증입니다. [Plan](docs/Plan.md), [가이드](docs/guide.md), [유지보수](docs/maintaining.md), [작성자 CI](docs/author-ci.md), [규칙](rules/README.md), [skill](skill/README.md)을 참고하세요.
 

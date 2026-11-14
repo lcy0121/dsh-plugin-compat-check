@@ -5,10 +5,18 @@ export const LIVE_VERSIONS = Object.freeze([
   "0.2.1-rc.3",
   "0.2.1-rc.5",
   "0.2.2-rc.1",
+  "0.2.2-rc.2",
+  "0.2.2-rc.3",
 ]);
-/** Contracts independently reviewed unchanged at these two exact tags. */
+/** Full acceptance is required for each independently reviewed exact tag. */
 export const extendedAcceptance = (version) =>
-  ["0.2.1-rc.3", "0.2.1-rc.5", "0.2.2-rc.1"].includes(version);
+  [
+    "0.2.1-rc.3",
+    "0.2.1-rc.5",
+    "0.2.2-rc.1",
+    "0.2.2-rc.2",
+    "0.2.2-rc.3",
+  ].includes(version);
 export function uiAcceptanceVersion(requested = "0.2.1-rc.3") {
   if (!extendedAcceptance(requested))
     throw Error("Full UI acceptance requires a reviewed exact target");
@@ -50,7 +58,7 @@ export async function readHostRuntime(hostVersion, driver, run) {
   const value = String(
     await run(
       driver.command,
-      ["-p", "process.versions.node"],
+      [...(driver.args || []), "-p", "process.versions.node"],
       20000,
       driver.env,
     ),

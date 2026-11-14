@@ -812,3 +812,22 @@ test("rc22 owns its catalogue and rejects historical observations", () => {
     fs.rmSync(f.dir || f, { recursive: true, force: true });
   }
 });
+
+test("rc22 later cohorts keep independent identities and pre-run business expectations", () => {
+  const old = api.createRegression("0.2.2-rc.1");
+  for (const version of ["0.2.2-rc.2", "0.2.2-rc.3"]) {
+    const next = api.createRegression(version);
+    assert.equal(next.manifest.dshVersion, version);
+    assert.notEqual(next.manifest.catalogueHash, old.manifest.catalogueHash);
+    assert.deepEqual(next.manifest.suites, old.manifest.suites);
+    const f = fixture();
+    try {
+      assert.throws(
+        () => next.validateCohort(f.dir || f, "sidebar-ui-previous"),
+        /catalogue|target/,
+      );
+    } finally {
+      fs.rmSync(f.dir || f, { recursive: true, force: true });
+    }
+  }
+});

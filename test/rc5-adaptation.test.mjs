@@ -18,7 +18,7 @@ test("rc.5 uses its own reviewed catalogue; rc.4 and future references remain un
     ["0.2.1-rc.4", "0.2.1-rc.3", false],
     ["0.2.1-rc.5", "0.2.1-rc.5", true],
     ["0.2.1-rc.6", "0.2.1-rc.5", false],
-    ["9.9.9", "0.2.2-rc.1", false],
+    ["9.9.9", "0.2.2-rc.3", false],
   ]) {
     const c = loadCatalog(root, version);
     assert.equal(c.evidence.referenceVersion, reference);
@@ -81,7 +81,7 @@ test("rc.5 author default retains its exact cell in the expanded matrix and all 
     assert.match(r.stdout, /0.2.1-rc.5/);
     if (format === "json") {
       const m = JSON.parse(r.stdout);
-      assert.equal(m.cells.length, 5);
+      assert.equal(m.cells.length, 7);
       const c = m.cells.find((c) => c.dshVersion === "0.2.1-rc.5");
       assert.equal(c.report.catalog.verified, true);
       assert.equal(c.report.observation.mode, "catalogue");

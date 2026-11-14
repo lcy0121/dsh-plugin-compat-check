@@ -1,12 +1,12 @@
 {
-  "toolVersion": "0.2.4",
-  "recordedAt": "2026-11-07T05:02:33.684333+00:00",
-  "testFiles": 94,
-  "tests": 1330,
+  "toolVersion": "0.2.5",
+  "recordedAt": "2026-11-14T16:31:47.160Z",
+  "testFiles": 99,
+  "tests": 1355,
   "repositoryFiles": {
-    "total": 410,
+    "total": 428,
     "fixtures": 100,
-    "other": 310
+    "other": 328
   },
   "verification": {
     "platform": "darwin",
@@ -21,13 +21,15 @@
         "0.2.1-rc.2",
         "0.2.1-rc.3",
         "0.2.1-rc.5",
-        "0.2.2-rc.1"
+        "0.2.2-rc.1",
+        "0.2.2-rc.2",
+        "0.2.2-rc.3"
       ],
       "scope": "Exact catalogue bytes only; dated host/artifact acceptance below. No future-host or general-business certification."
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
-      "scope": "0.2.4 source capabilities. Public distribution and dated artifact/platform acceptance remain independent."
+      "scope": "0.2.5 source capabilities; publication024 below is historical and does not certify a new artifact."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -35,118 +37,115 @@
       "Private execution profiles are not OS sandboxes; account/model execution needs its own authorization.",
       "CI applies to the exact GitHub commit; formal publication must use the accepted archive."
     ],
-    "history024Preparation": {
-      "commit": "79f2f72",
-      "path": "docs/current-state.json",
-      "scope": "Historical releases, upstream checks and 0.2.4 development receipts; none certifies a later archive. Initial0.2.4 local delivery and business/static-entry limitations are recorded there.",
-      "records": [
-        "business02120261030",
-        "historicalRelease021",
-        "history",
-        "issues02320261104",
-        "preparation02320261105",
-        "upstream20261105",
-        "delivery023",
-        "testInputs024",
-        "adaptation02420261106",
-        "upstream20261106",
-        "phase202420261106"
+    "testInputs025": {
+      "scope": "1355 default-suite tests, 1346 pass/9 documented opt-in or slow skips, 0fail; empty owned HOME, no user profile acceptance. Successful prepublish repeated the complete suite.",
+      "node": "26.13.1",
+      "tap": "tmp/025-development-20261115/final-suite.tap",
+      "prepublishTap": "tmp/025-development-20261115/prepublish.tap",
+      "mandatoryIssueTests": 106,
+      "mandatoryIssueSkip": 0,
+      "mandatoryIssueNodes": [
+        "22.19.0",
+        "26.13.1"
+      ],
+      "issueReceipts": [
+        "tmp/025-development-20261115/issues-node22/summary.json",
+        "tmp/025-development-20261115/issues-local/summary.json"
       ]
     },
-    "releasePreparation024": {
-      "details": "06b1b2e:docs/current-state.json",
-      "scope": "Historical pre-merge development preparation; official tagged-source/publication evidence follows."
+    "adaptation025": {
+      "recordedAt": "2026-11-15",
+      "sourceReview": [
+        "rules/dsh-0.2.2-rc.2-review.json",
+        "rules/dsh-0.2.2-rc.3-review.json"
+      ],
+      "semanticReview": [
+        "rules/dsh-0.2.2-rc.2-semantics-review.json",
+        "rules/dsh-0.2.2-rc.3-semantics-review.json"
+      ],
+      "officialAsarProbes": [
+        {
+          "version": "0.2.2-rc.2",
+          "receipt": "tmp/025-development-20261115/semantics/rc2-host-probe.json",
+          "sha256": "19df97535ecd10a33a6648d87692a9926d0ceb7ecd89e731d34654aa0041ded3",
+          "scope": "15 actual ASAR checks; controlled AgentFactory and PTC runtime seam, no OS-sandbox or arbitrary business certification"
+        },
+        {
+          "version": "0.2.2-rc.3",
+          "receipt": "tmp/025-development-20261115/semantics/rc3-host-probe.json",
+          "sha256": "ffbf2c3a2218b5aee9a486e9aefeba2bfe820fb6e3691a08af28200f1d5967a5",
+          "scope": "15 actual ASAR checks; controlled AgentFactory and PTC runtime seam, no OS-sandbox or arbitrary business certification"
+        }
+      ],
+      "manager": [
+        {
+          "version": "0.2.2-rc.2",
+          "receipt": "tmp/025-development-20261115/ui-manager/rc2-manager-reviewed/summary.json",
+          "sha256": "50c361f487149b39d22a592a9ff19379e49eb9101c9b77c9cc077f03c5a2604f",
+          "scope": "Registry/Git/file modes, actual package and bundle state, six operations, fresh apply after rollback, owned host and root cleaned"
+        },
+        {
+          "version": "0.2.2-rc.3",
+          "receipt": "tmp/025-development-20261115/ui-manager/rc3-manager-reviewed/summary.json",
+          "sha256": "4312cf8bb00a6d58c2ae9544f1eefc94cafd259fefe75f0cf73ce171fd642a33",
+          "scope": "Registry/Git/file modes, actual package and bundle state, six operations, fresh apply after rollback, owned host and root cleaned"
+        }
+      ],
+      "import": {
+        "version": "0.2.2-rc.3",
+        "receipt": "tmp/025-development-20261115/ui-manager/rc3-import-reviewed/summary.json",
+        "sha256": "d195a3284bc255a29ac27d4606e85f2cf3de43471920e3f7bdb44f8da877413e",
+        "scope": "Owned synthetic v3 archive, persistent events/header/workspace, owner-only, no live Agent/Session, unload404; not user-session or Windows acceptance"
+      },
+      "ci": "pending authorized branch push and actual Linux runs; configuration is not platform acceptance",
+      "publication": "not performed in this task",
+      "business": [
+        {
+          "version": "0.2.2-rc.2",
+          "receipt": "tmp/025-development-20261115/business-rc2/regression-report.json",
+          "sha256": "ce30e68cfb1d802dafc04146de9ca7d2dbe680270c5518c916ce59431455bb47",
+          "summary": {
+            "independentPackageFamilies": 4,
+            "pinnedArtifacts": 5,
+            "holdoutPackageFamilies": 2,
+            "holdoutPinnedArtifacts": 2,
+            "distinctPlannedCases": 24,
+            "knownOutcomeCases": 48,
+            "staticIdentifiedFailures": 0,
+            "serviceOnlyIdentifiedFailures": 0,
+            "unflaggedNaturalFailures": 4,
+            "unflaggedBusinessOrClientFailures": 20,
+            "driverErrors": 0,
+            "validationErrors": 0
+          },
+          "scope": "Two repeats of independent pre-run 5artifacts/24cases; green reproduces expected failures, not all business success."
+        }
+      ]
     },
-    "preflightPublicMetadata20261107": {
-      "scope": "Historical pre-publication snapshot only; current published0.2.4 is recorded below.",
-      "npmVersion": "0.2.3",
-      "receipt": "tmp/024-finalize-20261107/public-meta.json",
-      "publication": "Actual registry/tag/release verification belongs to the separately authorized release operation."
+    "upstream20261115": {
+      "marketVersion": "1.73.19",
+      "marketTarballSha256": "b7bb48acaa3ee0b1e172a007e533f57dd8ac1fc877c023bfa409c39f39e81ebd",
+      "gitHead": "da774820fd49f4915461ff2031eedbef9b48dfe7",
+      "issues": "#928 open/11 comments; #1047 closed/3; store#22 open/1; no new replies",
+      "originalFunctionCases": 6,
+      "repairAttemptsCap": 3,
+      "routeCases": 8,
+      "remaining": [
+        "repair error detail lost",
+        "install both-query-failure has no dedicated warning/unverified field",
+        "1024 no npm mapping"
+      ],
+      "receipts": "tmp/025-development-20261115/upstream/",
+      "scope": "Read-only public monitoring and unmodified published function/routes with controlled package-manager seam. Nov6 Desktop results historical; no new market Desktop recovery or upstream messages."
     },
-    "publication024": {
+    "historicalPublication024": {
       "version": "0.2.4",
       "tag": "v0.2.4",
       "sourceCommit": "06b1b2e530c665e19b400bd639269f8a386a7a35",
-      "sourceSha256": "461cd537aedf80f582fd33bd98744090684f779bc5805cbb85c9616b50de9aae",
-      "artifact": {
-        "filename": "dsh-plugin-compat-check-0.2.4.tgz",
-        "sha256": "85b8b25f171a3dfe5bab834ff42ce3f94887d60f700c7c5978034326bd7e1d81",
-        "sha1": "79f9b07874aed0aa14a2670b4e646e99a5df9b51",
-        "integrity": "sha512-PcsOOWkLNR2P0RQfzsLDWPNkSoAJS80S1W1D8FS0rh615LUlGMkpgGfHxXHLBeAtuMgibBVT6xcs1q2VN2/YrA==",
-        "bytes": 345260,
-        "files": 80
-      },
-      "ci": {
-        "checks": 27,
-        "allPassed": true,
-        "runs": [
-          "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/42337987285",
-          "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/42337992062",
-          "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/42339643411"
-        ]
-      },
-      "hostAcceptance": {
-        "dshVersion": "0.2.2-rc.1",
-        "platforms": [
-          {
-            "platform": "linux",
-            "arch": "x64",
-            "runtimeNode": "24.9.0",
-            "controllerNode": "24.9.0",
-            "gates": 9,
-            "screenshots": 21,
-            "cleanup": {
-              "privateRootRemoved": true
-            },
-            "modelCalls": 0,
-            "productionRequests": 0
-          },
-          {
-            "platform": "darwin",
-            "arch": "arm64",
-            "runtimeNode": "24.21.0",
-            "controllerNode": "26.13.0",
-            "gates": 9,
-            "screenshots": 21,
-            "cleanup": {
-              "privateRootRemoved": true
-            },
-            "modelCalls": 0,
-            "productionRequests": 0
-          }
-        ]
-      },
-      "public": {
-        "github": {
-          "status": "published",
-          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.4",
-          "publishedAt": "2026-11-07T04:42:58Z",
-          "tagCommit": "06b1b2e530c665e19b400bd639269f8a386a7a35",
-          "publicDownloadSha256Verified": true,
-          "latest": "v0.2.4"
-        },
-        "npm": {
-          "status": "published",
-          "version": "0.2.4",
-          "latest": "0.2.4",
-          "url": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.4",
-          "integrity": "sha512-PcsOOWkLNR2P0RQfzsLDWPNkSoAJS80S1W1D8FS0rh615LUlGMkpgGfHxXHLBeAtuMgibBVT6xcs1q2VN2/YrA==",
-          "shasum": "79f9b07874aed0aa14a2670b4e646e99a5df9b51",
-          "tarball": "https://registry.npmjs.org/dsh-plugin-compat-check/-/dsh-plugin-compat-check-0.2.4.tgz",
-          "publicTarballSha256Verified": true,
-          "observedAt": "2026-11-07T05:02:33.684333+00:00"
-        },
-        "publicInstallation": {
-          "status": "checked",
-          "pluginVersion": "0.2.4",
-          "dshVersion": "0.2.2-rc.1",
-          "tempProfileRemoved": true,
-          "scope": "Public registry fixed-version install and actual private host probe; no production account/model or general-business certification."
-        }
-      },
-      "receipt": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/download/v0.2.4/RELEASE-VERIFICATION.json",
-      "scope": "Exact original CI archive on clean tagged source06b1b2e, 27 successful main/dev/tag checks, macOS/Linux actual-host acceptance and verified public GitHub/npm distribution. Post-publication records do not retarget the tag."
+      "artifactSha256": "85b8b25f171a3dfe5bab834ff42ce3f94887d60f700c7c5978034326bd7e1d81",
+      "details": "cdbed0e:docs/current-state.json",
+      "scope": "Historical exact0.2.4 public release, macOS/Linux same artifact and CI receipts retained in Git; no certification of0.2.5."
     }
   },
-  "scope": "Published0.2.4 facts and exact tagged-source/archive acceptance; test totals1330 are fixture-suite counts, not user-profile or general-business certification."
+  "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
 }

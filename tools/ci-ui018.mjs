@@ -5,6 +5,7 @@ import {
 } from "./acceptance-target.mjs";
 /** One private tgz, one actual-host UI run, and provenance-bound CI evidence. */
 import fs from "node:fs";
+import { scrollChanged } from "./ui025-viewport.mjs";
 import path from "node:path";
 import os from "node:os";
 import { createHash } from "node:crypto";
@@ -32,7 +33,11 @@ export function validateUi018Evidence(
     result.dshVersion === uiAcceptanceVersion(expectedVersion),
     "exact requested host",
   );
-  if (["0.2.1-rc.5", "0.2.2-rc.1"].includes(expectedVersion)) {
+  if (
+    ["0.2.1-rc.5", "0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"].includes(
+      expectedVersion,
+    )
+  ) {
     for (const key of [
       "realHost",
       "installedArtifact",
@@ -93,7 +98,7 @@ export function validateUi018Evidence(
       "version-bound semantics",
     );
   }
-  if (expectedVersion === "0.2.2-rc.1") {
+  if (["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"].includes(expectedVersion)) {
     expect(typeof result.runtimeNode === "string", "actual runtime version");
     assertHostRuntime(expectedVersion, result.runtimeNode);
     expect(
@@ -110,6 +115,31 @@ export function validateUi018Evidence(
     expect(
       result.modelListing?.changeNotifications > 0,
       "model listing change notification",
+    );
+  }
+  if (["0.2.2-rc.2", "0.2.2-rc.3"].includes(expectedVersion)) {
+    const viewport = result.ui018?.viewportControls;
+    for (const key of [
+      "realBrowser",
+      "pageZoom",
+      "visualViewportPan",
+      "scrolling",
+      "nativeControls",
+    ])
+      expect(viewport?.[key] === true, "viewport." + key);
+    expect(
+      Array.isArray(viewport.controls) &&
+        viewport.controls.length === 2 &&
+        [1.25, 1.5].every((scale) =>
+          viewport.controls.some(
+            (c) =>
+              c.scale === scale &&
+              c.pointerToggleAndRestore === true &&
+              scrollChanged(c.scroll?.before, c.scroll?.displaced),
+          ),
+        ) &&
+        viewport.controls.some((c) => c.offsetLeft > 0 || c.offsetTop > 0),
+      "actual zoom/pan pointer controls",
     );
   }
   expect(

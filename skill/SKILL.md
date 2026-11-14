@@ -1,17 +1,17 @@
 ---
 name: dsh-plugin-compat-check
-description: 0.2.4版，用于检查已安装DSH插件的兼容性、升级前静态对比，以及排查更新后不工作、界面消失、工具无响应、did not activate或engines.dsh/peerDependencies声明问题。Use when checking installed DeepSeek Harness plugins, comparing exact host versions before upgrading, or investigating activation and missing-feature failures. Covers exact DSH 0.2.2-rc.1 catalogues and semantics, Cordis/tool scope migration, strict JSON tools and profile diagnosis; findings do not certify business functionality.
+description: 0.2.5版，用于检查已安装DSH插件的兼容性、升级前静态对比，以及排查更新后不工作、界面消失、工具无响应、did not activate或engines.dsh/peerDependencies声明问题。Use when checking installed DeepSeek Harness plugins, comparing exact host versions before upgrading, or investigating activation and missing-feature failures. Covers independently reviewed DSH 0.2.2-rc.2/rc.3 catalogues and bounded Agent/tool/Session migration, strict JSON tools and profile diagnosis; findings do not certify business functionality.
 ---
 
 # dsh-plugin-compat-check
 
-本版**0.2.4**对**已安装DSH插件**给出兼容证据与限制。API发现引用真实`file:line`，loader/声明事实不补造行号。各入口共用内核，静态与进程内观测可有不同结论/基线；先核目标、版本、规则和采样身份。
+本版**0.2.5**对**已安装DSH插件**给出兼容证据与限制。API发现引用真实`file:line`，loader/声明事实不补造行号。各入口共用内核，静态与进程内观测可有不同结论/基线；先核目标、版本、规则和采样身份。
 
 ## 选择入口
 
 当前会话有`compat_check`时优先调用，返回普通`report`、baseline/cache、toolVersion和exitCode；升级模式返回`upgradePreview`，普通report为null。无工具时定位含`bin/compat-check.mjs`、`lib/`、`rules/`的仓库，npm插件包没有CLI bin，不支持npx。根依赖缺失时在授权范围内运行`npm ci --ignore-scripts`。
 
-先核实际profile，不默认desktop；无参tool与设置页按宿主启动身份定位，冲突时用`compat_check({"profile":"my-profile"})`或CLI显式路径。Windows盘符/UNC有路径回归，仍须实机复验。profile位于`${DSH_HOME:-~/.dsh}/profiles/<name>`。rc.3/rc.5/0.2.2-rc.1界面入口：左下角“更多”/用户头像→设置→内置插件→兼容性；折叠不等于激活失败。界面支持中英韩，原始证据和JSON不翻译。
+先核实际profile，不默认desktop；无参tool与设置页按宿主启动身份定位，冲突时用`compat_check({"profile":"my-profile"})`或CLI显式路径。Windows盘符/UNC有路径回归，仍须实机复验。profile位于`${DSH_HOME:-~/.dsh}/profiles/<name>`。0.2.1-rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3界面入口：左下角“更多”/用户头像→设置→内置插件→兼容性；折叠不等于激活失败。界面支持中英韩，原始证据和JSON不翻译。
 
 ```sh
 node <repo>/bin/compat-check.mjs --help
@@ -38,13 +38,13 @@ node <repo>/bin/compat-check.mjs --nm <profile或node_modules> --no-baseline --j
 
 ## 升级前静态对比
 
-工具使用`compat_check({"upgradeTo":"0.2.2-rc.1"})`，当前版本取宿主，可按实际目标指定profile；无工具时运行：
+工具使用`compat_check({"upgradeTo":"0.2.2-rc.3"})`，当前版本取宿主，可按实际目标指定profile；无工具时运行：
 
 ```sh
-node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.5 --upgrade-to 0.2.2-rc.1 --json
+node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.2 --upgrade-to 0.2.2-rc.3 --json
 ```
 
-当前已认证目录仅为 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`。未知/范围返回unsupported-version及退出3，不能以邻近目录代替。预检不接受quiet、探针/启动、规则/目录覆盖、基线或issue-report参数，可带无操作的no-baseline。
+当前已认证目录仅为 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`。未知/范围返回unsupported-version及退出3，不能以邻近目录代替。预检不接受quiet、探针/启动、规则/目录覆盖、基线或issue-report参数，可带无操作的no-baseline。
 
 读取schema1、kind=`plugin-compat-check/upgrade-preview`的currentReport、targetReport、changes、summary与limitations。只比较同组私有字节，不执行/升级宿主，不借旁置probe、豁免、普通基线或缓存，不写状态。预检退出码0/1/2为无/非致命/致命新增或变重风险，3为无法预检；0仍可有旧问题。保留coverage/vacuous及客户端未验证限制，预测不代替目标版本业务验收。
 
@@ -58,7 +58,7 @@ node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.5 --upgra
 参考目录：0.2.1-rc.2 · SHA-256：90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743
 目录认证范围：0.2.1-rc.2；仅核验内置目录字节及对应精确版本的集成；不代表业务验收或运行时观测。
 
-工具版本: 0.2.4    证据覆盖有限: 4 个插件
+工具版本: 0.2.5    证据覆盖有限: 4 个插件
 结论: 可用 2    部分可用 1    不兼容 1    （其中 2 个「可用」没有已验证调用，不等于业务通过）
 ```
 
@@ -126,6 +126,6 @@ report_status=$?
 
 不额外启动宿主，不读写基线；仍可能读旁置probe。报告省略绝对路径、原始日志/源码/探针/基线，保留包名及包内位置；常见凭据字段隐藏不保证完全脱敏，预览后由用户决定分享。命令占位符须替换，生成文本不授权上传或发帖。
 
-0.2.4适配Cordis Core4.1、Loader/Include1.1、Agent工具作用域与新版插件管理；沿用缓存、JSON、profile和rc.5目录修复。无关运行状态写入不使报告失效，源码/声明变化仍会；非法JSON证据明确报错，不静默丢弃。目录未收录只表示覆盖不足，不能据此称方法缺失。
+0.2.5新增rc.2/rc.3精确目录及Agent所有权、Session重载和管理协议迁移提示；保留Cordis Core4.1、Loader/Include1.1与工具作用域适配；沿用缓存、JSON、profile和rc.5目录修复。无关运行状态写入不使报告失效，源码/声明变化仍会；非法JSON证据明确报错，不静默丢弃。目录未收录只表示覆盖不足，不能据此称方法缺失。
 
 实际运行版本取toolVersion/CLI version；分发以registry/GitHub Releases为准，docs/current-state.json按提交/归档/平台记录验收，不认证重打包、Windows或一般业务。docs/Plan.md列待办，操作/预算和目录治理见docs/guide.md、docs/maintaining.md。YAML是运行依赖，根dev依赖不随npm提供功能。

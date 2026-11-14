@@ -64,7 +64,7 @@ def method_names(seg):
     是两份不同的生成器产物，形状不完全一致。边界取下一个同级条目的起点。
     """
     marks = [(m.start(), m.group(1))
-             for m in re.finditer(r"key:\s*['\"]([A-Za-z][\w.]*)['\"]", seg)]
+             for m in re.finditer(r"key:\s*['\"`]([A-Za-z][\w.]*)['\"`]", seg)]
     svcs = {}
     for idx, (pos, key) in enumerate(marks):
         end = marks[idx + 1][0] if idx + 1 < len(marks) else len(seg)
@@ -72,9 +72,9 @@ def method_names(seg):
         names = []
         # Generated JS/TS string literals can contain quoted decorator arguments.
         # Keep escaped quotes inside the literal instead of ending at @Remote('…').
-        for literal in re.finditer(r"signature:\s*(['\"])((?:\\.|(?!\1)[^\\])*)\1", body):
+        for literal in re.finditer(r"signature:\s*(['\"`])((?:\\.|(?!\1)[^\\])*)\1", body):
             sig = re.sub(r"\\(['\"\\])", lambda m: m.group(1), literal.group(2))
-            mm = re.match(r"\s*(?:(?:@\w+(?:\([^)]*\))?|abstract|async|public|protected|private|static|override|readonly)\s+)*\*?\s*([A-Za-z_$][\w$]*)\s*\??\s*(?:\(|<)", sig)
+            mm = re.match(r"\s*(?:(?:@\w+(?:\([^)]*\))?|abstract|async\*?|public|protected|private|static|override|readonly)\s+)*\*?\s*([A-Za-z_$][\w$]*)\s*\??\s*(?:\(|<)", sig)
             if mm:
                 names.append(mm.group(1))
         svcs[key] = sorted(set(names))

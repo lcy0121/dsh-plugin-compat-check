@@ -6,8 +6,12 @@ import {
   assertBrowserAcceptance,
 } from "../tools/acceptance-target.mjs";
 test("new exact host requires real UI and rejects executable mismatch", () => {
-  assert.equal(acceptanceTarget("0.2.2-rc.1", "0.2.2-rc.1"), true);
-  assert.equal(uiAcceptanceVersion("0.2.2-rc.1"), "0.2.2-rc.1");
+  for (const v of ["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"]) {
+    assert.equal(acceptanceTarget(v, v), true);
+    assert.equal(uiAcceptanceVersion(v), v);
+    assert.throws(() => acceptanceTarget("0.2.1-rc.5", v), /mismatch/);
+    assert.throws(() => assertBrowserAcceptance(v, false, false), /browser/);
+  }
   assert.throws(() => acceptanceTarget("0.2.1-rc.5", "0.2.2-rc.1"), /mismatch/);
   assert.throws(
     () => assertBrowserAcceptance("0.2.2-rc.1", false, false),
@@ -35,7 +39,8 @@ test("CI keeps static Node22 while new host verifies its runtime before installa
   );
   assert(w.jobs.test.strategy.matrix.node.includes("22.19.0"));
   const job = w.jobs["linux-live"];
-  assert(job.strategy.matrix.dsh.includes("0.2.2-rc.1"));
+  for (const v of ["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"])
+    assert(job.strategy.matrix.dsh.includes(v));
   const pre = job.steps.findIndex(
     (s) => s.name === "Verify selected host runtime before installation",
   );
@@ -45,11 +50,13 @@ test("CI keeps static Node22 while new host verifies its runtime before installa
       job.steps.findIndex((s) => s.name?.startsWith("Install pinned official")),
   );
   const ui = job.steps.find((s) => s.run?.includes("node tools/ci-ui018.mjs"));
-  assert(ui.if.includes("0.2.2-rc.1"));
+  for (const v of ["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"])
+    assert(ui.if.includes(v));
   const download = job.steps.find((s) =>
     s.uses?.startsWith("actions/download-artifact"),
   );
-  assert(download.if.includes("0.2.2-rc.1"));
+  for (const v of ["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"])
+    assert(download.if.includes(v));
   assert(
     w.jobs.test.steps.some((s) => s.run?.includes("DSC_RC22_SOURCE_ARCHIVE")),
   );

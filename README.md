@@ -6,19 +6,19 @@
 
 ## 版本与入口
 
-**0.2.4**适配DSH 0.2.2-rc.1目录与精确语义、Cordis和工具执行作用域，复验新版插件管理与三槽位；保留运行状态缓存、严格JSON及profile修复；支持中英韩界面、升级预检、依赖视图、人工处置和报告历史。已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
+**0.2.5**适配DSH 0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3目录与精确语义、Cordis和工具执行作用域，复验新版插件管理与三槽位；保留运行状态缓存、严格JSON及profile修复；支持中英韩界面、升级预检、依赖视图、人工处置和报告历史。已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
 
 验收按提交、归档及平台记录于[docs/current-state.json](docs/current-state.json)；新制品须重验。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
 
-2026-11-06[上游复验](docs/upstream-verification.md)：dshmarket1.73.12仍有恢复/新装告警缺口，桌面操作写盘不等于完成；1024仍只列GitHub源码方式，awesome条目已合并。安装本工具请用下方npm或完整tgz。
+2026-11-15[上游复验](docs/upstream-verification.md)：dshmarket1.73.19仍有恢复/新装告警缺口，桌面操作写盘不等于完成；1024仍只列GitHub源码方式，awesome条目已合并。安装本工具请用下方npm或完整tgz。
 
 ## 安装与使用
 
 ```sh
 # 固定安装本版
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.4
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.5
 # 使用本地归档前核对摘要
-dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.4.tgz
+dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.5.tgz
 ```
 
 在安装所用profile的DSH中打开：**左下角“更多”（⋯）/用户头像 → 设置 → 内置插件 → 兼容性**。不默认是desktop；agent可调用`compat_check`。源码安装须[构建完整tgz](plugin/README.md#从源码构建安装)。
@@ -78,17 +78,17 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 
 ## 升级预检与验证
 
-工具调用`compat_check({"upgradeTo":"0.2.2-rc.1"})`，当前版本取宿主，返回`upgradePreview`；CLI显式给两个精确版本：
+工具调用`compat_check({"upgradeTo":"0.2.2-rc.3"})`，当前版本取宿主，返回`upgradePreview`；CLI显式给两个精确版本：
 
 ```sh
-node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.1-rc.5 --upgrade-to 0.2.2-rc.1 --json
+node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.2 --upgrade-to 0.2.2-rc.3 --json
 npm test
 npm run check
 node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-五个登记版本可任意比较；未知版本退出3。预检只静态比较同组私有字节，不借probe、豁免或普通基线。预检0/1/2为无/非致命/致命新增或变重风险，3为无法预检；0仍可有旧风险。普通退出码为**0未发现冲突、1部分可用或未知、2不兼容、3工具/输入错误**。
+七个登记版本可任意比较；未知版本退出3。预检只静态比较同组私有字节，不借probe、豁免或普通基线。预检0/1/2为无/非致命/致命新增或变重风险，3为无法预检；0仍可有旧风险。普通退出码为**0未发现冲突、1部分可用或未知、2不兼容、3工具/输入错误**。
 
 默认测试不启动真实DSH/模型，打包回归需要registry；发布前检查不发布，元数据核验取数失败不算通过。Windows和一般业务未获认证。详见[Plan](docs/Plan.md)、[使用指南](docs/guide.md)、[维护流程](docs/maintaining.md)、[作者CI](docs/author-ci.md)、[规则](rules/README.md)与[skill](skill/README.md)。
 

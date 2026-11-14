@@ -1,10 +1,10 @@
 # 开发计划与维护约定
 
-本文对应**0.2.4**。版本真源为`lib/version.mjs`；[README](../README.md)讲入口，[指南](guide.md)列操作/预算，[维护指南](maintaining.md)列实现与验证，[docs/current-state.json](current-state.json)保存带日期的限定回执。
+本文对应**0.2.5**。版本真源为`lib/version.mjs`；[README](../README.md)讲入口，[指南](guide.md)列操作/预算，[维护指南](maintaining.md)列实现与验证，[docs/current-state.json](current-state.json)保存带日期的限定回执。
 
 ## 1. 项目定位与交付状态
 
-检查已安装DSH插件，提供源码位置、依据和覆盖限制。**0.2.4**适配0.2.2-rc.1目录/精确语义、Cordis与工具执行作用域，复验插件管理和三槽位；声明放行、激活或无发现仍不等于业务正常。功能按本版描述，公开分发以[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub Releases](https://github.com/lcy0121/dsh-plugin-compat-check/releases)实际记录为准，限定验收见current-state。
+检查已安装DSH插件，提供源码位置、依据和覆盖限制。**0.2.5**新增0.2.2-rc.2/rc.3独立目录与Agent/工具/Session迁移提示，保留Cordis与严格工具作用域检查；声明放行、激活或无发现仍不等于业务正常。功能按本版描述，公开分发以[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub Releases](https://github.com/lcy0121/dsh-plugin-compat-check/releases)实际记录为准，限定验收见current-state。
 
 npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin、不支持npx。CLI、安装检查、批量、作者CI和健康执行器从private仓库运行；源码安装须[构建完整tgz](../plugin/README.md#从源码构建安装)。
 
@@ -14,7 +14,7 @@ npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin�
 
 AST按host/client/shared记录Context、服务及真实位置，入口遵循宿主解析。动态、变异、遮蔽、逃逸、异步及超限保守推断或弃权；能力守卫须控制调用，try/catch不是能力证明。不执行目标，不保存prompt或任意枚举；[语义范围](guide.md#参数与生命周期语义)与[提取规则](maintaining.md#提取器与探针维护)分别维护。
 
-0.2.4内置0.2.2-rc.1[独立审查](../rules/dsh-0.2.2-rc.1-review.json)：宿主107服务/601方法、客户端8服务/46方法；完整签名与固定官方归档/桌面字节对拍，提取器补齐泛型、带引号装饰器、生成器和可选方法。目录差分包含提取修正，不全是上游新增；新精确语义与迁移范围见[维护指南](maintaining.md#022-rc1语义与宿主验收)。
+0.2.5分别登记[rc.2](../rules/dsh-0.2.2-rc.2-review.json)与[rc.3](../rules/dsh-0.2.2-rc.3-review.json)：宿主108服务/639方法与109/640，客户端均8/46。来源固定完整源码/npm/桌面字节及签名，修复反引号和async*提取漏项，旧五版目录保留。目录新增不全是上游API新增；迁移提示与未知对象流/回调/时序边界见[维护指南](maintaining.md#025rc2与rc3独立适配)。
 
 rc.5[来源审查](../rules/dsh-0.2.1-rc.5-review.json)核对完整归档388文件差分，相对rc.3无服务/方法/生成签名变化；语义仍按精确版本独立审查。推理正文Slot新增rawText，text为显示文本；静态提示只定位注册和迁移限制，不验证props用途或流式行为，不把text使用报错。目录、语义、实际宿主及业务验收分别记录。
 
@@ -50,7 +50,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ### 2.7 升级前静态预检契约
 
-`runUpgradePreview`仅支持精确**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1**，其余读输入前退出3。对同组私有字节分别判定，捕获/分析/清理受监督，清理失败不成功；不安装/升级/执行宿主，不借运行时、豁免、普通缓存或基线。
+`runUpgradePreview`仅支持精确**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3**，其余读输入前退出3。对同组私有字节分别判定，捕获/分析/清理受监督，清理失败不成功；不安装/升级/执行宿主，不借运行时、豁免、普通缓存或基线。
 
 [预检schema1](../lib/upgrade-contract.mjs)：**0/1/2为无/非致命/致命新增或变重风险，3为无法预检**；旧风险及coverage/vacuous保留。CLI给nm/当前版本/upgrade-to，agent当前版本取宿主；返回upgradePreview，普通report为null。输入/目标/身份变化撤销旧比较，过时响应丢弃；[参数与预算](guide.md#升级预检与有限批量)统一维护。
 
@@ -62,7 +62,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ### 2.9 插件作者CI
 
-默认矩阵包含`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`，只读同一构建包；默认阻断发现、未知、覆盖不足及vacuous。显式策略不放行工具错误，new须已审查且身份相容的JSON。各格式保留完整证据，超限失败；策略码与内核码分开，0仅表示满足策略。参数、预算及工作流统一见[作者流程](author-ci.md)。
+默认矩阵包含`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`，只读同一构建包；默认阻断发现、未知、覆盖不足及vacuous。显式策略不放行工具错误，new须已审查且身份相容的JSON。各格式保留完整证据，超限失败；策略码与内核码分开，0仅表示满足策略。参数、预算及工作流统一见[作者流程](author-ci.md)。
 
 ## 3. 开发与文档维护约定
 
@@ -70,7 +70,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ## 4. 验收范围
 
-[current-state](current-state.json)按提交、归档和平台记录结果；正式发布须使用通过所选提交CI及同一tgz的新宿主macOS/Linux九项UI验收的文件，并核验公共安装。历史回执不认证新版本或重打包；固定24项业务样本仍保留12项未识别故障。0.2.4所选提交CI及新宿主macOS/Linux同包九项UI已通过，回执见current-state；Windows、用户试用和一般业务保持未验收；合成病例不替代真实试用。
+[current-state](current-state.json)按提交、归档和平台记录结果；正式发布须使用通过所选提交CI及同一tgz的新宿主macOS/Linux九项UI验收的文件，并核验公共安装。历史回执不认证新版本或重打包；固定24项业务样本仍保留12项未识别故障。0.2.4历史CI/同包回执保留；0.2.5只按本版实际回执声明结果，不继承历史成功；Windows、用户试用和一般业务保持未验收；合成病例不替代真实试用。
 
 ## 5. 验证入口
 
@@ -80,12 +80,9 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 仅列未完成事项，优先级不是漏洞评级。沿用的#7–#10修复与回归见[维护指南](maintaining.md#用户issue修订与回归)；源码修复不替代Windows现场确认。CI和平台验收以对应提交及同一归档为准。
 
-1. **P0：0.2.5首先完成rc.2/rc.3来源与精确API审查。** 固定官方[rc.2](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-rc.2)（2026-11-11、ddac967）和[rc.3](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-rc.3)（2026-11-13、38a6a5c）的tag/完整commit、源码/npm/桌面归档及摘要，按rc.1→rc.2→rc.3逐段核完整签名、依赖与语义；本次GitHub比较仅返回300文件，须用完整来源补齐。分别审查后再登记两版目录、选择策略、双向预检及作者矩阵，保留旧五版；公告或指南目录名不代替精确版本认证。
-2. **P0：适配Agent所有权、工具管线与Session精确语义。** 审查rc.2的调用者作用域/handle释放、具名多层SubAgent/Team及按preset关闭interrupt的准入；复验native/PTC选定执行器、condition集合、只读并行顺序、预算超限清状态和取消收敛。按[固定tag升级指南](https://github.com/deepseek-ai/deepseek-harness/tree/dsh-v0.2.2-rc.2/docs/upgrade-guide/v0.2.2-rc.1)补Session.append单事件/数组重载、工具及AttachmentError错误码、动态MCP接口审查与迁移提示；分别核rc.3，未知对象流/回调/时序保持弃权，不据提示新增fatal或已验证调用。
-3. **P0：复验插件加载、管理协议与鉴权边界。** 核可选客户端插件失败后的启动隔离、启用但未加载的“未运行”状态及原因，与现有Cordis状态/包映射区分。审查listBundles的updatable→update（registry/git/缺省）、unexpected-package及错误结构对探针、指导和验收夹具的影响；用自有registry复验更新、失败/取消恢复与dispose。核Zod4.6.6升级影响，两版分别跑严格JSON原始校验器、无参tool/真实profile、设置页、401/403/503及重启鉴权清理，旧五版回归保留。
-4. **P0：适配新客户端定位与槽位并复验三语界面。** 核rc.2浮层定位、缩放/平移/滚动及侧栏入口收纳，另审rc.3新增sidebar.session.action、workspace.picker工厂和directoryFlow槽位；按实际依赖决定迁移，不能因rc.3公告简短认定客户端契约未变。复验本工具三槽位、注入/热卸载恢复、焦点/草稿、窄容器/主题、三语及宿主语言回退；rc.3导入插件仅用隔离合成会话核加载/持久化依赖，不读取用户会话，Windows更新修复仍须现场另验。
-5. **P0：核对新发行布局、运行时与迁移指导。** 对拍两版随npm/桌面交付的源码、文档、primary-runtime和app-boot定位，核Node>=24.9及pnpm实际版本后调整私有执行器/CI pin，保留Node22静态工具。审查dsh-doc入口及搜索/账号/终端/Worktree归档配置迁移与本工具的实际交集，更新源码证据、三语指导和skill；目录缺失仍作覆盖限制，普通检查不代写宿主配置。保留受控样本、未识别故障与一般业务的区别。
-6. **P0：完成0.2.5两宿主同一制品回归与交付。** 为两版建立独立固定插件清单/预期，扩展验收目标、Linux矩阵及原始JSON/schema校验器门禁；作者默认版本由五增至七时同步审查总时限、输出与资源预算。重跑#7–#10、普通检查/预检/作者CI、HTTP/tool、九项UI及清理，用同一候选tgz取得macOS/Linux两版回执；Windows仍单列未验收。实现完成时统一0.2.5版本真源、manifest/lock、各版README、指南、skill/契约副本及current-state，正式发行另按同一制品流程核验。
-7. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题/窄容器及误读、失败、误报与操作耗时；联系、收集、公开分别授权，不默认遥测。
-8. **P2：等待上游修复与发行入口更新。** [1.73.12复验](upstream-verification.md)已完成：恢复细节/新装告警缺口仍在；0.2.2-rc.1 Desktop Host两次恢复及45秒手动自救仍未通过。awesome#717已合并，1024仍缺npm映射。待#928/#1047修复或npm映射变化后重验，反馈另取授权。
-9. **P2：Windows真实验收（依环境条件暂缓）。** 优先补#7–#10的Windows10 / DSH rc.5同一制品现场验证，记录版本、路径、启动方式及修复前后结果；同时验证安装、回收、权限、打包/诊断和自有资源清理。路径模拟及其它平台不替代实机结果，环境具备前保持未验收。
+1. **P0：复验插件加载、管理协议与鉴权边界。** 两版registry/git/file更新方式、失败/取消/错误包回滚、原始JSON校验器和Cordis状态区分已实现并验收；最终同包HTTP/tool、设置页与401/403/503、重启鉴权/清理仍随交付项复验。完整原任务保存在`cdbed0e:docs/Plan.md`。
+2. **P0：适配新客户端定位与槽位并复验三语界面。** 新槽位/浮层依赖审查与rc.3私有合成导入已完成；最终候选尚须两版三槽位、注入/热卸载、焦点/草稿、缩放/平移/实际滚动点击、窄容器/主题、三语及六种宿主语言回退验收。Windows更新修复仍待现场另验。
+3. **P0：完成0.2.5两宿主同一制品回归与交付。** 七版目录/预检/作者矩阵、独立固定五制品/24期望清单、四版原始校验器、运行时绑定和Linux矩阵已接通；#7–#10门禁与本地默认套件已通过。完成两版固定业务回归，冻结同一候选tgz取得macOS/Linux两版九项UI及上述HTTP/tool/清理回执，更新current-state后删除完成项。Linux所选提交CI须实际全通过，CI配置不等于验收；推送另取本轮授权，Windows仍未验收，正式发行另行授权。
+4. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题/窄容器及误读、失败、误报与操作耗时；联系、收集、公开分别授权，不默认遥测。
+5. **P2：等待上游修复与发行入口更新。** 2026-11-15[1.73.19新监测](upstream-verification.md)：#928 open/#1047 closed且均无新回复；原始恢复函数及install/update路由重验仍有恢复细节/新装告警缺口，1024仍缺npm映射，awesome已合并。0.2.2-rc.1 Desktop两次恢复及45秒手动自救为11月6日历史未通过，不冒充rc.2/rc.3复验；待修复/映射变化后重验，反馈另取授权。
+6. **P2：Windows真实验收（依环境条件暂缓）。** 优先补#7–#10的Windows10 / DSH rc.5同一制品现场验证，记录版本、路径、启动方式及修复前后结果；同时验证安装、回收、权限、打包/诊断和自有资源清理。路径模拟及其它平台不替代实机结果，环境具备前保持未验收。

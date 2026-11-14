@@ -89,7 +89,9 @@ export async function authorCI(args) {
           !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(v),
       )
     )
-      throw Error("Expected 1..4 distinct exact DSH versions");
+      throw Error(
+        `Expected 1..${AUTHOR_CI_LIMITS.versions} distinct exact DSH versions`,
+      );
     if (opts["--policy"]) {
       const candidate = JSON.parse(
         readRegular(

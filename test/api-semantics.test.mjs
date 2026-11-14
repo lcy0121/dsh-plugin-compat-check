@@ -591,7 +591,7 @@ test("rc.1 projection validation reports only proven stateVersion failures witho
 test("new migration contracts are exact version and side bound, leaving local objects alone", () => {
   const source =
     "export function apply(ctx){ctx.sessionProjections.cachedSnapshot(session);ctx.agents.get('id')}";
-  for (const version of ["0.2.1-rc.5", "0.2.2-rc.2", null]) {
+  for (const version of ["0.2.1-rc.5", "0.2.2-rc.4", null]) {
     const { p } = evaluate(source, { version, side: "host" });
     assert.doesNotMatch(notes(p), /agent.model.select|不完整.*baseline/);
     assert.match(notes(p), /语义未审查/);
@@ -832,4 +832,150 @@ test("new semantic abstention templates translate without changing raw evidence 
     localeStore.setPreference("auto");
   }
   assert.equal(JSON.stringify(examples), snapshot);
+});
+
+const modernHost = `export function apply(ctx){
+ctx.agents.create(options);ctx.agents.withInitiator(agent,handler);
+ctx.tools.selectExecutor(agent);ctx.tools.execute(batch);
+ctx.sessions.get(id);ctx.sessionPersistence.open(id);
+ctx.subagents.startActivation(spec);ctx.agentTeams.listTasks(agent);
+ctx.pluginManager.listBundles();ctx.mcpManager.probe(name);
+ctx.on('agent/request',handler);
+}`;
+
+test("rc.2 and rc.3 independently certify located migration entries without certifying execution", () => {
+  for (const version of ["0.2.2-rc.2", "0.2.2-rc.3"]) {
+    const { p } = evaluate(modernHost, { version, side: "host" });
+    assert.equal(
+      p.findings.filter((f) =>
+        ["api-argument-invalid", "api-option-unsupported"].includes(f.category),
+      ).length,
+      0,
+    );
+    assert.equal(p.coverage.verifiedCalls, 0);
+    for (const text of [
+      "ownerCtx",
+      "withInitiator",
+      "isConcurrencySafe",
+      "AttachmentError",
+      "append(eventTuples)",
+      "ownerName ?? ownerId",
+      "interrupt_agent",
+      "BundleInfo.update",
+      "MCP register",
+      "agent.model.select",
+    ])
+      assert(notes(p).includes(text), version + ": " + text);
+    assert.match(notes(p), /返回对象.*未|未追踪返回对象/);
+    assert.match(notes(p), /未执行连接、鉴权/);
+  }
+});
+
+test("modern semantics preserve nonfatal scalar checks and abstain on returned objects", () => {
+  for (const version of ["0.2.2-rc.2", "0.2.2-rc.3"]) {
+    const host = evaluate(
+      `export function apply(ctx){const s=ctx.sessions.get(id);s.append('event',payload);ctx.sessionProjections.register({stateVersion:-1})}`,
+      { version, side: "host" },
+    );
+    assert.equal(invalid(host.p).length, 1);
+    assert.equal(invalid(host.p)[0].severity, "degraded");
+    assert.equal(
+      host.p.findings.some((f) => f.method === "append"),
+      false,
+    );
+    const client = evaluate(
+      `export function apply(ctx){ctx.uiWorkspace.startSession(undefined,{whenDraftExists:'invalid'});ctx.slots.register({name:'conversation.chat.reasoning.body',render(){}})}`,
+      { version },
+    );
+    assert.equal(invalid(client.p).length, 1);
+    assert.match(notes(client.p), /rawText/);
+  }
+});
+
+test("modern entry guidance keeps Context proof, side and exact-version boundaries", () => {
+  for (const version of ["0.2.2-rc.2", "0.2.2-rc.3"]) {
+    for (const source of [
+      `export function apply(ctx){const local={mcpManager:{probe(){}}};local.mcpManager.probe(name)}`,
+      `export function apply(ctx){external(ctx);ctx.mcpManager.probe(name)}`,
+      `export function apply(ctx){ctx.mcpManager=other;ctx.mcpManager.probe(name)}`,
+    ]) {
+      const { p } = evaluate(source, { version, side: "host" });
+      assert.doesNotMatch(notes(p), /MCP register/);
+    }
+    const { p } = evaluate(
+      `export function apply(ctx){ctx.agents.withInitiator(a,f);ctx.mcpManager.probe(name)}`,
+      { version, side: "client" },
+    );
+    assert.doesNotMatch(notes(p), /ownerCtx|MCP register/);
+  }
+  for (const version of ["0.2.2-rc.1", "0.2.2-rc.4", null]) {
+    const { p } = evaluate(
+      `export function apply(ctx){ctx.mcpManager.probe(name);ctx.sessions.get(id)}`,
+      { version, side: "host" },
+    );
+    assert.doesNotMatch(notes(p), /MCP register|append\(eventTuples\)/);
+  }
+});
+
+test("modern receipt provenance is independent and missing entry proof disables certification", async () => {
+  const { validateSemanticBaselines } = await import(
+    "../lib/api-semantics.mjs"
+  );
+  assert.deepEqual(validateSemanticBaselines(rules), []);
+  const digests = new Set();
+  for (const version of ["0.2.2-rc.2", "0.2.2-rc.3"]) {
+    const receipt = JSON.parse(
+      fs.readFileSync(
+        new URL(
+          `../rules/dsh-${version}-semantics-review.json`,
+          import.meta.url,
+        ),
+      ),
+    );
+    const baseline = rules.apiSemantics.baselines[version];
+    assert.equal(receipt.sourceArchiveSha256, baseline.sourceArchiveSha256);
+    assert.equal(receipt.sourceTag, "dsh-v" + version);
+    assert.deepEqual(receipt.sources, baseline.sources);
+    assert.deepEqual(receipt.reviewedContracts, baseline.migrationNotices);
+    assert(Object.keys(receipt.sources).length <= 24);
+    digests.add(receipt.sourceArchiveSha256);
+    const copy = structuredClone(rules);
+    delete copy.apiSemantics.baselines[version].migrationNotices[
+      "host:mcpManager.probe"
+    ];
+    assert(validateSemanticBaselines(copy).length);
+    const { p } = evaluate(modernHost, {
+      version,
+      side: "host",
+      customRules: copy,
+    });
+    assert.doesNotMatch(notes(p), /MCP register|ownerCtx/);
+    assert.match(notes(p), /语义未审查/);
+  }
+  assert.equal(digests.size, 2);
+});
+
+test("modern migration advice translates all fixed paragraphs and preserves evidence identity", async () => {
+  const { evidenceNote } = await import("../plugin/src/i18n/presentation.mjs");
+  const { localeStore } = await import("../plugin/src/i18n/runtime.mjs");
+  try {
+    for (const version of ["0.2.2-rc.2", "0.2.2-rc.3"]) {
+      const { p } = evaluate(modernHost, { version, side: "host" });
+      const raw = p.coverage.limitations.filter((n) =>
+        n.startsWith("迁移提示："),
+      );
+      for (const lang of ["en", "ko"]) {
+        localeStore.setPreference(lang);
+        for (const note of raw) {
+          const rendered = evidenceNote(note);
+          assert.doesNotMatch(rendered, /[\p{Script=Han}]/u);
+          assert(rendered.includes("DSH " + version));
+          assert.match(rendered, /index.js:\d+/);
+          assert.equal(evidenceNote("user " + note), "user " + note);
+        }
+      }
+    }
+  } finally {
+    localeStore.setPreference("auto");
+  }
 });

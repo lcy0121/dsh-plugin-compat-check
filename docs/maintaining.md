@@ -1,6 +1,6 @@
 # 维护指南
 
-本文维护**0.2.4**的目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
+本文维护**0.2.5**的目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
 
 ## 维护入口与语法覆盖
 
@@ -20,7 +20,7 @@ UI词典位于`plugin/src/i18n/{zh,en,ko}.json`，用可读原文作为消息键
 
 打包回归与真实验收/到货工具经`tools/owned-package-source.mjs`核对manifest/lock/构建依赖，复制自有闭包到私有构建目录，不向源码、用户profile或运行包注入工具链。打包回归核源码客户端mtime不变，避免prepack重写与并行面板读取竞争。selector-parser固定覆盖7.1.6；更新Tailwind/覆盖后须重建、复验布局/主题及开发/运行两图审计。
 
-完整UI验收使用同一独立tgz及自有DSH/Chrome；默认rc.3，0.2.2-rc.1须显式选择：
+完整UI验收使用同一独立tgz及自有DSH/Chrome；默认rc.3，0.2.2-rc.2/rc.3须显式选择：
 
 ```sh
 DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 node tools/ci-ui018.mjs <自有输出目录>
@@ -28,7 +28,7 @@ DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 node tools/ci-ui018.mjs <自有输出目�
 
 入口统一启用九项验收：原面板、布局/主题/键盘、分页/完整导出、超时恢复/草稿、HTTP会话、复杂度/采样、处置定位、历史管理和中英韩国际化。检查第123条发现的双向定位/筛选/焦点、12px间距、短结论不折字、历史显式操作及报告/基线不变；密集数据来自明确标记的非激活合成插件。截图中的窄列CSS夹具不冒充真实插件布局。开关依赖以入口源码为准，单跑处置定位须同时启用hardening。
 
-输出含提交/dirty/逐文件摘要、tgz摘要、完整报告、日志、截图及SHA256SUMS，缺结果/截图或清理失败均不得通过。使用忽略的tmp或仓库外目录，避免证据进入源码身份；CI要求干净检出。Linux rc.3/rc.5/0.2.2-rc.1跑完整入口，旧两宿主保留集成门禁；平台结果绑定实际提交和归档，不由接入CI推定。`ui018`文件名、`DSC_UI018_*`及证据字段沿用以兼容脚本，不代表产品版本。Windows、真实用户和一般业务另验。
+输出含提交/dirty/逐文件摘要、tgz摘要、完整报告、日志、截图及SHA256SUMS，缺结果/截图或清理失败均不得通过。使用忽略的tmp或仓库外目录，避免证据进入源码身份；CI要求干净检出。Linux 0.2.1-rc.3/rc.5与0.2.2-rc.1/rc.2/rc.3跑完整入口，旧两宿主保留集成门禁；平台结果绑定实际提交和归档，不由接入CI推定。`ui018`文件名、`DSC_UI018_*`及证据字段沿用以兼容脚本，不代表产品版本。Windows、真实用户和一般业务另验。
 
 组件回归覆盖三槽位、共享订阅/可见性及迟到响应；`tools/ui018-performance.mjs`仅测1000插件合成hook树，不是浏览器性能门禁。语法矩阵由`test/fixtures/syntax-matrix.json`和`tools/syntax-matrix.mjs`记录/执行supported、inferred、abstained、excluded，核包名、调用对/跨度、确定性与诊断，不以解析成功代替结论或据业务答案调严重度。
 
@@ -102,10 +102,10 @@ rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.j
 
 ## 同一制品发布核对
 
-本版**0.2.4**的能力文档与带日期的发行/验收回执分开维护。发布顺序：
+本版**0.2.5**的能力文档与带日期的发行/验收回执分开维护。发布顺序：
 
 1. 先统一版本真源、manifest/lock、各版README、skill及示例；冻结到tag的文档不得保留“本版未发布”等即时状态。运行check与prepublish-check（不发布），用成功TAP更新current-state计数，核生成副本、许可证和公开元数据。
-2. 授权推送后等待所选提交全部Actions通过。CI candidate job只构建一次；rc.5及0.2.2-rc.1 job下载同一归档/回执，运行完整UI并上传证据。
+2. 授权推送后等待所选提交全部Actions通过。CI candidate job只构建一次；rc.5及0.2.2-rc.1/rc.2/rc.3 job下载同一归档/回执，运行完整UI并上传证据。
 3. 下载CI归档，核来源、提交、dirty及SHA-256；Mac使用该文件和构建回执重跑。若平台归档不同，即使内部文件相同也不能借旧文件验收。构建及重用命令见下方。
 4. 另取正式发布授权后，npm发布同一tgz，Git tag/Release附该文件、SHA256SUMS及限定验收回执；不从源码重打包。
 5. 核npm版本/integrity/shasum、附件SHA-256、tag提交，再实际公共安装。将真实结果记入current-state，不预写published或未经验证的时间/摘要。
@@ -116,7 +116,7 @@ GitHub简介/topics可独立于Git提交更新；npm简介/搜索关键词分别
 
 ## 参数语义基线维护
 
-`rules/severity.json.apiSemantics`登记0.2.1-rc.2/rc.3/rc.5及0.2.2-rc.1精确语义，与五版API目录认证独立。修改前锁定官方tag/归档，逐文件核对哈希、公开契约、实现及真实行为；归档只读，不执行目标。参数事实、弃用标记和所有权前提分别审查；clearPreviousDraft是兼容选项，新字段出现不表示它弃用。
+`rules/severity.json.apiSemantics`登记0.2.1-rc.2/rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3精确语义，与七版API目录认证独立。修改前锁定官方tag/归档，逐文件核对哈希、公开契约、实现及真实行为；归档只读，不执行目标。参数事实、弃用标记和所有权前提分别审查；clearPreviousDraft是兼容选项，新字段出现不表示它弃用。
 
 `lib/api-semantics.mjs.SEMANTIC_VERSIONS`单独限制语义版本，不能从目录登记或规则自报版本扩大。rc.5固定目录/完整来源审查见`rules/dsh-0.2.1-rc.5-review.json`；已进入CATALOG_REFERENCES，仍不认证一般业务。check:catalogs验证schema、登记版本及来源引用结构，不能代替语义审查。补类型/枚举、别名/改写、闭包副作用及跨版本正反例，验收同一tgz的HTTP/面板。静态验收夹具只放自有profile，保持未激活；提醒不证明泄漏/移除或业务失败。同步指导副本，保留旧语义基线，不自动认证未来、宿主同名、Windows或模型场景。
 
@@ -190,3 +190,15 @@ Cordis4.1保留递归entries及0–5状态；未知类型不当FAILED/PENDING，
 新宿主真实运行要求Node>=24.9；工具纯静态入口和旧宿主继续保留Node22.19覆盖，不提升产品engines。acceptance-target、rc2-live及ci-ui018精确接入0.2.2-rc.1；Linux矩阵保留旧四版，并为新版使用同一CI candidate及完整UI，安装前核运行时。Node22/24.9门禁均执行固定rc.5及0.2.2-rc.1原始JSON/schema校验器，新增DSC_RC22_SOURCE_ARCHIVE控制已核来源，坏摘要/缺源/跳过不转绿。ModelListingCache新版settings/changed回调、自动刷新及异步dispose单独记录，宿主Node由实际carrier查询、控制器版本另列；rc.5协议证据不借给新版。源码/归档变化仍阻断验收，实际CI结论以current-state所录提交为准，Windows仍未验收。
 
 0.2.4交付使用`tools/real-regression-manifest-rc22.json`独立锁定新宿主目录及五suite/24项发布插件预期，先固定预期再运行`DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.1 node tools/real-regression.mjs --live --out-dir <空目录>`；偏差记失败，不从输出反写预期。完整UI用上方供应归档入口，目标改为0.2.2-rc.1。可用空自有HOME运行npm test/prepublish排除用户profile，回执必须明确此范围，不能声称验证用户现场。
+
+## 0.2.5：rc.2与rc.3独立适配
+
+来源、完整差分、npm清单和桌面完整签名分别固定在[rc.2审查](../rules/dsh-0.2.2-rc.2-review.json)与[rc.3审查](../rules/dsh-0.2.2-rc.3-review.json)，不依赖GitHub截断的300文件。rc.2宿主108服务/639方法，rc.3为109/640，客户端均8/46；新增导入器服务只在rc.3。提取器兼容生成客户端反引号及async*，旧五目录字节保留。新目录接入普通检查、双向预检和作者七版默认矩阵；每cell2MiB、总报告8MiB、总30秒仍为硬上限，超限退出3，不裁证据。两版[固定清单](../tools/real-regression-manifest-rc22-2.json)与[rc.3清单](../tools/real-regression-manifest-rc22-3.json)独立绑定目录，沿用事先审查的五制品/24期望，不从实测回写预期。
+
+[rc.2语义](../rules/dsh-0.2.2-rc.2-semantics-review.json)与[rc.3语义](../rules/dsh-0.2.2-rc.3-semantics-review.json)独立登记Agent caller/initiator与ownerCtx、handle释放、具名Subagent/Team及interrupt preset、native/PTC与condition集合、isConcurrencySafe严格true的并行有序/预算清状态、Session.append单事件/数组重载及AttachmentError结构。静态提示仅落在已证明Context入口，不能证明返回对象流、callback、dispose时序或真实AgentLoop收敛，不新增fatal或已验证调用。MCP register/watch/restart/probe、manager update=registry/git/缺省及unexpected-package为迁移审查边界。三语固定提示同源，原始JSON/证据不翻译。
+
+本工具使用pluginManager.list和Cordis fiber；enabled、update可用与客户端模块存在均不证明ACTIVE。新版boot-client的可选client加载失败只警告继续，required最小集失败才阻断；本工具非required项。三槽位仍为settings.plugins.tab与plugins.detail.section/badge；未消费Popper、sidebar.session.action、workspace.picker或directoryFlow，故不新增无关UI依赖。私有manager验收覆盖registry/git/file更新方式、成功、启用失败、坏包、取消及unexpected-package回滚；rc.3导入只用合成v3归档，核持久化与owner鉴权、不创建liveSession/Agent和卸载404。它们不认证市场恢复或Windows。
+
+运行入口绑定PATH中选定dsh的真实路径：npm CLI使用同路径解析的app-boot，Desktop launcher才用其Electron/ASAR，不借本机另一个版本。runtime查询也用该carrier。两npm包含docs/src，CLI为lib/bin.js，app-boot公开入口为lib/index.js及worker/profile-resolution-bootstrap；安装版本、目录和摘要见独立审查。primary-runtime是宿主resources布局，不是可假定的npm同名模块；普通检查不创建或修复它。新宿主Node>=24.9.0，源码根packageManager两版均pnpm11.28.5，私有执行器与CI同步pin；工具Node22静态覆盖保留。原始JSON/schema门禁分别固定rc.5与三个0.2.2来源，显式DSC_RC22_2_SOURCE_ARCHIVE/DSC_RC22_3_SOURCE_ARCHIVE可复用已核归档。
+
+升级指南目录名v0.2.2-rc.1不表示实际rc.1已含该变更。两新版创造模式改用dsh-doc（源码编写skill名dsh-doc-writing），旧四skill及模板路径按官方指南迁移；本工具skill名称和provider无交集。searchBilling/fetchBilling及auth.sources、具体deepseek-account/Remote迁移、终端optional-terminal-panel与CLEANUP_FAILED，以及Worktree归档清理/retainOnArchive是宿主配置职责；本工具不调用这些提供方、不读凭据或改配置。归档可能删除干净检出目录而保留分支，ignored/skip-worktree文件不能保证保留；按宿主指南显式选择保留策略。普通检查不执行归档或迁移。实际回执统一见current-state；CI接入不等于Linux已验收。

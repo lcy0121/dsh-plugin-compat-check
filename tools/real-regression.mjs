@@ -13,18 +13,29 @@ import { stopOwnedChild } from "../lib/owned-process.mjs";
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 export function createRegression(version = "0.2.1-rc.2") {
   if (
-    !["0.2.1-rc.2", "0.2.1-rc.3", "0.2.1-rc.5", "0.2.2-rc.1"].includes(version)
+    ![
+      "0.2.1-rc.2",
+      "0.2.1-rc.3",
+      "0.2.1-rc.5",
+      "0.2.2-rc.1",
+      "0.2.2-rc.2",
+      "0.2.2-rc.3",
+    ].includes(version)
   )
     throw Error("Regression requires a reviewed exact version");
   const manifestPath = path.join(
     repo,
-    version === "0.2.2-rc.1"
-      ? "tools/real-regression-manifest-rc22.json"
-      : version === "0.2.1-rc.5"
-        ? "tools/real-regression-manifest-rc5.json"
-        : version === "0.2.1-rc.3"
-          ? "tools/real-regression-manifest-rc3.json"
-          : "tools/real-regression-manifest.json",
+    version === "0.2.2-rc.3"
+      ? "tools/real-regression-manifest-rc22-3.json"
+      : version === "0.2.2-rc.2"
+        ? "tools/real-regression-manifest-rc22-2.json"
+        : version === "0.2.2-rc.1"
+          ? "tools/real-regression-manifest-rc22.json"
+          : version === "0.2.1-rc.5"
+            ? "tools/real-regression-manifest-rc5.json"
+            : version === "0.2.1-rc.3"
+              ? "tools/real-regression-manifest-rc3.json"
+              : "tools/real-regression-manifest.json",
   );
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   const sha = (value) =>

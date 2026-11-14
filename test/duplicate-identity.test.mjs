@@ -263,17 +263,17 @@ test("host and agent expose an uncertified future DSH version with the actual re
   assert.equal(body.agent.ok, true);
   for (const out of [body.host, body.agent]) {
     assert.equal(out.report.catalog.targetVersion, "9.9.9");
-    assert.equal(out.report.catalog.referenceVersion, "0.2.2-rc.1");
+    assert.equal(out.report.catalog.referenceVersion, "0.2.2-rc.3");
     assert.equal(out.report.catalog.verified, false);
     assert.equal(
       out.report.catalog.sha256,
-      "ecad83d5e428e8fd348542e8ddbb83c829ca93f43169e6f37e18e29e599c4024",
+      "ec38e44cf9074042b13e6091c711a9907336b0b4154a26935cd8aa9091825cca",
     );
   }
   assert.match(body.agent.text, /未认证/);
   assert.ok(
     body.agent.text.includes(
-      "ecad83d5e428e8fd348542e8ddbb83c829ca93f43169e6f37e18e29e599c4024",
+      "ec38e44cf9074042b13e6091c711a9907336b0b4154a26935cd8aa9091825cca",
     ),
   );
 });

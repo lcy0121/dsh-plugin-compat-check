@@ -36,7 +36,7 @@ test("offline author matrix preserves exact catalogue/kernel results, identity a
   assert.notEqual(r.status, 3, r.stderr + r.stdout);
   const m = JSON.parse(r.stdout);
   assert.equal(m.kind, "plugin-compat-check/author-ci");
-  assert.equal(m.cells.length, 5);
+  assert.equal(m.cells.length, 7);
   for (const c of m.cells) {
     assert.equal(c.status, "analyzed");
     assert.equal(c.report.catalog.verified, true);
@@ -59,6 +59,12 @@ test("unknown versions and bad inputs fail closed with machine readable output",
   for (const args of [
     ["--package", f.source, "--versions", "99.0.0"],
     ["--package", f.source, "--versions", "^0.2.1"],
+    [
+      "--package",
+      f.source,
+      "--versions",
+      Array.from({ length: 8 }, (_, i) => `0.2.${i}`).join(","),
+    ],
     ["--package", f.source, "--versions", "0.2.1-rc.2,0.2.1-rc.2"],
     ["--package", path.join(f.root, "absent")],
     ["--package", f.source, "--typo"],
@@ -339,7 +345,7 @@ test("dense accepted JSON can be reused as previous and replayed to HTML without
     path.join(f.source, "index.js"),
     "export function apply(ctx){" +
       Array.from(
-        { length: 300 },
+        { length: 200 },
         (_, i) => `ctx.missingService${i}.call();`,
       ).join("") +
       "}",

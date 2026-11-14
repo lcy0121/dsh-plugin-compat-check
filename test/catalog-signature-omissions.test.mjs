@@ -67,3 +67,25 @@ assert x == {'stream':['flush','follow']},x
   );
   assert.equal(r.status, 0, r.stderr);
 });
+
+test("extractor reads minified static template strings in generated client catalogues", () => {
+  const code = [
+    "s=open('tools/catalog/extract-host-api.py').read().rsplit('main()',1)[0]",
+    "n={};exec(s,n)",
+    "x=n['method_names']('''key:`layout`,methods:[{signature:`@Remote(\"panel\") selectPanel<T>(id: T): void`},{signature:`readonly field: string`}],key:`slots`,methods:[{signature:`registerFactory<K>(name: K): void`}];''')",
+    "assert x == {'layout':['selectPanel'],'slots':['registerFactory']}, x",
+  ].join("\n");
+  const r = spawnSync("python3", ["-c", code], { encoding: "utf8" });
+  assert.equal(r.status, 0, r.stderr);
+});
+
+test("extractor retains async generator methods behind Remote options", () => {
+  const code = [
+    "s=open('tools/catalog/extract-host-api.py').read().rsplit('main()',1)[0]",
+    "n={};exec(s,n)",
+    "x=n['method_names'](\"key: 'mcpManager', signature: \\\"@Remote({ mode: 'stream' }) async* watch(signal: AbortSignal): AsyncIterable<View[]>\\\"\")",
+    "assert x == {'mcpManager':['watch']}, x",
+  ].join("\n");
+  const r = spawnSync("python3", ["-c", code], { encoding: "utf8" });
+  assert.equal(r.status, 0, r.stderr);
+});

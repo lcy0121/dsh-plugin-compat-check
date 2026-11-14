@@ -229,6 +229,38 @@ test("rc.5 UI gate binds the requested host and requires separate protocol and m
   );
   rc22.uiI18n.hostLocaleFallbacks = ["ja", "es", "fr", "de", "ru", "pt"];
   assert.equal(validateUi018Evidence(rc22, "a".repeat(64), "0.2.2-rc.1"), true);
+  for (const version of ["0.2.2-rc.2", "0.2.2-rc.3"]) {
+    const newer = structuredClone(rc22);
+    newer.dshVersion = newer.apiSemantics.exactVersion = version;
+    assert.throws(
+      () => validateUi018Evidence(newer, "a".repeat(64), version),
+      /viewport/,
+    );
+    newer.ui018.viewportControls = {
+      realBrowser: true,
+      pageZoom: true,
+      visualViewportPan: true,
+      scrolling: true,
+      nativeControls: true,
+      controls: [1.25, 1.5].map((scale) => ({
+        scale,
+        offsetTop: 30,
+        offsetLeft: 0,
+        pointerToggleAndRestore: true,
+        scroll: {
+          before: [{ top: 0, left: 0 }],
+          displaced: [{ top: 25, left: 0 }],
+        },
+      })),
+    };
+    assert.equal(validateUi018Evidence(newer, "a".repeat(64), version), true);
+    for (const control of newer.ui018.viewportControls.controls)
+      control.offsetTop = 0;
+    assert.throws(
+      () => validateUi018Evidence(newer, "a".repeat(64), version),
+      /pointer controls/,
+    );
+  }
   rc22.modelListing.changeNotifications = 0;
   assert.throws(
     () => validateUi018Evidence(rc22, "a".repeat(64), "0.2.2-rc.1"),
@@ -338,6 +370,8 @@ test("rc.5 Linux plan preserves old targets and consumes one candidate built by 
     "0.2.1-rc.3",
     "0.2.1-rc.5",
     "0.2.2-rc.1",
+    "0.2.2-rc.2",
+    "0.2.2-rc.3",
   ]);
   assert(job.needs.includes("candidate"));
   const download = job.steps.find((s) =>

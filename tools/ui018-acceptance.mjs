@@ -1,6 +1,7 @@
 /** Opt-in checks against the actual installed UI and its computed browser styles. */
 import fs from "node:fs";
 import path from "node:path";
+import { verifyViewportControls } from "./ui025-viewport.mjs";
 export async function verifyUi018(chrome, evaluate, poll) {
   const requireTrue = (value, message) => {
     if (!value) throw Error(message);
@@ -159,7 +160,13 @@ export async function verifyUi018(chrome, evaluate, poll) {
         ),
       "Keyboard collapse did not remove table",
     );
+    const viewportControls = await verifyViewportControls({
+      chrome,
+      evaluate,
+      poll,
+    });
     return {
+      viewportControls,
       controls,
       initial,
       colors,

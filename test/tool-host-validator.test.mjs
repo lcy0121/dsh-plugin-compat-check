@@ -21,6 +21,20 @@ for (const [version, archive, digest, prefix] of [
     "416750920b64272899259c26b2fa0a4341132c9c19b43337da502ab7ebd599f1",
     "deepseek-harness-dsh-v0.2.2-rc.1/",
   ],
+  [
+    "rc22-2",
+    process.env.DSC_RC22_2_SOURCE_ARCHIVE ||
+      "tmp/025-development-20261115/catalogue/rc2-source-proxy.tgz",
+    "d376fe64ec4b7c9b5837fb1155ed3a48e7e0e5f5b0aae0b91d9fb836daa8c20e",
+    "deepseek-harness-dsh-v0.2.2-rc.2/",
+  ],
+  [
+    "rc22-3",
+    process.env.DSC_RC22_3_SOURCE_ARCHIVE ||
+      "tmp/025-development-20261115/catalogue/rc3-source-proxy.tgz",
+    "bf6d668e52a26edf98aa2ef7960e240c8d9afcefbad2b09887a2cb1e14001dd5",
+    "deepseek-harness-dsh-v0.2.2-rc.3/",
+  ],
 ]) {
   test(
     `official ${version} registration and output validator accepts ordinary, cached, failure and upgrade results`,

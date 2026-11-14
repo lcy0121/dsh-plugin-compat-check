@@ -168,3 +168,35 @@ test("independent truth scorer cannot infer package ownership from a tree-local 
     assert.equal(r.rows[0].reason, "no-label");
   }
 });
+
+test("selected manager bundles and update availability cannot establish an active loader Fiber", () => {
+  const selected = [
+    {
+      id: "tree:child",
+      packageName: "sample",
+      enabled: true,
+      availability: "profile",
+      update: "registry",
+    },
+  ];
+  for (const fiber of [undefined, {}, { state: undefined }]) {
+    const r = loaderObservations(
+      context(entry({ fiber })),
+      manifests,
+      selected,
+    );
+    assert.equal(r.rows[0].state, "UNREADABLE");
+  }
+  assert.equal(
+    loaderObservations(context(), manifests, selected).rows.length,
+    0,
+  );
+  assert.equal(
+    loaderObservations(
+      context(entry({ fiber: { state: 0 } })),
+      manifests,
+      selected,
+    ).rows[0].state,
+    "PENDING",
+  );
+});

@@ -13,7 +13,7 @@ test("0.2.2-rc.1 selects independently reviewed bytes while future hosts remain 
     exact.catalog.host.tools.methods.includes("executionMode"),
     false,
   );
-  assert.equal(loadCatalog(root, "0.2.2-rc.2").evidence.verified, false);
+  assert.equal(loadCatalog(root, "0.2.2-rc.4").evidence.verified, false);
   assert.equal(
     loadCatalog(root, "0.2.1-rc.5").evidence.referenceVersion,
     "0.2.1-rc.5",
@@ -26,6 +26,10 @@ test("new catalogue participates in bidirectional static preview without executi
   t.after(f.cleanup);
   for (const [currentVersion, targetVersion] of [
     ["0.2.1-rc.5", "0.2.2-rc.1"],
+    ["0.2.2-rc.1", "0.2.2-rc.2"],
+    ["0.2.2-rc.2", "0.2.2-rc.3"],
+    ["0.2.2-rc.3", "0.2.2-rc.2"],
+    ["0.2.2-rc.2", "0.2.2-rc.1"],
     ["0.2.2-rc.1", "0.2.1-rc.5"],
     ["0.2.2-rc.1", "0.2.2-rc.1"],
   ]) {
@@ -43,7 +47,7 @@ test("new catalogue participates in bidirectional static preview without executi
   const r = await runUpgradePreview({
     nm: "/must-not-read",
     currentVersion: "0.2.2-rc.1",
-    targetVersion: "0.2.2-rc.2",
+    targetVersion: "0.2.2-rc.4",
   });
   assert.equal(r.status, "unsupported-version");
 });
@@ -61,7 +65,15 @@ test("author defaults add the reviewed new host without silently dropping earlie
   const v = JSON.parse(r.stdout);
   assert.deepEqual(
     v.cells.map((x) => x.dshVersion),
-    ["0.2.0-rc.2", "0.2.1-rc.2", "0.2.1-rc.3", "0.2.1-rc.5", "0.2.2-rc.1"],
+    [
+      "0.2.0-rc.2",
+      "0.2.1-rc.2",
+      "0.2.1-rc.3",
+      "0.2.1-rc.5",
+      "0.2.2-rc.1",
+      "0.2.2-rc.2",
+      "0.2.2-rc.3",
+    ],
   );
   assert.equal(v.cells.at(-1).report.catalog.verified, true);
 });
