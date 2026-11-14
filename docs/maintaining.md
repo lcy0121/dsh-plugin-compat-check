@@ -173,23 +173,17 @@ Node22/24、九项UI及问题联合验收按精确提交/归档核对；CI状态
 
 ## 0.2.4：0.2.2-rc.1来源、Cordis与工具迁移
 
-[0.2.2-rc.1审查](../rules/dsh-0.2.2-rc.1-review.json)锁定官方tag/commit、源码/npm/app.asar摘要和完整文件差分。双端完整签名与原始归档及桌面字节一致；独立AST核方法名，四项压平后缺少类型分隔符的签名另行人工核对。提取器补齐泛型、转义引号装饰器、生成器和可选方法；旧登记字节保持，目录新增不全是上游API新增。新精确目录已接普通报告、双向预检和作者默认五版矩阵；参数语义与迁移范围见下节。
+[0.2.2-rc.1审查](../rules/dsh-0.2.2-rc.1-review.json)固定官方源码/npm/ASAR、完整差分和双端签名；补齐泛型、转义装饰器、生成器、可选方法等提取漏项，不将其全算上游新增。0.2.4的五版作者矩阵、原始校验器、同包平台和[业务清单](../tools/real-regression-manifest-rc22.json)为历史独立验收，完整过程可追溯`cdbed0e:docs/maintaining.md`，不认证后来归档。
 
-Cordis4.1保留递归entries及0–5状态；未知类型不当FAILED/PENDING，树内id不能作包身份，显式冲突保持未映射，独立标签评分遵守同一边界。探针按已检查条目计预算，跳过坏形状不绕过上限。ctx.inject返回Fiber，清理保留dispose接收者，同时兼容旧函数disposer；此遗漏在旧宿主也存在。Include1.1的commit/journal/flush与patch克隆已核，静态扫描不写宿主配置，不模拟运行时持久化或热更新回滚。
+Cordis4.1保留递归entries和0–5状态；未知类型、树id、包映射冲突不当FAILED/PENDING或包身份。探针预算按访问条目计；ctx.inject返回Fiber，dispose保留接收者并兼容旧函数。Include1.1的commit/journal/flush及patch克隆已核，静态扫描不写配置或模拟持久化/回滚。
 
-`tools/owned-tool-invocation.mjs`仅供自有验收fixture：rc.5保留单调用；新宿主通过真实Agent选择执行器，resolve捕获modelSelection/步骤准入，executable和execute使用同一集合并finally释放。PTC经run_code调用能力，不直接绕过执行器；当前桥接限定TypeScript默认函数体模式，不外推Python/VM Script/REPL。`installIssue023Fixture(profile,{hostVersion,agentPreset})`显式选择新宿主及preset，返回executorSchemas作为独立证据；preset须在Agent setup中实际挂载，meta声明本身不证明执行器选择。
-
-`test/owned-tool-host-probe.test.mjs`默认跳过，显式DSC_RC22_HOST_PROBE=1才执行；可通过DSC_HOST_ASAR及DSC_HOST_ELECTRON选择安装归档，核摘要后运行实际ToolsService/native/PTC、条件准入、作用域、提示词、严格JSON与取消；探针的PTC runtime seam是受控夹具，不能代替真实后端。实际私有宿主/Chrome和独立tgz基础回执见current-state；精确语义与九项UI见下节，平台回执见current-state；现场试用另列§6，历史rc.5回执不认证新宿主。
+自有`owned-tool-invocation`在rc.5保留单调用，新宿主由真实Agent选执行器并捕获modelSelection/准入集合，executable/execute共用集合且finally释放；PTC经run_code执行，目前桥接仅TypeScript默认函数体，不外推Python/Script/REPL。Issue023 fixture显式给hostVersion/preset，setup真实挂载preset，返回executorSchemas；meta不证明选择。ASAR探针须DSC_RC22_HOST_PROBE=1，并可给DSC_HOST_ASAR/DSC_HOST_ELECTRON，核摘要后运行；PTC runtime seam仍为受控夹具，不认证真实后端。
 
 ## 0.2.2-rc.1语义与宿主验收
 
-[独立语义审查](../rules/dsh-0.2.2-rc.1-semantics-review.json)锁定官方归档及所审源码摘要。沿用已核startSession/草稿、timer、retain和reasoning约定；对可证明的投影stateVersion只校验非负安全整数。固定agent/request订阅及已证明端侧/服务调用提供agent.model、步骤准入、Session events/state/control、异步投影注册与changes帧迁移提示；不分析回调改路由、返回Agent/Session对象流、await顺序或业务结果。动态/逃逸/访问器保持弃权，提示不增加已验证调用或自动升级为fatal。semanticSites只保存固定事件身份，共用50000调用点及原8MiB回传预算；三语固定提示同步。
+[精确语义审查](../rules/dsh-0.2.2-rc.1-semantics-review.json)独立固定来源，沿用startSession/草稿、timer、retain/reasoning；可证明stateVersion只校非负安全整数。固定agent/request及已证明服务调用提供agent.model、准入、Session events/state/control、异步projection注册/changes迁移提示。动态、逃逸、访问器、返回对象流、callback路由、await顺序和业务结果仍弃权，不升fatal或增加已验证调用；semanticSites限固定事件身份，共用50000调用点/8MiB回传预算。
 
-新版实际PluginManager通过私有registry验证成功更新、启用失败/下载失败/实际取消后恢复旧版，分别核HTTP结果、依赖版本和apply/dispose记录；磁盘写入不替代激活。九项UI继续要求三槽位、身份、卸载路由/样式撤销后恢复、草稿/焦点、窄屏/主题及完整导出。新增ja/es/fr/de/ru/pt宿主语言均须auto回退英文且保留编辑器；不扩增产品翻译。迟到响应/worker回收由受控生命周期回归补证，不冒称实机精确指令时序验收。
-
-新宿主真实运行要求Node>=24.9；工具纯静态入口和旧宿主继续保留Node22.19覆盖，不提升产品engines。acceptance-target、rc2-live及ci-ui018精确接入0.2.2-rc.1；Linux矩阵保留旧四版，并为新版使用同一CI candidate及完整UI，安装前核运行时。Node22/24.9门禁均执行固定rc.5及0.2.2-rc.1原始JSON/schema校验器，新增DSC_RC22_SOURCE_ARCHIVE控制已核来源，坏摘要/缺源/跳过不转绿。ModelListingCache新版settings/changed回调、自动刷新及异步dispose单独记录，宿主Node由实际carrier查询、控制器版本另列；rc.5协议证据不借给新版。源码/归档变化仍阻断验收，实际CI结论以current-state所录提交为准，Windows仍未验收。
-
-0.2.4交付使用`tools/real-regression-manifest-rc22.json`独立锁定新宿主目录及五suite/24项发布插件预期，先固定预期再运行`DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.1 node tools/real-regression.mjs --live --out-dir <空目录>`；偏差记失败，不从输出反写预期。完整UI用上方供应归档入口，目标改为0.2.2-rc.1。可用空自有HOME运行npm test/prepublish排除用户profile，回执必须明确此范围，不能声称验证用户现场。
+rc.1历史manager核实际操作、依赖与apply/dispose；写盘不代替激活。九项UI和ja/es/fr/de/ru/pt回退英文、编辑器保持由实际宿主复验；迟到/worker清理由受控测试补证，Windows另验。工具保留Node22静态支持，新宿主要求Node>=24.9；runtime由实际carrier查询，rc.5协议不借给新版。DSC_HOST_SOURCE_ARCHIVE/DSC_RC22_SOURCE_ARCHIVE控制已核旧来源，缺失/坏摘要/跳过不绿；新版本门禁见下节。可用空自有HOME运行test/prepublish，须明确未验用户profile。
 
 ## 0.2.5：rc.2与rc.3独立适配
 
@@ -201,4 +195,4 @@ Cordis4.1保留递归entries及0–5状态；未知类型不当FAILED/PENDING，
 
 运行入口绑定PATH中选定dsh的真实路径：npm CLI使用同路径解析的app-boot，Desktop launcher才用其Electron/ASAR，不借本机另一个版本。runtime查询也用该carrier。两npm包含docs/src，CLI为lib/bin.js，app-boot公开入口为lib/index.js及worker/profile-resolution-bootstrap；安装版本、目录和摘要见独立审查。primary-runtime是宿主resources布局，不是可假定的npm同名模块；普通检查不创建或修复它。新宿主Node>=24.9.0，源码根packageManager两版均pnpm11.28.5，私有执行器与CI同步pin；工具Node22静态覆盖保留。原始JSON/schema门禁分别固定rc.5与三个0.2.2来源，显式DSC_RC22_2_SOURCE_ARCHIVE/DSC_RC22_3_SOURCE_ARCHIVE可复用已核归档。
 
-升级指南目录名v0.2.2-rc.1不表示实际rc.1已含该变更。两新版创造模式改用dsh-doc（源码编写skill名dsh-doc-writing），旧四skill及模板路径按官方指南迁移；本工具skill名称和provider无交集。searchBilling/fetchBilling及auth.sources、具体deepseek-account/Remote迁移、终端optional-terminal-panel与CLEANUP_FAILED，以及Worktree归档清理/retainOnArchive是宿主配置职责；本工具不调用这些提供方、不读凭据或改配置。归档可能删除干净检出目录而保留分支，ignored/skip-worktree文件不能保证保留；按宿主指南显式选择保留策略。普通检查不执行归档或迁移。实际回执统一见current-state；CI接入不等于Linux已验收。
+升级指南目录名v0.2.2-rc.1不表示实际rc.1已含该变更。两新版创造模式改用dsh-doc（源码编写skill名dsh-doc-writing），旧四skill及模板路径按官方指南迁移；本工具skill名称和provider无交集。searchBilling/fetchBilling及auth.sources、具体deepseek-account/Remote迁移、终端optional-terminal-panel与CLEANUP_FAILED，以及Worktree归档清理/retainOnArchive是宿主配置职责；本工具不调用这些提供方、不读凭据或改配置。归档可能删除干净检出目录而保留分支，ignored/skip-worktree文件不能保证保留；按宿主指南显式选择保留策略。普通检查不执行归档或迁移。review.integrationAcceptance为来源审查时快照，实际回执统一见current-state；CI接入不等于Linux已验收。

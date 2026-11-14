@@ -163,9 +163,11 @@ jobs:
           const root = path.join(process.env.RUNNER_TEMP, 'candidate');
           const receipt = JSON.parse(fs.readFileSync(path.join(root, 'summary.json')));
           if (path.basename(receipt.artifact.filename) !== receipt.artifact.filename) throw Error('Unsafe candidate filename');
+          if (!/^[a-f0-9]{64}$/.test(receipt.artifact.sha256)) throw Error('Invalid candidate digest');
           fs.appendFileSync(process.env.GITHUB_ENV, [
             `DSC_RC2_ARTIFACT=${path.join(root, receipt.artifact.filename)}`,
             `DSC_RC2_ARTIFACT_RECEIPT=${path.join(root, 'summary.json')}`,
+            `DSC_RC2_ARTIFACT_SHA256=${receipt.artifact.sha256}`,
             '',
           ].join(String.fromCharCode(10)));
           JS
@@ -174,6 +176,11 @@ jobs:
         env:
           DSC_ACCEPTANCE_DSH_VERSION: ${{ matrix.dsh }}
         run: node tools/ci-ui018.mjs "$RUNNER_TEMP/linux-ui018"
+      - name: Verify same-candidate unavailable auth and persistent session boundaries
+        if: matrix.dsh == '0.2.2-rc.2' || matrix.dsh == '0.2.2-rc.3'
+        env:
+          DSC_ACCEPTANCE_DSH_VERSION: ${{ matrix.dsh }}
+        run: node tools/auth025-acceptance.mjs "$RUNNER_TEMP/auth025" "$DSC_RC2_ARTIFACT" "$DSC_RC2_ARTIFACT_SHA256"
       - name: Verify private plugin manager rollback and identity on new hosts
         if: matrix.dsh == '0.2.2-rc.2' || matrix.dsh == '0.2.2-rc.3'
         env:
@@ -234,6 +241,7 @@ jobs:
             linux-editors/
             ${{ runner.temp }}/linux-ui018/
             ${{ runner.temp }}/manager025/
+            ${{ runner.temp }}/auth025/
             ${{ runner.temp }}/import025/
   dependency-security:
     runs-on: ubuntu-latest

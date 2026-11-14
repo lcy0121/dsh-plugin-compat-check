@@ -57,6 +57,18 @@ test("CI keeps static Node22 while new host verifies its runtime before installa
   );
   for (const v of ["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"])
     assert(download.if.includes(v));
+  const auth = job.steps.find((s) =>
+    s.run?.includes("tools/auth025-acceptance.mjs"),
+  );
+  for (const v of ["0.2.2-rc.2", "0.2.2-rc.3"]) assert(auth.if.includes(v));
+  assert(auth.run.includes('"$DSC_RC2_ARTIFACT" "$DSC_RC2_ARTIFACT_SHA256"'));
+  const binding = job.steps.find(
+    (s) => s.name === "Bind supplied candidate and source receipt",
+  );
+  assert(
+    binding.run.includes("DSC_RC2_ARTIFACT_SHA256=${receipt.artifact.sha256}"),
+  );
+  assert(job.steps.indexOf(binding) < job.steps.indexOf(auth));
   assert(
     w.jobs.test.steps.some((s) => s.run?.includes("DSC_RC22_SOURCE_ARCHIVE")),
   );

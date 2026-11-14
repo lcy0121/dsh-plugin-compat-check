@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.2.5",
-  "recordedAt": "2026-11-14T16:31:47.160Z",
-  "testFiles": 99,
-  "tests": 1355,
+  "recordedAt": "2026-11-14T16:51:14.717Z",
+  "testFiles": 100,
+  "tests": 1359,
   "repositoryFiles": {
-    "total": 428,
+    "total": 430,
     "fixtures": 100,
-    "other": 328
+    "other": 330
   },
   "verification": {
     "platform": "darwin",
@@ -38,10 +38,10 @@
       "CI applies to the exact GitHub commit; formal publication must use the accepted archive."
     ],
     "testInputs025": {
-      "scope": "1355 default-suite tests, 1346 pass/9 documented opt-in or slow skips, 0fail; empty owned HOME, no user profile acceptance. Successful prepublish repeated the complete suite.",
+      "scope": "1359 default-suite tests, 1350 pass/9 documented opt-in or slow skips, 0fail; empty owned HOME, no user profile acceptance. Final prepublish repeats the complete suite.",
       "node": "26.13.1",
-      "tap": "tmp/025-development-20261115/final-suite.tap",
-      "prepublishTap": "tmp/025-development-20261115/prepublish.tap",
+      "tap": "tmp/025-development-20261115/delivery-suite2.tap",
+      "prepublishTap": "tmp/025-development-20261115/prepublish-delivery.tap",
       "mandatoryIssueTests": 106,
       "mandatoryIssueSkip": 0,
       "mandatoryIssueNodes": [
@@ -51,7 +51,8 @@
       "issueReceipts": [
         "tmp/025-development-20261115/issues-node22/summary.json",
         "tmp/025-development-20261115/issues-local/summary.json"
-      ]
+      ],
+      "timingRegression": "Original delivery-suite.tap exposed coalesced interval cadence; test now measures initial heartbeat/window<200ms. Sync, microtask and delayed blocking negative controls fail; production limits unchanged."
     },
     "adaptation025": {
       "recordedAt": "2026-11-15",
@@ -119,8 +120,98 @@
             "validationErrors": 0
           },
           "scope": "Two repeats of independent pre-run 5artifacts/24cases; green reproduces expected failures, not all business success."
+        },
+        {
+          "version": "0.2.2-rc.3",
+          "receipt": "tmp/025-development-20261115/business-rc3-rerun/regression-report.json",
+          "sha256": "3f4a442f1c9f296f56b8ac056e2c1ddcefa8397c2a66c176b1c5a419548e653c",
+          "summary": {
+            "independentPackageFamilies": 4,
+            "pinnedArtifacts": 5,
+            "holdoutPackageFamilies": 2,
+            "holdoutPinnedArtifacts": 2,
+            "distinctPlannedCases": 24,
+            "knownOutcomeCases": 48,
+            "staticIdentifiedFailures": 0,
+            "serviceOnlyIdentifiedFailures": 0,
+            "unflaggedNaturalFailures": 4,
+            "unflaggedBusinessOrClientFailures": 20,
+            "driverErrors": 0,
+            "validationErrors": 0
+          },
+          "scope": "Full fresh two-repeat rerun; original startup timeout retained separately, expectations and budgets unchanged."
         }
-      ]
+      ],
+      "candidate": {
+        "sourceCommit": "7cca475945549ff65924f2430892797e7702b13f",
+        "sourceSha256": "f3729d977b500c946c47142bb8df88584b4a2f4fa3dc11f013aa116fa838d5e6",
+        "sourceDirty": false,
+        "filename": "dsh-plugin-compat-check-0.2.5.tgz",
+        "sha256": "18cb3dcba7ff2e80eb9a67b54bf671cca4287f911a66670af3bfd52e27bcc63c",
+        "receipt": "tmp/025-development-20261115/candidate/summary.json",
+        "deliverySourceBinding": "tmp/025-development-20261115/candidate-final/summary.json"
+      },
+      "macOS": [
+        {
+          "version": "0.2.2-rc.2",
+          "summary": "tmp/025-development-20261115/ui-rc2/summary.json",
+          "summarySha256": "dc540c912974255d03be73992b004bd6f10f3d68a5014cc9802399c915bbe432",
+          "liveSha256": "8a5caaee8cf4959feb94a5ef514d25f120ffdf591e2f477212834e4c96237934",
+          "runtimeNode": "26.13.1",
+          "passed": "9UI; three slots; zoom1.25/1.5+pan+actual scroll/pointer; zh/en/ko+6host locale fallbacks; HTTP401/403/503; strict tool/profile/cache/upgrade; hot-unload/recovery; cleanup",
+          "scope": "Owned exact npm CLI host on macOS/arm64+real Chrome; ASAR tool probes independently recorded above, no full Electron GUI/Windows/user-session certification"
+        },
+        {
+          "version": "0.2.2-rc.3",
+          "summary": "tmp/025-development-20261115/ui-rc3/summary.json",
+          "summarySha256": "fda720d608b674f53608ceea98b38a128c69849ecb1f6c48a7333d0c93a5442f",
+          "liveSha256": "7edb8723b55d241e9844adaca2aa1d8237d8dece6461eb6068b65166328c5f46",
+          "runtimeNode": "26.13.1",
+          "passed": "9UI; three slots; zoom1.25/1.5+pan+actual scroll/pointer; zh/en/ko+6host locale fallbacks; HTTP401/403/503; strict tool/profile/cache/upgrade; hot-unload/recovery; cleanup",
+          "scope": "Owned exact npm CLI host on macOS/arm64+real Chrome; ASAR tool probes independently recorded above, no full Electron GUI/Windows/user-session certification"
+        }
+      ],
+      "staticCandidate": {
+        "receipt": "tmp/025-development-20261115/static-candidate/summary.json",
+        "ordinaryExitCodes": [
+          0,
+          0
+        ],
+        "bidirectionalPreviewExitCodes": [
+          0,
+          0
+        ],
+        "authorVersions": 7,
+        "authorGateExitCode": 1,
+        "authorBlockingReasons": [
+          "incomplete-extraction",
+          "incomplete-coverage",
+          "vacuous"
+        ],
+        "scope": "Same unpacked candidate; author strict gate remains blocked, no tool errors or findings, no policy relaxation."
+      },
+      "businessInitialRc3Failure": {
+        "receipt": "tmp/025-development-20261115/business-rc3/regression-report.json",
+        "scope": "1st sidebar-ui-previous dsh command timed out at150s; original driver-error retained. Complete fresh two-repeat rerun passed; no expectation or budget relaxation."
+      },
+      "engineering": {
+        "ok": true,
+        "receipt": "tmp/025-development-20261115/engineering.json",
+        "scope": "Owned synthetic budgets/contention; not platform or whole-process RSS certification"
+      },
+      "httpAuth": [
+        {
+          "version": "0.2.2-rc.2",
+          "receipt": "tmp/025-development-20261115/ui-manager/rc2-auth-reviewed/summary.json",
+          "sha256": "b4b095a26072ad9572939372d61fad102a7d939ef7a0250aab3a1fda50f22a80"
+        },
+        {
+          "version": "0.2.2-rc.3",
+          "receipt": "tmp/025-development-20261115/ui-manager/rc3-auth-reviewed/summary.json",
+          "sha256": "8286c317ed0f87f49b84c37fd38aa1b255ebd4fd2e80e73f33de274a20ea9979"
+        }
+      ],
+      "httpAuthScope": "Same18cb candidate: four HTTP503 paths with unchanged instrumented get/start/Worker/fs-write counts and state hashes, recovery; same-authority persistent cookie survives restart, old launch token401/no Set-Cookie, different-authority old cookie401/new cookie200; owned hosts/roots cleaned."
     },
     "upstream20261115": {
       "marketVersion": "1.73.19",
