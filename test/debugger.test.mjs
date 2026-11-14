@@ -357,7 +357,10 @@ test(
       assert.equal(d.phase, "session");
       assert.equal(d.method, "Browser.getVersion");
       assert.equal(d.timeoutMs, 10000);
-      assert.ok(d.timing.requestElapsedMs >= d.timeoutMs);
+      // Timer scheduling uses whole milliseconds, while diagnostics retain
+      // performance.now() fractions (CI observed 9999.578ms for a 10000ms timer).
+      // Accept only that sub-millisecond boundary; an early whole ms still fails.
+      assert.ok(Math.ceil(d.timing.requestElapsedMs) >= d.timeoutMs);
       assert.equal(d.linux.atFailure.available, true);
       assert.equal(d.linux.atFailure.leader.state, "T");
       assert.equal(
