@@ -98,7 +98,7 @@
         "sha256": "d195a3284bc255a29ac27d4606e85f2cf3de43471920e3f7bdb44f8da877413e",
         "scope": "Owned synthetic v3 archive, persistent events/header/workspace, owner-only, no live Agent/Session, unload404; not user-session or Windows acceptance"
       },
-      "ci": "pending authorized branch push and actual Linux runs; configuration is not platform acceptance",
+      "ci": "User selected local-only completion; Linux CI/same-artifact acceptance awaits future push authorization. Configuration is not platform acceptance.",
       "publication": "not performed in this task",
       "business": [
         {
