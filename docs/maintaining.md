@@ -117,7 +117,7 @@ rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.j
 4. 正式发布另取授权：npm发布该tgz，Git tag/Release附同一文件、SHA256SUMS及限定回执，禁止重新打包冒用旧验收。
 5. 核npm版本/integrity/shasum、附件SHA-256及tag提交，实际公共安装后才记录发布结果。取数失败不算通过；Windows、用户试用和一般业务单列。
 
-文档、包说明或skill变化也会改变tgz，已有CI/宿主结果仅属于原提交/文件。`current-state.verification.adaptation025`保存原验收，`releasePreparation025`单列此后的文档准备，不把两者合并为新包通过。
+文档、包说明或skill变化也会改变tgz，已有CI/宿主结果仅属于原提交/文件。current-state的publication025保存已核分发与同包验收，历史准备由固定Git快照追溯；后续记录提交不改变发行tag。
 
 GitHub简介/topics可独立更新；npm简介/搜索关键词取`plugin/package.json`的description/keywords，随版本发布。dist-tags是版本渠道，不是关键词。发布前本地与registry的版本、正文及元数据差异只记为核验结果，不提前记为上线。字段见[npm package.json文档](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/#description)。
 

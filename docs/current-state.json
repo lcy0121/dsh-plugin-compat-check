@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.2.5",
-  "recordedAt": "2026-11-14T19:05:32.567Z",
+  "recordedAt": "2026-11-14T20:00:50.768843+00:00",
   "testFiles": 100,
   "tests": 1359,
   "repositoryFiles": {
@@ -29,7 +29,7 @@
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
-      "scope": "Current 0.2.5 capabilities; immutable acceptance history and dated public observations do not certify later edits."
+      "scope": "Published0.2.5 capabilities; release identity and exact archive acceptance below. Later documentation records do not retarget the tag."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -37,128 +37,138 @@
       "Private execution profiles are not OS sandboxes; account/model execution needs its own authorization.",
       "CI applies to the exact GitHub commit; formal publication must use the accepted archive."
     ],
-    "testInputs025": {
-      "scope": "Empty owned HOME locally, no user-profile acceptance; platform/opt-in skips are explicit. Mandatory original validators have no skips.",
-      "local": {
-        "node": "26.13.1",
-        "tests": 1359,
-        "pass": 1350,
-        "skip": 9,
-        "fail": 0,
-        "tap": "tmp/025-linux-delivery-20261115/navigation-full.tap",
-        "prepublishTap": "tmp/025-linux-delivery-20261115/final-prepublish.tap"
-      },
-      "linuxCI": {
-        "nodes": [
-          "22.19.0",
-          "24.9.0"
-        ],
-        "testsPerNode": 1359,
-        "passPerNode": 1348,
-        "skipPerNode": 11,
-        "failPerNode": 0,
-        "mandatoryIssueTestsPerNode": 106,
-        "mandatoryIssueSkip": 0,
-        "receiptRoot": "tmp/025-linux-delivery-20261115/fixed-artifacts"
-      },
-      "timingFix": "Test-only cold-fixture margin1s to2s; controlled parent block2.5s. Overrun/CPU/ELU assertions and production budgets retained."
-    },
-    "adaptation025": {
-      "recordedAt": "2026-11-14T18:10:13.327Z",
-      "detailedHistory": {
-        "commit": "8a1edbc6531e221f5741c1c03ecc1145457bd48b",
-        "path": "docs/current-state.json",
-        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/blob/8a1edbc6531e221f5741c1c03ecc1145457bd48b/docs/current-state.json",
-        "scope": "Full receipt paths, per-platform hashes, source/semantic reviews, initial failure/fix and prior archive comparison. Immutable history, not acceptance of later documentation or tool-description edits."
-      },
-      "sourceReview": [
-        "rules/dsh-0.2.2-rc.2-review.json",
-        "rules/dsh-0.2.2-rc.3-review.json"
-      ],
-      "semanticReview": [
-        "rules/dsh-0.2.2-rc.2-semantics-review.json",
-        "rules/dsh-0.2.2-rc.3-semantics-review.json"
-      ],
-      "candidate": {
+    "publication025": {
+      "status": "published",
+      "version": "0.2.5",
+      "tag": "v0.2.5",
+      "sourceCommit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
+      "sourceSha256": "66bb025175c120358da1b1895db5456afff4f6c76c7a79c8c149b0dba6df52e4",
+      "verifiedAt": "2026-11-14T20:00:50.748330+00:00",
+      "artifact": {
         "filename": "dsh-plugin-compat-check-0.2.5.tgz",
-        "sha256": "3f949b195658daad1296028a51809dbc92b5fac7811d3a6bfa003ad84b52ee95",
-        "sourceCommit": "8a1edbc6531e221f5741c1c03ecc1145457bd48b",
-        "sourceSha256": "8994be936ff43a96e2cba49c2733b8e644516c7e25633b9eef44fe7f3b2f28c0",
-        "sourceDirty": false,
-        "receipt": "tmp/025-linux-delivery-20261115/ci-candidate-final/summary.json",
-        "scope": "Historical accepted archive. Original macOS/implementation receipts used 41291e7; final CI archive has identical SHA-256."
+        "sha256": "3d5cc174052195e8401c86812a3609ef54cd90489470dff2b3bbafd5e270a1c2",
+        "shasum": "862b5d90c2b115fb213e98a5f15be2dd4a06a717",
+        "integrity": "sha512-/M72CIB66aRvoAf2l494PCybFkDpb1IWBFz95btP/O3GODUnjZdWtHzFQUHWm6wF/tuXC/WGqWPLx/7PqAgp9w==",
+        "bytes": 437727,
+        "files": 86
       },
       "ci": {
-        "observedAt": "2026-11-14T18:10:13.327Z",
-        "runId": 43623926184,
-        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/43623926184",
-        "sourceCommit": "8a1edbc6531e221f5741c1c03ecc1145457bd48b",
-        "conclusion": "success",
-        "successfulChecks": 11,
-        "checks": 11,
-        "staticNodes": [
-          "22.19.0",
-          "24.9.0"
+        "checks": 33,
+        "allPassed": true,
+        "runs": [
+          "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/43631740681",
+          "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/43632972687",
+          "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/43634028525"
         ],
-        "linuxHostVersions": [
-          "0.2.0-rc.2",
-          "0.2.1-rc.2",
-          "0.2.1-rc.3",
-          "0.2.1-rc.5",
-          "0.2.2-rc.1",
-          "0.2.2-rc.2",
-          "0.2.2-rc.3"
-        ],
-        "receipt": "tmp/025-linux-delivery-20261115/ci-final-success.json"
+        "scope": "Eleven jobs each for dev, merged main and tag; same release commit. Post-publication record checks are separate."
       },
-      "platformScope": "Same downloaded CI tgz on exact rc.2/rc.3, macOS/arm64 npm hosts Node26.13.1 and Linux/x64 npm hosts Node24.9.0, real Chrome nine UI suites, three slots, zh/en/ko plus six host-language fallbacks, zoom/pan/scroll, strict tool/profile/upgrade, HTTP and cleanup. ASAR probes separately historical; no full Electron GUI, Windows or general-business certification.",
-      "authScope": "Same candidate: unavailable auth returns503 before get/start/Worker/fs-write growth or state-content changes; recovery, persistent same-authority cookie across restart, old launch401/no Set-Cookie, different-authority isolation; owned hosts/roots cleaned.",
-      "receiptRoots": {
-        "macOS": "tmp/025-linux-delivery-20261115/mac-fixed-rc{2,3}/ and mac-auth-rc{2,3}/",
-        "linux": "tmp/025-linux-delivery-20261115/final-artifacts/linux-live-evidence-0.2.2-rc.{2,3}/_temp/",
-        "business": "tmp/025-linux-delivery-20261115/business-fixed-rc{2,3}/regression-report.json"
-      },
-      "business": {
-        "scope": "Fixed5 artifacts/24 independent pre-run expectations, two repeats per host; green reproduces expected failures, not all business success. Twelve unflagged failures remain per24 cases.",
-        "outcomesPerHost": 48,
-        "driverErrors": 0,
-        "validationErrors": 0
-      },
-      "staticCandidate": {
-        "receipt": "tmp/025-linux-delivery-20261115/static-ci/summary.json",
-        "ordinaryExitCodes": [
-          0,
-          0
-        ],
-        "bidirectionalPreviewExitCodes": [
-          0,
-          0
-        ],
-        "authorVersions": 7,
-        "authorGateExitCode": 1,
-        "authorBlockingReasons": [
-          "incomplete-extraction",
-          "incomplete-coverage",
-          "vacuous"
-        ],
-        "scope": "Exact CI archive; no findings/tool errors or policy relaxation."
-      }
-    },
-    "upstream20261115": {
-      "marketVersion": "1.73.19",
-      "marketTarballSha256": "b7bb48acaa3ee0b1e172a007e533f57dd8ac1fc877c023bfa409c39f39e81ebd",
-      "gitHead": "da774820fd49f4915461ff2031eedbef9b48dfe7",
-      "issues": "#928 open/11 comments; #1047 closed/3; store#22 open/1; no new replies",
-      "originalFunctionCases": 6,
-      "repairAttemptsCap": 3,
-      "routeCases": 8,
-      "remaining": [
-        "repair error detail lost",
-        "install both-query-failure has no dedicated warning/unverified field",
-        "1024 no npm mapping"
+      "tests": [
+        {
+          "node": "22.19.0",
+          "tests": 1359,
+          "pass": 1348,
+          "fail": 0,
+          "skipped": 11,
+          "mandatoryOriginalValidatorTests": 106,
+          "mandatorySkip": 0
+        },
+        {
+          "node": "24.9.0",
+          "tests": 1359,
+          "pass": 1348,
+          "fail": 0,
+          "skipped": 11,
+          "mandatoryOriginalValidatorTests": 106,
+          "mandatorySkip": 0
+        }
       ],
-      "receipts": "tmp/025-development-20261115/upstream/",
-      "scope": "Read-only public monitoring and unmodified published function/routes with controlled package-manager seam. Nov6 Desktop results historical; no new market Desktop recovery or upstream messages."
+      "hostAcceptance": [
+        {
+          "platform": "macOS/arm64",
+          "dshVersion": "0.2.2-rc.2",
+          "node": "26.13.1",
+          "sourceCommit": "105f9283e7cf3ec50f38adaf83c30b011b55f249",
+          "summarySha256": "3954dff6a0737a9cba0645874c5ddf419f977a087dda43742b0ce641c1a268e5",
+          "liveSha256": "0502c9217b422933349f570f04f4de14788db1ee7176689163bc6dd2195e3b8a",
+          "authSha256": "598e12f7c289389f9ebf9664f71e57ac4b8b4255073e28031d547a18aa844f64",
+          "nineUiSuites": true,
+          "authAndCleanup": true
+        },
+        {
+          "platform": "Linux/x64",
+          "dshVersion": "0.2.2-rc.2",
+          "node": "24.9.0",
+          "sourceCommit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
+          "summarySha256": "d6d6bf42faa251df80bf67a75a238f86f70396b68fd1602d4f10de813d0c8d86",
+          "liveSha256": "30e0ad84ae8e2a5159a96a5b0edc5617ab541bf67d0370aa1c979569cbec7032",
+          "authSha256": "df914453ee60339bcd25d384fdd3bc6bd8f8f15675d03a0efdc604ea8d640d6c",
+          "nineUiSuites": true,
+          "authAndCleanup": true
+        },
+        {
+          "platform": "macOS/arm64",
+          "dshVersion": "0.2.2-rc.3",
+          "node": "26.13.1",
+          "sourceCommit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
+          "summarySha256": "5cb06ea9b4032d1ce8f9469976fbe3f6e087b12227b2919eba9d8d44c49b1160",
+          "liveSha256": "bcd50368913b581469779a81d4ed8f67091b85a8d934777b337e93a9e40abc61",
+          "authSha256": "13b2e19c412900195269be6c8df8e819d11f2ec474f145eea9e6f9c3dc838e6e",
+          "nineUiSuites": true,
+          "authAndCleanup": true
+        },
+        {
+          "platform": "Linux/x64",
+          "dshVersion": "0.2.2-rc.3",
+          "node": "24.9.0",
+          "sourceCommit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
+          "summarySha256": "8ab52bb38dc2f4863bef54f92e5b586ad54e9db8417000af0fd3b5ee6a400ee3",
+          "liveSha256": "c186c6301b896efce7d17857f80268e9a35ad17f18560f0590cf9820b6020786",
+          "authSha256": "298ab9940c45e0c41ca996e287f822a6a71a2a520c19cad83bd04db4a6fca4aa",
+          "nineUiSuites": true,
+          "authAndCleanup": true
+        }
+      ],
+      "hostScope": "Same exact archive, real npm DSH hosts and owned Chrome/profile. macOS rc2 source105f928 and final source89dbe2c archives are byte-identical; only the paused-Chrome test changed. No full Electron GUI, Windows, user-profile or general-business certification.",
+      "public": {
+        "github": {
+          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.5",
+          "publishedAt": "2026-11-14T19:48:05Z",
+          "publicTarballSha256Verified": true
+        },
+        "npm": {
+          "url": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.5",
+          "version": "0.2.5",
+          "latest": "0.2.5",
+          "tarball": "https://registry.npmjs.org/dsh-plugin-compat-check/-/dsh-plugin-compat-check-0.2.5.tgz",
+          "publicTarballSha256Verified": true
+        },
+        "publicInstallation": {
+          "status": "checked",
+          "installedVersion": "0.2.5",
+          "usableRuntimeObservation": true,
+          "tempProfileRemoved": true,
+          "reportSha256": "73e51f2d1cd1e5d5ee75046178eb3ac9b69efc6f9b55223999db2e2c3ae3d7f0",
+          "scope": "Fixed public-registry installation and actual owned-host probe; no production account/model or general-business certification."
+        }
+      },
+      "receipt": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/download/v0.2.5/RELEASE-VERIFICATION.json",
+      "businessLimits": "Historical fixed5 artifacts/24 expectations per host retain12 unflagged failures; not a new same-archive business rerun. Detailed prior receipts:8a1edbc:docs/current-state.json. No findings never certifies business success.",
+      "retainedFailure": {
+        "runId": 43630738176,
+        "jobId": 132557363632,
+        "actualMs": 9999.578298,
+        "timeoutMs": 10000,
+        "state": "T",
+        "cleaned": true,
+        "fixCommit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
+        "scope": "Test-only comparison rounds up to timer milliseconds; early whole-millisecond failure still rejected. Production code and timeout budgets unchanged."
+      },
+      "scope": "Exact tagged-source/archive acceptance and independent public GitHub/npm download plus fixed public-registry installation. Only completed CI snapshots are listed; post-publication records never retarget the tag."
+    },
+    "historical025": {
+      "commit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
+      "path": "docs/current-state.json",
+      "scope": "Pre-publication preparation, earlier3f949 archive, upstreamNov15 monitoring and prior local/Linux receipts retained at this immutable Git revision. They do not replace the published3d5cc archive acceptance."
     },
     "historicalPublication024": {
       "version": "0.2.4",
@@ -167,42 +177,7 @@
       "artifactSha256": "85b8b25f171a3dfe5bab834ff42ce3f94887d60f700c7c5978034326bd7e1d81",
       "details": "cdbed0e:docs/current-state.json",
       "scope": "Historical exact0.2.4 public release, macOS/Linux same artifact and CI receipts retained in Git; no certification of0.2.5."
-    },
-    "releasePreparation025": {
-      "baselineCommit": "8a1edbc6531e221f5741c1c03ecc1145457bd48b",
-      "scope": "Local release-facing documentation and tool-parameter description refresh; no push, merge, tag, GitHub release or npm publish in this preparation.",
-      "publicationObservation": {
-        "observedAt": "2026-11-14T18:56:35.795Z",
-        "githubLatestTag": "v0.2.4",
-        "githubReleaseUrl": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.4",
-        "npmLatestVersion": "0.2.4",
-        "metadataErrors": 0,
-        "unavailableSources": [],
-        "receipt": "tmp/025-release-docs-20261115/public-metadata.json",
-        "scope": "Dated public observation only, separate from current product version and capabilities."
-      },
-      "verificationScope": "This preparation changes packed README, skill, notices and tool-description bytes. Historical 3f949 acceptance remains valid for that file only; a new archive requires its own selected-commit CI and same-artifact host verification before publication.",
-      "localValidation": {
-        "node": "26.13.1",
-        "tests": 1359,
-        "pass": 1350,
-        "skip": 9,
-        "fail": 0,
-        "targetedTests": 47,
-        "targetedSkip": 0,
-        "check": "passed",
-        "prepublishGate": "passed; never publishes",
-        "receiptRoot": "tmp/025-release-docs-20261115/",
-        "scope": "Empty owned HOME, no user-profile acceptance; local checks only, no CI or real-host rerun for these changed bytes."
-      },
-      "documentationAudit": {
-        "baselineCommit": "8a1edbc6531e221f5741c1c03ecc1145457bd48b",
-        "maintainedMarkdownFiles": 15,
-        "markdownBytesBefore": 248560,
-        "markdownBytesAfter": 245270,
-        "scope": "All maintained Markdown, including generated notices and skill copy. Legal texts, three Plan follow-ups, workflow steps, schemas and budgets retained; detailed receipt history is recoverable from the immutable Git baseline. Screenshot refreshed separately."
-      }
     }
   },
-  "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
+  "scope": "Published0.2.5 public distribution and exact tagged-source/archive acceptance. Default-suite counts are not user-profile or general-business certification; post-publication documentation keeps the release tag fixed."
 }

@@ -70,7 +70,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ## 4. 验收范围
 
-已有0.2.5 rc.2/rc.3 macOS/Linux同一CI归档的九项UI、鉴权和清理通过记录，提交`8a1edbc`的11项CI全过，身份见[current-state](current-state.json)。文档/工具说明更新会改变归档，既有结果不认证新字节；正式交付须按[同一制品流程](maintaining.md#同一制品发布核对)重核所选提交和文件。固定24项业务样本仍有12项未识别故障；Windows、真实用户试用和一般业务未验收，合成病例不替代真实试用。
+0.2.5已发布至npm和GitHub，tag固定提交`89dbe2c`。工作分支、合并后的main及tag各11项CI均通过；rc.2/rc.3的macOS/Linux九项UI、鉴权与清理验收使用同一归档，公共下载摘要、固定版本安装及真实宿主探针已核，见[current-state](current-state.json)。后续记录提交不改变tag；新制品仍须按[同一制品流程](maintaining.md#同一制品发布核对)重验。历史固定24项业务样本保留12项未识别故障，不是本归档新跑业务；Windows、真实用户试用和一般业务未验收。
 
 ## 5. 验证入口
 
