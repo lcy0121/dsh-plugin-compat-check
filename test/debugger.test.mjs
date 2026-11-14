@@ -286,15 +286,18 @@ test("command timeout records a blocked parent's timer overrun separately from b
   );
   let browser;
   try {
-    browser = await launchChromePipe(executable, { timeoutMs: 1000 });
+    // This control tests parent overrun after a successful handshake; give the
+    // cold Node fixture its own scheduling margin under parallel suite load.
+    const timeoutMs = 2000;
+    browser = await launchChromePipe(executable, { timeoutMs });
     const pending = browser.send("Runtime.evaluate");
-    const end = performance.now() + 1500;
+    const end = performance.now() + timeoutMs + 500;
     while (performance.now() < end) {}
     await assert.rejects(pending, (e) => {
       assert.equal(e.code, "CDP_COMMAND_TIMEOUT");
       assert.equal(e.diagnostic.phase, "session");
       assert.ok(e.diagnostic.timing, "Missing parent timer evidence");
-      assert.ok(e.diagnostic.timing.requestElapsedMs >= 1000);
+      assert.ok(e.diagnostic.timing.requestElapsedMs >= timeoutMs);
       assert.ok(e.diagnostic.timing.timerOverrunMs >= 300);
       assert.ok(e.diagnostic.timing.parentCpuMilliseconds >= 0);
       assert.ok(e.diagnostic.timing.eventLoopUtilization > 0.5);
