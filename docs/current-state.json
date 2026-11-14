@@ -1,6 +1,6 @@
 {
   "toolVersion": "0.2.5",
-  "recordedAt": "2026-11-14T16:51:14.717Z",
+  "recordedAt": "2026-11-14T17:55:05.630550+00:00",
   "testFiles": 100,
   "tests": 1359,
   "repositoryFiles": {
@@ -29,7 +29,7 @@
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
-      "scope": "0.2.5 source capabilities; publication024 below is historical and does not certify a new artifact."
+      "scope": "0.2.5 source capabilities; dated preparation/publication histories are separate from selected CI/archive/platform evidence."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -38,24 +38,33 @@
       "CI applies to the exact GitHub commit; formal publication must use the accepted archive."
     ],
     "testInputs025": {
-      "scope": "1359 default-suite tests, 1350 pass/9 documented opt-in or slow skips, 0fail; empty owned HOME, no user profile acceptance. Final prepublish repeats the complete suite.",
-      "node": "26.13.1",
-      "tap": "tmp/025-development-20261115/delivery-suite2.tap",
-      "prepublishTap": "tmp/025-development-20261115/prepublish-delivery.tap",
-      "mandatoryIssueTests": 106,
-      "mandatoryIssueSkip": 0,
-      "mandatoryIssueNodes": [
-        "22.19.0",
-        "26.13.1"
-      ],
-      "issueReceipts": [
-        "tmp/025-development-20261115/issues-node22/summary.json",
-        "tmp/025-development-20261115/issues-local/summary.json"
-      ],
-      "timingRegression": "Original delivery-suite.tap exposed coalesced interval cadence; test now measures initial heartbeat/window<200ms. Sync, microtask and delayed blocking negative controls fail; production limits unchanged."
+      "scope": "Empty owned HOME locally, no user-profile acceptance; platform/opt-in skips are explicit. Mandatory original validators have no skips.",
+      "local": {
+        "node": "26.13.1",
+        "tests": 1359,
+        "pass": 1350,
+        "skip": 9,
+        "fail": 0,
+        "tap": "tmp/025-linux-delivery-20261115/navigation-full.tap",
+        "prepublishTap": "tmp/025-linux-delivery-20261115/final-prepublish.tap"
+      },
+      "linuxCI": {
+        "nodes": [
+          "22.19.0",
+          "24.9.0"
+        ],
+        "testsPerNode": 1359,
+        "passPerNode": 1348,
+        "skipPerNode": 11,
+        "failPerNode": 0,
+        "mandatoryIssueTestsPerNode": 106,
+        "mandatoryIssueSkip": 0,
+        "receiptRoot": "tmp/025-linux-delivery-20261115/fixed-artifacts"
+      },
+      "timingFix": "Cold fake-browser fixture startup margin changed1s to2s with matching controlled parent block2.5s; overrun/CPU/ELU assertions retained, production budgets unchanged."
     },
     "adaptation025": {
-      "recordedAt": "2026-11-15",
+      "recordedAt": "2026-11-14T17:55:05.625409+00:00",
       "sourceReview": [
         "rules/dsh-0.2.2-rc.2-review.json",
         "rules/dsh-0.2.2-rc.3-review.json"
@@ -64,115 +73,106 @@
         "rules/dsh-0.2.2-rc.2-semantics-review.json",
         "rules/dsh-0.2.2-rc.3-semantics-review.json"
       ],
-      "officialAsarProbes": [
-        {
-          "version": "0.2.2-rc.2",
-          "receipt": "tmp/025-development-20261115/semantics/rc2-host-probe.json",
-          "sha256": "19df97535ecd10a33a6648d87692a9926d0ceb7ecd89e731d34654aa0041ded3",
-          "scope": "15 actual ASAR checks; controlled AgentFactory and PTC runtime seam, no OS-sandbox or arbitrary business certification"
-        },
-        {
-          "version": "0.2.2-rc.3",
-          "receipt": "tmp/025-development-20261115/semantics/rc3-host-probe.json",
-          "sha256": "ffbf2c3a2218b5aee9a486e9aefeba2bfe820fb6e3691a08af28200f1d5967a5",
-          "scope": "15 actual ASAR checks; controlled AgentFactory and PTC runtime seam, no OS-sandbox or arbitrary business certification"
-        }
-      ],
-      "manager": [
-        {
-          "version": "0.2.2-rc.2",
-          "receipt": "tmp/025-development-20261115/ui-manager/rc2-manager-reviewed/summary.json",
-          "sha256": "50c361f487149b39d22a592a9ff19379e49eb9101c9b77c9cc077f03c5a2604f",
-          "scope": "Registry/Git/file modes, actual package and bundle state, six operations, fresh apply after rollback, owned host and root cleaned"
-        },
-        {
-          "version": "0.2.2-rc.3",
-          "receipt": "tmp/025-development-20261115/ui-manager/rc3-manager-reviewed/summary.json",
-          "sha256": "4312cf8bb00a6d58c2ae9544f1eefc94cafd259fefe75f0cf73ce171fd642a33",
-          "scope": "Registry/Git/file modes, actual package and bundle state, six operations, fresh apply after rollback, owned host and root cleaned"
-        }
-      ],
-      "import": {
-        "version": "0.2.2-rc.3",
-        "receipt": "tmp/025-development-20261115/ui-manager/rc3-import-reviewed/summary.json",
-        "sha256": "d195a3284bc255a29ac27d4606e85f2cf3de43471920e3f7bdb44f8da877413e",
-        "scope": "Owned synthetic v3 archive, persistent events/header/workspace, owner-only, no live Agent/Session, unload404; not user-session or Windows acceptance"
+      "historicalPreparation": {
+        "details": "41291e7:docs/current-state.json",
+        "scope": "Earlier local18cb archive, source/ASAR probes and prior local-only decision; not certification of the selected CI archive."
       },
-      "ci": "User selected local-only completion; Linux CI/same-artifact acceptance awaits future push authorization. Configuration is not platform acceptance.",
-      "publication": "not performed in this task",
-      "business": [
-        {
-          "version": "0.2.2-rc.2",
-          "receipt": "tmp/025-development-20261115/business-rc2/regression-report.json",
-          "sha256": "ce30e68cfb1d802dafc04146de9ca7d2dbe680270c5518c916ce59431455bb47",
-          "summary": {
-            "independentPackageFamilies": 4,
-            "pinnedArtifacts": 5,
-            "holdoutPackageFamilies": 2,
-            "holdoutPinnedArtifacts": 2,
-            "distinctPlannedCases": 24,
-            "knownOutcomeCases": 48,
-            "staticIdentifiedFailures": 0,
-            "serviceOnlyIdentifiedFailures": 0,
-            "unflaggedNaturalFailures": 4,
-            "unflaggedBusinessOrClientFailures": 20,
-            "driverErrors": 0,
-            "validationErrors": 0
-          },
-          "scope": "Two repeats of independent pre-run 5artifacts/24cases; green reproduces expected failures, not all business success."
-        },
-        {
-          "version": "0.2.2-rc.3",
-          "receipt": "tmp/025-development-20261115/business-rc3-rerun/regression-report.json",
-          "sha256": "3f4a442f1c9f296f56b8ac056e2c1ddcefa8397c2a66c176b1c5a419548e653c",
-          "summary": {
-            "independentPackageFamilies": 4,
-            "pinnedArtifacts": 5,
-            "holdoutPackageFamilies": 2,
-            "holdoutPinnedArtifacts": 2,
-            "distinctPlannedCases": 24,
-            "knownOutcomeCases": 48,
-            "staticIdentifiedFailures": 0,
-            "serviceOnlyIdentifiedFailures": 0,
-            "unflaggedNaturalFailures": 4,
-            "unflaggedBusinessOrClientFailures": 20,
-            "driverErrors": 0,
-            "validationErrors": 0
-          },
-          "scope": "Full fresh two-repeat rerun; original startup timeout retained separately, expectations and budgets unchanged."
-        }
-      ],
       "candidate": {
-        "sourceCommit": "7cca475945549ff65924f2430892797e7702b13f",
-        "sourceSha256": "f3729d977b500c946c47142bb8df88584b4a2f4fa3dc11f013aa116fa838d5e6",
-        "sourceDirty": false,
         "filename": "dsh-plugin-compat-check-0.2.5.tgz",
-        "sha256": "18cb3dcba7ff2e80eb9a67b54bf671cca4287f911a66670af3bfd52e27bcc63c",
-        "receipt": "tmp/025-development-20261115/candidate/summary.json",
-        "deliverySourceBinding": "tmp/025-development-20261115/candidate-final/summary.json"
+        "sha256": "3f949b195658daad1296028a51809dbc92b5fac7811d3a6bfa003ad84b52ee95",
+        "sourceCommit": "41291e782943f44b6c1bf3a465ea0cdec4be0e15",
+        "sourceSha256": "d6e42a0c17caf8eeb1fcccbfdafcd74922deffc6342b8858a9c14f5c24ec7555",
+        "sourceDirty": false,
+        "receipt": "tmp/025-linux-delivery-20261115/ci-candidate-fixed/summary.json",
+        "artifactId": 14125120394,
+        "zipSha256": "be9984d86e325fc810edaf80c0029aeeaa46c8a7eb4199e6cec8b1ed0869547e"
+      },
+      "ci": {
+        "runId": 43622332173,
+        "url": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/43622332173",
+        "sourceCommit": "41291e782943f44b6c1bf3a465ea0cdec4be0e15",
+        "conclusion": "success",
+        "checks": 11,
+        "successfulChecks": 11,
+        "staticNodes": [
+          "22.19.0",
+          "24.9.0"
+        ],
+        "linuxHostVersions": [
+          "0.2.0-rc.2",
+          "0.2.1-rc.2",
+          "0.2.1-rc.3",
+          "0.2.1-rc.5",
+          "0.2.2-rc.1",
+          "0.2.2-rc.2",
+          "0.2.2-rc.3"
+        ],
+        "receipt": "tmp/025-linux-delivery-20261115/ci-fixed-success.json",
+        "sha256": "5dc17bcfd0c5d533a06f25e8d68fd46a14311602ed0c7cc7ae54b46d09940ccc",
+        "scope": "Selected implementation checks all passed. No legacy status contexts posted; empty combined-status pending is not a posted check."
       },
       "macOS": [
         {
           "version": "0.2.2-rc.2",
-          "summary": "tmp/025-development-20261115/ui-rc2/summary.json",
-          "summarySha256": "dc540c912974255d03be73992b004bd6f10f3d68a5014cc9802399c915bbe432",
-          "liveSha256": "8a5caaee8cf4959feb94a5ef514d25f120ffdf591e2f477212834e4c96237934",
-          "runtimeNode": "26.13.1",
-          "passed": "9UI; three slots; zoom1.25/1.5+pan+actual scroll/pointer; zh/en/ko+6host locale fallbacks; HTTP401/403/503; strict tool/profile/cache/upgrade; hot-unload/recovery; cleanup",
-          "scope": "Owned exact npm CLI host on macOS/arm64+real Chrome; ASAR tool probes independently recorded above, no full Electron GUI/Windows/user-session certification"
+          "summary": "tmp/025-linux-delivery-20261115/mac-fixed-rc2/summary.json",
+          "summarySha256": "c44d7ec182c6f0ef670ce66d2a8eb70d2ba68aa4cfa7ee869dc68a8a17cc2da8",
+          "liveSha256": "ad2edd238a160d1a0cc520e876161a352edb92d75b24a885e3df2b5264ca13b4",
+          "auth": "tmp/025-linux-delivery-20261115/mac-auth-rc2/summary.json",
+          "authSha256": "b72a9f9a84f3db79405da7741202de69a20c29b7948c482862a87bb6861fc5fc"
         },
         {
           "version": "0.2.2-rc.3",
-          "summary": "tmp/025-development-20261115/ui-rc3/summary.json",
-          "summarySha256": "fda720d608b674f53608ceea98b38a128c69849ecb1f6c48a7333d0c93a5442f",
-          "liveSha256": "7edb8723b55d241e9844adaca2aa1d8237d8dece6461eb6068b65166328c5f46",
-          "runtimeNode": "26.13.1",
-          "passed": "9UI; three slots; zoom1.25/1.5+pan+actual scroll/pointer; zh/en/ko+6host locale fallbacks; HTTP401/403/503; strict tool/profile/cache/upgrade; hot-unload/recovery; cleanup",
-          "scope": "Owned exact npm CLI host on macOS/arm64+real Chrome; ASAR tool probes independently recorded above, no full Electron GUI/Windows/user-session certification"
+          "summary": "tmp/025-linux-delivery-20261115/mac-fixed-rc3/summary.json",
+          "summarySha256": "6df7a54dbc03e09bacdeb44e49081fdaabbc38fab7f41291335d383aa34f57d7",
+          "liveSha256": "87e6471234f3ba9980715e7dd8e685baa9c9c2116ac234456ee83c405593173e",
+          "auth": "tmp/025-linux-delivery-20261115/mac-auth-rc3/summary.json",
+          "authSha256": "ed8fe02db886685e8defe2c55608545a2227bacfd341eb3bfb5099312a576861"
         }
       ],
+      "linux": [
+        {
+          "version": "0.2.2-rc.2",
+          "summary": "tmp/025-linux-delivery-20261115/fixed-artifacts/linux-live-evidence-0.2.2-rc.2/_temp/linux-ui018/summary.json",
+          "summarySha256": "a7120c6a9aa1c6dec2aaf44e03f1c9711407b3894c1ad82ab5dce305d192498b",
+          "liveSha256": "830454f36858738733bf0d3346ef2b4963e7789ad2a9019a5bd92b2406228b92",
+          "authSha256": "0b51f0fd447960412a1ff348e2f86e312ea627958f9ba5f93d771970a513e6cc",
+          "managerSha256": "68973f31981fb792b83ce073b78e727d06eb80240472a83a933bbe00d0790a0c"
+        },
+        {
+          "version": "0.2.2-rc.3",
+          "summary": "tmp/025-linux-delivery-20261115/fixed-artifacts/linux-live-evidence-0.2.2-rc.3/_temp/linux-ui018/summary.json",
+          "summarySha256": "1e2f877c580c66cc418f40f93b7fd4ea12439909074052574d1df65908fbb185",
+          "liveSha256": "a2e9636ff5807185ade49aad74bf7cb60c61fe8129eb48f22bbce033011c78e0",
+          "authSha256": "597d735e49d2e3104f8302ba699d5ea8b647a8d8f6fbd54a83583018db914900",
+          "managerSha256": "af8c8b7cdd4f8acc23e07454bad37e2995290c336cf4b078bc2e239b41403d77",
+          "importSha256": "a9c20dcb764bde6c4b925edc44165ee491235fddc46ec7e0f969e200ff499eda"
+        }
+      ],
+      "platformScope": "Same downloaded CI tgz on exact rc.2/rc.3, macOS/arm64 npm hosts Node26.13.1 and Linux/x64 npm hosts Node24.9.0, real Chrome nine UI suites, three slots, zh/en/ko plus six host-language fallbacks, zoom/pan/scroll, strict tool/profile/upgrade, HTTP and cleanup. ASAR probes separately historical; no full Electron GUI, Windows or general-business certification.",
+      "authScope": "Same candidate: unavailable auth returns503 before get/start/Worker/fs-write growth or state-content changes; recovery, persistent same-authority cookie across restart, old launch401/no Set-Cookie, different-authority isolation; owned hosts/roots cleaned.",
+      "business": {
+        "scope": "Fixed5 artifacts/24 independent pre-run expectations, two repeats per host; green reproduces expected failures, not all business success. Twelve unflagged failures remain per24 cases.",
+        "versions": [
+          {
+            "version": "0.2.2-rc.2",
+            "receipt": "tmp/025-linux-delivery-20261115/business-fixed-rc2/regression-report.json",
+            "sha256": "5f4a981f3ca0c966207105c9a5de2af6571efde5b8fc5e3a2d589bfec2c988c5",
+            "outcomes": 48,
+            "driverErrors": 0,
+            "validationErrors": 0
+          },
+          {
+            "version": "0.2.2-rc.3",
+            "receipt": "tmp/025-linux-delivery-20261115/business-fixed-rc3/regression-report.json",
+            "sha256": "93a0b7edfcd9c86709554a4d0ca19c2e969d77f121ad56ba63c56f4b59cda8a8",
+            "outcomes": 48,
+            "driverErrors": 0,
+            "validationErrors": 0
+          }
+        ]
+      },
       "staticCandidate": {
-        "receipt": "tmp/025-development-20261115/static-candidate/summary.json",
+        "receipt": "tmp/025-linux-delivery-20261115/static-ci/summary.json",
         "ordinaryExitCodes": [
           0,
           0
@@ -188,30 +188,21 @@
           "incomplete-coverage",
           "vacuous"
         ],
-        "scope": "Same unpacked candidate; author strict gate remains blocked, no tool errors or findings, no policy relaxation."
+        "scope": "Exact CI archive; no findings/tool errors or policy relaxation."
       },
-      "businessInitialRc3Failure": {
-        "receipt": "tmp/025-development-20261115/business-rc3/regression-report.json",
-        "scope": "1st sidebar-ui-previous dsh command timed out at150s; original driver-error retained. Complete fresh two-repeat rerun passed; no expectation or budget relaxation."
+      "ciFailureAndFix": {
+        "failedRunId": 43620557878,
+        "failedJobId": 132525898524,
+        "scope": "Initial rc2 note saved with HTTP200/disktrue but screenshot showed host home, not target market. Navigation driver now rechecks target after render and waits new reads; expected values, missing-control/value failures and budgets unchanged.",
+        "fixCommit": "41291e7",
+        "red": "tmp/025-linux-delivery-20261115/market-navigation-red.tap",
+        "green": "tmp/025-linux-delivery-20261115/market-navigation-green.tap"
       },
-      "engineering": {
-        "ok": true,
-        "receipt": "tmp/025-development-20261115/engineering.json",
-        "scope": "Owned synthetic budgets/contention; not platform or whole-process RSS certification"
+      "archiveDifference": {
+        "receipt": "tmp/025-linux-delivery-20261115/candidate-comparison.json",
+        "scope": "Earlier local18cb and CI3f949 archives differ in LICENSE/patch permissions; 86 file contents match. Both macOS hosts reran the downloaded CI archive; old archive results are not inherited."
       },
-      "httpAuth": [
-        {
-          "version": "0.2.2-rc.2",
-          "receipt": "tmp/025-development-20261115/ui-manager/rc2-auth-reviewed/summary.json",
-          "sha256": "b4b095a26072ad9572939372d61fad102a7d939ef7a0250aab3a1fda50f22a80"
-        },
-        {
-          "version": "0.2.2-rc.3",
-          "receipt": "tmp/025-development-20261115/ui-manager/rc3-auth-reviewed/summary.json",
-          "sha256": "8286c317ed0f87f49b84c37fd38aa1b255ebd4fd2e80e73f33de274a20ea9979"
-        }
-      ],
-      "httpAuthScope": "Same18cb candidate: four HTTP503 paths with unchanged instrumented get/start/Worker/fs-write counts and state hashes, recovery; same-authority persistent cookie survives restart, old launch token401/no Set-Cookie, different-authority old cookie401/new cookie200; owned hosts/roots cleaned."
+      "publication": "not performed; branch push only, no merge or release"
     },
     "upstream20261115": {
       "marketVersion": "1.73.19",
