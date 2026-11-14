@@ -1165,19 +1165,30 @@ describe(
       const { launchChromePipe } = await import("../lib/debugger.mjs");
       const { createServer } = await import("node:http");
       const fs = await import("node:fs");
-      let pending;
+      let pending, modeUnderTest, installedRequests;
       const server = createServer((req, res) => {
         if (req.url === "/dsh-market/installed") {
-          pending = res;
+          installedRequests++;
+          if (modeUnderTest === "host-reset" && installedRequests > 1) {
+            res.setHeader("content-type", "application/json");
+            res.end(JSON.stringify({ mode: "missing-value" }));
+          } else pending = res;
           return;
         }
         res.setHeader("content-type", "text/html; charset=utf-8");
         res.end(`<div data-dsh-market-root data-dsh-market-tab="discover"><div class="x_card"><a title="dsh-plugin-compat-check">target</a><button aria-label="加入收藏">favorite</button></div></div><script>
-          fetch('/dsh-market/installed').then(r=>r.json()).then(v=>requestAnimationFrame(()=>{
+          const markup=document.querySelector('[data-dsh-market-root]').outerHTML;
+          function load(){fetch('/dsh-market/installed').then(r=>r.json()).then(v=>requestAnimationFrame(()=>{
+            if(v.mode==='host-reset') requestAnimationFrame(()=>{
+              document.querySelector('[data-dsh-market-root]').remove();
+              const open=document.createElement('button');open.textContent='插件市场';
+              open.onclick=()=>{open.remove();document.body.insertAdjacentHTML('afterbegin',markup);load()};
+              document.body.append(open);
+            });
             const button=document.querySelector('button');
             if(v.mode==='saved') button.setAttribute('aria-label','取消收藏');
             if(v.mode==='missing-control') button.remove();
-          }));
+          }));}load();
         </script>`);
       });
       await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -1216,8 +1227,11 @@ describe(
           "missing-value",
           "missing-control",
           "request-failed",
+          "host-reset",
         ]) {
           pending = null;
+          modeUnderTest = mode;
+          installedRequests = 0;
           let settled = false;
           const opening = m.openMarketDocument(
             {
@@ -1261,6 +1275,19 @@ describe(
             await assert.rejects(opening, /installed-state.*503/i);
           else {
             await opening;
+            assert.equal(
+              await evalx(
+                "Boolean(document.querySelector('[data-dsh-market-root] a[title=\"dsh-plugin-compat-check\"]'))",
+              ),
+              true,
+              "Navigation must still show the independently identified market card after data/render barriers",
+            );
+            if (mode === "host-reset")
+              assert.equal(
+                installedRequests,
+                2,
+                "Reopened card must complete its own fresh installed-state read",
+              );
             assert.equal(
               await evalx(
                 `(${m.marketControl})('market.favorite','value',true)`,

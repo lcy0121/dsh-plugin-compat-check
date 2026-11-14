@@ -63,21 +63,16 @@ export async function openMarketDocument(driver, url, tab) {
   let cursor = chrome.events.length;
   const reads = new Map();
   await navigate(url);
-  await poll(
-    () => evalx(`(${marketNavigationStep})(${JSON.stringify(tab)})`),
-    "Market target card did not become ready",
-  );
-  await poll(() => {
+  const readState = () => {
     for (; cursor < chrome.events.length; cursor++) {
       const event = chrome.events[cursor],
         p = event.params;
-      if (event.method === "Network.requestWillBeSent") {
-        if (
-          p.request.method === "GET" &&
-          new URL(p.request.url).pathname === "/dsh-market/installed"
-        )
-          reads.set(p.requestId, {});
-      }
+      if (
+        event.method === "Network.requestWillBeSent" &&
+        p.request.method === "GET" &&
+        new URL(p.request.url).pathname === "/dsh-market/installed"
+      )
+        reads.set(p.requestId, {});
       const read = reads.get(p.requestId);
       if (!read) continue;
       if (event.method === "Network.responseReceived")
@@ -85,20 +80,32 @@ export async function openMarketDocument(driver, url, tab) {
       if (event.method === "Network.loadingFinished") read.finished = true;
       if (event.method === "Network.loadingFailed") read.failed = true;
     }
-    for (const read of reads.values()) {
+    for (const read of reads.values())
       if (read.failed || (read.status !== undefined && read.status !== 200))
         throw Error(
           `Market installed-state read failed: ${read.status ?? "transport"}`,
         );
-    }
-    return [...reads.values()].some(
-      (read) => read.status === 200 && read.finished,
+    // A newly mounted card must not borrow a completed earlier mount's read.
+    return (
+      reads.size > 0 &&
+      [...reads.values()].every((read) => read.status === 200 && read.finished)
     );
-  }, "Market installed-state request did not complete");
-  // Yield through rendering without waiting for a desired value or inventing controls.
-  await evalx(
-    "new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))",
-  );
+  };
+  const navigateToCard = () =>
+    evalx(`(${marketNavigationStep})(${JSON.stringify(tab)})`);
+  await poll(async () => {
+    const card = await navigateToCard();
+    const loaded = readState();
+    if (!card || !loaded) return false;
+    // Host hydration can revoke the settings route after the card/data are ready.
+    // Recheck navigation after rendering, without requiring a desired value or
+    // business control; if reopened, its own new read must finish as well.
+    await evalx(
+      "new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))",
+    );
+    const stillCard = await navigateToCard();
+    return readState() && stillCard;
+  }, "Market target card and installed-state request did not settle");
 }
 export function marketControl(feature, action = "observe", desired) {
   const visible = (e) =>
