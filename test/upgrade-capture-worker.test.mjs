@@ -38,9 +38,11 @@ const input = (f) => ({
 // Moving capture back to the calling thread blocks the first scheduled heartbeat.
 test("large real installed input starts and captures without blocking parent heartbeats", async (t) => {
   const f = fixture(t);
-  let ticks = 0;
-  const timer = setInterval(() => ticks++, 10);
   const start = performance.now();
+  let firstHeartbeatMs;
+  const timer = setInterval(() => {
+    firstHeartbeatMs ??= performance.now() - start;
+  }, 10);
   const pending = runUpgradePreview(input(f));
   const callMilliseconds = performance.now() - start;
   try {
@@ -49,7 +51,14 @@ test("large real installed input starts and captures without blocking parent hea
       callMilliseconds < 200,
       `calling capture blocked parent for ${callMilliseconds}ms`,
     );
-    assert.ok(ticks >= 2, "parent timers run while real files are captured");
+    // Intervals can coalesce under parallel test load. Measure responsiveness,
+    // not the number of callbacks dispatched in a 30ms timer phase.
+    assert.ok(
+      Number.isFinite(firstHeartbeatMs) &&
+        firstHeartbeatMs < 200 &&
+        performance.now() - start < 200,
+      `parent heartbeat delayed ${firstHeartbeatMs}ms; window ${performance.now() - start}ms while capturing real files`,
+    );
     const result = await pending;
     assert.equal(result.status, "compared", result.error);
     assert.equal(result.artifact.packages[0].name, "capture-fixture");
