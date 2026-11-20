@@ -1,13 +1,23 @@
 # 上游跟进与限定核验
 
-当前版本为**0.2.6**。本页固定2026-11-15的公共状态和dshmarket **1.73.19**原始函数/路由核验，另保留11月6日官方**0.2.2-rc.1 Desktop Host**历史结果；不随文档版本自动更新为上游已修复。0.2.6 宿主适配证据见[current-state](current-state.json)。
+当前版本为**0.2.6**。本页按日期记录上游公共状态、归档及受控验证。宿主适配见[current-state](current-state.json)。
 
-| 上游 | 2026-11-15结果 | 剩余事项 |
-|---|---|---|
-| [market#928](https://github.com/dsh-market/dsh-market/issues/928) | open、11评论，无新维护者回复；恢复reason仍丢失具体错误码，三次修复上限保留 | 补具体原因/用户出口；缺bundle两次真实重启及手动自救仍未通过 |
-| [market#1047](https://github.com/dsh-market/dsh-market/issues/1047) | closed、3评论，原install遗漏反馈后无新回复；双查询失败仍无版本未核实字段/专门warn，update有 | 等install分支补齐；关闭不等于原诉求完成 |
-| [1024#22](https://github.com/imsai-sh/dsh-1024store/issues/22) | open、1评论，无维护者回复；[详情API](https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin)浏览器UA为HTTP200，仍仅GitHub源码子目录、unknown/not_checked、checkedAt=null | 等准确npm映射后另验完整制品新装 |
-| [awesome#717](https://github.com/0xsline/awesome-deepseek-harness/pull/717) | **已于2026-11-06 15:22:35北京时间合并**，英/中文主分支条目已核 | 本次入口跟进完成；收录不代表兼容性认证 |
+## 2026-11-20复查
+
+[GitHub发行与标签](https://github.com/dsh-market/dsh-market/releases/tag/v1.73.25)和[npm latest](https://www.npmjs.com/package/dshmarket/v/1.73.25)均为 dshmarket **1.73.25**，tag 与 npm gitHead 同为 `d0967c75e59ef3d3d3d16ba4e41f169755508d7e`。归档 SHA-256 为 `4e6de3db01d32096551028921806e56233ad6741c4fe15ca2576e9d2247f8f3e`，shasum/integrity 均已核对。
+
+| 上游 | 本次观察与剩余事项 |
+|---|---|
+| [market#928](https://github.com/dsh-market/dsh-market/issues/928) | open，11条评论，数量与更新时间未变。6组原始恢复函数对照中，失败原因已保留管理器错误码，错误正文仍省略。缺bundle行仍保留恢复记录；5次受控触发最多安装3次，随后有abandoned及Settings提示。仍待两个真实重启与用户自救端到端复验。 |
+| [market#1047](https://github.com/dsh-market/dsh-market/issues/1047) | closed，3条评论，数量与更新时间未变。8组原始路由对照复现：双查询失败时新装仍用裸包名且缺专门告警和版本未核实字段，更新仍用@latest并返回该字段。显式版本及minimumReleaseAge保留。 |
+| [1024#22](https://github.com/imsai-sh/dsh-1024store/issues/22) | open，1条评论，数量与更新时间未变。[详情API](https://deepseek1024.com/api/v2/plugins/lcy0121/dsh-plugin-compat-check/plugin)返回HTTP 200，安装来源仍仅GitHub子目录，unknown/not_checked、checkedAt=null。待npm映射后复验新装。 |
+| [awesome#717](https://github.com/0xsline/awesome-deepseek-harness/pull/717) | 合并状态及当前主分支中英文条目均已确认。 |
+
+函数/路由复查使用私有profile、合成registry和模拟包管理器，范围限于恢复决定、HTTP返回及日志。真实Desktop恢复和自救沿用下方历史结果。
+
+## 2026-11-15市场与入口记录
+
+11月15日快照保留在 `61e9e71:docs/upstream-verification.md`。当时 #928、#1047、#22 分别为 11、3、1 条评论；awesome #717 已于 11 月 6 日 15:22:35（北京时间）合并。
 
 ## 1.73.19来源与原始代码复验
 
