@@ -1,6 +1,6 @@
 # skill交付与注册
 
-本页对应**0.2.6**候选 skill，含 rc.5 精确目录、拒答与搜索路由提示。0.2.5 为当前公开版，候选宿主验收与 CI 状态见[current-state](../docs/current-state.json)。
+本页对应**0.2.6**候选 skill，含 rc.5 精确目录、拒答与搜索路由提示。0.2.5 为当前公开版，候选提交已通过全部 CI，原始归档已过 macOS 与 Linux 验收。随包正文保留构建时说明，归档摘要与验收范围见[current-state](../docs/current-state.json)。
 
 权威正文为[SKILL.md](SKILL.md)，plugin/skill/SKILL.md为逐字节副本，prepack同步且通过files:skill交付，不含CLI。修改后执行：
 

@@ -8,7 +8,7 @@
 
 本源码为**0.2.6**候选，npm 与 GitHub 当前公开版均为 0.2.5。本版加入DSH 0.2.2-rc.5独立目录、拒答与搜索路由迁移提示及八版作者 CI，延续插件管理、鉴权与三槽位集成；支持中英韩界面、升级预检、依赖视图、人工处置和报告历史。已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3、0.2.2-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
 
-验收按提交、归档及平台记录于[docs/current-state.json](docs/current-state.json)。已有同一归档通过 macOS 和 Debian arm64 宿主验收。GitHub Actions 待核验，新归档按摘要重新验收。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
+验收按提交、归档及平台记录于[docs/current-state.json](docs/current-state.json)。候选提交已通过全部 12 项检查。同一 CI 归档已通过 macOS 和 GitHub Actions Linux 的宿主验收。新归档按摘要重新验收。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
 
 市场/发行入口的带日期核验见[上游记录](docs/upstream-verification.md)。安装使用下方npm或完整tgz。
 

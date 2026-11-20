@@ -215,7 +215,7 @@ DSC_HOST_SOURCE_ARCHIVE/DSC_RC22_SOURCE_ARCHIVE复用已核旧来源，坏摘要
 
 [来源审查](../rules/dsh-0.2.2-rc.5-review.json)固定 rc.4→rc.5 源码、npm 包和桌面 ASAR，[语义审查](../rules/dsh-0.2.2-rc.5-semantics-review.json)记录拒答和搜索选路。宿主入口调用 `plugin/lib/host-loader.js` 观测 loader，`host-tool-contract.js` 管参数、schema 和严格 JSON。真实宿主验收由 `tools/owned-live-host.mjs` 管启动与清理，`live-acceptance-receipt.mjs` 写回执。
 
-已验收的 0.2.6 归档通过 macOS 与 Debian arm64 的九项 UI、严格工具和鉴权检查。rc.5 桌面与 npm 另有管理协议及 LiveShare worker 回执。固定业务两轮共 48 项符合预期，每轮 12 例静态漏报含 2 例服务依赖、5 例 HTTP 和 5 例 DOM，误报 0。两套保留样本均已复跑。平台、归档身份和待核验的 CI 见[回执](current-state.json)。
+0.2.6 候选提交通过全部 12 项检查。CI 原始归档通过 macOS/Linux 的九项 UI、严格工具和鉴权验收，覆盖 rc.5 与 rc.3。固定业务两轮共 48 项符合预期，每轮 12 例静态漏报含 2 例服务依赖、5 例 HTTP 和 5 例 DOM，误报 0。随包 README 和 skill 保存构建时说明，交付状态及归档范围见[回执](current-state.json)。
 
 八版作者 CI 覆盖四种输出、旧报告回放和超限退出。公开元数据核验覆盖双源部分失败、空 npm README 与显式单源模式，成功来源的结果会保留。
 

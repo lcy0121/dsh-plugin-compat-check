@@ -70,7 +70,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ## 4. 验收范围
 
-0.2.5已发布至npm和GitHub，tag固定提交`89dbe2c`。工作分支、合并后的main及tag各11项CI均通过；rc.2/rc.3的macOS/Linux九项UI、鉴权与清理验收使用同一归档，公共下载摘要、固定版本安装及真实宿主探针已核，见[current-state](current-state.json)。0.2.6候选验收同见[current-state](current-state.json)。Windows与一般业务仍待独立验证。
+0.2.5已发布至npm和GitHub，tag固定提交`89dbe2c`。工作分支、合并后的main及tag各11项CI均通过；rc.2/rc.3的macOS/Linux九项UI、鉴权与清理验收使用同一归档，公共下载摘要、固定版本安装及真实宿主探针已核，见[current-state](current-state.json)。0.2.6候选的12项CI、同一归档macOS/Linux及rc.3回归均已通过，见[current-state](current-state.json)。Windows与一般业务仍待独立验证。
 
 ## 5. 验证入口
 
@@ -80,7 +80,6 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 仅列未完成事项，优先级不是漏洞评级。已完成的0.2.6适配见[维护指南](maintaining.md#026rc5适配)，本仓库issue #7–#10的修复见[问题回归](maintaining.md#用户issue修订与回归)。CI和平台验收以对应提交及同一归档为准。
 
-1. **P0：完成0.2.6同一制品回归与交付。** 核对GitHub Actions全部检查和新归档摘要，按[同一制品流程](maintaining.md#同一制品发布核对)完成平台验收并记录回执。
-2. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题/窄容器及误读、失败、误报与操作耗时；联系、收集、公开分别授权，不默认遥测。
-3. **P2：等待上游修复与发行入口更新。** 2026-11-20[复查](upstream-verification.md#2026-11-20复查)确认 dshmarket 1.73.25 恢复日志已保留错误码；真实重启/自救、新装告警和1024 npm映射仍待复验，awesome收录已核。反馈另取授权。
-4. **P2：Windows真实验收（依环境条件暂缓）。** 优先补本仓库issue #7–#10的Windows10 / DSH rc.5同一制品现场验证，记录版本、路径、启动方式及修复前后结果；同时验证安装、回收、权限、打包/诊断和自有资源清理。路径模拟及其它平台不替代实机结果，环境具备前保持未验收。
+1. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题/窄容器及误读、失败、误报与操作耗时；联系、收集、公开分别授权，不默认遥测。
+2. **P2：等待上游修复与发行入口更新。** 2026-11-20[复查](upstream-verification.md#2026-11-20复查)确认 dshmarket 1.73.25 恢复日志已保留错误码；真实重启/自救、新装告警和1024 npm映射仍待复验，awesome收录已核。反馈另取授权。
+3. **P2：Windows真实验收（依环境条件暂缓）。** 优先补本仓库issue #7–#10的Windows10 / DSH rc.5同一制品现场验证，记录版本、路径、启动方式及修复前后结果；同时验证安装、回收、权限、打包/诊断和自有资源清理。路径模拟及其它平台不替代实机结果，环境具备前保持未验收。

@@ -30,7 +30,7 @@
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
-      "scope": "0.2.6 development candidate. Publication025 records the verified public release and its tagged archive."
+      "scope": "0.2.6 candidate verified by exact CI commit and archive. Publication025 records the public release."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -180,11 +180,16 @@
       "scope": "Historical exact0.2.4 public release, macOS/Linux same artifact and CI receipts retained in Git; no certification of0.2.5."
     },
     "development026": {
-      "sourceCommit": "030b97be7955dc972608e6e7e5e072c4fbd14975",
-      "sourceSha256": "bd45fe062f38b07bec2b2545e297d2ec0700ae8ea0435558dc12df1143d8d70b",
+      "sourceCommit": "283f2eb8791ebd81bf7b20fab9f2134ad0167d81",
+      "sourceSha256": "25e5f9e5bc90163eb50a2b667f4c2abb1275dd6e49f6ba82316d184be9c46e00",
       "artifact": {
         "filename": "dsh-plugin-compat-check-0.2.6.tgz",
-        "sha256": "57e37b57f049cdcb250fba6eeb4e1f5b549e12dc669d188079f21bbfb9a864b6"
+        "sha256": "44b35087d1bf77b888f376812fab23ca5989429790e6f409916acb27cb189020"
+      },
+      "githubActions": {
+        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/44742343942",
+        "checksPassed": 12,
+        "linuxVersions": 8
       },
       "hosts": [
         {
@@ -212,26 +217,32 @@
           "uiGates": 9
         },
         {
-          "platform": "Debian 13",
-          "arch": "arm64",
+          "platform": "GitHub Actions Linux",
+          "arch": "x64",
           "carrier": "npm",
           "dsh": "0.2.2-rc.5",
+          "node": "24.9.0",
+          "uiGates": 9
+        },
+        {
+          "platform": "GitHub Actions Linux",
+          "arch": "x64",
+          "carrier": "npm",
+          "dsh": "0.2.2-rc.3",
           "node": "24.9.0",
           "uiGates": 9
         }
       ],
       "separateHostChecks": {
-        "macOS": {
-          "rc5Auth": true,
-          "rc5ManagerCasesPerCarrier": 6,
-          "liveShareWorkerBothCarriers": true,
-          "rc3Auth": true
-        },
-        "debian13": {
-          "rc5Auth": true,
-          "rc5Manager": true,
-          "liveshareWorker": true
-        }
+        "macOSNpmAuth": [
+          "0.2.2-rc.3",
+          "0.2.2-rc.5"
+        ],
+        "linuxAuthAndManager": [
+          "0.2.2-rc.3",
+          "0.2.2-rc.5"
+        ],
+        "linuxRc5LiveShareWorker": true
       },
       "officialSourceAssertions": {
         "passed": 110,
@@ -245,9 +256,9 @@
         "legacyReplayExit": 1
       },
       "business": {
-        "sourceCommit": "030b97be7955dc972608e6e7e5e072c4fbd14975",
+        "sourceCommit": "283f2eb8791ebd81bf7b20fab9f2134ad0167d81",
         "manifestSha256": "c5460b5b4a71f7e62684308885c4d70715c774d41a5d4a6cea085e46481564df",
-        "reportSha256": "facb6be49899af2e75f5b9738a08f1f06ccc64177a76f102fcfe1c7c240fc65f",
+        "reportSha256": "e58fb9f0277fcc655df52596237b5e828090904f4064ddbeefbfbf28e7731859",
         "pinnedArtifacts": 5,
         "holdoutFamilies": 2,
         "casesPerRun": 24,
@@ -261,8 +272,8 @@
         "driverErrors": 0,
         "validationErrors": 0
       },
-      "githubActions": "pending exact branch push",
-      "scope": "UI/auth bind to this archive. Fixed business uses the named source commit. Later packed README/skill edits require a new archive. The independent Linux repack differed in two file modes."
+      "previousLocalAcceptance": "4736552:docs/current-state.json",
+      "scope": "Exact CI candidate. Host checks used the same archive; bundled README and skill retain build-time wording. The preceding local author benchmark remains historical."
     }
   },
   "scope": "0.2.6 candidate evidence. 0.2.5 remains the public release. Suite counts and acceptance bind to recorded inputs."

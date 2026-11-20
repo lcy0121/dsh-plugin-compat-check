@@ -8,7 +8,7 @@
 
 이 체크아웃은 **0.2.6** 후보 버전입니다. npm과 GitHub의 현재 공개 버전은 0.2.5입니다. 독립 검토한 DSH 0.2.2-rc.5 카탈로그와 콘텐츠 거부·검색 라우팅 마이그레이션 안내와 8개 버전의 작성자 CI 매트릭스를 제공합니다. 중·영·한 UI, 업그레이드 사전 검사, 의존 관계, 수동 검토와 보고서 이력을 지원합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3, 0.2.2-rc.5**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
 
-[docs/current-state.json](docs/current-state.json)은 커밋·아카이브·플랫폼별 검수 범위를 기록합니다. 동일한 후보 아카이브로 macOS와 Debian arm64의 호스트 검수를 통과했으며 GitHub Actions 검증은 대기 중입니다. 새 아카이브는 해시를 확인해 다시 검수합니다. npm 패키지는 화면, 상세/배지, `compat_check`, skill을 제공합니다. CLI·설치 검사·배치·작성자 CI·건강 실행기는 저장소 전용이며 npm CLI bin과 `npx dsh-plugin-compat-check`는 지원하지 않습니다.
+[docs/current-state.json](docs/current-state.json)은 커밋·아카이브·플랫폼별 검수 범위를 기록합니다. 후보 커밋은 12개 검사를 모두 통과했습니다. 동일한 CI 아카이브가 macOS와 GitHub Actions Linux의 호스트 검수를 통과했습니다. 새 아카이브는 해시를 확인해 다시 검수합니다. npm 패키지는 화면, 상세/배지, `compat_check`, skill을 제공합니다. CLI·설치 검사·배치·작성자 CI·건강 실행기는 저장소 전용이며 npm CLI bin과 `npx dsh-plugin-compat-check`는 지원하지 않습니다.
 
 마켓·배포 경로의 날짜별 검증은 [상위 프로젝트 기록](docs/upstream-verification.md)을 참고하세요. 아래 npm 또는 완전한 tgz로 설치하세요.
 
