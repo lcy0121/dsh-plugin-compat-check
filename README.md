@@ -6,18 +6,18 @@
 
 ## 版本与入口
 
-当前版本为**0.2.6**。本版加入DSH 0.2.2-rc.5独立目录、拒答与搜索路由迁移提示，延续插件管理、鉴权与三槽位集成；支持中英韩界面、升级预检、依赖视图、人工处置和报告历史。已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3、0.2.2-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
+本源码为**0.2.6**候选，npm 与 GitHub 当前公开版均为 0.2.5。本版加入DSH 0.2.2-rc.5独立目录、拒答与搜索路由迁移提示及八版作者 CI，延续插件管理、鉴权与三槽位集成；支持中英韩界面、升级预检、依赖视图、人工处置和报告历史。已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3、0.2.2-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
 
-验收按提交、归档及平台记录于[docs/current-state.json](docs/current-state.json)；新制品须重验。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
+验收按提交、归档及平台记录于[docs/current-state.json](docs/current-state.json)。已有同一归档通过 macOS 和 Debian arm64 宿主验收。GitHub Actions 待核验，新归档按摘要重新验收。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
 
 市场/发行入口的带日期核验见[上游记录](docs/upstream-verification.md)。安装使用下方npm或完整tgz。
 
 ## 安装与使用
 
 ```sh
-# 固定安装本版
+# 从 npm 安装当前公开版
 dsh plugin --profile <profile> add dsh-plugin-compat-check
-# 使用本地归档前核对摘要
+# 测试 0.2.6 候选时使用已构建的本地归档并核对摘要
 dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.6.tgz
 ```
 
@@ -46,7 +46,7 @@ dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.
 
 ## 界面示例
 
-0.2.5 / DSH 0.2.2-rc.3，2026-11-15自有macOS测试profile实拍（中文界面）。包含明确用于回归的合成插件，数字只代表该次检查，不是生态统计或全部业务通过；验收身份见[current-state](docs/current-state.json)。
+公开版 0.2.5 的界面（DSH 0.2.2-rc.3），2026-11-15自有macOS测试profile实拍（中文界面）。包含明确用于回归的合成插件，数字只代表该次检查，不是生态统计或全部业务通过；验收身份见[current-state](docs/current-state.json)。
 
 ![0.2.5在DSH 0.2.2-rc.3中的主结果与覆盖限制](plugin/assets/compat-overview-0.2.5.png)
 
@@ -75,7 +75,7 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 
 ## 升级预检与验证
 
-工具调用`compat_check({"upgradeTo":"0.2.2-rc.5"})`，当前版本取宿主，返回`upgradePreview`；CLI显式给两个精确版本：
+以下 rc.5 示例使用 0.2.6 候选代码。工具调用`compat_check({"upgradeTo":"0.2.2-rc.5"})`，当前版本取宿主，返回`upgradePreview`；CLI显式给两个精确版本：
 
 ```sh
 node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.3 --upgrade-to 0.2.2-rc.5 --json
@@ -87,7 +87,7 @@ node tools/meta-check.mjs --json
 
 八个登记版本可任意比较；未知版本退出3。预检只静态比较同组私有字节，不借probe、豁免或普通基线。预检0/1/2为无/非致命/致命新增或变重风险，3为无法预检；0仍可有旧风险。普通退出码为**0未发现冲突、1部分可用或未知、2不兼容、3工具/输入错误**。
 
-默认测试不启动真实DSH/模型，打包回归需要registry；发布前检查不发布，元数据核验取数失败不算通过。Windows和一般业务未获认证。详见[Plan](docs/Plan.md)、[使用指南](docs/guide.md)、[维护流程](docs/maintaining.md)、[作者CI](docs/author-ci.md)、[规则](rules/README.md)与[skill](skill/README.md)。
+默认测试不启动真实DSH/模型，打包回归需要registry；发布前检查不发布，元数据核验只要有请求来源取数失败就退出 3，仍保留成功来源。Windows和一般业务未获认证。详见[Plan](docs/Plan.md)、[使用指南](docs/guide.md)、[维护流程](docs/maintaining.md)、[作者CI](docs/author-ci.md)、[规则](rules/README.md)与[skill](skill/README.md)。
 
 ## License
 

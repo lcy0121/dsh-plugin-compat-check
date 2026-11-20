@@ -13,9 +13,10 @@
 | dsh-api-catalog-0.2.1-rc.5.json / dsh-0.2.1-rc.5-review.json | 已登记精确目录与固定来源/语义审查；审查内基础集成为历史快照，后续平台/业务回执见current-state |
 | dsh-api-catalog-0.2.2-rc.1.json / dsh-0.2.2-rc.1-review.json | 独立来源、完整签名与提取修正；参数语义见dsh-0.2.2-rc.1-semantics-review.json，完整UI/平台回执见current-state |
 | dsh-api-catalog-0.2.2-rc.2.json / dsh-api-catalog-0.2.2-rc.3.json | 分别对应dsh-0.2.2-rc.2-review.json及rc.3审查；各自semantics-review记录迁移边界，不互借认证 |
+| dsh-api-catalog-0.2.2-rc.5.json | 固定桌面来源、109 个宿主服务/640 个方法及 8 个客户端服务/46 个方法；对应 rc.5 的来源与语义审查 JSON，rc.4 为差分基线 |
 | usage-inventory.json | 带日期、版本、profile和完整性标记的历史AST库存，不是当前覆盖率 |
 
-普通检查从`lib/contracts.mjs.CATALOG_REFERENCES`选不高于目标的最新目录，低于最旧目录或目标未知时取0.2.0-rc.2；显式覆盖优先。0.2.2-rc.2/rc.3/rc.5各用精确目录。登记字节与精确认证集合以该常量为准；升级预检仅接受八个登记版本，拒绝未知/范围。回退或自定义目录不认证未来宿主。
+普通检查从`lib/contracts.mjs.CATALOG_REFERENCES`选不高于目标的最新目录，低于最旧目录、版本缺失或格式无效时取0.2.0-rc.2；显式覆盖优先。0.2.2-rc.2/rc.3/rc.5各用精确目录。登记字节与精确认证集合以该常量为准；升级预检仅接受八个登记版本，拒绝未知/范围。回退或自定义目录不认证未来宿主。
 
 ## 判定与解释
 
@@ -28,7 +29,7 @@
 | 未采样、访问器未知、不可读或源码不完整 | 保留覆盖限制，不用省略键认定不存在 |
 | 固定客户端参数类型/枚举不符 | 非致命静态风险；未知值弃权，弃用/生命周期提醒仅作覆盖说明 |
 
-rc.5目录已补齐abstract/装饰器签名漏项，新增126项方法（291→417）；来源审查不等于运行时验收。方法自身layer优先、服务layer回退，客户端规则不能套宿主同名方法。提供方声明只是候选，不能掩盖明确absent；present服务上的方法缺失另判。certainty与impactBasis分别描述证据和影响，弱Context/别名保留suspected。没有语义依据的方法缺失明确“影响面未知”，不猜替代API或修复版本。
+0.2.1-rc.5目录已补齐abstract/装饰器签名漏项，新增126项方法（291→417）；来源审查不等于运行时验收。方法自身layer优先、服务layer回退，客户端规则不能套宿主同名方法。提供方声明只是候选，不能掩盖明确absent；present服务上的方法缺失另判。certainty与impactBasis分别描述证据和影响，弱Context/别名保留suspected。没有语义依据的方法缺失明确“影响面未知”，不猜替代API或修复版本。
 
 DSH≥0.2.1-rc.1优先engines.dsh，缺失回退官方peer，旧目标保留旧策略。独立compatibility.json仅按插件/DSH精确版本豁免；非法字段和无效豁免保留风险/限制。
 

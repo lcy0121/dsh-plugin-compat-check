@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-当前版本为**0.2.6**，真源为`lib/version.mjs`。本文保留产品契约与待办；操作/预算见[指南](guide.md)，实现/验收见[维护指南](maintaining.md)，带日期的回执见[docs/current-state.json](current-state.json)。
+当前源码为**0.2.6**候选，公开版为 0.2.5。源码版本取`lib/version.mjs`。本文保留产品契约与待办；操作/预算见[指南](guide.md)，实现/验收见[维护指南](maintaining.md)，带日期的回执见[docs/current-state.json](current-state.json)。
 
 ## 1. 项目定位与交付状态
 
@@ -84,9 +84,9 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 2. **P0：适配rc.4拒答语义与rc.5搜索路由。** 已接入[精确迁移提示](../rules/dsh-0.2.2-rc.5-semantics-review.json)，用合成响应回归拒答、异常/取消、搜索选路和网关端点。提示限于已证明入口。
 3. **P0：复验rc.5桌面宿主、三槽位与管理协议。** 桌面Electron与npm已通过加载、管理、九项UI、严格工具、skill、鉴权及历史。LiveShare自有worker已验证IPC启动及退出。
 4. **P0：联动作者CI预算与宿主矩阵。** 八版矩阵已验证四种输出、旧报告回放及超限退出。保留cell/总输出与时间预算，独立能力表生成Linux矩阵，Node22继续静态覆盖。
-5. **P0：完成0.2.6同一制品回归与交付。** 同一归档已过macOS与Debian arm64宿主验收，专用业务及原始校验器通过。待核对GitHub Actions制品与全部检查。见[current-state](current-state.json)。
+5. **P0：完成0.2.6同一制品回归与交付。** 既有同一归档已过macOS与Debian arm64宿主验收，专用业务及原始校验器通过。新归档与GitHub Actions待验。见[current-state](current-state.json)。
 6. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题/窄容器及误读、失败、误报与操作耗时；联系、收集、公开分别授权，不默认遥测。
-7. **P1：补充真实业务漏报样本。** 已保留原24项预期并在rc.5复跑两轮。每轮12例静态漏报含2例服务依赖、5例HTTP、5例DOM，误报0。两套独立保留样本仍需实测；这些边界保留为覆盖限制。
+7. **P1：补充真实业务漏报样本。** 已保留原24项预期并在rc.5复跑两轮。每轮12例静态漏报含2例服务依赖、5例HTTP、5例DOM，误报0。两套保留样本已复跑，其故障需用业务实测识别。
 8. **P1：修复公开元数据核验的部分成功退出。** 已修复并回归双源部分失败、空npm README及显式单源；保留成功来源的数据。
 9. **P2：分拆宿主适配与验收编排。** 已拆分loader观测、工具契约、宿主资源和验收回执。macOS三载体同一归档、打包和原始JSON校验器均已验证。
 10. **P2：等待上游修复与发行入口更新。** 2026-11-15[监测](upstream-verification.md)：dshmarket1.73.19仍有恢复细节/新装告警缺口；#928 open、#1047 closed，均无新回复；1024缺npm映射，awesome已合并。11月6日rc.1 Desktop恢复/自救未通过属历史，不代表rc.2/rc.3。待修复或映射变化后重验，反馈另取授权。

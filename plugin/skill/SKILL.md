@@ -1,6 +1,6 @@
 ---
 name: dsh-plugin-compat-check
-description: 0.2.6：检查已安装DSH插件、升级前静态对比，排查更新后失效、界面消失、工具无响应、did not activate及版本声明问题。Use for installed DeepSeek Harness plugin compatibility, static upgrade comparisons and activation failures. Includes an exact DSH 0.2.2-rc.5 catalogue and bounded Agent/tool/Session migration guidance; no findings does not certify business functionality.
+description: 0.2.6：检查已安装DSH插件、升级前静态对比，排查更新后失效、界面消失、工具无响应、did not activate及版本声明问题。Use for installed DeepSeek Harness plugin compatibility, static upgrade comparisons and activation failures. Includes an exact DSH 0.2.2-rc.5 catalogue, refusal and search routing guidance, and bounded Agent/tool/Session migration guidance; no findings does not certify business functionality.
 ---
 
 # dsh-plugin-compat-check
@@ -11,7 +11,7 @@ description: 0.2.6：检查已安装DSH插件、升级前静态对比，排查�
 
 当前会话有`compat_check`时优先调用，返回普通`report`、baseline/cache、toolVersion和exitCode；升级模式返回`upgradePreview`，普通report为null。无工具时定位含`bin/compat-check.mjs`、`lib/`、`rules/`的仓库，npm插件包没有CLI bin，不支持npx。根依赖缺失时在授权范围内运行`npm ci --ignore-scripts`。
 
-先核实际profile，不默认desktop；无参tool与设置页按宿主启动身份定位，冲突时用`compat_check({"profile":"my-profile"})`或CLI显式路径。Windows盘符/UNC有路径回归，仍须实机复验。profile位于`${DSH_HOME:-~/.dsh}/profiles/<name>`。0.2.1-rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3界面入口：左下角“更多”/用户头像→设置→内置插件→兼容性；折叠不等于激活失败。界面支持中英韩，原始证据和JSON不翻译。
+先核实际profile，不默认desktop；无参tool与设置页按宿主启动身份定位，冲突时用`compat_check({"profile":"my-profile"})`或CLI显式路径。Windows盘符/UNC有路径回归，仍须实机复验。profile位于`${DSH_HOME:-~/.dsh}/profiles/<name>`。0.2.1-rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3/rc.5界面入口：左下角“更多”/用户头像→设置→内置插件→兼容性；折叠不等于激活失败。界面支持中英韩，原始证据和JSON不翻译。
 
 ```sh
 node <repo>/bin/compat-check.mjs --help
@@ -95,11 +95,13 @@ DSH≥0.2.1-rc.1优先自有engines.dsh，仅字段缺失回退官方peer；旧�
 
 ## 精确语义与槽位
 
-精确语义覆盖0.2.1-rc.2/rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3，独立于方法名目录。startSession核已知prompt/agentPreset/clearPreviousDraft类型；除0.2.1-rc.2外另核whenDraftExists=keep/replace/append，显式新字段优先，旧clearPreviousDraft仍支持。空白会话可复用、preset隔离，创建草稿不等于发送。
+精确语义覆盖0.2.1-rc.2/rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3/rc.5，独立于方法名目录。startSession核已知prompt/agentPreset/clearPreviousDraft类型；除0.2.1-rc.2外另核whenDraftExists=keep/replace/append，显式新字段优先，旧clearPreviousDraft仍支持。空白会话可复用、preset隔离，创建草稿不等于发送。
 
-timer弃用及sessions.retain的ready/release/disposal仅提示覆盖，不证明泄漏。0.2.1-rc.5及三个0.2.2版本推理槽位显示/翻译用text、原始输出用rawText，Content Factory仍用text/running/labels；不把text使用报错，不验证props/流式时序或采集思考正文。
+timer弃用及sessions.retain的ready/release/disposal仅提示覆盖，不证明泄漏。0.2.1-rc.5及四个0.2.2版本推理槽位显示/翻译用text、原始输出用rawText，Content Factory仍用text/running/labels；不把text使用报错，不验证props/流式时序或采集思考正文。
 
-三个0.2.2版本对固定agent/request订阅及已证明服务调用给迁移提示，并核可证明的投影stateVersion为非负安全整数。rc.2/rc.3另提示Agent caller/initiator与ownerCtx、具名Subagent/Team及interrupt preset、native/PTC/condition与严格true的并行条件、Session.append单事件/数组、AttachmentError、动态MCP及manager更新协议。
+四个0.2.2版本对固定agent/request订阅及已证明服务调用给迁移提示，并核可证明的投影stateVersion为非负安全整数。0.2.2-rc.2/rc.3/rc.5另提示Agent caller/initiator与ownerCtx、具名Subagent/Team及interrupt preset、native/PTC/condition与严格true的并行条件、Session.append单事件/数组、AttachmentError、动态MCP及manager更新协议。
+
+0.2.2-rc.5还提示LLM终止块与Session turn/end的CONTENT_REFUSED，以及WebSearchRequest.llmProvider搜索选路。显式搜索提供方优先，Fetch默认HTTP；凭据、费用及实际调用由独立证据确认。
 
 提示只定位已证明Context入口，不新增fatal或已验证调用；未知、动态、展开、访问器、逃逸及跨helper合并弃权。不证明返回对象流、callback、await/dispose顺序或AgentLoop收敛，不执行代码或保存prompt。模型发现须凭据门控，不为体检访问生产/models或发送请求。
 
@@ -128,4 +130,4 @@ report_status=$?
 
 本版保留Cordis Core4.1、Loader/Include1.1及工具作用域适配。无关状态写入不使缓存失效，源码/声明变化仍会；非法JSON证据明确失败。目录未收录只表示覆盖不足，不据此称方法缺失。
 
-实际运行版本取toolVersion/CLI version；分发以registry/GitHub Releases为准，docs/current-state.json按提交/归档/平台记录验收，不认证重打包、Windows或一般业务。docs/Plan.md列待办，操作/预算和目录治理见docs/guide.md、docs/maintaining.md。YAML是运行依赖，根dev依赖不随npm提供功能。
+实际运行版本取toolVersion/CLI version。0.2.6是候选源码，0.2.5是当前公开版本；docs/current-state.json记录macOS/Debian同一归档及待核验的GitHub Actions。Windows和一般业务需独立证据。docs/Plan.md列待办，操作/预算和目录治理见docs/guide.md、docs/maintaining.md。YAML是运行依赖，根dev依赖不随npm提供功能。

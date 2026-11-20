@@ -6,18 +6,18 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-The current version is **0.2.6**. It adds an independently reviewed DSH 0.2.2-rc.5 catalogue and migration guidance for content refusal and search routing. It provides a Chinese/English/Korean UI, upgrade preview, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3 and 0.2.2-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
+This checkout contains the **0.2.6** candidate. The current public release on npm and GitHub is 0.2.5. It adds an independently reviewed DSH 0.2.2-rc.5 catalogue and migration guidance for content refusal and search routing, plus an eight-version author CI matrix. It provides a Chinese/English/Korean UI, upgrade preview, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3 and 0.2.2-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
 
-[docs/current-state.json](docs/current-state.json) records acceptance by commit, archive and platform; new artifacts require verification. The npm plugin provides the page, details/badges, `compat_check` and skill. CLI, install checks, batches, author CI and health executor are repository tools. There is no npm CLI bin or `npx dsh-plugin-compat-check` support.
+[docs/current-state.json](docs/current-state.json) records acceptance by commit, archive and platform. One candidate archive passed host checks on macOS and Debian arm64. GitHub Actions verification is pending. Verify new archives by digest. The npm plugin provides the page, details/badges, `compat_check` and skill. CLI, install checks, batches, author CI and health executor are repository tools. There is no npm CLI bin or `npx dsh-plugin-compat-check` support.
 
 See the dated [upstream record](docs/upstream-verification.md) for market and distribution-entry checks. Install using npm or a complete tgz below.
 
 ## Install and use
 
 ```sh
-# Install this exact version
+# Install the current public release from npm
 dsh plugin --profile <profile> add dsh-plugin-compat-check
-# Verify the digest before using a local archive
+# Test the 0.2.6 candidate with a verified local archive
 dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.6.tgz
 ```
 
@@ -46,7 +46,7 @@ Confirm and back up before archiving; restores/imports are references. Explicitl
 
 ## Screenshots
 
-0.2.5 / DSH 0.2.2-rc.3, captured on 2026-11-15 in an owned macOS test profile (Chinese UI). Includes synthetic regression plugins; counts describe that check, not ecosystem statistics or universal business success. Artifact identity is recorded in [current-state](docs/current-state.json).
+The public 0.2.5 release (DSH 0.2.2-rc.3), captured on 2026-11-15 in an owned macOS test profile (Chinese UI). Includes synthetic regression plugins; counts describe that check, not ecosystem statistics or universal business success. Artifact identity is recorded in [current-state](docs/current-state.json).
 
 ![0.2.5 main results and coverage limits in DSH 0.2.2-rc.3](plugin/assets/compat-overview-0.2.5.png)
 
@@ -75,7 +75,7 @@ Ordinary static checks do not execute targets or use the network, but write thei
 
 ## Upgrade preview and verification
 
-Call `compat_check({"upgradeTo":"0.2.2-rc.5"})`; the current version comes from the host and results use `upgradePreview`. CLI requires both exact versions:
+The rc.5 examples use the 0.2.6 candidate. Call `compat_check({"upgradeTo":"0.2.2-rc.5"})`; the current version comes from the host and results use `upgradePreview`. CLI requires both exact versions:
 
 ```sh
 node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.3 --upgrade-to 0.2.2-rc.5 --json
@@ -85,9 +85,9 @@ node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-Compare any pair of the seven registered versions; unknown versions exit 3. Preview statically compares the same private bytes without probes, exemptions or ordinary baselines. Preview codes 0/1/2 mean no/nonfatal/fatal new or worsened risks; 3 means unable to preview. Zero may retain old risks. Ordinary codes are **0 no conflict found, 1 partially usable or unknown, 2 incompatible, 3 tool/input error**.
+Compare any pair of the eight registered versions; unknown versions exit 3. Preview statically compares the same private bytes without probes, exemptions or ordinary baselines. Preview codes 0/1/2 mean no/nonfatal/fatal new or worsened risks; 3 means unable to preview. Zero may retain old risks. Ordinary codes are **0 no conflict found, 1 partially usable or unknown, 2 incompatible, 3 tool/input error**.
 
-Default tests do not start real DSH/models; packaging tests need the registry. The prepublish gate does not publish, and unavailable metadata is not verification. Windows and general business functionality remain unverified. See [Plan](docs/Plan.md), [guide](docs/guide.md), [maintenance](docs/maintaining.md), [author CI](docs/author-ci.md), [rules](rules/README.md) and [skill](skill/README.md).
+Default tests do not start real DSH/models; packaging tests need the registry. The prepublish gate runs local checks. Metadata lookup exits 3 if any requested source is unavailable and retains results from successful sources. Windows and general business functionality remain unverified. See [Plan](docs/Plan.md), [guide](docs/guide.md), [maintenance](docs/maintaining.md), [author CI](docs/author-ci.md), [rules](rules/README.md) and [skill](skill/README.md).
 
 ## License
 

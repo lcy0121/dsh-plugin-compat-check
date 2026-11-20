@@ -1,6 +1,6 @@
 # 使用与验证指南
 
-当前版本为**0.2.6**。面板、tool和skill随npm插件交付；CLI、健康执行器与作者CI从仓库运行，源码构建见[打包说明](../plugin/README.md#从源码构建安装)。声明放行、激活或无发现不等于业务验收；[current-state](current-state.json)按提交/归档/平台记录证据。
+本文对应**0.2.6**候选源码。npm 安装使用当前公开版 0.2.5，候选验收使用本地 tgz。面板、tool和skill随npm插件交付；CLI、健康执行器与作者CI从仓库运行，源码构建见[打包说明](../plugin/README.md#从源码构建安装)。声明放行、激活或无发现不等于业务验收；[current-state](current-state.json)按提交/归档/平台记录证据。
 
 已认证精确目录为`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`、`0.2.2-rc.5`。最低宿主声明不认证未来版本。0.2.1-rc.3/rc.5及四个0.2.2版本的入口：左下角账号菜单→设置→内置插件→兼容性；无参tool/设置页按宿主启动身份定位；冲突时改用`compat_check({"profile":"my-profile"})`或CLI显式路径，不猜desktop。路径模拟不替代Windows实机。
 
@@ -19,7 +19,7 @@
 
 新宿主执行须Node>=24.9.0；静态工具支持Node22.19。search/account/terminal/Worktree及dsh-doc迁移属于宿主配置，普通检查不代写。
 
-0.2.2-rc.5对已证明的LLM流、Session事件与Web搜索/Fetch入口提示拒答、模型路由及取消边界。提示仅描述固定源码契约，实际配置和调用需单独验收。
+0.2.2-rc.5 为已证明的 LLM 流和 Session 事件提示 `CONTENT_REFUSED`。搜索显式提供方优先，自动按 `llmProvider` 为 DeepSeek 官方或账号路由选 Messages，其余或无模型请求用 Search API。首选不可用时检查是否有唯一可用提供方，Fetch 默认 HTTP。提示保留凭据、实际调用和取消时序的覆盖边界。
 
 ## 可选功能健康检查
 
@@ -154,12 +154,14 @@ node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-test:issues固定官方0.2.1-rc.5及0.2.2-rc.1/rc.2/rc.3/rc.5五份源码的URL/SHA-256，缺输入时下载校验；坏来源或任何跳过均失败。本地复用变量见[维护指南](maintaining.md#维护入口与语法覆盖)。仅成功TAP可更新计数，不重建快照求绿；skill/契约改后同步stage-skill/stage-contract，依赖或组件来源变更同步第三方说明。默认套件不启动真实DSH/模型，打包测试需要registry；推送、发布及外部发帖分别授权，[同一制品流程](maintaining.md#同一制品发布核对)统一维护。
+test:issues 固定五份官方源码的 URL/SHA-256，缺输入时下载校验，坏来源或跳过均失败。[源码复用与制品流程](maintaining.md#维护入口与语法覆盖)记录变量及归档要求。计数取成功 TAP，打包测试需要 registry。
+
+`meta-check` 默认查 GitHub 和 npm，可用 `--github` 或 `--npm` 单查。任何请求来源失败或 npm README 缺失时退出 3，保留成功结果。取数齐全时，错误退出 1，只有提示或全部一致退出 0。
 
 ## 升级预检与有限批量
 
 ```sh
-node bin/compat-check.mjs --nm <profile或node_modules> --dsh-version 0.2.2-rc.2 --upgrade-to 0.2.2-rc.3 --json
+node bin/compat-check.mjs --nm <profile或node_modules> --dsh-version 0.2.2-rc.3 --upgrade-to 0.2.2-rc.5 --json
 node tools/static-batch.mjs --manifest test/fixtures/static-batch.json > batch.json
 node tools/static-batch.mjs --manifest test/fixtures/static-batch.json --previous batch.json
 ```
@@ -179,7 +181,7 @@ node tools/static-batch.mjs --manifest test/fixtures/static-batch.json --previou
 ```sh
 node tools/engineering-check.mjs
 DSC_SLOW=1 node --test test/engineering-live.test.mjs test/profile-lock.test.mjs test/owned-process.test.mjs test/debugger.test.mjs
-DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.3 DSC_REQUIRE_RC2_UI=1 node tools/rc2-live.mjs
+DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.5 DSC_REQUIRE_RC2_UI=1 node tools/rc2-live.mjs
 ```
 
 真实集成需可信DSH/pnpm、Chrome（DSC_CHROME可指定）及相应网络/执行授权；账户/模型另取授权。只清理自有目录/PID组，不按进程名清场；Darwin负例缺编译器时跳过不算验收。`DSC_EXECUTION_DIAGNOSTICS=<私有目录>`可保留有界启动诊断，不导出argv/env或stderr正文，分享前仍需预览。

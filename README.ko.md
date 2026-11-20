@@ -6,18 +6,18 @@
 
 ## 버전과 진입점
 
-현재 버전은 **0.2.6**입니다. 독립 검토한 DSH 0.2.2-rc.5 카탈로그와 콘텐츠 거부·검색 라우팅 마이그레이션 안내를 제공합니다. 중·영·한 UI, 업그레이드 사전 검사, 의존 관계, 수동 검토와 보고서 이력을 지원합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3, 0.2.2-rc.5**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
+이 체크아웃은 **0.2.6** 후보 버전입니다. npm과 GitHub의 현재 공개 버전은 0.2.5입니다. 독립 검토한 DSH 0.2.2-rc.5 카탈로그와 콘텐츠 거부·검색 라우팅 마이그레이션 안내와 8개 버전의 작성자 CI 매트릭스를 제공합니다. 중·영·한 UI, 업그레이드 사전 검사, 의존 관계, 수동 검토와 보고서 이력을 지원합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3, 0.2.2-rc.5**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
 
-[docs/current-state.json](docs/current-state.json)은 커밋·아카이브·플랫폼별 검수 범위를 기록하며 새 배포물은 다시 검증해야 합니다. npm 패키지는 화면, 상세/배지, `compat_check`, skill을 제공합니다. CLI·설치 검사·배치·작성자 CI·건강 실행기는 저장소 전용이며 npm CLI bin과 `npx dsh-plugin-compat-check`는 지원하지 않습니다.
+[docs/current-state.json](docs/current-state.json)은 커밋·아카이브·플랫폼별 검수 범위를 기록합니다. 동일한 후보 아카이브로 macOS와 Debian arm64의 호스트 검수를 통과했으며 GitHub Actions 검증은 대기 중입니다. 새 아카이브는 해시를 확인해 다시 검수합니다. npm 패키지는 화면, 상세/배지, `compat_check`, skill을 제공합니다. CLI·설치 검사·배치·작성자 CI·건강 실행기는 저장소 전용이며 npm CLI bin과 `npx dsh-plugin-compat-check`는 지원하지 않습니다.
 
 마켓·배포 경로의 날짜별 검증은 [상위 프로젝트 기록](docs/upstream-verification.md)을 참고하세요. 아래 npm 또는 완전한 tgz로 설치하세요.
 
 ## 설치와 사용
 
 ```sh
-# 이 정확한 버전 설치
+# npm에서 현재 공개 버전 설치
 dsh plugin --profile <profile> add dsh-plugin-compat-check
-# 로컬 아카이브 사용 전 해시 확인
+# 검증된 로컬 아카이브로 0.2.6 후보 버전 테스트
 dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.6.tgz
 ```
 
@@ -46,7 +46,7 @@ dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0
 
 ## 화면 예시
 
-0.2.5 / DSH 0.2.2-rc.3을 2026-11-15 자체 macOS 테스트 profile에서 촬영한 중국어 화면입니다. 합성 회귀 플러그인이 포함되어 있으며 수치는 해당 검사만 나타냅니다. 생태계 통계나 전체 기능 성공을 뜻하지 않습니다. 배포물 식별자는 [current-state](docs/current-state.json)에 있습니다.
+공개 버전 0.2.5(DSH 0.2.2-rc.3)를 2026-11-15 자체 macOS 테스트 profile에서 촬영한 중국어 화면입니다. 합성 회귀 플러그인이 포함되어 있으며 수치는 해당 검사만 나타냅니다. 생태계 통계나 전체 기능 성공을 뜻하지 않습니다. 배포물 식별자는 [current-state](docs/current-state.json)에 있습니다.
 
 ![DSH 0.2.2-rc.3의 0.2.5 주 결과와 분석 한계](plugin/assets/compat-overview-0.2.5.png)
 
@@ -75,7 +75,7 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 
 ## 업그레이드 사전 검사와 검증
 
-`compat_check({"upgradeTo":"0.2.2-rc.5"})`는 호스트의 현재 버전을 사용하고 `upgradePreview`를 반환합니다. CLI에는 두 정확한 버전을 지정합니다.
+다음 rc.5 예제는 0.2.6 후보 버전을 사용합니다. `compat_check({"upgradeTo":"0.2.2-rc.5"})`는 호스트의 현재 버전을 사용하고 `upgradePreview`를 반환합니다. CLI에는 두 정확한 버전을 지정합니다.
 
 ```sh
 node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.3 --upgrade-to 0.2.2-rc.5 --json
@@ -85,9 +85,9 @@ node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-등록된 일곱 버전의 임의 쌍을 비교하며 미등록 버전은 코드 3입니다. 같은 비공개 바이트만 정적으로 비교하고 probe·예외·일반 기준선을 사용하지 않습니다. 사전 검사 0/1/2는 새로 생기거나 악화된 위험 없음/비치명/치명, 3은 검사 불가이며 0에도 기존 위험이 남을 수 있습니다. 일반 종료 코드는 **0 충돌 미발견, 1 일부 사용 가능 또는 알 수 없음, 2 비호환, 3 도구/입력 오류**입니다.
+등록된 여덟 버전의 임의 쌍을 비교하며 미등록 버전은 코드 3입니다. 같은 비공개 바이트만 정적으로 비교하고 probe·예외·일반 기준선을 사용하지 않습니다. 사전 검사 0/1/2는 새로 생기거나 악화된 위험 없음/비치명/치명, 3은 검사 불가이며 0에도 기존 위험이 남을 수 있습니다. 일반 종료 코드는 **0 충돌 미발견, 1 일부 사용 가능 또는 알 수 없음, 2 비호환, 3 도구/입력 오류**입니다.
 
-기본 테스트는 실제 DSH/모델을 시작하지 않으며 패키징 테스트는 registry가 필요합니다. 출시 전 검사는 출시하지 않고 메타데이터 조회 실패는 검증 성공이 아닙니다. Windows와 일반 업무 기능은 미인증입니다. [Plan](docs/Plan.md), [가이드](docs/guide.md), [유지보수](docs/maintaining.md), [작성자 CI](docs/author-ci.md), [규칙](rules/README.md), [skill](skill/README.md)을 참고하세요.
+기본 테스트는 실제 DSH/모델을 시작하지 않으며 패키징 테스트는 registry가 필요합니다. 출시 전 검사는 출시하지 않고 요청한 메타데이터를 가져올 수 없으면 종료 코드 3을 반환합니다. 조회에 성공한 결과는 보존합니다. Windows와 일반 업무 기능은 미인증입니다. [Plan](docs/Plan.md), [가이드](docs/guide.md), [유지보수](docs/maintaining.md), [작성자 CI](docs/author-ci.md), [규칙](rules/README.md), [skill](skill/README.md)을 참고하세요.
 
 ## License
 

@@ -28,15 +28,15 @@ UI词典位于`plugin/src/i18n/{zh,en,ko}.json`，用可读原文作为消息键
 
 打包回归与真实验收/到货工具经`tools/owned-package-source.mjs`核对manifest/lock/构建依赖，复制自有闭包到私有构建目录，不向源码、用户profile或运行包注入工具链。打包回归核源码客户端mtime不变，避免prepack重写与并行面板读取竞争。selector-parser固定覆盖7.1.6；更新Tailwind/覆盖后须重建、复验布局/主题及开发/运行两图审计。
 
-完整UI验收使用同一独立tgz及自有DSH/Chrome；默认rc.3，0.2.2-rc.2/rc.3须显式选择：
+完整 UI 验收用同一 tgz 及自有 DSH/Chrome。显式选择目标，例如
 
 ```sh
-DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.3 node tools/ci-ui018.mjs <自有输出目录>
+DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.5 node tools/ci-ui018.mjs <自有输出目录>
 ```
 
-入口统一启用九项验收：原面板、布局/主题/键盘、分页/完整导出、超时恢复/草稿、HTTP会话、复杂度/采样、处置定位、历史管理和中英韩国际化。检查第123条发现的双向定位/筛选/焦点、12px间距、短结论不折字、历史显式操作及报告/基线不变；密集数据来自明确标记的非激活合成插件。截图中的窄列CSS夹具不冒充真实插件布局。开关依赖以入口源码为准，单跑处置定位须同时启用hardening。
+九项门禁包括面板、布局/主题/键盘、分页/完整导出、超时恢复/草稿、HTTP 会话、采样预算、处置定位、历史与中英韩界面。合成密集报告核第123条发现定位、12px间距、短结论及历史报告/基线不变。窄列布局用夹具，单跑处置定位须启用 hardening。
 
-输出含提交/dirty/逐文件摘要、tgz摘要、完整报告、日志、截图及SHA256SUMS，缺结果/截图或清理失败均不得通过。使用忽略的tmp或仓库外目录，避免证据进入源码身份；CI要求干净检出。Linux 0.2.1-rc.3/rc.5与0.2.2-rc.1/rc.2/rc.3跑完整入口，旧两宿主保留集成门禁；平台结果绑定实际提交和归档，不由接入CI推定。`ui018`文件名、`DSC_UI018_*`及证据字段沿用以兼容脚本，不代表产品版本。Windows、真实用户和一般业务另验。
+输出保留提交、源码与归档摘要、报告、日志、截图、SHA256SUMS及清理结果，存入忽略的 tmp 或仓库外目录。CI 使用干净检出，由 `tools/acceptance-target.mjs` 生成 Linux 精确版本矩阵。完整 UI 覆盖 0.2.1-rc.3/rc.5 和 0.2.2-rc.1/rc.2/rc.3/rc.5，旧两宿主保留集成门禁。`ui018` 是沿用的脚本和证据字段名称。
 
 组件回归覆盖三槽位、共享订阅/可见性及迟到响应；`tools/ui018-performance.mjs`仅测1000插件合成hook树，不是浏览器性能门禁。语法矩阵由`test/fixtures/syntax-matrix.json`和`tools/syntax-matrix.mjs`记录/执行supported、inferred、abstained、excluded，核包名、调用对/跨度、确定性与诊断，不以解析成功代替结论或据业务答案调严重度。
 
@@ -87,15 +87,15 @@ npm audit固定公共registry，任何公告级别（含未知）均阻断，无
 
 ## 真实插件回归
 
-固定清单覆盖0.2.1的[rc.2](../tools/real-regression-manifest.json)、[rc.3](../tools/real-regression-manifest-rc3.json)、[rc.5](../tools/real-regression-manifest-rc5.json)及0.2.2的[rc.1](../tools/real-regression-manifest-rc22.json)、[rc.2](../tools/real-regression-manifest-rc22-2.json)、[rc.3](../tools/real-regression-manifest-rc22-3.json)，分别绑定DSH/目录、五个制品/摘要和每轮24项期望，互不借结果。独立holdout为`dsh-pomodoro@0.5.5`与`dsh-global-todo@0.13.2`，先选无需账户/模型且可审阅的操作，再封存预测，不能据结果调规则。重复运行不增加独立样本数。
+固定清单覆盖0.2.1的[rc.2](../tools/real-regression-manifest.json)、[rc.3](../tools/real-regression-manifest-rc3.json)、[rc.5](../tools/real-regression-manifest-rc5.json)及0.2.2的[rc.1](../tools/real-regression-manifest-rc22.json)、[rc.2](../tools/real-regression-manifest-rc22-2.json)、[rc.3](../tools/real-regression-manifest-rc22-3.json)、[rc.5](../tools/real-regression-manifest-rc22-5.json)，分别绑定DSH/目录、五个制品/摘要和每轮24项期望，互不借结果。独立holdout为`dsh-pomodoro@0.5.5`与`dsh-global-todo@0.13.2`，先选无需账户/模型且可审阅的操作，再封存预测，不能据结果调规则。重复运行不增加独立样本数。
 
 业务真值来自实际动作及独立后置条件：Pomodoro核localStorage revision/deadline与新文档恢复；Todo核POST/create、私有JSON及重载DOM。受控故障分别删主按钮或仅令该POST返回503，恢复另验；GET配置或元素出现不代替功能通过，无通知/模型/外部采集。
 
 启动前封存静态预测；appReady后、Chrome/动作前封存原始service-only root。回放重算标签及动作时序，不信任保存的布尔值，不据业务/loader答案倒填服务观测。静态/service-only、自然/受控、FP/FN与驱动错误分列，clientVerified:false保留。旧sidebar两项HTTP405与动态patch挂载限制仍为limited/FN；绿色仅表示固定期望重现，不是生态准确率。
 
 ```sh
-DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.3 node tools/real-regression.mjs --live --repeat 1 --out-dir <新空目录>
-DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.3 node tools/real-regression.mjs --replay <证据根或单队列>
+DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.5 node tools/real-regression.mjs --live --repeat 1 --out-dir <新空目录>
+DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.5 node tools/real-regression.mjs --replay <证据根或单队列>
 node tools/business-labels.mjs --live --suite holdout-pomodoro --observe-services --out-dir <新空目录> --json
 node tools/business-labels.mjs --live --suite holdout-todo --observe-services --out-dir <另一新空目录> --json
 ```
@@ -114,7 +114,7 @@ rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.j
 
 1. 统一版本真源、manifest/lock、README、skill及示例；正文使用本版能力视角。运行check和prepublish-check（不发布），以成功TAP更新计数，核生成副本、许可证和公开元数据。
 2. 授权推送后，等待所选提交全部Actions通过。candidate job只构建一次，完整UI jobs下载同一tgz/回执并上传证据。
-3. 下载CI归档，核提交、源码/dirty及SHA-256；macOS使用该文件和回执复验九项UI、鉴权及清理。字节不同，即使内容相同也须重验。构建/重用命令见[验收入口](#rc5验收入口)。
+3. 下载CI归档，核提交、源码/dirty及SHA-256；macOS使用该文件和回执复验九项UI、鉴权及清理。字节不同，即使内容相同也须重验。构建/重用命令见[验收入口](#维护入口与语法覆盖)。
 4. 正式发布另取授权：npm发布该tgz，Git tag/Release附同一文件、SHA256SUMS及限定回执，禁止重新打包冒用旧验收。
 5. 核npm版本/integrity/shasum、附件SHA-256及tag提交，实际公共安装后才记录发布结果。取数失败不算通过；Windows、用户试用和一般业务单列。
 
@@ -148,7 +148,7 @@ GitHub简介/topics可独立更新；npm简介/搜索关键词取`plugin/package
 
 历史对象摘要仅用于损坏检测，不是签名；导入报告的自报身份不能当真实采样证明。历史/三语真实界面验收统一由上方九项入口执行，保持编辑器、原始草稿、报告及基线身份，保留三语及窄容器/深色截图。
 
-## rc.5验收入口
+## 0.2.1-rc.5验收入口
 
 acceptance-target按精确版本选择能力；rc.3/rc.5复用已核导航/草稿/模型列表契约，rc.2保留原路径。显式目标与实际可执行文件不符即失败，rc.3/rc.5缺浏览器不能skip求绿。
 
@@ -177,7 +177,7 @@ rc.5额外要求独立ACP stdout JSON-RPC、stderr目录诊断、MCP能力、受
 
 表中名称对应`test/<名称>.test.mjs`。身份观察复用有界源码图，任意后缀解析候选的存在性/类型/真实路径也纳入；读取、枚举和时间共享预算。官方校验器测试只执行经摘要校验的原始TypeScript，不复制第三方实现。
 
-`ci-ui018`的rc.5及0.2.2-rc.1门禁还要求`issues023`回执：独立tgz装入自有profile，每25ms原子写状态期间联合调用无参tool、刷新真实设置页、核目标一致及缓存命中；停写后核显式失败及升级回包。调用经过宿主tools.execute的严格JSON/schema管线；测试桥接路由/定时器仅驻临时profile，随宿主清理，不进入npm产品。预检复制全部输入字节，因此持续写入时拒绝不稳定快照是正确行为，不放宽该守卫。
+`ci-ui018` 的 0.2.1-rc.5 与四个已登记的 0.2.2 目标要求`issues023`回执：独立tgz装入自有profile，每25ms原子写状态期间联合调用无参tool、刷新真实设置页、核目标一致及缓存命中；停写后核显式失败及升级回包。调用经过宿主tools.execute的严格JSON/schema管线；测试桥接路由/定时器仅驻临时profile，随宿主清理，不进入npm产品。预检复制全部输入字节，因此持续写入时拒绝不稳定快照是正确行为，不放宽该守卫。
 
 Node22/24、九项UI及问题联合验收按精确提交/归档核对；CI状态见对应Actions运行，同一tgz须有macOS/Linux回执。Windows实机和用户现场确认单列。源码修复、现场复验及公开发行分开记录，issue沟通/关闭按当次授权与证据决定。
 
@@ -207,14 +207,14 @@ DSC_HOST_SOURCE_ARCHIVE/DSC_RC22_SOURCE_ARCHIVE复用已核旧来源，坏摘要
 
 本工具使用pluginManager.list和Cordis fiber；enabled、update可用与客户端模块存在均不证明ACTIVE。新版boot-client的可选client加载失败只警告继续，required最小集失败才阻断；本工具非required项。三槽位仍为settings.plugins.tab与plugins.detail.section/badge；未消费Popper、sidebar.session.action、workspace.picker或directoryFlow，故不新增无关UI依赖。私有manager验收覆盖registry/git/file更新方式、成功、启用失败、坏包、取消及unexpected-package回滚；rc.3导入只用合成v3归档，核持久化与owner鉴权、不创建liveSession/Agent和卸载404。它们不认证市场恢复或Windows。
 
-运行入口绑定PATH中选定dsh的真实路径：npm CLI使用同路径解析的app-boot，Desktop launcher才用其Electron/ASAR，不借本机另一个版本。runtime查询也用该carrier。两npm包含docs/src，CLI为lib/bin.js，app-boot公开入口为lib/index.js及worker/profile-resolution-bootstrap；安装版本、目录和摘要见独立审查。primary-runtime是宿主resources布局，不是可假定的npm同名模块；普通检查不创建或修复它。新宿主Node>=24.9.0，源码根packageManager两版均pnpm11.28.5，私有执行器与CI同步pin；工具Node22静态覆盖保留。原始JSON/schema门禁分别固定rc.5与三个0.2.2来源，显式DSC_RC22_2_SOURCE_ARCHIVE/DSC_RC22_3_SOURCE_ARCHIVE可复用已核归档。
+运行入口绑定PATH中选定dsh的真实路径：npm CLI使用同路径解析的app-boot，Desktop launcher才用其Electron/ASAR，不借本机另一个版本。runtime查询也用该carrier。两npm包含docs/src，CLI为lib/bin.js，app-boot公开入口为lib/index.js及worker/profile-resolution-bootstrap；安装版本、目录和摘要见独立审查。primary-runtime是宿主resources布局，不是可假定的npm同名模块；普通检查不创建或修复它。新宿主Node>=24.9.0，源码根packageManager两版均pnpm11.28.5，私有执行器与CI同步pin；工具Node22静态覆盖保留。该版原始 JSON/schema 验收使用固定源码；现行五份归档与复用变量见本页首节。
 
 升级指南目录名v0.2.2-rc.1不表示实际rc.1已含该变更。两新版创造模式改用dsh-doc（源码编写skill名dsh-doc-writing），旧四skill及模板路径按官方指南迁移；本工具skill名称和provider无交集。searchBilling/fetchBilling及auth.sources、具体deepseek-account/Remote迁移、终端optional-terminal-panel与CLEANUP_FAILED，以及Worktree归档清理/retainOnArchive是宿主配置职责；本工具不调用这些提供方、不读凭据或改配置。归档可能删除干净检出目录而保留分支，ignored/skip-worktree文件不能保证保留；按宿主指南显式选择保留策略。普通检查不执行归档或迁移。review.integrationAcceptance是来源审查时快照；后续同包macOS/Linux与11项CI记录见current-state，配置和历史回执不认证后改的制品。
 
 ## 0.2.6：rc.5适配
 
-[来源审查](../rules/dsh-0.2.2-rc.5-review.json)固定rc.4→rc.5源码、npm发行包和桌面ASAR。[语义审查](../rules/dsh-0.2.2-rc.5-semantics-review.json)绑定拒答与搜索路由源码。作者矩阵上限八版，保留每cell 2MiB/总8MiB/30秒。独立宿主能力表驱动Linux矩阵，Node22继续跑静态检查。
+[来源审查](../rules/dsh-0.2.2-rc.5-review.json)固定 rc.4→rc.5 源码、npm 包和桌面 ASAR，[语义审查](../rules/dsh-0.2.2-rc.5-semantics-review.json)记录拒答和搜索选路。宿主入口调用 `plugin/lib/host-loader.js` 观测 loader，`host-tool-contract.js` 管参数、schema 和严格 JSON。真实宿主验收由 `tools/owned-live-host.mjs` 管启动与清理，`live-acceptance-receipt.mjs` 写回执。
 
-历史漏报12/24：2例天然HTTP405需观察服务依赖；5例受控HTTP失败、5例DOM失败需执行业务动作核对持久化/界面。两套独立保留样本验证计时器和任务。保留固定预期，以[现行回执](current-state.json)报告新结果。
+同一 0.2.6 归档已过 macOS 和 Debian arm64 九项 UI、工具与鉴权；rc.5 管理协议有独立结果。固定业务两轮 48 项符合预期，每轮 12 例静态漏报、0 例误报。GitHub Actions 待核验。平台、提交与归档身份见[回执](current-state.json)。
 
-按当前PATH分别选桌面或npm载体，运行`node tools/liveshare-worker-acceptance.mjs`，只等待IPC ready并断开；不发送分享命令。
+在上述 UI 命令设置 `DSC_RC2_ARTIFACT` 和 `DSC_RC2_ARTIFACT_RECEIPT` 可复用同一归档与来源回执。按 PATH 选桌面或 npm 载体后，`node tools/liveshare-worker-acceptance.mjs` 核 IPC ready 与断开退出，范围限于 worker 生命周期。

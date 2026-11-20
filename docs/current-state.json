@@ -262,8 +262,8 @@
         "validationErrors": 0
       },
       "githubActions": "pending exact branch push",
-      "scope": "Same archive for UI/auth. Fixed business uses the named source commit. Independent Linux repack had two different file modes; file contents matched."
+      "scope": "UI/auth bind to this archive. Fixed business uses the named source commit. Later packed README/skill edits require a new archive. The independent Linux repack differed in two file modes."
     }
   },
-  "scope": "0.2.6 development evidence. Suite counts come from the recorded full TAP. Dated acceptance applies to the recorded commit and archive."
+  "scope": "0.2.6 candidate evidence. 0.2.5 remains the public release. Suite counts and acceptance bind to recorded inputs."
 }
