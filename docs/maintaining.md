@@ -10,7 +10,7 @@ npm test -- --test-reporter=tap > /tmp/dsc-tests.tap
 npm run test:issues -- /tmp/dsc-issues
 ```
 
-check离线核格式、文档/版本/链接、生成副本、许可证、语法矩阵和目录登记，不运行完整套件。test:issues必跑#7–#10及四版原始JSON/schema校验器，固定各源码URL/SHA-256；缺归档有界下载，坏来源或跳过均失败。CI在Node22.19/24.9均执行并保留TAP/摘要；成功TAP交给doc-check，宿主另验。
+check离线核格式、文档/版本/链接、生成副本、许可证、语法矩阵和目录登记，不运行完整套件。test:issues必跑#7–#10及五版原始JSON/schema校验器，固定各源码URL/SHA-256；缺归档有界下载，坏来源或跳过均失败。CI在Node22.19/24.9均执行并保留TAP/摘要；成功TAP交给doc-check，宿主另验。
 
 | 本地复用变量 | 官方源码版本 |
 |---|---|
@@ -215,6 +215,8 @@ DSC_HOST_SOURCE_ARCHIVE/DSC_RC22_SOURCE_ARCHIVE复用已核旧来源，坏摘要
 
 [来源审查](../rules/dsh-0.2.2-rc.5-review.json)固定 rc.4→rc.5 源码、npm 包和桌面 ASAR，[语义审查](../rules/dsh-0.2.2-rc.5-semantics-review.json)记录拒答和搜索选路。宿主入口调用 `plugin/lib/host-loader.js` 观测 loader，`host-tool-contract.js` 管参数、schema 和严格 JSON。真实宿主验收由 `tools/owned-live-host.mjs` 管启动与清理，`live-acceptance-receipt.mjs` 写回执。
 
-同一 0.2.6 归档已过 macOS 和 Debian arm64 九项 UI、工具与鉴权；rc.5 管理协议有独立结果。固定业务两轮 48 项符合预期，每轮 12 例静态漏报、0 例误报。GitHub Actions 待核验。平台、提交与归档身份见[回执](current-state.json)。
+已验收的 0.2.6 归档通过 macOS 与 Debian arm64 的九项 UI、严格工具和鉴权检查。rc.5 桌面与 npm 另有管理协议及 LiveShare worker 回执。固定业务两轮共 48 项符合预期，每轮 12 例静态漏报含 2 例服务依赖、5 例 HTTP 和 5 例 DOM，误报 0。两套保留样本均已复跑。平台、归档身份和待核验的 CI 见[回执](current-state.json)。
+
+八版作者 CI 覆盖四种输出、旧报告回放和超限退出。公开元数据核验覆盖双源部分失败、空 npm README 与显式单源模式，成功来源的结果会保留。
 
 在上述 UI 命令设置 `DSC_RC2_ARTIFACT` 和 `DSC_RC2_ARTIFACT_RECEIPT` 可复用同一归档与来源回执。按 PATH 选桌面或 npm 载体后，`node tools/liveshare-worker-acceptance.mjs` 核 IPC ready 与断开退出，范围限于 worker 生命周期。
