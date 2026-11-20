@@ -1,3 +1,7 @@
+import {
+  acceptanceCapabilities,
+  linuxAcceptanceMatrix,
+} from "../tools/acceptance-target.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -6,7 +10,7 @@ import {
   assertBrowserAcceptance,
 } from "../tools/acceptance-target.mjs";
 test("new exact host requires real UI and rejects executable mismatch", () => {
-  for (const v of ["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"]) {
+  for (const v of ["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3", "0.2.2-rc.5"]) {
     assert.equal(acceptanceTarget(v, v), true);
     assert.equal(uiAcceptanceVersion(v), v);
     assert.throws(() => acceptanceTarget("0.2.1-rc.5", v), /mismatch/);
@@ -39,8 +43,12 @@ test("CI keeps static Node22 while new host verifies its runtime before installa
   );
   assert(w.jobs.test.strategy.matrix.node.includes("22.19.0"));
   const job = w.jobs["linux-live"];
-  for (const v of ["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"])
-    assert(job.strategy.matrix.dsh.includes(v));
+  for (const v of ["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3", "0.2.2-rc.5"])
+    assert(
+      linuxAcceptanceMatrix().include.some(
+        (row) => row.dsh === v && row.node24,
+      ),
+    );
   const pre = job.steps.findIndex(
     (s) => s.name === "Verify selected host runtime before installation",
   );
@@ -50,17 +58,17 @@ test("CI keeps static Node22 while new host verifies its runtime before installa
       job.steps.findIndex((s) => s.name?.startsWith("Install pinned official")),
   );
   const ui = job.steps.find((s) => s.run?.includes("node tools/ci-ui018.mjs"));
-  for (const v of ["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"])
-    assert(ui.if.includes(v));
+  assert.equal(ui.if, "matrix.fullUI");
   const download = job.steps.find((s) =>
     s.uses?.startsWith("actions/download-artifact"),
   );
-  for (const v of ["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"])
-    assert(download.if.includes(v));
+  assert.equal(download.if, "matrix.candidate");
   const auth = job.steps.find((s) =>
     s.run?.includes("tools/auth025-acceptance.mjs"),
   );
-  for (const v of ["0.2.2-rc.2", "0.2.2-rc.3"]) assert(auth.if.includes(v));
+  assert.equal(auth.if, "matrix.modern");
+  for (const v of ["0.2.2-rc.2", "0.2.2-rc.3", "0.2.2-rc.5"])
+    assert.equal(acceptanceCapabilities(v).modern, true);
   assert(auth.run.includes('"$DSC_RC2_ARTIFACT" "$DSC_RC2_ARTIFACT_SHA256"'));
   const binding = job.steps.find(
     (s) => s.name === "Bind supplied candidate and source receipt",

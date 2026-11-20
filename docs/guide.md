@@ -1,23 +1,25 @@
 # 使用与验证指南
 
-当前版本为**0.2.5**。面板、tool和skill随npm插件交付；CLI、健康执行器与作者CI从仓库运行，源码构建见[打包说明](../plugin/README.md#从源码构建安装)。声明放行、激活或无发现不等于业务验收；[current-state](current-state.json)按提交/归档/平台记录证据。
+当前版本为**0.2.6**。面板、tool和skill随npm插件交付；CLI、健康执行器与作者CI从仓库运行，源码构建见[打包说明](../plugin/README.md#从源码构建安装)。声明放行、激活或无发现不等于业务验收；[current-state](current-state.json)按提交/归档/平台记录证据。
 
-已认证精确目录为`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`。最低宿主声明不认证未来版本。0.2.1-rc.3/rc.5及三个0.2.2版本的入口：左下角账号菜单→设置→内置插件→兼容性；无参tool/设置页按宿主启动身份定位；冲突时改用`compat_check({"profile":"my-profile"})`或CLI显式路径，不猜desktop。路径模拟不替代Windows实机。
+已认证精确目录为`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`、`0.2.2-rc.5`。最低宿主声明不认证未来版本。0.2.1-rc.3/rc.5及四个0.2.2版本的入口：左下角账号菜单→设置→内置插件→兼容性；无参tool/设置页按宿主启动身份定位；冲突时改用`compat_check({"profile":"my-profile"})`或CLI显式路径，不猜desktop。路径模拟不替代Windows实机。
 
 ## 参数与生命周期语义
 
 精确语义位于`rules/severity.json.apiSemantics`，独立记录固定tag、归档及所审查文件摘要；旧版、未知版或坏记录显示“语义未审查”，不借邻近版本认证。
 
-- `uiWorkspace.startSession`检查已知`prompt / agentPreset / clearPreviousDraft`类型；0.2.1-rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3另检查`whenDraftExists=keep / replace / append`，0.2.1-rc.2未使用它。类型/枚举不符是非致命推断风险，弱Context为疑似，不单独触发声明不符；方法存在或能力守卫不验证参数。
-- 0.2.1-rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3显式whenDraftExists优先，省略通常保留草稿，仍支持`clearPreviousDraft:true`选择replace。可复用同工作区未归档空白会话，指定preset隔离其它preset；这些选项不证明新建或发送成功。
+- `uiWorkspace.startSession`检查已知`prompt / agentPreset / clearPreviousDraft`类型；0.2.1-rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3/rc.5另检查`whenDraftExists=keep / replace / append`，0.2.1-rc.2未使用它。类型/枚举不符是非致命推断风险，弱Context为疑似，不单独触发声明不符；方法存在或能力守卫不验证参数。
+- 0.2.1-rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3/rc.5显式whenDraftExists优先，省略通常保留草稿，仍支持`clearPreviousDraft:true`选择replace。可复用同工作区未归档空白会话，指定preset隔离其它preset；这些选项不证明新建或发送成功。
 - 六个已审查语义版本的`ctx.timer.setTimeout / setInterval`仍保留但已弃用；`sessions.retain`提示所有权、按需等待ready及作用域结束时release/disposal。两类只进覆盖说明，不证明泄漏或失败。
-- 0.2.1-rc.5及0.2.2-rc.1/rc.2/rc.3的`conversation.chat.reasoning.body`提供原始`rawText`和显示`text`；普通渲染/翻译继续用text，Content Factory仍用text/running/labels。静态提示只定位slots.register和迁移限制，不验证props用途、签名处理或流式时序，不把text使用报错，不新增发现或已验证调用。
+- 0.2.1-rc.5及0.2.2-rc.1/rc.2/rc.3/rc.5的`conversation.chat.reasoning.body`提供原始`rawText`和显示`text`；普通渲染/翻译继续用text，Content Factory仍用text/running/labels。静态提示只定位slots.register和迁移限制，不验证props用途、签名处理或流式时序，不把text使用报错，不新增发现或已验证调用。
 
 只保存所核参数的类型/有限枚举标签，不执行代码或保存prompt/思考正文。常量别名与直接改写可分析；未知副作用、动态、展开、访问器、逃逸及不同helper实参合并弃权。完整签名、实参数量、深层对象、异步时序和所有权证明未覆盖。JSON、CLI、面板、预检及作者CI共用判定，目录/语义/运行时/业务证据分别记录。
 
-三个0.2.2版本另对固定agent/request订阅和已证明服务调用给迁移提示，并核可证明的投影stateVersion。rc.2/rc.3还覆盖Agent caller/initiator与ownerCtx、Session.append单事件/数组、具名Subagent/Team及interrupt preset、AttachmentError、动态MCP和manager更新方式。仅定位已证明Context入口，不新增fatal或已验证调用，不证明返回对象流、callback、await/dispose先后；未知与逃逸弃权。各版独立审查，详情见[维护指南](maintaining.md#025rc2与rc3独立适配)。
+四个0.2.2版本另对固定agent/request订阅和已证明服务调用给迁移提示，并核可证明的投影stateVersion。rc.2/rc.3/rc.5还覆盖Agent caller/initiator与ownerCtx、Session.append单事件/数组、具名Subagent/Team及interrupt preset、AttachmentError、动态MCP和manager更新方式。仅定位已证明Context入口，不新增fatal或已验证调用，不证明返回对象流、callback、await/dispose先后；未知与逃逸弃权。各版独立审查，详情见[维护指南](maintaining.md#025rc2与rc3独立适配)。
 
 新宿主执行须Node>=24.9.0；静态工具支持Node22.19。search/account/terminal/Worktree及dsh-doc迁移属于宿主配置，普通检查不代写。
+
+0.2.2-rc.5对已证明的LLM流、Session事件与Web搜索/Fetch入口提示拒答、模型路由及取消边界。提示仅描述固定源码契约，实际配置和调用需单独验收。
 
 ## 可选功能健康检查
 
@@ -152,7 +154,7 @@ node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-test:issues固定官方0.2.1-rc.5及0.2.2-rc.1/rc.2/rc.3四份源码的URL/SHA-256，缺输入时下载校验；坏来源或任何跳过均失败。本地复用变量见[维护指南](maintaining.md#维护入口与语法覆盖)。仅成功TAP可更新计数，不重建快照求绿；skill/契约改后同步stage-skill/stage-contract，依赖或组件来源变更同步第三方说明。默认套件不启动真实DSH/模型，打包测试需要registry；推送、发布及外部发帖分别授权，[同一制品流程](maintaining.md#同一制品发布核对)统一维护。
+test:issues固定官方0.2.1-rc.5及0.2.2-rc.1/rc.2/rc.3/rc.5五份源码的URL/SHA-256，缺输入时下载校验；坏来源或任何跳过均失败。本地复用变量见[维护指南](maintaining.md#维护入口与语法覆盖)。仅成功TAP可更新计数，不重建快照求绿；skill/契约改后同步stage-skill/stage-contract，依赖或组件来源变更同步第三方说明。默认套件不启动真实DSH/模型，打包测试需要registry；推送、发布及外部发帖分别授权，[同一制品流程](maintaining.md#同一制品发布核对)统一维护。
 
 ## 升级预检与有限批量
 

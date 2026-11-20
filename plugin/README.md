@@ -6,7 +6,7 @@
 
 ## 版本与入口
 
-当前版本为**0.2.5**。本版已完成DSH 0.2.2-rc.2/rc.3独立目录、Agent/工具/Session迁移提示及新版插件管理、鉴权和三槽位适配；支持中英韩界面、升级预检、依赖视图、人工处置和报告历史。已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
+当前版本为**0.2.6**。本版加入DSH 0.2.2-rc.5独立目录、拒答与搜索路由迁移提示，延续插件管理、鉴权与三槽位集成；支持中英韩界面、升级预检、依赖视图、人工处置和报告历史。已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3、0.2.2-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
 
 验收按提交、归档及平台记录于[docs/current-state.json](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)；新制品须重验。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
 
@@ -16,9 +16,9 @@
 
 ```sh
 # 固定安装本版
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.5
+dsh plugin --profile <profile> add dsh-plugin-compat-check
 # 使用本地归档前核对摘要
-dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.5.tgz
+dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.6.tgz
 ```
 
 在安装所用profile的DSH中打开：**左下角“更多”（⋯）/用户头像 → 设置 → 内置插件 → 兼容性**。不默认是desktop；agent可调用`compat_check`。源码安装须[构建完整tgz](#从源码构建安装)。
@@ -65,7 +65,7 @@ prepack同步skill、契约、客户端、内核及许可证；postpack清理暂
 
 ## 升级与仓库工具
 
-调用`compat_check({"upgradeTo":"0.2.2-rc.3"})`，当前版本取宿主，返回upgradePreview、report为null。七个登记精确版本可任意比较，未知版本/范围退出3。只做同组私有字节的静态比较，不安装或升级宿主，也不借用probe、豁免或普通基线；预检0/1/2表示无/非致命/致命新增或变重风险，3为无法预检，0仍可有旧风险。
+调用`compat_check({"upgradeTo":"0.2.2-rc.5"})`，当前版本取宿主，返回upgradePreview、report为null。八个登记精确版本可任意比较，未知版本/范围退出3。只做同组私有字节的静态比较，不安装或升级宿主，也不借用probe、豁免或普通基线；预检0/1/2表示无/非致命/致命新增或变重风险，3为无法预检，0仍可有旧风险。
 
 CLI、批量、作者CI及健康执行器从仓库运行，使用见[指南](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/guide.md)与[作者CI](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/author-ci.md)。契约/待办见[Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，构建及目录治理见[维护流程](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md)。certainty与impactBasis独立；未观测不等于缺失，coverage/vacuous必须保留。Windows与一般业务未获认证。
 

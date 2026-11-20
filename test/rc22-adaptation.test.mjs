@@ -73,6 +73,7 @@ test("author defaults add the reviewed new host without silently dropping earlie
       "0.2.2-rc.1",
       "0.2.2-rc.2",
       "0.2.2-rc.3",
+      "0.2.2-rc.5",
     ],
   );
   assert.equal(v.cells.at(-1).report.catalog.verified, true);

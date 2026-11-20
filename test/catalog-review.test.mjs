@@ -32,6 +32,7 @@ test("registry maintenance checks exact pinned catalogues without granting new c
       "0.2.2-rc.1",
       "0.2.2-rc.2",
       "0.2.2-rc.3",
+      "0.2.2-rc.5",
     ],
   );
   assert.ok(result.entries.every((entry) => entry.verified === true));
@@ -62,6 +63,7 @@ test("registry maintenance rejects changed pinned bytes and ignores unregistered
     "dsh-api-catalog-0.2.2-rc.1.json",
     "dsh-api-catalog-0.2.2-rc.2.json",
     "dsh-api-catalog-0.2.2-rc.3.json",
+    "dsh-api-catalog-0.2.2-rc.5.json",
   ])
     fs.copyFileSync(path.join("rules", file), path.join(root, "rules", file));
   const mod = await import("../tools/catalog-review.mjs");

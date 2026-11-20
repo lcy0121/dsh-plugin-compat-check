@@ -1,3 +1,5 @@
+import * as hostLoader from "../../plugin/lib/host-loader.js";
+import * as toolContract from "../../plugin/lib/host-tool-contract.js";
 import {
   resolveProfileTarget,
   resolveProfileIdentity,
@@ -95,6 +97,8 @@ export function loadHost(env = {}) {
     "node:crypto": nodeRequire("node:crypto"),
     "./lib/local-request.js": localRequest,
     "./lib/host-resources.js": hostResources,
+    "./lib/host-loader.js": hostLoader,
+    "./lib/host-tool-contract.js": toolContract,
     "./lib/report-contract.js": reportContract,
     "./lib/upgrade-contract.js": upgradeContract,
     "./lib/finding-guidance.js": { nextSteps },
@@ -107,7 +111,10 @@ export function loadHost(env = {}) {
     filename: HOST,
     importModuleDynamically: vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER,
   });
-  vm.runInContext("__out.resolveDshVersion = resolveDshVersion", sandbox);
+  vm.runInContext(
+    "__out.resolveDshVersion = resolveDshVersion; Object.assign(globalThis, { startInjectProbe, introspectEntry, toolResult })",
+    sandbox,
+  );
   async function fire(timer) {
     if (!timer || timer.cancelled || timer.fired)
       throw new Error("Timer is not pending");

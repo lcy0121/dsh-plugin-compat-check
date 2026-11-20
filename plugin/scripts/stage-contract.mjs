@@ -4,43 +4,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildClient } from "./build-client.mjs";
+import { SHARED_HOST, stagedContractSource } from "./shared-contracts.mjs";
 const plugin = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."),
   root = path.dirname(plugin);
 const outputs = [];
-for (const item of [
-  {
-    source: "contracts",
-    host: "report-contract",
-    label: "REPORT CONTRACT",
-    global: "ReportContract",
-    exports: "assertEnvelope: assertEnvelope, catalogLines: catalogLines",
-  },
-  {
-    source: "upgrade-contract",
-    host: "upgrade-contract",
-    label: "UPGRADE CONTRACT",
-    global: "UpgradeContract",
-    exports:
-      "assertUpgradePreview: assertUpgradePreview, SUPPORTED_PREVIEW_VERSIONS: SUPPORTED_PREVIEW_VERSIONS",
-  },
-  {
-    source: "finding-guidance",
-    host: "finding-guidance",
-    label: "FINDING GUIDANCE",
-    global: "FindingGuidance",
-    exports: "nextSteps: nextSteps",
-  },
-]) {
-  const sourcePath = `lib/${item.source}.mjs`;
-  const source = fs.readFileSync(path.join(root, sourcePath), "utf8");
-  if (/^import\s/m.test(source))
-    throw new Error(
-      "Browser presentation source must not import dependencies: " + sourcePath,
-    );
+for (const [file, host] of Object.entries(SHARED_HOST)) {
+  const source = fs.readFileSync(path.join(root, "lib", file), "utf8");
   outputs.push([
-    path.join(plugin, `lib/${item.host}.js`),
-    `// Generated from ${sourcePath}; run node plugin/scripts/stage-contract.mjs\n` +
-      source,
+    path.join(plugin, "lib", host),
+    stagedContractSource(file, source),
   ]);
 }
 // These views/validators are bundled directly from root sources. Shipping a

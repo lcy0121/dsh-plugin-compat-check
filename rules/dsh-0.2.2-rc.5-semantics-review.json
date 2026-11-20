@@ -1,0 +1,297 @@
+{
+  "schemaVersion": 1,
+  "dshVersion": "0.2.2-rc.5",
+  "reviewedAt": "2026-11-20",
+  "sourceTag": "dsh-v0.2.2-rc.5",
+  "commit": "9c2670d3bce5275e0d1610272958121af87787bb",
+  "sourceArchiveSha256": "4e24e132a9fc267d5cdc5724525873db2575680e073fd2db4519b92553614215",
+  "sources": {
+    "packages/api/session-controller/src/client/contract/sessions.ts": "d9a7c55416090b202415a763df92c4508478c280933e1a7e7b2188dad66d28d8",
+    "packages/api/session-controller/src/index.ts": "595a02cfeca055a498aa70cce949c648d0ce840a8bcdce01eb4bc65d692a79e8",
+    "packages/boot/plugin-manager/src/index.ts": "102b58878f76ccdfaaf762f1cdf5091bf0b21000147f11f83c5e6db7edecdd33",
+    "packages/client/ui-chat/src/client/contract/slots.ts": "4f8e6e1b62b5aeda24c5750ded979eeed0a7ef9a2a00e9a4acd6df4d08da8597",
+    "packages/client/ui-chat/src/client/reasoning-text.ts": "e65bed4c7627f02ed2f1db4595cbeca24d767c4c23da517d1bb262995a1bdb17",
+    "packages/client/ui-conversation/src/client/input/facade.ts": "35d04426a4ac222b890ff0926acd3742df88e7862e90ba3a7ebb55c4a4791266",
+    "packages/client/ui-workspace/src/client/navigation.ts": "f9a65b9e80b892219faf1be20631199f9be4f2348a31251167f309e3abcb7018",
+    "packages/core/agent-loop/src/agent.ts": "6fa6bd4c0ab2aaea988b92a3fd079fa38271f4b8065ec325a6ab09ec93eb13c8",
+    "packages/core/agent/src/index.ts": "c3af768658850fddda9ec91afb12f55a52b6101c43356b428919679a525e2bba",
+    "packages/core/session/src/index.ts": "8941b4c7a45debf2443b0f937830f806130167e3ef53426833f7225dd5a8bb8f",
+    "packages/core/tools/src/index.ts": "5d95d7f47781ba001a0116feb61a87bf436f2ca587c01fb4ce517258710b7537",
+    "packages/llm/llm-deepseek/src/translate.ts": "7550ba8f5ba2262c47671e56eca60220aec1480bf65b91911500825dd084f3fb",
+    "packages/llm/llm/src/error.ts": "4c089d52d9d5761014083960f4851c2b63b9ed4a4daa253b13e57afcbc6aad1b",
+    "packages/mcp/mcp-manager/src/index.ts": "fcbe84619c864392b0b92be4ecf96b09e5ddaafbf5b3451d2f2cb67152c309bf",
+    "packages/session/session-persistence/src/index.ts": "15d2feeaa8876d4be1c87234ac92e50d819c500444588e497d5228aed1876fc7",
+    "packages/session/session-projection/src/index.ts": "8799ce0906032333a8840debae461bab1129167f5ee073acd33b6167247ae64b",
+    "packages/subagent/subagent/src/index.ts": "b9b098db20176ea066895bda65aa20aadfb8d32f25a5a2eb033122885a74bf36",
+    "packages/team/agent-team/src/index.ts": "644e2e8eeb198d464cc53b983e6d74c24f75112d2a848037e979ac3b9ef29458",
+    "packages/web/tool-web/src/search.ts": "2c38e01cf05cd3e1525a9bc929e150430f6d377203cb21bde5de1c8baddd402c",
+    "packages/web/web-search-deepseek/src/index.ts": "f716b0891cefd0e144434b05f272588455608559a0c7e0809bf53af062cc57fa",
+    "packages/web/web-search-deepseek/src/provider.ts": "33d292b1520031e12c084ec02b5e6d7bb966aa8bbf6a16986e6008b78da9df7f",
+    "packages/web/web/src/index.ts": "2846d02d3ae66b2990a63c54c996660c58c97d14cf1b9c1604324ab05c10d891",
+    "packages/web/web/src/types.ts": "dd584f6a07aa1cc839ebb75e24f639a18d2af108ea830e0f49a2a15f30b08c7d",
+    "vendor/timer/src/index.ts": "abea90efa55dadef02ea7ef7810d5f1a578bacf1db78f0d376548efdde4875cc"
+  },
+  "reviewedContracts": {
+    "host:sessionProjections.register": {
+      "source": "packages/session/session-projection/src/index.ts",
+      "message": "注册是异步交接；发布消费者前 await register() 得到 handle，dispose() 释放注册；遗留 callable 返回值仅兼容。init/apply/wire.view 必须同步，状态为 JSON，stateVersion 为非负安全整数。未验证调用方 await 顺序、回调纯度或所有权路径，不证明泄漏或失败。"
+    },
+    "host:sessionProjections.snapshot": {
+      "source": "packages/session/session-projection/src/index.ts",
+      "message": "snapshot(session, keys) 同步返回 {asOfSeq, values}，仅计算选中的客户端 wire 单元；不含 host-only 状态，不执行持久化加载或证明注册已完成。回调和缓存一致性未验证。"
+    },
+    "host:sessionProjections.cachedSnapshot": {
+      "source": "packages/session/session-projection/src/index.ts",
+      "message": "cachedSnapshot 仍保留但已弃用：只读已物化单元，不折叠新历史，可能返回 undefined 或不完整 baseline；不能据此决定行为。需要完整客户端值时审阅 snapshot(session, keys)，Host 状态使用保留 handle；未验证调用方用途。"
+    },
+    "host:sessionProjections.onChanged": {
+      "source": "packages/session/session-projection/src/index.ts",
+      "message": "onChanged 仍逐 key 通知；onEventChanged 每个已提交事件聚合 changes[{key,val}] 与 seq。Remote control/observeProjections 的 projection 帧改为 changes 数组，不再是顶层 key/value；baseline 与 projections 读取保持独立。回调帧消费及订阅清理未验证。"
+    },
+    "host:sessionProjections.onEventChanged": {
+      "source": "packages/session/session-projection/src/index.ts",
+      "message": "onChanged 仍逐 key 通知；onEventChanged 每个已提交事件聚合 changes[{key,val}] 与 seq。Remote control/observeProjections 的 projection 帧改为 changes 数组，不再是顶层 key/value；baseline 与 projections 读取保持独立。回调帧消费及订阅清理未验证。"
+    },
+    "host:agents.get": {
+      "source": "packages/core/agent/src/index.ts",
+      "message": "Agent 所有权按调用 create/resume 的 ownerCtx 建立，get 仅借用；handle.dispose 停止并等待退出、注销及释放作用域，不删除持久历史。withInitiator 保留同步值或 Promise，仅作进程内因果归属，不是权限或存活证明；withoutInitiator 清除继承归属，不清除显式字段或收拢脱离任务。返回 Agent、回调、取消及 await 顺序未验证。 agent.model.current()/agent.model.select() 管理完整 provider/model/reasoningEffort 选路，记录优先于初始 options；step 准备时捕获选择，重试保持该选择。agent/request 已弃用且必须保留选路，不能修改 messages；输出上限用 AgentOptions.maxTokens，其它逐请求控制无替代 API。返回 Agent/model、回调修改及 await 顺序未验证；get 是借用，create/resume 返回拥有 dispose 的 handle，不证明业务成功。"
+    },
+    "host:agents.create": {
+      "source": "packages/core/agent/src/index.ts",
+      "message": "Agent 所有权按调用 create/resume 的 ownerCtx 建立，get 仅借用；handle.dispose 停止并等待退出、注销及释放作用域，不删除持久历史。withInitiator 保留同步值或 Promise，仅作进程内因果归属，不是权限或存活证明；withoutInitiator 清除继承归属，不清除显式字段或收拢脱离任务。返回 Agent、回调、取消及 await 顺序未验证。 agent.model.current()/agent.model.select() 管理完整 provider/model/reasoningEffort 选路，记录优先于初始 options；step 准备时捕获选择，重试保持该选择。agent/request 已弃用且必须保留选路，不能修改 messages；输出上限用 AgentOptions.maxTokens，其它逐请求控制无替代 API。返回 Agent/model、回调修改及 await 顺序未验证；get 是借用，create/resume 返回拥有 dispose 的 handle，不证明业务成功。"
+    },
+    "host:agents.resume": {
+      "source": "packages/core/agent/src/index.ts",
+      "message": "Agent 所有权按调用 create/resume 的 ownerCtx 建立，get 仅借用；handle.dispose 停止并等待退出、注销及释放作用域，不删除持久历史。withInitiator 保留同步值或 Promise，仅作进程内因果归属，不是权限或存活证明；withoutInitiator 清除继承归属，不清除显式字段或收拢脱离任务。返回 Agent、回调、取消及 await 顺序未验证。 agent.model.current()/agent.model.select() 管理完整 provider/model/reasoningEffort 选路，记录优先于初始 options；step 准备时捕获选择，重试保持该选择。agent/request 已弃用且必须保留选路，不能修改 messages；输出上限用 AgentOptions.maxTokens，其它逐请求控制无替代 API。返回 Agent/model、回调修改及 await 顺序未验证；get 是借用，create/resume 返回拥有 dispose 的 handle，不证明业务成功。"
+    },
+    "host:sessionController.events": {
+      "source": "packages/api/session-controller/src/index.ts",
+      "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。 DeepSeek 拒答会以 CONTENT_REFUSED 出现在 LLM 终止块和 turn/end。"
+    },
+    "host:sessionController.observeEvent": {
+      "source": "packages/api/session-controller/src/index.ts",
+      "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。 DeepSeek 拒答会以 CONTENT_REFUSED 出现在 LLM 终止块和 turn/end。"
+    },
+    "host:sessionController.state": {
+      "source": "packages/api/session-controller/src/index.ts",
+      "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+    },
+    "host:sessionController.observeState": {
+      "source": "packages/api/session-controller/src/index.ts",
+      "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+    },
+    "host:sessionController.wait": {
+      "source": "packages/api/session-controller/src/index.ts",
+      "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+    },
+    "host:sessionController.control": {
+      "source": "packages/api/session-controller/src/index.ts",
+      "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+    },
+    "host:sessionController.observeProjections": {
+      "source": "packages/api/session-controller/src/index.ts",
+      "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+    },
+    "host:sessionController.projections": {
+      "source": "packages/api/session-controller/src/index.ts",
+      "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。"
+    },
+    "client:sessions.retain": {
+      "source": "packages/api/session-controller/src/client/contract/sessions.ts",
+      "message": "retain 立即返回拥有 ready/release 的 Client generation 引用；using 在回调结算后释放，binding/sessionOf/scope 仅借用，不延长生命周期或拥有 Host Agent。SessionFace 通过 getSnapshot/subscribe 读快照，prompt/cancel/updateQueue 等为异步控制，RemoteResult 须检查业务结果；cancel 保留队列，接纳不等于执行完成。回调生命周期、订阅清理、await 和运行状态未验证，不证明泄漏。"
+    },
+    "client:sessions.using": {
+      "source": "packages/api/session-controller/src/client/contract/sessions.ts",
+      "message": "retain 立即返回拥有 ready/release 的 Client generation 引用；using 在回调结算后释放，binding/sessionOf/scope 仅借用，不延长生命周期或拥有 Host Agent。SessionFace 通过 getSnapshot/subscribe 读快照，prompt/cancel/updateQueue 等为异步控制，RemoteResult 须检查业务结果；cancel 保留队列，接纳不等于执行完成。回调生命周期、订阅清理、await 和运行状态未验证，不证明泄漏。"
+    },
+    "client:sessions.binding": {
+      "source": "packages/api/session-controller/src/client/contract/sessions.ts",
+      "message": "retain 立即返回拥有 ready/release 的 Client generation 引用；using 在回调结算后释放，binding/sessionOf/scope 仅借用，不延长生命周期或拥有 Host Agent。SessionFace 通过 getSnapshot/subscribe 读快照，prompt/cancel/updateQueue 等为异步控制，RemoteResult 须检查业务结果；cancel 保留队列，接纳不等于执行完成。回调生命周期、订阅清理、await 和运行状态未验证，不证明泄漏。"
+    },
+    "client:sessions.sessionOf": {
+      "source": "packages/api/session-controller/src/client/contract/sessions.ts",
+      "message": "retain 立即返回拥有 ready/release 的 Client generation 引用；using 在回调结算后释放，binding/sessionOf/scope 仅借用，不延长生命周期或拥有 Host Agent。SessionFace 通过 getSnapshot/subscribe 读快照，prompt/cancel/updateQueue 等为异步控制，RemoteResult 须检查业务结果；cancel 保留队列，接纳不等于执行完成。回调生命周期、订阅清理、await 和运行状态未验证，不证明泄漏。"
+    },
+    "client:sessions.scope": {
+      "source": "packages/api/session-controller/src/client/contract/sessions.ts",
+      "message": "retain 立即返回拥有 ready/release 的 Client generation 引用；using 在回调结算后释放，binding/sessionOf/scope 仅借用，不延长生命周期或拥有 Host Agent。SessionFace 通过 getSnapshot/subscribe 读快照，prompt/cancel/updateQueue 等为异步控制，RemoteResult 须检查业务结果；cancel 保留队列，接纳不等于执行完成。回调生命周期、订阅清理、await 和运行状态未验证，不证明泄漏。"
+    },
+    "client:uiWorkspace.startSession": {
+      "source": "packages/client/ui-conversation/src/client/input/facade.ts",
+      "message": "草稿初始化只替换文字和内联引用，附件始终保留；默认 keep，append 追加段落，clearPreviousDraft 仅在 whenDraftExists 缺省时生效。异步导航被取代或输入阻塞可拒绝准备；不证明已提交、新建会话或草稿应用成功。"
+    },
+    "host:tools.resolve": {
+      "source": "packages/core/tools/src/index.ts",
+      "message": "工具执行使用 Agent 选定的 native/PTC 执行器和同一 step 的 condition 集合，无直接定义回退。仅 isConcurrencySafe 精确返回 true 的调用可有界并行，策略与结果仍按模型顺序提交。PTC reset 释放保留环境并等待嵌套清理，不撤销工具副作用；清理失败可阻止后续程序。AttachmentError 继承 HarnessError，错误码无统一前缀；tool/result 与 turn/end 保留错误码，旧日志可为 UNKNOWN。未验证回调、预算、清理或业务结果。"
+    },
+    "host:tools.executable": {
+      "source": "packages/core/tools/src/index.ts",
+      "message": "工具执行使用 Agent 选定的 native/PTC 执行器和同一 step 的 condition 集合，无直接定义回退。仅 isConcurrencySafe 精确返回 true 的调用可有界并行，策略与结果仍按模型顺序提交。PTC reset 释放保留环境并等待嵌套清理，不撤销工具副作用；清理失败可阻止后续程序。AttachmentError 继承 HarnessError，错误码无统一前缀；tool/result 与 turn/end 保留错误码，旧日志可为 UNKNOWN。未验证回调、预算、清理或业务结果。"
+    },
+    "host:tools.execute": {
+      "source": "packages/core/tools/src/index.ts",
+      "message": "工具执行使用 Agent 选定的 native/PTC 执行器和同一 step 的 condition 集合，无直接定义回退。仅 isConcurrencySafe 精确返回 true 的调用可有界并行，策略与结果仍按模型顺序提交。PTC reset 释放保留环境并等待嵌套清理，不撤销工具副作用；清理失败可阻止后续程序。AttachmentError 继承 HarnessError，错误码无统一前缀；tool/result 与 turn/end 保留错误码，旧日志可为 UNKNOWN。未验证回调、预算、清理或业务结果。"
+    },
+    "host:sessionController.follow": {
+      "source": "packages/api/session-controller/src/index.ts",
+      "message": "Session events 是按 seq 分页的持久事件，observeEvent 不附快照；state/observeState 是被动运行状态读取/完整替换，wait 是有界等待而非执行成功证明。control 的 baseline 后跟替换帧；projection 帧使用 changes[{key,val}] 和 seq，未出现 key 表示未变化，observeProjections 同样聚合，follow 从 opening 快照开始跟随持久事件；projections 是独立快照读取，需迁移时可能只给缓存提示或缺失。回调协议、AbortSignal、运行状态转换及远端动态调用未验证。 DeepSeek 拒答会以 CONTENT_REFUSED 出现在 LLM 终止块和 turn/end。"
+    },
+    "host:agents.currentInitiator": {
+      "source": "packages/core/agent/src/index.ts",
+      "message": "Agent 所有权按调用 create/resume 的 ownerCtx 建立，get 仅借用；handle.dispose 停止并等待退出、注销及释放作用域，不删除持久历史。withInitiator 保留同步值或 Promise，仅作进程内因果归属，不是权限或存活证明；withoutInitiator 清除继承归属，不清除显式字段或收拢脱离任务。返回 Agent、回调、取消及 await 顺序未验证。"
+    },
+    "host:agents.requireInitiator": {
+      "source": "packages/core/agent/src/index.ts",
+      "message": "Agent 所有权按调用 create/resume 的 ownerCtx 建立，get 仅借用；handle.dispose 停止并等待退出、注销及释放作用域，不删除持久历史。withInitiator 保留同步值或 Promise，仅作进程内因果归属，不是权限或存活证明；withoutInitiator 清除继承归属，不清除显式字段或收拢脱离任务。返回 Agent、回调、取消及 await 顺序未验证。"
+    },
+    "host:agents.withInitiator": {
+      "source": "packages/core/agent/src/index.ts",
+      "message": "Agent 所有权按调用 create/resume 的 ownerCtx 建立，get 仅借用；handle.dispose 停止并等待退出、注销及释放作用域，不删除持久历史。withInitiator 保留同步值或 Promise，仅作进程内因果归属，不是权限或存活证明；withoutInitiator 清除继承归属，不清除显式字段或收拢脱离任务。返回 Agent、回调、取消及 await 顺序未验证。"
+    },
+    "host:agents.withoutInitiator": {
+      "source": "packages/core/agent/src/index.ts",
+      "message": "Agent 所有权按调用 create/resume 的 ownerCtx 建立，get 仅借用；handle.dispose 停止并等待退出、注销及释放作用域，不删除持久历史。withInitiator 保留同步值或 Promise，仅作进程内因果归属，不是权限或存活证明；withoutInitiator 清除继承归属，不清除显式字段或收拢脱离任务。返回 Agent、回调、取消及 await 顺序未验证。"
+    },
+    "host:agents.register": {
+      "source": "packages/core/agent/src/index.ts",
+      "message": "Agent 所有权按调用 create/resume 的 ownerCtx 建立，get 仅借用；handle.dispose 停止并等待退出、注销及释放作用域，不删除持久历史。withInitiator 保留同步值或 Promise，仅作进程内因果归属，不是权限或存活证明；withoutInitiator 清除继承归属，不清除显式字段或收拢脱离任务。返回 Agent、回调、取消及 await 顺序未验证。"
+    },
+    "host:agents.setFactory": {
+      "source": "packages/core/agent/src/index.ts",
+      "message": "Agent 所有权按调用 create/resume 的 ownerCtx 建立，get 仅借用；handle.dispose 停止并等待退出、注销及释放作用域，不删除持久历史。withInitiator 保留同步值或 Promise，仅作进程内因果归属，不是权限或存活证明；withoutInitiator 清除继承归属，不清除显式字段或收拢脱离任务。返回 Agent、回调、取消及 await 顺序未验证。"
+    },
+    "host:tools.selectExecutor": {
+      "source": "packages/core/tools/src/index.ts",
+      "message": "工具执行使用 Agent 选定的 native/PTC 执行器和同一 step 的 condition 集合，无直接定义回退。仅 isConcurrencySafe 精确返回 true 的调用可有界并行，策略与结果仍按模型顺序提交。PTC reset 释放保留环境并等待嵌套清理，不撤销工具副作用；清理失败可阻止后续程序。AttachmentError 继承 HarnessError，错误码无统一前缀；tool/result 与 turn/end 保留错误码，旧日志可为 UNKNOWN。未验证回调、预算、清理或业务结果。"
+    },
+    "host:tools.setExecutor": {
+      "source": "packages/core/tools/src/index.ts",
+      "message": "工具执行使用 Agent 选定的 native/PTC 执行器和同一 step 的 condition 集合，无直接定义回退。仅 isConcurrencySafe 精确返回 true 的调用可有界并行，策略与结果仍按模型顺序提交。PTC reset 释放保留环境并等待嵌套清理，不撤销工具副作用；清理失败可阻止后续程序。AttachmentError 继承 HarnessError，错误码无统一前缀；tool/result 与 turn/end 保留错误码，旧日志可为 UNKNOWN。未验证回调、预算、清理或业务结果。"
+    },
+    "host:sessions.get": {
+      "source": "packages/core/session/src/index.ts",
+      "message": "返回 Session 的 append 同时支持 append(type, data) 单事件和 append(eventTuples) 数组重载，分别返回事件和数组；包装器或替身须保留两种签名，可用 Proxy 与 Reflect.apply 转发。这里只定位 sessions/sessionPersistence 入口，未追踪返回对象、写入原子性、持久化完成或包装器行为，不证明重载已适配。"
+    },
+    "host:sessions.create": {
+      "source": "packages/core/session/src/index.ts",
+      "message": "返回 Session 的 append 同时支持 append(type, data) 单事件和 append(eventTuples) 数组重载，分别返回事件和数组；包装器或替身须保留两种签名，可用 Proxy 与 Reflect.apply 转发。这里只定位 sessions/sessionPersistence 入口，未追踪返回对象、写入原子性、持久化完成或包装器行为，不证明重载已适配。"
+    },
+    "host:sessions.prepare": {
+      "source": "packages/core/session/src/index.ts",
+      "message": "返回 Session 的 append 同时支持 append(type, data) 单事件和 append(eventTuples) 数组重载，分别返回事件和数组；包装器或替身须保留两种签名，可用 Proxy 与 Reflect.apply 转发。这里只定位 sessions/sessionPersistence 入口，未追踪返回对象、写入原子性、持久化完成或包装器行为，不证明重载已适配。"
+    },
+    "host:sessions.fork": {
+      "source": "packages/core/session/src/index.ts",
+      "message": "返回 Session 的 append 同时支持 append(type, data) 单事件和 append(eventTuples) 数组重载，分别返回事件和数组；包装器或替身须保留两种签名，可用 Proxy 与 Reflect.apply 转发。这里只定位 sessions/sessionPersistence 入口，未追踪返回对象、写入原子性、持久化完成或包装器行为，不证明重载已适配。"
+    },
+    "host:sessions.flush": {
+      "source": "packages/core/session/src/index.ts",
+      "message": "返回 Session 的 append 同时支持 append(type, data) 单事件和 append(eventTuples) 数组重载，分别返回事件和数组；包装器或替身须保留两种签名，可用 Proxy 与 Reflect.apply 转发。这里只定位 sessions/sessionPersistence 入口，未追踪返回对象、写入原子性、持久化完成或包装器行为，不证明重载已适配。"
+    },
+    "host:sessionPersistence.create": {
+      "source": "packages/session/session-persistence/src/index.ts",
+      "message": "返回 Session 的 append 同时支持 append(type, data) 单事件和 append(eventTuples) 数组重载，分别返回事件和数组；包装器或替身须保留两种签名，可用 Proxy 与 Reflect.apply 转发。这里只定位 sessions/sessionPersistence 入口，未追踪返回对象、写入原子性、持久化完成或包装器行为，不证明重载已适配。"
+    },
+    "host:sessionPersistence.open": {
+      "source": "packages/session/session-persistence/src/index.ts",
+      "message": "返回 Session 的 append 同时支持 append(type, data) 单事件和 append(eventTuples) 数组重载，分别返回事件和数组；包装器或替身须保留两种签名，可用 Proxy 与 Reflect.apply 转发。这里只定位 sessions/sessionPersistence 入口，未追踪返回对象、写入原子性、持久化完成或包装器行为，不证明重载已适配。"
+    },
+    "host:subagents.startActivation": {
+      "source": "packages/subagent/subagent/src/index.ts",
+      "message": "Subagent 使用同级唯一名称和嵌套路径，旧子级可回退 Session id；工具参数 agent 替代 agent_id，list_agents 行为 name/status/description。Team 工具用 owner 名称与 unowned: true，Host agentTeams 仍读 ownerId，展示用 ownerName ?? ownerId。内置 base/Web preset 关闭 interrupt_agent（含 Team），独立插件默认仍 true；旧 Session 保留 preset 修订。新版目录载荷须先升级所有共享存储进程。未验证工具参数、返回对象、preset 或持久化迁移。"
+    },
+    "host:subagents.resolveName": {
+      "source": "packages/subagent/subagent/src/index.ts",
+      "message": "Subagent 使用同级唯一名称和嵌套路径，旧子级可回退 Session id；工具参数 agent 替代 agent_id，list_agents 行为 name/status/description。Team 工具用 owner 名称与 unowned: true，Host agentTeams 仍读 ownerId，展示用 ownerName ?? ownerId。内置 base/Web preset 关闭 interrupt_agent（含 Team），独立插件默认仍 true；旧 Session 保留 preset 修订。新版目录载荷须先升级所有共享存储进程。未验证工具参数、返回对象、preset 或持久化迁移。"
+    },
+    "host:subagents.namesOf": {
+      "source": "packages/subagent/subagent/src/index.ts",
+      "message": "Subagent 使用同级唯一名称和嵌套路径，旧子级可回退 Session id；工具参数 agent 替代 agent_id，list_agents 行为 name/status/description。Team 工具用 owner 名称与 unowned: true，Host agentTeams 仍读 ownerId，展示用 ownerName ?? ownerId。内置 base/Web preset 关闭 interrupt_agent（含 Team），独立插件默认仍 true；旧 Session 保留 preset 修订。新版目录载荷须先升级所有共享存储进程。未验证工具参数、返回对象、preset 或持久化迁移。"
+    },
+    "host:subagents.listDescendants": {
+      "source": "packages/subagent/subagent/src/index.ts",
+      "message": "Subagent 使用同级唯一名称和嵌套路径，旧子级可回退 Session id；工具参数 agent 替代 agent_id，list_agents 行为 name/status/description。Team 工具用 owner 名称与 unowned: true，Host agentTeams 仍读 ownerId，展示用 ownerName ?? ownerId。内置 base/Web preset 关闭 interrupt_agent（含 Team），独立插件默认仍 true；旧 Session 保留 preset 修订。新版目录载荷须先升级所有共享存储进程。未验证工具参数、返回对象、preset 或持久化迁移。"
+    },
+    "host:subagents.sendMessage": {
+      "source": "packages/subagent/subagent/src/index.ts",
+      "message": "Subagent 使用同级唯一名称和嵌套路径，旧子级可回退 Session id；工具参数 agent 替代 agent_id，list_agents 行为 name/status/description。Team 工具用 owner 名称与 unowned: true，Host agentTeams 仍读 ownerId，展示用 ownerName ?? ownerId。内置 base/Web preset 关闭 interrupt_agent（含 Team），独立插件默认仍 true；旧 Session 保留 preset 修订。新版目录载荷须先升级所有共享存储进程。未验证工具参数、返回对象、preset 或持久化迁移。"
+    },
+    "host:subagents.interrupt": {
+      "source": "packages/subagent/subagent/src/index.ts",
+      "message": "Subagent 使用同级唯一名称和嵌套路径，旧子级可回退 Session id；工具参数 agent 替代 agent_id，list_agents 行为 name/status/description。Team 工具用 owner 名称与 unowned: true，Host agentTeams 仍读 ownerId，展示用 ownerName ?? ownerId。内置 base/Web preset 关闭 interrupt_agent（含 Team），独立插件默认仍 true；旧 Session 保留 preset 修订。新版目录载荷须先升级所有共享存储进程。未验证工具参数、返回对象、preset 或持久化迁移。"
+    },
+    "host:agentTeams.createTask": {
+      "source": "packages/team/agent-team/src/index.ts",
+      "message": "Subagent 使用同级唯一名称和嵌套路径，旧子级可回退 Session id；工具参数 agent 替代 agent_id，list_agents 行为 name/status/description。Team 工具用 owner 名称与 unowned: true，Host agentTeams 仍读 ownerId，展示用 ownerName ?? ownerId。内置 base/Web preset 关闭 interrupt_agent（含 Team），独立插件默认仍 true；旧 Session 保留 preset 修订。新版目录载荷须先升级所有共享存储进程。未验证工具参数、返回对象、preset 或持久化迁移。"
+    },
+    "host:agentTeams.getTask": {
+      "source": "packages/team/agent-team/src/index.ts",
+      "message": "Subagent 使用同级唯一名称和嵌套路径，旧子级可回退 Session id；工具参数 agent 替代 agent_id，list_agents 行为 name/status/description。Team 工具用 owner 名称与 unowned: true，Host agentTeams 仍读 ownerId，展示用 ownerName ?? ownerId。内置 base/Web preset 关闭 interrupt_agent（含 Team），独立插件默认仍 true；旧 Session 保留 preset 修订。新版目录载荷须先升级所有共享存储进程。未验证工具参数、返回对象、preset 或持久化迁移。"
+    },
+    "host:agentTeams.listTasks": {
+      "source": "packages/team/agent-team/src/index.ts",
+      "message": "Subagent 使用同级唯一名称和嵌套路径，旧子级可回退 Session id；工具参数 agent 替代 agent_id，list_agents 行为 name/status/description。Team 工具用 owner 名称与 unowned: true，Host agentTeams 仍读 ownerId，展示用 ownerName ?? ownerId。内置 base/Web preset 关闭 interrupt_agent（含 Team），独立插件默认仍 true；旧 Session 保留 preset 修订。新版目录载荷须先升级所有共享存储进程。未验证工具参数、返回对象、preset 或持久化迁移。"
+    },
+    "host:agentTeams.updateTask": {
+      "source": "packages/team/agent-team/src/index.ts",
+      "message": "Subagent 使用同级唯一名称和嵌套路径，旧子级可回退 Session id；工具参数 agent 替代 agent_id，list_agents 行为 name/status/description。Team 工具用 owner 名称与 unowned: true，Host agentTeams 仍读 ownerId，展示用 ownerName ?? ownerId。内置 base/Web preset 关闭 interrupt_agent（含 Team），独立插件默认仍 true；旧 Session 保留 preset 修订。新版目录载荷须先升级所有共享存储进程。未验证工具参数、返回对象、preset 或持久化迁移。"
+    },
+    "host:agentTeams.setEnabled": {
+      "source": "packages/team/agent-team/src/index.ts",
+      "message": "Subagent 使用同级唯一名称和嵌套路径，旧子级可回退 Session id；工具参数 agent 替代 agent_id，list_agents 行为 name/status/description。Team 工具用 owner 名称与 unowned: true，Host agentTeams 仍读 ownerId，展示用 ownerName ?? ownerId。内置 base/Web preset 关闭 interrupt_agent（含 Team），独立插件默认仍 true；旧 Session 保留 preset 修订。新版目录载荷须先升级所有共享存储进程。未验证工具参数、返回对象、preset 或持久化迁移。"
+    },
+    "host:pluginManager.listBundles": {
+      "source": "packages/boot/plugin-manager/src/index.ts",
+      "message": "listBundles 的 BundleInfo.update 为可选 registry/git，替代 updatable；registry 才能按 listVersions 列版本，非 undefined 才表示存在更新方式。ManagementError 与 ChangeResult 须处理 unexpected-package，更新须保持包身份约束。pluginManager.list 与 plugin_manager 工具未因此改变。未验证返回字段读取、动态远端调用或更新结果。"
+    },
+    "host:pluginManager.updateBundle": {
+      "source": "packages/boot/plugin-manager/src/index.ts",
+      "message": "listBundles 的 BundleInfo.update 为可选 registry/git，替代 updatable；registry 才能按 listVersions 列版本，非 undefined 才表示存在更新方式。ManagementError 与 ChangeResult 须处理 unexpected-package，更新须保持包身份约束。pluginManager.list 与 plugin_manager 工具未因此改变。未验证返回字段读取、动态远端调用或更新结果。"
+    },
+    "host:pluginManager.installBundle": {
+      "source": "packages/boot/plugin-manager/src/index.ts",
+      "message": "listBundles 的 BundleInfo.update 为可选 registry/git，替代 updatable；registry 才能按 listVersions 列版本，非 undefined 才表示存在更新方式。ManagementError 与 ChangeResult 须处理 unexpected-package，更新须保持包身份约束。pluginManager.list 与 plugin_manager 工具未因此改变。未验证返回字段读取、动态远端调用或更新结果。"
+    },
+    "host:mcpManager.list": {
+      "source": "packages/mcp/mcp-manager/src/index.ts",
+      "message": "MCP register 归属调用插件生命周期并返回幂等 void disposer；watch 发出合并后的完整列表，取消订阅不等于停止实例。restart 使用新重连预算，未清理实例可阻止重启；probe 可检查禁用项且不修改运行实例，配置变化或销毁会取消，须分别检查阶段结果和 cleanup。此处未执行连接、鉴权、探测或清理验收。"
+    },
+    "host:mcpManager.register": {
+      "source": "packages/mcp/mcp-manager/src/index.ts",
+      "message": "MCP register 归属调用插件生命周期并返回幂等 void disposer；watch 发出合并后的完整列表，取消订阅不等于停止实例。restart 使用新重连预算，未清理实例可阻止重启；probe 可检查禁用项且不修改运行实例，配置变化或销毁会取消，须分别检查阶段结果和 cleanup。此处未执行连接、鉴权、探测或清理验收。"
+    },
+    "host:mcpManager.watch": {
+      "source": "packages/mcp/mcp-manager/src/index.ts",
+      "message": "MCP register 归属调用插件生命周期并返回幂等 void disposer；watch 发出合并后的完整列表，取消订阅不等于停止实例。restart 使用新重连预算，未清理实例可阻止重启；probe 可检查禁用项且不修改运行实例，配置变化或销毁会取消，须分别检查阶段结果和 cleanup。此处未执行连接、鉴权、探测或清理验收。"
+    },
+    "host:mcpManager.restart": {
+      "source": "packages/mcp/mcp-manager/src/index.ts",
+      "message": "MCP register 归属调用插件生命周期并返回幂等 void disposer；watch 发出合并后的完整列表，取消订阅不等于停止实例。restart 使用新重连预算，未清理实例可阻止重启；probe 可检查禁用项且不修改运行实例，配置变化或销毁会取消，须分别检查阶段结果和 cleanup。此处未执行连接、鉴权、探测或清理验收。"
+    },
+    "host:mcpManager.probe": {
+      "source": "packages/mcp/mcp-manager/src/index.ts",
+      "message": "MCP register 归属调用插件生命周期并返回幂等 void disposer；watch 发出合并后的完整列表，取消订阅不等于停止实例。restart 使用新重连预算，未清理实例可阻止重启；probe 可检查禁用项且不修改运行实例，配置变化或销毁会取消，须分别检查阶段结果和 cleanup。此处未执行连接、鉴权、探测或清理验收。"
+    },
+    "host:mcpManager.probeFromClient": {
+      "source": "packages/mcp/mcp-manager/src/index.ts",
+      "message": "MCP register 归属调用插件生命周期并返回幂等 void disposer；watch 发出合并后的完整列表，取消订阅不等于停止实例。restart 使用新重连预算，未清理实例可阻止重启；probe 可检查禁用项且不修改运行实例，配置变化或销毁会取消，须分别检查阶段结果和 cleanup。此处未执行连接、鉴权、探测或清理验收。"
+    },
+    "host:llm.stream": {
+      "source": "packages/llm/llm-deepseek/src/translate.ts",
+      "message": "DeepSeek 拒答会以 CONTENT_REFUSED 出现在 LLM 终止块和 turn/end；普通异常与取消仍各有原契约。审查消费方是否分别处理；回调、凭据和实际响应未验证。"
+    },
+    "host:web.search": {
+      "source": "packages/web/web/src/index.ts",
+      "message": "显式 searchProvider 优先。自动模式按 WebSearchRequest.llmProvider 为 deepseek-official/deepseek-account 优先 Messages，其余或未传时优先 Search API。首选未注册时仅接受唯一可选提供方；核对网关独立端点、响应格式及信号传递。凭据、费用和实际调用未验证。"
+    },
+    "host:web.searchReady": {
+      "source": "packages/web/web/src/index.ts",
+      "message": "传入与 search 请求相同的模型路由。就绪检查只询问选中提供方，选路错误由 search 返回结构化错误；就绪不证明可用、有效凭据或实际调用。"
+    },
+    "host:web.fetch": {
+      "source": "packages/web/web/src/index.ts",
+      "message": "Fetch 独立选择提供方，默认 HTTP；模型路由不会替它自动切到 Messages。核对显式配置和取消信号，实际抓取未验证。"
+    }
+  },
+  "scope": "Exact static migration notices from pinned source. No credentials, billing, provider availability, business outcomes or callback execution inferred. rc.4 is an independent source comparison with no registered catalogue."
+}

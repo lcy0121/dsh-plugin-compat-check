@@ -14,6 +14,7 @@ const archiveSpecs = [
   ["rc22", "DSC_RC22_SOURCE_ARCHIVE", "0.2.2-rc.1"],
   ["rc22-2", "DSC_RC22_2_SOURCE_ARCHIVE", "0.2.2-rc.2"],
   ["rc22-3", "DSC_RC22_3_SOURCE_ARCHIVE", "0.2.2-rc.3"],
+  ["rc22-5", "DSC_RC22_5_SOURCE_ARCHIVE", "0.2.2-rc.5"],
 ];
 const sourceArchives = [],
   archiveEnv = {};
@@ -74,6 +75,7 @@ try {
     "profile-target",
     "tool-json",
     "tool-host-validator",
+    "rc22-5-semantics",
     "catalog-signature-omissions",
     "verdict-regressions",
   ].map((name) => "test/" + name + ".test.mjs");

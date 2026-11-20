@@ -3,6 +3,8 @@
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
+import os from 'node:os'
+import { spawnSync } from 'node:child_process'
 import path from 'node:path'
 
 import { GITHUB_RULES, NPM_RULES, runRules, repoSlug } from '../tools/meta-check.mjs'
@@ -156,3 +158,62 @@ describe('规则表自身的约束', () => {
     }
   })
 })
+
+test('CLI preserves successful responses and fails if a requested source is unavailable', (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dsc-meta-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(dir, 'gh.json'), JSON.stringify({
+    description: goodGh.description,
+    repositoryTopics: goodGh.topics.map(name => ({ name })),
+    homepageUrl: goodGh.homepage,
+    licenseInfo: { spdxId: goodGh.license },
+  }));
+  fs.writeFileSync(path.join(dir, 'npm.json'), JSON.stringify(pkg));
+  fs.writeFileSync(path.join(dir, 'README.md'), local.readme);
+  fs.writeFileSync(path.join(dir, 'gh'), `#!/bin/sh
+case "$GH_MODE" in
+  fail) echo "controlled failure" >&2; exit 1;;
+  malformed) echo "{"; exit 0;;
+esac
+/bin/cat "$META_STUBS/gh.json"
+`, { mode: 0o700 });
+  fs.writeFileSync(path.join(dir, 'npm'), `#!/bin/sh
+if [ "$3" = "readme" ]; then
+  case "$README_MODE" in
+    fail) echo "readme unavailable" >&2; exit 1;;
+    blank) exit 0;;
+  esac
+  /bin/cat "$META_STUBS/README.md"
+else
+  [ "$NPM_MODE" = "fail" ] && exit 1
+  /bin/cat "$META_STUBS/npm.json"
+fi
+`, { mode: 0o700 });
+  function run(args, modes, expected) {
+    const r = spawnSync(process.execPath, ['tools/meta-check.mjs', '--json', ...args], {
+      cwd: REPO,
+      env: { PATH: dir, META_STUBS: dir, ...modes },
+      encoding: 'utf8',
+    });
+    assert.equal(r.status, expected, r.stderr);
+    return JSON.parse(r.stdout);
+  }
+  for (const GH_MODE of ['fail', 'malformed']) {
+    const partial = run([], { GH_MODE }, 3);
+    assert.equal(partial.observed.npm.version, pkg.version);
+    assert.equal(partial.observed.npmReadmeFetched, true);
+    assert.match(partial.skipped[0], /GitHub/);
+  }
+  const gh = run([], { NPM_MODE: 'fail' }, 3);
+  assert.equal(gh.observed.github.description, goodGh.description);
+  for (const README_MODE of ['fail', 'blank']) {
+    const partial = run(['--npm'], { README_MODE }, 3);
+    assert.equal(partial.observed.npm.version, pkg.version);
+    assert.equal(partial.observed.npmReadmeFetched, false);
+    assert.match(partial.skipped[0], /npm README/);
+  }
+  assert.deepEqual(Object.keys(run(['--github'], { NPM_MODE: 'fail' }, 0).observed), ['github']);
+  assert.deepEqual(Object.keys(run(['--npm'], { GH_MODE: 'fail' }, 0).observed), ['npm', 'npmReadmeFetched']);
+  fs.writeFileSync(path.join(dir, 'npm.json'), JSON.stringify({ ...pkg, version: '99.0.0' }));
+  assert.equal(run(['--npm'], {}, 1).problems.some(p => p.id === 'npm.version-matches'), true);
+});

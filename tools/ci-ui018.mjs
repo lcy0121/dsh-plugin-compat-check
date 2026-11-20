@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import {
   uiAcceptanceVersion,
+  acceptanceCapabilities,
   assertHostRuntime,
 } from "./acceptance-target.mjs";
 /** One private tgz, one actual-host UI run, and provenance-bound CI evidence. */
@@ -33,11 +34,8 @@ export function validateUi018Evidence(
     result.dshVersion === uiAcceptanceVersion(expectedVersion),
     "exact requested host",
   );
-  if (
-    ["0.2.1-rc.5", "0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"].includes(
-      expectedVersion,
-    )
-  ) {
+  const capabilities = acceptanceCapabilities(expectedVersion);
+  if (capabilities.candidate) {
     for (const key of [
       "realHost",
       "installedArtifact",
@@ -98,7 +96,7 @@ export function validateUi018Evidence(
       "version-bound semantics",
     );
   }
-  if (["0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"].includes(expectedVersion)) {
+  if (capabilities.node24) {
     expect(typeof result.runtimeNode === "string", "actual runtime version");
     assertHostRuntime(expectedVersion, result.runtimeNode);
     expect(
@@ -117,7 +115,7 @@ export function validateUi018Evidence(
       "model listing change notification",
     );
   }
-  if (["0.2.2-rc.2", "0.2.2-rc.3"].includes(expectedVersion)) {
+  if (capabilities.modern) {
     const viewport = result.ui018?.viewportControls;
     for (const key of [
       "realBrowser",

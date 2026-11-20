@@ -1,6 +1,6 @@
 # 规则与固定源码参考
 
-当前版本为**0.2.5**。本页说明规则、目录选择和度量；契约见[Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，审查流程见[维护指南](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md)，限定验收/分发核验见[current-state](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。
+当前版本为**0.2.6**。本页说明规则、目录选择和度量；契约见[Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，审查流程见[维护指南](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md)，限定验收/分发核验见[current-state](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。
 
 ## 文件与消费者
 
@@ -15,7 +15,7 @@
 | dsh-api-catalog-0.2.2-rc.2.json / dsh-api-catalog-0.2.2-rc.3.json | 分别对应dsh-0.2.2-rc.2-review.json及rc.3审查；各自semantics-review记录迁移边界，不互借认证 |
 | usage-inventory.json | 带日期、版本、profile和完整性标记的历史AST库存，不是当前覆盖率 |
 
-普通检查从`lib/contracts.mjs.CATALOG_REFERENCES`选不高于目标的最新目录，低于最旧目录或目标未知时取0.2.0-rc.2；显式覆盖优先。0.2.2-rc.2/rc.3各用自己的目录。登记字节与精确认证集合以该常量为准；升级预检仅接受七个登记版本，拒绝未知/范围。回退或自定义目录不认证未来宿主。
+普通检查从`lib/contracts.mjs.CATALOG_REFERENCES`选不高于目标的最新目录，低于最旧目录或目标未知时取0.2.0-rc.2；显式覆盖优先。0.2.2-rc.2/rc.3/rc.5各用精确目录。登记字节与精确认证集合以该常量为准；升级预检仅接受八个登记版本，拒绝未知/范围。回退或自定义目录不认证未来宿主。
 
 ## 判定与解释
 

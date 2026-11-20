@@ -7,6 +7,7 @@
  */
 
 import fs from "node:fs";
+import { SHARED_HOST, stagedContractSource } from "./shared-contracts.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -57,20 +58,13 @@ for (const file of ["LICENSE", "THIRD_PARTY_NOTICES.md"])
 // The host must have contracts available before dynamic kernel resolution.
 // Kernel imports reuse those same generated modules through tiny re-exports,
 // instead of shipping a second full implementation of each shared contract.
-const SHARED_HOST = {
-  "contracts.mjs": "report-contract.js",
-  "upgrade-contract.mjs": "upgrade-contract.js",
-  "finding-guidance.mjs": "finding-guidance.js",
-};
 for (const f of KERNEL_LIBS) {
   const src = path.join(REPO, "lib", f);
   if (!fs.existsSync(src)) bail(`缺少内核模块 lib/${f}`);
   const host = SHARED_HOST[f];
   if (host) {
     const stagedHost = path.join(PLUGIN, "lib", host);
-    const expected =
-      `// Generated from lib/${f}; run node plugin/scripts/stage-contract.mjs\n` +
-      fs.readFileSync(src, "utf8");
+    const expected = stagedContractSource(f, fs.readFileSync(src, "utf8"));
     if (
       !fs.existsSync(stagedHost) ||
       fs.readFileSync(stagedHost, "utf8") !== expected

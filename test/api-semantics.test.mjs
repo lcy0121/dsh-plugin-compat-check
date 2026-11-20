@@ -979,3 +979,27 @@ test("modern migration advice translates all fixed paragraphs and preserves evid
     localeStore.setPreference("auto");
   }
 });
+
+test("rc.5 reports located search and refusal guidance only for proved DSH receivers", () => {
+  const source = `export function apply(ctx) {
+    ctx.web.search({ query: 'fixture', llmProvider: 'fixture-route' });
+    ctx.web.searchReady('fixture-route');
+    ctx.web.fetch({ url: 'https://fixture.invalid' });
+    ctx.llm.stream({});
+    ctx.sessionController.events('fixture');
+    unrelated.web.search({ query: 'unknown' });
+  }`;
+  const rc5 = evaluate(source, { version: "0.2.2-rc.5", side: "host" }).p;
+  assert.match(notes(rc5), /web\.search @ .*WebSearchRequest\.llmProvider/);
+  assert.match(notes(rc5), /web\.searchReady @ .*只询问选中提供方/);
+  assert.match(notes(rc5), /web\.fetch @ .*默认 HTTP/);
+  assert.match(notes(rc5), /llm\.stream @ .*CONTENT_REFUSED/);
+  assert.match(notes(rc5), /sessionController\.events @ .*CONTENT_REFUSED/);
+  assert.equal(rc5.coverage.verifiedCalls, 0);
+  assert.deepEqual(rc5.findings, []);
+  assert.equal(notes(rc5).match(/web\.search @ /g)?.length, 1);
+  for (const version of ["0.2.2-rc.3", "0.2.2-rc.4", "9.9.9"]) {
+    const other = evaluate(source, { version, side: "host" }).p;
+    assert.doesNotMatch(notes(other), /CONTENT_REFUSED|Messages/);
+  }
+});

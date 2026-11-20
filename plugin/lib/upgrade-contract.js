@@ -1,14 +1,10 @@
 // Generated from lib/upgrade-contract.mjs; run node plugin/scripts/stage-contract.mjs
-/** Browser-safe preview contract, also staged into the plugin. No imports. */
-export const SUPPORTED_PREVIEW_VERSIONS = Object.freeze([
-  "0.2.0-rc.2",
-  "0.2.1-rc.2",
-  "0.2.1-rc.3",
-  "0.2.1-rc.5",
-  "0.2.2-rc.1",
-  "0.2.2-rc.2",
-  "0.2.2-rc.3",
-]);
+import { CATALOG_REFERENCES } from "./report-contract.js";
+/** Browser-safe preview contract, also staged into the plugin. */
+
+export const SUPPORTED_PREVIEW_VERSIONS = Object.freeze(
+  CATALOG_REFERENCES.map(({ version }) => version),
+);
 const record = (x) => x !== null && typeof x === "object" && !Array.isArray(x);
 const text = (x) => typeof x === "string" && x.length > 0;
 const strings = (x) =>

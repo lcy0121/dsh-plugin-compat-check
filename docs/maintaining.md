@@ -1,6 +1,6 @@
 # 维护指南
 
-当前版本为**0.2.5**；本文维护目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
+当前版本为**0.2.6**；本文维护目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
 
 ## 维护入口与语法覆盖
 
@@ -18,6 +18,7 @@ check离线核格式、文档/版本/链接、生成副本、许可证、语法�
 | `DSC_RC22_SOURCE_ARCHIVE` | 0.2.2-rc.1 |
 | `DSC_RC22_2_SOURCE_ARCHIVE` | 0.2.2-rc.2 |
 | `DSC_RC22_3_SOURCE_ARCHIVE` | 0.2.2-rc.3 |
+| `DSC_RC22_5_SOURCE_ARCHIVE` | 0.2.2-rc.5 |
 
 宿主`plugin/index.js`编排加载/资源，`plugin/lib/host-{reports,reviews,http,upgrade,history}.js`分管各接口；`lib/review-sidecar-cache.mjs`仅缓存已校验派生上下文，不授权保存。客户端真源为`plugin/src/client.jsx`、`panels/`、`components/`和`styles.css`，纯契约/workflow共享`lib/*.mjs`。
 
@@ -109,7 +110,7 @@ rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.j
 
 ## 同一制品发布核对
 
-本版**0.2.5**的能力正文与带日期的验收/公开分发回执分开维护。每次正式交付按以下顺序执行：
+本版**0.2.6**的能力正文与带日期的验收/公开分发回执分开维护。每次正式交付按以下顺序执行：
 
 1. 统一版本真源、manifest/lock、README、skill及示例；正文使用本版能力视角。运行check和prepublish-check（不发布），以成功TAP更新计数，核生成副本、许可证和公开元数据。
 2. 授权推送后，等待所选提交全部Actions通过。candidate job只构建一次，完整UI jobs下载同一tgz/回执并上传证据。
@@ -123,7 +124,7 @@ GitHub简介/topics可独立更新；npm简介/搜索关键词取`plugin/package
 
 ## 参数语义基线维护
 
-`rules/severity.json.apiSemantics`登记0.2.1-rc.2/rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3，由`lib/api-semantics.mjs.SEMANTIC_VERSIONS`独立限范围，不从七版目录或规则自报版本扩张。
+`rules/severity.json.apiSemantics`登记0.2.1-rc.2/rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3/rc.5，由`lib/api-semantics.mjs.SEMANTIC_VERSIONS`独立限范围，不从目录或规则自报版本扩张。
 
 修改前锁定官方tag/归档，逐文件核哈希、公开契约、实现与行为；只读源码，不执行目标。类型/枚举、弃用与所有权分别审查，保留别名/改写、闭包副作用和跨版本正反例；clearPreviousDraft仍是兼容选项。check:catalogs只核登记结构，不代替人工审查或宿主验证。
 
@@ -209,3 +210,11 @@ DSC_HOST_SOURCE_ARCHIVE/DSC_RC22_SOURCE_ARCHIVE复用已核旧来源，坏摘要
 运行入口绑定PATH中选定dsh的真实路径：npm CLI使用同路径解析的app-boot，Desktop launcher才用其Electron/ASAR，不借本机另一个版本。runtime查询也用该carrier。两npm包含docs/src，CLI为lib/bin.js，app-boot公开入口为lib/index.js及worker/profile-resolution-bootstrap；安装版本、目录和摘要见独立审查。primary-runtime是宿主resources布局，不是可假定的npm同名模块；普通检查不创建或修复它。新宿主Node>=24.9.0，源码根packageManager两版均pnpm11.28.5，私有执行器与CI同步pin；工具Node22静态覆盖保留。原始JSON/schema门禁分别固定rc.5与三个0.2.2来源，显式DSC_RC22_2_SOURCE_ARCHIVE/DSC_RC22_3_SOURCE_ARCHIVE可复用已核归档。
 
 升级指南目录名v0.2.2-rc.1不表示实际rc.1已含该变更。两新版创造模式改用dsh-doc（源码编写skill名dsh-doc-writing），旧四skill及模板路径按官方指南迁移；本工具skill名称和provider无交集。searchBilling/fetchBilling及auth.sources、具体deepseek-account/Remote迁移、终端optional-terminal-panel与CLEANUP_FAILED，以及Worktree归档清理/retainOnArchive是宿主配置职责；本工具不调用这些提供方、不读凭据或改配置。归档可能删除干净检出目录而保留分支，ignored/skip-worktree文件不能保证保留；按宿主指南显式选择保留策略。普通检查不执行归档或迁移。review.integrationAcceptance是来源审查时快照；后续同包macOS/Linux与11项CI记录见current-state，配置和历史回执不认证后改的制品。
+
+## 0.2.6：rc.5适配
+
+[来源审查](../rules/dsh-0.2.2-rc.5-review.json)固定rc.4→rc.5源码、npm发行包和桌面ASAR。[语义审查](../rules/dsh-0.2.2-rc.5-semantics-review.json)绑定拒答与搜索路由源码。作者矩阵上限八版，保留每cell 2MiB/总8MiB/30秒。独立宿主能力表驱动Linux矩阵，Node22继续跑静态检查。
+
+历史漏报12/24：2例天然HTTP405需观察服务依赖；5例受控HTTP失败、5例DOM失败需执行业务动作核对持久化/界面。两套独立保留样本验证计时器和任务。保留固定预期，以[现行回执](current-state.json)报告新结果。
+
+按当前PATH分别选桌面或npm载体，运行`node tools/liveshare-worker-acceptance.mjs`，只等待IPC ready并断开；不发送分享命令。

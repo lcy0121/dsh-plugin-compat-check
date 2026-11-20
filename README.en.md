@@ -6,7 +6,7 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-The current version is **0.2.5**. It includes independently reviewed DSH 0.2.2-rc.2/rc.3 catalogues, bounded Agent/tool/Session migration guidance, and updated plugin management, authentication and three-slot integration. It provides a Chinese/English/Korean UI, upgrade preview, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2 and 0.2.2-rc.3**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
+The current version is **0.2.6**. It adds an independently reviewed DSH 0.2.2-rc.5 catalogue and migration guidance for content refusal and search routing. It provides a Chinese/English/Korean UI, upgrade preview, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3 and 0.2.2-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
 
 [docs/current-state.json](docs/current-state.json) records acceptance by commit, archive and platform; new artifacts require verification. The npm plugin provides the page, details/badges, `compat_check` and skill. CLI, install checks, batches, author CI and health executor are repository tools. There is no npm CLI bin or `npx dsh-plugin-compat-check` support.
 
@@ -16,9 +16,9 @@ See the dated [upstream record](docs/upstream-verification.md) for market and di
 
 ```sh
 # Install this exact version
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.5
+dsh plugin --profile <profile> add dsh-plugin-compat-check
 # Verify the digest before using a local archive
-dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.5.tgz
+dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.6.tgz
 ```
 
 In the DSH instance using that profile, open **bottom-left More (⋯)/avatar → Settings → Built-in plugins → Compatibility (兼容性)**. Do not assume desktop. Agents can call `compat_check`; source installations require a [complete tgz](plugin/README.md#从源码构建安装).
@@ -75,10 +75,10 @@ Ordinary static checks do not execute targets or use the network, but write thei
 
 ## Upgrade preview and verification
 
-Call `compat_check({"upgradeTo":"0.2.2-rc.3"})`; the current version comes from the host and results use `upgradePreview`. CLI requires both exact versions:
+Call `compat_check({"upgradeTo":"0.2.2-rc.5"})`; the current version comes from the host and results use `upgradePreview`. CLI requires both exact versions:
 
 ```sh
-node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.2 --upgrade-to 0.2.2-rc.3 --json
+node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.3 --upgrade-to 0.2.2-rc.5 --json
 npm test
 npm run check
 node plugin/scripts/prepublish-check.mjs

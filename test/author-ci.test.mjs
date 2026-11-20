@@ -36,7 +36,7 @@ test("offline author matrix preserves exact catalogue/kernel results, identity a
   assert.notEqual(r.status, 3, r.stderr + r.stdout);
   const m = JSON.parse(r.stdout);
   assert.equal(m.kind, "plugin-compat-check/author-ci");
-  assert.equal(m.cells.length, 7);
+  assert.equal(m.cells.length, 8);
   for (const c of m.cells) {
     assert.equal(c.status, "analyzed");
     assert.equal(c.report.catalog.verified, true);
@@ -63,7 +63,7 @@ test("unknown versions and bad inputs fail closed with machine readable output",
       "--package",
       f.source,
       "--versions",
-      Array.from({ length: 8 }, (_, i) => `0.2.${i}`).join(","),
+      Array.from({ length: 9 }, (_, i) => `0.2.${i}`).join(","),
     ],
     ["--package", f.source, "--versions", "0.2.1-rc.2,0.2.1-rc.2"],
     ["--package", path.join(f.root, "absent")],

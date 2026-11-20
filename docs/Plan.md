@@ -1,10 +1,10 @@
 # 开发计划与维护约定
 
-当前版本为**0.2.5**，真源为`lib/version.mjs`。本文保留产品契约与待办；操作/预算见[指南](guide.md)，实现/验收见[维护指南](maintaining.md)，带日期的回执见[docs/current-state.json](current-state.json)。
+当前版本为**0.2.6**，真源为`lib/version.mjs`。本文保留产品契约与待办；操作/预算见[指南](guide.md)，实现/验收见[维护指南](maintaining.md)，带日期的回执见[docs/current-state.json](current-state.json)。
 
 ## 1. 项目定位与交付状态
 
-检查已安装DSH插件，提供源码位置、依据和覆盖限制。本版已完成0.2.2-rc.2/rc.3独立目录、Agent/工具/Session迁移提示及管理、鉴权和三槽位适配，保留Cordis与严格工具作用域检查。声明放行、激活或无发现不等于业务正常。正文描述本版能力；实际分发以[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub Releases](https://github.com/lcy0121/dsh-plugin-compat-check/releases)记录为准。
+检查已安装DSH插件，提供源码位置、依据和覆盖限制。本版加入0.2.2-rc.5精确目录、拒答与搜索路由迁移提示、八版作者矩阵。声明放行、激活或无发现不等于业务正常。正文描述本版能力；实际分发以[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub Releases](https://github.com/lcy0121/dsh-plugin-compat-check/releases)记录为准。
 
 npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin、不支持npx。CLI、安装检查、批量、作者CI和健康执行器从仓库工作区运行；源码安装须[构建完整tgz](../plugin/README.md#从源码构建安装)。
 
@@ -14,9 +14,9 @@ npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin�
 
 AST按host/client/shared记录Context、服务及真实位置，入口遵循宿主解析。动态、变异、遮蔽、逃逸、异步及超限保守推断或弃权；能力守卫须控制调用，try/catch不是能力证明。不执行目标，不保存prompt或任意枚举；[语义范围](guide.md#参数与生命周期语义)与[提取规则](maintaining.md#提取器与探针维护)分别维护。
 
-本版分别登记[rc.2](../rules/dsh-0.2.2-rc.2-review.json)与[rc.3](../rules/dsh-0.2.2-rc.3-review.json)：宿主108服务/639方法与109/640，客户端均8/46。固定完整源码/npm/桌面字节和签名，补反引号/async*提取漏项，保留旧五版目录；目录增项不全是API新增。迁移边界见[维护指南](maintaining.md#025rc2与rc3独立适配)。
+本版登记[0.2.2-rc.5](../rules/dsh-0.2.2-rc.5-review.json)，宿主109服务/640方法、客户端8/46，保留旧目录。0.2.2-rc.4用于独立来源差分。语义边界和实机回执见[维护指南](maintaining.md#026rc5适配)。
 
-rc.5[来源审查](../rules/dsh-0.2.1-rc.5-review.json)核对388文件差分，相对rc.3无API名称/生成签名变化，语义仍独立审查。推理Slot的rawText为原始文本、text供显示；只提示迁移，不把text使用报错，不验证props或流式行为。目录、语义、宿主与业务验收分别记录。
+0.2.1-rc.5[来源审查](../rules/dsh-0.2.1-rc.5-review.json)核对388文件差分，相对rc.3无API名称/生成签名变化，语义仍独立审查。推理Slot的rawText为原始文本、text供显示；只提示迁移，不把text使用报错，不验证props或流式行为。目录、语义、宿主与业务验收分别记录。
 
 ### 2.2 结论、影响与基线
 
@@ -50,7 +50,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ### 2.7 升级前静态预检契约
 
-`runUpgradePreview`仅支持精确**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3**，其余读输入前退出3。对同组私有字节分别判定，捕获/分析/清理受监督，清理失败不成功；不安装/升级/执行宿主，不借运行时、豁免、普通缓存或基线。
+`runUpgradePreview`仅支持精确**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3、0.2.2-rc.5**，其余读输入前退出3。对同组私有字节分别判定，捕获/分析/清理受监督，清理失败不成功；不安装/升级/执行宿主，不借运行时、豁免、普通缓存或基线。
 
 [预检schema1](../lib/upgrade-contract.mjs)：**0/1/2为无/非致命/致命新增或变重风险，3为无法预检**；旧风险及coverage/vacuous保留。CLI给nm/当前版本/upgrade-to，agent当前版本取宿主；返回upgradePreview，普通report为null。输入/目标/身份变化撤销旧比较，过时响应丢弃；[参数与预算](guide.md#升级预检与有限批量)统一维护。
 
@@ -62,7 +62,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ### 2.9 插件作者CI
 
-默认矩阵包含`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`，只读同一构建包；默认阻断发现、未知、覆盖不足及vacuous。显式策略不放行工具错误，new须已审查且身份相容的JSON。各格式保留完整证据，超限失败；策略码与内核码分开，0仅表示满足策略。参数、预算及工作流统一见[作者流程](author-ci.md)。
+默认矩阵包含`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`、`0.2.2-rc.5`，只读同一构建包；默认阻断发现、未知、覆盖不足及vacuous。显式策略不放行工具错误，new须已审查且身份相容的JSON。各格式保留完整证据，超限失败；策略码与内核码分开，0仅表示满足策略。参数、预算及工作流统一见[作者流程](author-ci.md)。
 
 ## 3. 开发与文档维护约定
 
@@ -80,14 +80,14 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 仅列未完成事项，优先级不是漏洞评级。沿用的#7–#10修复与回归见[维护指南](maintaining.md#用户issue修订与回归)；源码修复不替代Windows现场确认。CI和平台验收以对应提交及同一归档为准。
 
-1. **P0：0.2.6首先完成DSH 0.2.2-rc.5来源与精确API审查。** 固定[rc.4](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-rc.4)和[rc.5](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.2-rc.5)的tag、完整源码差分、官方npm包与桌面渠道归档，核对摘要、ASAR条目和双端签名。11月20日本机rc.5候选对rc.3无服务/方法名增删（宿主109/640、客户端8/46），仍须审查类型、事件、默认行为并完成实机验收后登记。rc.4先作独立差分基线，若纳入支持范围须单独验收。同步普通检查、双向预检与文档，保留旧目录及未知版本提示。
-2. **P0：适配rc.4拒答语义与rc.5搜索路由。** 审查`refusal`在LLM终止块及`turn/end`改报`CONTENT_REFUSED`，复验普通异常和取消边界。检查rc.5自动搜索随模型路由选择，其他模型及无模型请求用Search API，显式配置优先，Fetch仍默认HTTP。以合成响应验证`WebSearchRequest.llmProvider`传递、准入/取消、提供方不可用和网关端点行为。仅对可证明的插件调用或配置给迁移提示，保留覆盖限制，不推断凭据、扣费、实测可用性或新增致命结论。参见[拒答指南](https://github.com/deepseek-ai/deepseek-harness/blob/3f321d32bfe382212a8ed8785c1d47a5a300aa23/docs/upgrade-guide/v0.2.2-rc.3/deepseek-refusal-code/guide.zh.md)与[搜索指南](https://github.com/deepseek-ai/deepseek-harness/blob/9c2670d3bce5275e0d1610272958121af87787bb/docs/upgrade-guide/v0.2.2-rc.4/web-search-deepseek-model-default/guide.zh.md)。
-3. **P0：复验rc.5桌面宿主、三槽位与管理协议。** 使用独立profile核Electron与npm两种启动入口、加载/卸载、安装更新回滚、工具严格JSON、skill、HTTP鉴权和草稿/历史。复验设置页、详情、角标的三语及回退。对rc.4传入的LiveShare Electron worker修复，用自有进程核启动与退出边界，区分宿主分享能力与本插件契约。分别记录真实桌面、npm宿主和受控夹具的结果。
-4. **P0：联动作者CI预算与宿主矩阵。** 新增一个精确目录后作者默认矩阵即为八版，当前七版上限会拒绝默认调用。用密集包测量后确定并验证上限，覆盖默认及显式矩阵、JSON/SARIF/JUnit/HTML、旧报告回放与超限失败。统一精确版本元数据与验收能力的来源，保留目录、语义和实机各自的门槛。复核新包Node≥24.9.0与pnpm11.28.5，保留Node22静态覆盖及旧宿主检查。
+1. **P0：0.2.6首先完成DSH 0.2.2-rc.5来源与精确API审查。** 已固定[来源、签名和摘要](../rules/dsh-0.2.2-rc.5-review.json)，rc.4只用作差分基线。rc.5方法名无增删，新增搜索请求路由字段，保留旧目录及回退提示。
+2. **P0：适配rc.4拒答语义与rc.5搜索路由。** 已接入[精确迁移提示](../rules/dsh-0.2.2-rc.5-semantics-review.json)，用合成响应回归拒答、异常/取消、搜索选路和网关端点。提示限于已证明入口。
+3. **P0：复验rc.5桌面宿主、三槽位与管理协议。** 以独立profile核桌面Electron与npm的加载、管理、九项UI、严格工具、skill、鉴权和历史。LiveShare仅核自有worker启动及退出。
+4. **P0：联动作者CI预算与宿主矩阵。** 八版矩阵保留原cell/总输出及时间预算。Node22静态检查，Node≥24.9.0与pnpm11.28.5验收新宿主，独立能力表保留旧目标。
 5. **P0：完成0.2.6同一制品回归与交付。** 锁定rc.5目录与专用业务清单，先封存预测，再核HTTP/DOM/磁盘证据、误报漏报和资源清理。用同一CI归档跑macOS/Linux及rc.3回归，核九项UI、鉴权和原始校验器。记录提交、归档SHA-256、检查及平台结果，沿用[同一制品发布核对](maintaining.md#同一制品发布核对)。
 6. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题/窄容器及误读、失败、误报与操作耗时；联系、收集、公开分别授权，不默认遥测。
 7. **P1：补充真实业务漏报样本。** 以历史固定24项中12项未识别故障为起点，按可静态定位、可运行时观测、只能业务实测分组。保留原期望，先用独立样本量化改进及误报，再决定是否加规则或标为覆盖限制。
-8. **P1：修复公开元数据核验的部分成功退出。** GitHub取数失败而npm成功时`meta-check`当前退出0。补齐请求范围、npm README获取状态与退出码的联动，测试双源部分失败及显式单源模式，保留已验证来源的结果。
-9. **P2：分拆宿主适配与验收编排。** 先将入口中的loader观测和工具契约按职责拆分，再把真实宿主脚本的启动、阶段记录和清理分开。以报告、退出码、取消/卸载、旧宿主和打包回归对照每一步。
+8. **P1：修复公开元数据核验的部分成功退出。** 已修复并回归双源部分失败、空npm README及显式单源；保留成功来源的数据。
+9. **P2：分拆宿主适配与验收编排。** 已拆分loader观测、工具契约、宿主资源和验收回执，待同一制品复核。
 10. **P2：等待上游修复与发行入口更新。** 2026-11-15[监测](upstream-verification.md)：dshmarket1.73.19仍有恢复细节/新装告警缺口；#928 open、#1047 closed，均无新回复；1024缺npm映射，awesome已合并。11月6日rc.1 Desktop恢复/自救未通过属历史，不代表rc.2/rc.3。待修复或映射变化后重验，反馈另取授权。
 11. **P2：Windows真实验收（依环境条件暂缓）。** 优先补#7–#10的Windows10 / DSH rc.5同一制品现场验证，记录版本、路径、启动方式及修复前后结果；同时验证安装、回收、权限、打包/诊断和自有资源清理。路径模拟及其它平台不替代实机结果，环境具备前保持未验收。

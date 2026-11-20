@@ -1,11 +1,11 @@
 ---
 name: dsh-plugin-compat-check
-description: 0.2.5：检查已安装DSH插件、升级前静态对比，排查更新后失效、界面消失、工具无响应、did not activate及版本声明问题。Use for installed DeepSeek Harness plugin compatibility, static upgrade comparisons and activation failures. Includes exact DSH 0.2.2-rc.2/rc.3 catalogues and bounded Agent/tool/Session migration guidance; no findings does not certify business functionality.
+description: 0.2.6：检查已安装DSH插件、升级前静态对比，排查更新后失效、界面消失、工具无响应、did not activate及版本声明问题。Use for installed DeepSeek Harness plugin compatibility, static upgrade comparisons and activation failures. Includes an exact DSH 0.2.2-rc.5 catalogue and bounded Agent/tool/Session migration guidance; no findings does not certify business functionality.
 ---
 
 # dsh-plugin-compat-check
 
-当前版本**0.2.5**对**已安装DSH插件**给出兼容证据与限制。API发现引用真实`file:line`，loader/声明事实不补造行号。各入口共用内核，静态与进程内观测可有不同结论/基线；先核目标、版本、规则和采样身份。
+当前版本**0.2.6**对**已安装DSH插件**给出兼容证据与限制。API发现引用真实`file:line`，loader/声明事实不补造行号。各入口共用内核，静态与进程内观测可有不同结论/基线；先核目标、版本、规则和采样身份。
 
 ## 选择入口
 
@@ -38,13 +38,13 @@ node <repo>/bin/compat-check.mjs --nm <profile或node_modules> --no-baseline --j
 
 ## 升级前静态对比
 
-工具使用`compat_check({"upgradeTo":"0.2.2-rc.3"})`，当前版本取宿主，可按实际目标指定profile；无工具时运行：
+工具使用`compat_check({"upgradeTo":"0.2.2-rc.5"})`，当前版本取宿主，可按实际目标指定profile；无工具时运行：
 
 ```sh
-node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.2 --upgrade-to 0.2.2-rc.3 --json
+node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.3 --upgrade-to 0.2.2-rc.5 --json
 ```
 
-当前已认证目录仅为 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`。未知/范围返回unsupported-version及退出3，不能以邻近目录代替。预检不接受quiet、探针/启动、规则/目录覆盖、基线或issue-report参数，可带无操作的no-baseline。
+当前已认证目录仅为 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`、`0.2.2-rc.5`。未知/范围返回unsupported-version及退出3，不能以邻近目录代替。预检不接受quiet、探针/启动、规则/目录覆盖、基线或issue-report参数，可带无操作的no-baseline。
 
 读取schema1、kind=`plugin-compat-check/upgrade-preview`的currentReport、targetReport、changes、summary与limitations。只比较同组私有字节，不执行/升级宿主，不借旁置probe、豁免、普通基线或缓存，不写状态。预检退出码0/1/2为无/非致命/致命新增或变重风险，3为无法预检；0仍可有旧问题。保留coverage/vacuous及客户端未验证限制，预测不代替目标版本业务验收。
 
@@ -58,7 +58,7 @@ node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.2 --upgra
 参考目录：0.2.1-rc.2 · SHA-256：90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743
 目录认证范围：0.2.1-rc.2；仅核验内置目录字节及对应精确版本的集成；不代表业务验收或运行时观测。
 
-工具版本: 0.2.5    证据覆盖有限: 4 个插件
+工具版本: 0.2.6    证据覆盖有限: 4 个插件
 结论: 可用 2    部分可用 1    不兼容 1    （其中 2 个「可用」没有已验证调用，不等于业务通过）
 ```
 

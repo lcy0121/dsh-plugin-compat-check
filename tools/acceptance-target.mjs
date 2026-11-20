@@ -1,22 +1,49 @@
 import semver from "semver";
+import { CATALOG_REFERENCES } from "../lib/contracts.mjs";
+
+// Capabilities are reviewed independently of catalogue registration.
+const hostModes = Object.freeze({
+  "0.2.0-rc.2": "skip",
+  "0.2.1-rc.2": "declarations",
+  "0.2.1-rc.3": "ui",
+  "0.2.1-rc.5": "candidate",
+  "0.2.2-rc.1": "node24",
+  "0.2.2-rc.2": "modern",
+  "0.2.2-rc.3": "modern",
+  "0.2.2-rc.5": "modern",
+});
+
+export function acceptanceCapabilities(version) {
+  const mode = Object.hasOwn(hostModes, version) ? hostModes[version] : null;
+  const modern = mode === "modern";
+  const node24 = modern || mode === "node24";
+  const candidate = node24 || mode === "candidate";
+  return {
+    dsh: version,
+    fullUI: candidate || mode === "ui",
+    candidate,
+    node24,
+    modern,
+    chatImport: version === "0.2.2-rc.3",
+    liveshareWorker: version === "0.2.2-rc.5",
+  };
+}
+
+export function linuxAcceptanceMatrix() {
+  const rows = CATALOG_REFERENCES.map(({ version }) => {
+    if (!Object.hasOwn(hostModes, version))
+      throw Error("Missing reviewed host acceptance target: " + version);
+    return acceptanceCapabilities(version);
+  });
+  return { include: rows };
+}
+
 /** Explicit targets fail closed; legacy auto mode retains its documented skip. */
-export const LIVE_VERSIONS = Object.freeze([
-  "0.2.1-rc.2",
-  "0.2.1-rc.3",
-  "0.2.1-rc.5",
-  "0.2.2-rc.1",
-  "0.2.2-rc.2",
-  "0.2.2-rc.3",
-]);
-/** Full acceptance is required for each independently reviewed exact tag. */
+export const LIVE_VERSIONS = Object.freeze(
+  Object.keys(hostModes).filter((version) => hostModes[version] !== "skip"),
+);
 export const extendedAcceptance = (version) =>
-  [
-    "0.2.1-rc.3",
-    "0.2.1-rc.5",
-    "0.2.2-rc.1",
-    "0.2.2-rc.2",
-    "0.2.2-rc.3",
-  ].includes(version);
+  acceptanceCapabilities(version).fullUI;
 export function uiAcceptanceVersion(requested = "0.2.1-rc.3") {
   if (!extendedAcceptance(requested))
     throw Error("Full UI acceptance requires a reviewed exact target");

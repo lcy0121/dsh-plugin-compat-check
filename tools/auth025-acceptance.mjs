@@ -12,9 +12,11 @@ import { ownedHostHeaders } from "./owned-host-session.mjs";
 import { disableCredentialOnboarding } from "./browser-session.mjs";
 import { cleanupAcceptance } from "./acceptance-cleanup.mjs";
 import { hostRuntimeDriver } from "./host-runtime-driver.mjs";
-import { assertHostRuntime } from "./acceptance-target.mjs";
+import {
+  assertHostRuntime,
+  acceptanceCapabilities,
+} from "./acceptance-target.mjs";
 import { TOOL_VERSION } from "../lib/version.mjs";
-const versions = ["0.2.2-rc.2", "0.2.2-rc.3"];
 const redact = (s) =>
   String(s)
     .replace(/([?&]token=)[^\s&]+/g, "$1[redacted]")
@@ -23,7 +25,7 @@ const redact = (s) =>
       "[redacted-cookie]",
     );
 export function validateAuthAcceptance(r, expectedVersion, expectedSha) {
-  assert(versions.includes(expectedVersion));
+  assert(acceptanceCapabilities(expectedVersion).modern);
   assert.equal(r.hostVersion, expectedVersion);
   assert.equal(r.artifactSha256, expectedSha);
   assert.match(expectedSha, /^[a-f0-9]{64}$/);
@@ -98,7 +100,10 @@ export async function runAuthAcceptance(
     /^[a-f0-9]{64}$/,
     "explicit candidate SHA required",
   );
-  assert(versions.includes(hostVersion), "exact auth host required");
+  assert(
+    acceptanceCapabilities(hostVersion).modern,
+    "exact auth host required",
+  );
   output = path.resolve(output);
   fs.mkdirSync(output, { recursive: true });
   assert.equal(fs.readdirSync(output).length, 0);

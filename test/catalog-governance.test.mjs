@@ -21,7 +21,9 @@ test("ordinary reports distinguish an exact reviewed catalogue from unknown and 
     ["0.2.1-rc.2", "0.2.1-rc.2", "exact", true],
     ["0.2.1-rc.3", "0.2.1-rc.3", "exact", true],
     ["0.2.1-rc.5", "0.2.1-rc.5", "exact", true],
-    ["9.9.9", "0.2.2-rc.3", "fallback", false],
+    ["0.2.2-rc.5", "0.2.2-rc.5", "exact", true],
+    ["0.2.2-rc.4", "0.2.2-rc.3", "fallback", false],
+    ["9.9.9", "0.2.2-rc.5", "fallback", false],
     ["0.2.1-rc.1", "0.2.0-rc.2", "fallback", false],
     [undefined, "0.2.0-rc.2", "fallback", false],
   ]) {
@@ -98,11 +100,11 @@ test("fallback warning and reference digest remain visible in text, quiet and sa
     renderIssueReport(body),
   ]) {
     assert.match(text, /9\.9\.9/);
-    assert.match(text, /0\.2\.2-rc\.3/);
+    assert.match(text, /0\.2\.2-rc\.5/);
     assert.match(text, /未认证/);
     assert.match(
       text,
-      /ec38e44cf9074042b13e6091c711a9907336b0b4154a26935cd8aa9091825cca/,
+      /7fce7aa5c6c7ceb8b0d7db6a9b203eb0d8df42bb56219cbe43e0cbbb1869cd46/,
     );
   }
 });
@@ -143,11 +145,11 @@ test("panel displays the actual target, reference digest and fallback warning wi
   assert.match(h.text(), /未认证/);
   h.field("展开查看目录与覆盖限制").props.onClick();
   h.render();
-  assert.match(h.text(), /参考目录.*0\.2\.2-rc\.3/);
+  assert.match(h.text(), /参考目录.*0\.2\.2-rc\.5/);
   assert.match(h.text(), /未认证/);
   assert.match(
     h.text(),
-    /ec38e44cf9074042b13e6091c711a9907336b0b4154a26935cd8aa9091825cca/,
+    /7fce7aa5c6c7ceb8b0d7db6a9b203eb0d8df42bb56219cbe43e0cbbb1869cd46/,
   );
   assert(h.rows().length > 0);
   h.dispose();

@@ -5,7 +5,7 @@ import vm from "node:vm";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { transformSync } from "esbuild";
-import { loadHost } from "./support/host-harness.mjs";
+import { toolResult, toolSchemas } from "../plugin/lib/host-tool-contract.js";
 for (const [version, archive, digest, prefix] of [
   [
     "rc5",
@@ -34,6 +34,13 @@ for (const [version, archive, digest, prefix] of [
       "tmp/025-development-20261115/catalogue/rc3-source-proxy.tgz",
     "bf6d668e52a26edf98aa2ef7960e240c8d9afcefbad2b09887a2cb1e14001dd5",
     "deepseek-harness-dsh-v0.2.2-rc.3/",
+  ],
+  [
+    "rc22-5",
+    process.env.DSC_RC22_5_SOURCE_ARCHIVE ||
+      "tmp/026-planning-20261120/rc5.tgz",
+    "4e24e132a9fc267d5cdc5724525873db2575680e073fd2db4519b92553614215",
+    "deepseek-harness-dsh-v0.2.2-rc.5/",
   ],
 ]) {
   test(
@@ -74,21 +81,7 @@ for (const [version, archive, digest, prefix] of [
       );
       const { assertSupportedJsonSchema, validateJsonSchemaValue } =
         module.exports;
-      const { sandbox } = loadHost();
-      const host = fs.readFileSync("plugin/index.js", "utf8");
-      const start = host.indexOf("schema: {", host.indexOf("output: {")) + 8;
-      let end = start,
-        depth = 0;
-      for (; end < host.length; end++) {
-        if (host[end] === "{") depth++;
-        if (host[end] === "}") {
-          depth--;
-          if (depth === 0) break;
-        }
-      }
-      const outputSchema = vm.runInNewContext(
-        "(" + host.slice(start, end + 1) + ")",
-      );
+      const outputSchema = toolSchemas().output.schema;
       assertSupportedJsonSchema(outputSchema);
       for (const compat of [
         { ok: true, exitCode: 0 },
@@ -100,14 +93,14 @@ for (const [version, archive, digest, prefix] of [
         },
         { ok: false, exitCode: 3, error: "original failure" },
       ]) {
-        const result = sandbox.toolResult(compat, "coverage evidence");
+        const result = toolResult(compat, "coverage evidence");
         assert.deepEqual(
           Array.from(validateJsonSchemaValue(outputSchema, result)),
           [],
         );
       }
       const upgrade = {
-        ...sandbox.toolResult({ ok: true, exitCode: 0 }, "static only"),
+        ...toolResult({ ok: true, exitCode: 0 }, "static only"),
         upgradePreview: { ok: true, coverage: { runtime: false } },
       };
       assert.deepEqual(

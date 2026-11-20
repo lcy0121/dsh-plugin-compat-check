@@ -19,24 +19,27 @@ import {
 } from "./issue023-acceptance.mjs";
 import {
   acceptanceTarget,
+  acceptanceCapabilities,
   readHostRuntime,
   extendedAcceptance,
   assertBrowserAcceptance,
 } from "./acceptance-target.mjs";
-import { isolatedEnvironment } from "../lib/execution-environment.mjs";
 import { CATALOG_REFERENCES } from "../lib/contracts.mjs";
-import { failureDiagnostic, cleanupOwned } from "../lib/owned-process.mjs";
+import {
+  createOwnedLiveHost,
+  poll,
+  redactLiveUrl as redact,
+} from "./owned-live-host.mjs";
+import {
+  recordLiveFailure,
+  finishLiveReceipt,
+  writeJSON,
+} from "./live-acceptance-receipt.mjs";
 import path from "node:path";
-import os from "node:os";
 import crypto from "node:crypto";
-import { spawn } from "node:child_process";
-import { hostRuntimeDriver } from "./host-runtime-driver.mjs";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { command, stopOwnedChild } from "../lib/probe-runner.mjs";
-import { launchChromePipe } from "../lib/debugger.mjs";
 import {
   configureChineseBrowser,
-  disableCredentialOnboarding,
   loadedNavigation,
   submitUpgradeTarget,
   upgradeRequestReceipts,
@@ -50,139 +53,23 @@ import { assertUpgradePreview } from "../lib/upgrade-contract.mjs";
 import { prepareOwnedPackageSource } from "./owned-package-source.mjs";
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsc-rc2-live-"));
-const env = isolatedEnvironment(root);
-const children = new Set();
-let chrome,
-  chromeStarting,
-  result,
-  commandCleanupFailure,
-  upgradeFailureSnapshot;
-const cancellation = new AbortController(),
-  commands = new Set();
-const redact = (text) =>
-  String(text).replace(/([?&]token=)[^\s&]+/g, "$1[redacted]");
+const {
+  root,
+  env,
+  exec,
+  profilePath,
+  init,
+  boot,
+  stop,
+  bootDriver,
+  openChrome,
+  closeChrome,
+  cleanup,
+} = createOwnedLiveHost();
+let result, upgradeFailureSnapshot;
 const requireTrue = (condition, message) => {
   if (!condition) throw Error(message);
 };
-const exec = async (c, a, timeoutMs = 120000, commandEnv = env) => {
-  const pending = command(c, a, {
-    env: commandEnv,
-    timeoutMs,
-    signal: cancellation.signal,
-  });
-  commands.add(pending);
-  let r;
-  try {
-    r = await pending;
-  } finally {
-    commands.delete(pending);
-  }
-  if (r.cleanup?.stopped === false)
-    commandCleanupFailure = Object.assign(new Error(r.error), {
-      diagnostics: r.diagnostics || [],
-    });
-  if (r.code !== 0)
-    throw Object.assign(
-      new Error(c + " failed: " + redact(r.error || r.output).slice(-900)),
-      { diagnostics: r.diagnostics || [] },
-    );
-  return r.output;
-};
-const writeJSON = (p, value) =>
-  fs.writeFileSync(p, JSON.stringify(value, null, 2) + "\n");
-const profilePath = (name) => path.join(env.DSH_HOME, "profiles", name);
-const init = async (name) => {
-  await exec("dsh", [
-    "--profile",
-    name,
-    "--from-default-profile",
-    "web",
-    "--dump-config",
-  ]);
-  disableCredentialOnboarding(profilePath(name));
-  return profilePath(name);
-};
-async function boot(name, overrides = {}) {
-  const child = spawn(
-    "dsh",
-    ["--profile", name, "--", "--port", "0", "--no-open"],
-    {
-      env: { ...env, ...overrides },
-      detached: process.platform !== "win32",
-      stdio: ["ignore", "pipe", "pipe"],
-    },
-  );
-  children.add(child);
-  return new Promise((resolve, reject) => {
-    let output = "",
-      settled = false;
-    const finish = (url) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      resolve({
-        child,
-        url,
-        get output() {
-          return output;
-        },
-      });
-    };
-    const timer = setTimeout(() => {
-      if (settled) return;
-      settled = true;
-      reject(
-        Error("Private host startup timeout: " + redact(output).slice(-900)),
-      );
-    }, 45000);
-    const append = (b) => {
-      if (output.length < 1024 * 1024) output += b;
-      const m = /(https?:\/\/127\.0\.0\.1:\d+\/?\?token=[\w.-]+)/.exec(output);
-      if (m) finish(m[1]);
-    };
-    child.stdout.on("data", append);
-    child.stderr.on("data", append);
-    child.once("exit", () => finish(null));
-    child.once("error", () => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      reject(Error("Host spawn failed"));
-    });
-  });
-}
-const stop = async (host) => {
-  await stopOwnedChild(host.child);
-  children.delete(host.child);
-};
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-async function poll(fn, message, timeout = 20000) {
-  const until = Date.now() + timeout;
-  do {
-    const value = await fn();
-    if (value) return value;
-    await wait(100);
-  } while (Date.now() < until);
-  throw Error(message);
-}
-function bootDriver({ runtimeOnly = false } = {}) {
-  return hostRuntimeDriver({ env, runtimeOnly });
-}
-
-async function cleanup() {
-  cancellation.abort();
-  await Promise.allSettled([...commands]);
-  const browser = chrome || (await chromeStarting?.catch(() => null));
-  await cleanupOwned([
-    () => {
-      if (commandCleanupFailure) throw commandCleanupFailure;
-    },
-    () => browser?.close(),
-    ...[...children].map((child) => () => stopOwnedChild(child)),
-  ]);
-  fs.rmSync(root, { recursive: true, force: true });
-}
 for (const signal of ["SIGTERM", "SIGINT"])
   process.once(signal, async () => {
     await cleanup();
@@ -519,9 +406,7 @@ try {
       "export function apply(){}\n",
     );
     if (extendedAcceptance(version)) installRc3Fixture(profile);
-    if (
-      ["0.2.1-rc.5", "0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"].includes(version)
-    )
+    if (acceptanceCapabilities(version).candidate)
       installIssue023Fixture(profile, { hostVersion: version });
     const futureProbeFile = path.join(root, "future-probe.json");
     const host = await boot("rc2-ui", { DSC_PROBE_REPORT: futureProbeFile });
@@ -752,11 +637,7 @@ try {
         "/usr/bin/chromium",
       ].find((p) => fs.existsSync(p));
     if (chromePath) {
-      chromeStarting = launchChromePipe(chromePath, {
-        timeoutMs: 15000,
-        userDataDir: path.join(root, "chrome"),
-      });
-      chrome = await chromeStarting;
+      const chrome = await openChrome(chromePath);
       await configureChineseBrowser(chrome);
       await chrome.send("Emulation.setDeviceMetricsOverride", {
         width: 1280,
@@ -1800,11 +1681,7 @@ try {
           readReport: ordinary,
           screenshotDir: process.env.DSC_UI018_SCREENSHOTS,
         });
-      if (
-        ["0.2.1-rc.5", "0.2.2-rc.1", "0.2.2-rc.2", "0.2.2-rc.3"].includes(
-          version,
-        )
-      ) {
+      if (acceptanceCapabilities(version).candidate) {
         result.issues023 = await verifyIssue023({
           url: host.url,
           headers,
@@ -1823,8 +1700,7 @@ try {
           Buffer.from(s.data, "base64"),
         );
       }
-      await chrome.close();
-      chrome = null;
+      await closeChrome();
     } else
       result.ui = {
         available: false,
@@ -1852,34 +1728,11 @@ try {
   const upgradeUI = await upgradeFailureSnapshot?.().catch(() => ({
     unavailable: true,
   }));
-  result = {
-    ...result,
-    ...(upgradeUI ? { upgradeUI } : {}),
-    ok: false,
-    error: redact(error.stack || error.message),
-    diagnostics: failureDiagnostic(error),
-  };
-  process.exitCode = 1;
+  result = recordLiveFailure(result, error, upgradeUI ? { upgradeUI } : {});
 } finally {
-  try {
-    await cleanup();
-  } catch (error) {
-    result = {
-      ...result,
-      ok: false,
-      error: [result?.error, error.message].filter(Boolean).join("; "),
-      diagnostics: [
-        ...(result?.diagnostics || []),
-        ...failureDiagnostic(error),
-      ],
-    };
-    process.exitCode = 1;
-  }
+  result = await finishLiveReceipt(result, { root, cleanup });
 }
-result.cleanup = {
-  privateRootRemoved: !fs.existsSync(root),
-  ...(fs.existsSync(root) ? { workDir: root } : {}),
-};
+if (!result.ok) process.exitCode = 1;
 if (process.env.DSC_RC2_LIVE_LOG)
   writeJSON(process.env.DSC_RC2_LIVE_LOG, result);
 console.log(JSON.stringify(result, null, 2));

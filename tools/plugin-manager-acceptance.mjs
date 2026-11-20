@@ -12,12 +12,12 @@ import { command } from "../lib/probe-runner.mjs";
 import { cleanupAcceptance } from "./acceptance-cleanup.mjs";
 import { ownedHostHeaders } from "./owned-host-session.mjs";
 import { disableCredentialOnboarding } from "./browser-session.mjs";
-const versions = ["0.2.2-rc.2", "0.2.2-rc.3"];
+import { acceptanceCapabilities } from "./acceptance-target.mjs";
 const redact = (s) => String(s).replace(/([?&]token=)[^\s&]+/g, "$1[redacted]");
 
 /** Green means all fixed controls and owned cleanup, never arbitrary bundle compatibility. */
 export function validateManagerAcceptance(r, version) {
-  assert(versions.includes(version), "exact manager host required");
+  assert(acceptanceCapabilities(version).modern, "exact manager host required");
   assert.equal(r.hostVersion, version);
   assert.equal(r.ok, true);
   assert.equal(r.hostStopped, true);
@@ -109,7 +109,7 @@ export function validateManagerAcceptance(r, version) {
 
 export async function runManagerAcceptance(output, hostVersion) {
   assert(
-    versions.includes(hostVersion),
+    acceptanceCapabilities(hostVersion).modern,
     "reviewed exact manager host required",
   );
   output = path.resolve(output);

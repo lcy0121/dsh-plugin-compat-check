@@ -1,3 +1,4 @@
+import { TOOL_VERSION } from "../lib/version.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { validateAuthAcceptance } from "../tools/auth025-acceptance.mjs";
@@ -20,7 +21,7 @@ function receipt(version = "0.2.2-rc.2") {
       status: 200,
       ok: true,
       dshVersion: version,
-      toolVersion: "0.2.5",
+      toolVersion: TOOL_VERSION,
       computedAt: "2026-11-15T00:00:00Z",
     },
     unavailable: {
@@ -50,7 +51,7 @@ function receipt(version = "0.2.2-rc.2") {
     restartsStopped: true,
   };
 }
-for (const v of ["0.2.2-rc.2", "0.2.2-rc.3"])
+for (const v of ["0.2.2-rc.2", "0.2.2-rc.3", "0.2.2-rc.5"])
   test(
     "auth receipt requires exact host/candidate and persistent-cookie authority policy " +
       v,

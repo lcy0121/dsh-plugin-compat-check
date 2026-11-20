@@ -211,7 +211,7 @@ export function runRules(rules, ...args) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 取数层：联网，记录不可用来源；全部不可用时退出3
+// 取数层：联网，记录不可用来源；任何请求来源不可用时退出3
 // ─────────────────────────────────────────────────────────────────────────────
 
 function tryRun(cmd, args, timeout = 30000) {
@@ -241,21 +241,30 @@ function fetchGithub(slug) {
   const raw = tryRun('gh', ['repo', 'view', slug, '--json',
     'description,repositoryTopics,homepageUrl,licenseInfo']);
   if (raw.error) return raw;
-  const d = JSON.parse(raw);
-  return {
-    description: d.description ?? '',
-    topics: (d.repositoryTopics ?? []).map((t) => t.name),
-    homepage: d.homepageUrl ?? '',
-    license: d.licenseInfo?.spdxId ?? d.licenseInfo?.name ?? '',
-  };
+  try {
+    const d = JSON.parse(raw);
+    if (!d || typeof d.description !== 'string' || !Array.isArray(d.repositoryTopics))
+      throw Error('缺少简介或标签');
+    return {
+      description: d.description,
+      topics: d.repositoryTopics.map((t) => t.name),
+      homepage: d.homepageUrl ?? '',
+      license: d.licenseInfo?.spdxId ?? d.licenseInfo?.name ?? '',
+    };
+  } catch {
+    return { error: '返回的仓库元数据无效' };
+  }
 }
 
 function fetchNpm(name) {
   const raw = tryRun('npm', ['view', name, '--json']);
   if (raw.error) return raw;
-  const d = JSON.parse(raw);
+  let d;
+  try { d = JSON.parse(raw); } catch { return { error: '返回的包元数据无效' }; }
   // `npm view x --json` 对单版本返回对象、多版本返回数组 —— 取 latest
   const v = Array.isArray(d) ? d[d.length - 1] : d;
+  if (!v || typeof v.version !== 'string' || !semver.valid(v.version))
+    return { error: '缺少有效的包版本' };
   return {
     version: v.version,
     description: v.description ?? '',
@@ -266,11 +275,11 @@ function fetchNpm(name) {
   };
 }
 
-/** npm 页面的正文 —— `npm view` 不给，要从 registry 的文档接口取。 */
+/** npm 页面正文是独立的查询，空输出也无法用于比对。 */
 function fetchNpmReadme(name) {
   const raw = tryRun('npm', ['view', name, 'readme']);
-  if (raw.error) return null;
-  return raw;
+  if (raw.error) return raw;
+  return raw.trim() ? { text: raw } : { error: '没有返回正文' };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -321,9 +330,10 @@ function main() {
     if (npm.error) skipped.push(`npm：${npm.error}`);
     else {
       observed.npm = npm;
-      const npmReadme = fetchNpmReadme(pkg.name);
-      observed.npmReadmeFetched = npmReadme !== null;
-      results.push(...runRules(NPM_RULES, npm, local, { npmReadme })
+      const readme = fetchNpmReadme(pkg.name);
+      observed.npmReadmeFetched = !readme.error;
+      if (readme.error) skipped.push(`npm README：${readme.error}`);
+      results.push(...runRules(NPM_RULES, npm, local, { npmReadme: readme.text ?? null })
         .map((r) => ({ ...r, side: 'npm' })));
     }
   }
@@ -348,7 +358,7 @@ function main() {
         process.stdout.write(`  ⏳ [${r.side}] ${r.message}\n`);
       }
     }
-    if (notices.length && !errors.length) {
+    if (notices.length && !errors.length && !skipped.length) {
       process.stdout.write('\n  ✅ 没有错误 —— 上面的是**预期内的漂移**（本地有还没发布的改动）。\n');
     }
     process.stdout.write('\n');
@@ -356,9 +366,7 @@ function main() {
     process.stdout.write('     所以本工具联网核验；本地链接与事实由 doc-check 独立核验。\n');
   }
 
-  // 全部数据源都不可用 → 3（不是"全过"）
-  const sources = (opts.github ? 1 : 0) + (opts.npm ? 1 : 0);
-  if (skipped.length >= sources) process.exit(3);
+  if (skipped.length) process.exit(3);
   // ⚠️ 只有 error 才让退出码变 1 —— notice 天天都有，让它红就等于把守卫变成噪音
   process.exit(results.some((r) => r.severity === ERROR) ? 1 : 0);
 }

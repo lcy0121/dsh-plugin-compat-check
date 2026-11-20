@@ -1,7 +1,7 @@
 {
-  "toolVersion": "0.2.5",
+  "toolVersion": "0.2.6",
   "recordedAt": "2026-11-14T20:00:50.768843+00:00",
-  "testFiles": 100,
+  "testFiles": 101,
   "tests": 1359,
   "repositoryFiles": {
     "total": 431,
@@ -23,13 +23,14 @@
         "0.2.1-rc.5",
         "0.2.2-rc.1",
         "0.2.2-rc.2",
-        "0.2.2-rc.3"
+        "0.2.2-rc.3",
+        "0.2.2-rc.5"
       ],
       "scope": "Exact catalogue bytes only; dated host/artifact acceptance below. No future-host or general-business certification."
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
-      "scope": "Published0.2.5 capabilities; release identity and exact archive acceptance below. Later documentation records do not retarget the tag."
+      "scope": "0.2.6 development candidate. Publication025 records the verified public release and its tagged archive."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -179,5 +180,5 @@
       "scope": "Historical exact0.2.4 public release, macOS/Linux same artifact and CI receipts retained in Git; no certification of0.2.5."
     }
   },
-  "scope": "Published0.2.5 public distribution and exact tagged-source/archive acceptance. Default-suite counts are not user-profile or general-business certification; post-publication documentation keeps the release tag fixed."
+  "scope": "0.2.6 source and development evidence. The dated publication receipt covers only the tagged 0.2.5 archive."
 }

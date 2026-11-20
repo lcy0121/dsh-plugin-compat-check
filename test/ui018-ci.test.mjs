@@ -1,3 +1,4 @@
+import { linuxAcceptanceMatrix } from "../tools/acceptance-target.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -123,7 +124,7 @@ test("rc.3 Linux workflow runs all UI acceptance through a single-artifact evide
     step.run?.includes("tools/ci-ui018.mjs"),
   );
   assert(step);
-  assert.match(step.if, /0\.2\.1-rc\.3/);
+  assert.equal(step.if, "matrix.fullUI");
   assert.match(step.run, /linux-ui018/);
   assert(
     job.steps.indexOf(step) <
@@ -229,7 +230,7 @@ test("rc.5 UI gate binds the requested host and requires separate protocol and m
   );
   rc22.uiI18n.hostLocaleFallbacks = ["ja", "es", "fr", "de", "ru", "pt"];
   assert.equal(validateUi018Evidence(rc22, "a".repeat(64), "0.2.2-rc.1"), true);
-  for (const version of ["0.2.2-rc.2", "0.2.2-rc.3"]) {
+  for (const version of ["0.2.2-rc.2", "0.2.2-rc.3", "0.2.2-rc.5"]) {
     const newer = structuredClone(rc22);
     newer.dshVersion = newer.apiSemantics.exactVersion = version;
     assert.throws(
@@ -364,15 +365,23 @@ test("rc.5 Linux plan preserves old targets and consumes one candidate built by 
     ),
   );
   const job = w.jobs["linux-live"];
-  assert.deepEqual(job.strategy.matrix.dsh, [
-    "0.2.0-rc.2",
-    "0.2.1-rc.2",
-    "0.2.1-rc.3",
-    "0.2.1-rc.5",
-    "0.2.2-rc.1",
-    "0.2.2-rc.2",
-    "0.2.2-rc.3",
-  ]);
+  assert.equal(
+    job.strategy.matrix,
+    "${{ fromJSON(needs.candidate.outputs.linux) }}",
+  );
+  assert.deepEqual(
+    linuxAcceptanceMatrix().include.map(({ dsh }) => dsh),
+    [
+      "0.2.0-rc.2",
+      "0.2.1-rc.2",
+      "0.2.1-rc.3",
+      "0.2.1-rc.5",
+      "0.2.2-rc.1",
+      "0.2.2-rc.2",
+      "0.2.2-rc.3",
+      "0.2.2-rc.5",
+    ],
+  );
   assert(job.needs.includes("candidate"));
   const download = job.steps.find((s) =>
     s.uses?.startsWith("actions/download-artifact@"),
@@ -380,7 +389,7 @@ test("rc.5 Linux plan preserves old targets and consumes one candidate built by 
   assert.equal(download.with.name, "candidate-package");
   assert.equal(download.with["digest-mismatch"], "error");
   const ui = job.steps.find((s) => s.run?.includes("tools/ci-ui018.mjs"));
-  assert.match(ui.if, /rc\.5/);
+  assert.equal(ui.if, "matrix.fullUI");
   assert.equal(ui.env.DSC_ACCEPTANCE_DSH_VERSION, "${{ matrix.dsh }}");
   assert(job.steps.indexOf(download) < job.steps.indexOf(ui));
   const build = w.jobs.candidate.steps.find((s) =>
@@ -389,7 +398,7 @@ test("rc.5 Linux plan preserves old targets and consumes one candidate built by 
   assert(build);
   assert(
     job.steps.some(
-      (s) => s.name?.startsWith("Install CJK") && s.if.includes("rc.5"),
+      (s) => s.name?.startsWith("Install CJK") && s.if === "matrix.fullUI",
     ),
   );
 });

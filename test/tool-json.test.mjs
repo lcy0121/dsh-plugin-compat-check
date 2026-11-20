@@ -1,17 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
-const source = fs.readFileSync("plugin/index.js", "utf8");
-const body = source.slice(
-  source.indexOf("function strictToolJson("),
-  source.indexOf("\nfunction registerTool("),
-);
-function result(value) {
-  return vm.runInNewContext(`${body};toolResult(input,'evidence')`, {
-    input: value,
-  });
-}
+import { toolResult } from "../plugin/lib/host-tool-contract.js";
+const result = (value) => toolResult(value, "evidence");
 test("required nullable tool fields are explicit null", () => {
   const r = result({ ok: true, exitCode: 0 });
   for (const k of ["error", "toolVersion", "report", "baseline"])
