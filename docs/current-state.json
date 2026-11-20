@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.2.6",
-  "recordedAt": "2026-11-14T20:00:50.768843+00:00",
+  "recordedAt": "2026-11-20T12:40:48.565Z",
   "testFiles": 101,
-  "tests": 1359,
+  "tests": 1366,
   "repositoryFiles": {
-    "total": 431,
+    "total": 442,
     "fixtures": 100,
-    "other": 331
+    "other": 342
   },
   "verification": {
     "platform": "darwin",
@@ -178,7 +178,92 @@
       "artifactSha256": "85b8b25f171a3dfe5bab834ff42ce3f94887d60f700c7c5978034326bd7e1d81",
       "details": "cdbed0e:docs/current-state.json",
       "scope": "Historical exact0.2.4 public release, macOS/Linux same artifact and CI receipts retained in Git; no certification of0.2.5."
+    },
+    "development026": {
+      "sourceCommit": "030b97be7955dc972608e6e7e5e072c4fbd14975",
+      "sourceSha256": "bd45fe062f38b07bec2b2545e297d2ec0700ae8ea0435558dc12df1143d8d70b",
+      "artifact": {
+        "filename": "dsh-plugin-compat-check-0.2.6.tgz",
+        "sha256": "57e37b57f049cdcb250fba6eeb4e1f5b549e12dc669d188079f21bbfb9a864b6"
+      },
+      "hosts": [
+        {
+          "platform": "macOS",
+          "arch": "arm64",
+          "carrier": "Desktop ASAR",
+          "dsh": "0.2.2-rc.5",
+          "node": "24.21.0",
+          "uiGates": 9
+        },
+        {
+          "platform": "macOS",
+          "arch": "arm64",
+          "carrier": "npm",
+          "dsh": "0.2.2-rc.5",
+          "node": "26.13.1",
+          "uiGates": 9
+        },
+        {
+          "platform": "macOS",
+          "arch": "arm64",
+          "carrier": "npm",
+          "dsh": "0.2.2-rc.3",
+          "node": "26.13.1",
+          "uiGates": 9
+        },
+        {
+          "platform": "Debian 13",
+          "arch": "arm64",
+          "carrier": "npm",
+          "dsh": "0.2.2-rc.5",
+          "node": "24.9.0",
+          "uiGates": 9
+        }
+      ],
+      "separateHostChecks": {
+        "macOS": {
+          "rc5Auth": true,
+          "rc5ManagerCasesPerCarrier": 6,
+          "liveShareWorkerBothCarriers": true,
+          "rc3Auth": true
+        },
+        "debian13": {
+          "rc5Auth": true,
+          "rc5Manager": true,
+          "liveshareWorker": true
+        }
+      },
+      "officialSourceAssertions": {
+        "passed": 110,
+        "archives": 5
+      },
+      "authorMatrix": {
+        "cells": 8,
+        "maxCellBytes": 223150,
+        "maxFormattedBytes": 7668588,
+        "ninthVersionExit": 3,
+        "legacyReplayExit": 1
+      },
+      "business": {
+        "sourceCommit": "030b97be7955dc972608e6e7e5e072c4fbd14975",
+        "manifestSha256": "c5460b5b4a71f7e62684308885c4d70715c774d41a5d4a6cea085e46481564df",
+        "reportSha256": "facb6be49899af2e75f5b9738a08f1f06ccc64177a76f102fcfe1c7c240fc65f",
+        "pinnedArtifacts": 5,
+        "holdoutFamilies": 2,
+        "casesPerRun": 24,
+        "repeatedOutcomes": 48,
+        "staticFalsePositives": 0,
+        "staticFalseNegativesPerRun": {
+          "natural-service-dependency": 2,
+          "controlled-http-business": 5,
+          "controlled-client-dom": 5
+        },
+        "driverErrors": 0,
+        "validationErrors": 0
+      },
+      "githubActions": "pending exact branch push",
+      "scope": "Same archive for UI/auth. Fixed business uses the named source commit. Independent Linux repack had two different file modes; file contents matched."
     }
   },
-  "scope": "0.2.6 source and development evidence. The dated publication receipt covers only the tagged 0.2.5 archive."
+  "scope": "0.2.6 development evidence. Suite counts come from the recorded full TAP. Dated acceptance applies to the recorded commit and archive."
 }

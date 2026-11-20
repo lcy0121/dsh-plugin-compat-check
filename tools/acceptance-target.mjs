@@ -26,6 +26,7 @@ export function acceptanceCapabilities(version) {
     modern,
     chatImport: version === "0.2.2-rc.3",
     liveshareWorker: version === "0.2.2-rc.5",
+    fixedBusiness: version === "0.2.2-rc.5",
   };
 }
 

@@ -186,6 +186,11 @@ jobs:
       - name: Verify owned LiveShare worker startup and exit
         if: matrix.liveshareWorker
         run: node tools/liveshare-worker-acceptance.mjs > "$RUNNER_TEMP/liveshare-worker.json"
+      - name: Run pinned rc.5 business cases with sealed predictions
+        if: matrix.fixedBusiness
+        env:
+          DSC_ACCEPTANCE_DSH_VERSION: ${{ matrix.dsh }}
+        run: node tools/real-regression.mjs --live --out-dir "$RUNNER_TEMP/fixed-business"
       - name: Verify isolated synthetic session import ownership on rc3
         if: matrix.chatImport
         env:
@@ -241,6 +246,7 @@ jobs:
             linux-editors/
             ${{ runner.temp }}/linux-ui018/
             ${{ runner.temp }}/liveshare-worker.json
+            ${{ runner.temp }}/fixed-business/
             ${{ runner.temp }}/manager025/
             ${{ runner.temp }}/auth025/
             ${{ runner.temp }}/import025/

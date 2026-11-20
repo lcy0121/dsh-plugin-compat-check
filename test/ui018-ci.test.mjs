@@ -383,6 +383,14 @@ test("rc.5 Linux plan preserves old targets and consumes one candidate built by 
     ],
   );
   assert(job.needs.includes("candidate"));
+  const fixed = job.steps.find((s) => s.run?.includes("real-regression.mjs"));
+  assert.equal(fixed.if, "matrix.fixedBusiness");
+  assert.deepEqual(
+    linuxAcceptanceMatrix()
+      .include.filter(({ fixedBusiness }) => fixedBusiness)
+      .map(({ dsh }) => dsh),
+    ["0.2.2-rc.5"],
+  );
   const download = job.steps.find((s) =>
     s.uses?.startsWith("actions/download-artifact@"),
   );

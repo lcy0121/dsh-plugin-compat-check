@@ -37,10 +37,10 @@ function officialModules() {
     }
     return sources.get(file);
   }
-  function load(file, dependencies = {}, globals = {}, appendix = "") {
+  function load(file, dependencies = {}, globals = {}) {
     const module = { exports: {} };
     vm.runInNewContext(
-      transformSync(read(file) + appendix, {
+      transformSync(read(file), {
         loader: "ts",
         format: "cjs",
         tsconfigRaw: { compilerOptions: { experimentalDecorators: true } },
@@ -68,7 +68,7 @@ test(
   "rc.5 official Messages translator distinguishes refusal, malformed response and cancellation",
   { skip },
   async () => {
-    const { load } = officialModules();
+    const { read, load } = officialModules();
     class LlmError extends Error {
       constructor(message, code) {
         super(message);
@@ -109,6 +109,15 @@ test(
         code: "MALFORMED_RESPONSE",
       },
     );
+    const session = read(
+      "snapshots/session/deepseek-content-refusal/session.v4.jsonl",
+    )
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line));
+    const turn = session.find((event) => event.type === "turn/end");
+    assert.equal(turn.data.reason.kind, "error");
+    assert.equal(turn.data.reason.error.code, "CONTENT_REFUSED");
     const abort = new AbortController();
     abort.abort(new DOMException("fixture cancelled", "AbortError"));
     async function* cancelled() {

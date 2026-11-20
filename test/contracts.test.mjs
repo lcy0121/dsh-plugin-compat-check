@@ -402,6 +402,7 @@ test("staging detects stale host/browser artifacts and updates both from the can
       "plugin/lib/report-contract.js",
       "plugin/lib/finding-guidance.js",
       "plugin/scripts/stage-contract.mjs",
+      "plugin/scripts/shared-contracts.mjs",
       "plugin/scripts/build-client.mjs",
       "plugin/tailwind.config.mjs",
     ])
