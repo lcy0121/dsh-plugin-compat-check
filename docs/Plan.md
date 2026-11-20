@@ -70,7 +70,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ## 4. 验收范围
 
-0.2.6 的 `283f2eb` 通过 12 项 CI。该 CI 归档通过 macOS 与 GitHub Actions Linux 的 rc.5/rc.3 宿主验收，归档摘要及逐平台证据见[current-state](current-state.json)。新提交和重新打包须按[交付流程](maintaining.md#同一制品发布核对)复验。Windows、一般业务及历次公开分发各以对应回执为准。
+0.2.6 已发布至 [npm](https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.6) 和 [GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.6)，标签固定到 `f921287`。开发分支、main 和标签各 12 项 CI 全过。相同归档通过 macOS/Linux 宿主验收，公开下载及固定版本安装已核验。详情见[current-state](current-state.json)。新提交和归档按[交付流程](maintaining.md#同一制品发布核对)另验，Windows、用户现场和一般业务各以对应证据为准。
 
 ## 5. 验证入口
 

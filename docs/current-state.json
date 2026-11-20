@@ -274,6 +274,111 @@
       },
       "previousLocalAcceptance": "4736552:docs/current-state.json",
       "scope": "CI and macOS/Linux host acceptance bind to this commit and archive. Subsequent bundled documentation changes require fresh acceptance."
+    },
+    "publication026": {
+      "status": "published",
+      "version": "0.2.6",
+      "tag": "v0.2.6",
+      "sourceCommit": "f921287b182c4bae8d8a4708de2c6caa7a9a7df7",
+      "sourceSha256": "23dd8615f701b71cca45104e2afbec7a9f5ca43c622adf6af8d36cc6fb1f2200",
+      "verifiedAt": "2026-11-20T14:48:06.508Z",
+      "artifact": {
+        "filename": "dsh-plugin-compat-check-0.2.6.tgz",
+        "sha256": "b311026c3ae3d0d80d10e585b3daf60d8a688d0db699f10c62a94796e928fde2",
+        "bytes": 459392,
+        "shasum": "8ad4ad9a753fff49a0c8612a123b851aa7e1b348",
+        "integrity": "sha512-u32OxI0FQkdSa+XHTdyIYtBrPPO7LzZhroeIwCbEPWsAyiQ1j8vX3+W+9jqLx4SW1SzY22OXrXWsMf9nMwcD9w=="
+      },
+      "ci": {
+        "runs": [
+          {
+            "role": "dev",
+            "ref": "0.2.6-dev",
+            "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/44746690962",
+            "checksPassed": 12
+          },
+          {
+            "role": "main",
+            "ref": "main",
+            "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/44749042090",
+            "checksPassed": 12
+          },
+          {
+            "role": "tag",
+            "ref": "v0.2.6",
+            "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/44753069431",
+            "checksPassed": 12
+          }
+        ],
+        "checksPassed": 36,
+        "linuxVersions": 8
+      },
+      "hostAcceptance": [
+        {
+          "platform": "macOS",
+          "arch": "arm64",
+          "carrier": "Desktop ASAR",
+          "dsh": "0.2.2-rc.5",
+          "node": "24.21.0",
+          "uiGates": 9
+        },
+        {
+          "platform": "macOS",
+          "arch": "arm64",
+          "carrier": "npm",
+          "dsh": "0.2.2-rc.5",
+          "node": "26.13.1",
+          "uiGates": 9
+        },
+        {
+          "platform": "macOS",
+          "arch": "arm64",
+          "carrier": "npm",
+          "dsh": "0.2.2-rc.3",
+          "node": "26.13.1",
+          "uiGates": 9
+        },
+        {
+          "platform": "GitHub Actions Linux",
+          "arch": "x64",
+          "carrier": "npm",
+          "dsh": "0.2.2-rc.5",
+          "node": "24.9.0",
+          "uiGates": 9
+        },
+        {
+          "platform": "GitHub Actions Linux",
+          "arch": "x64",
+          "carrier": "npm",
+          "dsh": "0.2.2-rc.3",
+          "node": "24.9.0",
+          "uiGates": 9
+        }
+      ],
+      "public": {
+        "github": {
+          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.6",
+          "publishedAt": "2026-11-20T14:47:35Z",
+          "publicTarballSha256Verified": true
+        },
+        "npm": {
+          "url": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.6",
+          "version": "0.2.6",
+          "latest": "0.2.6",
+          "tarball": "https://registry.npmjs.org/dsh-plugin-compat-check/-/dsh-plugin-compat-check-0.2.6.tgz",
+          "publicTarballSha256Verified": true
+        },
+        "publicInstallation": {
+          "status": "checked",
+          "installedVersion": "0.2.6",
+          "dshVersion": "0.2.2-rc.5",
+          "usableRuntimeObservation": true,
+          "tempProfileRemoved": true,
+          "reportSha256": "86dafba066c3256393da8b7570bff2ae0fc2ed31027a0debd04a3f3dba0e12b5"
+        }
+      },
+      "receipt": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/download/v0.2.6/RELEASE-VERIFICATION.json",
+      "scope": "Exact release checks and host acceptance. See the public receipt for assertions and fixed business outcomes."
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
