@@ -1,15 +1,15 @@
 # 插件作者CI
 
-本页对应**0.2.6**候选的仓库 CLI。对**同一已构建插件目录**建立只读快照并比较API目录，不安装依赖、执行目标、启动DSH、联网或读取用户profile。目标须含第三方npm包名、精确版本、对象形式的`dsh`及实际交付代码，拒绝夹带`node_modules`、链接和特殊文件。
+**0.2.6** 的作者 CLI 对同一已构建目录取只读快照，再按版本比较 API。目标须含第三方 npm 包名、精确版本、对象形式的 `dsh` 和交付代码。拒绝 `node_modules`、链接及特殊文件。扫描离线运行，无须安装目标依赖、启动宿主或读取用户 profile。
 
 ```sh
 node tools/author-ci.mjs --package ./dist-plugin > compatibility.json
-node tools/author-ci.mjs --package ./dist-plugin --versions 0.2.0-rc.2,0.2.1-rc.2,0.2.1-rc.3,0.2.1-rc.5,0.2.2-rc.1,0.2.2-rc.2,0.2.2-rc.3,0.2.2-rc.5 --format sarif > compatibility.sarif
+node tools/author-ci.mjs --package ./dist-plugin --format sarif > compatibility.sarif
 node tools/author-ci.mjs --package ./dist-plugin --format junit > compatibility.xml
 node tools/author-ci.mjs --report compatibility.json --format html > compatibility.html
 ```
 
-默认矩阵包含已认证的 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`、`0.2.2-rc.5`。未知版本以工具错误阻断，不回退目录。各cell保留完整报告、内核码及判定/源码身份。目录未收录的方法保留位置和覆盖限制，不直接报缺失；默认阻断覆盖不足。静态矩阵不证明宿主启动或业务通过。
+默认矩阵包含已认证的 `0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`、`0.2.2-rc.5`。用 `--versions` 传逗号分隔的子集。未知版本退出 3。各 cell 保留内核报告、退出码及身份，目录缺项记录为覆盖限制。
 
 ## 门禁策略
 
@@ -36,7 +36,7 @@ stdout只写所选格式；JSON `kind=plugin-compat-check/author-ci`、schema1�
 
 SARIF 2.1.0保留逐版本规则、真实包内位置及身份；JUnit按版本与策略结果显示失败/错误。无位置不造行号，策略接受的旧风险仍在原报告。构建目录若不对应仓库路径，上传前须正确映射。
 
-HTML独立、无脚本/网络资源或动态链接，包名、位置和消息均转义为文本。`--report ... --format html`只校验并渲染原JSON，不重扫或改写gate；不能与package/版本/policy/previous参数混用。渲染仍返回保存的gate码，坏输入返回3及错误页。结构校验不是签名或重新评价new基线，HTML不能代替JSON门禁输入。
+HTML 独立离线，包名、位置和消息以文本转义。`--report ... --format html` 校验原 JSON 并返回保存的 gate 码，坏输入返回 3 和错误页。回放参数与 package/versions/policy/previous 互斥。后续 `new` 门禁仍用完整 JSON。
 
 ## 资源与身份
 
@@ -61,6 +61,6 @@ HTML独立、无脚本/网络资源或动态链接，包名、位置和消息均
 
 示例仅workflow_dispatch、contents:read，checkout不保存凭据，Actions固定完整commit；工具依赖按冻结lock安装且禁用lifecycle。没有pull_request_target、写token或自动基线。其它触发器需先审查构建代码、策略和基线来源；分享前检查报告中包名、位置及业务说明。
 
-无Actions时运行同样的扫描/HTML命令，分别保存退出码；渲染码须等于JSON gate码，否则按工具错误3阻断。完整JSON是后续new策略输入，不能用HTML或截断输出替代。
+本地运行也须比对扫描和 HTML 的退出码。分享前预览证据和业务说明。
 
-本仓库Tests不替代作者远端CI或业务验收；静态通过不认证市场安装/恢复。项目限定验收与分发核验见[current-state](current-state.json)，市场边界见[上游记录](upstream-verification.md)。
+项目验收范围见[current-state](current-state.json)，市场安装及恢复见[上游记录](upstream-verification.md)。

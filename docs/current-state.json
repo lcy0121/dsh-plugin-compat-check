@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.2.6",
-  "recordedAt": "2026-11-20T12:40:48.565Z",
+  "recordedAt": "2026-11-20T13:37:30.865Z",
   "testFiles": 101,
   "tests": 1366,
   "repositoryFiles": {
-    "total": 442,
+    "total": 443,
     "fixtures": 100,
-    "other": 342
+    "other": 343
   },
   "verification": {
     "platform": "darwin",
@@ -30,7 +30,7 @@
     },
     "sourceContext": {
       "versionSource": "lib/version.mjs",
-      "scope": "0.2.6 candidate verified by exact CI commit and archive. Publication025 records the public release."
+      "scope": "The version identifies the tool source. CI, hosts and public distribution have dated receipts."
     },
     "limitations": [
       "Windows real-host acceptance remains unverified.",
@@ -164,7 +164,7 @@
         "fixCommit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
         "scope": "Test-only comparison rounds up to timer milliseconds; early whole-millisecond failure still rejected. Production code and timeout budgets unchanged."
       },
-      "scope": "Exact tagged-source/archive acceptance and independent public GitHub/npm download plus fixed public-registry installation. Only completed CI snapshots are listed; post-publication records never retarget the tag."
+      "scope": "Historical 0.2.5 distribution and exact-artifact acceptance."
     },
     "historical025": {
       "commit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
@@ -273,8 +273,8 @@
         "validationErrors": 0
       },
       "previousLocalAcceptance": "4736552:docs/current-state.json",
-      "scope": "Exact CI candidate. Host checks used the same archive; bundled README and skill retain build-time wording. The preceding local author benchmark remains historical."
+      "scope": "CI and macOS/Linux host acceptance bind to this commit and archive. Subsequent bundled documentation changes require fresh acceptance."
     }
   },
-  "scope": "0.2.6 candidate evidence. 0.2.5 remains the public release. Suite counts and acceptance bind to recorded inputs."
+  "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."
 }

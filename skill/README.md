@@ -1,16 +1,16 @@
 # skill交付与注册
 
-本页对应**0.2.6**候选 skill，含 rc.5 精确目录、拒答与搜索路由提示。0.2.5 为当前公开版，候选提交已通过全部 CI，原始归档已过 macOS 与 Linux 验收。随包正文保留构建时说明，归档摘要与验收范围见[current-state](../docs/current-state.json)。
+**0.2.6** 随包交付的 skill 包含 rc.5 精确目录、内容拒答和搜索路由提示。验收范围与归档摘要见[current-state](../docs/current-state.json)。
 
-权威正文为[SKILL.md](SKILL.md)，plugin/skill/SKILL.md为逐字节副本，prepack同步且通过files:skill交付，不含CLI。修改后执行：
+编辑[SKILL.md](SKILL.md)后同步包内逐字节副本 `plugin/skill/SKILL.md`。prepack 也会同步并通过 `files:skill` 交付。
 
 ```sh
 node plugin/scripts/stage-skill.mjs
 node --test test/skill.test.mjs test/docs.test.mjs
 ```
 
-宿主以scoped Context的skills.registerProvider软订阅注册list/get；provider和skill名均为dsh-plugin-compat-check，source=bundled、rank=600，优先读包内副本。frontmatter仅单行name/description，name为kebab-case。
+宿主用 scoped Context 的 `skills.registerProvider` 软订阅 list/get。同名 provider 与 skill 为 dsh-plugin-compat-check，source=bundled、rank=600。frontmatter 只用单行 name/description，name 为 kebab-case。
 
-正文按宿主slice+trim后的JavaScript UTF-16 length为**6650 字符**。工具注册、独立安装及tgz交付均有默认回归；不运行模型对话。
+正文经宿主 slice + trim 为**6585 字符**（JavaScript UTF-16）。默认回归覆盖注册、独立安装与 tgz。
 
-独立安装用`./dsh-plugin-compat-check.sh --install-skill`，落点为`${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`；默认不覆盖，仅显式force覆盖。CLI仍需完整仓库/根依赖。报告保留真实位置、certainty/impactBasis及coverage/vacuous；历史通过不认证当前制品。
+独立安装用 `./dsh-plugin-compat-check.sh --install-skill`，写入 `${DSH_AGENTS_HOME:-~/.agents}/skills/dsh-plugin-compat-check/SKILL.md`，仅显式 force 可覆盖。CLI 另需完整仓库和根依赖。

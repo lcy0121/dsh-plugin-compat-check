@@ -6,18 +6,18 @@
 
 ## 버전과 진입점
 
-이 체크아웃은 **0.2.6** 후보 버전입니다. npm과 GitHub의 현재 공개 버전은 0.2.5입니다. 독립 검토한 DSH 0.2.2-rc.5 카탈로그와 콘텐츠 거부·검색 라우팅 마이그레이션 안내와 8개 버전의 작성자 CI 매트릭스를 제공합니다. 중·영·한 UI, 업그레이드 사전 검사, 의존 관계, 수동 검토와 보고서 이력을 지원합니다. 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3, 0.2.2-rc.5**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
+현재 버전은 **0.2.6**입니다. 독립 검토한 DSH 0.2.2-rc.5 카탈로그, 콘텐츠 거부·검색 라우팅 마이그레이션 안내, 8개 버전의 작성자 CI 매트릭스를 제공합니다. 중·영·한 UI에서 업그레이드 사전 검사, 의존 관계, 수동 검토와 보고서 이력을 사용할 수 있습니다.
 
-[docs/current-state.json](docs/current-state.json)은 커밋·아카이브·플랫폼별 검수 범위를 기록합니다. 후보 커밋은 12개 검사를 모두 통과했습니다. 동일한 CI 아카이브가 macOS와 GitHub Actions Linux의 호스트 검수를 통과했습니다. 새 아카이브는 해시를 확인해 다시 검수합니다. npm 패키지는 화면, 상세/배지, `compat_check`, skill을 제공합니다. CLI·설치 검사·배치·작성자 CI·건강 실행기는 저장소 전용이며 npm CLI bin과 `npx dsh-plugin-compat-check`는 지원하지 않습니다.
+인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3, 0.2.2-rc.5**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
 
-마켓·배포 경로의 날짜별 검증은 [상위 프로젝트 기록](docs/upstream-verification.md)을 참고하세요. 아래 npm 또는 완전한 tgz로 설치하세요.
+npm 플러그인은 화면, 상세/배지, `compat_check`, skill을 제공합니다. CLI·설치 검사·배치·작성자 CI·기능 확인 실행기는 저장소에서 실행합니다. npm 패키지에는 CLI 실행 파일이 없습니다. [검수·배포 기록](docs/current-state.json)과 [상위 프로젝트 검증 기록](docs/upstream-verification.md)을 참고하세요.
 
 ## 설치와 사용
 
 ```sh
-# npm에서 현재 공개 버전 설치
-dsh plugin --profile <profile> add dsh-plugin-compat-check
-# 검증된 로컬 아카이브로 0.2.6 후보 버전 테스트
+# npm에서 0.2.6 설치
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.6
+# 또는 해시를 검증한 전체 아카이브로 설치
 dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.6.tgz
 ```
 
@@ -40,15 +40,15 @@ dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0
 
 ### 수동 검토와 이력
 
-소스와 다음 단계를 확인하고 미확인/검토됨/오탐/수정됨 및 근거를 명시적으로 저장합니다. 소스·대상·근거가 바뀌면 재검토해야 합니다. 상태는 위험을 숨기거나 판정/기준선을 바꾸거나 예외를 부여하지 않습니다. 초안은 현재 페이지에만 남고 오래된 저장은 차단됩니다. 새로고침 전 저장하거나 복사하세요.
+소스와 다음 단계를 확인한 뒤 미확인/검토됨/오탐/수정됨 상태를 근거와 함께 저장합니다. 소스·대상·근거가 바뀌면 재검토합니다. 기존 발견, 판정, 기준선은 유지됩니다. 새로고침 전에 초안을 저장하거나 복사하세요.
 
-보관 전 확인과 백업이 필요하며 복원/가져오기는 참고용입니다. 스냅샷을 명시적으로 저장하고 두 개를 비교합니다. 식별자가 다르면 중립적으로 표시하고 근거 약화를 수정으로 보지 않습니다. 용량이 차면 내보낸 뒤 삭제하며 자동 정리는 없습니다. 경로·한도·경계는 [가이드](docs/guide.md)에 있습니다.
+보관 전에 백업합니다. 스냅샷은 직접 저장하며 비교할 때는 두 개를 선택합니다. 한도와 식별 기준은 [가이드](docs/guide.md#人工处置归档与本地历史报告)를 참고하세요.
 
 ## 화면 예시
 
-공개 버전 0.2.5(DSH 0.2.2-rc.3)를 2026-11-15 자체 macOS 테스트 profile에서 촬영한 중국어 화면입니다. 합성 회귀 플러그인이 포함되어 있으며 수치는 해당 검사만 나타냅니다. 생태계 통계나 전체 기능 성공을 뜻하지 않습니다. 배포물 식별자는 [current-state](docs/current-state.json)에 있습니다.
+0.2.6의 DSH 0.2.2-rc.5 중국어 화면입니다. 2026-11-20 GitHub Actions Linux의 자체 회귀 테스트 profile에서 촬영했습니다. 수치는 해당 합성 테스트에 한정됩니다.
 
-![DSH 0.2.2-rc.3의 0.2.5 주 결과와 분석 한계](plugin/assets/compat-overview-0.2.5.png)
+![DSH 0.2.2-rc.5의 0.2.6 주 결과와 분석 한계](plugin/assets/compat-overview-0.2.6.png)
 
 ## 저장소 CLI
 
@@ -75,7 +75,7 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 
 ## 업그레이드 사전 검사와 검증
 
-다음 rc.5 예제는 0.2.6 후보 버전을 사용합니다. `compat_check({"upgradeTo":"0.2.2-rc.5"})`는 호스트의 현재 버전을 사용하고 `upgradePreview`를 반환합니다. CLI에는 두 정확한 버전을 지정합니다.
+`compat_check({"upgradeTo":"0.2.2-rc.5"})`는 호스트의 현재 버전을 사용하고 `upgradePreview`를 반환합니다. CLI에는 두 정확한 버전을 지정합니다.
 
 ```sh
 node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.3 --upgrade-to 0.2.2-rc.5 --json

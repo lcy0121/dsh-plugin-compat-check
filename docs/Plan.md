@@ -1,10 +1,10 @@
 # 开发计划与维护约定
 
-当前源码为**0.2.6**候选，公开版为 0.2.5。源码版本取`lib/version.mjs`。本文保留产品契约与待办；操作/预算见[指南](guide.md)，实现/验收见[维护指南](maintaining.md)，带日期的回执见[docs/current-state.json](current-state.json)。
+当前版本为**0.2.6**，以 `lib/version.mjs` 为准。本文维护产品契约与待办。操作见[指南](guide.md)，验收流程见[维护指南](maintaining.md)，带日期的证据见[docs/current-state.json](current-state.json)。
 
 ## 1. 项目定位与交付状态
 
-检查已安装DSH插件，提供源码位置、依据和覆盖限制。本版加入0.2.2-rc.5精确目录、拒答与搜索路由迁移提示、八版作者矩阵。声明放行、激活或无发现不等于业务正常。正文描述本版能力；实际分发以[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub Releases](https://github.com/lcy0121/dsh-plugin-compat-check/releases)记录为准。
+检查已安装DSH插件，提供源码位置、依据和覆盖限制。已发布功能包括 0.2.2-rc.5 精确目录、内容拒答与搜索路由迁移提示、八版作者矩阵。声明放行、激活或无发现不等于业务正常。公开分发见[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub Releases](https://github.com/lcy0121/dsh-plugin-compat-check/releases)。
 
 npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin、不支持npx。CLI、安装检查、批量、作者CI和健康执行器从仓库工作区运行；源码安装须[构建完整tgz](../plugin/README.md#从源码构建安装)。
 
@@ -12,11 +12,11 @@ npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin�
 
 ### 2.1 证据与分析边界
 
-AST按host/client/shared记录Context、服务及真实位置，入口遵循宿主解析。动态、变异、遮蔽、逃逸、异步及超限保守推断或弃权；能力守卫须控制调用，try/catch不是能力证明。不执行目标，不保存prompt或任意枚举；[语义范围](guide.md#参数与生命周期语义)与[提取规则](maintaining.md#提取器与探针维护)分别维护。
+AST 按 host/client/shared 保留真实位置，按宿主规则解析入口。动态、变异、遮蔽、逃逸、异步或超限时保守推断或弃权。能力守卫须控制实际调用。静态分析不执行目标、保存 prompt 或遍历任意服务。详见[语义](guide.md#参数与生命周期语义)及[提取](maintaining.md#提取器与探针维护)。
 
 本版登记[0.2.2-rc.5](../rules/dsh-0.2.2-rc.5-review.json)，宿主109服务/640方法、客户端8/46，保留旧目录。0.2.2-rc.4用于独立来源差分。语义边界和实机回执见[维护指南](maintaining.md#026rc5适配)。
 
-0.2.1-rc.5[来源审查](../rules/dsh-0.2.1-rc.5-review.json)核对388文件差分，相对rc.3无API名称/生成签名变化，语义仍独立审查。推理Slot的rawText为原始文本、text供显示；只提示迁移，不把text使用报错，不验证props或流式行为。目录、语义、宿主与业务验收分别记录。
+历史目录修正及推理槽位 `rawText`、`text` 的使用见[来源记录](../rules/dsh-0.2.1-rc.5-review.json)和[语义指南](guide.md#参数与生命周期语义)。
 
 ### 2.2 结论、影响与基线
 
@@ -36,7 +36,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 三槽位为`settings.plugins.tab`、`plugins.detail.section / .badge`；无可靠身份不作包级判断。客户端用ModuleLoader id/factory，tool required为顶层数组，skill经provider注册。界面入口见[README](../README.md#界面各板块怎么用)，UI真源/组件来源见[维护指南](maintaining.md#维护入口与语法覆盖)。
 
-主结果→依赖→人工处置→升级预检；辅助内容默认收起，明细50项/页。三语只译固定模板，切换保留草稿；三槽位共享可见性轮询，隐藏取消、迟到结果丢弃。
+主结果按依赖、处置、预检展开，辅助区默认收起，明细每页50项。三语只译固定模板。共享可见性轮询取消隐藏任务并丢弃迟到结果。
 
 [HTTP](guide.md#本地http边界)先核本地/完整同源和请求标记，再调用宿主connection.requestRejection；未认证401、鉴权不可用503，拒绝早于计算/写入。私有profile不是OS沙箱，只认证登记的精确版本/目录；[新目录](maintaining.md#api目录候选审查)须另审另验。
 
@@ -70,7 +70,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ## 4. 验收范围
 
-0.2.5已发布至npm和GitHub，tag固定提交`89dbe2c`。工作分支、合并后的main及tag各11项CI均通过；rc.2/rc.3的macOS/Linux九项UI、鉴权与清理验收使用同一归档，公共下载摘要、固定版本安装及真实宿主探针已核，见[current-state](current-state.json)。0.2.6候选的12项CI、同一归档macOS/Linux及rc.3回归均已通过，见[current-state](current-state.json)。Windows与一般业务仍待独立验证。
+0.2.6 的 `283f2eb` 通过 12 项 CI。该 CI 归档通过 macOS 与 GitHub Actions Linux 的 rc.5/rc.3 宿主验收，归档摘要及逐平台证据见[current-state](current-state.json)。新提交和重新打包须按[交付流程](maintaining.md#同一制品发布核对)复验。Windows、一般业务及历次公开分发各以对应回执为准。
 
 ## 5. 验证入口
 

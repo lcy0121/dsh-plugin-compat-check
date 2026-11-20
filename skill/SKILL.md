@@ -1,6 +1,6 @@
 ---
 name: dsh-plugin-compat-check
-description: 0.2.6：检查已安装DSH插件、升级前静态对比，排查更新后失效、界面消失、工具无响应、did not activate及版本声明问题。Use for installed DeepSeek Harness plugin compatibility, static upgrade comparisons and activation failures. Includes an exact DSH 0.2.2-rc.5 catalogue, refusal and search routing guidance, and bounded Agent/tool/Session migration guidance; no findings does not certify business functionality.
+description: 0.2.6：检查已安装 DSH 插件与升级风险，排查未激活、界面消失或工具无响应。Use for installed DeepSeek Harness plugin compatibility and static upgrade previews. Includes exact DSH 0.2.2-rc.5 coverage, content refusal and search routing guidance.
 ---
 
 # dsh-plugin-compat-check
@@ -130,4 +130,4 @@ report_status=$?
 
 本版保留Cordis Core4.1、Loader/Include1.1及工具作用域适配。无关状态写入不使缓存失效，源码/声明变化仍会；非法JSON证据明确失败。目录未收录只表示覆盖不足，不据此称方法缺失。
 
-实际运行版本取toolVersion/CLI version。0.2.6是候选源码，0.2.5是当前公开版本；docs/current-state.json记录macOS/Debian同一归档及待核验的GitHub Actions。Windows和一般业务需独立证据。docs/Plan.md列待办，操作/预算和目录治理见docs/guide.md、docs/maintaining.md。YAML是运行依赖，根dev依赖不随npm提供功能。
+用 `toolVersion` 或 CLI `--version` 核对实际运行版本。docs/current-state.json 按提交与归档记录 macOS/Linux 验收和分发证据。Windows 与一般业务需独立验收。操作和维护见 docs/guide.md、docs/maintaining.md。

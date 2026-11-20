@@ -1,22 +1,17 @@
 # 规则与固定源码参考
 
-当前版本为**0.2.6**。本页说明规则、目录选择和度量；契约见[Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，审查流程见[维护指南](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md)，限定验收/分发核验见[current-state](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。
+规则与目录适用于**0.2.6**。审查步骤见[维护指南](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md#api目录候选审查)，验收范围见[current-state](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。
 
 ## 文件与消费者
 
 | 文件 | 用途 |
 |---|---|
 | severity.json | services下的方法严重度/影响与端侧约束；apiSemantics下的精确客户端参数、弃用和生命周期参考 |
-| dsh-api-catalog.json | 固定0.2.0-rc.2目录 |
-| dsh-api-catalog-0.2.1-rc.2.json / dsh-api-catalog-0.2.1-rc.3.json | 两个独立精确版本目录；不能因方法名相同而互相认证 |
-| dsh-0.2.1-rc.3-review.json | 固定来源、摘要、签名与语义审查 |
-| dsh-api-catalog-0.2.1-rc.5.json / dsh-0.2.1-rc.5-review.json | 已登记精确目录与固定来源/语义审查；审查内基础集成为历史快照，后续平台/业务回执见current-state |
-| dsh-api-catalog-0.2.2-rc.1.json / dsh-0.2.2-rc.1-review.json | 独立来源、完整签名与提取修正；参数语义见dsh-0.2.2-rc.1-semantics-review.json，完整UI/平台回执见current-state |
-| dsh-api-catalog-0.2.2-rc.2.json / dsh-api-catalog-0.2.2-rc.3.json | 分别对应dsh-0.2.2-rc.2-review.json及rc.3审查；各自semantics-review记录迁移边界，不互借认证 |
-| dsh-api-catalog-0.2.2-rc.5.json | 固定桌面来源、109 个宿主服务/640 个方法及 8 个客户端服务/46 个方法；对应 rc.5 的来源与语义审查 JSON，rc.4 为差分基线 |
+| dsh-api-catalog.json / dsh-api-catalog-<版本>.json | 分别固定 0.2.0-rc.2 与后续登记版目录，精确集合以 `CATALOG_REFERENCES` 为准 |
+| dsh-<版本>-review.json / dsh-<版本>-semantics-review.json | 各版固定来源、签名与语义证据。0.2.2-rc.5 对照 rc.4，宿主 109 服务/640 方法，客户端 8/46 |
 | usage-inventory.json | 带日期、版本、profile和完整性标记的历史AST库存，不是当前覆盖率 |
 
-普通检查从`lib/contracts.mjs.CATALOG_REFERENCES`选不高于目标的最新目录，低于最旧目录、版本缺失或格式无效时取0.2.0-rc.2；显式覆盖优先。0.2.2-rc.2/rc.3/rc.5各用精确目录。登记字节与精确认证集合以该常量为准；升级预检仅接受八个登记版本，拒绝未知/范围。回退或自定义目录不认证未来宿主。
+普通检查从 `lib/contracts.mjs.CATALOG_REFERENCES` 选择不高于目标的最新目录，低于最旧版本或版本无效/缺失时用 0.2.0-rc.2，显式覆盖优先。升级预检仅接受八个登记精确版本。回退或自定义目录保留未认证提示。
 
 ## 判定与解释
 

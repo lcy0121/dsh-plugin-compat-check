@@ -6,18 +6,18 @@
 
 ## 版本与入口
 
-本源码为**0.2.6**候选，npm 与 GitHub 当前公开版均为 0.2.5。本版加入DSH 0.2.2-rc.5独立目录、拒答与搜索路由迁移提示及八版作者 CI，延续插件管理、鉴权与三槽位集成；支持中英韩界面、升级预检、依赖视图、人工处置和报告历史。已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3、0.2.2-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
+当前版本为 **0.2.6**。本版发布 DSH 0.2.2-rc.5 独立目录、内容拒答与搜索路由迁移提示，并将作者 CI 扩展至八版。兼容性界面支持中英韩、升级预检、依赖视图、人工处置和报告历史。
 
-验收按提交、归档及平台记录于[docs/current-state.json](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。已有同一归档通过 macOS 和 Debian arm64 宿主验收。GitHub Actions 待核验，新归档按摘要重新验收。npm插件交付面板、详情/角标、`compat_check`和skill；CLI、安装检查、批量、作者CI及健康执行器只随仓库提供。npm无CLI bin，不支持`npx dsh-plugin-compat-check`。
+已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3、0.2.2-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
 
-市场/发行入口的带日期核验见[上游记录](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/upstream-verification.md)。安装使用下方npm或完整tgz。
+npm 插件提供面板、详情/角标、`compat_check` 和 skill。CLI、安装检查、批量、作者 CI 和健康执行器从仓库运行。npm 包没有 CLI bin。 详见[验收与发行回执](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)及[上游入口核验](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/upstream-verification.md)。
 
 ## 安装与使用
 
 ```sh
-# 从 npm 安装当前公开版
-dsh plugin --profile <profile> add dsh-plugin-compat-check
-# 测试 0.2.6 候选时使用已构建的本地归档并核对摘要
+# 从 npm 安装 0.2.6
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.6
+# 或从已核验摘要的完整归档安装
 dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.6.tgz
 ```
 
@@ -40,15 +40,15 @@ dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.
 
 ### 人工处置与历史记录
 
-核实源码及“下一步”，填写待确认/已复核/误报/已修复和依据后显式保存。源码、目标或证据变化须重审；人工状态不隐藏风险、不改判定/基线或授予豁免。草稿仅驻当前页，过期禁保存；重载前保存或复制。
+核实源码及“下一步”，选择待确认/已复核/误报/已修复，填写依据并保存。源码、目标或证据变化须重审。重载前保存或复制草稿。
 
-归档先确认并备份，恢复/导入只供参考。快照显式保存并选择两份比较，身份不相容中性显示、证据变弱不称修复；满额先导出再删除，无自动轮转。[指南](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/guide.md)列路径、容量和边界。
+归档先备份。于高级工具显式保存快照并选择两份比较。容量和身份规则见[指南](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/guide.md#人工处置归档与本地历史报告)。
 
 ## 界面示例
 
-公开版 0.2.5 的界面（DSH 0.2.2-rc.3），2026-11-15自有macOS测试profile实拍（中文界面）。包含明确用于回归的合成插件，数字只代表该次检查，不是生态统计或全部业务通过；验收身份见[current-state](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。
+0.2.6 在 DSH 0.2.2-rc.5 的中文界面，2026-11-20 摄于 GitHub Actions Linux 的自有回归 profile。数字对应本次合成样本。
 
-![0.2.5在DSH 0.2.2-rc.3中的主结果与覆盖限制](https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/main/plugin/assets/compat-overview-0.2.5.png)
+![0.2.6 在 DSH 0.2.2-rc.5 的主结果与覆盖限制](https://raw.githubusercontent.com/lcy0121/dsh-plugin-compat-check/main/plugin/assets/compat-overview-0.2.6.png)
 
 ## 从源码构建安装
 
@@ -65,7 +65,7 @@ prepack同步skill、契约、客户端、内核及许可证；postpack清理暂
 
 ## 升级与仓库工具
 
-以下 rc.5 示例使用 0.2.6 候选代码。调用`compat_check({"upgradeTo":"0.2.2-rc.5"})`，当前版本取宿主，返回upgradePreview、report为null。八个登记精确版本可任意比较，未知版本/范围退出3。只做同组私有字节的静态比较，不安装或升级宿主，也不借用probe、豁免或普通基线；预检0/1/2表示无/非致命/致命新增或变重风险，3为无法预检，0仍可有旧风险。
+调用`compat_check({"upgradeTo":"0.2.2-rc.5"})`，当前版本取宿主，返回upgradePreview、report为null。八个登记精确版本可任意比较，未知版本/范围退出3。只做同组私有字节的静态比较，不安装或升级宿主，也不借用probe、豁免或普通基线；预检0/1/2表示无/非致命/致命新增或变重风险，3为无法预检，0仍可有旧风险。
 
 CLI、批量、作者CI及健康执行器从仓库运行，使用见[指南](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/guide.md)与[作者CI](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/author-ci.md)。契约/待办见[Plan](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/Plan.md)，构建及目录治理见[维护流程](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md)。certainty与impactBasis独立；未观测不等于缺失，coverage/vacuous必须保留。Windows与一般业务未获认证。
 

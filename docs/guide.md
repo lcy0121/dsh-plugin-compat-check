@@ -1,6 +1,6 @@
 # 使用与验证指南
 
-本文对应**0.2.6**候选源码。npm 安装使用当前公开版 0.2.5，候选验收使用本地 tgz。面板、tool和skill随npm插件交付；CLI、健康执行器与作者CI从仓库运行，源码构建见[打包说明](../plugin/README.md#从源码构建安装)。声明放行、激活或无发现不等于业务验收；[current-state](current-state.json)按提交/归档/平台记录证据。
+本指南适用于**0.2.6**。npm 交付面板、`compat_check` 和 skill。CLI、健康执行器和作者 CI 从仓库运行。安装见[README](../README.md#安装与使用)，源码构建见[打包说明](../plugin/README.md#从源码构建安装)，提交、归档与平台证据见[current-state](current-state.json)。
 
 已认证精确目录为`0.2.0-rc.2`、`0.2.1-rc.2`、`0.2.1-rc.3`、`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`、`0.2.2-rc.5`。最低宿主声明不认证未来版本。0.2.1-rc.3/rc.5及四个0.2.2版本的入口：左下角账号菜单→设置→内置插件→兼容性；无参tool/设置页按宿主启动身份定位；冲突时改用`compat_check({"profile":"my-profile"})`或CLI显式路径，不猜desktop。路径模拟不替代Windows实机。
 
@@ -8,8 +8,8 @@
 
 精确语义位于`rules/severity.json.apiSemantics`，独立记录固定tag、归档及所审查文件摘要；旧版、未知版或坏记录显示“语义未审查”，不借邻近版本认证。
 
-- `uiWorkspace.startSession`检查已知`prompt / agentPreset / clearPreviousDraft`类型；0.2.1-rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3/rc.5另检查`whenDraftExists=keep / replace / append`，0.2.1-rc.2未使用它。类型/枚举不符是非致命推断风险，弱Context为疑似，不单独触发声明不符；方法存在或能力守卫不验证参数。
-- 0.2.1-rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3/rc.5显式whenDraftExists优先，省略通常保留草稿，仍支持`clearPreviousDraft:true`选择replace。可复用同工作区未归档空白会话，指定preset隔离其它preset；这些选项不证明新建或发送成功。
+- `uiWorkspace.startSession` 核对已知 `prompt / agentPreset / clearPreviousDraft` 类型。从 0.2.1-rc.3 起的登记版本也检查 `whenDraftExists=keep / replace / append`。已知错值是非致命风险，弱 Context 标疑似。能力守卫只证明调用条件。
+- 支持 `whenDraftExists` 的版本以其显式值优先。省略通常保留草稿，`clearPreviousDraft:true` 仍兼容 replace。可复用同工作区未归档空白会话，指定 preset 时按 preset 隔离。实际新建和发送另验。
 - 六个已审查语义版本的`ctx.timer.setTimeout / setInterval`仍保留但已弃用；`sessions.retain`提示所有权、按需等待ready及作用域结束时release/disposal。两类只进覆盖说明，不证明泄漏或失败。
 - 0.2.1-rc.5及0.2.2-rc.1/rc.2/rc.3/rc.5的`conversation.chat.reasoning.body`提供原始`rawText`和显示`text`；普通渲染/翻译继续用text，Content Factory仍用text/running/labels。静态提示只定位slots.register和迁移限制，不验证props用途、签名处理或流式时序，不把text使用报错，不新增发现或已验证调用。
 
@@ -115,9 +115,9 @@ review锁使用相同入口。只有同主机/用户、完整匹配元数据且�
 
 标记不是密码。通过同源检查后，所有读取/保存入口（含元数据与历史管理）均调用宿主`connection.requestRejection(req)`，沿用宿主签名Cookie、过期及会话策略，不自行解析密钥或另造令牌；未认证/伪造/过期返回401，鉴权服务缺失、异常或不符合同步接口返回503，且不开始计算/读取请求体/写入。无Origin的本机工具也需要标记及有效宿主会话；登录URL令牌先交给宿主根登录入口换取Cookie，不能只附在本插件URL上。界面使用既有同源Cookie；401时重新打开宿主提供的登录入口，不把登录URL/Cookie贴进报告。静态CLI及进程内agent tool不经过HTTP。
 
-两新版官方签名Cookie保留验证密钥：同profile、同地址端口重启后，未过期Cookie继续有效；启动令牌只属于当次进程，跨地址端口的Cookie受audience隔离。不要把重启当作登出。
+rc.2/rc.3/rc.5 原始宿主验收核过签名 Cookie：同 profile、同地址端口重启后，未过期 Cookie 继续有效。启动令牌限当次进程，跨地址端口受 audience 隔离。
 
-这不隔离同一已登录宿主中的可信插件、操作系统用户文件权限或反向代理部署；仍只承诺已登记宿主/本地边界，不外推公网可利用性或未来宿主认证。跨端口图片/同源恢复与未认证拒绝见HTTP回归，签名过期在自有fixture内临时推进宿主时钟31天并立即还原，不修改系统时钟。
+HTTP 证据限登记宿主的本地边界。同一已登录宿主的可信插件与系统用户权限沿用宿主策略，反向代理部署须独立验证。跨端口图片、同源恢复和拒绝由 HTTP 回归覆盖。签名过期在自有 fixture 验证。
 
 ## 日常检查与源码交付
 
@@ -154,7 +154,7 @@ node plugin/scripts/prepublish-check.mjs
 node tools/meta-check.mjs --json
 ```
 
-test:issues 固定五份官方源码的 URL/SHA-256，缺输入时下载校验，坏来源或跳过均失败。[源码复用与制品流程](maintaining.md#维护入口与语法覆盖)记录变量及归档要求。计数取成功 TAP，打包测试需要 registry。
+`test:issues` 的官方源码摘要、复用变量和同包验收见[维护指南](maintaining.md#维护入口与语法覆盖)。计数取成功 TAP，发布前门禁只做本地检查。
 
 `meta-check` 默认查 GitHub 和 npm，可用 `--github` 或 `--npm` 单查。任何请求来源失败或 npm README 缺失时退出 3，保留成功结果。取数齐全时，错误退出 1，只有提示或全部一致退出 0。
 
@@ -172,7 +172,7 @@ node tools/static-batch.mjs --manifest test/fixtures/static-batch.json --previou
 
 ## 面板与报告核实
 
-“下一步”由结构化类别/状态生成，不猜替代API/修复版本。搜索、组合筛选、折叠不改报告或完整导出；无可比基线中性提示。目标、时间、缓存状态及覆盖限制须可见。复制前预览；导出保留包内位置而省略原始源码/日志/probe/baseline，不保证完全脱敏，不自动发帖。
+“下一步”按类别和状态给出可核实的操作。筛选、折叠和分页保留完整导出，无可比基线时中性提示。分享前预览目标、时间、缓存、覆盖及包内位置，并核对隐私。原始源码、日志、probe 和基线留在本地。
 
 市场安装/恢复另见[上游复验](upstream-verification.md)：兼容检查无发现不证明市场操作成功，磁盘写入也不代替HTTP完成或激活。
 

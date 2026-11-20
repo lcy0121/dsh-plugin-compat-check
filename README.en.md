@@ -6,18 +6,18 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-This checkout contains the **0.2.6** candidate. The current public release on npm and GitHub is 0.2.5. It adds an independently reviewed DSH 0.2.2-rc.5 catalogue and migration guidance for content refusal and search routing, plus an eight-version author CI matrix. It provides a Chinese/English/Korean UI, upgrade preview, dependency views, manual reviews and report history. Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3 and 0.2.2-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
+The current version is **0.2.6**. It ships an independently reviewed DSH 0.2.2-rc.5 catalogue, content refusal and search routing migration guidance, and an eight-version author CI matrix. The Chinese, English and Korean UI includes upgrade previews, dependencies, manual reviews and report history.
 
-[docs/current-state.json](docs/current-state.json) records acceptance by commit, archive and platform. The candidate commit passed all 12 checks. Its CI archive passed host acceptance on macOS and GitHub Actions Linux. Verify new archives by digest. The npm plugin provides the page, details/badges, `compat_check` and skill. CLI, install checks, batches, author CI and health executor are repository tools. There is no npm CLI bin or `npx dsh-plugin-compat-check` support.
+Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3 and 0.2.2-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
 
-See the dated [upstream record](docs/upstream-verification.md) for market and distribution-entry checks. Install using npm or a complete tgz below.
+The npm plugin provides the page, details/badges, `compat_check` and skill. The CLI, install checks, batches, author CI and health runner ship in the repository. The npm package has no CLI bin. See [acceptance and release receipts](docs/current-state.json) and the dated [upstream checks](docs/upstream-verification.md).
 
 ## Install and use
 
 ```sh
-# Install the current public release from npm
-dsh plugin --profile <profile> add dsh-plugin-compat-check
-# Test the 0.2.6 candidate with a verified local archive
+# Install 0.2.6 from npm
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.6
+# Or install a complete archive after verifying its digest
 dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.6.tgz
 ```
 
@@ -40,15 +40,15 @@ Auxiliary content starts collapsed. Results/dependencies/findings/upgrade detail
 
 ### Manual review and history
 
-Investigate the source and next steps, choose Unconfirmed/Reviewed/False positive/Fixed, enter evidence and explicitly save. Source, target or evidence changes require re-review; statuses never hide risks, alter verdicts/baselines or grant exemptions. Drafts stay in the current page; stale saves are blocked. Save or copy before reloading.
+Check the source and next steps, then save Unconfirmed/Reviewed/False positive/Fixed with a note. Re-review when the source, target or evidence changes. Original findings, verdicts and baselines are retained. Save or copy drafts before reloading.
 
-Confirm and back up before archiving; restores/imports are references. Explicitly save snapshots and select two to compare. Incompatible identities remain neutral; weaker evidence is not a repair. Export before deleting when full; no automatic pruning. The [guide](docs/guide.md) lists paths, limits and boundaries.
+Back up before archiving. Save snapshots explicitly and select two to compare. See the [guide](docs/guide.md#人工处置归档与本地历史报告) for capacity and identity rules.
 
 ## Screenshots
 
-The public 0.2.5 release (DSH 0.2.2-rc.3), captured on 2026-11-15 in an owned macOS test profile (Chinese UI). Includes synthetic regression plugins; counts describe that check, not ecosystem statistics or universal business success. Artifact identity is recorded in [current-state](docs/current-state.json).
+0.2.6 on DSH 0.2.2-rc.5 in Chinese, captured on 2026-11-20 in an owned GitHub Actions Linux regression profile. Counts apply to its synthetic fixtures.
 
-![0.2.5 main results and coverage limits in DSH 0.2.2-rc.3](plugin/assets/compat-overview-0.2.5.png)
+![0.2.6 main results and coverage limits on DSH 0.2.2-rc.5](plugin/assets/compat-overview-0.2.6.png)
 
 ## Repository CLI
 
@@ -75,7 +75,7 @@ Ordinary static checks do not execute targets or use the network, but write thei
 
 ## Upgrade preview and verification
 
-The rc.5 examples use the 0.2.6 candidate. Call `compat_check({"upgradeTo":"0.2.2-rc.5"})`; the current version comes from the host and results use `upgradePreview`. CLI requires both exact versions:
+Call `compat_check({"upgradeTo":"0.2.2-rc.5"})`; the current version comes from the host and results use `upgradePreview`. CLI requires both exact versions:
 
 ```sh
 node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.3 --upgrade-to 0.2.2-rc.5 --json

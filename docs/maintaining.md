@@ -1,6 +1,6 @@
 # 维护指南
 
-当前版本为**0.2.6**；本文维护目录、规则、依赖与验收流程。操作/限额见[指南](guide.md)，契约及未完成事项见[Plan](Plan.md)，限定证据及实际发布状态见[current-state](current-state.json)。历史成功不认证新制品。
+当前版本为**0.2.6**。本文涵盖目录、规则、依赖和验收。操作见[指南](guide.md)，契约和待办见[Plan](Plan.md)，验收及分发回执见[current-state](current-state.json)。
 
 ## 维护入口与语法覆盖
 
@@ -28,11 +28,17 @@ UI词典位于`plugin/src/i18n/{zh,en,ko}.json`，用可读原文作为消息键
 
 打包回归与真实验收/到货工具经`tools/owned-package-source.mjs`核对manifest/lock/构建依赖，复制自有闭包到私有构建目录，不向源码、用户profile或运行包注入工具链。打包回归核源码客户端mtime不变，避免prepack重写与并行面板读取竞争。selector-parser固定覆盖7.1.6；更新Tailwind/覆盖后须重建、复验布局/主题及开发/运行两图审计。
 
-完整 UI 验收用同一 tgz 及自有 DSH/Chrome。显式选择目标，例如
+在干净检出中构建，取得 tgz 与 `summary.json`。发布验收时，从 CI 下载这两份文件，再用当前匹配的提交运行宿主。下例演示构建与复用：
 
 ```sh
-DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.5 node tools/ci-ui018.mjs <自有输出目录>
+node tools/ci-ui018.mjs --build-only <新构建目录>
+DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.5 \
+  DSC_RC2_ARTIFACT=<tgz绝对路径> \
+  DSC_RC2_ARTIFACT_RECEIPT=<构建目录/summary.json> \
+  node tools/ci-ui018.mjs <另一自有验收目录>
 ```
+
+`--build-only` 只证明构建。完整验收需要自有 DSH/Chrome，脚本核对实际目标、提交、源码与归档身份。
 
 九项门禁包括面板、布局/主题/键盘、分页/完整导出、超时恢复/草稿、HTTP 会话、采样预算、处置定位、历史与中英韩界面。合成密集报告核第123条发现定位、12px间距、短结论及历史报告/基线不变。窄列布局用夹具，单跑处置定位须启用 hardening。
 
@@ -58,7 +64,7 @@ asar='/绝对路径/目标版本/app.asar'
 candidate="$review_dir/dsh-api-catalog-0.3.0-rc.1.candidate.json"
 shasum -a 256 "$asar" > "$review_dir/app-asar.sha256"
 python3 -I tools/catalog/extract-host-api.py "$asar" "$candidate"
-node tools/catalog-review.mjs --before rules/dsh-api-catalog-0.2.2-rc.3.json --candidate "$candidate" --asar "$asar" --json > "$review_dir/catalog-review.json"
+node tools/catalog-review.mjs --before rules/dsh-api-catalog-0.2.2-rc.5.json --candidate "$candidate" --asar "$asar" --json > "$review_dir/catalog-review.json"
 ```
 
 候选须有_dshVersion、固定双端_source路径、原始字节_sourceSha256及方法列表。检查重新提取版本、路径、摘要与API内容，给出两目录SHA-256和稳定排序的双端增删。退出0只表示sourceVerified，semanticReview/integrationAcceptance仍pending、certification为not-granted；退出3是参数/输入/来源/内容/资源或提取错误，不能当无差分。
@@ -110,17 +116,13 @@ rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.j
 
 ## 同一制品发布核对
 
-本版**0.2.6**的能力正文与带日期的验收/公开分发回执分开维护。每次正式交付按以下顺序执行：
+1. 同步版本真源、manifest、lock、README、skill 和示例。运行 `npm run check` 与 `node plugin/scripts/prepublish-check.mjs`，用成功 TAP 更新计数。
+2. 授权推送后等待同一提交所有 Actions 通过。candidate job 构建一次，Linux UI jobs 下载同一 tgz 与回执。
+3. 下载 CI 归档，核提交、源码状态和 SHA-256，再用同一 tgz 跑 macOS 九项 UI、鉴权与清理。构建与复用见[验收入口](#维护入口与语法覆盖)。
+4. 正式发布获授权后，npm 发布验收过的 tgz，GitHub Release 附同一文件、SHA256SUMS 与限定回执，tag 指向对应提交。
+5. 核 tag、附件 SHA-256、npm 版本/integrity/shasum 与实际公共安装，再写[current-state](current-state.json)。取数失败、Windows、用户试用与一般业务均按证据记录。
 
-1. 统一版本真源、manifest/lock、README、skill及示例；正文使用本版能力视角。运行check和prepublish-check（不发布），以成功TAP更新计数，核生成副本、许可证和公开元数据。
-2. 授权推送后，等待所选提交全部Actions通过。candidate job只构建一次，完整UI jobs下载同一tgz/回执并上传证据。
-3. 下载CI归档，核提交、源码/dirty及SHA-256；macOS使用该文件和回执复验九项UI、鉴权及清理。字节不同，即使内容相同也须重验。构建/重用命令见[验收入口](#维护入口与语法覆盖)。
-4. 正式发布另取授权：npm发布该tgz，Git tag/Release附同一文件、SHA256SUMS及限定回执，禁止重新打包冒用旧验收。
-5. 核npm版本/integrity/shasum、附件SHA-256及tag提交，实际公共安装后才记录发布结果。取数失败不算通过；Windows、用户试用和一般业务单列。
-
-文档、包说明或skill变化也会改变tgz，已有CI/宿主结果仅属于原提交/文件。current-state的publication025保存已核分发与同包验收，历史准备由固定Git快照追溯；后续记录提交不改变发行tag。
-
-GitHub简介/topics可独立更新；npm简介/搜索关键词取`plugin/package.json`的description/keywords，随版本发布。dist-tags是版本渠道，不是关键词。发布前本地与registry的版本、正文及元数据差异只记为核验结果，不提前记为上线。字段见[npm package.json文档](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/#description)。
+包内 README、manifest 或 skill 改动也会改变归档。CI 回执只覆盖记录的提交，宿主验收绑定归档字节。回执提交保留已发布 tag。npm description/keywords 随包更新，dist-tags 表示版本渠道。GitHub 简介与 topics 独立维护。
 
 ## 参数语义基线维护
 
@@ -154,11 +156,9 @@ acceptance-target按精确版本选择能力；rc.3/rc.5复用已核导航/草�
 
 ```sh
 DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_REQUIRE_RC2_UI=1 node tools/rc2-live.mjs
-node tools/ci-ui018.mjs --build-only <自有候选目录>
-DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_RC2_ARTIFACT=<候选tgz绝对路径> DSC_RC2_ARTIFACT_RECEIPT=<候选目录/summary.json> node tools/ci-ui018.mjs <另一自有验收目录>
 ```
 
-基础入口验HTTP/tool、声明、预检、精确语义、三槽位及导航恢复；完整UI入口要求九项结果、截图、来源、归档摘要与清理。build-only只证明构建，不算宿主通过；供应归档必须附来源回执，核当前源码/commit/dirty/摘要及包名/版本后复制，不重打包。缺回执、源码变化或坏包在启动前失败。
+基础入口覆盖 HTTP/tool、声明、预检、精确语义、三槽位和导航恢复。完整 UI 按[同包入口](#维护入口与语法覆盖)传入 `DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5`。
 
 rc.5额外要求独立ACP stdout JSON-RPC、stderr目录诊断、MCP能力、受控模型列表及导航语义回执。rc5-acp-stdout只用私有DSH_HOME、合成凭据、loopback列表/两轮模型响应和tools-only MCP；无resources能力不请求资源。失败/超时/清理不确认均失败，只保存计数与断言，不保存对话正文。模型列表另验首次等待、失败/超时回退及无凭据不请求；没有生产账户/模型调用。
 
@@ -183,40 +183,26 @@ Node22/24、九项UI及问题联合验收按精确提交/归档核对；CI状态
 
 ## 0.2.4：0.2.2-rc.1来源、Cordis与工具迁移
 
-[rc.1审查](../rules/dsh-0.2.2-rc.1-review.json)固定源码/npm/ASAR、完整差分与双端签名，补泛型、转义装饰器、生成器及可选方法漏项，不能全算上游新增。0.2.4的五版矩阵、校验器、同包平台及[业务清单](../tools/real-regression-manifest-rc22.json)属历史验收，过程见`cdbed0e:docs/maintaining.md`。
+[rc.1 来源审查](../rules/dsh-0.2.2-rc.1-review.json)固定源码、npm、ASAR 与双端签名，并修正泛型、转义装饰器、生成器和可选方法漏提取。Cordis 4.1 递归 entries 时只确认已知状态及可靠包映射。inject 返回 Fiber，dispose 保留接收者及旧函数兼容。Include 1.1 的 commit/journal/flush 与 patch 克隆只做契约核验。
 
-Cordis4.1保留递归entries与0–5状态；未知类型、树id和包映射冲突不当FAILED/PENDING或包身份，探针按访问条目计预算。ctx.inject返回Fiber；dispose保留接收者、兼容旧函数。Include1.1的commit/journal/flush与patch克隆已核，静态检查不写配置或模拟回滚。
-
-`owned-tool-invocation`在rc.5保留单调用；新宿主由真实Agent选执行器并捕获modelSelection/准入集合，executable/execute共用集合且finally释放。PTC经run_code执行，桥接仅支持TypeScript默认函数体，不外推Python/Script/REPL。Issue023 fixture显式hostVersion/preset，setup真实挂载并返回executorSchemas，meta不证明选择。
-
-ASAR探针以DSC_RC22_HOST_PROBE=1启用，可指定DSC_HOST_ASAR/DSC_HOST_ELECTRON；核摘要后执行。PTC runtime seam是受控夹具，不认证真实后端。
+真实 Agent 选择执行器，executable/execute 共用准入集合并在 finally 释放。PTC 夹具经 run_code，仅支持 TypeScript 默认函数体。Issue023 fixture 指定 hostVersion/preset，验证实际 executorSchemas。ASAR 探针用 `DSC_RC22_HOST_PROBE=1`，可指定 `DSC_HOST_ASAR` / `DSC_HOST_ELECTRON`。五版矩阵及同包历史记录见[current-state](current-state.json)和 `cdbed0e:docs/maintaining.md`。
 
 ## 0.2.2-rc.1语义与宿主验收
 
-[rc.1语义审查](../rules/dsh-0.2.2-rc.1-semantics-review.json)独立固定来源，沿用startSession/草稿、timer、retain/reasoning；stateVersion只核非负安全整数，固定agent/request和服务入口提供迁移提示。semanticSites限固定事件，共用50000调用点/8MiB回传预算；返回对象流、callback/await及业务结果弃权，不增fatal或已验证调用。
-
-rc.1历史manager实测操作、依赖与apply/dispose；写盘不证明激活。九项UI含ja/es/fr/de/ru/pt回退英文及编辑器保持，迟到/worker清理由受控测试补证。Node22静态支持保留，新宿主需Node>=24.9.0，runtime取实际carrier；不借rc.5协议认证新版。
-
-DSC_HOST_SOURCE_ARCHIVE/DSC_RC22_SOURCE_ARCHIVE复用已核旧来源，坏摘要/缺失/跳过不绿；新版入口见下节。空自有HOME可用于test/prepublish，须注明未验用户profile，Windows仍另验。
+[独立语义审查](../rules/dsh-0.2.2-rc.1-semantics-review.json)涵盖草稿、timer、retain/reasoning、stateVersion 和固定 agent/request。stateVersion 只核非负安全整数，semanticSites 与分析共用 50000 调用点/8 MiB 预算。动态返回、回调及 await 时序弃权。历史 manager/UI 验收含写盘、apply/dispose、六种语言回退及编辑器保持。新宿主的 runtime 取实际载体，Node 最低 24.9.0。原始校验器按[固定源码变量](#维护入口与语法覆盖)复验。
 
 ## 0.2.5：rc.2与rc.3独立适配
 
-[rc.2](../rules/dsh-0.2.2-rc.2-review.json)与[rc.3](../rules/dsh-0.2.2-rc.3-review.json)独立固定完整来源差分、npm清单与桌面签名，不依赖GitHub截断列表。宿主分别108服务/639方法、109/640，客户端均8/46，导入器仅rc.3。提取器补反引号/async*，旧五目录字节保留。普通检查、双向预检和作者七版矩阵共用新目录；作者cell2MiB/总8MiB/30秒不放宽，超限退出3。业务清单分别绑定目录，五制品/24期望不据实测改写。
+[rc.2](../rules/dsh-0.2.2-rc.2-review.json)与[rc.3](../rules/dsh-0.2.2-rc.3-review.json)独立记录来源、双端签名和运行布局。宿主分别为 108 服务/639 方法、109/640，客户端均 8/46。[rc.2 语义](../rules/dsh-0.2.2-rc.2-semantics-review.json)与[rc.3 语义](../rules/dsh-0.2.2-rc.3-semantics-review.json)覆盖 Agent 所有权、native/PTC、显式并发、Session.append、AttachmentError、MCP 与 manager 迁移。输入边界见[指南](guide.md#参数与生命周期语义)。
 
-[rc.2语义](../rules/dsh-0.2.2-rc.2-semantics-review.json)与[rc.3语义](../rules/dsh-0.2.2-rc.3-semantics-review.json)独立审查Agent caller/initiator/ownerCtx与handle释放、具名Subagent/Team及interrupt preset、native/PTC/condition集合、isConcurrencySafe严格true的并行有序/预算清状态、Session.append重载和AttachmentError结构；还包括MCP register/watch/restart/probe、manager update=registry/git/缺省及unexpected-package。用户提示和静态边界见[指南](guide.md#参数与生命周期语义)：只定位已证明Context，不证明返回对象流/回调/释放时序或AgentLoop收敛，不增fatal/已验证调用；三语固定提示同源，原始证据不翻译。
+实际执行沿 PATH 选定的 carrier，npm CLI 解析同路径 app-boot，Desktop 用自身 Electron/ASAR。primary-runtime 属宿主 resources 布局。manager 核 registry/git/file 更新、启用失败、取消与 unexpected-package 回滚。rc.3 导入以合成 v3 归档核 owner 鉴权、持久化及卸载后 404，保持无 liveSession/Agent。
 
-本工具使用pluginManager.list和Cordis fiber；enabled、update可用与客户端模块存在均不证明ACTIVE。新版boot-client的可选client加载失败只警告继续，required最小集失败才阻断；本工具非required项。三槽位仍为settings.plugins.tab与plugins.detail.section/badge；未消费Popper、sidebar.session.action、workspace.picker或directoryFlow，故不新增无关UI依赖。私有manager验收覆盖registry/git/file更新方式、成功、启用失败、坏包、取消及unexpected-package回滚；rc.3导入只用合成v3归档，核持久化与owner鉴权、不创建liveSession/Agent和卸载404。它们不认证市场恢复或Windows。
-
-运行入口绑定PATH中选定dsh的真实路径：npm CLI使用同路径解析的app-boot，Desktop launcher才用其Electron/ASAR，不借本机另一个版本。runtime查询也用该carrier。两npm包含docs/src，CLI为lib/bin.js，app-boot公开入口为lib/index.js及worker/profile-resolution-bootstrap；安装版本、目录和摘要见独立审查。primary-runtime是宿主resources布局，不是可假定的npm同名模块；普通检查不创建或修复它。新宿主Node>=24.9.0，源码根packageManager两版均pnpm11.28.5，私有执行器与CI同步pin；工具Node22静态覆盖保留。该版原始 JSON/schema 验收使用固定源码；现行五份归档与复用变量见本页首节。
-
-升级指南目录名v0.2.2-rc.1不表示实际rc.1已含该变更。两新版创造模式改用dsh-doc（源码编写skill名dsh-doc-writing），旧四skill及模板路径按官方指南迁移；本工具skill名称和provider无交集。searchBilling/fetchBilling及auth.sources、具体deepseek-account/Remote迁移、终端optional-terminal-panel与CLEANUP_FAILED，以及Worktree归档清理/retainOnArchive是宿主配置职责；本工具不调用这些提供方、不读凭据或改配置。归档可能删除干净检出目录而保留分支，ignored/skip-worktree文件不能保证保留；按宿主指南显式选择保留策略。普通检查不执行归档或迁移。review.integrationAcceptance是来源审查时快照；后续同包macOS/Linux与11项CI记录见current-state，配置和历史回执不认证后改的制品。
+dsh-doc、搜索/抓取计费、auth.sources、terminal 与 Worktree 按宿主指南迁移。归档可能删检出目录但保留分支，ignored/skip-worktree 文件须另行保全。完整迁移说明及当时七版矩阵见 `1394bc9:docs/maintaining.md`，发行与同包证据见[current-state](current-state.json)。
 
 ## 0.2.6：rc.5适配
 
-[来源审查](../rules/dsh-0.2.2-rc.5-review.json)固定 rc.4→rc.5 源码、npm 包和桌面 ASAR，[语义审查](../rules/dsh-0.2.2-rc.5-semantics-review.json)记录拒答和搜索选路。宿主入口调用 `plugin/lib/host-loader.js` 观测 loader，`host-tool-contract.js` 管参数、schema 和严格 JSON。真实宿主验收由 `tools/owned-live-host.mjs` 管启动与清理，`live-acceptance-receipt.mjs` 写回执。
+[来源审查](../rules/dsh-0.2.2-rc.5-review.json)固定 rc.4→rc.5 源码、npm 包和桌面 ASAR。[语义审查](../rules/dsh-0.2.2-rc.5-semantics-review.json)覆盖内容拒答和搜索路由。宿主 loader 观测在 `plugin/lib/host-loader.js`，严格 JSON 与 schema 在 `host-tool-contract.js`，实机生命周期与回执分别在 `tools/owned-live-host.mjs`、`tools/live-acceptance-receipt.mjs`。
 
-0.2.6 候选提交通过全部 12 项检查。CI 原始归档通过 macOS/Linux 的九项 UI、严格工具和鉴权验收，覆盖 rc.5 与 rc.3。固定业务两轮共 48 项符合预期，每轮 12 例静态漏报含 2 例服务依赖、5 例 HTTP 和 5 例 DOM，误报 0。随包 README 和 skill 保存构建时说明，交付状态及归档范围见[回执](current-state.json)。
+[current-state](current-state.json)记录 `283f2eb` 的 12 项 CI、同包 macOS/Linux 九项 UI、严格工具与鉴权。固定五制品重复两轮，共 48 项符合预期，每轮静态漏报 12 例（服务依赖 2、HTTP 5、DOM 5），误报 0。八版作者 CI 核四种输出、旧报告回放和超限退出。公开元数据核验保留成功来源，缺请求来源或空 npm README 时退出 3。
 
-八版作者 CI 覆盖四种输出、旧报告回放和超限退出。公开元数据核验覆盖双源部分失败、空 npm README 与显式单源模式，成功来源的结果会保留。
-
-在上述 UI 命令设置 `DSC_RC2_ARTIFACT` 和 `DSC_RC2_ARTIFACT_RECEIPT` 可复用同一归档与来源回执。按 PATH 选桌面或 npm 载体后，`node tools/liveshare-worker-acceptance.mjs` 核 IPC ready 与断开退出，范围限于 worker 生命周期。
+按 PATH 选载体后，`node tools/liveshare-worker-acceptance.mjs` 核 IPC ready 与断开退出，证据限 worker 生命周期。
