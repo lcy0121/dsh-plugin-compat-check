@@ -313,6 +313,7 @@ test("known coverage message templates translate without changing identifiers or
     for (const locale of ["en", "ko"]) {
       localeStore.setPreference(locale);
       for (const text of [
+        "已跳过超限文件 dist/agent/dsh-native.js（2512049 字节，上限 2097152 字节）",
         "settings 客户端尚未验证",
         "settings Context 绑定仅由语法推断",
         "Loader 有 3 个条目无法映射到包名",

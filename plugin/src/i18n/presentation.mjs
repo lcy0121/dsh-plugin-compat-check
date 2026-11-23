@@ -67,6 +67,14 @@ const explanationPatterns = [
 ];
 export function evidenceNote(value) {
   if (typeof value !== "string") return value;
+  const skipped =
+    /^已跳过超限文件 ([\s\S]+)（(\d+) 字节，上限 (\d+) 字节）$/.exec(value);
+  if (skipped)
+    return t("已跳过超限文件 {p0}（{p1} 字节，上限 {p2} 字节）", {
+      p0: skipped[1],
+      p1: skipped[2],
+      p2: skipped[3],
+    });
   for (const notice of MIGRATION_NOTICES) {
     if (value.startsWith("迁移提示：") && value.endsWith("；" + notice)) {
       const context = value.slice("迁移提示：".length, -(notice.length + 1));

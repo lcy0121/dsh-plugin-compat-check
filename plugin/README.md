@@ -6,7 +6,7 @@
 
 ## 版本与入口
 
-当前版本为 **0.2.6**。本版发布 DSH 0.2.2-rc.5 独立目录、内容拒答与搜索路由迁移提示，并将作者 CI 扩展至八版。兼容性界面支持中英韩、升级预检、依赖视图、人工处置和报告历史。
+本分支版本为 **0.2.7**。单个源码文件超过 2 MiB 时，兼容性页保留其他检查结果；在对应插件的「覆盖限制」中可查看跳过的文件、大小与上限。覆盖不完整的报告不会推进基线。
 
 已认证精确目录仍仅**0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3、0.2.2-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
 
@@ -15,10 +15,10 @@ npm 插件提供面板、详情/角标、`compat_check` 和 skill。CLI、安装
 ## 安装与使用
 
 ```sh
-# 从 npm 安装 0.2.6
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.6
+# 已发布的 npm 版本
+dsh plugin --profile <profile> add dsh-plugin-compat-check@latest
 # 或从已核验摘要的完整归档安装
-dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.6.tgz
+dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.7.tgz
 ```
 
 在安装所用profile的DSH中打开：**左下角“更多”（⋯）/用户头像 → 设置 → 内置插件 → 兼容性**。不默认是desktop；agent可调用`compat_check`。源码安装须[构建完整tgz](#从源码构建安装)。

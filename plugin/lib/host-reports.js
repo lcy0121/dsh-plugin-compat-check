@@ -94,6 +94,7 @@ export function createReportRuntime({
               const identity = await reportIdentity(
                 {
                   nodeModules: scope.nodeModules,
+                  resolutionInputs: options._cacheInputs.resolutionInputs || [],
                   context: {
                     ...scope,
                     currentVersion,
@@ -113,6 +114,9 @@ export function createReportRuntime({
                 },
                 { signal },
               );
+              // Never let two stale resolution samples compare equal at publication.
+              if (identity.resolutionChanged)
+                return Symbol("module resolution changed");
               const sameHost = active === scope.nodeModules;
               const itemListing = sameHost
                 ? await (async () => {
@@ -312,14 +316,21 @@ export function createReportRuntime({
 
       const extracted = await extractInWorker(
         nm.dir,
-        { catalog, analysisLimits: analysisWorkerOptions.limits },
-        analysisWorkerOptions.timeoutMs ?? 10000,
+        {
+          catalog,
+          analysisLimits: analysisWorkerOptions.limits,
+          trackResolutions: Boolean(options._cacheInputs),
+        },
+        analysisWorkerOptions.timeoutMs ?? 30000,
         { signal: options._cacheGuard?.signal },
       );
       if (state.disposed)
         return failureEnvelope("Plugin generation disposed / 已卸载");
-      if (options._cacheInputs)
+      if (options._cacheInputs) {
         options._cacheInputs.services = extracted.report.services;
+        options._cacheInputs.resolutionInputs = extracted.resolutionInputs;
+        delete extracted.resolutionInputs;
+      }
       const { sampleServices } = await import(
         pathToFileURL(join(kernel, "lib", "observation.mjs")).href
       );

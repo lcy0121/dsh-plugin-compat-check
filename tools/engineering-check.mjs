@@ -55,7 +55,7 @@ try {
         nodeVersion: process.versions.node,
         metrics,
         scope:
-          "Owned synthetic inputs only. Heap pressure covers a controlled 32 MiB policy and the actual extractor at the production 512/64 MiB and 10-second defaults. Not a whole-process RSS limit or platform certification.",
+          "Owned synthetic inputs only. Heap pressure covers a controlled 32 MiB policy and the extractor with 512/64 MiB heap limits and a 10-second test deadline. Not a whole-process RSS limit or platform certification.",
       },
       null,
       2,

@@ -341,11 +341,11 @@ export function run(options = {}) {
 export async function runAsync(options = {}, supervision = {}) {
   const analyze = async (opts) => {
     try {
-      const { timeoutMs = 10000, signal } = supervision;
+      const { timeoutMs = 30000, signal } = supervision;
       if (
         !Number.isSafeInteger(timeoutMs) ||
         timeoutMs <= 0 ||
-        timeoutMs > 10000
+        timeoutMs > 30000
       )
         throw new Error("CLI worker时间预算无效");
       const result = await runWorkerTask(

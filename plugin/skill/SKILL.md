@@ -1,11 +1,11 @@
 ---
 name: dsh-plugin-compat-check
-description: 0.2.6：检查已安装 DSH 插件与升级风险，排查未激活、界面消失或工具无响应。Use for installed DeepSeek Harness plugin compatibility and static upgrade previews. Includes exact DSH 0.2.2-rc.5 coverage, content refusal and search routing guidance.
+description: 0.2.7：检查已安装 DSH 插件与升级风险，排查未激活、界面消失或工具无响应。Use for installed DeepSeek Harness plugin compatibility and static upgrade previews. Includes exact DSH 0.2.2-rc.5 coverage, content refusal and search routing guidance.
 ---
 
 # dsh-plugin-compat-check
 
-当前版本**0.2.6**对**已安装DSH插件**给出兼容证据与限制。API发现引用真实`file:line`，loader/声明事实不补造行号。各入口共用内核，静态与进程内观测可有不同结论/基线；先核目标、版本、规则和采样身份。
+当前版本**0.2.7**对**已安装DSH插件**给出兼容证据与限制。API发现引用真实`file:line`，loader/声明事实不补造行号。各入口共用内核，静态与进程内观测可有不同结论/基线；先核目标、版本、规则和采样身份。源码文件超限时展开该插件的覆盖限制，核对文件与字节上限；其余结果可用，本轮不推进基线。
 
 ## 选择入口
 
@@ -58,7 +58,7 @@ node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.3 --upgra
 参考目录：0.2.1-rc.2 · SHA-256：90b4ae484ebc6660c53e5c9ad14ba657581534b30e8222c636c759e19587f743
 目录认证范围：0.2.1-rc.2；仅核验内置目录字节及对应精确版本的集成；不代表业务验收或运行时观测。
 
-工具版本: 0.2.6    证据覆盖有限: 4 个插件
+工具版本: 0.2.7    证据覆盖有限: 4 个插件
 结论: 可用 2    部分可用 1    不兼容 1    （其中 2 个「可用」没有已验证调用，不等于业务通过）
 ```
 

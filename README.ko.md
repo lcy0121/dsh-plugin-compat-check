@@ -6,7 +6,7 @@
 
 ## 버전과 진입점
 
-현재 버전은 **0.2.6**입니다. 독립 검토한 DSH 0.2.2-rc.5 카탈로그, 콘텐츠 거부·검색 라우팅 마이그레이션 안내, 8개 버전의 작성자 CI 매트릭스를 제공합니다. 중·영·한 UI에서 업그레이드 사전 검사, 의존 관계, 수동 검토와 보고서 이력을 사용할 수 있습니다.
+이 브랜치의 버전은 **0.2.7**입니다. 소스 파일 하나가 2 MiB를 초과해도 호환성 화면에 다른 검사 결과가 표시됩니다. 해당 플러그인의 분석 한계를 펼치면 건너뛴 파일의 경로, 크기와 한도를 확인할 수 있습니다. 검사가 불완전하면 기준 기록을 갱신하지 않습니다.
 
 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3, 0.2.2-rc.5**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
 
@@ -15,10 +15,10 @@ npm 플러그인은 화면, 상세/배지, `compat_check`, skill을 제공합니
 ## 설치와 사용
 
 ```sh
-# npm에서 0.2.6 설치
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.6
+# npm에 게시된 버전
+dsh plugin --profile <profile> add dsh-plugin-compat-check@latest
 # 또는 해시를 검증한 전체 아카이브로 설치
-dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.6.tgz
+dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.7.tgz
 ```
 
 설치한 profile을 사용하는 DSH에서 **왼쪽 아래 더 보기(⋯)/아바타 → 설정 → 내장 플러그인 → 호환성(兼容性)**을 엽니다. desktop으로 가정하지 마세요. 에이전트는 `compat_check`를 호출할 수 있습니다. 소스 설치에는 [완전한 tgz](plugin/README.md#从源码构建安装)가 필요합니다.

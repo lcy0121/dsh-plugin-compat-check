@@ -1,6 +1,6 @@
 # 规则与固定源码参考
 
-规则与目录适用于**0.2.6**。审查步骤见[维护指南](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md#api目录候选审查)，验收范围见[current-state](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。
+规则与目录适用于**0.2.7**。审查步骤见[维护指南](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/maintaining.md#api目录候选审查)，验收范围见[current-state](https://github.com/lcy0121/dsh-plugin-compat-check/blob/main/docs/current-state.json)。
 
 ## 文件与消费者
 

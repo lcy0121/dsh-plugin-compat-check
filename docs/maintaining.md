@@ -1,6 +1,6 @@
 # 维护指南
 
-当前版本为**0.2.6**。本文涵盖目录、规则、依赖和验收。操作见[指南](guide.md)，契约和待办见[Plan](Plan.md)，验收及分发回执见[current-state](current-state.json)。
+当前版本为**0.2.7**。本文涵盖目录、规则、依赖和验收。操作见[指南](guide.md)，契约和待办见[Plan](Plan.md)，验收及分发回执见[current-state](current-state.json)。
 
 ## 维护入口与语法覆盖
 
@@ -198,6 +198,10 @@ Node22/24、九项UI及问题联合验收按精确提交/归档核对；CI状态
 实际执行沿 PATH 选定的 carrier，npm CLI 解析同路径 app-boot，Desktop 用自身 Electron/ASAR。primary-runtime 属宿主 resources 布局。manager 核 registry/git/file 更新、启用失败、取消与 unexpected-package 回滚。rc.3 导入以合成 v3 归档核 owner 鉴权、持久化及卸载后 404，保持无 liveSession/Agent。
 
 dsh-doc、搜索/抓取计费、auth.sources、terminal 与 Worktree 按宿主指南迁移。归档可能删检出目录但保留分支，ignored/skip-worktree 文件须另行保全。完整迁移说明及当时七版矩阵见 `1394bc9:docs/maintaining.md`，发行与同包证据见[current-state](current-state.json)。
+
+## 0.2.7 大文件的部分报告
+
+源码读取在打开文件之前核对单文件上限。超限诊断保留到对应插件的覆盖限制。缓存核对源码、清单、patch 和控制输入的身份，并复验本次提取实际尝试的其他模块路径；普通刷新不需要重新解析整个源码图。整轮清单、元数据、worker 内存与截止时间仍有独立上限。
 
 ## 0.2.6：rc.5适配
 

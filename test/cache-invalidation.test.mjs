@@ -176,6 +176,14 @@ test("ordinary HTTP reports refresh after source and loader changes without forc
   await fs.mkdir(path.join(home, "profiles/B/node_modules"), {
     recursive: true,
   });
+  const large = path.join(nm, "large");
+  await fs.mkdir(large);
+  await fs.writeFile(
+    path.join(large, "package.json"),
+    JSON.stringify({ name: "large", dsh: {}, main: "large.js" }),
+  );
+  const largeFile = path.join(large, "large.js");
+  await fs.writeFile(largeFile, Buffer.alloc(2 * 1024 * 1024 + 1, 32));
   const script = `import assert from 'node:assert/strict';import fs from 'node:fs';import {apply} from ${JSON.stringify(pathToFileURL(path.resolve("plugin/index.js")).href)};
   const routes=new Map(),effects=[],entry={id:'slot-demo',disabled:false,options:{},fiber:{state:2}};let custom={ping(){}};
   const ctx={get:n=>n==='connection'?{requestRejection:()=>undefined}:n==='loader'?{entries:()=>[entry]}:n==='pluginManager'?{list:async()=>[{id:'slot-demo',packageName:'demo'}]}:n==='customService'?custom:undefined,inject:(deps,cb)=>{if(deps[0]!=='webServer')return;const off=cb({webServer:{register:r=>{routes.set(r.path,r);return()=>routes.delete(r.path)}}});if(off)effects.push(off);},effect:f=>{const off=f();if(off)effects.push(off);}};apply(ctx);
@@ -183,6 +191,12 @@ test("ordinary HTTP reports refresh after source and loader changes without forc
   async function waitFor(fn){let last;for(let i=0;i<200;i++){const r=await request();last=r;if(fn(r))return r;await new Promise(r=>setTimeout(r,20));}assert.fail('automatic refresh did not settle: '+JSON.stringify({plugins:last.report?.plugins,cache:last.cache}));}
   try{
     const first=await request();assert.equal(first.ok,true,first.error);assert.equal(first.report.plugins.demo.version,'1');
+    const limited=first.report.plugins.large.coverage;
+    assert.equal(limited.status,'limited');assert(limited.limitations.some(n=>n.includes('large.js')&&n.includes('2097153')&&n.includes('2097152')));
+    assert.equal(first.report.extraction.scanComplete,false);assert.equal(first.baseline.wrote,false);
+    assert.equal((await request()).cache.hit,true);
+    fs.writeFileSync(${JSON.stringify(largeFile)},'export const restored = true;');
+    await waitFor(r=>r.report?.extraction.scanComplete===true&&!r.report.plugins.large.coverage.limitations.some(n=>n.includes('large.js')));
     const meta=JSON.parse(fs.readFileSync(${JSON.stringify(path.join(pkg, "package.json"))}));meta.version='2';fs.writeFileSync(${JSON.stringify(path.join(pkg, "package.json"))},JSON.stringify(meta));
     const second=await waitFor(r=>r.report?.plugins.demo.version==='2');assert.notEqual(second.computedAt,first.computedAt);
     entry.disabled=true;await waitFor(r=>r.loaderCoverage?.rows[0]?.disabled===true);

@@ -1,6 +1,6 @@
 # 开发计划与维护约定
 
-当前版本为**0.2.6**，以 `lib/version.mjs` 为准。本文维护产品契约与待办。操作见[指南](guide.md)，验收流程见[维护指南](maintaining.md)，带日期的证据见[docs/current-state.json](current-state.json)。
+当前版本为**0.2.7**，以 `lib/version.mjs` 为准。本文维护产品契约与待办。操作见[指南](guide.md)，验收流程见[维护指南](maintaining.md)，带日期的证据见[docs/current-state.json](current-state.json)。
 
 ## 1. 项目定位与交付状态
 
@@ -69,6 +69,8 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 先复现再修，保留正反例，不重建快照求绿；`test/__baseline-versions.json`判据变更单独审查/提交。默认测试用只读profile副本，真实执行只清自有目录/PID组，账户/模型/外部写入分别授权。§6仅列待办，完成能力归入相应文档，历史细节留Git。移除运行文件前确认职责已替代，保留许可证和有效夹具。
 
 ## 4. 验收范围
+
+0.2.7 的宿主报告回归覆盖超限文件与正常插件共存、部分结果缓存、基线保护，以及文件缩小后的自动恢复。单个文件的覆盖说明见[指南](guide.md#日常检查与源码交付)。
 
 0.2.6 已发布至 [npm](https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.6) 和 [GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.6)，标签固定到 `f921287`。开发分支、main 和标签各 12 项 CI 全过。相同归档通过 macOS/Linux 宿主验收，公开下载及固定版本安装已核验。详情见[current-state](current-state.json)。新提交和归档按[交付流程](maintaining.md#同一制品发布核对)另验，Windows、用户现场和一般业务各以对应证据为准。
 

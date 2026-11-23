@@ -6,7 +6,7 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-The current version is **0.2.6**. It ships an independently reviewed DSH 0.2.2-rc.5 catalogue, content refusal and search routing migration guidance, and an eight-version author CI matrix. The Chinese, English and Korean UI includes upgrade previews, dependencies, manual reviews and report history.
+This branch contains **0.2.7**. When a source file exceeds 2 MiB, the compatibility page keeps the other results. Expand the affected plugin’s coverage limits to see the skipped path, file size and limit. An incomplete scan leaves the baseline in place.
 
 Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3 and 0.2.2-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
 
@@ -15,10 +15,10 @@ The npm plugin provides the page, details/badges, `compat_check` and skill. The 
 ## Install and use
 
 ```sh
-# Install 0.2.6 from npm
-dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.6
+# Published npm version
+dsh plugin --profile <profile> add dsh-plugin-compat-check@latest
 # Or install a complete archive after verifying its digest
-dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.6.tgz
+dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.7.tgz
 ```
 
 In the DSH instance using that profile, open **bottom-left More (⋯)/avatar → Settings → Built-in plugins → Compatibility (兼容性)**. Do not assume desktop. Agents can call `compat_check`; source installations require a [complete tgz](plugin/README.md#从源码构建安装).

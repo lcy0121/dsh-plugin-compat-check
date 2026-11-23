@@ -117,6 +117,7 @@ test("unreferenced temporary file vanishing after enumeration does not affect id
   const before = (await reportIdentity({ nodeModules: nm })).digest;
   const temp = path.join(state, "next.tmp");
   await fs.writeFile(temp, "pending");
+  const canonicalTemp = await fs.realpath(temp);
   const result = await new Promise((resolve, reject) => {
     const worker = new Worker(
       `
@@ -133,7 +134,7 @@ test("unreferenced temporary file vanishing after enumeration does not affect id
         eval: true,
         workerData: {
           nodeModules: nm,
-          temp,
+          temp: canonicalTemp,
           module: new URL("../lib/report-identity-worker.mjs", import.meta.url)
             .href,
         },
@@ -145,4 +146,47 @@ test("unreferenced temporary file vanishing after enumeration does not affect id
   });
   assert.equal(result.ok, true, result.error);
   assert.equal(result.value.digest, before);
+  await assert.rejects(fs.stat(temp), { code: "ENOENT" });
+});
+
+test("tracked opaque paths invalidate on resolution changes and ignore unrelated files", async (t) => {
+  const { extractWithProvenance } = await import("../lib/extract.mjs");
+  const { nm, pkg } = await fixture(t);
+  await fs.writeFile(
+    path.join(pkg, "package.json"),
+    JSON.stringify({ name: "demo", dsh: {}, main: "index.js" }),
+  );
+  await fs.writeFile(path.join(pkg, "index.js"), 'import "./payload.data";');
+  const capture = () =>
+    extractWithProvenance(nm, { trackResolutions: true }).resolutionInputs;
+  const observe = (resolutionInputs) =>
+    reportIdentity({ nodeModules: nm, resolutionInputs });
+  const missing = capture();
+  assert.equal((await observe(missing)).resolutionChanged, false);
+  await fs.writeFile(path.join(pkg, "unrelated.tmp"), "state");
+  assert.equal((await observe(missing)).resolutionChanged, false);
+  const file = path.join(pkg, "payload.data");
+  await fs.writeFile(file, "one");
+  assert.equal((await observe(missing)).resolutionChanged, true);
+  const present = capture();
+  const observedPresent = await observe(present);
+  await fs.writeFile(file, "two");
+  assert.equal((await observe(present)).resolutionChanged, false);
+  await fs.unlink(file);
+  assert.equal((await observe(present)).resolutionChanged, true);
+  assert.notEqual((await observe(missing)).digest, observedPresent.digest);
+});
+
+test("a link outside the package cannot make external source edits invalidate the report", async (t) => {
+  const { root, nm, pkg } = await fixture(t);
+  const external = path.join(root, "external.js");
+  await fs.writeFile(external, "one");
+  await fs.symlink(external, path.join(pkg, "external.js"));
+  const identity = async () =>
+    (await reportIdentity({ nodeModules: nm, resolutionInputs: [] })).digest;
+  const original = await identity();
+  await fs.writeFile(external, "different bytes");
+  assert.equal(await identity(), original);
+  await fs.unlink(path.join(pkg, "external.js"));
+  assert.notEqual(await identity(), original);
 });

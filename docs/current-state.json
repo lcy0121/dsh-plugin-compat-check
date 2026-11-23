@@ -1,8 +1,8 @@
 {
-  "toolVersion": "0.2.6",
-  "recordedAt": "2026-11-20T13:37:30.865Z",
+  "toolVersion": "0.2.7",
+  "recordedAt": "2026-11-23T11:09:26.070Z",
   "testFiles": 101,
-  "tests": 1366,
+  "tests": 1368,
   "repositoryFiles": {
     "total": 443,
     "fixtures": 100,

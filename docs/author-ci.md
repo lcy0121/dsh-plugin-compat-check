@@ -1,6 +1,6 @@
 # 插件作者CI
 
-**0.2.6** 的作者 CLI 对同一已构建目录取只读快照，再按版本比较 API。目标须含第三方 npm 包名、精确版本、对象形式的 `dsh` 和交付代码。拒绝 `node_modules`、链接及特殊文件。扫描离线运行，无须安装目标依赖、启动宿主或读取用户 profile。
+**0.2.7** 的作者 CLI 对同一已构建目录取只读快照，再按版本比较 API。目标须含第三方 npm 包名、精确版本、对象形式的 `dsh` 和交付代码。拒绝 `node_modules`、链接及特殊文件。扫描离线运行，无须安装目标依赖、启动宿主或读取用户 profile。
 
 ```sh
 node tools/author-ci.mjs --package ./dist-plugin > compatibility.json
