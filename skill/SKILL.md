@@ -1,15 +1,15 @@
 ---
 name: dsh-plugin-compat-check
-description: 0.2.7：检查已安装 DSH 插件与升级风险，排查未激活、界面消失或工具无响应。Use for installed DeepSeek Harness plugin compatibility and static upgrade previews. Includes exact DSH 0.2.2-rc.5 coverage, content refusal and search routing guidance.
+description: 0.2.7：检查已安装 DSH 插件的兼容性与升级风险，排查界面消失、工具无响应或超大源码导致的部分报告。Use for installed plugin checks, coverage limits and static upgrade previews.
 ---
 
 # dsh-plugin-compat-check
 
-当前版本**0.2.7**对**已安装DSH插件**给出兼容证据与限制。API发现引用真实`file:line`，loader/声明事实不补造行号。各入口共用内核，静态与进程内观测可有不同结论/基线；先核目标、版本、规则和采样身份。源码文件超限时展开该插件的覆盖限制，核对文件与字节上限；其余结果可用，本轮不推进基线。
+**0.2.7** 检查已安装的 DSH 插件。先确认 profile、目标版本、规则与采样身份。API 发现引用真实 `file:line`，loader/声明不补造行号。静态与进程内观测可产生不同结论及基线。
 
 ## 选择入口
 
-当前会话有`compat_check`时优先调用，返回普通`report`、baseline/cache、toolVersion和exitCode；升级模式返回`upgradePreview`，普通report为null。无工具时定位含`bin/compat-check.mjs`、`lib/`、`rules/`的仓库，npm插件包没有CLI bin，不支持npx。根依赖缺失时在授权范围内运行`npm ci --ignore-scripts`。
+优先调用 `compat_check`。普通检查返回 report、baseline/cache、toolVersion、exitCode；预检返回 upgradePreview，report 为 null。无工具时在含 bin/compat-check.mjs、lib/、rules/ 的仓库运行 CLI。npm 包没有 CLI bin，不支持 npx。经授权可用 `npm ci --ignore-scripts` 安装根依赖。
 
 先核实际profile，不默认desktop；无参tool与设置页按宿主启动身份定位，冲突时用`compat_check({"profile":"my-profile"})`或CLI显式路径。Windows盘符/UNC有路径回归，仍须实机复验。profile位于`${DSH_HOME:-~/.dsh}/profiles/<name>`。0.2.1-rc.3/rc.5及0.2.2-rc.1/rc.2/rc.3/rc.5界面入口：左下角“更多”/用户头像→设置→内置插件→兼容性；折叠不等于激活失败。界面支持中英韩，原始证据和JSON不翻译。
 
@@ -34,7 +34,7 @@ node <repo>/bin/compat-check.mjs --nm <profile或node_modules> --no-baseline --j
 | `--issue-report` | 生成Markdown，不读写基线，与json/quiet互斥 |
 | `--rules <json>` / `--catalog <json>` | 覆盖规则 / 参考目录，不授予认证 |
 
-普通检查不执行目标或联网，但默认写自身基线：`$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`。一次性检查用no-baseline，dry-run仍读取并比较。失败/不完整不推进，旧或损坏原件不覆盖。
+普通检查离线读取源码，默认写 `$DSH_HOME/dsh-plugin-compat-check/baseline.<profile>.<path-hash>.<mode>.json`。单个源码超过 2 MiB 时，展开受影响插件的覆盖限制，报告路径、实际字节数和上限。其余文件继续检查，部分报告可缓存。仅完整成功的检查可推进基线，旧或损坏原件保留。
 
 ## 升级前静态对比
 
@@ -71,13 +71,13 @@ node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.3 --upgra
 | 2 | 不兼容，保留致命发现类别与依据 |
 | 3 | 工具/输入错误，本次无法判定，不能称插件不兼容 |
 
-插件数0也不等于全部正常，先核路径；保留原退出码，后续命令不可覆盖。报告有确定性、影响和覆盖三个独立维度：
+插件数为 0 时先核路径。保留原退出码，分别解释确定性、影响与覆盖。
 
 - `certain`表示证据足以支持该发现，可来自明确静态事实或合格观测；`suspected`必须保留疑似。过滤/守卫/弃权不冒充已验证调用。
 - `impactBasis=measured`须有对应实测依据，inferred仅为推断；certain不表示业务影响已实测，缺字段不视为measured。
 - `vacuous=true`表示未发现冲突且verifiedCalls=0，不表示没有依赖/客户端功能。逐项转述coverage；源码解析、读取、动态绑定和预算诊断不可省略。
 
-发现保留严重度、类别、API、真实位置、依据与下一步，不猜替代API或修复版本。名字无调用点不算证据；业务须实际操作并核请求/持久化/UI，元素出现、激活或日志干净不算通过。
+逐条注明严重度、类别、API、位置、依据与下一步。实际业务须核请求、持久化或 UI；避免根据名字、激活或干净日志猜测替代 API 和修复版本。
 
 ## 运行时、目录与声明
 
@@ -87,7 +87,7 @@ node <repo>/bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.3 --upgra
 
 可靠映射且启用的FAILED/PENDING loader才构成相应fatal实测发现。必需inject须合格同目标观测明确absent才推断激活障碍；目录缺项或未采样不证明缺失。可选/子作用域不自动阻断整插件；present服务的方法缺失另判。provide只是候选，不借业务/loader答案倒填服务观测，try/catch不是能力证明。
 
-普通检查从已登记目录中选不高于目标的最新版本；低于最旧目录或目标未知时取0.2.0-rc.2，显式catalog优先。0.2.2-rc.2/rc.3分别使用自己的目录；未来版本使用参考目录仍属未认证。报告catalog保留目标/参考版本、摘要、selection、verified、certifiedVersions及warning。未来/回退/覆盖目录未经认证；摘要不符或同名包重复安装明确无法判定。verified只证明登记目录匹配，不是业务认证。
+普通检查选择不高于目标的最新登记目录。目标未知或低于最旧版本时用 0.2.0-rc.2，显式 catalog 优先。catalog 保留目标/参考版本、摘要、selection、verified、certifiedVersions、warning。回退、未来版本和自定义目录均未经认证。摘要不符或同名包重复安装时无法判定。verified 仅确认目录匹配。
 
 DSH≥0.2.1-rc.1优先自有engines.dsh，仅字段缺失回退官方peer；旧目标保留peer规则和engines建议。非法/空范围仍报风险，peer的workspace:^/~/*按当前精确版本处理，engines的workspace不放行。声明冲突为推断，不说成实际加载失败。
 
@@ -117,7 +117,7 @@ HTTP/tool的reviews是独立人工记录，pending/reviewed/false-positive/fixed
 
 仓库`tools/functional-health.mjs`默认review；仅在用户授权所选制品安装、执行及HTTP/DOM测量后加run。验USTAR字节SHA-256、包名/版本和本机DSH，不接作者脚本。最多32项、请求/导航3秒、响应64KiB、整轮180秒，只测自有同源GET/只读DOM；超时、取消、断言或清理失败不算成功。导入/清单不构成执行授权，不借用户账户/模型。
 
-市场安装/恢复故障另见docs/upstream-verification.md；本工具结论不能证明市场操作完成，须分别核写盘、HTTP及激活。
+市场安装与恢复须分别核写盘、HTTP 和激活，见 docs/upstream-verification.md。
 
 ## 故障分享与交付事实
 
@@ -128,6 +128,6 @@ report_status=$?
 
 不额外启动宿主，不读写基线；仍可能读旁置probe。报告省略绝对路径、原始日志/源码/探针/基线，保留包名及包内位置；常见凭据字段隐藏不保证完全脱敏，预览后由用户决定分享。命令占位符须替换，生成文本不授权上传或发帖。
 
-本版保留Cordis Core4.1、Loader/Include1.1及工具作用域适配。无关状态写入不使缓存失效，源码/声明变化仍会；非法JSON证据明确失败。目录未收录只表示覆盖不足，不据此称方法缺失。
+无关状态写入不使缓存失效，源码或声明变化会触发重新检查。非法 JSON 报错，目录缺项只说明覆盖有限。
 
-用 `toolVersion` 或 CLI `--version` 核对实际运行版本。docs/current-state.json 按提交与归档记录 macOS/Linux 验收和分发证据。Windows 与一般业务需独立验收。操作和维护见 docs/guide.md、docs/maintaining.md。
+用 `toolVersion` 或 CLI `--version` 核对运行版本。docs/current-state.json 按提交与归档记录验收。Windows 与一般业务需独立验收。操作和维护见 docs/guide.md、docs/maintaining.md。

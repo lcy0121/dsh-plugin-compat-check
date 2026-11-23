@@ -4,7 +4,7 @@
 
 ## 1. 项目定位与交付状态
 
-检查已安装DSH插件，提供源码位置、依据和覆盖限制。已发布功能包括 0.2.2-rc.5 精确目录、内容拒答与搜索路由迁移提示、八版作者矩阵。声明放行、激活或无发现不等于业务正常。公开分发见[npm](https://www.npmjs.com/package/dsh-plugin-compat-check)和[GitHub Releases](https://github.com/lcy0121/dsh-plugin-compat-check/releases)。
+本工具检查已安装的 DSH 插件，报告源码位置、判断依据与覆盖限制。0.2.7 已修复超大源码导致整个兼容性页报错的问题。[npm 插件](https://www.npmjs.com/package/dsh-plugin-compat-check)与 [GitHub Releases](https://github.com/lcy0121/dsh-plugin-compat-check/releases) 提供发行入口。
 
 npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin、不支持npx。CLI、安装检查、批量、作者CI和健康执行器从仓库工作区运行；源码安装须[构建完整tgz](../plugin/README.md#从源码构建安装)。
 
@@ -14,7 +14,7 @@ npm交付面板、详情/角标、`compat_check`、skill和内核，无CLI bin�
 
 AST 按 host/client/shared 保留真实位置，按宿主规则解析入口。动态、变异、遮蔽、逃逸、异步或超限时保守推断或弃权。能力守卫须控制实际调用。静态分析不执行目标、保存 prompt 或遍历任意服务。详见[语义](guide.md#参数与生命周期语义)及[提取](maintaining.md#提取器与探针维护)。
 
-本版登记[0.2.2-rc.5](../rules/dsh-0.2.2-rc.5-review.json)，宿主109服务/640方法、客户端8/46，保留旧目录。0.2.2-rc.4用于独立来源差分。语义边界和实机回执见[维护指南](maintaining.md#026rc5适配)。
+已登记[0.2.2-rc.5](../rules/dsh-0.2.2-rc.5-review.json)，宿主109服务/640方法、客户端8/46，保留旧目录。0.2.2-rc.4用于独立来源差分。语义边界和实机回执见[维护指南](maintaining.md#026rc5适配)。
 
 历史目录修正及推理槽位 `rawText`、`text` 的使用见[来源记录](../rules/dsh-0.2.1-rc.5-review.json)和[语义指南](guide.md#参数与生命周期语义)。
 
@@ -28,7 +28,7 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 [报告schema1](../lib/contracts.mjs)：CLI kind=`plugin-compat-check/result`，HTTP kind=`plugin-compat-check/report`；tool保留summary/text及report/baseline/cache。不兼容变更升schema，普通退出码为**0未发现冲突、1部分可用或未知、2不兼容、3工具/输入错误**。
 
-缓存按目标/输入/观测身份隔离，有界single-flight及worker队列；失效结果不得发布或写基线，刷新失败保留旧成功及错误。提取与计算受独立worker监督，返回后重核身份再提交；超限报工具错误，不裁证据求成功。[资源预算](guide.md#日常检查与源码交付)集中维护。
+缓存按目标/输入/观测身份隔离，有界single-flight及worker队列；失效结果不得发布或写基线，刷新失败保留旧成功及错误。提取与计算受独立worker监督，返回后重核身份再提交；单文件超限保留部分报告，整轮硬上限耗尽则报工具错误。[资源预算](guide.md#日常检查与源码交付)集中维护。
 
 筛选/分页保留完整导出。issue-report不读写基线，终端转义低信任字段；报告须预览后手动分享。
 
@@ -70,9 +70,9 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ## 4. 验收范围
 
-0.2.7 的宿主报告回归覆盖超限文件与正常插件共存、部分结果缓存、基线保护，以及文件缩小后的自动恢复。单个文件的覆盖说明见[指南](guide.md#日常检查与源码交付)。
+0.2.7 在 `905a982` 的 28 插件样本上返回可缓存的部分报告，保留上次基线。回归还覆盖文件缩小后的重新分析。[操作指南](guide.md#日常检查与源码交付)
 
-0.2.6 已发布至 [npm](https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.6) 和 [GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.6)，标签固定到 `f921287`。开发分支、main 和标签各 12 项 CI 全过。相同归档通过 macOS/Linux 宿主验收，公开下载及固定版本安装已核验。详情见[current-state](current-state.json)。新提交和归档按[交付流程](maintaining.md#同一制品发布核对)另验，Windows、用户现场和一般业务各以对应证据为准。
+同一归档通过 macOS 三种宿主组合与 Linux rc.3/rc.5 的九项 UI 门禁。[验收记录](current-state.json)按提交和归档区分，正式发布沿用[同一制品流程](maintaining.md#同一制品发布核对)。
 
 ## 5. 验证入口
 
@@ -80,8 +80,8 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ## 6. 后续工作
 
-仅列未完成事项，优先级不是漏洞评级。已完成的0.2.6适配见[维护指南](maintaining.md#026rc5适配)，本仓库issue #7–#10的修复见[问题回归](maintaining.md#用户issue修订与回归)。CI和平台验收以对应提交及同一归档为准。
+这里只列未完成事项。
 
 1. **P1：继续交互评测与小规模真实用户试用。** 复核定位、字体、展开、主题/窄容器及误读、失败、误报与操作耗时；联系、收集、公开分别授权，不默认遥测。
-2. **P2：等待上游修复与发行入口更新。** 2026-11-20[复查](upstream-verification.md#2026-11-20复查)确认 dshmarket 1.73.25 恢复日志已保留错误码；真实重启/自救、新装告警和1024 npm映射仍待复验，awesome收录已核。反馈另取授权。
+2. **P2：等待上游修复与发行入口更新。** [11 月 23 日复查](upstream-verification.md#2026-11-23入口复查)确认 dshmarket 1.80.0 已发行。待复验新版真实重启恢复、自救和新装告警，并跟进 1024 的 npm 映射。对外反馈另行授权。
 3. **P2：Windows真实验收（依环境条件暂缓）。** 优先补本仓库issue #7–#10的Windows10 / DSH rc.5同一制品现场验证，记录版本、路径、启动方式及修复前后结果；同时验证安装、回收、权限、打包/诊断和自有资源清理。路径模拟及其它平台不替代实机结果，环境具备前保持未验收。

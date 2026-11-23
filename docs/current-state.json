@@ -1,12 +1,12 @@
 {
   "toolVersion": "0.2.7",
-  "recordedAt": "2026-11-23T11:09:26.070Z",
+  "recordedAt": "2026-11-23T12:27:39.297Z",
   "testFiles": 101,
   "tests": 1368,
   "repositoryFiles": {
-    "total": 443,
+    "total": 446,
     "fixtures": 100,
-    "other": 343
+    "other": 346
   },
   "verification": {
     "platform": "darwin",
@@ -38,199 +38,61 @@
       "Private execution profiles are not OS sandboxes; account/model execution needs its own authorization.",
       "CI applies to the exact GitHub commit; formal publication must use the accepted archive."
     ],
-    "publication025": {
-      "status": "published",
-      "version": "0.2.5",
-      "tag": "v0.2.5",
-      "sourceCommit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
-      "sourceSha256": "66bb025175c120358da1b1895db5456afff4f6c76c7a79c8c149b0dba6df52e4",
-      "verifiedAt": "2026-11-14T20:00:50.748330+00:00",
-      "artifact": {
-        "filename": "dsh-plugin-compat-check-0.2.5.tgz",
-        "sha256": "3d5cc174052195e8401c86812a3609ef54cd90489470dff2b3bbafd5e270a1c2",
-        "shasum": "862b5d90c2b115fb213e98a5f15be2dd4a06a717",
-        "integrity": "sha512-/M72CIB66aRvoAf2l494PCybFkDpb1IWBFz95btP/O3GODUnjZdWtHzFQUHWm6wF/tuXC/WGqWPLx/7PqAgp9w==",
-        "bytes": 437727,
-        "files": 86
+    "regression027": {
+      "version": "0.2.7",
+      "verifiedAt": "2026-11-23T11:33:55.386Z",
+      "sourceCommit": "905a982941f801327e4e18f8d80958c50a9783ed",
+      "sourceSha256": "a37169e5d26f0095cb035ad68faad9bcb97148901f25d2f4bae28d169a7849c1",
+      "artifactSha256": "a42da99a2e5e6e69aa57de24f6cfdb83b4d5c83a539e7149b4576bedaa7da164",
+      "ci": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/45162841269",
+      "checksPassed": 12,
+      "linuxHosts": 8,
+      "profileRegression": {
+        "version": "0.2.7",
+        "rows": 28,
+        "elapsedMs": 47516,
+        "partial": true,
+        "cacheHit": true,
+        "baselineAdvanced": false,
+        "oversizedPathAndBytesRendered": true
       },
-      "ci": {
-        "checks": 33,
-        "allPassed": true,
-        "runs": [
-          "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/43631740681",
-          "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/43632972687",
-          "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/43634028525"
-        ],
-        "scope": "Eleven jobs each for dev, merged main and tag; same release commit. Post-publication record checks are separate."
-      },
-      "tests": [
-        {
-          "node": "22.19.0",
-          "tests": 1359,
-          "pass": 1348,
-          "fail": 0,
-          "skipped": 11,
-          "mandatoryOriginalValidatorTests": 106,
-          "mandatorySkip": 0
-        },
-        {
-          "node": "24.9.0",
-          "tests": 1359,
-          "pass": 1348,
-          "fail": 0,
-          "skipped": 11,
-          "mandatoryOriginalValidatorTests": 106,
-          "mandatorySkip": 0
-        }
-      ],
-      "hostAcceptance": [
-        {
-          "platform": "macOS/arm64",
-          "dshVersion": "0.2.2-rc.2",
-          "node": "26.13.1",
-          "sourceCommit": "105f9283e7cf3ec50f38adaf83c30b011b55f249",
-          "summarySha256": "3954dff6a0737a9cba0645874c5ddf419f977a087dda43742b0ce641c1a268e5",
-          "liveSha256": "0502c9217b422933349f570f04f4de14788db1ee7176689163bc6dd2195e3b8a",
-          "authSha256": "598e12f7c289389f9ebf9664f71e57ac4b8b4255073e28031d547a18aa844f64",
-          "nineUiSuites": true,
-          "authAndCleanup": true
-        },
-        {
-          "platform": "Linux/x64",
-          "dshVersion": "0.2.2-rc.2",
-          "node": "24.9.0",
-          "sourceCommit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
-          "summarySha256": "d6d6bf42faa251df80bf67a75a238f86f70396b68fd1602d4f10de813d0c8d86",
-          "liveSha256": "30e0ad84ae8e2a5159a96a5b0edc5617ab541bf67d0370aa1c979569cbec7032",
-          "authSha256": "df914453ee60339bcd25d384fdd3bc6bd8f8f15675d03a0efdc604ea8d640d6c",
-          "nineUiSuites": true,
-          "authAndCleanup": true
-        },
-        {
-          "platform": "macOS/arm64",
-          "dshVersion": "0.2.2-rc.3",
-          "node": "26.13.1",
-          "sourceCommit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
-          "summarySha256": "5cb06ea9b4032d1ce8f9469976fbe3f6e087b12227b2919eba9d8d44c49b1160",
-          "liveSha256": "bcd50368913b581469779a81d4ed8f67091b85a8d934777b337e93a9e40abc61",
-          "authSha256": "13b2e19c412900195269be6c8df8e819d11f2ec474f145eea9e6f9c3dc838e6e",
-          "nineUiSuites": true,
-          "authAndCleanup": true
-        },
-        {
-          "platform": "Linux/x64",
-          "dshVersion": "0.2.2-rc.3",
-          "node": "24.9.0",
-          "sourceCommit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
-          "summarySha256": "8ab52bb38dc2f4863bef54f92e5b586ad54e9db8417000af0fd3b5ee6a400ee3",
-          "liveSha256": "c186c6301b896efce7d17857f80268e9a35ad17f18560f0590cf9820b6020786",
-          "authSha256": "298ab9940c45e0c41ca996e287f822a6a71a2a520c19cad83bd04db4a6fca4aa",
-          "nineUiSuites": true,
-          "authAndCleanup": true
-        }
-      ],
-      "hostScope": "Same exact archive, real npm DSH hosts and owned Chrome/profile. macOS rc2 source105f928 and final source89dbe2c archives are byte-identical; only the paused-Chrome test changed. No full Electron GUI, Windows, user-profile or general-business certification.",
-      "public": {
-        "github": {
-          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.5",
-          "publishedAt": "2026-11-14T19:48:05Z",
-          "publicTarballSha256Verified": true
-        },
-        "npm": {
-          "url": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.5",
-          "version": "0.2.5",
-          "latest": "0.2.5",
-          "tarball": "https://registry.npmjs.org/dsh-plugin-compat-check/-/dsh-plugin-compat-check-0.2.5.tgz",
-          "publicTarballSha256Verified": true
-        },
-        "publicInstallation": {
-          "status": "checked",
-          "installedVersion": "0.2.5",
-          "usableRuntimeObservation": true,
-          "tempProfileRemoved": true,
-          "reportSha256": "73e51f2d1cd1e5d5ee75046178eb3ac9b69efc6f9b55223999db2e2c3ae3d7f0",
-          "scope": "Fixed public-registry installation and actual owned-host probe; no production account/model or general-business certification."
-        }
-      },
-      "receipt": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/download/v0.2.5/RELEASE-VERIFICATION.json",
-      "businessLimits": "Historical fixed5 artifacts/24 expectations per host retain12 unflagged failures; not a new same-archive business rerun. Detailed prior receipts:8a1edbc:docs/current-state.json. No findings never certifies business success.",
-      "retainedFailure": {
-        "runId": 43630738176,
-        "jobId": 132557363632,
-        "actualMs": 9999.578298,
-        "timeoutMs": 10000,
-        "state": "T",
-        "cleaned": true,
-        "fixCommit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
-        "scope": "Test-only comparison rounds up to timer milliseconds; early whole-millisecond failure still rejected. Production code and timeout budgets unchanged."
-      },
-      "scope": "Historical 0.2.5 distribution and exact-artifact acceptance."
-    },
-    "historical025": {
-      "commit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
-      "path": "docs/current-state.json",
-      "scope": "Pre-publication preparation, earlier3f949 archive, upstreamNov15 monitoring and prior local/Linux receipts retained at this immutable Git revision. They do not replace the published3d5cc archive acceptance."
-    },
-    "historicalPublication024": {
-      "version": "0.2.4",
-      "tag": "v0.2.4",
-      "sourceCommit": "06b1b2e530c665e19b400bd639269f8a386a7a35",
-      "artifactSha256": "85b8b25f171a3dfe5bab834ff42ce3f94887d60f700c7c5978034326bd7e1d81",
-      "details": "cdbed0e:docs/current-state.json",
-      "scope": "Historical exact0.2.4 public release, macOS/Linux same artifact and CI receipts retained in Git; no certification of0.2.5."
-    },
-    "development026": {
-      "sourceCommit": "283f2eb8791ebd81bf7b20fab9f2134ad0167d81",
-      "sourceSha256": "25e5f9e5bc90163eb50a2b667f4c2abb1275dd6e49f6ba82316d184be9c46e00",
-      "artifact": {
-        "filename": "dsh-plugin-compat-check-0.2.6.tgz",
-        "sha256": "44b35087d1bf77b888f376812fab23ca5989429790e6f409916acb27cb189020"
-      },
-      "githubActions": {
-        "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/44742343942",
-        "checksPassed": 12,
-        "linuxVersions": 8
-      },
-      "hosts": [
+      "cliExit": 1,
+      "uiGatesPerHost": 9,
+      "uiHosts": [
         {
           "platform": "macOS",
           "arch": "arm64",
           "carrier": "Desktop ASAR",
           "dsh": "0.2.2-rc.5",
-          "node": "24.21.0",
-          "uiGates": 9
+          "node": "24.21.0"
         },
         {
           "platform": "macOS",
           "arch": "arm64",
           "carrier": "npm",
           "dsh": "0.2.2-rc.5",
-          "node": "26.13.1",
-          "uiGates": 9
+          "node": "26.13.1"
         },
         {
           "platform": "macOS",
           "arch": "arm64",
           "carrier": "npm",
           "dsh": "0.2.2-rc.3",
-          "node": "26.13.1",
-          "uiGates": 9
+          "node": "26.13.1"
         },
         {
           "platform": "GitHub Actions Linux",
           "arch": "x64",
           "carrier": "npm",
           "dsh": "0.2.2-rc.5",
-          "node": "24.9.0",
-          "uiGates": 9
+          "node": "24.9.0"
         },
         {
           "platform": "GitHub Actions Linux",
           "arch": "x64",
           "carrier": "npm",
           "dsh": "0.2.2-rc.3",
-          "node": "24.9.0",
-          "uiGates": 9
+          "node": "24.9.0"
         }
       ],
       "separateHostChecks": {
@@ -244,21 +106,22 @@
         ],
         "linuxRc5LiveShareWorker": true
       },
-      "officialSourceAssertions": {
-        "passed": 110,
-        "archives": 5
-      },
-      "authorMatrix": {
-        "cells": 8,
-        "maxCellBytes": 223150,
-        "maxFormattedBytes": 7668588,
-        "ninthVersionExit": 3,
-        "legacyReplayExit": 1
-      },
+      "officialSourceAssertions": [
+        {
+          "node": "22.19.0",
+          "passed": 112,
+          "archives": 5
+        },
+        {
+          "node": "24.9.0",
+          "passed": 112,
+          "archives": 5
+        }
+      ],
       "business": {
-        "sourceCommit": "283f2eb8791ebd81bf7b20fab9f2134ad0167d81",
+        "sourceCommit": "905a982941f801327e4e18f8d80958c50a9783ed",
         "manifestSha256": "c5460b5b4a71f7e62684308885c4d70715c774d41a5d4a6cea085e46481564df",
-        "reportSha256": "e58fb9f0277fcc655df52596237b5e828090904f4064ddbeefbfbf28e7731859",
+        "reportSha256": "397fc0b794cdab999462d43bf0ad78ba68436b5957346f9ab2e448c171add09d",
         "pinnedArtifacts": 5,
         "holdoutFamilies": 2,
         "casesPerRun": 24,
@@ -272,113 +135,46 @@
         "driverErrors": 0,
         "validationErrors": 0
       },
-      "previousLocalAcceptance": "4736552:docs/current-state.json",
-      "scope": "CI and macOS/Linux host acceptance bind to this commit and archive. Subsequent bundled documentation changes require fresh acceptance."
+      "scope": "Exact 905a982 archive. The desktop-file regression used an isolated host context. Later commits and repacked archives need their own acceptance."
     },
-    "publication026": {
-      "status": "published",
-      "version": "0.2.6",
-      "tag": "v0.2.6",
-      "sourceCommit": "f921287b182c4bae8d8a4708de2c6caa7a9a7df7",
-      "sourceSha256": "23dd8615f701b71cca45104e2afbec7a9f5ca43c622adf6af8d36cc6fb1f2200",
-      "verifiedAt": "2026-11-20T14:48:06.508Z",
-      "artifact": {
-        "filename": "dsh-plugin-compat-check-0.2.6.tgz",
-        "sha256": "b311026c3ae3d0d80d10e585b3daf60d8a688d0db699f10c62a94796e928fde2",
-        "bytes": 459392,
-        "shasum": "8ad4ad9a753fff49a0c8612a123b851aa7e1b348",
-        "integrity": "sha512-u32OxI0FQkdSa+XHTdyIYtBrPPO7LzZhroeIwCbEPWsAyiQ1j8vX3+W+9jqLx4SW1SzY22OXrXWsMf9nMwcD9w=="
-      },
-      "ci": {
-        "runs": [
-          {
-            "role": "dev",
-            "ref": "0.2.6-dev",
-            "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/44746690962",
-            "checksPassed": 12
-          },
-          {
-            "role": "main",
-            "ref": "main",
-            "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/44749042090",
-            "checksPassed": 12
-          },
-          {
-            "role": "tag",
-            "ref": "v0.2.6",
-            "run": "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/44753069431",
-            "checksPassed": 12
-          }
-        ],
-        "checksPassed": 36,
-        "linuxVersions": 8
-      },
-      "hostAcceptance": [
+    "publicationHistory": {
+      "details": "https://github.com/lcy0121/dsh-plugin-compat-check/blob/a688eb948ffbea68d045f3b0686051d4c9baa8fb/docs/current-state.json",
+      "scope": "Dated publication receipts. Full historical development, acceptance, CI, installation and failure records are preserved at the immutable revision above.",
+      "releases": [
         {
-          "platform": "macOS",
-          "arch": "arm64",
-          "carrier": "Desktop ASAR",
-          "dsh": "0.2.2-rc.5",
-          "node": "24.21.0",
-          "uiGates": 9
+          "version": "0.2.4",
+          "tag": "v0.2.4",
+          "sourceCommit": "06b1b2e530c665e19b400bd639269f8a386a7a35",
+          "artifactSha256": "85b8b25f171a3dfe5bab834ff42ce3f94887d60f700c7c5978034326bd7e1d81",
+          "details": "cdbed0e:docs/current-state.json"
         },
         {
-          "platform": "macOS",
-          "arch": "arm64",
-          "carrier": "npm",
-          "dsh": "0.2.2-rc.5",
-          "node": "26.13.1",
-          "uiGates": 9
+          "version": "0.2.5",
+          "tag": "v0.2.5",
+          "sourceCommit": "89dbe2cc8a85da6b6ee8fd914a7d08c4f0962df9",
+          "verifiedAt": "2026-11-14T20:00:50.748330+00:00",
+          "receipt": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/download/v0.2.5/RELEASE-VERIFICATION.json",
+          "artifactSha256": "3d5cc174052195e8401c86812a3609ef54cd90489470dff2b3bbafd5e270a1c2",
+          "github": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.5",
+          "npm": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.5"
         },
         {
-          "platform": "macOS",
-          "arch": "arm64",
-          "carrier": "npm",
-          "dsh": "0.2.2-rc.3",
-          "node": "26.13.1",
-          "uiGates": 9
-        },
-        {
-          "platform": "GitHub Actions Linux",
-          "arch": "x64",
-          "carrier": "npm",
-          "dsh": "0.2.2-rc.5",
-          "node": "24.9.0",
-          "uiGates": 9
-        },
-        {
-          "platform": "GitHub Actions Linux",
-          "arch": "x64",
-          "carrier": "npm",
-          "dsh": "0.2.2-rc.3",
-          "node": "24.9.0",
-          "uiGates": 9
-        }
-      ],
-      "public": {
-        "github": {
-          "url": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.6",
-          "publishedAt": "2026-11-20T14:47:35Z",
-          "publicTarballSha256Verified": true
-        },
-        "npm": {
-          "url": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.6",
           "version": "0.2.6",
-          "latest": "0.2.6",
-          "tarball": "https://registry.npmjs.org/dsh-plugin-compat-check/-/dsh-plugin-compat-check-0.2.6.tgz",
-          "publicTarballSha256Verified": true
-        },
-        "publicInstallation": {
-          "status": "checked",
-          "installedVersion": "0.2.6",
-          "dshVersion": "0.2.2-rc.5",
-          "usableRuntimeObservation": true,
-          "tempProfileRemoved": true,
-          "reportSha256": "86dafba066c3256393da8b7570bff2ae0fc2ed31027a0debd04a3f3dba0e12b5"
+          "tag": "v0.2.6",
+          "sourceCommit": "f921287b182c4bae8d8a4708de2c6caa7a9a7df7",
+          "verifiedAt": "2026-11-20T14:48:06.508Z",
+          "receipt": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/download/v0.2.6/RELEASE-VERIFICATION.json",
+          "artifactSha256": "b311026c3ae3d0d80d10e585b3daf60d8a688d0db699f10c62a94796e928fde2",
+          "github": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.6",
+          "npm": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.6"
         }
-      },
-      "receipt": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/download/v0.2.6/RELEASE-VERIFICATION.json",
-      "scope": "Exact release checks and host acceptance. See the public receipt for assertions and fixed business outcomes."
+      ]
+    },
+    "localSuite": {
+      "profileInput": "empty private snapshot",
+      "passed": 1359,
+      "skipped": 9,
+      "failed": 0
     }
   },
   "scope": "Default-suite counts from the supplied TAP log; fixtures means test/fixtures/**, other includes support and production files. Optional profiles depend on local inputs. Dated acceptance summaries are preserved, not rerun by this script; detailed history stays in Git."

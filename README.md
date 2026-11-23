@@ -6,17 +6,17 @@
 
 ## 版本与入口
 
-本分支版本为 **0.2.7**。单个源码文件超过 2 MiB 时，兼容性页保留其他检查结果；在对应插件的「覆盖限制」中可查看跳过的文件、大小与上限。覆盖不完整的报告不会推进基线。
+当前版本为 **0.2.7**。兼容性页会跳过超过 2 MiB 的单个源码文件，继续检查其余文件和插件。展开该插件的「覆盖限制」可见路径、实际字节数和上限。部分报告可从缓存查看，基线保留上次完整结果。
 
 已认证精确目录仅 **0.2.0-rc.2、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.5、0.2.2-rc.1、0.2.2-rc.2、0.2.2-rc.3、0.2.2-rc.5**。Node `^22.19.0 || >=24`，宿主声明 `>=0.2.0-rc.2`；最低版本不认证未来宿主。
 
-npm 插件提供面板、详情/角标、`compat_check` 和 skill。CLI、安装检查、批量、作者 CI 和健康执行器从仓库运行。npm 包没有 CLI bin。 详见[验收与发行回执](docs/current-state.json)及[上游入口核验](docs/upstream-verification.md)。
+npm 插件提供面板、详情/角标、`compat_check` 和 skill。CLI、安装检查、批量、作者 CI 和健康执行器从仓库运行。npm 包没有 CLI bin。详见[验收与发行回执](docs/current-state.json)及[上游入口核验](docs/upstream-verification.md)。
 
 ## 安装与使用
 
 ```sh
-# 已发布的 npm 版本
-dsh plugin --profile <profile> add dsh-plugin-compat-check@latest
+# 从 npm 安装此版本
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.7
 # 或从已核验摘要的完整归档安装
 dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.2.7.tgz
 ```
@@ -25,7 +25,7 @@ dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.
 
 ### 界面各板块怎么用
 
-界面语言默认跟随宿主，可切换中文/English/한국어；未知语言回退英文，偏好仅存本机。切换保留筛选与草稿，原始证据、人工依据、命令及JSON不翻译。
+界面默认跟随宿主，支持中英韩，未知语言回退英文。语言偏好只存本机，切换保留筛选、草稿及原始证据。
 
 | 板块 | 操作 |
 |---|---|
@@ -40,15 +40,15 @@ dsh plugin --profile <profile> add file:/绝对路径/dsh-plugin-compat-check-0.
 
 ### 人工处置与历史记录
 
-核实源码及“下一步”，选择待确认/已复核/误报/已修复，填写依据并保存。源码、目标或证据变化须重审。人工记录保留原风险、判定和基线；重载前保存或复制草稿。
+填写处置状态和依据后保存。源码、目标或证据变化须重审，重载前保存或复制草稿。人工记录独立于判定和基线。
 
 归档先备份。历史快照须显式保存，比较时选两份。容量和身份规则见[指南](docs/guide.md#人工处置归档与本地历史报告)。
 
 ## 界面示例
 
-0.2.6 在 DSH 0.2.2-rc.5 的中文界面，2026-11-20 摄于 GitHub Actions Linux 的自有回归 profile。数字对应本次合成样本。
+0.2.7 中文兼容性页，DSH 0.2.2-rc.5。截图取自 2026-11-23 的 Linux CI 合成样本。
 
-![0.2.6 在 DSH 0.2.2-rc.5 的主结果与覆盖限制](plugin/assets/compat-overview-0.2.6.png)
+![兼容性页的结果分布与覆盖限制](plugin/assets/compat-overview-zh-0.2.7.png)
 
 ## 仓库CLI
 
@@ -79,15 +79,11 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 
 ```sh
 node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.3 --upgrade-to 0.2.2-rc.5 --json
-npm test
-npm run check
-node plugin/scripts/prepublish-check.mjs
-node tools/meta-check.mjs --json
 ```
 
 八个登记版本可任意比较；未知版本退出3。预检只静态比较同组私有字节，不借probe、豁免或普通基线。预检0/1/2为无/非致命/致命新增或变重风险，3为无法预检；0仍可有旧风险。普通退出码为**0未发现冲突、1部分可用或未知、2不兼容、3工具/输入错误**。
 
-默认测试不启动真实DSH/模型，打包回归需要registry；发布前检查不发布，元数据核验只要有请求来源取数失败就退出 3，仍保留成功来源。Windows和一般业务未获认证。详见[Plan](docs/Plan.md)、[使用指南](docs/guide.md)、[维护流程](docs/maintaining.md)、[作者CI](docs/author-ci.md)、[规则](rules/README.md)与[skill](skill/README.md)。
+Windows 实机和一般业务行为须独立验收。详见[Plan](docs/Plan.md)、[使用指南](docs/guide.md)、[维护流程](docs/maintaining.md)、[作者CI](docs/author-ci.md)、[规则](rules/README.md)与[skill](skill/README.md)。
 
 ## License
 

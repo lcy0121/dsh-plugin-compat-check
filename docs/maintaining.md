@@ -146,7 +146,7 @@ rc.3固定来源/签名/语义见[审查记录](../rules/dsh-0.2.1-rc.3-review.j
 
 ## 本地历史管理维护
 
-归档在`lib/review-archive.mjs`，复用活动review路径/锁/有界读取；不可将归档记录直接合并成当前已复核。快照契约与中性比较为`lib/report-history-contract.mjs`，落盘为`lib/report-history.mjs`，共用`lib/local-history-store.mjs`的私有目录、不可覆盖内容对象和限额。新HTTP入口为`plugin/lib/host-history.js`，UI为`plugin/src/panels/history.jsx`；沿用Card/Fold/Pager及原报告/草稿状态。不得为历史功能提高活动sidecar上限或改变基线/判定标准。
+归档在`lib/review-archive.mjs`，复用活动review路径/锁/有界读取；不可将归档记录直接合并成当前已复核。快照契约与中性比较为`lib/report-history-contract.mjs`，落盘为`lib/report-history.mjs`，共用`lib/local-history-store.mjs`的私有目录、不可覆盖内容对象和限额。HTTP入口为`plugin/lib/host-history.js`，UI为`plugin/src/panels/history.jsx`；沿用Card/Fold/Pager及原报告/草稿状态。不得为历史功能提高活动sidecar上限或改变基线/判定标准。
 
 历史对象摘要仅用于损坏检测，不是签名；导入报告的自报身份不能当真实采样证明。历史/三语真实界面验收统一由上方九项入口执行，保持编辑器、原始草稿、报告及基线身份，保留三语及窄容器/深色截图。
 
@@ -161,8 +161,6 @@ DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5 DSC_REQUIRE_RC2_UI=1 node tools/rc2-live.m
 基础入口覆盖 HTTP/tool、声明、预检、精确语义、三槽位和导航恢复。完整 UI 按[同包入口](#维护入口与语法覆盖)传入 `DSC_ACCEPTANCE_DSH_VERSION=0.2.1-rc.5`。
 
 rc.5额外要求独立ACP stdout JSON-RPC、stderr目录诊断、MCP能力、受控模型列表及导航语义回执。rc5-acp-stdout只用私有DSH_HOME、合成凭据、loopback列表/两轮模型响应和tools-only MCP；无resources能力不请求资源。失败/超时/清理不确认均失败，只保存计数与断言，不保存对话正文。模型列表另验首次等待、失败/超时回退及无凭据不请求；没有生产账户/模型调用。
-
-历史回执及目录登记快照不认证新包；同一制品流程与固定回归边界见上节。
 
 ## 用户issue修订与回归
 
@@ -199,14 +197,14 @@ Node22/24、九项UI及问题联合验收按精确提交/归档核对；CI状态
 
 dsh-doc、搜索/抓取计费、auth.sources、terminal 与 Worktree 按宿主指南迁移。归档可能删检出目录但保留分支，ignored/skip-worktree 文件须另行保全。完整迁移说明及当时七版矩阵见 `1394bc9:docs/maintaining.md`，发行与同包证据见[current-state](current-state.json)。
 
-## 0.2.7 大文件的部分报告
-
-源码读取在打开文件之前核对单文件上限。超限诊断保留到对应插件的覆盖限制。缓存核对源码、清单、patch 和控制输入的身份，并复验本次提取实际尝试的其他模块路径；普通刷新不需要重新解析整个源码图。整轮清单、元数据、worker 内存与截止时间仍有独立上限。
-
 ## 0.2.6：rc.5适配
 
 [来源审查](../rules/dsh-0.2.2-rc.5-review.json)固定 rc.4→rc.5 源码、npm 包和桌面 ASAR。[语义审查](../rules/dsh-0.2.2-rc.5-semantics-review.json)覆盖内容拒答和搜索路由。宿主 loader 观测在 `plugin/lib/host-loader.js`，严格 JSON 与 schema 在 `host-tool-contract.js`，实机生命周期与回执分别在 `tools/owned-live-host.mjs`、`tools/live-acceptance-receipt.mjs`。
 
-[current-state](current-state.json)记录 `283f2eb` 的 12 项 CI、同包 macOS/Linux 九项 UI、严格工具与鉴权。固定五制品重复两轮，共 48 项符合预期，每轮静态漏报 12 例（服务依赖 2、HTTP 5、DOM 5），误报 0。八版作者 CI 核四种输出、旧报告回放和超限退出。公开元数据核验保留成功来源，缺请求来源或空 npm README 时退出 3。
+0.2.6 的宿主、固定业务样本及八版作者 CI 回执已[归档](current-state.json)。公开元数据核验保留成功来源，缺请求来源或空 npm README 时退出 3。
 
 按 PATH 选载体后，`node tools/liveshare-worker-acceptance.mjs` 核 IPC ready 与断开退出，证据限 worker 生命周期。
+
+## 0.2.7 大文件的部分报告
+
+普通检查按文件执行 2 MiB 上限。缓存核对源码、清单、patch、控制输入和上次解析过的候选路径，避免每次刷新重解析整个源码图。回归须同时覆盖部分报告可见、缓存命中、基线保护，以及文件缩小后的重新分析。整轮预算见[指南](guide.md#日常检查与源码交付)，按提交复核的宿主与 28 插件样本见[验收记录](current-state.json)。

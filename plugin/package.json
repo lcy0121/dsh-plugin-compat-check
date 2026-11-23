@@ -1,7 +1,7 @@
 {
   "name": "dsh-plugin-compat-check",
   "version": "0.2.7",
-  "description": "Checks installed DSH plugins and static upgrade risks, with exact DSH 0.2.2-rc.5 coverage, content refusal and search routing guidance, multilingual UI, source evidence, manual reviews and report history.",
+  "description": "Checks installed DSH plugin compatibility and upgrade risks. Shows source evidence and per-file coverage limits in Chinese, English and Korean. Includes exact DSH 0.2.2-rc.5 coverage.",
   "license": "MIT",
   "type": "module",
   "main": "index.js",

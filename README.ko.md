@@ -6,7 +6,7 @@
 
 ## 버전과 진입점
 
-이 브랜치의 버전은 **0.2.7**입니다. 소스 파일 하나가 2 MiB를 초과해도 호환성 화면에 다른 검사 결과가 표시됩니다. 해당 플러그인의 분석 한계를 펼치면 건너뛴 파일의 경로, 크기와 한도를 확인할 수 있습니다. 검사가 불완전하면 기준 기록을 갱신하지 않습니다.
+현재 버전은 **0.2.7**입니다. 호환성 검사는 2 MiB를 초과하는 소스 파일만 건너뛰고 나머지 파일과 플러그인을 계속 검사합니다. 해당 플러그인의 분석 한계를 펼치면 경로, 실제 바이트 수와 상한이 표시됩니다. 부분 보고서는 캐시할 수 있으며 기준선에는 마지막 전체 검사 결과가 유지됩니다.
 
 인증된 정확한 카탈로그 버전은 **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3, 0.2.2-rc.5**입니다. Node `^22.19.0 || >=24`, 호스트 선언은 `>=0.2.0-rc.2`이며 미래 버전을 인증하지 않습니다.
 
@@ -15,8 +15,8 @@ npm 플러그인은 화면, 상세/배지, `compat_check`, skill을 제공합니
 ## 설치와 사용
 
 ```sh
-# npm에 게시된 버전
-dsh plugin --profile <profile> add dsh-plugin-compat-check@latest
+# npm에서 이 버전 설치
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.7
 # 또는 해시를 검증한 전체 아카이브로 설치
 dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.7.tgz
 ```
@@ -25,7 +25,7 @@ dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0
 
 ### 화면별 사용법
 
-기본 언어는 호스트를 따르며 중국어/English/한국어 또는 호스트 따르기를 선택할 수 있습니다. 미지원 언어는 영어로 표시됩니다. 설정은 로컬에 저장되고 전환해도 필터/초안은 유지됩니다. 원본 근거, 사용자 메모, 명령 및 JSON은 번역하지 않습니다.
+화면은 호스트 언어를 따르며 중국어·영어·한국어를 지원합니다. 미지원 언어는 영어로 표시됩니다. 언어를 바꿔도 필터·초안·원본 근거는 유지되며 설정은 로컬에 저장됩니다.
 
 | 화면 | 동작 |
 |---|---|
@@ -40,15 +40,15 @@ dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0
 
 ### 수동 검토와 이력
 
-소스와 다음 단계를 확인한 뒤 미확인/검토됨/오탐/수정됨 상태를 근거와 함께 저장합니다. 소스·대상·근거가 바뀌면 재검토합니다. 기존 발견, 판정, 기준선은 유지됩니다. 새로고침 전에 초안을 저장하거나 복사하세요.
+검토 상태와 근거를 저장하세요. 소스·대상·근거가 바뀌면 재검토하고 새로고침 전에는 초안을 저장하거나 복사하세요. 수동 검토는 판정과 기준선을 유지합니다.
 
 보관 전에 백업합니다. 스냅샷은 직접 저장하며 비교할 때는 두 개를 선택합니다. 한도와 식별 기준은 [가이드](docs/guide.md#人工处置归档与本地历史报告)를 참고하세요.
 
 ## 화면 예시
 
-0.2.6의 DSH 0.2.2-rc.5 중국어 화면입니다. 2026-11-20 GitHub Actions Linux의 자체 회귀 테스트 profile에서 촬영했습니다. 수치는 해당 합성 테스트에 한정됩니다.
+DSH 0.2.2-rc.5에서 본 0.2.7 한국어 패널입니다. 2026-11-23 Linux CI의 합성 테스트 데이터입니다.
 
-![DSH 0.2.2-rc.5의 0.2.6 주 결과와 분석 한계](plugin/assets/compat-overview-0.2.6.png)
+![호환성 검사 결과와 분석 한계](plugin/assets/compat-overview-ko-0.2.7.png)
 
 ## 저장소 CLI
 
@@ -79,15 +79,11 @@ node bin/compat-check.mjs --nm ~/.dsh/profiles/<profile> --no-baseline
 
 ```sh
 node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.3 --upgrade-to 0.2.2-rc.5 --json
-npm test
-npm run check
-node plugin/scripts/prepublish-check.mjs
-node tools/meta-check.mjs --json
 ```
 
 등록된 여덟 버전의 임의 쌍을 비교하며 미등록 버전은 코드 3입니다. 같은 비공개 바이트만 정적으로 비교하고 probe·예외·일반 기준선을 사용하지 않습니다. 사전 검사 0/1/2는 새로 생기거나 악화된 위험 없음/비치명/치명, 3은 검사 불가이며 0에도 기존 위험이 남을 수 있습니다. 일반 종료 코드는 **0 충돌 미발견, 1 일부 사용 가능 또는 알 수 없음, 2 비호환, 3 도구/입력 오류**입니다.
 
-기본 테스트는 실제 DSH/모델을 시작하지 않으며 패키징 테스트는 registry가 필요합니다. 출시 전 검사는 출시하지 않고 요청한 메타데이터를 가져올 수 없으면 종료 코드 3을 반환합니다. 조회에 성공한 결과는 보존합니다. Windows와 일반 업무 기능은 미인증입니다. [Plan](docs/Plan.md), [가이드](docs/guide.md), [유지보수](docs/maintaining.md), [작성자 CI](docs/author-ci.md), [규칙](rules/README.md), [skill](skill/README.md)을 참고하세요.
+Windows 실기와 실제 업무 기능은 별도 검증 대상입니다. [Plan](docs/Plan.md), [가이드](docs/guide.md), [유지보수](docs/maintaining.md), [작성자 CI](docs/author-ci.md), [규칙](rules/README.md), [skill](skill/README.md)을 참고하세요.
 
 ## License
 

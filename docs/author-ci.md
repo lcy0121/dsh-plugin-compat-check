@@ -49,7 +49,7 @@ HTML 独立离线，包名、位置和消息以文本转义。`--report ... --fo
 | 策略 / cell紧凑JSON | 64KiB / 2MiB |
 | 最终JSON及各展示输出、previous/保存报告输入 | 各8MiB，UTF-8字节计数，含末尾换行 |
 
-各格式发布前检查预算，超限退出 3。JSON 可回放成 HTML 并保留门禁结果。八版密集样本及旧七版回放见[验收回执](current-state.json)。
+作者快照对超出单文件上限的输入退出 3。普通兼容性页遇到超大源码时的部分报告行为见[指南](guide.md#日常检查与源码交付)。
 
 ## CI接入
 
@@ -61,6 +61,4 @@ HTML 独立离线，包名、位置和消息以文本转义。`--report ... --fo
 
 示例仅workflow_dispatch、contents:read，checkout不保存凭据，Actions固定完整commit；工具依赖按冻结lock安装且禁用lifecycle。没有pull_request_target、写token或自动基线。其它触发器需先审查构建代码、策略和基线来源；分享前检查报告中包名、位置及业务说明。
 
-本地运行也须比对扫描和 HTML 的退出码。分享前预览证据和业务说明。
-
-项目验收范围见[current-state](current-state.json)，市场安装及恢复见[上游记录](upstream-verification.md)。
+本地运行同样核对扫描与 HTML 的退出码。八版矩阵和旧报告回放见[验收记录](current-state.json)。

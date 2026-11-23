@@ -6,7 +6,7 @@ Checks **installed DSH plugins** against a target version, with source locations
 
 ## Versions and entry points
 
-This branch contains **0.2.7**. When a source file exceeds 2 MiB, the compatibility page keeps the other results. Expand the affected plugin’s coverage limits to see the skipped path, file size and limit. An incomplete scan leaves the baseline in place.
+The current version is **0.2.7**. When a source file exceeds 2 MiB, the compatibility page skips that file and checks the rest. Expand the plugin’s coverage limits for the path, size in bytes and limit. Partial reports can be cached. The baseline retains the last complete result.
 
 Certified exact catalogues remain **0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3 and 0.2.2-rc.5**. Node `^22.19.0 || >=24`; declared host minimum `>=0.2.0-rc.2` does not certify future hosts.
 
@@ -15,8 +15,8 @@ The npm plugin provides the page, details/badges, `compat_check` and skill. The 
 ## Install and use
 
 ```sh
-# Published npm version
-dsh plugin --profile <profile> add dsh-plugin-compat-check@latest
+# Install this version from npm
+dsh plugin --profile <profile> add dsh-plugin-compat-check@0.2.7
 # Or install a complete archive after verifying its digest
 dsh plugin --profile <profile> add file:/absolute/path/dsh-plugin-compat-check-0.2.7.tgz
 ```
@@ -25,7 +25,7 @@ In the DSH instance using that profile, open **bottom-left More (⋯)/avatar →
 
 ### Using each panel
 
-The UI follows the host language; choose Chinese/English/Korean or restore Follow host. Unsupported languages fall back to English. Preferences stay local; switching preserves filters/drafts. Raw evidence, user notes, commands and JSON are not translated.
+The panel follows the host language and supports Chinese, English and Korean, with English as fallback. Switching keeps filters, drafts and original evidence. Preferences stay local.
 
 | Panel | Actions |
 |---|---|
@@ -40,15 +40,15 @@ Auxiliary content starts collapsed. Results/dependencies/findings/upgrade detail
 
 ### Manual review and history
 
-Check the source and next steps, then save Unconfirmed/Reviewed/False positive/Fixed with a note. Re-review when the source, target or evidence changes. Original findings, verdicts and baselines are retained. Save or copy drafts before reloading.
+Save a review status and note. Revisit it when the source, target or evidence changes. Save or copy drafts before reloading. Reviews preserve findings and baselines.
 
 Back up before archiving. Save snapshots explicitly and select two to compare. See the [guide](docs/guide.md#人工处置归档与本地历史报告) for capacity and identity rules.
 
 ## Screenshots
 
-0.2.6 on DSH 0.2.2-rc.5 in Chinese, captured on 2026-11-20 in an owned GitHub Actions Linux regression profile. Counts apply to its synthetic fixtures.
+0.2.7 on DSH 0.2.2-rc.5. The English panel shows synthetic data from Linux CI on 2026-11-23.
 
-![0.2.6 main results and coverage limits on DSH 0.2.2-rc.5](plugin/assets/compat-overview-0.2.6.png)
+![Compatibility results and coverage limits](plugin/assets/compat-overview-en-0.2.7.png)
 
 ## Repository CLI
 
@@ -79,15 +79,11 @@ Call `compat_check({"upgradeTo":"0.2.2-rc.5"})`; the current version comes from 
 
 ```sh
 node bin/compat-check.mjs --nm <profile> --dsh-version 0.2.2-rc.3 --upgrade-to 0.2.2-rc.5 --json
-npm test
-npm run check
-node plugin/scripts/prepublish-check.mjs
-node tools/meta-check.mjs --json
 ```
 
 Compare any pair of the eight registered versions; unknown versions exit 3. Preview statically compares the same private bytes without probes, exemptions or ordinary baselines. Preview codes 0/1/2 mean no/nonfatal/fatal new or worsened risks; 3 means unable to preview. Zero may retain old risks. Ordinary codes are **0 no conflict found, 1 partially usable or unknown, 2 incompatible, 3 tool/input error**.
 
-Default tests do not start real DSH/models; packaging tests need the registry. The prepublish gate runs local checks. Metadata lookup exits 3 if any requested source is unavailable and retains results from successful sources. Windows and general business functionality remain unverified. See [Plan](docs/Plan.md), [guide](docs/guide.md), [maintenance](docs/maintaining.md), [author CI](docs/author-ci.md), [rules](rules/README.md) and [skill](skill/README.md).
+Windows and general business functionality require separate acceptance. See [Plan](docs/Plan.md), [guide](docs/guide.md), [maintenance](docs/maintaining.md), [author CI](docs/author-ci.md), [rules](rules/README.md) and [skill](skill/README.md).
 
 ## License
 

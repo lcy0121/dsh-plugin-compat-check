@@ -10,7 +10,7 @@
 
 - `uiWorkspace.startSession` 核对已知 `prompt / agentPreset / clearPreviousDraft` 类型。从 0.2.1-rc.3 起的登记版本也检查 `whenDraftExists=keep / replace / append`。已知错值是非致命风险，弱 Context 标疑似。能力守卫只证明调用条件。
 - 支持 `whenDraftExists` 的版本以其显式值优先。省略通常保留草稿，`clearPreviousDraft:true` 仍兼容 replace。可复用同工作区未归档空白会话，指定 preset 时按 preset 隔离。实际新建和发送另验。
-- 六个已审查语义版本的`ctx.timer.setTimeout / setInterval`仍保留但已弃用；`sessions.retain`提示所有权、按需等待ready及作用域结束时release/disposal。两类只进覆盖说明，不证明泄漏或失败。
+- 七个已审查语义版本的`ctx.timer.setTimeout / setInterval`仍保留但已弃用；`sessions.retain`提示所有权、按需等待ready及作用域结束时release/disposal。两类只进覆盖说明，不证明泄漏或失败。
 - 0.2.1-rc.5及0.2.2-rc.1/rc.2/rc.3/rc.5的`conversation.chat.reasoning.body`提供原始`rawText`和显示`text`；普通渲染/翻译继续用text，Content Factory仍用text/running/labels。静态提示只定位slots.register和迁移限制，不验证props用途、签名处理或流式时序，不把text使用报错，不新增发现或已验证调用。
 
 只保存所核参数的类型/有限枚举标签，不执行代码或保存prompt/思考正文。常量别名与直接改写可分析；未知副作用、动态、展开、访问器、逃逸及不同helper实参合并弃权。完整签名、实参数量、深层对象、异步时序和所有权证明未覆盖。JSON、CLI、面板、预检及作者CI共用判定，目录/语义/运行时/业务证据分别记录。
@@ -121,7 +121,7 @@ HTTP 证据限登记宿主的本地边界。同一已登录宿主的可信插件
 
 ## 日常检查与源码交付
 
-CLI分析和runAsync由worker监督，30秒、512+64MiB代际预算，回收后父线程比较/提交基线；失败/取消/不完整不推进，no-baseline禁读写。宿主将提取与纯判定、关系图、报告渲染及基线快照分为两个受监督worker（提取30秒、判定10秒），回传后才核身份及受控提交；同步run须调用方监督；probe安装/启动及前后分析分开计时。
+CLI 分析和 runAsync 的 worker 限时 30 秒，代际内存预算为 512+64 MiB。宿主提取限时 30 秒，随后判定、关系图、渲染及基线快照共用 10 秒。父线程复核身份后提交基线。同步 run 由调用方监督，探针安装、启动及前后分析分别计时。
 
 | 输入/状态 | 上限或策略 |
 |---|---|
@@ -139,7 +139,7 @@ CLI分析和runAsync由worker监督，30秒、512+64MiB代际预算，回收后�
 
 服务反射的单次原生枚举不可中断，不承诺硬实时或中间分配的RSS上限；时间/属性/字节预算限制继续遍历与保留结果。单服务及整轮截断在全局说明可见，只降低实际消费截断/未采样服务的插件覆盖，不连带已取得完整证据的无关插件。
 
-单个源码文件超过 2 MiB 时，该插件的覆盖限制列出文件路径、实际大小和上限。其余文件和插件继续检查；部分报告不推进基线。
+普通检查遇到超过 2 MiB 的源码文件时继续扫描。打开该插件的「覆盖限制」查看路径、实际字节数与上限。部分报告可命中缓存，不能推进基线。文件缩小后再次检查会重新分析。整轮资源上限见上表。
 
 目录逐项核验后再排序，文件以非阻塞描述符核对类型、大小及前后身份。包根pnpm链接可解析，源码/patch链接须留在包内；超限、变化或不可读保留诊断，清单枚举不完整报工具错误。compatReport使用相同规则/probe检查；采用独立进程内观测也保留坏probe原因。辅助终端输出（labels、直接提取、规则库存、到货）对名称/版本/错误等低信任字段复用terminalText；布局换行与JSON原始身份保留。缓存失效任务不得发布或写基线，刷新失败保留旧成功及错误。
 
@@ -188,4 +188,4 @@ DSC_ACCEPTANCE_DSH_VERSION=0.2.2-rc.5 DSC_REQUIRE_RC2_UI=1 node tools/rc2-live.m
 
 真实集成需可信DSH/pnpm、Chrome（DSC_CHROME可指定）及相应网络/执行授权；账户/模型另取授权。只清理自有目录/PID组，不按进程名清场；Darwin负例缺编译器时跳过不算验收。`DSC_EXECUTION_DIAGNOSTICS=<私有目录>`可保留有界启动诊断，不导出argv/env或stderr正文，分享前仍需预览。
 
-基础驱动用`DSC_RC2_ARTIFACT=<确切tgz绝对路径>`验收选定归档；完整ci-ui018入口另须DSC_RC2_ARTIFACT_RECEIPT，见维护指南。未指定归档会重新打包，不继承旧包通过记录；正式发布只用双平台已验收的同一文件。真实插件队列见[维护指南](maintaining.md#真实插件回归)；版本/平台及原始证据身份见[current-state](current-state.json)。
+基础驱动以 `DSC_RC2_ARTIFACT` 指定 tgz。完整 UI 还需 `DSC_RC2_ARTIFACT_RECEIPT`，见[同一制品发布核对](maintaining.md#同一制品发布核对)。真实插件队列见[维护指南](maintaining.md#真实插件回归)；版本/平台及原始证据身份见[current-state](current-state.json)。
