@@ -167,6 +167,32 @@
           "artifactSha256": "b311026c3ae3d0d80d10e585b3daf60d8a688d0db699f10c62a94796e928fde2",
           "github": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.6",
           "npm": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.6"
+        },
+        {
+          "version": "0.2.7",
+          "tag": "v0.2.7",
+          "sourceCommit": "66419340127687a3494f4040f5705afd26f0edb2",
+          "verifiedAt": "2026-11-23T13:17:30.552Z",
+          "receipt": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/download/v0.2.7/RELEASE-VERIFICATION.json",
+          "artifactSha256": "9f6bd0919379b6bbd323ecf4aa47ed57d0aae554967877be99fc517212ba16d2",
+          "github": "https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.7",
+          "npm": "https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.7",
+          "ci": {
+            "checksPassed": 36,
+            "runs": [
+              "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/45174600529",
+              "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/45176524752",
+              "https://github.com/lcy0121/dsh-plugin-compat-check/actions/runs/45180292542"
+            ]
+          },
+          "publicInstallation": {
+            "status": "checked",
+            "installedVersion": "0.2.7",
+            "dshVersion": "0.2.2-rc.5",
+            "usableRuntimeObservation": true,
+            "tempProfileRemoved": true,
+            "reportSha256": "94a33e696368e8728723a390f6e8c106ca7fcfc3b8b471bce8aa3aef5ec622cb"
+          }
         }
       ]
     },

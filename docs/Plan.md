@@ -70,9 +70,9 @@ certainty与impactBasis独立；ok且无已验证调用标vacuous，保留covera
 
 ## 4. 验收范围
 
-0.2.7 在 `905a982` 的 28 插件样本上返回可缓存的部分报告，保留上次基线。回归还覆盖文件缩小后的重新分析。[操作指南](guide.md#日常检查与源码交付)
+0.2.7 已发布至 [npm](https://www.npmjs.com/package/dsh-plugin-compat-check/v/0.2.7) 和 [GitHub](https://github.com/lcy0121/dsh-plugin-compat-check/releases/tag/v0.2.7)，标签 `v0.2.7` 指向 `6641934`。开发分支、main 和标签各 12 项 CI 全部通过。两端公开下载的安装包与 macOS/Linux 验收归档逐字节一致，已在临时 DSH 0.2.2-rc.5 profile 中按固定版本安装并取得运行时观测。[发行回执](https://github.com/lcy0121/dsh-plugin-compat-check/releases/download/v0.2.7/RELEASE-VERIFICATION.json)
 
-同一归档通过 macOS 三种宿主组合与 Linux rc.3/rc.5 的九项 UI 门禁。[验收记录](current-state.json)按提交和归档区分，正式发布沿用[同一制品流程](maintaining.md#同一制品发布核对)。
+28 插件样本可查看跳过文件的路径、实际大小和上限，部分报告命中缓存并保留上次基线。Windows 实机仍待验收。[验收记录](current-state.json) · [操作指南](guide.md#日常检查与源码交付)
 
 ## 5. 验证入口
 
